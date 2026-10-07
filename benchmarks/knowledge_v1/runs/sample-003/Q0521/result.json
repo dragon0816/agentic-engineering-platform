@@ -1,0 +1,103 @@
+{
+ "id": "Q0521",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 101.39,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 13,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NG eCall EN 17240 2024 verification.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 8,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NG eCall EN 17240 2024 verification.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 9,
+   "kind": "wiki",
+   "ref": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 12,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S SMA100B.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 28,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S SMA100B.md",
+   "ok": true,
+   "text_found": 0.94,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 24,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "推薦先賣",
+   "首選應是 CMX500/CMX-KA098",
+   "首選應是 AREG800A production configurations",
+   "可把功率、頻率、時間相關需求轉成可量測參數",
+   "若客戶仍要求 SG/SA 角色，知識庫只支持把 SMA100B K28 用於...或把 SMW200A K61 + FSW 用於..."
+  ],
+  "reason": "The cited passages support the core facts about NG eCall requirements and CMX500/CMX-KA098, AREG800A radar echo capabilities, SMA100B K28 power analysis, SMW200A K61 MCCW generation, and FSW readout. The answer is reasonable because it explicitly flags that the directly supported automotive tools are not general SG/SA and that the SG/SA mappings lack direct automotive-market evidence, though some sales-priority language and 'only supports' framing go beyond the passages.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

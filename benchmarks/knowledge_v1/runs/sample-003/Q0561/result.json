@@ -1,0 +1,131 @@
+{
+ "id": "Q0561",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge",
+  "knowledge__rs-knowledge",
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 241.203,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "raw",
+   "ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "raw",
+   "ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "raw",
+   "ref": "raw/Market/review-options.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 6,
+   "kind": "raw",
+   "ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 7,
+   "kind": "raw",
+   "ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 8,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 9,
+   "kind": "wiki",
+   "ref": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 10,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 11,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 12,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/PhasedArray/Beamforming.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "A Vector Network Analyzer (VNA) fits upstream of radar scenario / target simulation",
+   "Measure S-parameters of antennas, feed lines, transitions, filters, couplers, PCB interconnects, radome samples, and RF front-end paths",
+   "Validate TX/RX path behavior before doing full radar functional testing",
+   "The VNA does not replace the radar target simulator; it validates the passive/linear RF path that the radar depends on",
+   "Can be used for spot checks or fixture/module verification"
+  ],
+  "reason": "The cited passages show AREG800A is an automotive radar echo generator and mention VNA measurement conditions for IF transfer characteristics, but they do not establish where a VNA belongs in an automotive radar test workflow. The answer honestly flags insufficient raw evidence, but then supplies a substantive workflow placement from outside the cited knowledge base.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages show AREG800A is an automotive radar echo generator and mention VNA measurement conditions for IF transfer characteristics, but they do not establish where a VNA belongs in an automotive radar test workflow. The answer honestly flags insufficient raw evidence, but then supplies a "
+}

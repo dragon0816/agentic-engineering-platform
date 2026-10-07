@@ -1,0 +1,705 @@
+{
+ "question": {
+  "id": "Q0681",
+  "text": "How do changes in AI data centers technology affect the measurement capability required from Oscilloscope?",
+  "market": "AI",
+  "product": "Oscilloscope",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-cd9cff76b3cb46919a99229909305d82",
+ "exchange": {
+  "sent": "How do changes in AI data centers technology affect the measurement capability required from Oscilloscope?",
+  "http_status": 200,
+  "seconds": 125.641,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-cd9cff76b3cb46919a99229909305d82",
+    "actor": "leo.chi",
+    "title": "How do changes in AI data centers technology affect the measurement capa…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T13:26:31.893181Z",
+    "updated_at": "2026-10-07T13:28:36.899973Z",
+    "messages": [
+     {
+      "message_id": "message-a24af48d7c074787bb136f8580ef2128",
+      "role": "user",
+      "text": "How do changes in AI data centers technology affect the measurement capability required from Oscilloscope?",
+      "created_at": "2026-10-07T13:26:31.904268Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-9cf0f4d7c95249a3a60089dd7e9bd1af",
+      "role": "assistant",
+      "text": "The knowledge base gave insufficient direct, raw-cited evidence for oscilloscope requirements in AI data centers. The following is therefore **general industry knowledge, not from the knowledge base**.\n\nAI data centers are pushing oscilloscope requirements upward because the bottleneck is moving from compute chips alone to **high-speed electrical links, optical-module interfaces, memory buses, and power delivery**. Oscilloscopes used in this space need to measure smaller margins at much higher data rates.\n\n### 1. Higher-speed interconnects require more bandwidth and lower jitter noise\n\nAI clusters use faster links between GPUs, CPUs, NICs, switches, accelerators, memory, and optical modules. Examples include PCIe Gen5/Gen6, 800G/1.6T Ethernet, high-speed SerDes, CXL, DDR5/LPDDR5/possibly HBM-related interfaces.\n\nThis drives oscilloscope needs such as:\n\n- **Higher analog bandwidth** for 32, 64, 112, and 224 Gb/s-class signals.\n- **Very low intrinsic jitter** so the scope does not dominate the timing-error measurement.\n- **High sample rate and deep memory** to capture long patterns, link training, burst behavior, and rare events.\n- **PAM4 analysis capability**, since many data center links use multilevel signaling rather than simple NRZ.\n- Eye diagram, bathtub, TDECQ, SNDR, jitter decomposition, and equalization analysis.\n\n### 2. PAM4 and 224G-class SerDes make noise and linearity more important\n\nWith PAM4, the voltage spacing between symbols is much smaller than NRZ. That means the oscilloscope must have:\n\n- Lower front-end noise.\n- Better vertical resolution or effective number of bits.\n- High linearity.\n- Accurate clock recovery.\n- Advanced de-embedding and equalization tools.\n\nFor 112G/224G SerDes, the raw signal at the receiver input may look badly closed until channel loss and equalization are accounted for, so the oscilloscope must support **CTLE/DFE modeling, fixture de-embedding, S-parameter embedding/de-embedding, and compliance applications**.\n\n### 3. Shorter margins make fixture, probe, and de-embedding quality critical\n\nAI server boards are dense and lossy: high-layer-count PCBs, backplanes, cables, connectors, sockets, interposers, and retimers all contribute loss, reflections, and crosstalk.\n\nSo oscilloscope capability is no longer just “bandwidth.” It also needs:\n\n- High-performance differential probes.\n- Low-loading probing.\n- Accurate probe calibration.\n- Fixture removal.\n- S-parameter-based de-embedding.\n- Channel emulation or embedding.\n- Support for compliance fixtures.\n\nIn practice, measurement accuracy may depend as much on the probe and de-embedding workflow as on the oscilloscope mainframe.\n\n### 4. AI accelerator power delivery increases power-integrity measurement demand\n\nAI GPUs and accelerators have very high transient current. Fast workload changes can create supply droop, ripple, ground bounce, and PDN resonance.\n\nOscilloscope requirements therefore include:\n\n- Low-noise power rail probes.\n- High offset range with millivolt sensitivity.\n- Fast transient capture.\n- Frequency-domain view of ripple and noise.\n- Correlation of power events with digital activity.\n- Multi-channel time alignment across power rails, clocks, resets, and data links.\n\nFor AI servers, measuring only the average supply voltage is not enough. Engineers need to see nanosecond-to-microsecond droops and correlate them with link errors or compute load changes.\n\n### 5. PCIe Gen5/Gen6 and CXL need protocol-aware compliance support\n\nAI servers rely heavily on PCIe and increasingly CXL. As speeds rise, oscilloscopes need built-in or optional compliance applications for:\n\n- PCIe transmitter tests.\n- Receiver calibration support.\n- Jitter and eye mask measurements.\n- Link equalization analysis.\n- CEM and base specification test coverage.\n- Long pattern capture for training sequences and low-probability events.\n\nPCIe Gen6 adds PAM4 and FLIT/FEC-related behavior, which increases the need for advanced signal integrity and protocol-adjacent debugging.\n\n### 6. Ethernet and optical-module testing expands the scope role\n\nAI data centers are rapidly moving to 800G and 1.6T optical and electrical interfaces. Oscilloscopes may be used for:\n\n- Electrical host interface validation.\n- Optical module electrical lane testing.\n- PAM4 eye and TDECQ-type analysis.\n- Jitter and noise characterization.\n- Debugging host-to-module signal integrity.\n- Correlating electrical impairments with optical link performance.\n\nThis requires high-bandwidth real-time or sampling oscilloscopes, depending on the test case.\n\n### 7. More channels and synchronization are needed\n\nAI server debugging often requires correlation across many signals:\n\n- Multiple differential lanes.\n- Reference clocks.\n- Power rails.\n- VRM control signals.\n- Reset and sideband signals.\n- Thermal or workload triggers.\n\nSo engineers need oscilloscopes with:\n\n- Four or more high-bandwidth channels.\n- Good channel-to-channel skew performance.\n- External trigger support.\n- Multi-instrument synchronization in some cases.\n- Deep acquisition memory.\n\n### 8. Debug is shifting from simple waveform viewing to system-level validation\n\nIn older systems, an oscilloscope might mainly confirm signal shape. In AI data center hardware, the oscilloscope increasingly supports:\n\n- Compliance testing.\n- Margin analysis.\n- Root-cause debugging.\n- Power-aware signal integrity.\n- Time-correlated multi-domain analysis.\n- Statistical analysis of rare failures.\n\nThat means software capability—compliance packages, jitter tools, serial decode, de-embedding, automation APIs—is as important as raw bandwidth.\n\n### Summary\n\nAI data center technology increases oscilloscope requirements in five main ways:\n\n| Technology change | Oscilloscope impact |\n|---|---|\n| Faster SerDes, PCIe, Ethernet | Higher bandwidth, lower jitter, PAM4 analysis |\n| Dense lossy channels | Better probes, fixtures, de-embedding, equalization |\n| High-current AI accelerators | Better power-integrity and transient rail measurement |\n| More complex standards | Compliance software for PCIe, Ethernet, DDR, CXL, etc. |\n| System-level failures | More channels, deeper memory, automation, correlation tools |\n\nIn short: AI data centers require oscilloscopes that are not only faster, but also **cleaner, more accurate, more software-driven, and better integrated with signal-integrity and power-integrity workflows**.",
+      "created_at": "2026-10-07T13:28:36.899973Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-56e725a798104ff4b3fc966c100c2d47",
+       "request_id": "request-56e725a798104ff4b3fc966c100c2d47",
+       "span_id": "span-56e725a798104ff4b3fc966c100c2d47",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base gave insufficient direct, raw-cited evidence for oscilloscope requirements in AI data centers. The following is therefore **general industry knowledge, not from the knowledge base**.\n\nAI data centers are pushing oscilloscope requirements upward because the bottleneck is moving from compute chips alone to **high-speed electrical links, optical-module interfaces, memory buses, and power delivery**. Oscilloscopes used in this space need to measure smaller margins at much higher data rates.\n\n### 1. Higher-speed interconnects require more bandwidth and lower jitter noise\n\nAI clusters use faster links between GPUs, CPUs, NICs, switches, accelerators, memory, and optical modules. Examples include PCIe Gen5/Gen6, 800G/1.6T Ethernet, high-speed SerDes, CXL, DDR5/LPDDR5/possibly HBM-related interfaces.\n\nThis drives oscilloscope needs such as:\n\n- **Higher analog bandwidth** for 32, 64, 112, and 224 Gb/s-class signals.\n- **Very low intrinsic jitter** so the scope does not dominate the timing-error measurement.\n- **High sample rate and deep memory** to capture long patterns, link training, burst behavior, and rare events.\n- **PAM4 analysis capability**, since many data center links use multilevel signaling rather than simple NRZ.\n- Eye diagram, bathtub, TDECQ, SNDR, jitter decomposition, and equalization analysis.\n\n### 2. PAM4 and 224G-class SerDes make noise and linearity more important\n\nWith PAM4, the voltage spacing between symbols is much smaller than NRZ. That means the oscilloscope must have:\n\n- Lower front-end noise.\n- Better vertical resolution or effective number of bits.\n- High linearity.\n- Accurate clock recovery.\n- Advanced de-embedding and equalization tools.\n\nFor 112G/224G SerDes, the raw signal at the receiver input may look badly closed until channel loss and equalization are accounted for, so the oscilloscope must support **CTLE/DFE modeling, fixture de-embedding, S-parameter embedding/de-embedding, and compliance applications**.\n\n### 3. Shorter margins make fixture, probe, and de-embedding quality critical\n\nAI server boards are dense and lossy: high-layer-count PCBs, backplanes, cables, connectors, sockets, interposers, and retimers all contribute loss, reflections, and crosstalk.\n\nSo oscilloscope capability is no longer just “bandwidth.” It also needs:\n\n- High-performance differential probes.\n- Low-loading probing.\n- Accurate probe calibration.\n- Fixture removal.\n- S-parameter-based de-embedding.\n- Channel emulation or embedding.\n- Support for compliance fixtures.\n\nIn practice, measurement accuracy may depend as much on the probe and de-embedding workflow as on the oscilloscope mainframe.\n\n### 4. AI accelerator power delivery increases power-integrity measurement demand\n\nAI GPUs and accelerators have very high transient current. Fast workload changes can create supply droop, ripple, ground bounce, and PDN resonance.\n\nOscilloscope requirements therefore include:\n\n- Low-noise power rail probes.\n- High offset range with millivolt sensitivity.\n- Fast transient capture.\n- Frequency-domain view of ripple and noise.\n- Correlation of power events with digital activity.\n- Multi-channel time alignment across power rails, clocks, resets, and data links.\n\nFor AI servers, measuring only the average supply voltage is not enough. Engineers need to see nanosecond-to-microsecond droops and correlate them with link errors or compute load changes.\n\n### 5. PCIe Gen5/Gen6 and CXL need protocol-aware compliance support\n\nAI servers rely heavily on PCIe and increasingly CXL. As speeds rise, oscilloscopes need built-in or optional compliance applications for:\n\n- PCIe transmitter tests.\n- Receiver calibration support.\n- Jitter and eye mask measurements.\n- Link equalization analysis.\n- CEM and base specification test coverage.\n- Long pattern capture for training sequences and low-probability events.\n\nPCIe Gen6 adds PAM4 and FLIT/FEC-related behavior, which increases the need for advanced signal integrity and protocol-adjacent debugging.\n\n### 6. Ethernet and optical-module testing expands the scope role\n\nAI data centers are rapidly moving to 800G and 1.6T optical and electrical interfaces. Oscilloscopes may be used for:\n\n- Electrical host interface validation.\n- Optical module electrical lane testing.\n- PAM4 eye and TDECQ-type analysis.\n- Jitter and noise characterization.\n- Debugging host-to-module signal integrity.\n- Correlating electrical impairments with optical link performance.\n\nThis requires high-bandwidth real-time or sampling oscilloscopes, depending on the test case.\n\n### 7. More channels and synchronization are needed\n\nAI server debugging often requires correlation across many signals:\n\n- Multiple differential lanes.\n- Reference clocks.\n- Power rails.\n- VRM control signals.\n- Reset and sideband signals.\n- Thermal or workload triggers.\n\nSo engineers need oscilloscopes with:\n\n- Four or more high-bandwidth channels.\n- Good channel-to-channel skew performance.\n- External trigger support.\n- Multi-instrument synchronization in some cases.\n- Deep acquisition memory.\n\n### 8. Debug is shifting from simple waveform viewing to system-level validation\n\nIn older systems, an oscilloscope might mainly confirm signal shape. In AI data center hardware, the oscilloscope increasingly supports:\n\n- Compliance testing.\n- Margin analysis.\n- Root-cause debugging.\n- Power-aware signal integrity.\n- Time-correlated multi-domain analysis.\n- Statistical analysis of rare failures.\n\nThat means software capability—compliance packages, jitter tools, serial decode, de-embedding, automation APIs—is as important as raw bandwidth.\n\n### Summary\n\nAI data center technology increases oscilloscope requirements in five main ways:\n\n| Technology change | Oscilloscope impact |\n|---|---|\n| Faster SerDes, PCIe, Ethernet | Higher bandwidth, lower jitter, PAM4 analysis |\n| Dense lossy channels | Better probes, fixtures, de-embedding, equalization |\n| High-current AI accelerators | Better power-integrity and transient rail measurement |\n| More complex standards | Compliance software for PCIe, Ethernet, DDR, CXL, etc. |\n| System-level failures | More channels, deeper memory, automation, correlation tools |\n\nIn short: AI data centers require oscilloscopes that are not only faster, but also **cleaner, more accurate, more software-driven, and better integrated with signal-integrity and power-integrity workflows**.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-56e725a798104ff4b3fc966c100c2d47",
+      "request_id": "request-56e725a798104ff4b3fc966c100c2d47",
+      "span_id": "span-56e725a798104ff4b3fc966c100c2d47",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-56e725a798104ff4b3fc966c100c2d47",
+       "request_id": "request-56e725a798104ff4b3fc966c100c2d47",
+       "span_id": "span-56e725a798104ff4b3fc966c100c2d47",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave insufficient direct, raw-cited evidence for oscilloscope requirements in AI data centers. The following is therefore **general industry knowledge, not from the knowledge base**.\n\nAI data centers are pushing oscilloscope requirements upward because the bottleneck is moving from compute chips alone to **high-speed electrical links, optical-module interfaces, memory buses, and power delivery**. Oscilloscopes used in this space need to measure smaller margins at much higher data rates.\n\n### 1. Higher-speed interconnects require more bandwidth and lower jitter noise\n\nAI clusters use faster links between GPUs, CPUs, NICs, switches, accelerators, memory, and optical modules. Examples include PCIe Gen5/Gen6, 800G/1.6T Ethernet, high-speed SerDes, CXL, DDR5/LPDDR5/possibly HBM-related interfaces.\n\nThis drives oscilloscope needs such as:\n\n- **Higher analog bandwidth** for 32, 64, 112, and 224 Gb/s-class signals.\n- **Very low intrinsic jitter** so the scope does not dominate the timing-error measurement.\n- **High sample rate and deep memory** to capture long patterns, link training, burst behavior, and rare events.\n- **PAM4 analysis capability**, since many data center links use multilevel signaling rather than simple NRZ.\n- Eye diagram, bathtub, TDECQ, SNDR, jitter decomposition, and equalization analysis.\n\n### 2. PAM4 and 224G-class SerDes make noise and linearity more important\n\nWith PAM4, the voltage spacing between symbols is much smaller than NRZ. That means the oscilloscope must have:\n\n- Lower front-end noise.\n- Better vertical resolution or effective number of bits.\n- High linearity.\n- Accurate clock recovery.\n- Advanced de-embedding and equalization tools.\n\nFor 112G/224G SerDes, the raw signal at the receiver input may look badly closed until channel loss and equalization are accounted for, so the oscilloscope must support **CTLE/DFE modeling, fixture de-embedding, S-parameter embedding/de-embedding, and compliance applications**.\n\n### 3. Shorter margins make fixture, probe, and de-embedding quality critical\n\nAI server boards are dense and lossy: high-layer-count PCBs, backplanes, cables, connectors, sockets, interposers, and retimers all contribute loss, reflections, and crosstalk.\n\nSo oscilloscope capability is no longer just “bandwidth.” It also needs:\n\n- High-performance differential probes.\n- Low-loading probing.\n- Accurate probe calibration.\n- Fixture removal.\n- S-parameter-based de-embedding.\n- Channel emulation or embedding.\n- Support for compliance fixtures.\n\nIn practice, measurement accuracy may depend as much on the probe and de-embedding workflow as on the oscilloscope mainframe.\n\n### 4. AI accelerator power delivery increases power-integrity measurement demand\n\nAI GPUs and accelerators have very high transient current. Fast workload changes can create supply droop, ripple, ground bounce, and PDN resonance.\n\nOscilloscope requirements therefore include:\n\n- Low-noise power rail probes.\n- High offset range with millivolt sensitivity.\n- Fast transient capture.\n- Frequency-domain view of ripple and noise.\n- Correlation of power events with digital activity.\n- Multi-channel time alignment across power rails, clocks, resets, and data links.\n\nFor AI servers, measuring only the average supply voltage is not enough. Engineers need to see nanosecond-to-microsecond droops and correlate them with link errors or compute load changes.\n\n### 5. PCIe Gen5/Gen6 and CXL need protocol-aware compliance support\n\nAI servers rely heavily on PCIe and increasingly CXL. As speeds rise, oscilloscopes need built-in or optional compliance applications for:\n\n- PCIe transmitter tests.\n- Receiver calibration support.\n- Jitter and eye mask measurements.\n- Link equalization analysis.\n- CEM and base specification test coverage.\n- Long pattern capture for training sequences and low-probability events.\n\nPCIe Gen6 adds PAM4 and FLIT/FEC-related behavior, which increases the need for advanced signal integrity and protocol-adjacent debugging.\n\n### 6. Ethernet and optical-module testing expands the scope role\n\nAI data centers are rapidly moving to 800G and 1.6T optical and electrical interfaces. Oscilloscopes may be used for:\n\n- Electrical host interface validation.\n- Optical module electrical lane testing.\n- PAM4 eye and TDECQ-type analysis.\n- Jitter and noise characterization.\n- Debugging host-to-module signal integrity.\n- Correlating electrical impairments with optical link performance.\n\nThis requires high-bandwidth real-time or sampling oscilloscopes, depending on the test case.\n\n### 7. More channels and synchronization are needed\n\nAI server debugging often requires correlation across many signals:\n\n- Multiple differential lanes.\n- Reference clocks.\n- Power rails.\n- VRM control signals.\n- Reset and sideband signals.\n- Thermal or workload triggers.\n\nSo engineers need oscilloscopes with:\n\n- Four or more high-bandwidth channels.\n- Good channel-to-channel skew performance.\n- External trigger support.\n- Multi-instrument synchronization in some cases.\n- Deep acquisition memory.\n\n### 8. Debug is shifting from simple waveform viewing to system-level validation\n\nIn older systems, an oscilloscope might mainly confirm signal shape. In AI data center hardware, the oscilloscope increasingly supports:\n\n- Compliance testing.\n- Margin analysis.\n- Root-cause debugging.\n- Power-aware signal integrity.\n- Time-correlated multi-domain analysis.\n- Statistical analysis of rare failures.\n\nThat means software capability—compliance packages, jitter tools, serial decode, de-embedding, automation APIs—is as important as raw bandwidth.\n\n### Summary\n\nAI data center technology increases oscilloscope requirements in five main ways:\n\n| Technology change | Oscilloscope impact |\n|---|---|\n| Faster SerDes, PCIe, Ethernet | Higher bandwidth, lower jitter, PAM4 analysis |\n| Dense lossy channels | Better probes, fixtures, de-embedding, equalization |\n| High-current AI accelerators | Better power-integrity and transient rail measurement |\n| More complex standards | Compliance software for PCIe, Ethernet, DDR, CXL, etc. |\n| System-level failures | More channels, deeper memory, automation, correlation tools |\n\nIn short: AI data centers require oscilloscopes that are not only faster, but also **cleaner, more accurate, more software-driven, and better integrated with signal-integrity and power-integrity workflows**.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_E1eG6oiGVbjyVbH2flH07BAF",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-56e725a798104ff4b3fc966c100c2d47",
+          "request_id": "request-56e725a798104ff4b3fc966c100c2d47",
+          "span_id": "span-56e725a798104ff4b3fc966c100c2d47",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-56e725a798104ff4b3fc966c100c2d47",
+           "request_id": "request-56e725a798104ff4b3fc966c100c2d47",
+           "span_id": "span-56e725a798104ff4b3fc966c100c2d47",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "How do changes in AI data centers technology affect the measurement capability required from Oscilloscope? Focus on oscilloscope measurement requirements for AI data centers, high-speed interconnects, power integrity, PCIe/Ethernet/SerDes/DDR, and related Rohde & Schwarz application context.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "ASMedia Technology Inc. › 來源中的說法\n- [[Serdes IC-IP companies]]（來源正文未標示正式日期；raw 路徑含 2026-8-7；converted 2026-09-17）在台灣 IC 設計公司與產品方向名單中列出 [[祥碩科技]]，說其與 [[AMD]] 合作密切，產品涵蓋 USB、PCIe、SATA 等高速傳輸技術。\n- 同一來源在公司簡介中說 [[ASMedia Technology Inc.]] 是 fabless IC design company。\n- 同一來源說 ASMedia 成立於 2004 年，總部位於 New Taipei City, Taiwan。\n- 同一來源說其專注於 high-speed interface technologies。\n- 來源列出的產品與技術包含 USB host and device controllers、PCIe bridge controllers、SATA bridges and controllers、high-speed signal switches、ASIC solutions。\n- 來源說 ASMedia 服務全球 motherboard 與 OEM companies。\n- 來源說其市場據點包含 United States、Taiwan、China、Southeast Asia、Northeast Asia。\n- 來源明確寫 ASMedia 具備 high-speed SERDES（Serializer/Deserializer）development 專業。\n- 來源說 ASMedia 2012 年公開上市，並在 Taiwan Stock Exchange 上市，ticker symbol 為 5269。\n- [[HighSpeedSerdesIC]]（來源未標示正式發布日期；converted 2026-09-17）在 **SerdesIC list** 的 PCIE 分類列出：企業 [[祥碩]]、English [[ASMedia]]、代號 `5269.0`、website 欄 `ASMedia Technology Inc.`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/ASMedia Technology Inc..md"
+             },
+             "score": 2.44754
+            },
+            {
+             "text": "Sentry HD High-Speed Backplane Connector › 來源中的說法\n- [[full-spectrum-data-center-connectivity-brochure]]（來源未標示日期；raw converted 2026-09-17）在 featured product 區塊列出 Sentry HD High-Speed Backplane Connector。\n- 來源稱 Sentry HD is Amphenol's next-generation high-speed backplane connector platform。\n- 來源稱它 purpose-built to power the future of AI data center architectures。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Sentry HD High-Speed Backplane Connector.md"
+             },
+             "score": 1.800054
+            },
+            {
+             "text": "高速互連 probing 與 de-embedding 測試案例 › 可學到的 sales / solution pattern\n- 來源明示的 win factor 不是單一儀器規格，而是 total solution：probe、mount-kit、de-embedding tool 與 local partner。這與 [[R&S PCB test solutions]] 中 material measurement / sampling testing / process monitoring 的流程視角互補。\n- Bare board for SoCs、socket / transmission line evaluation 與 board-to-board connector DUT 都落在 [[Signal Integrity]]、[[Insertion Loss]]、[[Return Loss]]、[[Impedance]] 與 de-embedding 的交界。\n- Samsung 5G SoC including VCO case 顯示 [[R&S FSWP50]]、[[R&S SMW200A]] 與 automated VCO tuning software 可以被包裝成 RF / analog enablement 測試方案，但來源未提供正式 software product name 或 version。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+             },
+             "score": 3.182817
+            },
+            {
+             "text": "R&S FSWP50 › Spectrum analyzer、bandwidth 與 frequency extension options\n| Option code | 名稱 | Order No. | 原文說明 / 限制 |\n|---|---|---|---|\n| R&S®FSWP-B1 | Spectrum analyzer, 10 Hz to 50 GHz | 1322.9997.50 | for R&S®FSWP50 |\n| R&S®FSWP-B8 | Resolution bandwidth up to 80 MHz | 1325.5028.02 | not retrofittable，for R&S®FSWP50 with R&S®FSWP-B80 option；export license required |\n| R&S®FSWP-B21 | LO/IF connections for external mixers | 1325.3848.02 | retrofittable，for R&S®FSWP26/50，contact service center，includes two cables for IF and LO ports, length 1 m |\n| R&S®FSWP-B24 | RF preamplifier, 100 kHz to 50 GHz | 1325.3725.50 | for R&S®FSWP50 |\n| R&S®FSWP-B56G | Frequency extension up to 56 GHz | 1357.7878.02 | retrofittable，for R&S®FSWP50 with model .51 或 R&S®FSWP-B61 option model .51 |\n| R&S®FSWP-B80 | 80 MHz analysis bandwidth | 1325.4338.02 | retrofittable，for R&S®FSWP8/26/50 |\n| R&S®FSWP-B320 | 320 MHz analysis bandwidth | 1338.3235.04 | retrofittable，for R&S®FSWP8/26/50 |\n\n- R&S®FSWP-B1 spectrum analyzer mode：DC coupled 10 Hz to 50 GHz；AC coupled 10 MHz to 50 GHz；with R&S®FSWP-B56G 時 DC coupled 1 MHz to 56 GHz，AC coupled 10 MHz to 56 GHz。\n- Signal analysis bandwidth：standard 10 MHz nominal；with R&S®FSWP-B80 option 80 MHz nominal；with R&S®FSWP-B320 option 320 MHz nominal。\n- R&S®FSWP-B24 RF preamplifier frequency range：100 kHz to 50 GHz；RF preamplifier gain setting range 15 dB / 30 dB nominal；RF preamplifier 對 phase noise analyzer specifications 無影響。\n- R&S®FSWP-B320：signal analysis bandwidth 標稱 320 MHz；f ≥ 8 GHz 時 YIG preselector off。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSWP50.md"
+             },
+             "score": 3.083992
+            },
+            {
+             "text": "R&S FSWP › 共通功能\n- Frequency resolution：0.01 Hz。\n- 主要量測：[[Phase noise measurement]]、[[AM noise measurement]]、[[Baseband noise measurement]]、[[VCO characterization]]、[[Transient analysis]]、[[Allan deviation]] / [[Allan variance]]。\n- Phase noise measurement results：SSB phase noise、spurious signals、integrated RMS phase deviation、residual FM、time jitter。\n- Number of traces：phase noise 6；spectrum analyzer mode level display 6。\n- Cross-correlations 改善量：10 cross-correlations 改善 5 dB；100 改善 10 dB；1000 改善 15 dB；10 000 改善 20 dB。\n- Signal levels below +10 dBm 時，phase noise sensitivity 受 thermal noise floor −177 dBm (1 Hz) 限制。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSWP.md"
+             },
+             "score": 8.203849
+            },
+            {
+             "text": "Wi-Fi 7 and 5G RedCap OTA measurements › 使用限制\n- 來源未標示發布日期。\n- 來源未標示 [[R&S CMX500]] 搭配 [[EMITE]] OTA chambers 的硬體 BOM、software option code、CSW version、RF chain count 或 license requirement。\n- 來源未標示 [[EMITE]] chamber 型號、頻率範圍、DUT 尺寸、load condition、校準程序、measurement uncertainty 或 conformance applicability。\n- 來源使用 full compliance with [[IEEE 802.11be]] and [[5G RedCap]] 的語句，但未展開 compliance 的標準版本、測試項目、pass/fail criteria 或認證機構。\n- 來源未列出 [[Wi-Fi 7]]、[[5G RedCap]]、[[LTE]]、[[NR FR1]]、[[NR FR2]] 的完整 test case list。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+             },
+             "score": 2.556472
+            },
+            {
+             "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx | WLAN SISO signaling |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx | 802.11ax station testing |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx | 802.11be station testing |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx | 802.11bn station testing |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx | 802.11ax AP testing |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx | 802.11be AP testing |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx | 802.11bn AP testing |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx | 2x2 MIMO support |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx | Enterprise security support |\n| R&S CMX-KS500B / M / X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx | 僅 LTE standalone 需要；NR NSA LTE anchor cells 包含於 NR signaling options |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx | D2C fixed / variable delay |\n| R&S CMX-KS600B / M / X | NR signaling enabler, Rel. 15 | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx | 包含 5G NR SA option 2、NSA option 3、DL 2x2/4x4 MIMO、one CC、UL 256QAM |\n| R&S CMX-KS610B / M / X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx | UL 2x2 MIMO、CA up to 9 CC |\n| R&S CMX-KS611B / M / X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx | SUL / Rel. 16 features |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 25,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 9.748054
+            },
+            {
+             "text": "R&S FSWX › 產品定位與架構\n- 產品定位：multiport signal and spectrum analyzer。\n- 內部 multipath architecture 支援 1-port 與 2-port instruments。\n- 可用於 spectrum、noise measurement、phase noise、modulation quality（EVM）的 [[Cross-correlation]]。\n- 提供 extended [[Spurious free dynamic range]]（SFDR）。\n- 改善 [[Displayed average noise level]]（DANL）以尋找 hidden spurs。\n- 可在 high-power carrier 存在時量測 distortion 與 noise。\n- 可針對 EVM 要求嚴苛的 components 做 characterization。\n- Multipath wideband phase coherent receivers 可使用 independent receivers 同時進行 signal analysis 與 spectrum analysis。\n- 可在 spectrum 任意位置、相同或不同頻率同時觀察 signals。\n- 可同時量測 antenna 的 H 或 V polarizations、device input 與 output，並直接比較 ports 之間的 amplitude、frequency、phase。\n- Image free I/Q and vector signal analysis 使用 preselected capture and analysis，避免 unwanted signals 干擾量測。\n- Operating system：Linux based operating system，目標為 high security 與 long-term support。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSWX.md"
+             },
+             "score": 11.279761
+            },
+            {
+             "text": "R&S SMW200A › 產品定位與架構\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]（Version 31.00，May 2026）與 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（Version 06.00，May 2024）：\n\n- [[R&S SMW200A]] 可從 single-path vector signal generator 擴充到 multichannel [[MIMO]] receiver tester。\n- 支援最多 `8` 個 signal sources 與最多 `64` 個 fading channels。\n- 可連接 [[R&S SGT100A]] signal generator modules，提供最多 `8` 條 RF paths。\n- 最多可在 `2` 個 internal baseband modules 上配置 `8` 個 baseband generators，具 real-time coder 與 ARB。\n- 單機可配置最多兩個 internal RF paths：RF path A 為 mandatory，RF path B 為 optional second RF path。\n- Baseband section 分成 standard baseband section 與 wideband baseband section；standard baseband 最高 `160 MHz` RF modulation bandwidth，wideband baseband 最高 `2 GHz` RF modulation bandwidth。\n- 可選 integrated fading section，channel emulation bandwidth 最高 `800 MHz`；最多可安裝 `4` 個 fading modules，提供最多 `64` 個 logical faders。\n- 單一儀器可實作 MIMO fading scenarios：`2x2`、`3x3`、`4x4`、`8x4`、`4x8`、`2x4x4`。\n- Path-specific、baseband-specific 與 fading/MIMO software options 採 floating license concept；若同一 feature 需同時在兩個 paths 或兩個 baseband generators 使用，通常需安裝兩份對應 option。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SMW200A.md"
+             },
+             "score": 15.657365
+            },
+            {
+             "text": "High speed SerDes eco-chain › 下游 — 終端應用與市場部署\n- 通訊設備製造商：核心網、5G 基站、光傳輸設備、交換機、路由器等。\n- 服務器與資料中心：協助 AI、高效能計算環境部署，需求高速內部連與介面連接。\n- 網通基礎建設與雲端應用：包含物聯網、雲計算與邊緣運算等場域皆需高速數據傳輸與處理能力。\n- 消費電子與車用領域：筆電 / 手機等需 [[HDMI]]、[[DisplayPort]]、[[USB]] 介面，汽車上的 [[ADAS]] 與 [[V2X]] 通訊亦需高速訊號傳輸。\n- 工業與智慧製造：工業自動化系統、高速資料擷取與辨識也仰賴高速訊號鏈路。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+             },
+             "score": 8.073569
+            },
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 8.63149
+            },
+            {
+             "text": "ASMedia Technology Inc.\n[[ASMedia Technology Inc.]] 是 [[Serdes IC-IP companies]] 中列出的台灣 fabless IC design company，來源稱其專注於 high-speed interface technologies，並具備 high-speed SERDES development 專業；[[HighSpeedSerdesIC]] 另以 [[祥碩]] / [[ASMedia]] 將其列在 PCIE 分類，代號欄為 5269.0。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/ASMedia Technology Inc..md"
+             },
+             "score": 1.255032
+            },
+            {
+             "text": "Sentry HD High-Speed Backplane Connector › 可追溯限制\n- 來源未標示正式內容日期、datasheet 版次、料號、支援速率、pin count、impedance、insertion loss、crosstalk 或 compliance 資訊。\n- `next-generation`、`purpose-built` 與 `AI data center architectures` 是 brochure marketing claim；不可推論市占率、客戶導入或量產狀態。\n- 來源未說明 [[Sentry HD High-Speed Backplane Connector]] 與既有 [[Paladin HD]]、[[Paladin HD2 224Gb-s Backplane Interconnect System]]、[[EXAMAX2]] 或 [[XCede HD2]] 的產品階層關係。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Sentry HD High-Speed Backplane Connector.md"
+             },
+             "score": 1.362327
+            },
+            {
+             "text": "高速互連 probing 與 de-embedding 測試案例 › 與既有知識的關係\n- [[R&S PCB test solutions]] — 保存 R&S high-speed digital 簡報中的 PCB test flow；本頁補入 case-sharing 中的 customer / partner / competitor context。\n- [[SerDes 與 SI PI 測試概覽]] — 本頁提供 PCB / interconnect probing 的實務案例語境。\n- [[Keysight ENA]] — 在 LSmtron case 中作為 competitor。\n- [[R&S ZNB3044]]、[[R&S ZNA43]]、[[R&S FSWP50]]、[[R&S SMW200A]] — 本來源提供 Market 應用案例，不改寫 Productions 規格。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+             },
+             "score": 1.757136
+            },
+            {
+             "text": "R&S SMW200A\n[[R&S SMW200A]] 是 Rohde & Schwarz 的 vector signal generator；依 `R&S®SMW200A Vector Signal Generator Specifications` `Version 31.00`（`May 2026`），RF path A 可覆蓋 `100 kHz to 67 GHz`，RF path B 可覆蓋至 `44 GHz`，並可由 single-path vector signal generator 擴充到 multichannel MIMO receiver tester（來源：[[SMW200A_specs_en_3606-8037-22_v3100]]）。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SMW200A.md"
+             },
+             "score": 6.419938
+            },
+            {
+             "text": "R&S FSWP\nR&S FSWP 是 Rohde & Schwarz 的 Phase Noise Analyzer and VCO Tester 系列，依 Version 09.01（January 2026）涵蓋 [[R&S FSWP8]]、[[R&S FSWP26]]、[[R&S FSWP50]]，其中 [[R&S FSWP50]] 搭配 R&S®FSWP-B56G 可延伸至 56 GHz。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSWP.md"
+             },
+             "score": 4.504678
+            },
+            {
+             "text": "Wi-Fi 7 and 5G RedCap OTA measurements\n[[Wi-Fi 7 and 5G RedCap OTA measurements]] 是 [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 中描述的 OTA 測試解決方案情境：將 [[R&S CMX500]] 的 latest test capabilities 整合到 [[EMITE]] over-the-air chambers，以評估 [[Wi-Fi 7]] / [[IEEE 802.11be]] 與 [[5G RedCap]] devices 的 performance。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+             },
+             "score": 2.20097
+            },
+            {
+             "text": "EMITE › 與 Rohde & Schwarz 的合作\n[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 說明 [[EMITE]] 與 [[Rohde & Schwarz]] 延續合作，將 [[R&S CMX500]] multi-technology、multi-channel one-box signaling tester 的 latest test capabilities fully integrated 到 [[EMITE]] OTA measurement solutions。\n\n來源中的合作重點：\n\n- [[EMITE]] state-of-the-art over-the-air chambers 可與 [[R&S CMX500]] 最新 testing features combined。\n- 整合能力涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]、[[IEEE 802.11be]] / [[Wi-Fi 7]] 與 [[5G RedCap]]。\n- 對 EMITE customers 的目標是提供 comprehensive environment，用於 assessing performance of [[Wi-Fi 7]] and [[5G RedCap]] devices。\n- 下一步合作方向是整合 [[NB-IoT NTN]] 與 [[NR NTN]] test capabilities；來源稱兩者 already covered by [[R&S CMW500]] and [[R&S CMX500]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/EMITE.md"
+             },
+             "score": 3.234524
+            },
+            {
+             "text": "R&S FSWX › Firmware / licence options（摘錄）\n| Option code | 名稱 | Order No. | Requires / 原文說明 |\n|---|---|---|---|\n| R&S FSW3-KR110 | User defined frequency correction | 1347.8113.02 | 來源未標示 |\n| R&S FSW3-KR200 | External frontend control | 1347.8107.02 | 支援 [[R&S FE110SR]]、[[R&S FE170SR]] |\n| R&S FSW3-KM100 | I/Q spectrum analyzer | 1347.7600.02 | 來源未標示 |\n| R&S FSW3-KM101 | Vector signal analysis | 1347.7846.02 | 來源未標示 |\n| R&S FSW3-KM102 | Multi-modulation analysis | 1347.7852.02 | 需要 R&S FSW3-KM101 |\n| R&S FSW3-KM103 | BER PRBS Measurements | 1347.7869.02 | 需要 R&S FSW3-KM101 |\n| R&S FSW3-KM105 | Cross-correlation for I/Q spectrum analyzer | 1349.2170.02 | 需要 R&S FSW3-KM100 |\n| R&S FSW3-KM107 | Analog demodulation application | 1347.7646.02 | 來源未標示 |\n| R&S FSW3-KM112 | OFDM vector signal analysis | 1348.5930.02 | 來源未標示 |\n| R&S FSW3-KM113 | Cross-correlation for OFDM vector signal analysis | 3852.5400.02 | 需要 R&S FSW3-KM112 |\n| R&S FSW3-KM118 | Amplifier measurements | 1347.7675.02 | 來源未標示 |\n| R&S FSW3-KM119 | Frequency response measurements | 1347.7698.02 | 需要 R&S FSW3-KM118 |\n| R&S FSW3-KM120 | Direct DPD measurements | 1347.7681.02 | 需要 R&S FSW3-KM118 |\n| R&S FSW3-KM121 | Memory-polynomial DPD measurements | 1347.8388.02 | 需要 R&S FSW3-KM118 |\n| R&S FSW3-KM125 | Noise figure measurement application | 1347.7723.02 | 來源未標示 |\n| R&S FSW3-KM126 | Cross-correlation for noise figure measurement application | 1347.7730.02 | 需要 R&S FSW3-KM125 |\n| R&S FSW3-KM129 | Phase noise measurement application | 1347.7752.02 | 來源未標示 |\n| R&S FSW3-KM130 | Cross-correlation for phase noise | 1347.7769.02 | 需要 R&S FSW3-KM129 |\n| R&S FSW3-KM135 | Cross-application control and triggering | 1349.2129.02 | 來源未標示 |\n| R&S FSW3-KM310 | EUTRA/LTE FDD downlink | 1347.7969.02 | 來源未標示 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSWX.md"
+             },
+             "score": 7.935428
+            },
+            {
+             "text": "High speed SerDes eco-chain › 分層整理\n| 層級 | 來源分類 | 來源明示內容 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| 上游 | 基礎材料與核心元件 | 半導體晶片、光模組 / 光元件、PCB 材、被動元件、高頻高速線材與接頭 | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供公司名單完整性、市占率、供應關係或材料規格 |\n| 中游 | 模組整合與生產製造 | 晶片封測、線材接頭組裝、系統級整合、消費電子裝置整合、高速 PCB 設計 | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供具體廠商、產能或客戶 |\n| 下游 | 終端應用與市場部署 | 通訊設備、伺服器與資料中心、雲端 / 邊緣、消費電子 / 車用、工業與智慧製造 | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供需求數字、出貨量或區域市場資料 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+             },
+             "score": 5.363839
+            },
+            {
+             "text": "ASMedia Technology Inc. › 可追溯範圍\n- 本頁只記錄 [[Serdes IC-IP companies]] 中 ASMedia 的公司定位、產品方向與 high-speed SERDES development 專業說法，以及 [[HighSpeedSerdesIC]] 中 PCIE 分類列名。\n- [[HighSpeedSerdesIC]] 未提供 ASMedia 的 PCIe 版本、資料率、產品型號、SerDes lane 數、客戶、出貨量、營收占比、R&S Solution 或 Sales kits。\n- 來源未提供與 [[AMD]] 合作密切的合約、產品平台、時間範圍或證據。\n- [[HighSpeedSerdesIC]] 的代號欄以 `5269.0` 呈現，可能是 Excel 數字格式；本頁保留來源格式並另記既有來源中的 ticker symbol 5269。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/ASMedia Technology Inc..md"
+             },
+             "score": 0.994349
+            },
+            {
+             "text": "Sentry HD High-Speed Backplane Connector › 未決事項\n- 來源未提供 Sentry HD 的完整型號、order number、可訂購狀態、測試條件或正式規格表。\n- 來源未提供 AI data center architecture 的具體系統、客戶、平台或設計導入案例。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Sentry HD High-Speed Backplane Connector.md"
+             },
+             "score": 0.720734
+            },
+            {
+             "text": "高速互連 probing 與 de-embedding 測試案例\n[[高速互連 probing 與 de-embedding 測試案例]] 是從 [[TRI_AMD_RSKR Sharing1]] 抽出的 Market 層級案例集合，描述以 VNA、probe、mount-kit、de-embedding tool 與 local partner 解決 PCB、socket、connector 與 SoC validation 量測問題。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+             },
+             "score": 0.279874
+            },
+            {
+             "text": "R&S FSWP › 硬體 options（系列總覽，型號頁另列適用性）\n| Option code | 名稱 | Order No. | 原文適用 / 限制 |\n|---|---|---|---|\n| R&S®FSWP-B60 | Cross-correlation, 8 GHz | 1322.9800.08 | retrofittable，for [[R&S FSWP8]] |\n| R&S®FSWP-B60 | Cross-correlation, 26 GHz | 1322.9800.26 | retrofittable，for [[R&S FSWP26]] |\n| R&S®FSWP-B60 | Cross-correlation, 50 GHz | 1322.9800.50 | retrofittable，for [[R&S FSWP50]] |\n| R&S®FSWP-B60 | Cross-correlation, 50 GHz | 1322.9800.51 | retrofittable，for [[R&S FSWP50]] |\n| R&S®FSWP-B61 | Cross-correlation low phase noise, 8 GHz | 1325.3719.08 | retrofittable，for [[R&S FSWP8]]，contact service center，includes R&S®FSWP-B4 option |\n| R&S®FSWP-B61 | Cross-correlation low phase noise, 26 GHz | 1325.3719.26 | retrofittable in factory，for [[R&S FSWP26]] |\n| R&S®FSWP-B61 | Cross-correlation low phase noise, 50 GHz | 1325.3719.50 | retrofittable in factory，for [[R&S FSWP50]] with R&S®FSWP-B60 option model .50 |\n| R&S®FSWP-B61 | Cross-correlation low phase noise, 50 GHz | 1325.3719.51 | retrofittable in factory，for [[R&S FSWP50]] model .51 |\n| R&S®FSWP-B64 | Additive phase noise measurements | 1322.9900.27 | retrofittable，for [[R&S FSWP8]]、[[R&S FSWP26]]、model .50 或 R&S®FSWP-B61 option model .50；frequency range 10 MHz to 8 GHz for [[R&S FSWP8]]，10 MHz to 18 GHz for [[R&S FSWP26]] and [[R&S FSWP50]]；contact service center |\n| R&S®FSWP-B64 | Additive phase noise measurements | 1322.9900.51 | retrofittable，for [[R&S FSWP50]] with model .51 或 R&S®FSWP-B61 option model .51；100 MHz to 50 GHz for [[R&S FSWP50]]，100 MHz to 54 GHz with internal signal source，100 MHz to 56 GHz with external signal source for R&S®FSWP-B56G option |\n| R&S®FSWP-B4 | High stability OCXO | 1325.3890.02 | user-retrofittable |\n| R&S®FSWP-B1 | Spectrum analyzer, 10 Hz to 8 GHz | 1322.9997.08 | retrofittable in factory，for [[R&S FSWP8]] |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSWP.md"
+             },
+             "score": 4.190978
+            },
+            {
+             "text": "# Users in high speed serdes application",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-74f44a4409e2b694",
+               "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+               "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "section": 57,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.393995
+            },
+            {
+             "text": "1. ==🔴PCI Express (PCIe) – Used in computer motherboards, GPUs, and storage devices.==\n1. ==🔴Ethernet – Especially in high-speed variants like 10G, 25G, 100G, 400G, and even 800G Ethernet.==\n1. ==🔴USB – Particularly USB 3.x and USB4.==\n1. ==🔴SATA and SAS – For storage interfaces.==\n1. ==🔴MIPI – Used in mobile and camera interfaces (e.g., MIPI D-PHY, C-PHY).==",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e79d5eefd7496f4c",
+               "original_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+               "sha256": "e79d5eefd7496f4cbc507082860f6c528c961149dcfec0d8443f8338eafdfd31",
+               "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+              "section": 382,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.34159
+            },
+            {
+             "text": "DATA CENTER\nSERVER SOLUTIONS\nFueling Servers with High-Speed Interconnect\nSolutions for Scalable Performance\nAmphenol’s portfolio of connectors, cables, and high-speed\ncomponents is built for peak server performance. Designed for high-\nbandwidth efficiency, our solutions ensure seamless data flow in data\ncenters. These reliable components optimize server operations for\ncomplex data processing and high-performance computing.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-108d7b58b896a099",
+               "original_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+               "sha256": "108d7b58b896a0995ecc89afb9d513a04577bf496cb665f05a481edc7b27d429",
+               "raw_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.430918
+            },
+            {
+             "text": "At MWC Barcelona 2026, visitors can learn how to achieve significant performance gains through AI-enhanced CSI feedback at the KT booth 4A60 in hall 4. For further information on Rohde & Schwarz test solutions for AI and ML in 6G networks, visit: [www.rohde-schwarz.com/6G-AI-ML](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/6g/ai-and-ml-for-6g-networks/ai-and-ml-for-6g-networks_257029.html \"www.rohde-schwarz.com/6G-AI-ML\")",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c78ae7048c7db92f",
+               "original_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+               "sha256": "c78ae7048c7db92f3c3beda6128d6b1f27e7b231d8a46ee8143d0d79bb418a65",
+               "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.099012
+            }
+           ],
+           "text": "AI data centers increase measurement relevance because servers and data centers for AI and high-performance computing require high-speed internal interconnects and interface connections [10].\nHigh-speed SerDes applications explicitly include PCIe, Ethernet, USB, SATA/SAS, and MIPI, with Ethernet variants listed up to 800G [26].\nAI data center connector technology is moving toward next-generation high-speed backplane platforms purpose-built for AI data center architectures [2].\nThe available R&S application context for high-speed interconnect validation is not oscilloscope-specific; it describes VNA, probe, mount-kit, de-embedding tool, and local partner solutions for PCB, socket, connector, and SoC validation [23].\nThe measurement domains explicitly tied to those interconnect cases are signal integrity, insertion loss, return loss, impedance, and de-embedding [3].\nThe passages support a “total solution” pattern rather than a single instrument-specification pattern for high-speed interconnect validation [3].\n【推論】As AI data centers adopt higher-speed internal interconnects and interfaces, oscilloscope requirements would need to align with high-speed digital validation around PCIe/Ethernet/SerDes-class links, but the exact oscilloscope bandwidth or option set is not specified in the passages.[10][26]\n【推論】Because the supported R&S high-speed interconnect context emphasizes probing, de-embedding, impedance, insertion loss, return loss, and signal integrity, an oscilloscope-based workflow would likely need strong probing and de-embedding capability, but this is not directly specified as an R&S oscilloscope requirement.[3][23]\n【推論】For AI data center connector and backplane evolution, oscilloscope measurements would likely need to complement VNA-style channel characterization rather than replace it, because the cited R&S context centers on VNA plus probes and de-embedding for PCB, socket, connector, and SoC validation.[2][23]",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Sentry HD High-Speed Backplane Connector › 來源中的說法\n- [[full-spectrum-data-center-connectivity-brochure]]（來源未標示日期；raw converted 2026-09-17）在 featured product 區塊列出 Sentry HD High-Speed Backplane Connector。\n- 來源稱 Sentry HD is Amphenol's next-generation high-speed backplane connector platform。\n- 來源稱它 purpose-built to power the future of AI data center architectures。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/entities/Sentry HD High-Speed Backplane Connector.md"
+            },
+            "score": 1.800054
+           },
+           {
+            "text": "高速互連 probing 與 de-embedding 測試案例 › 可學到的 sales / solution pattern\n- 來源明示的 win factor 不是單一儀器規格，而是 total solution：probe、mount-kit、de-embedding tool 與 local partner。這與 [[R&S PCB test solutions]] 中 material measurement / sampling testing / process monitoring 的流程視角互補。\n- Bare board for SoCs、socket / transmission line evaluation 與 board-to-board connector DUT 都落在 [[Signal Integrity]]、[[Insertion Loss]]、[[Return Loss]]、[[Impedance]] 與 de-embedding 的交界。\n- Samsung 5G SoC including VCO case 顯示 [[R&S FSWP50]]、[[R&S SMW200A]] 與 automated VCO tuning software 可以被包裝成 RF / analog enablement 測試方案，但來源未提供正式 software product name 或 version。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+            },
+            "score": 3.182817
+           },
+           {
+            "text": "High speed SerDes eco-chain › 下游 — 終端應用與市場部署\n- 通訊設備製造商：核心網、5G 基站、光傳輸設備、交換機、路由器等。\n- 服務器與資料中心：協助 AI、高效能計算環境部署，需求高速內部連與介面連接。\n- 網通基礎建設與雲端應用：包含物聯網、雲計算與邊緣運算等場域皆需高速數據傳輸與處理能力。\n- 消費電子與車用領域：筆電 / 手機等需 [[HDMI]]、[[DisplayPort]]、[[USB]] 介面，汽車上的 [[ADAS]] 與 [[V2X]] 通訊亦需高速訊號傳輸。\n- 工業與智慧製造：工業自動化系統、高速資料擷取與辨識也仰賴高速訊號鏈路。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+            },
+            "score": 8.073569
+           },
+           {
+            "text": "高速互連 probing 與 de-embedding 測試案例\n[[高速互連 probing 與 de-embedding 測試案例]] 是從 [[TRI_AMD_RSKR Sharing1]] 抽出的 Market 層級案例集合，描述以 VNA、probe、mount-kit、de-embedding tool 與 local partner 解決 PCB、socket、connector 與 SoC validation 量測問題。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 1,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+            },
+            "score": 0.279874
+           },
+           {
+            "text": "1. ==🔴PCI Express (PCIe) – Used in computer motherboards, GPUs, and storage devices.==\n1. ==🔴Ethernet – Especially in high-speed variants like 10G, 25G, 100G, 400G, and even 800G Ethernet.==\n1. ==🔴USB – Particularly USB 3.x and USB4.==\n1. ==🔴SATA and SAS – For storage interfaces.==\n1. ==🔴MIPI – Used in mobile and camera interfaces (e.g., MIPI D-PHY, C-PHY).==",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-e79d5eefd7496f4c",
+              "original_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+              "sha256": "e79d5eefd7496f4cbc507082860f6c528c961149dcfec0d8443f8338eafdfd31",
+              "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/Serdes IC-IP companies.md",
+             "section": 382,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.34159
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [
+            {
+             "name": "technical_knowledge",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWP.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWX.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              }
+             ],
+             "attempts": 1
+            }
+           ],
+           "missing_facets": [],
+           "relation_required": false,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": [
+           {
+            "wiki_page": "wiki/entities/Sentry HD High-Speed Backplane Connector.md",
+            "raw_refs": [
+             "raw/Market/OneNote/full-spectrum-data-center-connectivity-brochure.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md",
+            "raw_refs": [
+             "raw/Market/OneNote/TRI_AMD_RSKR Sharing1.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md",
+            "raw_refs": [
+             "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+            ]
+           }
+          ]
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

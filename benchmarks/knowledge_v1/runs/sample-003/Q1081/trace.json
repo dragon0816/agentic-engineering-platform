@@ -1,0 +1,126 @@
+{
+ "question": {
+  "id": "Q1081",
+  "text": "What is comparison methodology, and which product-related measurement decisions depend on understanding it?",
+  "technical": "Technical Document / Paper Understanding",
+  "topic": "comparison methodology",
+  "product_related": "true"
+ },
+ "session_id": "conversation-dbe542c932f24aadbc075586a84de3e0",
+ "exchange": {
+  "sent": "What is comparison methodology, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 209.063,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-dbe542c932f24aadbc075586a84de3e0",
+    "actor": "leo.chi",
+    "title": "What is comparison methodology, and which product-related measurement de…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T14:26:39.808215Z",
+    "updated_at": "2026-10-07T14:30:08.568480Z",
+    "messages": [
+     {
+      "message_id": "message-359ccff1a5bd433d89edf462dd673cf5",
+      "role": "user",
+      "text": "What is comparison methodology, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-07T14:26:39.824017Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-feedcbbc17674f94898d4a98ae897b5b",
+      "role": "assistant",
+      "text": "The knowledge base gave no answer: evidence was insufficient, so I can’t cite the RS vault for this.\n\nFrom general measurement/product knowledge, **comparison methodology** means the agreed way to compare measurement results, products, or specifications so the comparison is fair and repeatable. It defines things like:\n\n- What is being compared: instrument spec, measured DUT result, uncertainty, throughput, EVM, phase noise, S-parameters, etc.\n- Test conditions: frequency, bandwidth, power level, temperature, waveform, modulation, averaging, calibration state.\n- Reference standard: golden unit, calibrated instrument, standard-defined limit, competitor datasheet, or previous product generation.\n- Calculation method: peak vs RMS, typical vs guaranteed, absolute vs relative, normalized vs raw.\n- Uncertainty and tolerances: measurement uncertainty, guard bands, pass/fail margins.\n- Reporting basis: worst case, average, percentile, production limit, datasheet limit.\n\nProduct-related measurement decisions that depend on understanding the comparison methodology include:\n\n1. **Which instrument/spec option is sufficient**  \n   Example: choosing analyzer bandwidth, phase-noise performance, VNA dynamic range, generator EVM, or oscilloscope sample rate.\n\n2. **Whether two products are truly comparable**  \n   A competitor’s “typical” spec under narrow conditions may not compare directly to another product’s guaranteed spec over temperature.\n\n3. **Pass/fail limit setting**  \n   Production or compliance limits need guard bands if measurement uncertainty is significant.\n\n4. **Calibration and traceability requirements**  \n   The methodology determines whether factory calibration is enough or accredited/traceable calibration is required.\n\n5. **Test setup design**  \n   Cable loss, fixtures, attenuators, probes, switching matrices, and reference planes can change the measured result.\n\n6. **Measurement speed vs accuracy tradeoff**  \n   Averaging, detector choice, sweep time, RBW/VBW, and demodulation length affect both throughput and repeatability.\n\n7. **Datasheet interpretation**  \n   Understanding whether values are guaranteed, nominal, typical, residual, additive, or system-level is essential.\n\n8. **Benchmarking against competitors**  \n   Fair product comparison requires matching conditions, options, firmware versions, test modes, and correction methods.\n\n9. **Production test strategy**  \n   Decisions such as sample size, retest rules, guard banding, and yield targets rely on a clear comparison method.\n\n10. **Customer application fit**  \n   The “best” product depends on the customer’s actual measurement condition, not only the headline specification.\n\nIn short: comparison methodology is the rulebook for making an apples-to-apples measurement comparison. Without it, product selection, specification claims, pass/fail limits, and competitive benchmarks can all be misleading.",
+      "created_at": "2026-10-07T14:30:08.568480Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-b6d1f439a3f647b3b052ca3e74984714",
+       "request_id": "request-b6d1f439a3f647b3b052ca3e74984714",
+       "span_id": "span-b6d1f439a3f647b3b052ca3e74984714",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)",
+    "ok": true,
+    "answer": "The knowledge base gave no answer: evidence was insufficient, so I can’t cite the RS vault for this.\n\nFrom general measurement/product knowledge, **comparison methodology** means the agreed way to compare measurement results, products, or specifications so the comparison is fair and repeatable. It defines things like:\n\n- What is being compared: instrument spec, measured DUT result, uncertainty, throughput, EVM, phase noise, S-parameters, etc.\n- Test conditions: frequency, bandwidth, power level, temperature, waveform, modulation, averaging, calibration state.\n- Reference standard: golden unit, calibrated instrument, standard-defined limit, competitor datasheet, or previous product generation.\n- Calculation method: peak vs RMS, typical vs guaranteed, absolute vs relative, normalized vs raw.\n- Uncertainty and tolerances: measurement uncertainty, guard bands, pass/fail margins.\n- Reporting basis: worst case, average, percentile, production limit, datasheet limit.\n\nProduct-related measurement decisions that depend on understanding the comparison methodology include:\n\n1. **Which instrument/spec option is sufficient**  \n   Example: choosing analyzer bandwidth, phase-noise performance, VNA dynamic range, generator EVM, or oscilloscope sample rate.\n\n2. **Whether two products are truly comparable**  \n   A competitor’s “typical” spec under narrow conditions may not compare directly to another product’s guaranteed spec over temperature.\n\n3. **Pass/fail limit setting**  \n   Production or compliance limits need guard bands if measurement uncertainty is significant.\n\n4. **Calibration and traceability requirements**  \n   The methodology determines whether factory calibration is enough or accredited/traceable calibration is required.\n\n5. **Test setup design**  \n   Cable loss, fixtures, attenuators, probes, switching matrices, and reference planes can change the measured result.\n\n6. **Measurement speed vs accuracy tradeoff**  \n   Averaging, detector choice, sweep time, RBW/VBW, and demodulation length affect both throughput and repeatability.\n\n7. **Datasheet interpretation**  \n   Understanding whether values are guaranteed, nominal, typical, residual, additive, or system-level is essential.\n\n8. **Benchmarking against competitors**  \n   Fair product comparison requires matching conditions, options, firmware versions, test modes, and correction methods.\n\n9. **Production test strategy**  \n   Decisions such as sample size, retest rules, guard banding, and yield targets rely on a clear comparison method.\n\n10. **Customer application fit**  \n   The “best” product depends on the customer’s actual measurement condition, not only the headline specification.\n\nIn short: comparison methodology is the rulebook for making an apples-to-apples measurement comparison. Without it, product selection, specification claims, pass/fail limits, and competitive benchmarks can all be misleading.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-b6d1f439a3f647b3b052ca3e74984714",
+      "request_id": "request-b6d1f439a3f647b3b052ca3e74984714",
+      "span_id": "span-b6d1f439a3f647b3b052ca3e74984714",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-b6d1f439a3f647b3b052ca3e74984714",
+       "request_id": "request-b6d1f439a3f647b3b052ca3e74984714",
+       "span_id": "span-b6d1f439a3f647b3b052ca3e74984714",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no answer: evidence was insufficient, so I can’t cite the RS vault for this.\n\nFrom general measurement/product knowledge, **comparison methodology** means the agreed way to compare measurement results, products, or specifications so the comparison is fair and repeatable. It defines things like:\n\n- What is being compared: instrument spec, measured DUT result, uncertainty, throughput, EVM, phase noise, S-parameters, etc.\n- Test conditions: frequency, bandwidth, power level, temperature, waveform, modulation, averaging, calibration state.\n- Reference standard: golden unit, calibrated instrument, standard-defined limit, competitor datasheet, or previous product generation.\n- Calculation method: peak vs RMS, typical vs guaranteed, absolute vs relative, normalized vs raw.\n- Uncertainty and tolerances: measurement uncertainty, guard bands, pass/fail margins.\n- Reporting basis: worst case, average, percentile, production limit, datasheet limit.\n\nProduct-related measurement decisions that depend on understanding the comparison methodology include:\n\n1. **Which instrument/spec option is sufficient**  \n   Example: choosing analyzer bandwidth, phase-noise performance, VNA dynamic range, generator EVM, or oscilloscope sample rate.\n\n2. **Whether two products are truly comparable**  \n   A competitor’s “typical” spec under narrow conditions may not compare directly to another product’s guaranteed spec over temperature.\n\n3. **Pass/fail limit setting**  \n   Production or compliance limits need guard bands if measurement uncertainty is significant.\n\n4. **Calibration and traceability requirements**  \n   The methodology determines whether factory calibration is enough or accredited/traceable calibration is required.\n\n5. **Test setup design**  \n   Cable loss, fixtures, attenuators, probes, switching matrices, and reference planes can change the measured result.\n\n6. **Measurement speed vs accuracy tradeoff**  \n   Averaging, detector choice, sweep time, RBW/VBW, and demodulation length affect both throughput and repeatability.\n\n7. **Datasheet interpretation**  \n   Understanding whether values are guaranteed, nominal, typical, residual, additive, or system-level is essential.\n\n8. **Benchmarking against competitors**  \n   Fair product comparison requires matching conditions, options, firmware versions, test modes, and correction methods.\n\n9. **Production test strategy**  \n   Decisions such as sample size, retest rules, guard banding, and yield targets rely on a clear comparison method.\n\n10. **Customer application fit**  \n   The “best” product depends on the customer’s actual measurement condition, not only the headline specification.\n\nIn short: comparison methodology is the rulebook for making an apples-to-apples measurement comparison. Without it, product selection, specification claims, pass/fail limits, and competitive benchmarks can all be misleading.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_ejhAGnhMmUyEAoS7EyD7kPfm",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-b6d1f439a3f647b3b052ca3e74984714",
+          "request_id": "request-b6d1f439a3f647b3b052ca3e74984714",
+          "span_id": "span-b6d1f439a3f647b3b052ca3e74984714",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_insufficient_evidence",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

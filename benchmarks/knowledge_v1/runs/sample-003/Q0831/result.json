@@ -1,0 +1,68 @@
+{
+ "id": "Q0831",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 108.313,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/sources/Regulatory test for wireless devices with cellular technology.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "NB-IoT/NTN, RedCap and other variants",
+   "FR1 testing can often remain conducted, but FR2/mmWave introduces radiated setups",
+   "OTA workflows, beam behavior, TRP/TRS/RSE-type measurements",
+   "call setup, mobility, throughput, BLER, CSI reporting, fading, AWGN, application traffic, IMS/audio",
+   "carrier aggregation, UL MIMO, UL CA, SRS-based measurements, multi-SIM",
+   "CMP180 evidence mentions multiplexing eight input signals to RF analyzers and frequency-dependent attenuation correction tables",
+   "coexist with cellular, Wi-Fi, Bluetooth, GNSS, UWB and NTN functions",
+   "GUI, graphical scripting, Python XLAPI and SCPI remote control"
+  ],
+  "reason": "The cited passages support a narrower conclusion that testers need multi-technology coverage, signaling for realistic Wi-Fi/cellular tests, multi-channel/MIMO capability, and fast non-signaling production RF testing. However, many major points in the answer add unsupported specifics about OTA/mmWave beam measurements, protocol metrics, automation interfaces, NTN/RedCap, multi-SIM/CA/SRS, and CMP180 architecture details not present in the passages.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages support a narrower conclusion that testers need multi-technology coverage, signaling for realistic Wi-Fi/cellular tests, multi-channel/MIMO capability, and fast non-signaling production RF testing. However, many major points in the answer add unsupported specifics about OTA/mmWave"
+}

@@ -1,0 +1,55 @@
+{
+ "id": "Q0631",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge",
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 238.0,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP180.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "AI data center evolution ... shifts signaling / non-signaling testers toward higher-throughput, wider-bandwidth, multi-radio, low-latency, and scalable production validation",
+   "high-speed electrical and optical interconnects, fiber deployment, rack power distribution, busbars, liquid cooling and leak detection",
+   "power architectures shifting from 48 V ecosystems toward 800 V or ±400 Vdc",
+   "much of it belongs to VNAs, oscilloscopes, BERT/high-speed digital, power analyzers, EMI/EMC, thermal and power integrity tools",
+   "Wi‑Fi 7 / future Wi‑Fi 8 adoption",
+   "CMX500 adds Wi‑Fi 7 signaling test functionality and supports cellular/non-cellular testing in one setup",
+   "validate Wi‑Fi 7 features such as MLO, 2x2 MIMO, multiple RF chains, 6 GHz operation and coexistence",
+   "CMP180 ... supporting Wi‑Fi 6E, Wi‑Fi 7 and 5G NR FR1 up to 8 GHz, with bandwidths up to 500 MHz",
+   "480 MHz WLAN waveform loopback demonstration as a potential Wi‑Fi 8 waveform candidate",
+   "CMP-class testers must deliver wider bandwidth, more ports, better EVM/dynamic range, and faster parallel production throughput"
+  ],
+  "reason": "Only passage [1] supports limited CMX500 capabilities: network emulation/measurement, LTE/NR FR1/FR2, NSA/SA, RF parametric testing, and fading. Passage [2] is only CMP180 warranty/service information, so the answer's AI data center trends, Wi‑Fi 7/8, CMP180 capabilities, production throughput, EVM, MIMO, and broader test-equipment conclusions are largely unsupported by the cited passages.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: Only passage [1] supports limited CMX500 capabilities: network emulation/measurement, LTE/NR FR1/FR2, NSA/SA, RF parametric testing, and fading. Passage [2] is only CMP180 warranty/service information, so the answer's AI data center trends, Wi‑Fi 7/8, CMP180 capabilities, production throughput, EVM,"
+}

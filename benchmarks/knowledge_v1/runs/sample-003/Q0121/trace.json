@@ -1,0 +1,784 @@
+{
+ "question": {
+  "id": "Q0121",
+  "text": "Map the chain from a Wireless Communication market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "market": "Wireless Communication",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-9d82aae38c234f6999965c92314f2fab",
+ "exchange": {
+  "sent": "Map the chain from a Wireless Communication market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "http_status": 200,
+  "seconds": 177.594,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-9d82aae38c234f6999965c92314f2fab",
+    "actor": "leo.chi",
+    "title": "Map the chain from a Wireless Communication market requirement to a meas…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T12:14:27.255636Z",
+    "updated_at": "2026-10-07T12:17:24.695578Z",
+    "messages": [
+     {
+      "message_id": "message-2b0ac5abdae041a889d28e167aa16877",
+      "role": "user",
+      "text": "Map the chain from a Wireless Communication market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+      "created_at": "2026-10-07T12:14:27.287096Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-eec84d582b0a46519bf1494a76f3f128",
+      "role": "assistant",
+      "text": "### Supported facts\n| Area | Supported fact |\n|---|---|\n| Wireless certification / GMA | A wireless communication certification lab tests and verifies wireless devices against regulatory, safety, and performance standards, covering RF, EMC, safety, and conformance certification, and can support Global Market Access and faster launch [14]. |\n| Measured certification items | Main test items include spectrum, output power, DFS, SAR, EMI / EMS, ESD, power surge, protocol compatibility, interoperability, and PTCRB / GCF certification [14]. |\n| Wi‑Fi 7 market requirement | The Taiwan wireless ODM/OEM report identifies Wi‑Fi 7 as a 2026 growth theme and lists IEEE 802.11be, 320 MHz channel bandwidth, 4096‑QAM, MLO, STR, eMLSR, 6 GHz band, and thermal throttling as technical specifications; it also states Taiwan opened 5925–6425 MHz in 2026 [19]. |\n| LEO / satellite terminal requirement | The certification-lab source connects LEO satellite terminal certification applications to Starlink / Kuiper user-terminal RF validation, phased-array beamforming testing, mmWave / MIMO high-frequency testing, Taiwan supply-chain GMA, and 8–12 week GMA cycles [14]. |\n| LEO supply-chain technical focus | The Taiwan wireless report says LEO ground equipment and user terminals focus on phased-array antennas, Ku/Ka-band, RF front-end, and system integration capabilities [19]. |\n| R&S CMPHEAD30 capability | R&S CMPHEAD30 supports 28 GHz / 39 GHz FR2 ranges, with generator frequency ranges 24.25–31.80 GHz and 37.00–43.50 GHz, generator output levels down to –84 dBm / –78 dBm and up to +20 / +19 / +17 dBm depending on band, analyzer frequency extensions, and analyzer frequency error < ±0.01 ppm [6]. |\n| R&S CM-Z310A capability | R&S CM-Z310A UWB head has generator frequency range 6–13 GHz and analyzer frequency range 4–13 GHz [8]. |\n| R&S CMP200 IF generator capability | The IF generator has 6–20 GHz frequency range including modulation bandwidth, <0.1 Hz frequency resolution, <300 µs settling time, and PEP output level range –20 dBm to +2 dBm with overrange up to +10 dBm [9]. |\n| R&S SMA100B power analysis capability | R&S SMAB-K28 Power analysis supports power versus frequency, power versus power, and power versus time trace modes, with 10–1000 points per sweep and Y-axis range –200 dBm to +100 dBm [13]. |\n### Inferred chains\n【推論】Certification / Global Market Access requirement → measurable spectrum and output-power tests → Signal Analyzer needs spectrum/power measurement capability, and Signal Generator needs controllable frequency/output-level capability; the supported R&S-side capabilities are SMA100B power analysis modes and CMP200 IF generator frequency/output-level control [14][13][9].\n【推論】Wi‑Fi 7 ODM/OEM requirement → measurable 5925–6425 MHz operation, 320 MHz channel bandwidth, and 4096‑QAM-related validation → Signal Generator / Signal Analyzer needs at least 6 GHz coverage and relevant modulation-bandwidth capability; the supported R&S-side facts are CM-Z310A generator 6–13 GHz / analyzer 4–13 GHz and CMP200 IF generator 6–20 GHz including modulation bandwidth [19][8][9].\n【推論】LEO satellite terminal / mmWave-MIMO / beamforming requirement → measurable RF validation, high-frequency operation, and beamforming-related testing → Signal Generator / Signal Analyzer needs mmWave frequency coverage and accurate analysis; the supported R&S-side capability is CMPHEAD30 28 GHz / 39 GHz FR2 generation and analysis coverage with analyzer frequency error < ±0.01 ppm [14][19][6].\n\n來源：\n[6] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[8] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[9] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[13] Wiki：R&S SMA100B（來源：`SMA100B_specs_en_5215-1018-22_v1000.md`）\n[14] Wiki：無線通訊認證實驗室（來源：`Test House.md`、`無線通訊認證實驗室.md`）\n[19] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+      "created_at": "2026-10-07T12:17:24.695578Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-a63d8d714d9e4808a3d41e01fa3f59bf",
+       "request_id": "request-a63d8d714d9e4808a3d41e01fa3f59bf",
+       "span_id": "span-a63d8d714d9e4808a3d41e01fa3f59bf",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     }
+    ]
+   },
+   "answer": {
+    "ok": true,
+    "answer": "### Supported facts\n| Area | Supported fact |\n|---|---|\n| Wireless certification / GMA | A wireless communication certification lab tests and verifies wireless devices against regulatory, safety, and performance standards, covering RF, EMC, safety, and conformance certification, and can support Global Market Access and faster launch [14]. |\n| Measured certification items | Main test items include spectrum, output power, DFS, SAR, EMI / EMS, ESD, power surge, protocol compatibility, interoperability, and PTCRB / GCF certification [14]. |\n| Wi‑Fi 7 market requirement | The Taiwan wireless ODM/OEM report identifies Wi‑Fi 7 as a 2026 growth theme and lists IEEE 802.11be, 320 MHz channel bandwidth, 4096‑QAM, MLO, STR, eMLSR, 6 GHz band, and thermal throttling as technical specifications; it also states Taiwan opened 5925–6425 MHz in 2026 [19]. |\n| LEO / satellite terminal requirement | The certification-lab source connects LEO satellite terminal certification applications to Starlink / Kuiper user-terminal RF validation, phased-array beamforming testing, mmWave / MIMO high-frequency testing, Taiwan supply-chain GMA, and 8–12 week GMA cycles [14]. |\n| LEO supply-chain technical focus | The Taiwan wireless report says LEO ground equipment and user terminals focus on phased-array antennas, Ku/Ka-band, RF front-end, and system integration capabilities [19]. |\n| R&S CMPHEAD30 capability | R&S CMPHEAD30 supports 28 GHz / 39 GHz FR2 ranges, with generator frequency ranges 24.25–31.80 GHz and 37.00–43.50 GHz, generator output levels down to –84 dBm / –78 dBm and up to +20 / +19 / +17 dBm depending on band, analyzer frequency extensions, and analyzer frequency error < ±0.01 ppm [6]. |\n| R&S CM-Z310A capability | R&S CM-Z310A UWB head has generator frequency range 6–13 GHz and analyzer frequency range 4–13 GHz [8]. |\n| R&S CMP200 IF generator capability | The IF generator has 6–20 GHz frequency range including modulation bandwidth, <0.1 Hz frequency resolution, <300 µs settling time, and PEP output level range –20 dBm to +2 dBm with overrange up to +10 dBm [9]. |\n| R&S SMA100B power analysis capability | R&S SMAB-K28 Power analysis supports power versus frequency, power versus power, and power versus time trace modes, with 10–1000 points per sweep and Y-axis range –200 dBm to +100 dBm [13]. |\n### Inferred chains\n【推論】Certification / Global Market Access requirement → measurable spectrum and output-power tests → Signal Analyzer needs spectrum/power measurement capability, and Signal Generator needs controllable frequency/output-level capability; the supported R&S-side capabilities are SMA100B power analysis modes and CMP200 IF generator frequency/output-level control [14][13][9].\n【推論】Wi‑Fi 7 ODM/OEM requirement → measurable 5925–6425 MHz operation, 320 MHz channel bandwidth, and 4096‑QAM-related validation → Signal Generator / Signal Analyzer needs at least 6 GHz coverage and relevant modulation-bandwidth capability; the supported R&S-side facts are CM-Z310A generator 6–13 GHz / analyzer 4–13 GHz and CMP200 IF generator 6–20 GHz including modulation bandwidth [19][8][9].\n【推論】LEO satellite terminal / mmWave-MIMO / beamforming requirement → measurable RF validation, high-frequency operation, and beamforming-related testing → Signal Generator / Signal Analyzer needs mmWave frequency coverage and accurate analysis; the supported R&S-side capability is CMPHEAD30 28 GHz / 39 GHz FR2 generation and analysis coverage with analyzer frequency error < ±0.01 ppm [14][19][6].\n\n來源：\n[6] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[8] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[9] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[13] Wiki：R&S SMA100B（來源：`SMA100B_specs_en_5215-1018-22_v1000.md`）\n[14] Wiki：無線通訊認證實驗室（來源：`Test House.md`、`無線通訊認證實驗室.md`）\n[19] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-a63d8d714d9e4808a3d41e01fa3f59bf",
+      "request_id": "request-a63d8d714d9e4808a3d41e01fa3f59bf",
+      "span_id": "span-a63d8d714d9e4808a3d41e01fa3f59bf",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-a63d8d714d9e4808a3d41e01fa3f59bf",
+       "request_id": "request-a63d8d714d9e4808a3d41e01fa3f59bf",
+       "span_id": "span-a63d8d714d9e4808a3d41e01fa3f59bf",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.2"
+       },
+       "trace": {
+        "trace_id": "trace-a63d8d714d9e4808a3d41e01fa3f59bf",
+        "request_id": "request-a63d8d714d9e4808a3d41e01fa3f59bf",
+        "span_id": "span-a63d8d714d9e4808a3d41e01fa3f59bf",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "Map the chain from a Wireless Communication market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "Ho-Chi Hwang › 來源中的說法\n依 [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]]：\n\n- [[Ho-Chi Hwang]] 的職稱是 General Manager of Wireless Communication System and Partnerships at [[MediaTek]]。\n- 他在來源中評論 [[MediaTek]] 與 [[Rohde & Schwarz]] 的 long-standing relationship。\n- 引言主旨是：雙方合作反映 MediaTek 對 ushering in a new era of connectivity 的 commitment。\n- 他也提到 satellite technology demand grows across a wide variety of product categories，因此需要 further expand ecosystem of connected devices。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Ho-Chi Hwang.md"
+          },
+          "score": 4.083799
+         },
+         {
+          "text": "無線通訊認證實驗室資料清單 › 已擷取的無線通訊認證實驗室簡報內容\n依 [[無線通訊認證實驗室]]：\n\n- [[無線通訊認證實驗室]]用於測試與驗證無線設備符合法規、安全與性能標準，涵蓋 [[RF 測試]]、[[EMC]]、安規及一致性認證。\n- 來源稱其可經 [[NCC]]、[[TAF]]、[[FCC]] 等機構認可，並支援 [[Global Market Access]] 與上市加速。\n- 主要測試項目包含：頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試、[[PTCRB]] / [[GCF]] 認證。\n- 認證必要性包含防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端、6G 等需求。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+          },
+          "score": 2.454629
+         },
+         {
+          "text": "NCC › 衛星 / 通訊監理語境中的 NCC\n- [[低軌衛星通信終端設備技術規範與相關檢測]]（來源標示 111年08月）列出 NCC 電信事業申請衛星固定通信用無線電頻率核配有關事項草案、NCC 衛星地球電臺設置使用管理辦法部分條文修正草案，以及 NCC 衛星地球電臺設備技術規範草案總說明。\n- 上述語境應連到 [[國家通訊傳播委員會]]，不應與交換機光器件圖上的 NCC 混用。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/NCC.md"
+          },
+          "score": 7.4508
+         },
+         {
+          "text": "Ho-Chi Hwang\n[[Ho-Chi Hwang]] 是 [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 中列名的 [[MediaTek]] General Manager of Wireless Communication System and Partnerships。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Ho-Chi Hwang.md"
+          },
+          "score": 3.548102
+         },
+         {
+          "text": "無線通訊認證實驗室資料清單\n[[無線通訊認證實驗室資料清單]]原本由 [[Test House]] 提供待讀材料索引；[[低軌衛星通信終端設備技術規範與相關檢測]]新增了[[電信技術中心]]在 111年08月簡報中的毫米波頻段測試量能描述；[[無線通訊認證實驗室]]則補入 `無線通訊認證實驗室.pptx` 的簡報正文摘要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+          },
+          "score": 0.707606
+         },
+         {
+          "text": "R&S CMP200 › R&S CMPHEAD30\n[[R&S CMPHEAD30]] remote radio head 用於 28 GHz / 39 GHz FR2 frequency ranges：\n\n| 項目 | 規格 |\n|---|---|\n| Order No. | 1201.0002K23 |\n| Hardware unit | [[R&S CMPH-B23A]]，1430.8000.02 |\n| Connector type | RF 1、RF 2，front panel，wear adapter，2.4 mm（Q），female |\n| Duplex mode | half duplex（TDD） |\n| Frequency range | 28 GHz band：24.25 GHz to 31.80 GHz；39 GHz band：37.00 GHz to 43.50 GHz |\n| Generator output level range | 28 GHz PEP –84 dBm to +20 dBm；37–40 GHz PEP –78 dBm to +19 dBm；40–43.5 GHz PEP –78 dBm to +17 dBm |\n| Analyzer frequency extension | 28 GHz band：23.45 GHz to 24.25 GHz；39 GHz band：43.50 GHz to 44.30 GHz |\n| Analyzer frequency error | < ±0.01 ppm，符合 [[3GPP TS 38.521-2]] V17.0.0 |\n| Isolation of RF ports | RF 1 to RF 2 > 27 dB，35 dB typ. |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 18,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP200.md"
+          },
+          "score": 6.321809
+         },
+         {
+          "text": "無線通訊認證實驗室資料清單 › 目前已知內容\n- [[Test House]] 只包含一個本機檔案連結：`無線通訊認證實驗室.pptx`。\n- [[Test House]] 來源 converted 日期為 2026-09-17，但正文未標示正式發布日期或文件版次。\n- 先前 [[Test House]] 沒有可抽取的簡報正文、圖表、標準清單、實驗室名稱、認證範圍或設備配置。\n- [[無線通訊認證實驗室]]已補入該 PPT 的 markitdown 轉檔文字；raw frontmatter 顯示 converted 日期為 2026-09-17，但簡報本身仍未標示正式發布日期與版次。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+          },
+          "score": 0.62735
+         },
+         {
+          "text": "R&S CMP200 › R&S CM-Z310A UWB head\n[[R&S CM-Z310A]] UWB head 是 [[R&S CMP200]] 的 ultra wideband extension：\n\n| 項目 | 規格 |\n|---|---|\n| Order No. | 1215.0000.02 |\n| Connection cable | [[R&S CM-Z33A]]，3 m，1215.0500.02 |\n| Step attenuator | RF 1、RF 2、RF 3、RF 4，user controlled |\n| Attenuation range | 0 dB to 20 dB |\n| Attenuation step size | 1 dB |\n| Generator frequency range | 6 GHz to 13 GHz |\n| Generator output level range | RMS，step attenuator 20 dB：–110 dBm to –46 dBm；step attenuator 0 dB overrange：up to –10 dBm |\n| Analyzer frequency range | 4 GHz to 13 GHz |\n| Analyzer absolute maximum | 30 V DC，+15 dBm |\n| Analyzer displayed average noise level | +15 °C to +35 °C，4 GHz to 13 GHz：< –154.5 dBm/Hz meas. |\n| Calibration interval | 24 months |\n| Dimensions | 245 mm × 185 mm × 38 mm |\n| Weight | 約 2.0 kg |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 20,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP200.md"
+          },
+          "score": 5.676925
+         },
+         {
+          "text": "R&S CMP200 › IF generator\n| 項目 | 規格 |\n|---|---|\n| Ports | 3 × IF Out，port 1/2/3 |\n| Connector | SMA |\n| Frequency range | 6 GHz to 20 GHz，含 modulation bandwidth |\n| Frequency resolution | < 0.1 Hz |\n| Frequency uncertainty | same as timebase + frequency resolution |\n| Frequency settling time | < 300 µs |\n| Maximum reverse power | 0 V DC，+25 dBm |\n| Output level range | 6 GHz ≤ f ≤ 20 GHz，PEP，best SNR/IMD performance：–20 dBm to +2 dBm；overrange up to +10 dBm |\n| Output level resolution | 0.1 dB |\n| Output level uncertainty | +15 °C 至 +35 °C、no overranging、6 GHz to 20 GHz：< 1.5 dB |\n| Output level repeatability | 1 h warm-up 後 typical < 0.1 dB |\n| Harmonics attenuation | second harmonics > 35 dB nom.；third harmonics > 45 dB nom. |\n\nIF generator EVM 條件為 5G NR PDSCH、100 MHz channel bandwidth、full allocation、SCS 60 kHz / 120 kHz、64QAM、+15 °C 至 +35 °C、signal PAR = 11.8 dB；來源標示 EVM 為 measured values。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP200.md"
+          },
+          "score": 4.890146
+         },
+         {
+          "text": "R&S SMA100B › 軟體 / keycode options\n| Licence code | 名稱 | Order No. | 原文說明 / requires |\n|---|---|---|---|\n| R&S®SMAB-K725 | Chirp signal generation | 1420.9861.02 | 需要 R&S®SMAB-K22、R&S®SMAB-K23、R&S®SMAB-K720；FW version > 4.70.xxx required |\n| R&S®SMAB-K28 | Power analysis | 1420.9755.02 | 建議使用 latest power sensor firmware version |\n| R&S®SMAB-K722 | Clock synthesizer frequency extension to 6 GHz | 1420.9810.02 | not available for instruments equipped with R&S®SMAB-B103 |\n| R&S®SMAB-K724 | High dynamic uninterrupted level sweep | 1420.9832.02 | serial number < 102000 需聯絡 Rohde & Schwarz service department |\n| R&S®SMAB-K980 | Health and utilization monitoring service HUMS | 1420.9284.02 | 支援 SNMP、REST JSON、SCPI、device web |\n| R&S®SMAB-K554 | R&S®SZM control via USB by the R&S®SMA100B microwave signal generator | 1420.9884.02 | Recommended extra |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 26,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMA100B.md"
+          },
+          "score": 11.210268
+         },
+         {
+          "text": "R&S SMA100B › Platform height options\n| Option code | 名稱 | Order No. | 原文說明 |\n|---|---|---|---|\n| R&S®SMAB-B92 | 2 HU with 5-inch touch display | 1420.8288.04 | 2 HU model；dimensions 460 mm × 107 mm × 503 mm；without handles and feet 445 mm × 89 mm × 485 mm；weight 14.4 kg；rated current 3.5 A to 1.6 A at 50 Hz to 60 Hz、3.5 A to 2.9 A at 400 Hz；rated power fully equipped 300 W measured |\n| R&S®SMAB-B93 | 3 HU with 7-inch touch display | 1420.8388.04 | 3 HU model；dimensions 460 mm × 151 mm × 503 mm；without handles and feet 445 mm × 133 mm × 485 mm；weight 18.0 kg；rated current 7.3 A to 4.6 A；rated power fully equipped 380 W measured |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMA100B.md"
+          },
+          "score": 7.279215
+         },
+         {
+          "text": "無線通訊認證實驗室 › 與既有知識的關係\n- 本來源補齊 [[Test House]] 原本只保存 `無線通訊認證實驗室.pptx` 本機簡報連結、尚未擷取正文的缺口。\n- 本來源應更新 [[無線通訊認證實驗室資料清單]]：原本該頁指出 `無線通訊認證實驗室.pptx` 尚未 ingest，現在已由本來源提供正文摘要。\n- 本來源與 [[無線裝置法規符合性測試]]、[[CE RED 無線設備法規測試]]、[[FCC 無線設備法規測試]]屬同一主題群，但層次不同：本來源是市場 / 簡報式的實驗室能力與認證流程總覽；既有頁面保存較細的法規框架與測試項目。\n- 本來源對 [[低軌衛星終端設備檢測]]、[[相控陣列天線]]、[[Satellite User Terminal 外部資料清單]] 提供 LEO satellite user terminal certification / RF validation / beamforming testing 的市場線索，但不提供正式測試標準、量測條件或實驗室 accreditation scope。\n- 本來源中的 [[NCC]] 位於台灣通訊設備認證流程語境，應與 [[NCC]] 既有縮寫碰撞頁中的交換機光器件 NCC 區分，必要時連到 [[國家通訊傳播委員會]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+          },
+          "score": 2.74755
+         },
+         {
+          "text": "R&S SMA100B › Power analysis\n- R&S®SMAB-K28 Power analysis 建議使用 latest power sensor firmware version。\n- 支援 modes：power versus frequency、power versus power、power versus time trace mode。\n- Supported power sensors：R&S®NRP-Z81/-Z85/-Z86 支援 power versus frequency、power versus time、pulse data measurement and power versus power；來源標示為 phased-out products。R&S®NRP18P/NRP40P/NRP50P 支援 power versus frequency、power versus time、pulse data measurement and power versus power。\n- Number of points per sweep：10 to 1000。\n- Frequency range：依 R&S®NRP power sensor and R&S®SMA100B frequency option，為 signal generator 或 power sensor full frequency range 較低者；支援 frequency-converting DUTs。\n- Y-axis setting range：–200 dBm to +100 dBm。\n- Number of traces：4；number of markers：4；trace data export file formats JPG、BMP、XPM、PNG、CSV。\n- Power versus time mode with R&S®NRP-Z81/-Z85/-Z86：sweep time 100 ns to 1 s；resolution 12.5 ns 或 2 ns（periodic signals、internally triggered）；pulse data measurement 僅適用 R&S®NRP-Z81/-Z85/-Z86。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 19,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMA100B.md"
+          },
+          "score": 7.063615
+         },
+         {
+          "text": "無線通訊認證實驗室 › 重點摘要\n本來源是由 `無線通訊認證實驗室.pptx` 轉出的 company restricted 簡報，正式發布日期與文件版次未標示；raw frontmatter 顯示 converted 日期為 2026-09-17。\n\n來源將[[無線通訊認證實驗室]]定義為測試與驗證無線設備符合法規、安全與性能標準的實驗室，涵蓋 [[RF 測試]]、[[EMC]]、安規與一致性認證，並稱其可支援 [[Global Market Access]]（GMA）與加速上市。\n\n主要內容包括：\n\n- 無線設備認證實驗室涵蓋 RF、EMC、安規與一致性認證。\n- 主要測試項目包含頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試與 [[PTCRB]] / [[GCF]] 認證。\n- 來源稱認證必要性包括防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端與 6G 等需求。\n- 來源列出台灣 [[NCC]] 認證流程：準備文件 / 樣品 / 電路圖 / 天線規格、提交 [[RCB]] 核驗機構初審、[[TAF]] 認可實驗室 RF / EMC 測試約 3–4 週、報告審查與證書核發，並稱證書有效期 5 年。\n- 來源列出台灣領先認證實驗室：[[耕興]]、[[SGS]]、[[電信技術中心]] / [[ISL]]。\n- 來源稱[[耕興]]具 30 MHz–325 GHz 全頻段測試能力、108 座測試場地、連續 10 年 FCC 最佳實驗室認證、10 米半電波暗室、OTA / SAR / [[相控陣列天線]]測試等能力。\n- 來源簡述 [[FCC 無線設備法規測試]]、[[CE RED 無線設備法規測試]]、Wi‑Fi / BLE 聯盟流程的差異。\n- 來源將 LEO 衛星終端認證應用連到 Starlink / Kuiper user terminal RF validation、[[相控陣列天線]] beamforming 測試、mmWave / MIMO 高頻測試、台灣供應鏈 GMA，以及耕興等 [[RCB]] 提供 8–12 週 GMA 週期的說法。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+          },
+          "score": 2.29482
+         },
+         {
+          "text": "無線通訊認證實驗室 › 實體\n- [[NCC]] / [[國家通訊傳播委員會]]：來源中的台灣 NCC 認證流程脈絡，需注意 [[NCC]] 既有頁面是縮寫碰撞頁。\n- [[TAF]]：來源稱 TAF 認可實驗室執行 RF / EMC 測試。\n- [[FCC]]：來源在認可機構、FCC 流程與耕興實驗室亮點中出現。\n- [[RCB]]：來源列為台灣 NCC 流程中的核驗機構。\n- [[耕興]] / SPORTON：來源列為台灣領先認證實驗室之一，並列出多項能力與宣稱。\n- [[SGS]]：來源列為台灣領先認證實驗室之一，核心能力為 EMC / RF / 安規，特色為國際認可與 GMA 一站式。\n- [[電信技術中心]] / TTC：來源以 `TTC / ISL` 列為台灣領先認證實驗室，核心能力為 RF 認證 / 測試，特色為台灣政府 6G 研究支援。\n- [[ISL]]：與 TTC 同列，但來源未展開全名。\n- [[Starlink]]、[[Project Kuiper]]：來源列為 LEO 衛星終端認證應用中的 user terminal RF 驗證對象。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+          },
+          "score": 0.977847
+         },
+         {
+          "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告\n這份來源是 2026-09-15 的台灣無線通訊代工製造市場分析，涵蓋 [[Wi-Fi 7 網通設備代工製造]]、[[低軌衛星零組件與地面終端供應鏈]]與[[手機直連衛星供應鏈]]三個主題。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+          },
+          "score": 0.98099
+         },
+         {
+          "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 概念\n- [[Wi-Fi 7 網通設備代工製造]] — 2026 年台灣網通 ODM / OEM 成長主題，核心規格包含 320 MHz、4096-QAM、MLO、6 GHz 與散熱設計。\n- [[低軌衛星零組件與地面終端供應鏈]] — 來源中的 LEO 供應鏈主題，包含高頻 PCB、RF 元件、相控陣列天線、UT、系統整合與測試驗證。\n- [[手機直連衛星供應鏈]] — 來源中的 Direct-to-Cell 主題，涵蓋衛星端天線、RF front-end、baseband、衛星內建基地台、手機品牌與電信商服務方案。\n- [[網路通訊設備產業鏈]] — 既有頁面記錄未標示日期的網路通訊設備四層供應鏈；本來源提供 2026-09-15 的 Wi-Fi 7 / FWA / CPE 市場補充。\n- [[整體通訊產業鏈]] — 既有頁面記錄未標示日期的整體通訊產業鏈；本來源提供 2026-09-15 的無線通訊代工與衛星通訊補充。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+          },
+          "score": 0.961762
+         },
+         {
+          "text": "Block Diagram of UAV › UAV 系統組成\n- [[Power System]] — 來源描述為提供 UAV 所需電力，包含 batteries 與 power distribution systems。\n- [[Control System]] — 來源描述為管理 flight control、navigation 與 communication systems。\n- [[Onboard Computer]] — 來源寫作 Controller / manages flight control、navigation 與 communication systems；未提供處理器、OS、介面或安全架構。\n- [[Propulsion System]] — 來源描述由 motors、propellers 與 fuel system 構成，提供 flight thrust。\n- [[Airframe]] — 來源描述為 UAV physical structure，包含 wings、fuselage 與 landing gear。\n- [[Communication Interfaces]] — 來源列出 LVDS、CAN、USB、MIPI/CSI 作為外部 / 內部裝置連接例子。\n- [[Sensors]] — 來源列出 cameras / gimbal、radar 與其他 sensors，用於 data collection 與 situational awareness。\n- [[Communication]] — 來源描述為 UAV 與 [[Ground Control Station]] 之間的 data transmission。\n- [[Wireless Modules]] — 來源列出 Wi‑Fi、Cellular、Satcom 作為 remote control 與 data transmission 的例子。\n- [[Network Protocols]] — 來源描述為促進與 external systems 的 communication，並標示 IoD。\n- [[Navigation]] — 來源描述使用 GPS 與其他 systems 判定 UAV position 並導引 flight path。\n- [[UAV Payload]] — 來源描述為 UAV mission 所攜帶的 equipment，例如 cameras、sensors 與 cargo。\n- [[Ground Control Station]] — 來源描述為 operator 控制與監看 UAV 的 interface，包含 computers 與 communication equipment。\n- [[Mission Planning and Control Station]] — 來源描述為 mission planning / execution 的 software and hardware，包含 flight path 與 task management。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Block Diagram of UAV.md"
+          },
+          "score": 4.293492
+         },
+         {
+          "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 重點摘要\n- 報告日期：2026-09-15；來源轉檔日期：2026-09-15。\n- 報告主張 2026 年台灣無線通訊代工製造產業呈現雙引擎成長：既有的 [[Wi-Fi 7 網通設備代工製造]]，以及新興的 [[低軌衛星零組件與地面終端供應鏈]]。\n- 在 [[Wi-Fi 7]] 部分，來源列出 [[IEEE 802.11be]]、320 MHz channel bandwidth、4096-QAM、[[MLO]]、STR、eMLSR、6 GHz band、thermal throttling 等技術規格，並指出台灣已於 2026 年全面開放 6 GHz 頻段 5925–6425 MHz。\n- 在台灣網通 ODM / OEM 廠商版圖部分，來源列出 [[智易]]、[[智邦]]、[[中磊]]、[[啟碁]]、[[建漢]]、[[友訊]]、[[合勤控]]、[[正文]]等廠商，並分別描述 2026 年動態與受惠程度。\n- 在 [[低軌衛星]] 供應鏈部分，來源將產業鏈分成衛星本體製造與關鍵材料、地面設備與用戶終端、系統整合與測試驗證、衛星營運商服務四大環節。\n- 衛星本體零組件表列 [[華通]]、[[昇達科]]、[[同欣電]]、[[穩懋]]、[[台燿]]，並將 [[華通]]定位為衛星用高頻高密度連接板 / HDI 廠商，將 [[台燿]]定位為高頻高速 [[CCL]] 材料供應商。\n- 地面設備與用戶終端表列 [[啟碁]]、[[耀登]]、[[鐳洋科技]]、[[稜研科技]]、[[濰元科技]]，主題集中於[[相控陣列天線]]、Ku/Ka-band、RF front-end 與系統整合能力。\n- 手機直連衛星部分，來源將 [[Direct-to-Cell]] 描述為一般 4G/5G 手機無需額外硬體、修改韌體或安裝特殊軟體即可直接連結低軌衛星的技術，並連到 [[3GPP Release 17]]與[[3GPP Release 18]]。\n- 市場數字包括：[[TrendForce]] 最新研究指出 2026 年全球手機直連衛星市場規模預估為 76 億美元、年成長率約 49%；來源未提供該 TrendForce 報告名稱、發布日期或頁碼。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+          },
+          "score": 0.752004
+         },
+         {
+          "text": "Block Diagram of UAV › 重點摘要\n- 本來源是 OneNote 複製出的 [[UAV]] block diagram / component list，raw 轉檔日期為 2026-09-17；來源正文未標示正式發布日期、作者、版本或適用的 UAV 型號。\n- 來源以表格列出 [[UAV 系統方塊圖]] 的主要組成：[[Power System]]、[[Control System]]、[[Onboard Computer]]、[[Propulsion System]]、[[Airframe]]、[[Communication Interfaces]]、[[Sensors]]、[[Communication]]、[[Wireless Modules]]、[[Network Protocols]]、[[Navigation]]、[[UAV Payload]]、[[Ground Control Station]] 與 [[Mission Planning and Control Station]]。\n- 來源描述 [[Communication Interfaces]] 連接外部 / 內部裝置，例子包含 LVDS、CAN、USB、MIPI/CSI；但未提供實際 bus 版本、資料率、pinout、connector 或測試條件。\n- 來源描述 [[Wireless Modules]] 可支援 remote control 與 data transmission，例子包含 Wi‑Fi、Cellular、Satcom；但未指定標準版本、頻段、模組型號、功率或認證需求。\n- 來源列出 [[Network Protocols]] 促進 UAV 與外部系統通信，並以 IoD 標示；但原文寫成 robot and external systems，疑似從 robotics 範本沿用，未提供 [[Internet of Drones]] 定義或 protocol stack。\n- 來源包含一個本機 PDF 連結 [[NXP DroneSystem_HOVERGAMES-DRONE-SYSTEM]]，但 PDF 正文未擷取；不能由檔名推論 [[NXP]] 的正式 UAV reference design、元件料號或文件版次。\n- 來源列出來自 Textron Systems Aerosonde UAS 頁面的 payload examples，包含 FMV/day-night imaging、maritime wide area search、SAR、AIS、ADS-B、EW、SIGINT、COMINT、LiDAR、3D mapping、voice communications relay 與 MANET；但網頁正文未擷取完整頁面、日期或產品規格。\n- 來源嵌入 12 張 PNG 圖片與 1 個 Ink SVG；raw 未提供 OCR，本次不從圖片推取架構、產品、測試流程或供應鏈主張。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Block Diagram of UAV.md"
+          },
+          "score": 3.830888
+         },
+         {
+          "text": "Block Diagram of UAV › 與既有知識的關係\n- [[6. UAV Technologies]] 曾把 [[Block Diagram of UAV]] 列為 OneNote 內部頁線索且正文未擷取；本來源是該內部頁的 raw markdown，將其從待讀節點提升為已擷取來源。\n- [[UAV Technologies 外部資料清單]] 需要更新：[[Block Diagram of UAV]] 不再只是待讀標題，但其中的 NXP PDF、Textron Systems 網頁與圖片仍然是待讀 / 未 OCR 材料。\n- [[台灣無人機產業]] 與 [[台灣無人機供應鏈]] 已保存台灣 UAV 市場與公司列名；本來源補充的是一般 UAV 系統組成與 payload 類型，不支援台灣供應鏈公司、採購、出貨或政策主張。\n- [[5. Regulation and Policy]] 與 [[UAV Regulation and Policy 外部資料清單]] 保存法規 / 標準線索；本來源沒有新增可驗證的合規需求或標準版本。\n- 本來源屬於 [[Market]] 類 OneNote 材料，因為它是會隨產品、payload、通信方式與供應商資料更新的彙整頁；使用時必須保留來源未標示正式日期的限制。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Block Diagram of UAV.md"
+          },
+          "score": 2.195111
+         },
+         {
+          "text": "UAV 通訊頻段 › HF Underground 頻段摘錄\n[[Communication of UAVs]] 從 [[HF Underground]] 摘錄下列頻段 / 類別線索：\n\n| 類別 | 來源文字 | 限制 |\n|---|---|---|\n| 900 MHz band | 902 MHz - 928 MHz，包含 [[Meshtastic]]、[[LoRa]] 等 mesh networks | 未標示適用國家、service rules、功率、頻寬或 UAV 合法用途。 |\n| 2.4 GHz band | 2400 MHz - 2500 MHz / 2.4 GHz - 2.5 GHz | 與 RF Wireless World 的 2.4–2.4835 GHz 範圍不同，未說明差異。 |\n| 5 GHz band | various allocations 5000 MHz - 5725 MHz，有時稱 5-6 GHz band | `various` 表示區域 / 用途可能不同；來源未列完整 allocation。 |\n| 5.8 GHz band | 5725 MHz - 5875 MHz / 5.725 GHz - 5.875 MHz | 來源最後寫成 5.875 MHz，疑似單位不一致；本頁不推論修正。 |\n| SRD860 | 865 MHz - 870 MHz | 來源未提供 power limit、region 或 UAV use condition。 |\n| LPD433 | 433.050 MHz - 434.775 MHz，或 433 MHz band 433.92 MHz | 與 RF Wireless World 的 433.05–434.79 MHz 接近但不完全相同；未說明 region / standard。 |\n| M bands | Full frequency range 1625 MHz - 2510 MHz | 來源列 M1–M6，但未說明 UAV 實際用途或法規依據。 |\n| European CEPT RC bands | 35 MHz RC band、40 MHz RC band | 來源列 35 MHz 100 mW power limit；其他條件未完整。 |\n| U.S. Part 95 RCRS / MURS | 27 MHz、72 MHz、MURS VHF service | 來源包含 ground-to-air、power、antenna height、channel bandwidth 等文字；仍需回到 FCC / Part 95 正文確認。 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/UAV 通訊頻段.md"
+          },
+          "score": 1.823067
+         },
+         {
+          "text": "UAV 通訊頻段 › RF Wireless World 頻段表摘錄\n[[Communication of UAVs]] 從 [[RF Wireless World]] 摘錄下列表格：\n\n| Drone band name | Start frequency | Stop frequency | Power limit |\n|---|---:|---:|---:|\n| UHF SRD Short Range Device | 433.05 MHz | 434.79 MHz | <= 10 mWatt ERP |\n| ISM 2.4 GHz | 2.4 GHz | 2.4835 GHz | <= 100 mWatt EIRP |\n| ISM 5.8 GHz | 5.725 GHz | 5.85 GHz | <= 100 mWatt EIRP |\n\n限制：來源未標示地區、法規條文、版本、channel plan、bandwidth、duty cycle、antenna gain 或量測方法。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/UAV 通訊頻段.md"
+          },
+          "score": 1.308818
+         },
+         {
+          "text": "Test House › 與既有知識的關係\n- 既有 vault 已有多個無線通訊測試相關主題，例如 [[FWA CPE 測試與驗證]]、[[Small Cell BTS 測試資料清單]]、[[5G NR Base Station Conformance Testing]]、[[NR-NTN conformance testing]]、[[Wi-Fi 7 OTA MIMO stress testing]] 與 [[Reverberation chamber OTA testing]]；本來源目前只提供「無線通訊認證實驗室」簡報線索，尚不能補充上述主題的技術或市場內容。\n- 由於簡報正文未擷取，本來源不能作為任何 test house、certification lab、accreditation、conformance testing 或 OTA testing 主張的證據，只能作為待讀材料索引。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Test House.md"
+          },
+          "score": 3.484579
+         },
+         {
+          "text": "![](Picture4.jpg)\nWireless communication tester\nEMI test receiver\nSignal & spectrum analyzer\nWireless communication tester",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-4a179a13677acd8f",
+            "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+            "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "section": 175,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 29.267142
+         },
+         {
+          "text": "Addition of an AWGN signal of settable bandwidth and settable C/N ratio or Eb/N0 to a wanted signal. If the noise generator is used,\na frequency offset cannot be added to the wanted signal.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-8ec180d5f5e4ded7",
+            "original_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+            "sha256": "8ec180d5f5e4ded7daf73d9a99dc85b471116e2789518fb2949545a4a27543fa",
+            "raw_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+           "section": 612,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.883489
+         },
+         {
+          "text": "Addition of an AWGN signal of settable bandwidth and settable C/N ratio or Eb/N0 to a wanted signal. If the noise generator is used,\na frequency offset cannot be added to the wanted signal.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-06da2c5f1d2f72f1",
+            "original_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+            "sha256": "06da2c5f1d2f72f119e80e8c7c835aa45e792602f9337b4e7dee78622469a272",
+            "raw_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+           "section": 1202,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.883489
+         },
+         {
+          "text": "For easier analysis, you can switch from the default \"Flat\" view to a \"Grouped\" view of flows or visualize\nthe connections on a world map.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-bc47a8ad4da77a6a",
+            "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+            "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+           "section": 3477,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.563123
+         }
+        ],
+        "text": "### Supported facts\n| Area | Supported fact |\n|---|---|\n| Wireless certification / GMA | A wireless communication certification lab tests and verifies wireless devices against regulatory, safety, and performance standards, covering RF, EMC, safety, and conformance certification, and can support Global Market Access and faster launch [14]. |\n| Measured certification items | Main test items include spectrum, output power, DFS, SAR, EMI / EMS, ESD, power surge, protocol compatibility, interoperability, and PTCRB / GCF certification [14]. |\n| Wi‑Fi 7 market requirement | The Taiwan wireless ODM/OEM report identifies Wi‑Fi 7 as a 2026 growth theme and lists IEEE 802.11be, 320 MHz channel bandwidth, 4096‑QAM, MLO, STR, eMLSR, 6 GHz band, and thermal throttling as technical specifications; it also states Taiwan opened 5925–6425 MHz in 2026 [19]. |\n| LEO / satellite terminal requirement | The certification-lab source connects LEO satellite terminal certification applications to Starlink / Kuiper user-terminal RF validation, phased-array beamforming testing, mmWave / MIMO high-frequency testing, Taiwan supply-chain GMA, and 8–12 week GMA cycles [14]. |\n| LEO supply-chain technical focus | The Taiwan wireless report says LEO ground equipment and user terminals focus on phased-array antennas, Ku/Ka-band, RF front-end, and system integration capabilities [19]. |\n| R&S CMPHEAD30 capability | R&S CMPHEAD30 supports 28 GHz / 39 GHz FR2 ranges, with generator frequency ranges 24.25–31.80 GHz and 37.00–43.50 GHz, generator output levels down to –84 dBm / –78 dBm and up to +20 / +19 / +17 dBm depending on band, analyzer frequency extensions, and analyzer frequency error < ±0.01 ppm [6]. |\n| R&S CM-Z310A capability | R&S CM-Z310A UWB head has generator frequency range 6–13 GHz and analyzer frequency range 4–13 GHz [8]. |\n| R&S CMP200 IF generator capability | The IF generator has 6–20 GHz frequency range including modulation bandwidth, <0.1 Hz frequency resolution, <300 µs settling time, and PEP output level range –20 dBm to +2 dBm with overrange up to +10 dBm [9]. |\n| R&S SMA100B power analysis capability | R&S SMAB-K28 Power analysis supports power versus frequency, power versus power, and power versus time trace modes, with 10–1000 points per sweep and Y-axis range –200 dBm to +100 dBm [13]. |\n### Inferred chains\n【推論】Certification / Global Market Access requirement → measurable spectrum and output-power tests → Signal Analyzer needs spectrum/power measurement capability, and Signal Generator needs controllable frequency/output-level capability; the supported R&S-side capabilities are SMA100B power analysis modes and CMP200 IF generator frequency/output-level control [14][13][9].\n【推論】Wi‑Fi 7 ODM/OEM requirement → measurable 5925–6425 MHz operation, 320 MHz channel bandwidth, and 4096‑QAM-related validation → Signal Generator / Signal Analyzer needs at least 6 GHz coverage and relevant modulation-bandwidth capability; the supported R&S-side facts are CM-Z310A generator 6–13 GHz / analyzer 4–13 GHz and CMP200 IF generator 6–20 GHz including modulation bandwidth [19][8][9].\n【推論】LEO satellite terminal / mmWave-MIMO / beamforming requirement → measurable RF validation, high-frequency operation, and beamforming-related testing → Signal Generator / Signal Analyzer needs mmWave frequency coverage and accurate analysis; the supported R&S-side capability is CMPHEAD30 28 GHz / 39 GHz FR2 generation and analysis coverage with analyzer frequency error < ±0.01 ppm [14][19][6].",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "R&S CMP200 › R&S CMPHEAD30\n[[R&S CMPHEAD30]] remote radio head 用於 28 GHz / 39 GHz FR2 frequency ranges：\n\n| 項目 | 規格 |\n|---|---|\n| Order No. | 1201.0002K23 |\n| Hardware unit | [[R&S CMPH-B23A]]，1430.8000.02 |\n| Connector type | RF 1、RF 2，front panel，wear adapter，2.4 mm（Q），female |\n| Duplex mode | half duplex（TDD） |\n| Frequency range | 28 GHz band：24.25 GHz to 31.80 GHz；39 GHz band：37.00 GHz to 43.50 GHz |\n| Generator output level range | 28 GHz PEP –84 dBm to +20 dBm；37–40 GHz PEP –78 dBm to +19 dBm；40–43.5 GHz PEP –78 dBm to +17 dBm |\n| Analyzer frequency extension | 28 GHz band：23.45 GHz to 24.25 GHz；39 GHz band：43.50 GHz to 44.30 GHz |\n| Analyzer frequency error | < ±0.01 ppm，符合 [[3GPP TS 38.521-2]] V17.0.0 |\n| Isolation of RF ports | RF 1 to RF 2 > 27 dB，35 dB typ. |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 18,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S CMP200.md"
+         },
+         "score": 6.321809
+        },
+        {
+         "text": "R&S CMP200 › R&S CM-Z310A UWB head\n[[R&S CM-Z310A]] UWB head 是 [[R&S CMP200]] 的 ultra wideband extension：\n\n| 項目 | 規格 |\n|---|---|\n| Order No. | 1215.0000.02 |\n| Connection cable | [[R&S CM-Z33A]]，3 m，1215.0500.02 |\n| Step attenuator | RF 1、RF 2、RF 3、RF 4，user controlled |\n| Attenuation range | 0 dB to 20 dB |\n| Attenuation step size | 1 dB |\n| Generator frequency range | 6 GHz to 13 GHz |\n| Generator output level range | RMS，step attenuator 20 dB：–110 dBm to –46 dBm；step attenuator 0 dB overrange：up to –10 dBm |\n| Analyzer frequency range | 4 GHz to 13 GHz |\n| Analyzer absolute maximum | 30 V DC，+15 dBm |\n| Analyzer displayed average noise level | +15 °C to +35 °C，4 GHz to 13 GHz：< –154.5 dBm/Hz meas. |\n| Calibration interval | 24 months |\n| Dimensions | 245 mm × 185 mm × 38 mm |\n| Weight | 約 2.0 kg |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 20,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S CMP200.md"
+         },
+         "score": 5.676925
+        },
+        {
+         "text": "R&S CMP200 › IF generator\n| 項目 | 規格 |\n|---|---|\n| Ports | 3 × IF Out，port 1/2/3 |\n| Connector | SMA |\n| Frequency range | 6 GHz to 20 GHz，含 modulation bandwidth |\n| Frequency resolution | < 0.1 Hz |\n| Frequency uncertainty | same as timebase + frequency resolution |\n| Frequency settling time | < 300 µs |\n| Maximum reverse power | 0 V DC，+25 dBm |\n| Output level range | 6 GHz ≤ f ≤ 20 GHz，PEP，best SNR/IMD performance：–20 dBm to +2 dBm；overrange up to +10 dBm |\n| Output level resolution | 0.1 dB |\n| Output level uncertainty | +15 °C 至 +35 °C、no overranging、6 GHz to 20 GHz：< 1.5 dB |\n| Output level repeatability | 1 h warm-up 後 typical < 0.1 dB |\n| Harmonics attenuation | second harmonics > 35 dB nom.；third harmonics > 45 dB nom. |\n\nIF generator EVM 條件為 5G NR PDSCH、100 MHz channel bandwidth、full allocation、SCS 60 kHz / 120 kHz、64QAM、+15 °C 至 +35 °C、signal PAR = 11.8 dB；來源標示 EVM 為 measured values。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 10,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S CMP200.md"
+         },
+         "score": 4.890146
+        },
+        {
+         "text": "R&S SMA100B › Power analysis\n- R&S®SMAB-K28 Power analysis 建議使用 latest power sensor firmware version。\n- 支援 modes：power versus frequency、power versus power、power versus time trace mode。\n- Supported power sensors：R&S®NRP-Z81/-Z85/-Z86 支援 power versus frequency、power versus time、pulse data measurement and power versus power；來源標示為 phased-out products。R&S®NRP18P/NRP40P/NRP50P 支援 power versus frequency、power versus time、pulse data measurement and power versus power。\n- Number of points per sweep：10 to 1000。\n- Frequency range：依 R&S®NRP power sensor and R&S®SMA100B frequency option，為 signal generator 或 power sensor full frequency range 較低者；支援 frequency-converting DUTs。\n- Y-axis setting range：–200 dBm to +100 dBm。\n- Number of traces：4；number of markers：4；trace data export file formats JPG、BMP、XPM、PNG、CSV。\n- Power versus time mode with R&S®NRP-Z81/-Z85/-Z86：sweep time 100 ns to 1 s；resolution 12.5 ns 或 2 ns（periodic signals、internally triggered）；pulse data measurement 僅適用 R&S®NRP-Z81/-Z85/-Z86。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 19,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S SMA100B.md"
+         },
+         "score": 7.063615
+        },
+        {
+         "text": "無線通訊認證實驗室 › 重點摘要\n本來源是由 `無線通訊認證實驗室.pptx` 轉出的 company restricted 簡報，正式發布日期與文件版次未標示；raw frontmatter 顯示 converted 日期為 2026-09-17。\n\n來源將[[無線通訊認證實驗室]]定義為測試與驗證無線設備符合法規、安全與性能標準的實驗室，涵蓋 [[RF 測試]]、[[EMC]]、安規與一致性認證，並稱其可支援 [[Global Market Access]]（GMA）與加速上市。\n\n主要內容包括：\n\n- 無線設備認證實驗室涵蓋 RF、EMC、安規與一致性認證。\n- 主要測試項目包含頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試與 [[PTCRB]] / [[GCF]] 認證。\n- 來源稱認證必要性包括防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端與 6G 等需求。\n- 來源列出台灣 [[NCC]] 認證流程：準備文件 / 樣品 / 電路圖 / 天線規格、提交 [[RCB]] 核驗機構初審、[[TAF]] 認可實驗室 RF / EMC 測試約 3–4 週、報告審查與證書核發，並稱證書有效期 5 年。\n- 來源列出台灣領先認證實驗室：[[耕興]]、[[SGS]]、[[電信技術中心]] / [[ISL]]。\n- 來源稱[[耕興]]具 30 MHz–325 GHz 全頻段測試能力、108 座測試場地、連續 10 年 FCC 最佳實驗室認證、10 米半電波暗室、OTA / SAR / [[相控陣列天線]]測試等能力。\n- 來源簡述 [[FCC 無線設備法規測試]]、[[CE RED 無線設備法規測試]]、Wi‑Fi / BLE 聯盟流程的差異。\n- 來源將 LEO 衛星終端認證應用連到 Starlink / Kuiper user terminal RF validation、[[相控陣列天線]] beamforming 測試、mmWave / MIMO 高頻測試、台灣供應鏈 GMA，以及耕興等 [[RCB]] 提供 8–12 週 GMA 週期的說法。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+         },
+         "score": 2.29482
+        },
+        {
+         "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 重點摘要\n- 報告日期：2026-09-15；來源轉檔日期：2026-09-15。\n- 報告主張 2026 年台灣無線通訊代工製造產業呈現雙引擎成長：既有的 [[Wi-Fi 7 網通設備代工製造]]，以及新興的 [[低軌衛星零組件與地面終端供應鏈]]。\n- 在 [[Wi-Fi 7]] 部分，來源列出 [[IEEE 802.11be]]、320 MHz channel bandwidth、4096-QAM、[[MLO]]、STR、eMLSR、6 GHz band、thermal throttling 等技術規格，並指出台灣已於 2026 年全面開放 6 GHz 頻段 5925–6425 MHz。\n- 在台灣網通 ODM / OEM 廠商版圖部分，來源列出 [[智易]]、[[智邦]]、[[中磊]]、[[啟碁]]、[[建漢]]、[[友訊]]、[[合勤控]]、[[正文]]等廠商，並分別描述 2026 年動態與受惠程度。\n- 在 [[低軌衛星]] 供應鏈部分，來源將產業鏈分成衛星本體製造與關鍵材料、地面設備與用戶終端、系統整合與測試驗證、衛星營運商服務四大環節。\n- 衛星本體零組件表列 [[華通]]、[[昇達科]]、[[同欣電]]、[[穩懋]]、[[台燿]]，並將 [[華通]]定位為衛星用高頻高密度連接板 / HDI 廠商，將 [[台燿]]定位為高頻高速 [[CCL]] 材料供應商。\n- 地面設備與用戶終端表列 [[啟碁]]、[[耀登]]、[[鐳洋科技]]、[[稜研科技]]、[[濰元科技]]，主題集中於[[相控陣列天線]]、Ku/Ka-band、RF front-end 與系統整合能力。\n- 手機直連衛星部分，來源將 [[Direct-to-Cell]] 描述為一般 4G/5G 手機無需額外硬體、修改韌體或安裝特殊軟體即可直接連結低軌衛星的技術，並連到 [[3GPP Release 17]]與[[3GPP Release 18]]。\n- 市場數字包括：[[TrendForce]] 最新研究指出 2026 年全球手機直連衛星市場規模預估為 76 億美元、年成長率約 49%；來源未提供該 TrendForce 報告名稱、發布日期或頁碼。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+         },
+         "score": 0.752004
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [
+         {
+          "name": "market_segment",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Ho-Chi Hwang.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 3,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Ho-Chi Hwang.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 3,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/entities/R&S CMP200.md",
+         "raw_refs": [
+          "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S SMA100B.md",
+         "raw_refs": [
+          "raw/Productions/SMA100B_specs_en_5215-1018-22_v1000.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/無線通訊認證實驗室.md",
+         "raw_refs": [
+          "raw/Market/OneNote/TestHouse/Test House.md",
+          "raw/Market/OneNote/無線通訊認證實驗室.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md",
+         "raw_refs": [
+          "raw/Market/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md",
+          "raw/Market/HSD PCB image 18.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-65202d7748834b0683cc59557b8073f4",
+      "task_sha256": "58a4daaf8cf1f8deb2634c4586b84c60fc15eb86d6c1c072d31dc180e3fb3c19",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.5.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "needs_input",
+      "retry_budget": 0
+     },
+     "phase": "validated",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validated",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "passed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": null
+    },
+    "evidence": {
+     "raw_citations": 6,
+     "facet_status": "covered",
+     "missing_facets": [],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {
+      "market_segment": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

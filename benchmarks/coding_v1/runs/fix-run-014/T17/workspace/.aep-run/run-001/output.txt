@@ -1,0 +1,45 @@
+workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-014\T17\workspace
+input exists: True
+output exists: True
+input files:
+ - input\testplan.json size= 638
+testplan exists: True
+testplan bytes/chars: 638 638
+root type: dict
+root keys: ['name', 'description', 'center_frequency', 'bands', 'sub', 'timeout']
+sample: {
+  "name": "RF plan",
+  "description": "frequency values in GHz or MHz; keep this text",
+  "center_frequency": "2.4GHz",
+  "bands": [
+    {
+      "label": "WLAN 2G",
+      "frequency": "2.4GHz",
+      "bandwidth": "20MHz",
+      "power": 18
+    },
+    {
+      "label": "WLAN 5G",
+      "frequency": "5 GHz",
+      "bandwidth": "80MHz",
+      "power": 17
+    },
+    {
+      "label": "ISM",
+      "frequency": "2400MHz",
+      "timeout": 30
+    }
+  ],
+  "sub": {
+    "nested": [
+      {
+        "frequency": 915,
+        "power": 10
+      },
+      {
+        "frequency": "100kHz",
+        "note": "LF"
+      }
+    ]
+  }
+}

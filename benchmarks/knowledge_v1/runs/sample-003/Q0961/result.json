@@ -1,0 +1,106 @@
+{
+ "id": "Q0961",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 156.578,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S ZNL20.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S ZNL20.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 use-case based 5G testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 use-case based 5G testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Virtual tester.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 6,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Virtual tester.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 7,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CONTEST.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 8,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S ZNB3044.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 9,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S ZNB3044.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "fits mainly in the small-signal / linear RF characterization stage",
+   "typically after basic DC bring-up and before large-signal modulation/EVM or system-level tests",
+   "Use the VNA to measure: S-parameters: S11, S21, S12, S22",
+   "This is especially important for LNAs, PAs at low power, mixers, switches, filters, matching networks, antenna tuners, front-end modules, and RF interconnect/package validation",
+   "Move to signal generators, power meters, spectrum/signal analyzers, load-pull systems",
+   "the VNA is the core instrument for verifying the RFIC’s linear RF network behavior"
+  ],
+  "reason": "The cited passages only establish that certain R&S products are Vector Network Analyzers and give some frequency/port details; they do not describe RFIC validation workflow placement or the listed measurements and stages. Although the answer caveats that the KB lacks direct evidence, it then provides a substantive workflow mapping not supported by the passages.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages only establish that certain R&S products are Vector Network Analyzers and give some frequency/port details; they do not describe RFIC validation workflow placement or the listed measurements and stages. Although the answer caveats that the KB lacks direct evidence, it then provide"
+}

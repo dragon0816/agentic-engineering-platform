@@ -1,0 +1,69 @@
+{
+ "id": "Q0671",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 55.907,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 21,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI 資料中心基礎設施.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 23,
+   "kind": "wiki",
+   "ref": "wiki/sources/AISeverEcosystem.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 10,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 12,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 20,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Data center full-spectrum connectivity.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "MXO oscilloscope",
+   "Oscilloscope should support motor driver analysis",
+   "jitter / phase noise / LDO NSD as an oscilloscope-relevant measurable parameter"
+  ],
+  "reason": "The answer’s core chain—AI data center Power requirement → power rail-related measurement/analysis → MXO mapped to power rail analysis—is a fair synthesis of passages [21] and [23], and it appropriately cautions that PCB IL/TDR parameters are mapped to ZNA/ZNB rather than directly to an oscilloscope. Some wording goes beyond the passages because the cited text names MXO but does not itself identify MXO as an oscilloscope or establish all listed parameters as oscilloscope requirements.",
+  "confidence": "medium"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

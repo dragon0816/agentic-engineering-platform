@@ -1,0 +1,779 @@
+{
+ "question": {
+  "id": "Q0211",
+  "text": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "market": "Aerospace / Defense",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-4ae611a22b10458f8eef4da97df95b31",
+ "exchange": {
+  "sent": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 96.157,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-4ae611a22b10458f8eef4da97df95b31",
+    "actor": "leo.chi",
+    "title": "For a Aerospace / Defense use case involving radar, where would Signalin…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T12:23:15.563023Z",
+    "updated_at": "2026-10-07T12:24:51.541532Z",
+    "messages": [
+     {
+      "message_id": "message-a017b8ffcbcf42ba85c7d87cb2e90cb0",
+      "role": "user",
+      "text": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+      "created_at": "2026-10-07T12:23:15.590108Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-8d2e4ef9ea5f48b1ac4fcb4a6a4a6e7b",
+      "role": "assistant",
+      "text": "The knowledge base did not provide raw-cited evidence specifically placing a Signaling / Non-signaling Tester inside an Aerospace / Defense radar test workflow. The following is general engineering guidance, not from the knowledge base.\n\nA **Signaling / Non-signaling Tester** usually does **not** sit in the core radar measurement path. For radar itself, the main workflow is typically covered by instruments such as signal generators, spectrum/signal analyzers, VNAs, oscilloscopes, power meters, phase-noise analyzers, OTA/chamber systems, and radar target/echo simulators.\n\nWhere it **does** fit is when the radar platform includes a **communications subsystem** — for example:\n\n- tactical 4G/5G radio link,\n- UAV command-and-control link,\n- telemetry modem,\n- SATCOM / NTN terminal,\n- private 5G defense network interface,\n- vehicle or aircraft data link,\n- coexistence testing between radar and comms radios.\n\nIn that case, the tester fits in the workflow like this:\n\n| Test stage | Role of Signaling / Non-signaling Tester |\n|---|---|\n| RF module / modem bring-up | **Non-signaling mode** checks transmitter and receiver parameters without a live protocol session: output power, EVM, ACLR, frequency error, sensitivity, spectrum mask, spurious emissions, etc. |\n| Communications subsystem validation | **Signaling mode** emulates the network/base station/satellite link to establish real protocol sessions and test attach, call/session setup, throughput, latency, mobility, handover, QoS, and error behavior. |\n| Radar + comms integration | Used for **coexistence / desense testing**: operate the radar while the comms link is active and check whether radar emissions degrade the receiver, or whether the comms transmitter interferes with radar performance. |\n| Platform-level mission testing | Verifies that the communications link remains stable during realistic radar operating modes, jamming scenarios, mobility, thermal stress, or chamber/OTA tests. |\n| Production / maintenance | Can provide repeatable go/no-go RF and protocol checks for the communication module, not the radar function itself. |\n\nSo the short answer is:\n\n**A Signaling / Non-signaling Tester fits beside the radar workflow, not inside the primary radar waveform/target simulation chain. It is used to validate the communication link integrated with the radar platform, especially for tactical connectivity, telemetry, UAV control, SATCOM/NTN, private 5G, and radar–radio coexistence/desense testing.**\n\nFor a pure radar-only test case, I would position it as **not applicable** unless the radar system includes a wireless communication interface that must be tested.",
+      "created_at": "2026-10-07T12:24:51.541532Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-a2d5599f50ef4bf18fe7aa9a3127bdfe",
+       "request_id": "request-a2d5599f50ef4bf18fe7aa9a3127bdfe",
+       "span_id": "span-a2d5599f50ef4bf18fe7aa9a3127bdfe",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base did not provide raw-cited evidence specifically placing a Signaling / Non-signaling Tester inside an Aerospace / Defense radar test workflow. The following is general engineering guidance, not from the knowledge base.\n\nA **Signaling / Non-signaling Tester** usually does **not** sit in the core radar measurement path. For radar itself, the main workflow is typically covered by instruments such as signal generators, spectrum/signal analyzers, VNAs, oscilloscopes, power meters, phase-noise analyzers, OTA/chamber systems, and radar target/echo simulators.\n\nWhere it **does** fit is when the radar platform includes a **communications subsystem** — for example:\n\n- tactical 4G/5G radio link,\n- UAV command-and-control link,\n- telemetry modem,\n- SATCOM / NTN terminal,\n- private 5G defense network interface,\n- vehicle or aircraft data link,\n- coexistence testing between radar and comms radios.\n\nIn that case, the tester fits in the workflow like this:\n\n| Test stage | Role of Signaling / Non-signaling Tester |\n|---|---|\n| RF module / modem bring-up | **Non-signaling mode** checks transmitter and receiver parameters without a live protocol session: output power, EVM, ACLR, frequency error, sensitivity, spectrum mask, spurious emissions, etc. |\n| Communications subsystem validation | **Signaling mode** emulates the network/base station/satellite link to establish real protocol sessions and test attach, call/session setup, throughput, latency, mobility, handover, QoS, and error behavior. |\n| Radar + comms integration | Used for **coexistence / desense testing**: operate the radar while the comms link is active and check whether radar emissions degrade the receiver, or whether the comms transmitter interferes with radar performance. |\n| Platform-level mission testing | Verifies that the communications link remains stable during realistic radar operating modes, jamming scenarios, mobility, thermal stress, or chamber/OTA tests. |\n| Production / maintenance | Can provide repeatable go/no-go RF and protocol checks for the communication module, not the radar function itself. |\n\nSo the short answer is:\n\n**A Signaling / Non-signaling Tester fits beside the radar workflow, not inside the primary radar waveform/target simulation chain. It is used to validate the communication link integrated with the radar platform, especially for tactical connectivity, telemetry, UAV control, SATCOM/NTN, private 5G, and radar–radio coexistence/desense testing.**\n\nFor a pure radar-only test case, I would position it as **not applicable** unless the radar system includes a wireless communication interface that must be tested.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-a2d5599f50ef4bf18fe7aa9a3127bdfe",
+      "request_id": "request-a2d5599f50ef4bf18fe7aa9a3127bdfe",
+      "span_id": "span-a2d5599f50ef4bf18fe7aa9a3127bdfe",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-a2d5599f50ef4bf18fe7aa9a3127bdfe",
+       "request_id": "request-a2d5599f50ef4bf18fe7aa9a3127bdfe",
+       "span_id": "span-a2d5599f50ef4bf18fe7aa9a3127bdfe",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base did not provide raw-cited evidence specifically placing a Signaling / Non-signaling Tester inside an Aerospace / Defense radar test workflow. The following is general engineering guidance, not from the knowledge base.\n\nA **Signaling / Non-signaling Tester** usually does **not** sit in the core radar measurement path. For radar itself, the main workflow is typically covered by instruments such as signal generators, spectrum/signal analyzers, VNAs, oscilloscopes, power meters, phase-noise analyzers, OTA/chamber systems, and radar target/echo simulators.\n\nWhere it **does** fit is when the radar platform includes a **communications subsystem** — for example:\n\n- tactical 4G/5G radio link,\n- UAV command-and-control link,\n- telemetry modem,\n- SATCOM / NTN terminal,\n- private 5G defense network interface,\n- vehicle or aircraft data link,\n- coexistence testing between radar and comms radios.\n\nIn that case, the tester fits in the workflow like this:\n\n| Test stage | Role of Signaling / Non-signaling Tester |\n|---|---|\n| RF module / modem bring-up | **Non-signaling mode** checks transmitter and receiver parameters without a live protocol session: output power, EVM, ACLR, frequency error, sensitivity, spectrum mask, spurious emissions, etc. |\n| Communications subsystem validation | **Signaling mode** emulates the network/base station/satellite link to establish real protocol sessions and test attach, call/session setup, throughput, latency, mobility, handover, QoS, and error behavior. |\n| Radar + comms integration | Used for **coexistence / desense testing**: operate the radar while the comms link is active and check whether radar emissions degrade the receiver, or whether the comms transmitter interferes with radar performance. |\n| Platform-level mission testing | Verifies that the communications link remains stable during realistic radar operating modes, jamming scenarios, mobility, thermal stress, or chamber/OTA tests. |\n| Production / maintenance | Can provide repeatable go/no-go RF and protocol checks for the communication module, not the radar function itself. |\n\nSo the short answer is:\n\n**A Signaling / Non-signaling Tester fits beside the radar workflow, not inside the primary radar waveform/target simulation chain. It is used to validate the communication link integrated with the radar platform, especially for tactical connectivity, telemetry, UAV control, SATCOM/NTN, private 5G, and radar–radio coexistence/desense testing.**\n\nFor a pure radar-only test case, I would position it as **not applicable** unless the radar system includes a wireless communication interface that must be tested.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_c4yhrgbTjdf47ZSomQxVQ2nk",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-a2d5599f50ef4bf18fe7aa9a3127bdfe",
+          "request_id": "request-a2d5599f50ef4bf18fe7aa9a3127bdfe",
+          "span_id": "span-a2d5599f50ef4bf18fe7aa9a3127bdfe",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-a2d5599f50ef4bf18fe7aa9a3127bdfe",
+           "request_id": "request-a2d5599f50ef4bf18fe7aa9a3127bdfe",
+           "span_id": "span-a2d5599f50ef4bf18fe7aa9a3127bdfe",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "For an Aerospace / Defense use case involving radar, where would a Signaling / Non-signaling Tester fit in the radar test workflow? Please explain using R&S knowledge sources and cite Raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 8.015961
+            },
+            {
+             "text": "R&S CMX500 › Rear panel interfaces\n- LAN：Ethernet RJ-45 connector，1000 Mbps。\n- Trigger interfaces：Trig. A、Trig. B，2 × BNC connector，3.3 V TTL；Trig. C、Trig. D、Trig. E，3 × BNC connector，3.3 V TTL；AST Out，1 × BNC connector。\n- Flexx Sync interface：for future use；In 為 1 × mini SAS HD connector；Loop 為 2 × mini SAS HD connector；Out 為 1 × mini SAS HD connector。\n- Flexx Data interface：for future use；In/Out 各 1 × QSFP-DD connector。\n- Flexx IQ interface：for future use；In/Out 各 1 × QSFP-DD connector。\n- LAN Switch Subnet Only interface：for future use；port 1、port 2 各 1 × SFP+ connector。\n- USB：for keyboard、mouse、USB flash drive；2 × USB 3.1 type A connector。\n- HDMI：for external monitor；DisplayPort：for external monitor。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 37,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 13.245816
+            },
+            {
+             "text": "5G private network resilience against smart jamming › Program / roadmap 脈絡\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 把 private 5G resilience 放入 defense / Future-G roadmap：\n\n| 期間 | 來源說法 |\n|---|---|\n| 2025–2028 | widespread deployment of 5G tactical networks；mmWave phased arrays available for field testing；hybrid commercial / military networks such as 5G.MIL-style architectures |\n| 2028–2032 | 5G/6G-capable software-defined radios replacing multi-radio tactical stacks；early [[ISAC]] deployment for drone detection and perimeter defense；[[URLLC]] services for autonomy |\n| 2032–2035+ | full 6G networks with integrated sensing；AI-native battlefield connectivity；high-precision location sensing and spectrum-aware autonomy |\n\n來源也列出 [[5G.MIL]]、[[Raytheon OXYGEN]]、[[L3Harris Tactical Network Demo]]、[[DoD EMS Superiority Strategy]] 與 [[FutureG ISAC]] / spectrum sharing programs，作為 FHSS 與 5G convergence 的 program examples。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+             },
+             "score": 1.683943
+            },
+            {
+             "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 3.606005
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing › 使用限制\n- 本頁不是 [[RTCA DO-160]] 正式標準摘要；只保存 [[2025RS Drone Solution]] 的簡報文字。\n- 不得由本頁推論 DO-160G / DO-160 任何 section 的完整 category、limit、waveform、test setup 或 pass / fail criteria。\n- 來源把 DO-160 放在 military / aviation drone example 中，但未說明特定 drone、eVTOL 或 avionics equipment 的 qualification plan。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 3.16751
+            },
+            {
+             "text": "衛星地面設備 › Satellite Ground Station / Operation and Control Center 線索\n- [[Satellite Ground Station]]（raw converted 2026-09-17；來源正文未標示正式發布日期）列出 TASA | Satellite Operation and Control Center 外部連結。\n- 該連結指向 TASA 網站的 `space-facilities/satellite/satellite-operation-and-control-center` URL。\n- 本來源只提供 link hub 與未 OCR 圖片，尚未提供 [[Satellite Operation and Control Center]] 的正文內容。\n- 因此，這筆資料只可作為後續查證 [[TASA]] / [[國家太空中心]] 衛星地面站或操作控制中心的入口，不可視為設施規格或能力證據。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/衛星地面設備.md"
+             },
+             "score": 5.317672
+            },
+            {
+             "text": "Satellite Operation and Control Center › 可追溯限制\n- [[Satellite Ground Station]] 尚未擷取 TASA 外部頁正文，因此不能確認 [[Satellite Operation and Control Center]] 的中文正式名稱、法律 / 組織歸屬、地址、設備、任務、操作衛星、天線規格或服務能力。\n- 不得把外部連結標題改寫為 TASA 已公開某項地面站技術規格。\n- 不得從檔名或圖片嵌入推論設施照片內容、天線數量、frequency band、tracking capability、mission control workflow 或客戶 / 任務關係。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Satellite Operation and Control Center.md"
+             },
+             "score": 3.261989
+            },
+            {
+             "text": "經緯航太\n[[經緯航太]] 是 [[0. UAV產業分析報告架構]] 中列於 [[台灣無人機供應鏈]] 下游的公司，來源描述其與智慧農業與多用途無人機相關；[[4. UAV Eco-chain in Taiwan]] 另在 System Integrator 區段列出經緯航太名稱。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/經緯航太.md"
+             },
+             "score": 0.70924
+            },
+            {
+             "text": "CMX500 Callbox › Callbox 定位\n依 [[CMX500_Callbox]]，callbox 的核心敘事是：\n\n- Easy to set up。\n- Easy to get in a call。\n- Easy to test with。\n- Focus on [[RF Testing]]，including [[3GPP pre-conformance]]。\n\n來源以 [[Device Under Test]]、cell tower 與 smartphone 圖示描述 [[R&S CMX500]] 作為 DUT 連線與測試環境的中心。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 6.460773
+            },
+            {
+             "text": "Rohde & Schwarz GmbH & Co KG › 來源中的列名\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- frontmatter `author` 欄列出 [[Rohde & Schwarz GmbH & Co KG]]。\n- 正文末段寫明：R&S® is a registered trademark of Rohde & Schwarz GmbH & Co. KG。\n- 來源未展開公司法律登記資訊、地址、股權結構或組織層級。\n\n依 [[SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices]]：\n\n- frontmatter `author` 欄列出 [[Rohde & Schwarz GmbH & Co KG]]。\n- 正文末段同樣寫明：R&S® is a registered trademark of Rohde & Schwarz GmbH & Co. KG。\n- 來源正文以 [[Rohde & Schwarz]] 品牌 / 公司名稱描述與 [[SPEAG]] 的合作、[[R&S CMX500 OBT]] 與 [[DASY8-3D]] 的整合。\n\n依 [[1C111_1e_3GPPPreConfGuide]]：\n\n- R&S® 是 [[Rohde & Schwarz GmbH & Co KG]] 的 registered trademark。\n- Trade names 為其 owners 的 trademarks。\n- 文件頁尾標示：© 2025 Rohde & Schwarz GmbH & Co. KG，81671 Munich, Germany。\n- 文件頁尾也描述 [[Rohde & Schwarz]] electronics group 的 business fields 包含 test and measurement、broadcast and media、secure communications、cybersecurity、monitoring and network testing。\n- 來源稱 [[Rohde & Schwarz]] 成立超過 80 年，總部位於 Munich, Germany，並在超過 70 個國家設有 sales and service network。\n- 來源列出 website、training、customer support 與 ISO 9001 certified quality management 線索。\n\n依 [[Dual Sim Dual Active]]：\n\n- markdown 頁尾標示 `COMPANY CONFIDENTIAL`。\n- 頁尾列出 `Rohde & Schwarz GmbH & Co. KG ©`。\n- 本來源是 [[Dual SIM Dual Active]] / [[Multi-USIM operation]] 技術筆記，未標示正式發布日期、文件編號、作者或版本。\n\n依 [[Extended Logical Channel IDs]]：\n\n- markdown 頁尾標示 `COMPANY CONFIDENTIAL`。\n- 頁尾列出 `Rohde & Schwarz GmbH & Co. KG ©`。\n- 本來源是 [[Extended Logical Channel ID]] / [[3GPP TS 38.321]] / [[MAC Control Element]] 技術筆記，未標示正式發布日期、文件編號、作者或版本。\n- 來源本身只支撐頁尾 copyright / confidential 標示，不支撐公司法律資訊或產品承諾。\n\n依 [[Logical Channels]]：",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Rohde & Schwarz GmbH & Co KG.md"
+             },
+             "score": 8.983846
+            },
+            {
+             "text": "5G private network resilience against smart jamming › Mission context 與 industry drivers\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 列出的 mission / market drivers 包含：\n\n- tactical edge connectivity needs；\n- rise of smart jamming and improved [[EW]] tactics；\n- complex RF environment 與 contested spectrum；\n- growing adoption of private 5G networks；\n- autonomous systems and drones requiring low latency；\n- expansion of tactical private 5G networks on military bases；\n- demand for secure command-and-control networks；\n- strategic partnerships，例如來源提到 Nokia + L3Harris in 2024；\n- multi-year contracts，例如來源提到 Northrop Grumman 5G battlefield networking in 2024。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 另稱 United States Department of Defense has recently embarked on a strategy leveraging both public and private 5G networks，並說 5G could become the de-facto communications network between NATO members。此為 white paper statement；來源未附完整 DoD / NATO 文件引用。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+             },
+             "score": 1.281171
+            },
+            {
+             "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 2.354196
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing\n[[DO-160 airborne equipment EMC testing]] 是 [[2025RS Drone Solution]] 中引用 [[RTCA DO-160]] 作為 airborne equipment environmental conditions and test procedures 的測試線索，用於 military / aviation drone EMC proposal context。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 2.269403
+            },
+            {
+             "text": "衛星地面設備 › 與既有頁面的關係\n- [[低軌衛星零組件與地面終端供應鏈]] 已整理 2026-09-15 市場報告中的地面設備與用戶終端公司，例如 [[啟碁]]、[[耀登]]、[[鐳洋科技]]、[[稜研科技]]與[[濰元科技]]。\n- [[Satellite User Terminal 外部資料清單]] 保存 [[User Terminal]] 來源中的 OneWeb / Kuiper / Starlink user terminal、test flow 與 supply-chain 待讀材料。\n- [[相控陣列天線]] 是地面終端與電子掃描天線相關的主題；[[User Terminal]] 補入 flat-panel antenna、ESA、phased array OTA testing、active phased array characterization 等待讀連結。\n- [[手機直連衛星供應鏈]] 涉及衛星通訊服務與手機終端，但 [[0.Satcom Industry]] 的「衛星地面設備」數字不可直接套用到手機直連衛星市場。\n- [[Satellite Operation and Control Center]] 是 [[Satellite Ground Station]] 新增的 TASA 外部頁線索，應待外部正文擷取後再判斷其與地面設備、ground station、mission control 或 satellite operations 的關係。\n- [[低軌衛星通信終端設備技術規範與相關檢測]]補入規範 / 檢測視角，連到 [[衛星地球電臺設備技術規範]]、[[低軌衛星終端設備檢測]]與[[電信技術中心]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/衛星地面設備.md"
+             },
+             "score": 3.646841
+            },
+            {
+             "text": "TASA › Satellite Operation and Control Center 待讀線索\n- [[Satellite Ground Station]] 只提供外部連結標題與 URL，未擷取 TASA 頁面正文。\n- 本線索連到 [[Satellite Operation and Control Center]]，可作為後續補強 [[衛星地面設備]]、[[台灣太空產業]] 與 TASA space facilities 資料的入口。\n- 目前不能根據該 link hub 判斷 TASA 地面站的地點、設備、操作衛星、任務範圍、建置年份或技術規格。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/TASA.md"
+             },
+             "score": 4.303038
+            },
+            {
+             "text": "經緯航太 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[經緯航太]] 列在台灣無人機產業供應鏈下游，分類為整機製造與應用服務，描述為智慧農業與多用途無人機。\n- [[4. UAV Eco-chain in Taiwan]]（來源未標示正式日期；raw 轉檔 2026-09-17）在 System Integrator 區段列出經緯航太，但未附 URL 或補充文字。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/經緯航太.md"
+             },
+             "score": 0.642929
+            },
+            {
+             "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 5.913484
+            },
+            {
+             "text": "5G private network resilience against smart jamming › 與既有頁面的關係\n- [[DUT]]：本概念的限制條件是 unmodified 5G DUT。\n- [[Handover frequency hopping]]：白皮書中最具體的 implementation。\n- [[Frequency hopping for 5G resilience]]：本概念的主要技術方向。\n- [[Smart Jamming]]：本概念要處理的 threat model。\n- [[R&S CMX500]]：白皮書明示測試使用 CMX500 作為 network emulator；但該 Market source 不是 CMX500 binding specifications。\n- [[Counter-UAV 技術]]：簡報 mid-term roadmap 提到 drone detection 與 perimeter defense，但不是 counter-UAV 系統評估來源。\n- [[Beamforming]]：簡報短期 roadmap 提到 mmWave phased arrays field testing，但沒有 beamforming 定義或測試方法。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+             },
+             "score": 1.143075
+            },
+            {
+             "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 2.082402
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing › 來源中的 DO-160 定位\n[[2025RS Drone Solution]] 說 [[RTCA DO-160]] is important because it provides the minimum operational performance standards for electronic systems and equipment that support aviation to pursue increased safety, system capacity and efficiency。\n\n來源另說其 purpose 是提供 means of determining performance characteristics of airborne equipment in environmental conditions which may be encountered in airborne operation of the equipment，並可與 applicable standards 一起作為 minimum specification。\n\n使用限制：來源未提供 DO-160 的正式版次文件、section limit table、category matrix 或適用 drone 類型。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 0.396179
+            },
+            {
+             "text": "衛星地面設備 › Satellite user terminal link hub\n[[User Terminal]]（來源正文標示 links current as of January 7, 2026, 1:33 PM CST；raw converted 2026-09-17）提供一組衛星 user terminal、OEM terminal manufacturers、RF components、infrastructure、Kuiper / Starlink test flow 與 supply chain 待讀資料索引。\n\n該來源列出三個本機附件但未擷取正文：\n\n- `oneweb_ut_final_presentation.html`。\n- `Kuiper UT Test & Supply Chain.pptx`。\n- `Starlink UT Test Flow.pptx`。\n\n該來源表格列出 user terminal / terminal ecosystem 線索：\n\n- Primary OEM Terminal Manufacturers：[[Intellian]]、[[Hughes]]、[[Kymeta]]、[[Sharp]]。\n- Expanded OEM Ecosystem：[[Gilat ESR-2030Ku]]、[[ThinKom Ka2517]]、[[SatixFy ESMA]]、[[Intelsat ESA]]。\n- RF Components & Semiconductors：[[Qorvo QPA1722]]、[[MediaTek M80]]、[[Analog Devices]] / [[ADAR1000]]。\n- Infrastructure & Distribution：[[Hughes Network]]、[[Airbus OneWeb]]、[[Eutelsat]]、[[KVH]]。\n- Kuiper / Amazon：[[Project Kuiper]]、[[Amazon Leo]]、[[Amazon]] official terminal links、FCC appendix、R&S / Keysight phased array testing references。\n- Starlink：[[Starlink]] user terminal supply chain、teardown、FCC filings、R&S / Keysight / GSOA testing links、Taiwan Focus references。\n\n這些內容目前只可作為 [[Satellite User Terminal 外部資料清單]] 的待讀索引；不可直接視為產品規格、供應鏈驗證、測試報告或商用狀態證據。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/衛星地面設備.md"
+             },
+             "score": 3.235659
+            },
+            {
+             "text": "國家太空中心 › 來源中的說法\n- [[0.Satcom Industry]]（來源正文未標示正式發布日期；內容含 2025 年資料點；raw converted 2026-09-17）稱[[國家太空中心]] / [[TASA]] 於美國 [[Satellite 2025]] 展會中首度發表《[[台灣太空產業地圖]]》。\n- 同一來源稱《[[台灣太空產業地圖]]》涵蓋 222 家企業與機構，展現完整供應鏈與國際合作潛力。\n- 同一來源將台灣太空產業描述為歷經三期國家太空科技發展長程計畫，並稱第三期計畫強調「韌性」與「產業化」。\n- [[02160280]]（頁尾標示《科儀新知》216期 `107.9`；raw converted 2026-09-17）稱 [[FORMOSAT-5]] 是台灣首次由 National Space Organization, Taiwan 自行完成 design、analysis、assembly、validation and test 的 spacecraft。\n- [[02160280]] 稱 [[FORMOSAT-5]] [[衛星電力次系統]]由太空中心主導；[[PCDU]]由中科院與太空中心設計、製作與驗證測試；衛星線束由太空中心設計並委託國外製作；演算法與控制軟體由太空中心設計、編碼與系統驗證。\n- [[02160280]] 文末作者簡介稱[[葉嘉靖]]為 National Space Organization, NARLabs 的 Electrical Engineering Division principal engineer。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/國家太空中心.md"
+             },
+             "score": 3.228805
+            },
+            {
+             "text": "經緯航太 › 可追溯限制\n- 來源未提供經緯航太的無人機型號、客戶、出貨、認證、營收或得標資料。\n- 來源未標示股票代號；本頁不推補。\n- [[4. UAV Eco-chain in Taiwan]] 僅列名稱，不能推論其具體 System Integrator 產品、服務或供應關係。\n- 本頁不把來源列名改寫為已確認供應、量產或採購關係。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/經緯航太.md"
+             },
+             "score": 0.557813
+            },
+            {
+             "text": "Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024 › 關鍵實體與概念\n- [[Rohde & Schwarz]]：新聞稿發布者與測試解決方案供應商。\n- [[Rohde & Schwarz GmbH & Co KG]]：frontmatter author 與 R&S registered trademark 所屬公司名。\n- [[R&S CMX500]]：R&D single-box signaling tester；本來源新增 Wi‑Fi 7 test functionality、WLAN offloading、N3IWF 與 POLQA voice quality measurement 的 PR 語境。\n- [[R&S CMP180]]：production / R&D non-signaling tester；本來源宣稱支援 Wi-Fi 6E、Wi-Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz，並展示 480 MHz WLAN waveform loopback。\n- [[Wi-Fi 7 R&D and production testing]]：本來源的主題概念，區分 CMX500 R&D signaling 與 CMP180 production non-signaling 測試。\n- [[WLAN offloading with Voice over WLAN]]：本來源描述的 CMX500 single-box interworking / voice continuity 測試情境。\n- [[Wi-Fi 7]] / [[IEEE 802.11be]]：來源列出 320 MHz channel bandwidth、up to 16 spatial streams、4096 QAM、低延遲與 high throughput。\n- [[Wi-Fi 8]] / [[IEEE 802.11bn]]：來源稱 yet-to-be-defined，且 wider channel bandwidths are in discussion；CMP180 480 MHz waveform 被稱為 potential waveform candidate。\n- [[MLO]]：Wi-Fi 7 key feature，使 multiple RF chains 的 test environment 變重要。\n- [[N3IWF]]：Non-3GPP Interworking Function gateway；來源稱 newly integrated in R&S CMX500。\n- [[POLQA]]：來源稱 R&S CMX500 integrated POLQA voice quality measurement function 可用於 Voice over WLAN applications。\n- [[MWC 2024]]：展示場合。\n- [[Christian Mokry]]：Press & media contact。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             },
+             "score": 5.702161
+            },
+            {
+             "text": "•  Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c733beba88ba4b3a",
+               "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.328886
+            },
+            {
+             "text": "The setup is operated using the Bluetest Flow control software, an integrated test environment for complex wireless solutions. By integrating the Wi-Fi 7 test functionality of the [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester into the Bluetest Flow software, WLAN developers utilizing the R&S CMX500 can now leverage Bluetest's reverberation chamber technology in the development of their advanced WLAN stations and access points.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-54cc8cb2ee42584d",
+               "original_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+               "sha256": "54cc8cb2ee42584d7782fc776b5114e91fddf5f57b891a177556a7f8bdfd3d42",
+               "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.380983
+            },
+            {
+             "text": "At the core of the Rohde & Schwarz conformance test solutions is the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") 5G one-box signaling tester, which also supports early research and development through integrated fading and channel emulation, along with an intuitive tool for visualizing satellite constellations – all in a single-box test setup. In addition, the user-friendly R&S CONTEST test system software platform facilitates the seamless execution of 3GPP test cases.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f9f65126e3850d1e",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+               "sha256": "f9f65126e3850d1e3700c2c8ed45daf700054df15566d39ccdf83f655032725c",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.20613
+            },
+            {
+             "text": "During the development of WLAN devices, measurements of the RF TX and RX characteristics must be conducted under real-world conditions in signaling mode. The R&S CMX500 one-box tester is a multi-technology multi-channel signaling tester that is now available with integrated Wi-Fi 7 test functionality. Especially in Wi-Fi 7 where Multi-Link-Operation (MLO) is a key feature, a test environment that provides multiple RF chains is crucial. The tester's flexibility, support for multiple radio technologies, and embedded IP test capabilities make it a versatile solution for a wide range of Wi-Fi 7-specific tests, such as 2x2 MIMO, 6 GHz band with out-of-band discovery, coexistence and E2E test capabilities.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.204231
+            }
+           ],
+           "text": "It would fit only in the **wireless communications / RF subsystem test portion around a radar platform**, such as 5G/Wi‑Fi links, DUT connectivity, RF TX/RX validation, channel emulation, desense, pre-conformance, and production-style non-signaling checks [9][17][24][27][28].\n### Where it fits in the radar-related workflow\n| Radar test workflow area | Fit of Signaling / Non-signaling Tester | Supported evidence |\n|---|---|---|\n| Communications link R&D around the radar system | CMX500 fits as a signaling tester/callbox to connect a DUT and perform RF testing, mobility/application-style testing, pre-conformance, and R&D verification.[1][9][17] RAW evidence says CMX500 supports early R&D with integrated fading and channel emulation and 3GPP test execution via CONTEST.[27] | [1][9][17][27] |\n| Wireless RF TX/RX validation under realistic conditions | CMX500 fits when the radar platform includes WLAN / cellular radios that must be tested in signaling mode; RAW evidence states RF TX/RX characteristics of WLAN devices must be measured under real-world conditions in signaling mode, and CMX500 is a multi-technology multi-channel signaling tester with Wi‑Fi 7 functionality.[28] | [28] |\n| OTA / chamber-based wireless subsystem testing | CMX500 can be integrated into a reverberation-chamber workflow for advanced WLAN stations and access points; RAW evidence states Bluetest Flow integrates CMX500 Wi‑Fi 7 test functionality with reverberation chamber technology.[26] | [26] |\n| Production or R&D non-signaling checks of wireless modules | CMP180 fits as the production / R&D non-signaling tester; the R&S source summary distinguishes CMX500 as an R&D single-box signaling tester and CMP180 as a production / R&D non-signaling tester.[24] | [24] |\n【推論】For an Aerospace / Defense radar program, the Signaling Tester would sit **beside the radar test bench**, in the validation workflow for the platform’s 5G/Wi‑Fi/private-network communications radios, not in the radar target-generation or radar detection chain; this follows from CMX500’s stated role in DUT connectivity, RF testing, pre-conformance, fading/channel emulation, and signaling-mode RF TX/RX testing.[9][17][27][28]\n【推論】The Non-signaling Tester would fit later as a **manufacturing/R&D RF screening tool** for those communications modules, because the R&S source positions CMP180 as a production / R&D non-signaling tester, while CMX500 is positioned for R&D signaling workflows.[24]\n【推論】If the defense radar use case is part of a contested-spectrum or tactical private-5G environment, CMX500 is relevant to testing the communications-network resilience side, because the knowledge base lists defense drivers such as tactical edge connectivity, smart jamming, complex RF environments, contested spectrum, drones, and secure command-and-control networks, and separately notes CMX500 as a network emulator in that 5G resilience context.[11][18]",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 1,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+            },
+            "score": 8.015961
+           },
+           {
+            "text": "CMX500 Callbox › Callbox 定位\n依 [[CMX500_Callbox]]，callbox 的核心敘事是：\n\n- Easy to set up。\n- Easy to get in a call。\n- Easy to test with。\n- Focus on [[RF Testing]]，including [[3GPP pre-conformance]]。\n\n來源以 [[Device Under Test]]、cell tower 與 smartphone 圖示描述 [[R&S CMX500]] 作為 DUT 連線與測試環境的中心。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+            },
+            "score": 6.460773
+           },
+           {
+            "text": "5G private network resilience against smart jamming › Mission context 與 industry drivers\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 列出的 mission / market drivers 包含：\n\n- tactical edge connectivity needs；\n- rise of smart jamming and improved [[EW]] tactics；\n- complex RF environment 與 contested spectrum；\n- growing adoption of private 5G networks；\n- autonomous systems and drones requiring low latency；\n- expansion of tactical private 5G networks on military bases；\n- demand for secure command-and-control networks；\n- strategic partnerships，例如來源提到 Nokia + L3Harris in 2024；\n- multi-year contracts，例如來源提到 Northrop Grumman 5G battlefield networking in 2024。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 另稱 United States Department of Defense has recently embarked on a strategy leveraging both public and private 5G networks，並說 5G could become the de-facto communications network between NATO members。此為 white paper statement；來源未附完整 DoD / NATO 文件引用。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+            },
+            "score": 1.281171
+           },
+           {
+            "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+            },
+            "score": 5.913484
+           },
+           {
+            "text": "5G private network resilience against smart jamming › 與既有頁面的關係\n- [[DUT]]：本概念的限制條件是 unmodified 5G DUT。\n- [[Handover frequency hopping]]：白皮書中最具體的 implementation。\n- [[Frequency hopping for 5G resilience]]：本概念的主要技術方向。\n- [[Smart Jamming]]：本概念要處理的 threat model。\n- [[R&S CMX500]]：白皮書明示測試使用 CMX500 作為 network emulator；但該 Market source 不是 CMX500 binding specifications。\n- [[Counter-UAV 技術]]：簡報 mid-term roadmap 提到 drone detection 與 perimeter defense，但不是 counter-UAV 系統評估來源。\n- [[Beamforming]]：簡報短期 roadmap 提到 mmWave phased arrays field testing，但沒有 beamforming 定義或測試方法。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 8,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+            },
+            "score": 1.143075
+           },
+           {
+            "text": "Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024 › 關鍵實體與概念\n- [[Rohde & Schwarz]]：新聞稿發布者與測試解決方案供應商。\n- [[Rohde & Schwarz GmbH & Co KG]]：frontmatter author 與 R&S registered trademark 所屬公司名。\n- [[R&S CMX500]]：R&D single-box signaling tester；本來源新增 Wi‑Fi 7 test functionality、WLAN offloading、N3IWF 與 POLQA voice quality measurement 的 PR 語境。\n- [[R&S CMP180]]：production / R&D non-signaling tester；本來源宣稱支援 Wi-Fi 6E、Wi-Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz，並展示 480 MHz WLAN waveform loopback。\n- [[Wi-Fi 7 R&D and production testing]]：本來源的主題概念，區分 CMX500 R&D signaling 與 CMP180 production non-signaling 測試。\n- [[WLAN offloading with Voice over WLAN]]：本來源描述的 CMX500 single-box interworking / voice continuity 測試情境。\n- [[Wi-Fi 7]] / [[IEEE 802.11be]]：來源列出 320 MHz channel bandwidth、up to 16 spatial streams、4096 QAM、低延遲與 high throughput。\n- [[Wi-Fi 8]] / [[IEEE 802.11bn]]：來源稱 yet-to-be-defined，且 wider channel bandwidths are in discussion；CMP180 480 MHz waveform 被稱為 potential waveform candidate。\n- [[MLO]]：Wi-Fi 7 key feature，使 multiple RF chains 的 test environment 變重要。\n- [[N3IWF]]：Non-3GPP Interworking Function gateway；來源稱 newly integrated in R&S CMX500。\n- [[POLQA]]：來源稱 R&S CMX500 integrated POLQA voice quality measurement function 可用於 Voice over WLAN applications。\n- [[MWC 2024]]：展示場合。\n- [[Christian Mokry]]：Press & media contact。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+            },
+            "score": 5.702161
+           },
+           {
+            "text": "The setup is operated using the Bluetest Flow control software, an integrated test environment for complex wireless solutions. By integrating the Wi-Fi 7 test functionality of the [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester into the Bluetest Flow software, WLAN developers utilizing the R&S CMX500 can now leverage Bluetest's reverberation chamber technology in the development of their advanced WLAN stations and access points.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-54cc8cb2ee42584d",
+              "original_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+              "sha256": "54cc8cb2ee42584d7782fc776b5114e91fddf5f57b891a177556a7f8bdfd3d42",
+              "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.380983
+           },
+           {
+            "text": "At the core of the Rohde & Schwarz conformance test solutions is the [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") 5G one-box signaling tester, which also supports early research and development through integrated fading and channel emulation, along with an intuitive tool for visualizing satellite constellations – all in a single-box test setup. In addition, the user-friendly R&S CONTEST test system software platform facilitates the seamless execution of 3GPP test cases.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f9f65126e3850d1e",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+              "sha256": "f9f65126e3850d1e3700c2c8ed45daf700054df15566d39ccdf83f655032725c",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.20613
+           },
+           {
+            "text": "During the development of WLAN devices, measurements of the RF TX and RX characteristics must be conducted under real-world conditions in signaling mode. The R&S CMX500 one-box tester is a multi-technology multi-channel signaling tester that is now available with integrated Wi-Fi 7 test functionality. Especially in Wi-Fi 7 where Multi-Link-Operation (MLO) is a key feature, a test environment that provides multiple RF chains is crucial. The tester's flexibility, support for multiple radio technologies, and embedded IP test capabilities make it a versatile solution for a wide range of Wi-Fi 7-specific tests, such as 2x2 MIMO, 6 GHz band with out-of-band discovery, coexistence and E2E test capabilities.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d0a8f03c4120b8e2",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+             "section": 7,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.204231
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [
+            {
+             "name": "technical_knowledge",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Rohde & Schwarz GmbH & Co KG.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              }
+             ],
+             "attempts": 1
+            }
+           ],
+           "missing_facets": [],
+           "relation_required": false,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": [
+           {
+            "wiki_page": "wiki/concepts/CMX500 Callbox.md",
+            "raw_refs": [
+             "raw/Market/OneNote/CMX500_Callbox.md",
+             "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+             "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md",
+            "raw_refs": [
+             "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+             "raw/Market/OneNote/5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+            "raw_refs": [
+             "raw/Productions/CMP180_specs_en_3609-7348-22_v0800.md",
+             "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+             "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+             "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+            ]
+           }
+          ]
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

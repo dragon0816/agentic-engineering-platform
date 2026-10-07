@@ -1,0 +1,58 @@
+workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-014\T18\workspace
+input files:
+ - DEPENDENCIES.txt size= 22
+ - export.py size= 1082
+ - input.csv size= 39
+
+=== input/export.py ===
+"""Average Value per Model from input.csv into summary.xlsx.
+
+Usage: python export.py --input input.csv --output summary.xlsx
+Requires: openpyxl
+"""
+
+import argparse
+import csv
+
+from openpyxl import Workbook
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--input", required=True)
+    parser.add_argument("--output", required=True)
+    args = parser.parse_args()
+    totals = {}
+    counts = {}
+    with open(args.input, newline="", encoding="utf-8") as handle:
+        for row in csv.DictReader(handle):
+            model = row["DeviceModel"]
+            value = row["Value"]
+            if value == "":
+                continue
+            totals[model] = totals.get(model, "") + value
+            counts[model] = counts.get(model, 0) + 1
+    book = Workbook()
+    sheet = book.active
+    sheet.title = "summary"
+    sheet.append(["Model", "Average", "ValidCount"])
+    for model in sorted(totals):
+        sheet.append([model, totals[model] / counts[model], counts[model]])
+    book.save(args.output)
+
+
+if __name__ == "__main__":
+    main()
+
+
+=== input/DEPENDENCIES.txt ===
+Python 3.12, openpyxl
+
+
+=== input/input.csv ===
+0 ['Model', 'Value']
+1 ['M1', '10']
+2 ['M1', '20']
+3 ['M1', '']
+4 ['M2', '5']
+5 ['M2', '15']

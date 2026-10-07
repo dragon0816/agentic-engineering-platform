@@ -1,0 +1,133 @@
+{
+ "run_id": "fix-run-014",
+ "task_id": "T06",
+ "attempt": 1,
+ "status": "PASS",
+ "task_success": true,
+ "first_attempt_success": null,
+ "repair_loops": null,
+ "tool_calls": 2,
+ "duration_seconds": 90.45,
+ "clarification_wait_seconds": null,
+ "human_interventions": 0,
+ "intervention_details": [],
+ "checks": [
+  {
+   "name": "three steps with the exact fields and values",
+   "passed": true,
+   "expected": [
+    {
+     "step_id": 1,
+     "action": "開啟量測儀器電源",
+     "input": "主電源開關",
+     "expected_result": "儀器開機畫面出現"
+    },
+    {
+     "step_id": 2,
+     "action": "執行自我校正",
+     "input": null,
+     "expected_result": "校正狀態顯示 OK"
+    },
+    {
+     "step_id": 3,
+     "action": "記錄環境溫度",
+     "input": "溫度計讀值",
+     "expected_result": null
+    }
+   ],
+   "actual": [
+    {
+     "step_id": 1,
+     "action": "開啟量測儀器電源",
+     "input": "主電源開關",
+     "expected_result": "儀器開機畫面出現"
+    },
+    {
+     "step_id": 2,
+     "action": "執行自我校正",
+     "input": null,
+     "expected_result": "校正狀態顯示 OK"
+    },
+    {
+     "step_id": 3,
+     "action": "記錄環境溫度",
+     "input": "溫度計讀值",
+     "expected_result": null
+    }
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "no preface or notes mixed in",
+   "passed": true,
+   "expected": "absent",
+   "actual": null,
+   "evidence_path": null
+  },
+  {
+   "name": "input files unchanged",
+   "passed": true,
+   "expected": "same SHA-256",
+   "actual": "same",
+   "evidence_path": null
+  }
+ ],
+ "failure_category": null,
+ "failure_reason": null,
+ "telemetry_limitations": [
+  "repair loops and first-attempt success are not observable: the Gateway trace records tool calls per turn, not program edits or reruns",
+  "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry"
+ ],
+ "artifact_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-014\\T06\\workspace\\output\\sop.json"
+ ],
+ "trace_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-014\\T06\\trace.json",
+ "tools": [
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-a45aa8f71b46471baa70260ed4ca4d3b",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-aa0aa79d8e614dedb0bd205cdc03f9fa",
+   "authored_run_id": null,
+   "approval_id": null
+  }
+ ],
+ "model_turns": [
+  3
+ ],
+ "repo_commit": "06d1ebf48b0e2040f6875d08c2e782d0d33452b1",
+ "agent_backend": "aep-agent-web-chat (gateway)",
+ "model": "gpt-5.5",
+ "skill_versions": {
+  "company-agent/knowledge-query": "1.5.0",
+  "company-agent/market-alignment": "1.1.0",
+  "company-agent/personal-proof": "1.1.0",
+  "company-agent/workflow-author": "1.1.0",
+  "engineering/coding": "1.7.0",
+  "engineering/knowledge-query": "1.0.0",
+  "engineering/rs-ncc-improvement-plan-skill": "1.0.0",
+  "engineering/team-tickets": "2.1.0",
+  "engineering/weekly-report": "2.0.0",
+  "preview/checklist-review-skill": "1.0.0"
+ },
+ "fixture_manifest_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\fixtures\\MANIFEST.json",
+ "validator_version": "1.4"
+}

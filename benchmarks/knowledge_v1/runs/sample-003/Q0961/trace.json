@@ -1,0 +1,705 @@
+{
+ "question": {
+  "id": "Q0961",
+  "text": "For a Semiconductor use case involving RFIC validation, where would Vector Network Analyzer fit in the test workflow?",
+  "market": "Semiconductor",
+  "product": "Vector Network Analyzer",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-99ca3f65244b4fed95cbf7892ad2fcb2",
+ "exchange": {
+  "sent": "For a Semiconductor use case involving RFIC validation, where would Vector Network Analyzer fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 156.578,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-99ca3f65244b4fed95cbf7892ad2fcb2",
+    "actor": "leo.chi",
+    "title": "For a Semiconductor use case involving RFIC validation, where would Vect…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T14:04:49.224618Z",
+    "updated_at": "2026-10-07T14:07:18.452364Z",
+    "messages": [
+     {
+      "message_id": "message-5e829bda6e1546f1b5af12659a8a0723",
+      "role": "user",
+      "text": "For a Semiconductor use case involving RFIC validation, where would Vector Network Analyzer fit in the test workflow?",
+      "created_at": "2026-10-07T14:04:49.243395Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-ebd8f49707ee4defb3a7afaf345c5f98",
+      "role": "assistant",
+      "text": "The knowledge base did not provide direct Raw evidence for an “RFIC validation workflow” placement, so the workflow mapping below is general engineering guidance, not KB-cited.\n\nIn an RFIC validation workflow, a Vector Network Analyzer fits mainly in the **small-signal / linear RF characterization stage**, typically after basic DC bring-up and before large-signal modulation/EVM or system-level tests.\n\nTypical RFIC validation flow:\n\n1. **DC bring-up / safety checks**  \n   Verify supplies, bias currents, leakage, enable pins, thermal behavior.\n\n2. **Small-signal RF characterization — VNA fits here**  \n   Use the VNA to measure:\n   - **S-parameters**: S11, S21, S12, S22  \n   - **Input/output return loss**\n   - **Gain and insertion loss**\n   - **Reverse isolation**\n   - **Impedance matching**\n   - **Stability indicators**, often derived from S-parameters\n   - **Frequency response / bandwidth**\n   - For multiport RFICs: port-to-port coupling, switch paths, differential behavior if supported\n\n   This is especially important for LNAs, PAs at low power, mixers, switches, filters, matching networks, antenna tuners, front-end modules, and RF interconnect/package validation.\n\n3. **Large-signal RF characterization**  \n   Move to signal generators, power meters, spectrum/signal analyzers, load-pull systems, etc. Measure:\n   - P1dB\n   - IP3 / intermodulation\n   - Harmonics\n   - ACPR/ACLR\n   - Efficiency\n   - Compression behavior\n\n4. **Modulated-signal validation**  \n   Use vector signal generators/analyzers or communication testers for:\n   - EVM\n   - Spectral mask\n   - 5G/LTE/Wi-Fi waveform performance\n   - Receiver sensitivity or transmitter quality\n\n5. **System / conformance / production correlation**  \n   Compare bench results with ATE, system-level results, temperature/voltage corners, and compliance requirements.\n\nSo, in short: **the VNA is the core instrument for verifying the RFIC’s linear RF network behavior before moving into nonlinear, modulated, and system-level validation.**",
+      "created_at": "2026-10-07T14:07:18.452364Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-585bbd5a7446413cbc0591008575c391",
+       "request_id": "request-585bbd5a7446413cbc0591008575c391",
+       "span_id": "span-585bbd5a7446413cbc0591008575c391",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base did not provide direct Raw evidence for an “RFIC validation workflow” placement, so the workflow mapping below is general engineering guidance, not KB-cited.\n\nIn an RFIC validation workflow, a Vector Network Analyzer fits mainly in the **small-signal / linear RF characterization stage**, typically after basic DC bring-up and before large-signal modulation/EVM or system-level tests.\n\nTypical RFIC validation flow:\n\n1. **DC bring-up / safety checks**  \n   Verify supplies, bias currents, leakage, enable pins, thermal behavior.\n\n2. **Small-signal RF characterization — VNA fits here**  \n   Use the VNA to measure:\n   - **S-parameters**: S11, S21, S12, S22  \n   - **Input/output return loss**\n   - **Gain and insertion loss**\n   - **Reverse isolation**\n   - **Impedance matching**\n   - **Stability indicators**, often derived from S-parameters\n   - **Frequency response / bandwidth**\n   - For multiport RFICs: port-to-port coupling, switch paths, differential behavior if supported\n\n   This is especially important for LNAs, PAs at low power, mixers, switches, filters, matching networks, antenna tuners, front-end modules, and RF interconnect/package validation.\n\n3. **Large-signal RF characterization**  \n   Move to signal generators, power meters, spectrum/signal analyzers, load-pull systems, etc. Measure:\n   - P1dB\n   - IP3 / intermodulation\n   - Harmonics\n   - ACPR/ACLR\n   - Efficiency\n   - Compression behavior\n\n4. **Modulated-signal validation**  \n   Use vector signal generators/analyzers or communication testers for:\n   - EVM\n   - Spectral mask\n   - 5G/LTE/Wi-Fi waveform performance\n   - Receiver sensitivity or transmitter quality\n\n5. **System / conformance / production correlation**  \n   Compare bench results with ATE, system-level results, temperature/voltage corners, and compliance requirements.\n\nSo, in short: **the VNA is the core instrument for verifying the RFIC’s linear RF network behavior before moving into nonlinear, modulated, and system-level validation.**",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-585bbd5a7446413cbc0591008575c391",
+      "request_id": "request-585bbd5a7446413cbc0591008575c391",
+      "span_id": "span-585bbd5a7446413cbc0591008575c391",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-585bbd5a7446413cbc0591008575c391",
+       "request_id": "request-585bbd5a7446413cbc0591008575c391",
+       "span_id": "span-585bbd5a7446413cbc0591008575c391",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base did not provide direct Raw evidence for an “RFIC validation workflow” placement, so the workflow mapping below is general engineering guidance, not KB-cited.\n\nIn an RFIC validation workflow, a Vector Network Analyzer fits mainly in the **small-signal / linear RF characterization stage**, typically after basic DC bring-up and before large-signal modulation/EVM or system-level tests.\n\nTypical RFIC validation flow:\n\n1. **DC bring-up / safety checks**  \n   Verify supplies, bias currents, leakage, enable pins, thermal behavior.\n\n2. **Small-signal RF characterization — VNA fits here**  \n   Use the VNA to measure:\n   - **S-parameters**: S11, S21, S12, S22  \n   - **Input/output return loss**\n   - **Gain and insertion loss**\n   - **Reverse isolation**\n   - **Impedance matching**\n   - **Stability indicators**, often derived from S-parameters\n   - **Frequency response / bandwidth**\n   - For multiport RFICs: port-to-port coupling, switch paths, differential behavior if supported\n\n   This is especially important for LNAs, PAs at low power, mixers, switches, filters, matching networks, antenna tuners, front-end modules, and RF interconnect/package validation.\n\n3. **Large-signal RF characterization**  \n   Move to signal generators, power meters, spectrum/signal analyzers, load-pull systems, etc. Measure:\n   - P1dB\n   - IP3 / intermodulation\n   - Harmonics\n   - ACPR/ACLR\n   - Efficiency\n   - Compression behavior\n\n4. **Modulated-signal validation**  \n   Use vector signal generators/analyzers or communication testers for:\n   - EVM\n   - Spectral mask\n   - 5G/LTE/Wi-Fi waveform performance\n   - Receiver sensitivity or transmitter quality\n\n5. **System / conformance / production correlation**  \n   Compare bench results with ATE, system-level results, temperature/voltage corners, and compliance requirements.\n\nSo, in short: **the VNA is the core instrument for verifying the RFIC’s linear RF network behavior before moving into nonlinear, modulated, and system-level validation.**",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_7ItJ7NmBz2rYtrUIUmTjwxWr",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-585bbd5a7446413cbc0591008575c391",
+          "request_id": "request-585bbd5a7446413cbc0591008575c391",
+          "span_id": "span-585bbd5a7446413cbc0591008575c391",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-585bbd5a7446413cbc0591008575c391",
+           "request_id": "request-585bbd5a7446413cbc0591008575c391",
+           "span_id": "span-585bbd5a7446413cbc0591008575c391",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "For a Semiconductor use case involving RFIC validation, where would a Vector Network Analyzer fit in the test workflow? Explain the RFIC validation workflow context and VNA role.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "R&S ZNL20\n[[R&S ZNL20]] 是 [[R&S ZNL]] 系列的 20 GHz 2-port Vector Network Analyzer，依 [[ZNL_specs_en_3607-1071-22_v1000]] Version 10.00（September 2025）標示，VNA frequency range 為 5 kHz to 20 GHz，test port connector 為 3.5 mm, male；加裝 [[R&S ZNL20-B1]] 時 spectrum analysis frequency range 為 5 kHz to 26.5 GHz。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNL20.md"
+             },
+             "score": 7.322315
+            },
+            {
+             "text": "R&S ZNL20 › 型號與訂購資訊\n| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNL20 | Vector network analyzer，20 GHz，3.5 mm connectors | 1323.0012.20 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNL20.md"
+             },
+             "score": 4.984545
+            },
+            {
+             "text": "R&S ZNL20 › Spectrum analysis option\n| Code | Order No. | 名稱 / 原文說明 | 相依 / 限制 |\n|---|---:|---|---|\n| R&S®ZNL20-B1 | 1303.8101.02 | Spectrum analysis，for R&S®ZNL20 | devices with serial number < 101200 cannot retrofit |\n\nWith R&S®ZNL20-B1 spectrum analysis option：\n\n- Spectrum analysis frequency range：5 kHz to 26.5 GHz。\n- RF input impedance：50 Ω。\n- RF input connector：see section Measurement range, Test port connector，即 3.5 mm, male。\n- Attenuator setting range：0 dB to 30 dB，10 dB steps。\n- Frequency resolution：0.01 Hz。\n- Number of sweep / trace points：default 1001；range 101 to 100001。\n- Signal analysis bandwidth equalized：standard 10 MHz nominal；f < 6 GHz with [[R&S FPL1-B40]] option 為 40 MHz nominal；f ≥ 6 GHz with [[R&S FPL1-B40]] and [[R&S FPL1-B11]] options，YIG preselector off，為 40 MHz nominal。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNL20.md"
+             },
+             "score": 3.998339
+            },
+            {
+             "text": "CMX500 use-case based 5G testing › CMsquares\n來源列出 [[R&S CMsquares]]：\n\n- Web-based Interface。\n- OS independent。\n- State of the art, future proof software。\n- No need for PC license dongle。\n- Seamless switching across applications。\n- All Tools in one Place。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+             },
+             "score": 5.665903
+            },
+            {
+             "text": "CMX500 use-case based 5G testing › RedCap testing support\n來源列出 [[R&S CMX500]] RedCap testing use cases：\n\n- [[XLAPI]]（Python）scenario package [[R&S CMX-KF678X]] for early R&D protocol verification。\n- Interactive callbox mode for RF and application tests。\n- Sequencer with graphical sequencer blocks for RF、protocol、application tests。\n- Protocol conformance testing for GCF / PTCRB type approval。\n- 3GPP R17 RedCap supported in [[R&S CMsquares]] GUI。\n- 3GPP R17 RedCap tests in [[R&S CMsequencer]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+             },
+             "score": 4.126917
+            },
+            {
+             "text": "CMX500 use-case based 5G testing › CMX500 platform overview\n來源對 [[R&S CMX500]] 的 platform overview 說法包含：\n\n- Future proof 5G signaling test platform。\n- Running on Linux：faster and more robust。\n- Single web-based GUI for RF、protocol、application testing。\n- Modular and scalable HW architecture。\n- LTE & FR1：up to 8 GHz。\n- FR2：24–50 GHz。\n- Ready for up to 20 Gbps and more E2E IP performance。\n- Extensive IP and Application Test feature set onboard。\n\n此處屬 presentation claim；不能取代 formal frequency range、hardware configuration、software option 或 guaranteed performance 規格。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+             },
+             "score": 3.594162
+            },
+            {
+             "text": "Virtual tester › 來源定義\n[[AIW_Products_Customer_Questionnaire]] 的 short definitions 寫道：\n\n> Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a single tool.\n\n因此本庫把 [[Virtual tester]] 記為工作流 / solution concept，而非單一軟體工具或儀器。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Virtual tester.md"
+             },
+             "score": 2.981453
+            },
+            {
+             "text": "Virtual tester\n[[Virtual tester]] 在 [[AIW_Products_Customer_Questionnaire]] 中被定義為跨 implementation → test → debug → validation 的 agentic workflow，而不是 single tool。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Virtual tester.md"
+             },
+             "score": 1.808086
+            },
+            {
+             "text": "Virtual tester › 與 point tools 的區分\n問卷第 3b 題要求客戶說明他們是在尋找 point tools，或 broader [[Virtual tester]]：\n\n- point tools examples：better scripting、log analysis。\n- broader [[Virtual tester]]：spans implementation → test → debug → validation。\n\n這個區分表示 [[Virtual tester]] 的範圍比單一 scripting assistant 或 log analyzer 更寬，但來源未提供具體產品功能矩陣。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Virtual tester.md"
+             },
+             "score": 1.609258
+            },
+            {
+             "text": "R&S CMX-KC661B › 在 1C111 workflow 中的角色\n依 [[1C111_1e_3GPPPreConfGuide]]：\n\n- 文件中的 test steps 需要 [[R&S CMX-KC661B]]、[[R&S CMX-KS600B]] 與 [[R&S CMX-KM600]]。\n- [[R&S CMX-KC661B]] 對應 SA FR1 3GPP RF Test Scenarios。\n- Test case 會依 selected test case 與 test ID，自動調整 reference measurement channel（RMC）configurations、UL power control settings 與 additional spectrum emission values。\n- [[R&S CMsequencer]] 3GPP 5G SA pre-conformance solution 包含於 KC661 license，提供 automated execution、validation 與 comprehensive reporting。\n- WebGUI workflow 可用於 selected [[3GPP TS 38.521-1]] pre-conformance test cases 的 setup、configuration、execution 與 verification。\n\n依 [[1C111_0e_3GPPPreConfGuide]]，同一 license 也被描述為 [[R&S CMX500]] 3GPP RF conformance / pre-conformance WebGUI workflow 的必要 license。\n\n依 [[CMX500_Callbox]]：\n\n- 3GPP Pre-Conformance Wizard takes care of 3GPP RMC settings。\n- Quick and easy 3GPP pre-conformance testing in GUI。\n- Coming in 2025 and later 的 roadmap 包含 dynamic workspaces per TC、LTE TCs + workspace、NSA TCs + workspace。\n- 該來源的 roadmap / GUI wording 不提供 KC661 的 formal coverage matrix。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KC661B.md"
+             },
+             "score": 6.844804
+            },
+            {
+             "text": "R&S CMX-KC661B › 使用限制\n- 本頁只記錄來源明示的 option role 與 order number，不構成正式報價、license entitlement 或 complete configuration rule。\n- [[1C111_1e_3GPPPreConfGuide]] 是 application note，且來源明示其 procedures 可能相較 [[3GPP]] specification 更 streamlined 或 simplified，不嚴格遵循所有 parameters。\n- [[CMX500_Callbox]] 是簡報來源，補充 use-case / roadmap / GUI 敘事；不可用來覆蓋 formal features、specs 或 package database。\n- 完整 test case coverage、supported band / bandwidth / UE capability、software version 與 automation behavior 仍需查正式 R&S documentation、sequencer database、release notes 與 configurator。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KC661B.md"
+             },
+             "score": 3.147002
+            },
+            {
+             "text": "R&S CMX-KC661B\n[[R&S CMX-KC661B]] 是 [[R&S CMX500]] 的 **NR SA FR1 3GPP RF Test Scenarios** option / license；在 [[1C111_0e_3GPPPreConfGuide]] 與 [[1C111_1e_3GPPPreConfGuide]] 中，它是執行 5G NR FR1 SA R&D RF pre-conformance WebGUI workflow 所需的 test scenario license；[[CMX500_Callbox]] 也在 callbox example use case 中將它列為 3GPP Pre-Conformance Testing 的 option 線索。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KC661B.md"
+             },
+             "score": 2.906304
+            },
+            {
+             "text": "R&S CONTEST › 來源中的角色\n依 [[Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP]]：\n\n- User-friendly [[R&S CONTEST]] test system software platform facilitates the execution of [[3GPP]] test cases seamlessly。\n- 來源脈絡是 [[NR-NTN]] [[3GPP conformance testing]] readiness，以及 [[GCF]] [[WI-555]] / [[PTCRB]] [[RFT 555]] upcoming validation。\n\n依 [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]]：\n\n- [[R&S CONTEST]] test system software platform facilitates the seamless execution of [[3GPP]] test cases。\n- 該說法出現在 [[Rohde & Schwarz]] 宣稱 GCF validated [[NR-NTN]] conformance test cases across [[RF]]、[[RRM]] and [[PCT]] domains 的 PR 中。\n\n依 [[WIC Glossary]]：\n\n- CONTEST 展開為 CONformance TEST software platform of R&S。\n- 這是 glossary 層級定義；來源未列版本、license、order number 或 supported test package。\n\n依 [[RS_TS8980FTA_PRE_Series_SystemManual_en_63]]：\n\n- [[R&S TS8980FTA]] 與 [[R&S TS8980PRE]] 是基於 [[R&S CONTEST]] 的 test systems series。\n- [[R&S CONTEST]] 執行於所有 system configurations。\n- 在列出的 test system types 中，[[R&S CONTEST]] 執行於 system controller PC。\n- System controller PC 負責執行 [[R&S CONTEST]] GUI、test applications、tools，並支援 devices 的 remote control。\n- Test system 的主要 user interface 由 system controller PC 提供，因為 test system 完全 remote controlled。\n- 同時間只能執行一個 [[R&S CONTEST]] instance。\n- 啟動方式為 double-click Windows desktop 上的 `R&S CONTEST <version>` shortcut。\n- [[R&S CONTEST]] GUI 可 configure and operate test system、configure and run tests。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CONTEST.md"
+             },
+             "score": 7.064387
+            },
+            {
+             "text": "R&S CONTEST › Test case information and validation files\n依 [[RS_TS8980FTA_PRE_Series_SystemManual_en_63]] glossary：\n\n- `TC`：Test Case，常用於 conformance test applications 命名。\n- `TCI`：Test Case Information；相關 `.rsetci` file 包含 test case information，供 [[R&S CONTEST]] read-in。\n- `TCV`：Test Case Validation；相關 `.rsetcv` file 包含 [[GCF]] 與 [[PTCRB]] 的 current validation status，由 [[Rohde & Schwarz]] 定期更新並由 [[R&S CONTEST]] read-in，透過 [[Installation Manager]] 安裝。\n- `TTCN`：Tree and Tabular Combined Notation（TTCN-2）與 Testing and Test Control Notation（TTCN-3）。\n- `SimLib`：Simulation Library；TTCN API，作為 conformance test suites 與 [[R&S CMW500]] 之間的 TTCN abstraction layer。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CONTEST.md"
+             },
+             "score": 6.840407
+            },
+            {
+             "text": "R&S CONTEST › System controller PC context\n依 [[RS_TS8980FTA_PRE_Series_SystemManual_en_63]]：\n\n- System controller PC 執行 Microsoft Windows 10 或 Microsoft Windows 11 operating system，以及 [[R&S CONTEST]] GUI。\n- System controller PC 可 configure test system、control test case execution、access test results。\n- PC 通常由 [[Rohde & Schwarz]] 隨 system 交付；customer-provided standard PC optional，但需滿足 minimum requirements。\n- 第一 LAN adapter 連接 private LAN，用於控制不同 instruments。\n- 第二 LAN adapter 可選擇連接 company LAN，以允許 Remote Desktop Connection 等 remote access。\n- R&S CONTEST system controller PC 出貨時含 standard Windows user `TS8980`；initial password 是 system controller PC 的 6-digit serial number。\n- Legacy R&S CONTEST test systems 曾使用 `TS8980` 作為 initial password。\n- 初次登入後需變更 password，並使用符合公司 security policies 的 unique and strong Windows password。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CONTEST.md"
+             },
+             "score": 2.943188
+            },
+            {
+             "text": "R&S ZNB3044 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3044 2-port | Vector network analyzer，2-port，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.42 |\n| R&S®ZNB3044 4-port | Vector network analyzer，4-port，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.44 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNB3044.md"
+             },
+             "score": 6.08222
+            },
+            {
+             "text": "R&S ZNB3044\n[[R&S ZNB3044]] 是 [[R&S ZNB3000]] 系列的 43.5 GHz Vector Network Analyzer 型號，依 Version 09.00（July 2026）base frequency range 為 9 kHz to 43.5 GHz，搭配 frequency upgrade option 可到 54.0 GHz。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNB3044.md"
+             },
+             "score": 4.882782
+            },
+            {
+             "text": "R&S ZNB3044 › 文件依據\n- 來源：[[ZNB3000_specs_en_3647-5184-22_v0900]]。\n- 文件：R&S®ZNB3000 Vector Network Analyzer Specifications。\n- 文件編號：PD 3647.5184.22。\n- 文件版本：Version 09.00。\n- 發布時間：July 2026。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNB3044.md"
+             },
+             "score": 4.74596
+            },
+            {
+             "text": "R&S ZNL3\n[[R&S ZNL3]] 是 [[R&S ZNL]] 系列的 3 GHz 2-port Vector Network Analyzer，依 [[ZNL_specs_en_3607-1071-22_v1000]] Version 10.00（September 2025）標示，VNA frequency range 為 5 kHz to 3 GHz，test port connector 為 N, female。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNL3.md"
+             },
+             "score": 7.15625
+            },
+            {
+             "text": "R&S ZNL3 › 型號與訂購資訊\n| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNL3 | Vector network analyzer，3 GHz，N connectors | 1323.0012.03 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNL3.md"
+             },
+             "score": 4.518504
+            },
+            {
+             "text": "R&S ZNL3 › Firmware / software options\n| Code | Order No. | 名稱 / 原文說明 | Requires / 限制 |\n|---|---:|---|---|\n| R&S®ZNL-K2 | 1323.1819.02 | Time domain analysis | 來源未標示 |\n| R&S®ZNL-K3 | 1323.1825.02 | Distance-to-fault measurement | 來源未標示 |\n| R&S®ZNL-K14 | 1303.8182.02 | Independent CW source | available for R&S®ZNL3；requires spectrum analysis option |\n| R&S®FPL1-K7 | 1323.1731.02 | AM/FM/PM measurement demodulator | requires spectrum analysis option |\n| R&S®FPL1-K9 | 1323.1754.02 | Power sensor measurement with R&S®NRP power sensors | requires spectrum analysis option；僅適用 average power measurement |\n| R&S®FPL1-K30 | 1323.1760.02 | Noise figure and gain measurements | requires spectrum analysis option and R&S®FPL1-B5 additional interface option |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNL3.md"
+             },
+             "score": 4.00241
+            },
+            {
+             "text": "R&S ZNL6\n[[R&S ZNL6]] 是 [[R&S ZNL]] 系列的 6 GHz 2-port Vector Network Analyzer，依 [[ZNL_specs_en_3607-1071-22_v1000]] Version 10.00（September 2025）正文與 ordering information 標示，VNA frequency range 為 5 kHz to 6 GHz，test port connector 為 N, female。\n\n⚠️ [[ZNL_specs_en_3607-1071-22_v1000]]（September 2025，讀圖 p001）說產品照片機身可辨識「ZNL6」與「10 kHz to 3 GHz」，但既有頁面 [[R&S ZNL6]] 說 [[R&S ZNL6]] 的 VNA frequency range 為 5 kHz to 6 GHz。讀圖可信度低於正文，且同一來源正文與 ordering information 均支持 5 kHz to 6 GHz，本頁以正文為準並保留此讀圖矛盾供回查。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNL6.md"
+             },
+             "score": 5.697605
+            },
+            {
+             "text": "R&S ZNL6 › Firmware / software options\n| Code | Order No. | 名稱 / 原文說明 | Requires / 限制 |\n|---|---:|---|---|\n| R&S®ZNL-K2 | 1323.1819.02 | Time domain analysis | 來源未標示 |\n| R&S®ZNL-K3 | 1323.1825.02 | Distance-to-fault measurement | 來源未標示 |\n| R&S®ZNL-K14 | 1303.8182.02 | Independent CW source | available for R&S®ZNL6；requires spectrum analysis option |\n| R&S®FPL1-K7 | 1323.1731.02 | AM/FM/PM measurement demodulator | requires spectrum analysis option |\n| R&S®FPL1-K9 | 1323.1754.02 | Power sensor measurement with R&S®NRP power sensors | requires spectrum analysis option；僅適用 average power measurement |\n| R&S®FPL1-K30 | 1323.1760.02 | Noise figure and gain measurements | requires spectrum analysis option and R&S®FPL1-B5 additional interface option |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNL6.md"
+             },
+             "score": 4.721444
+            },
+            {
+             "text": "R&S ZNL6 › 型號與訂購資訊\n| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNL6 | Vector network analyzer，6 GHz，N connectors | 1323.0012.06 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNL6.md"
+             },
+             "score": 4.640299
+            },
+            {
+             "text": "The R&S®ZNA67EXT vector network analyzer system consists of one R&S®ZNA67 vector network analyzer and up to four external\ntest sets.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-7e1162da3b81e67d",
+               "original_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "sha256": "7e1162da3b81e67d624d41412ac7001689adff85388ecb9bb8e5f9064bc583df",
+               "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.68857
+            },
+            {
+             "text": "•  Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c733beba88ba4b3a",
+               "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.25253
+            },
+            {
+             "text": "R&S®ZNB3020 9\nVector network analyzer (VNA) uncertainty model, applicable for R&S®ZNB3-K50 and R&S®ZNB3-K50P real-time\nmeasurement uncertainty analysis options",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-eca8f030d797ca58",
+               "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+               "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "section": 299,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.50275
+            },
+            {
+             "text": "R&S®ZNB3032/ZNB3044 9\nVector network analyzer (VNA) uncertainty model, applicable for R&S®ZNB3-K50 and R&S®ZNB3-K50P real-time\nmeasurement uncertainty analysis options",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-eca8f030d797ca58",
+               "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+               "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "section": 310,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.055042
+            }
+           ],
+           "text": "No passage directly describes a Semiconductor RFIC validation workflow, but the supported workflow context is an implementation → test → debug → validation flow, and the “Virtual tester” is defined as an agentic workflow spanning those stages rather than a single tool [7][8].\nIn that context, a Vector Network Analyzer would fit as a physical RF measurement instrument used in the test/validation portion of the workflow, not as the overall workflow controller or software platform; this is an inference from the workflow definition and the fact that R&S ZNL/ZNB products are explicitly Vector Network Analyzers [1][2][16][17].\nFor RF-related validation context, the passages show that R&S CMX500 is positioned as a 5G signaling test platform with a single web-based GUI for RF, protocol, and application testing [6], and that CMX500 use cases include interactive callbox mode and sequencer workflows for RF, protocol, and application tests [5].\nThat suggests the broader RF validation workflow can include automated RF/protocol/application execution, while the VNA remains the instrument for vector network analyzer measurements rather than the conformance/test-sequencing environment [5][6][13].\nSupported VNA examples include R&S ZNL20, a 20 GHz 2-port Vector Network Analyzer with 5 kHz to 20 GHz VNA frequency range and 3.5 mm male test-port connector [1][2], and R&S ZNB3044, a 2-port or 4-port Vector Network Analyzer with 9 kHz to 43.5 GHz base frequency range and 1.85 mm connector [16][17].\n【推論】For a Semiconductor RFIC validation use case, the VNA would be a bench or automated-test measurement instrument inside the “test → debug → validation” part of the workflow, while software/test platforms handle broader execution, reporting, or RF/protocol/application workflows where applicable [5][6][7][8][13].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "R&S ZNL20\n[[R&S ZNL20]] 是 [[R&S ZNL]] 系列的 20 GHz 2-port Vector Network Analyzer，依 [[ZNL_specs_en_3607-1071-22_v1000]] Version 10.00（September 2025）標示，VNA frequency range 為 5 kHz to 20 GHz，test port connector 為 3.5 mm, male；加裝 [[R&S ZNL20-B1]] 時 spectrum analysis frequency range 為 5 kHz to 26.5 GHz。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 1,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/entities/R&S ZNL20.md"
+            },
+            "score": 7.322315
+           },
+           {
+            "text": "R&S ZNL20 › 型號與訂購資訊\n| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNL20 | Vector network analyzer，20 GHz，3.5 mm connectors | 1323.0012.20 |",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/entities/R&S ZNL20.md"
+            },
+            "score": 4.984545
+           },
+           {
+            "text": "CMX500 use-case based 5G testing › RedCap testing support\n來源列出 [[R&S CMX500]] RedCap testing use cases：\n\n- [[XLAPI]]（Python）scenario package [[R&S CMX-KF678X]] for early R&D protocol verification。\n- Interactive callbox mode for RF and application tests。\n- Sequencer with graphical sequencer blocks for RF、protocol、application tests。\n- Protocol conformance testing for GCF / PTCRB type approval。\n- 3GPP R17 RedCap supported in [[R&S CMsquares]] GUI。\n- 3GPP R17 RedCap tests in [[R&S CMsequencer]]。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 12,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+            },
+            "score": 4.126917
+           },
+           {
+            "text": "CMX500 use-case based 5G testing › CMX500 platform overview\n來源對 [[R&S CMX500]] 的 platform overview 說法包含：\n\n- Future proof 5G signaling test platform。\n- Running on Linux：faster and more robust。\n- Single web-based GUI for RF、protocol、application testing。\n- Modular and scalable HW architecture。\n- LTE & FR1：up to 8 GHz。\n- FR2：24–50 GHz。\n- Ready for up to 20 Gbps and more E2E IP performance。\n- Extensive IP and Application Test feature set onboard。\n\n此處屬 presentation claim；不能取代 formal frequency range、hardware configuration、software option 或 guaranteed performance 規格。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+            },
+            "score": 3.594162
+           },
+           {
+            "text": "Virtual tester › 來源定義\n[[AIW_Products_Customer_Questionnaire]] 的 short definitions 寫道：\n\n> Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a single tool.\n\n因此本庫把 [[Virtual tester]] 記為工作流 / solution concept，而非單一軟體工具或儀器。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/Virtual tester.md"
+            },
+            "score": 2.981453
+           },
+           {
+            "text": "Virtual tester\n[[Virtual tester]] 在 [[AIW_Products_Customer_Questionnaire]] 中被定義為跨 implementation → test → debug → validation 的 agentic workflow，而不是 single tool。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 1,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/Virtual tester.md"
+            },
+            "score": 1.808086
+           },
+           {
+            "text": "R&S CONTEST › 來源中的角色\n依 [[Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP]]：\n\n- User-friendly [[R&S CONTEST]] test system software platform facilitates the execution of [[3GPP]] test cases seamlessly。\n- 來源脈絡是 [[NR-NTN]] [[3GPP conformance testing]] readiness，以及 [[GCF]] [[WI-555]] / [[PTCRB]] [[RFT 555]] upcoming validation。\n\n依 [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]]：\n\n- [[R&S CONTEST]] test system software platform facilitates the seamless execution of [[3GPP]] test cases。\n- 該說法出現在 [[Rohde & Schwarz]] 宣稱 GCF validated [[NR-NTN]] conformance test cases across [[RF]]、[[RRM]] and [[PCT]] domains 的 PR 中。\n\n依 [[WIC Glossary]]：\n\n- CONTEST 展開為 CONformance TEST software platform of R&S。\n- 這是 glossary 層級定義；來源未列版本、license、order number 或 supported test package。\n\n依 [[RS_TS8980FTA_PRE_Series_SystemManual_en_63]]：\n\n- [[R&S TS8980FTA]] 與 [[R&S TS8980PRE]] 是基於 [[R&S CONTEST]] 的 test systems series。\n- [[R&S CONTEST]] 執行於所有 system configurations。\n- 在列出的 test system types 中，[[R&S CONTEST]] 執行於 system controller PC。\n- System controller PC 負責執行 [[R&S CONTEST]] GUI、test applications、tools，並支援 devices 的 remote control。\n- Test system 的主要 user interface 由 system controller PC 提供，因為 test system 完全 remote controlled。\n- 同時間只能執行一個 [[R&S CONTEST]] instance。\n- 啟動方式為 double-click Windows desktop 上的 `R&S CONTEST <version>` shortcut。\n- [[R&S CONTEST]] GUI 可 configure and operate test system、configure and run tests。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/entities/R&S CONTEST.md"
+            },
+            "score": 7.064387
+           },
+           {
+            "text": "R&S ZNB3044 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3044 2-port | Vector network analyzer，2-port，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.42 |\n| R&S®ZNB3044 4-port | Vector network analyzer，4-port，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.44 |",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/entities/R&S ZNB3044.md"
+            },
+            "score": 6.08222
+           },
+           {
+            "text": "R&S ZNB3044\n[[R&S ZNB3044]] 是 [[R&S ZNB3000]] 系列的 43.5 GHz Vector Network Analyzer 型號，依 Version 09.00（July 2026）base frequency range 為 9 kHz to 43.5 GHz，搭配 frequency upgrade option 可到 54.0 GHz。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 1,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/entities/R&S ZNB3044.md"
+            },
+            "score": 4.882782
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [],
+           "missing_facets": [],
+           "relation_required": false,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": [
+           {
+            "wiki_page": "wiki/entities/R&S ZNL20.md",
+            "raw_refs": [
+             "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md",
+            "raw_refs": [
+             "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+             "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+             "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/concepts/Virtual tester.md",
+            "raw_refs": [
+             "raw/Productions/AIW_Products_Customer_Questionnaire.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/entities/R&S CONTEST.md",
+            "raw_refs": [
+             "raw/Market/OneNote/FWA CPE SmallCell/WIC Glossary.md",
+             "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+             "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+             "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/entities/R&S ZNB3044.md",
+            "raw_refs": [
+             "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md"
+            ]
+           }
+          ]
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

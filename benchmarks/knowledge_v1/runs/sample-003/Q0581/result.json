@@ -1,0 +1,87 @@
+{
+ "id": "Q0581",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge",
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 209.906,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S ZNL20.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "wiki",
+   "ref": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S ZNB3020.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 6,
+   "kind": "raw",
+   "ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "Automotive radar evolution mainly pushes VNAs toward higher frequency, wider bandwidth, more ports, better calibration, and faster automated measurement.",
+   "Migration from 24 GHz to 76–81 GHz radar",
+   "VNA must cover mmWave bands, typically at least 81 GHz",
+   "A 20/26.5 GHz VNA is not enough for direct 77 GHz radar RF path measurement.",
+   "MIMO / imaging / “4D” radar with many TX/RX channels",
+   "VNA may be used with OTA/free-space setups to measure antenna return loss, transmission through radomes, material properties, and phase distortion.",
+   "Small phase errors can translate into angle-estimation errors.",
+   "as automotive radar moves toward 77/79 GHz wideband FMCW, dense MIMO arrays, integrated antennas, and radome/bumper-in-the-loop validation",
+   "Frequency coverage to at least 81 GHz",
+   "TRL/LRM, on-wafer calibration, fixture removal, port extension, time-domain gating, and ECal support are increasingly important."
+  ],
+  "reason": "The answer correctly notes that the cited passages do not directly link automotive radar technology changes to VNA requirements, but then provides extensive uncited engineering claims that are not supported by the passages. The passages only establish limited facts about some VNA frequency ranges/ports and an automotive radar echo generator, not the asserted 77/81 GHz, MIMO, OTA, calibration, production, or radome requirements.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The answer correctly notes that the cited passages do not directly link automotive radar technology changes to VNA requirements, but then provides extensive uncited engineering claims that are not supported by the passages. The passages only establish limited facts about some VNA frequency ranges/po"
+}

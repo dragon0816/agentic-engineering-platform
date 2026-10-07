@@ -1,0 +1,98 @@
+{
+ "id": "Q0411",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 99.375,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 Callbox.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 Callbox.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 6,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NG eCall EN 17240 2024 verification.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 7,
+   "kind": "wiki",
+   "ref": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 8,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "spectrum/signal analyzer, signal generator, chamber/CATR setup",
+   "Vehicle connectivity / telematics / eCall / 5G / Wi‑Fi coexistence",
+   "V2X",
+   "OTA / infotainment",
+   "ADAS validation — Radar + camera + lidar + ECU fusion; HIL/SIL, chambers, road test setups",
+   "Antenna, RF front end, chirp quality, EIRP, phase noise, bandwidth, receiver behavior"
+  ],
+  "reason": "The cited passages support that AREG800A is for automotive radar echo generation, while CMX500/CMP180-class testers are for cellular/WLAN signaling, non-signaling verification, eCall, and production RF testing. The answer reasonably states there is no direct evidence placing signaling/non-signaling testers inside the radar workflow and positions them adjacent in connectivity testing, though several workflow details are not directly evidenced by the passages.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

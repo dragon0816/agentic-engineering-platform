@@ -1,0 +1,52 @@
+{
+ "id": "Q0311",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 142.922,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "In a radar test workflow, Signal Generators and Signal Analyzers sit around the radar DUT as the main RF stimulus and measurement instruments.",
+   "They are used from early subsystem validation through full radar scenario simulation.",
+   "Signal Generator: provides known RF/IF test signals, LO-like stimuli, pulsed RF, chirps, or modulated waveforms",
+   "Signal Generator fit: emulates radar echoes or controlled target returns at specific frequency, power, delay, Doppler, and modulation conditions.",
+   "Signal Analyzer fit: connects to the radar transmit path through couplers/attenuators to measure transmitted waveform quality.",
+   "Electronic warfare / threat simulation",
+   "injects realistic target scenarios: range delay, Doppler shift, RCS amplitude variation, multi-target returns, clutter, and motion profiles",
+   "production, calibration, and maintenance"
+  ],
+  "reason": "The cited passages only support that signal/spectrum analyzers and optional signal generators are used in a 5G NR base station receiver test context, including CW interference generation. They provide no evidence for radar, Aerospace/Defense, EW, transmitter testing, scenario simulation, or production workflow placement; although the answer disclaims this, it then gives extensive uncited guidance as factual.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages only support that signal/spectrum analyzers and optional signal generators are used in a 5G NR base station receiver test context, including CW interference generation. They provide no evidence for radar, Aerospace/Defense, EW, transmitter testing, scenario simulation, or producti"
+}

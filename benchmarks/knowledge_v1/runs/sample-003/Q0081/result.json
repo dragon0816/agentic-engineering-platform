@@ -1,0 +1,87 @@
+{
+ "id": "Q0081",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge",
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 230.953,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 6,
+   "kind": "raw",
+   "ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "One earlier Wi‑Fi 8 discussion mentioned a 480 MHz waveform candidate",
+   "the source warns not to treat 480 MHz as a finalized IEEE 802.11bn channel bandwidth",
+   "MLO is specifically called out as making multiple RF chains important in the test environment",
+   "Higher analog bandwidth and sample rate are needed",
+   "For direct RF capture near 6–7 GHz, the oscilloscope bandwidth must cover the carrier",
+   "4096‑QAM [means] lower noise floor, better ENOB, lower jitter, good linearity/SFDR, and stable timebase",
+   "More synchronized channels are useful",
+   "Long memory, segmented acquisition, rare-event triggering, jitter/noise statistics, power-integrity correlation, and automated pass/fail analysis become more important",
+   "the scope may need faster serial-bus analysis, eye/jitter tools, and power-integrity measurement capability",
+   "Wi‑Fi 7/8 pushes oscilloscope requirements from 'basic RF/digital debug' toward..."
+  ],
+  "reason": "The cited passages support the Wi‑Fi 7/8 feature summary: 320 MHz bandwidth, 4096QAM, MLO, up to 16 spatial streams, low latency/high throughput, and Wi‑Fi 8 UHR/testing hurdles. However, they do not discuss oscilloscopes or the detailed oscilloscope requirements asserted, and the answer adds substantial engineering conclusions despite its caveat.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages support the Wi‑Fi 7/8 feature summary: 320 MHz bandwidth, 4096QAM, MLO, up to 16 spatial streams, low latency/high throughput, and Wi‑Fi 8 UHR/testing hurdles. However, they do not discuss oscilloscopes or the detailed oscilloscope requirements asserted, and the answer adds substa"
+}

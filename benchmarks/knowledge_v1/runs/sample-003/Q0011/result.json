@@ -1,0 +1,58 @@
+{
+ "id": "Q0011",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 141.813,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP180.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "Signaling tester: R&D / system validation stage",
+   "R&S CMX500 as a multi-technology, multi-channel signaling tester for R&D",
+   "Wi‑Fi 7 operation with MLO and multiple RF chains",
+   "2x2 MIMO",
+   "6 GHz operation and out-of-band discovery",
+   "Coexistence and end-to-end behavior",
+   "WLAN offloading / Voice over WLAN",
+   "R&S CMP180 for production-phase non-signaling RF measurements",
+   "supports Wi‑Fi 6E / Wi‑Fi 7",
+   "bandwidths up to 500 MHz and operation up to 8 GHz",
+   "480 MHz WLAN waveform loopback",
+   "potential Wi‑Fi 8 / IEEE 802.11bn candidate waveform",
+   "Typical measurements would include TX power, EVM, spectrum mask",
+   "The KB notes that the cited Wi‑Fi 7/8 material is PR / demonstration positioning"
+  ],
+  "reason": "The cited passages only support that CMP180 is a radio communication tester used for production/wireless device testing with RF generator/analyzer, measurement, waveform, and VSE options, and list CMX500 rear-panel interfaces. They do not support the answer's main Wi‑Fi 7/8 workflow placement, CMX500 signaling/R&D role, MLO/MIMO/coexistence claims, Wi‑Fi 8 waveform discussion, or measurement examples.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages only support that CMP180 is a radio communication tester used for production/wireless device testing with RF generator/analyzer, measurement, waveform, and VSE options, and list CMX500 rear-panel interfaces. They do not support the answer's main Wi‑Fi 7/8 workflow placement, CMX50"
+}

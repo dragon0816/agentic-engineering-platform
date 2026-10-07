@@ -1,0 +1,1315 @@
+{
+ "question": {
+  "id": "Q0546",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Signal Generator / Signal Analyzer in Automotive, and what evidence supports each opportunity?",
+  "market": "Automotive",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-aff5a9f649d647cdaa2bbcd41260ca13",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Signal Generator / Signal Analyzer in Automotive, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 306.953,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-aff5a9f649d647cdaa2bbcd41260ca13",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T13:08:25.585292Z",
+    "updated_at": "2026-10-07T13:13:32.436032Z",
+    "messages": [
+     {
+      "message_id": "message-32c9e37d0da546fcaa21799ecf9a6a5d",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Signal Generator / Signal Analyzer in Automotive, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T13:08:25.596567Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-a0a1b550506c49fbb832b2954ddf8e9a",
+      "role": "assistant",
+      "text": "The knowledge base did **not** return a complete Raw-cited opportunity map for “Signal Generator / Signal Analyzer in Automotive”; one Raw-citation lookup also failed with insufficient evidence. So the evidence is **strong for a few adjacent/explicit automotive test areas**, but **weak for a full SG/SA-specific ranking**.\n\nBased on the evidence returned, the strongest opportunities are:\n\n| Rank | Opportunity | Why it looks strong | Evidence returned |\n|---|---|---|---|\n| 1 | **Automotive radar / ADAS radar validation** | This is the clearest automotive RF-generation opportunity. The vault has explicit R&S automotive radar echo-generation evidence, including dynamic object/echo generation and FMCW radar support. Even though AREG800A is described as an automotive radar echo generator rather than a generic RF signal generator or spectrum analyzer, it is directly in the automotive radar signal-generation/test domain. | R&S AREG800A is an “Automotive Radar Echo Generator”; echo generator type is “dynamic artificial object generation.” Hybrid mode uses analog stepped delay line for short distances `<17 m` and digital implementation out to `3000 m`; digital mode is for FMCW radar with max generated distance `3000 m`. Citation returned: `wiki/entities/R&S AREG800A.md`, section 4; also `wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md`, section 1. |\n| 2 | **Next Generation eCall / automotive cellular emergency-call validation** | Strong automotive regulatory driver: EU eCall is mandatory for new cars, and NG eCall becomes obligatory from 2026-01-01 according to the returned source summary. This is more of a mobile radio tester / network simulation opportunity than a classic standalone SG/SA opportunity, but it is a strong automotive RF/communications test opportunity. | R&S and Qualcomm verified Snapdragon Auto 5G Modem-RF NG eCall using R&S CMX500 with CMX-KA098 under realistic network conditions, simulating a PSAP, validating voice and data transmission against EN 17240:2024. The same source says eCall has been mandatory for all new cars sold in the EU since 2018 and NG eCall becomes obligatory starting 2026-01-01. Citations returned: `wiki/concepts/NG eCall EN 17240 2024 verification.md`, sections 2–3; `wiki/entities/Juergen Meyer.md`, section 2. |\n| 3 | **High-speed in-vehicle digital links / SerDes SI validation — GMSL, ASA, etc.** | The vault evidence explicitly lists automotive-relevant high-speed interfaces such as GMSL and ASA, and it lists signal generators and spectrum analyzers among instrument types used for transmission-channel / electrical-interface validation. The opportunity is plausible for automotive camera/display/ADAS data links, but the returned evidence is **not explicitly automotive-specific beyond the interface names**. | A SerDes/SI/PI presentation lists high-speed SerDes standards/interfaces including GMSL and ASA. It describes transmission-channel and electrical-interface validation challenges and lists scopes, BERTs, AWGs, switch matrices, phase-noise analyzers, signal generators, network analyzers, and spectrum analyzers. Citation returned: `wiki/sources/0 Digital Test - What are SIPI and Serdes.md`, section 1. |\n| 4 | **Automotive power / semiconductor test ecosystem** | The evidence is weak for SG/SA specifically, but the vault does identify automotive and power IC test players/categories. This may indicate downstream opportunity around automotive power electronics, EMC, or semiconductor validation, but the retrieved passages do not establish a direct SG/SA use case. | The vault notes 欣銓 as a “車用與功率IC測試核心廠” in a power semiconductor testing context, but also says the source does not provide test items, automotive/power IC share, customers, revenue, capacity, or market share. Citation returned: `wiki/entities/欣銓.md`, sections 2–3. |\n\n**Bottom line:**  \nThe best-supported automotive SG/SA-adjacent opportunity is **automotive radar / ADAS radar validation**, because the evidence is directly automotive and directly about RF/echo generation. The next strongest is **NG eCall / 4G/5G automotive communications validation**, driven by regulation, but the evidence points to CMX500 rather than classic SG/SA. **SerDes/GMSL/ASA SI validation** is promising but less firmly automotive-grounded in the returned evidence.",
+      "created_at": "2026-10-07T13:13:32.436032Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-8ea4060acad94c5d99e5b59794aea327",
+       "request_id": "request-8ea4060acad94c5d99e5b59794aea327",
+       "span_id": "span-8ea4060acad94c5d99e5b59794aea327",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)",
+    "ok": true,
+    "answer": "The knowledge base did **not** return a complete Raw-cited opportunity map for “Signal Generator / Signal Analyzer in Automotive”; one Raw-citation lookup also failed with insufficient evidence. So the evidence is **strong for a few adjacent/explicit automotive test areas**, but **weak for a full SG/SA-specific ranking**.\n\nBased on the evidence returned, the strongest opportunities are:\n\n| Rank | Opportunity | Why it looks strong | Evidence returned |\n|---|---|---|---|\n| 1 | **Automotive radar / ADAS radar validation** | This is the clearest automotive RF-generation opportunity. The vault has explicit R&S automotive radar echo-generation evidence, including dynamic object/echo generation and FMCW radar support. Even though AREG800A is described as an automotive radar echo generator rather than a generic RF signal generator or spectrum analyzer, it is directly in the automotive radar signal-generation/test domain. | R&S AREG800A is an “Automotive Radar Echo Generator”; echo generator type is “dynamic artificial object generation.” Hybrid mode uses analog stepped delay line for short distances `<17 m` and digital implementation out to `3000 m`; digital mode is for FMCW radar with max generated distance `3000 m`. Citation returned: `wiki/entities/R&S AREG800A.md`, section 4; also `wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md`, section 1. |\n| 2 | **Next Generation eCall / automotive cellular emergency-call validation** | Strong automotive regulatory driver: EU eCall is mandatory for new cars, and NG eCall becomes obligatory from 2026-01-01 according to the returned source summary. This is more of a mobile radio tester / network simulation opportunity than a classic standalone SG/SA opportunity, but it is a strong automotive RF/communications test opportunity. | R&S and Qualcomm verified Snapdragon Auto 5G Modem-RF NG eCall using R&S CMX500 with CMX-KA098 under realistic network conditions, simulating a PSAP, validating voice and data transmission against EN 17240:2024. The same source says eCall has been mandatory for all new cars sold in the EU since 2018 and NG eCall becomes obligatory starting 2026-01-01. Citations returned: `wiki/concepts/NG eCall EN 17240 2024 verification.md`, sections 2–3; `wiki/entities/Juergen Meyer.md`, section 2. |\n| 3 | **High-speed in-vehicle digital links / SerDes SI validation — GMSL, ASA, etc.** | The vault evidence explicitly lists automotive-relevant high-speed interfaces such as GMSL and ASA, and it lists signal generators and spectrum analyzers among instrument types used for transmission-channel / electrical-interface validation. The opportunity is plausible for automotive camera/display/ADAS data links, but the returned evidence is **not explicitly automotive-specific beyond the interface names**. | A SerDes/SI/PI presentation lists high-speed SerDes standards/interfaces including GMSL and ASA. It describes transmission-channel and electrical-interface validation challenges and lists scopes, BERTs, AWGs, switch matrices, phase-noise analyzers, signal generators, network analyzers, and spectrum analyzers. Citation returned: `wiki/sources/0 Digital Test - What are SIPI and Serdes.md`, section 1. |\n| 4 | **Automotive power / semiconductor test ecosystem** | The evidence is weak for SG/SA specifically, but the vault does identify automotive and power IC test players/categories. This may indicate downstream opportunity around automotive power electronics, EMC, or semiconductor validation, but the retrieved passages do not establish a direct SG/SA use case. | The vault notes 欣銓 as a “車用與功率IC測試核心廠” in a power semiconductor testing context, but also says the source does not provide test items, automotive/power IC share, customers, revenue, capacity, or market share. Citation returned: `wiki/entities/欣銓.md`, sections 2–3. |\n\n**Bottom line:**  \nThe best-supported automotive SG/SA-adjacent opportunity is **automotive radar / ADAS radar validation**, because the evidence is directly automotive and directly about RF/echo generation. The next strongest is **NG eCall / 4G/5G automotive communications validation**, driven by regulation, but the evidence points to CMX500 rather than classic SG/SA. **SerDes/GMSL/ASA SI validation** is promising but less firmly automotive-grounded in the returned evidence.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-8ea4060acad94c5d99e5b59794aea327",
+      "request_id": "request-8ea4060acad94c5d99e5b59794aea327",
+      "span_id": "span-8ea4060acad94c5d99e5b59794aea327",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-8ea4060acad94c5d99e5b59794aea327",
+       "request_id": "request-8ea4060acad94c5d99e5b59794aea327",
+       "span_id": "span-8ea4060acad94c5d99e5b59794aea327",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base did **not** return a complete Raw-cited opportunity map for “Signal Generator / Signal Analyzer in Automotive”; one Raw-citation lookup also failed with insufficient evidence. So the evidence is **strong for a few adjacent/explicit automotive test areas**, but **weak for a full SG/SA-specific ranking**.\n\nBased on the evidence returned, the strongest opportunities are:\n\n| Rank | Opportunity | Why it looks strong | Evidence returned |\n|---|---|---|---|\n| 1 | **Automotive radar / ADAS radar validation** | This is the clearest automotive RF-generation opportunity. The vault has explicit R&S automotive radar echo-generation evidence, including dynamic object/echo generation and FMCW radar support. Even though AREG800A is described as an automotive radar echo generator rather than a generic RF signal generator or spectrum analyzer, it is directly in the automotive radar signal-generation/test domain. | R&S AREG800A is an “Automotive Radar Echo Generator”; echo generator type is “dynamic artificial object generation.” Hybrid mode uses analog stepped delay line for short distances `<17 m` and digital implementation out to `3000 m`; digital mode is for FMCW radar with max generated distance `3000 m`. Citation returned: `wiki/entities/R&S AREG800A.md`, section 4; also `wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md`, section 1. |\n| 2 | **Next Generation eCall / automotive cellular emergency-call validation** | Strong automotive regulatory driver: EU eCall is mandatory for new cars, and NG eCall becomes obligatory from 2026-01-01 according to the returned source summary. This is more of a mobile radio tester / network simulation opportunity than a classic standalone SG/SA opportunity, but it is a strong automotive RF/communications test opportunity. | R&S and Qualcomm verified Snapdragon Auto 5G Modem-RF NG eCall using R&S CMX500 with CMX-KA098 under realistic network conditions, simulating a PSAP, validating voice and data transmission against EN 17240:2024. The same source says eCall has been mandatory for all new cars sold in the EU since 2018 and NG eCall becomes obligatory starting 2026-01-01. Citations returned: `wiki/concepts/NG eCall EN 17240 2024 verification.md`, sections 2–3; `wiki/entities/Juergen Meyer.md`, section 2. |\n| 3 | **High-speed in-vehicle digital links / SerDes SI validation — GMSL, ASA, etc.** | The vault evidence explicitly lists automotive-relevant high-speed interfaces such as GMSL and ASA, and it lists signal generators and spectrum analyzers among instrument types used for transmission-channel / electrical-interface validation. The opportunity is plausible for automotive camera/display/ADAS data links, but the returned evidence is **not explicitly automotive-specific beyond the interface names**. | A SerDes/SI/PI presentation lists high-speed SerDes standards/interfaces including GMSL and ASA. It describes transmission-channel and electrical-interface validation challenges and lists scopes, BERTs, AWGs, switch matrices, phase-noise analyzers, signal generators, network analyzers, and spectrum analyzers. Citation returned: `wiki/sources/0 Digital Test - What are SIPI and Serdes.md`, section 1. |\n| 4 | **Automotive power / semiconductor test ecosystem** | The evidence is weak for SG/SA specifically, but the vault does identify automotive and power IC test players/categories. This may indicate downstream opportunity around automotive power electronics, EMC, or semiconductor validation, but the retrieved passages do not establish a direct SG/SA use case. | The vault notes 欣銓 as a “車用與功率IC測試核心廠” in a power semiconductor testing context, but also says the source does not provide test items, automotive/power IC share, customers, revenue, capacity, or market share. Citation returned: `wiki/entities/欣銓.md`, sections 2–3. |\n\n**Bottom line:**  \nThe best-supported automotive SG/SA-adjacent opportunity is **automotive radar / ADAS radar validation**, because the evidence is directly automotive and directly about RF/echo generation. The next strongest is **NG eCall / 4G/5G automotive communications validation**, driven by regulation, but the evidence points to CMX500 rather than classic SG/SA. **SerDes/GMSL/ASA SI validation** is promising but less firmly automotive-grounded in the returned evidence.",
+      "model_turns": 4,
+      "tools": [
+       {
+        "call_id": "call_nscMCY2dGj0VsgqR5XMGVpqq",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-8ea4060acad94c5d99e5b59794aea327",
+          "request_id": "request-8ea4060acad94c5d99e5b59794aea327",
+          "span_id": "span-8ea4060acad94c5d99e5b59794aea327",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-8ea4060acad94c5d99e5b59794aea327",
+           "request_id": "request-8ea4060acad94c5d99e5b59794aea327",
+           "span_id": "span-8ea4060acad94c5d99e5b59794aea327",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Based on current vault evidence, what are the strongest opportunities for Signal Generator / Signal Analyzer in Automotive, and what evidence supports each opportunity? Please identify opportunities specifically for Signal Generator / Signal Analyzer in Automotive and cite the Raw evidence supporting each.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- Slide 21 題為 **R&S PCB test solutions**，面向 **PCB Fabricator and System House**，將流程分成 Material Measurement、Material/Stackup selection、Signal Integrity modeling/testing、Sampling testing、PL/Process Monitoring，並列出 impedance (TDR)、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram、Delta-L、ISD/ADK、w/ cable / connector testing 等項目。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 0.873921
+            },
+            {
+             "text": "NG eCall EN 17240 2024 verification › 與既有 NGeCall / hybrid eCall 頁面的關係\n- [[NGeCall over LTE]] 整理 CMW500 與 CMX500 capability lists，本頁只整理 PR 中的 Qualcomm / Snapdragon verification event。\n- [[CMX500 NGeCall configuration]] 整理 configuration guide 的 mandatory / optional items，本頁不取代正式 configuration 或 quote。\n- [[Hybrid eCall testing]] 以 EN 18052:2025 與 hybrid fallback 為核心；本頁聚焦 EN 17240:2024 NG eCall verification，不描述 classic CS fallback 或 EN 18052 test scope。\n- [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 提到 EN 17240:2024+A1:2026 與 cetecom advanced certification testing；本頁來源只提 EN 17240:2024，且未說第三方 certification report。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+             },
+             "score": 1.588172
+            },
+            {
+             "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+             },
+             "score": 2.449444
+            },
+            {
+             "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 6.421744
+            },
+            {
+             "text": "欣銓 › 來源中的說法\n- [[Power IC - Power Management IC]] 在功率半導體封測區塊將 [[欣銓]] 寫為「車用與功率IC測試核心廠」。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/欣銓.md"
+             },
+             "score": 2.8079
+            },
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 0.808818
+            },
+            {
+             "text": "NG eCall EN 17240 2024 verification › 驗證範圍\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 驗證對象：[[Snapdragon Auto 5G Modem-RF]] 的 [[Next Generation eCall]] functionality。\n- 合作方：[[Rohde & Schwarz]] 與 [[Qualcomm Technologies]]。\n- 測試設備：[[R&S CMX500]] mobile radio tester。\n- Software context：來源稱 [[R&S CMX500]] with [[R&S CMX-KA098]] software option can be effectively used for NG eCall testing under realistic network conditions。\n- 標準：[[EN 17240]]:2024。\n- 測試情境：simulating a [[PSAP]]。\n- 驗證內容：NG eCall including voice and data transmission，並 validated the compliance of the implementation at both ends with EN 17240:2024。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+             },
+             "score": 1.219887
+            },
+            {
+             "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n這份來源是 [[R&S AREG800A]] Automotive Radar Echo Generator 的 specifications，文件編號 `PD 3609.8015.22`，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`，文件標題為 `AREG800A Automotive Radar Echo Generator`，Copyright `© 2021–2025 Rohde & Schwarz`。\n\n[[R&S AREG800A]] 的 echo generator type 為 `dynamic artificial object generation`。Echo generation concept 分為：\n\n- `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n- `digital`：針對 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 `air gap value`；maximum generated distance 為 `3000 m`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 在環境溫度下儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格資料定義：\n\n- `Specifications with limits`：代表保證的產品效能，以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 的方式指定與測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：代表保證的產品效能，通常為 dimensions 或 setting parameter resolution 等無偏差或偏差可忽略的值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依據 GUM 計算，納入 environmental conditions、aging、wear and tear。\n- `Data without tolerance limits is not binding`；文件 `subject to change`。\n\n主要能力與限制：",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+             },
+             "score": 2.401593
+            },
+            {
+             "text": "欣銓 › 限制與不可推論事項\n- 來源未標示 Threads 原文發布日期。\n- 來源未提供 [[欣銓]] 的測試項目、車用 / 功率 IC 占比、客戶、營收、產能或市占率。\n- 「核心廠」是來源用語，缺少排名或供應關係證據。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/欣銓.md"
+             },
+             "score": 2.213529
+            },
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 關鍵實體與概念\n- [[Dr. Milton Lien]] — 封面列名的作者 / 講者。\n- [[RSTW]] — 封面單位文字之一，來源未展開完整名稱。\n- [[SerDes]] — 本簡報主題之一，並在 standards / eco-chain / transmission channel 脈絡中出現。\n- [[Signal Integrity]] — Slide 20 以 high speed PCB/PCBA signal integrity flow 呈現，包含 [[IL]]、[[Xtalk]]、[[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]] 與 [[TL Calculator]]。\n- [[Power Integrity]] — 封面題名中的 PI；Slide 11 以 [[Power Distribution Network]] 形式出現，並列 scopes 與 network analyzers。\n- [[High speed SerDes standards]] — Slide 4 的高速介面 / 標準列名。\n- [[High speed SerDes eco-chain]] — Slide 9 的上中下游產業鏈分類。\n- [[R&S PCB test solutions]] — Slide 21 的 PCB fabricator / system house 測試流程與工具 / 方法集合。\n- [[HDI vs Package substrate]] — Slide 17 的 HDI、package substrate、CoWoS、ABF、L/S、pitch 對照線索。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] — 既有概念頁可承接 Slide 20–21 的 PCB / PCBA 測試內容。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 0.705757
+            },
+            {
+             "text": "NG eCall EN 17240 2024 verification › Regulatory transition context\n同一來源提供下列背景，但未列 regulation 文件編號：\n\n- [[eCall]] automated vehicle emergency call system introduced in 2015。\n- eCall 自 2018 年起是 all new cars sold within the European Union 的 mandatory requirement。\n- 來源稱 2G / 3G circuit-switched cellular networks become obsolete，因此 emergency call systems 需要 adapted to 4G / 5G packet-switched cellular networks。\n- 來源稱 [[European Commission]] most recent regulation 定義 NG eCall will be obligatory starting **2026-01-01**。\n- 來源稱 EN 17240:2024 establishes guidelines for testing eCall systems over [[IMS]] networks, including advanced 4G LTE and 5G NR technologies。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+             },
+             "score": 1.129084
+            },
+            {
+             "text": "AREG800A_specs_en_3609-8015-22_v0900 › 讀圖補充\n以下內容來自讀圖補充，可信度低於正文，不用於推翻正文。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+             },
+             "score": 1.79307
+            },
+            {
+             "text": "R&S SGT100A › General data\nPower supply：\n\n| 項目 | 規格 |\n|---|---|\n| AC input voltage range | `100 V to 240 V`, `±10 %` |\n| AC supply frequency | `50 Hz to 60 Hz`, `±5 %` |\n| Maximum input current | `1.7 A` |\n| Power consumption | `65 W (meas.)` |\n| Power factor correction | complies with `EN 61000-3-2` |\n\nCompliance / environmental：\n\n- Electrical safety compliance：`IEC 61010-1`, `EN 61010-1`, `CAN/CSA-C22.2 No. 61010-1-04`, `UL 61010-1`。\n- Test marks：`VDE-GS`, `CSA C US`。\n- EMC：`EN 55011 class A`, `EN 61326-1 (industrial environment)`, `EN 61326-2-1`。\n- Vibration sinusoidal：`5 Hz to 150 Hz`，55 Hz 時 max. `2 g`，55 Hz to 150 Hz 時 const. `0.5 g`，符合 `EN 60068-2-6`。\n- Vibration random：`10 Hz to 300 Hz`，acceleration `1.2 g (RMS)`，符合 `EN 60068-2-64`。\n- Shock：`40 g shock spectrum`，符合 `MIL-STD-810E`, method no. 516.4, procedure I。\n- Operating temperature range：`0 °C to +50 °C`，符合 `EN 60068-2-1`, `EN 60068-2-2`。\n- Storage temperature range：`–40 °C to +71 °C`。\n- Climatic resistance：`+40 °C / 95 % relative humidity`，符合 `EN 60068-2-30`。\n- Altitude：operating up to `4600 m`；storage up to `4600 m`。\n\nDimensions / weight：\n\n| 條件 | Dimensions | Weight |\n|---|---|---|\n| without `R&S®SGT-B88` option | `246 mm × 52.5 mm × 401 mm (9.69 in × 2.07 in × 15.79 in)`, `1 HU`, `½ 19 inch rack width` | fully equipped `4.0 kg (8.82 lb)` |\n| with `R&S®SGT-B88` option | `246 mm × 98 mm × 401 mm (9.69 in × 3.86 in × 15.79 in)`, `2 HU`, `½ 19 inch rack width` | `4.6 kg (10.14 lb)` |\n\nCalibration interval：recommended calibration interval `3 years`，條件 `40 h/week operation in the full range of the specified environmental conditions`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SGT100A.md"
+             },
+             "score": 2.490012
+            },
+            {
+             "text": "欣銓\n[[欣銓]] 是 [[Power IC - Power Management IC]]（原文未標示日期；raw converted 2026-09-16）列於 [[功率半導體封測]] 分類的公司名稱。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/欣銓.md"
+             },
+             "score": 0.154007
+            },
+            {
+             "text": "NTN signal generator solutions › 與 NTN validation / conformance 的關係\n- [[5G NTN validation and testing]]：較寬的 NTN validation、partner collaboration、CMX500 / SMBV100B / Viasat / Gatehouse / MediaTek PR 語境。\n- [[NR-NTN conformance testing]]：偏 UE / GCF / PTCRB / TS8980 / CMX500 conformance validation。\n- [[5G NR SAN conformance testing]]：本來源新增的 Satellite Access Node 測試概念，聚焦 SAN transmitter、receiver、performance 與 OTA chapters。\n- [[NTN propagation emulation and fading]]：既有 CMX500 PR 中 propagation emulation 與 fading 的概念；本來源補充 SMW200A dynamic fading / Doppler / path delay 實作線索。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+             },
+             "score": 1.781076
+            },
+            {
+             "text": "Juergen Meyer › 來源中的列名\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 人名：Juergen Meyer。\n- 組織：[[Rohde & Schwarz]]。\n- 職稱：Vice President Market Segment Automotive at Rohde & Schwarz。\n- 引言主旨：他表示 [[Rohde & Schwarz]] 很高興與 [[Qualcomm Technologies]] 合作驗證其 chipsets 的 NG eCall implementation，並稱此 collaboration 為 future emergency call services 設定 new benchmark，為 automotive industry 提供 robust and dependable solution 以 meet latest eCall standards。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Juergen Meyer.md"
+             },
+             "score": 1.64862
+            },
+            {
+             "text": "R&S SMW200A › Remote control、connectors 與一般資料\n- Remote control interfaces：IEC 60625 GPIB IEEE-488.2、Ethernet/LAN 10/100/1000BASE-T、USB 3.0 super speed、serial RS-232 via `R&S®TS-USB1`。\n- Remote command set：`SCPI 1999.5 or compatible command sets`。\n- Ethernet/LAN protocols and services：VISA VXI-11、Telnet/RawEthernet、VNC、FTP、SMB。\n- Front panel RF 50 Ω path A connector：3/6/7.5 GHz options 為 N female；12.75/20/31.8/40 GHz options 為 test port adapter PC 2.92 mm female；44 GHz options 為 PC 1.85 mm male with adapter；56/67 GHz options 為 1.85 mm female with wear and tear adapter。\n- Front panel RF 50 Ω path B connector：3/6/7.5 GHz options 為 N female；12.75/20/31.8 GHz options 為 test port adapter PC 2.92 mm female；44 GHz options 為 PC 1.85 mm male with adapter。\n- Rear panel 包含 REF IN/OUT、INST TRG A/B、USER 4/5/6、EFC、LO IN/OUT、IEEE 488、LAN、USB DEVICE、EXT 1/2、DIG I/Q OUT、HS DIG I/Q OUT 等。\n- Rated power when fully equipped：`550 W measured`；with `R&S®SMW-B94L` fully equipped：`750 W measured`。\n- Operating temperature range：`0 °C to +45 °C`；with `R&S®SMW-B1056`、`R&S®SMW-B1067`、`R&S®SMW-B1067N`、`R&S®SMW-B1067O` 為 `+5 °C to +45 °C`。\n- Dimensions：standard `435 mm × 192 mm × 460 mm`；with `R&S®SMW-B94L` 為 `435 mm × 192 mm × 560 mm`。\n- Weight：fully equipped `21 kg`；with `R&S®SMW-B94L` fully equipped `30 kg`。\n- Non-volatile memory：SSD，`512 Gbyte`。\n- Recommended calibration interval：`3 years`，條件 `40 h/week operation in the full range of the specified environmental conditions`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 22,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SMW200A.md"
+             },
+             "score": 3.153957
+            },
+            {
+             "text": "R&S PCB test solutions › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 既有內容來自 Keysight 圖像，流程是原材料表徵、材料選擇、電路板抽樣測試、大批量監控；本頁保存 R&S 簡報中的類似但不完全相同的流程詞。\n- [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 均已有既有頁面；本來源增加 2026.3.4 R&S 簡報的追溯來源，但沒有新增可量化規格。\n- [[SerDes 與 SI PI 測試概覽]] 連接 Slide 11 和 Slide 20 的 validation challenges / SI flow；本頁聚焦 Slide 21 的 PCB test solutions。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 3.741485
+            },
+            {
+             "text": "NTN signal generator solutions › End-to-end system testing\n來源將 E2E system testing 描述為對 UE、NTN payload、service link channel emulator 與 feeder link channel emulator 的 RF satellite link emulation。[[R&S SMW200A]] 需要 firmware version ≥ 5.30，並透過 B14 或 B15 搭配 [[R&S SMW-K820]] customized dynamic fading 支援：\n\n- satellite trajectory modelling。\n- frequency-dependent atmospheric effects。\n- longer path delays。\n- enhanced Doppler capabilities。\n- up to 1073 ms delay。\n- up to ±1 MHz Doppler（pure Doppler）。\n\n[[R&S Space Nexus]] 在來源中被描述為 PC Software，available on request，可依 satellite trajectory 產生 [[R&S SMW200A]] fading files。\n\n詳見 [[SMW200A NTN end-to-end channel emulation]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+             },
+             "score": 1.702677
+            },
+            {
+             "text": "Juergen Meyer\n[[Juergen Meyer]] 是 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]] 中列名的 [[Rohde & Schwarz]] Vice President Market Segment Automotive。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Juergen Meyer.md"
+             },
+             "score": 1.539625
+            },
+            {
+             "text": "R&S AREG800A › 相關來源\n- [[AREG800A_specs_en_3609-8015-22_v0900]] — R&S AREG800A Automotive Radar Echo Generator Specifications，Version 09.00，September 2025。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 50,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 5.811304
+            },
+            {
+             "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 3.606005
+            },
+            {
+             "text": "NTN signal generator solutions › SAN testing\n來源將 SAN testing 連到 [[3GPP TS 38.108]]、[[3GPP TS 38.181]]、[[3GPP TS 36.108]] 與 [[3GPP TS 36.181]]。在 signal generator 角度，[[R&S SMW200A]] 提供：\n\n- Fixed Reference Channels（FRCs）。\n- Test Models（TMs）。\n- Fading Module。\n- AWGN Module。\n- static UE propagation models。\n- TDL and moving propagation。\n- SISO / MIMO。\n- NB-IoT options：K119 / K115 / K143 / K146。\n- NR options：K144 / K148 / K171。\n- B14 / B15 + K71 moving propagation。\n\n詳見 [[5G NR SAN conformance testing]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+             },
+             "score": 1.546401
+            },
+            {
+             "text": "Juergen Meyer › 使用限制\n- 本頁只記錄來源中的 person / role / quote context。\n- 來源未提供 [[Juergen Meyer]] 的部門全名、任期、所在地、email、其他職務或是否仍在任。\n- 來源中的 chipset 字樣指向 [[Qualcomm Technologies]] 的 NG eCall implementation context；不可由此推論具體 chipset list。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Juergen Meyer.md"
+             },
+             "score": 0.516484
+            },
+            {
+             "text": ".\\vault-cli.ps1 convert          see what would be converted\n  .\\vault-cli.ps1 convert -Apply   write them into raw/ as markdown",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ea90fce69e235bab",
+               "original_ref": "raw/drop/README.md",
+               "sha256": "ea90fce69e235bab585cdb428ef3f0ff2df3b8fe757839583a4489ff5446b72d",
+               "raw_ref": "raw/drop/README.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/drop/README.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.903642
+            },
+            {
+             "text": "The CMP200 provides vector signal analysis and ARB based generator functionality in the IF frequency range.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-1b031c0e1fd39629",
+               "original_ref": "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md",
+               "sha256": "1b031c0e1fd3962967fc0dc72b733e4c42d62199ffa61fb9033cd8f2c8012e6f",
+               "raw_ref": "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md",
+              "section": 24,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.558545
+            },
+            {
+             "text": "3.  What is the anticipated timeline for deploying your NTN services, and what are the",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3b343d1990f39b17",
+               "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.708398
+            },
+            {
+             "text": "► R&S®FPS\nFor further information on R&S signal and spectrum analyzers, please see:\nhttps://www.rohde-schwarz.com/signal-spectrum-analyzers\nThe following test equipment and abbreviations are used in this application note:\n► The R&S®SMW200A vector signal generator is referred to as the SMW",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.012722
+            }
+           ],
+           "text": "### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| **CMP200** | IF frequency range 的 vector signal analysis 與 ARB-based signal generation | 知識庫只確認：vector signal analysis、ARB based generator functionality、IF frequency range | 最接近「Signal Generator / Signal Analyzer」雙角色，且可作為 automotive radar IF 候選切入 | CMP200 provides vector signal analysis and ARB based generator functionality in the IF frequency range [26] | Raw 未說 automotive、未說 radar、未列 option code、頻率範圍數值或量測規格 |\n| **SMW200A + FPS / signal & spectrum analyzers** | 通用 RF vector signal generation 與 signal / spectrum analysis | Raw 只確認 SMW200A vector signal generator；FPS / signal and spectrum analyzers 被列為相關設備 | 可作為 automotive RF validation 的候選平台，但目前只是 generic RF T&M evidence | R&S FPS / signal and spectrum analyzers are referenced, and R&S SMW200A vector signal generator is used as test equipment [28] | Raw 未說 automotive；未說具體 automotive application、option、規格、標準或測試項目 |\n| **AREG800A** | Automotive radar echo generation | dynamic artificial object generation；hybrid / digital echo generation；maximum generated distance 3000 m | 是 vault 中 automotive radar 證據最強的產品，但不是 RF signal generator 或 spectrum analyzer | AREG800A is an Automotive Radar Echo Generator with dynamic artificial object generation and echo generation up to 3000 m [8] | Wiki 明確指出 AREG800A 用途為 automotive radar echo generation，**不屬 RF signal generator 或 spectrum analyzer** [3] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Automotive radar validation / IF debug | AREG800A + CMP200 候選 | AREG800A 覆蓋 automotive radar echo generation；CMP200 覆蓋 IF vector signal analysis 與 ARB generation | 目前沒有 Raw 直接證明 CMP200 用於 automotive radar；需補 application note、solution brief 或 customer case [8][26] |\n| Automotive RF validation | SMW200A + FPS 候選 | SMW200A 作 vector signal generator；FPS / signal & spectrum analyzers 作 analysis side | 目前 Raw 只有 generic RF equipment evidence，未連到 automotive use case [28] |\n| Automotive high-speed digital / SerDes validation | Signal generator / spectrum analyzer 作為候選儀器角色 | Wiki 顯示 SerDes / SI 驗證會涉及 signal generators、spectrum analyzers 等儀器 | 目前缺 Raw evidence；不能作為 Raw-supported automotive opportunity [6] |\n### 限制\n目前可被 Raw 直接支持的只有 **CMP200 的 IF VSA + ARB generator 能力** [26]，以及 **SMW200A / FPS 類 RF generator-analyzer 設備存在於測試設備語境** [28]；Raw passages 沒有直接說明這些產品在 Automotive 的商機、客戶、標準、測試項目或 revenue opportunity。",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+            },
+            "score": 2.449444
+           },
+           {
+            "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 1,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+            },
+            "score": 0.808818
+           },
+           {
+            "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n這份來源是 [[R&S AREG800A]] Automotive Radar Echo Generator 的 specifications，文件編號 `PD 3609.8015.22`，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`，文件標題為 `AREG800A Automotive Radar Echo Generator`，Copyright `© 2021–2025 Rohde & Schwarz`。\n\n[[R&S AREG800A]] 的 echo generator type 為 `dynamic artificial object generation`。Echo generation concept 分為：\n\n- `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n- `digital`：針對 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 `air gap value`；maximum generated distance 為 `3000 m`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 在環境溫度下儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格資料定義：\n\n- `Specifications with limits`：代表保證的產品效能，以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 的方式指定與測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：代表保證的產品效能，通常為 dimensions 或 setting parameter resolution 等無偏差或偏差可忽略的值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依據 GUM 計算，納入 environmental conditions、aging、wear and tear。\n- `Data without tolerance limits is not binding`；文件 `subject to change`。\n\n主要能力與限制：",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 1,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+            },
+            "score": 2.401593
+           },
+           {
+            "text": "The CMP200 provides vector signal analysis and ARB based generator functionality in the IF frequency range.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-1b031c0e1fd39629",
+              "original_ref": "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md",
+              "sha256": "1b031c0e1fd3962967fc0dc72b733e4c42d62199ffa61fb9033cd8f2c8012e6f",
+              "raw_ref": "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md",
+             "section": 24,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 25.558545
+           },
+           {
+            "text": "► R&S®FPS\nFor further information on R&S signal and spectrum analyzers, please see:\nhttps://www.rohde-schwarz.com/signal-spectrum-analyzers\nThe following test equipment and abbreviations are used in this application note:\n► The R&S®SMW200A vector signal generator is referred to as the SMW",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0acf440ab126eca3",
+              "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+             "section": 16,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 24.012722
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [],
+           "missing_facets": [],
+           "relation_required": false,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": [
+           {
+            "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+            "raw_refs": [
+             "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+            "raw_refs": [
+             "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+            ]
+           }
+          ]
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_q8hFCbXSZOwcJ072BI6oQ6Do",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-8ea4060acad94c5d99e5b59794aea327",
+          "request_id": "request-8ea4060acad94c5d99e5b59794aea327",
+          "span_id": "span-8ea4060acad94c5d99e5b59794aea327",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-8ea4060acad94c5d99e5b59794aea327",
+           "request_id": "request-8ea4060acad94c5d99e5b59794aea327",
+           "span_id": "span-8ea4060acad94c5d99e5b59794aea327",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Raw evidence only: In the RS_Knowledge corpus, what evidence supports opportunities for Rohde & Schwarz Signal Generators and Signal/Spectrum Analyzers in Automotive? Focus on automotive use cases such as radar, eCall/cellular/V2X, UWB/digital key, EMC, SerDes/ASA/GMSL if present. Return opportunity, instrument/product, market/application evidence, and raw citations.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Juergen Meyer › 來源中的列名\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 人名：Juergen Meyer。\n- 組織：[[Rohde & Schwarz]]。\n- 職稱：Vice President Market Segment Automotive at Rohde & Schwarz。\n- 引言主旨：他表示 [[Rohde & Schwarz]] 很高興與 [[Qualcomm Technologies]] 合作驗證其 chipsets 的 NG eCall implementation，並稱此 collaboration 為 future emergency call services 設定 new benchmark，為 automotive industry 提供 robust and dependable solution 以 meet latest eCall standards。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Juergen Meyer.md"
+             },
+             "score": 4.124265
+            },
+            {
+             "text": "NG eCall EN 17240 2024 verification › 與既有 NGeCall / hybrid eCall 頁面的關係\n- [[NGeCall over LTE]] 整理 CMW500 與 CMX500 capability lists，本頁只整理 PR 中的 Qualcomm / Snapdragon verification event。\n- [[CMX500 NGeCall configuration]] 整理 configuration guide 的 mandatory / optional items，本頁不取代正式 configuration 或 quote。\n- [[Hybrid eCall testing]] 以 EN 18052:2025 與 hybrid fallback 為核心；本頁聚焦 EN 17240:2024 NG eCall verification，不描述 classic CS fallback 或 EN 18052 test scope。\n- [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 提到 EN 17240:2024+A1:2026 與 cetecom advanced certification testing；本頁來源只提 EN 17240:2024，且未說第三方 certification report。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+             },
+             "score": 1.588172
+            },
+            {
+             "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+             },
+             "score": 2.449444
+            },
+            {
+             "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 6.421744
+            },
+            {
+             "text": "欣銓 › 來源中的說法\n- [[Power IC - Power Management IC]] 在功率半導體封測區塊將 [[欣銓]] 寫為「車用與功率IC測試核心廠」。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/欣銓.md"
+             },
+             "score": 2.8079
+            },
+            {
+             "text": "Juergen Meyer\n[[Juergen Meyer]] 是 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]] 中列名的 [[Rohde & Schwarz]] Vice President Market Segment Automotive。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Juergen Meyer.md"
+             },
+             "score": 2.02218
+            },
+            {
+             "text": "朋程 › 來源中的說法\n- [[Power IC - Power Management IC image 1]]（來源未標示日期；取得於 2026-09-04）將 [[朋程]] 列於產業分類「整流/車用二極體」。\n- [[Power IC - Power Management IC image 1]]（來源未標示日期；取得於 2026-09-04）在核心能力欄寫「車用整流二極體全球第一」。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/朋程.md"
+             },
+             "score": 3.44403
+            },
+            {
+             "text": "NG eCall EN 17240 2024 verification › 驗證範圍\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 驗證對象：[[Snapdragon Auto 5G Modem-RF]] 的 [[Next Generation eCall]] functionality。\n- 合作方：[[Rohde & Schwarz]] 與 [[Qualcomm Technologies]]。\n- 測試設備：[[R&S CMX500]] mobile radio tester。\n- Software context：來源稱 [[R&S CMX500]] with [[R&S CMX-KA098]] software option can be effectively used for NG eCall testing under realistic network conditions。\n- 標準：[[EN 17240]]:2024。\n- 測試情境：simulating a [[PSAP]]。\n- 驗證內容：NG eCall including voice and data transmission，並 validated the compliance of the implementation at both ends with EN 17240:2024。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+             },
+             "score": 1.219887
+            },
+            {
+             "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n這份來源是 [[R&S AREG800A]] Automotive Radar Echo Generator 的 specifications，文件編號 `PD 3609.8015.22`，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`，文件標題為 `AREG800A Automotive Radar Echo Generator`，Copyright `© 2021–2025 Rohde & Schwarz`。\n\n[[R&S AREG800A]] 的 echo generator type 為 `dynamic artificial object generation`。Echo generation concept 分為：\n\n- `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n- `digital`：針對 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 `air gap value`；maximum generated distance 為 `3000 m`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 在環境溫度下儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格資料定義：\n\n- `Specifications with limits`：代表保證的產品效能，以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 的方式指定與測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：代表保證的產品效能，通常為 dimensions 或 setting parameter resolution 等無偏差或偏差可忽略的值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依據 GUM 計算，納入 environmental conditions、aging、wear and tear。\n- `Data without tolerance limits is not binding`；文件 `subject to change`。\n\n主要能力與限制：",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+             },
+             "score": 2.401593
+            },
+            {
+             "text": "欣銓 › 限制與不可推論事項\n- 來源未標示 Threads 原文發布日期。\n- 來源未提供 [[欣銓]] 的測試項目、車用 / 功率 IC 占比、客戶、營收、產能或市占率。\n- 「核心廠」是來源用語，缺少排名或供應關係證據。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/欣銓.md"
+             },
+             "score": 2.213529
+            },
+            {
+             "text": "朋程 › 限制與不可推論事項\n- 「全球第一」是圖上用語；來源未提供排名口徑、市占率、年度、產品範圍或資料來源拆分。\n- 來源未標示日期，因此不能把上述列名寫成特定時間點的市場現況。\n- 來源是概念股整理表，不構成投資建議或供應鏈驗證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/朋程.md"
+             },
+             "score": 0.401528
+            },
+            {
+             "text": "Juergen Meyer › 使用限制\n- 本頁只記錄來源中的 person / role / quote context。\n- 來源未提供 [[Juergen Meyer]] 的部門全名、任期、所在地、email、其他職務或是否仍在任。\n- 來源中的 chipset 字樣指向 [[Qualcomm Technologies]] 的 NG eCall implementation context；不可由此推論具體 chipset list。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Juergen Meyer.md"
+             },
+             "score": 0.114271
+            },
+            {
+             "text": "NG eCall EN 17240 2024 verification › Regulatory transition context\n同一來源提供下列背景，但未列 regulation 文件編號：\n\n- [[eCall]] automated vehicle emergency call system introduced in 2015。\n- eCall 自 2018 年起是 all new cars sold within the European Union 的 mandatory requirement。\n- 來源稱 2G / 3G circuit-switched cellular networks become obsolete，因此 emergency call systems 需要 adapted to 4G / 5G packet-switched cellular networks。\n- 來源稱 [[European Commission]] most recent regulation 定義 NG eCall will be obligatory starting **2026-01-01**。\n- 來源稱 EN 17240:2024 establishes guidelines for testing eCall systems over [[IMS]] networks, including advanced 4G LTE and 5G NR technologies。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+             },
+             "score": 1.129084
+            },
+            {
+             "text": "AREG800A_specs_en_3609-8015-22_v0900 › 讀圖補充\n以下內容來自讀圖補充，可信度低於正文，不用於推翻正文。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+             },
+             "score": 1.79307
+            },
+            {
+             "text": "R&S SGT100A › General data\nPower supply：\n\n| 項目 | 規格 |\n|---|---|\n| AC input voltage range | `100 V to 240 V`, `±10 %` |\n| AC supply frequency | `50 Hz to 60 Hz`, `±5 %` |\n| Maximum input current | `1.7 A` |\n| Power consumption | `65 W (meas.)` |\n| Power factor correction | complies with `EN 61000-3-2` |\n\nCompliance / environmental：\n\n- Electrical safety compliance：`IEC 61010-1`, `EN 61010-1`, `CAN/CSA-C22.2 No. 61010-1-04`, `UL 61010-1`。\n- Test marks：`VDE-GS`, `CSA C US`。\n- EMC：`EN 55011 class A`, `EN 61326-1 (industrial environment)`, `EN 61326-2-1`。\n- Vibration sinusoidal：`5 Hz to 150 Hz`，55 Hz 時 max. `2 g`，55 Hz to 150 Hz 時 const. `0.5 g`，符合 `EN 60068-2-6`。\n- Vibration random：`10 Hz to 300 Hz`，acceleration `1.2 g (RMS)`，符合 `EN 60068-2-64`。\n- Shock：`40 g shock spectrum`，符合 `MIL-STD-810E`, method no. 516.4, procedure I。\n- Operating temperature range：`0 °C to +50 °C`，符合 `EN 60068-2-1`, `EN 60068-2-2`。\n- Storage temperature range：`–40 °C to +71 °C`。\n- Climatic resistance：`+40 °C / 95 % relative humidity`，符合 `EN 60068-2-30`。\n- Altitude：operating up to `4600 m`；storage up to `4600 m`。\n\nDimensions / weight：\n\n| 條件 | Dimensions | Weight |\n|---|---|---|\n| without `R&S®SGT-B88` option | `246 mm × 52.5 mm × 401 mm (9.69 in × 2.07 in × 15.79 in)`, `1 HU`, `½ 19 inch rack width` | fully equipped `4.0 kg (8.82 lb)` |\n| with `R&S®SGT-B88` option | `246 mm × 98 mm × 401 mm (9.69 in × 3.86 in × 15.79 in)`, `2 HU`, `½ 19 inch rack width` | `4.6 kg (10.14 lb)` |\n\nCalibration interval：recommended calibration interval `3 years`，條件 `40 h/week operation in the full range of the specified environmental conditions`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SGT100A.md"
+             },
+             "score": 2.490012
+            },
+            {
+             "text": "欣銓\n[[欣銓]] 是 [[Power IC - Power Management IC]]（原文未標示日期；raw converted 2026-09-16）列於 [[功率半導體封測]] 分類的公司名稱。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/欣銓.md"
+             },
+             "score": 0.154007
+            },
+            {
+             "text": "艾姆勒\n[[艾姆勒]] 是 [[Power IC - Power Management IC image 3]]（來源未標示日期；取得於 2026-09-04）列於「下游：模組、散熱與終端系統應用」中「車用/功率散熱模組機構件」分類的公司名稱，圖上代號為 2241。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/艾姆勒.md"
+             },
+             "score": 0.493055
+            },
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 8.988884
+            },
+            {
+             "text": "R&S SMW200A › Remote control、connectors 與一般資料\n- Remote control interfaces：IEC 60625 GPIB IEEE-488.2、Ethernet/LAN 10/100/1000BASE-T、USB 3.0 super speed、serial RS-232 via `R&S®TS-USB1`。\n- Remote command set：`SCPI 1999.5 or compatible command sets`。\n- Ethernet/LAN protocols and services：VISA VXI-11、Telnet/RawEthernet、VNC、FTP、SMB。\n- Front panel RF 50 Ω path A connector：3/6/7.5 GHz options 為 N female；12.75/20/31.8/40 GHz options 為 test port adapter PC 2.92 mm female；44 GHz options 為 PC 1.85 mm male with adapter；56/67 GHz options 為 1.85 mm female with wear and tear adapter。\n- Front panel RF 50 Ω path B connector：3/6/7.5 GHz options 為 N female；12.75/20/31.8 GHz options 為 test port adapter PC 2.92 mm female；44 GHz options 為 PC 1.85 mm male with adapter。\n- Rear panel 包含 REF IN/OUT、INST TRG A/B、USER 4/5/6、EFC、LO IN/OUT、IEEE 488、LAN、USB DEVICE、EXT 1/2、DIG I/Q OUT、HS DIG I/Q OUT 等。\n- Rated power when fully equipped：`550 W measured`；with `R&S®SMW-B94L` fully equipped：`750 W measured`。\n- Operating temperature range：`0 °C to +45 °C`；with `R&S®SMW-B1056`、`R&S®SMW-B1067`、`R&S®SMW-B1067N`、`R&S®SMW-B1067O` 為 `+5 °C to +45 °C`。\n- Dimensions：standard `435 mm × 192 mm × 460 mm`；with `R&S®SMW-B94L` 為 `435 mm × 192 mm × 560 mm`。\n- Weight：fully equipped `21 kg`；with `R&S®SMW-B94L` fully equipped `30 kg`。\n- Non-volatile memory：SSD，`512 Gbyte`。\n- Recommended calibration interval：`3 years`，條件 `40 h/week operation in the full range of the specified environmental conditions`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 22,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SMW200A.md"
+             },
+             "score": 3.153957
+            },
+            {
+             "text": "R&S PCB test solutions › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 既有內容來自 Keysight 圖像，流程是原材料表徵、材料選擇、電路板抽樣測試、大批量監控；本頁保存 R&S 簡報中的類似但不完全相同的流程詞。\n- [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 均已有既有頁面；本來源增加 2026.3.4 R&S 簡報的追溯來源，但沒有新增可量化規格。\n- [[SerDes 與 SI PI 測試概覽]] 連接 Slide 11 和 Slide 20 的 validation challenges / SI flow；本頁聚焦 Slide 21 的 PCB test solutions。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 3.741485
+            },
+            {
+             "text": "艾姆勒 › 來源中的說法\n- [[Power IC - Power Management IC image 3]]（來源未標示日期；取得於 2026-09-04）將 [[艾姆勒]]（2241）列於「下游：模組、散熱與終端系統應用」大分類。\n- 同一來源將 [[艾姆勒]] 放在「車用/功率散熱模組機構件」子分類。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/艾姆勒.md"
+             },
+             "score": 0.467793
+            },
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 關鍵實體與概念\n- [[Dr. Milton Lien]] — 封面列名的作者 / 講者。\n- [[RSTW]] — 封面單位文字之一，來源未展開完整名稱。\n- [[SerDes]] — 本簡報主題之一，並在 standards / eco-chain / transmission channel 脈絡中出現。\n- [[Signal Integrity]] — Slide 20 以 high speed PCB/PCBA signal integrity flow 呈現，包含 [[IL]]、[[Xtalk]]、[[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]] 與 [[TL Calculator]]。\n- [[Power Integrity]] — 封面題名中的 PI；Slide 11 以 [[Power Distribution Network]] 形式出現，並列 scopes 與 network analyzers。\n- [[High speed SerDes standards]] — Slide 4 的高速介面 / 標準列名。\n- [[High speed SerDes eco-chain]] — Slide 9 的上中下游產業鏈分類。\n- [[R&S PCB test solutions]] — Slide 21 的 PCB fabricator / system house 測試流程與工具 / 方法集合。\n- [[HDI vs Package substrate]] — Slide 17 的 HDI、package substrate、CoWoS、ABF、L/S、pitch 對照線索。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] — 既有概念頁可承接 Slide 20–21 的 PCB / PCBA 測試內容。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 1.797467
+            },
+            {
+             "text": "R&S AREG800A › 相關來源\n- [[AREG800A_specs_en_3609-8015-22_v0900]] — R&S AREG800A Automotive Radar Echo Generator Specifications，Version 09.00，September 2025。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 50,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 5.811304
+            },
+            {
+             "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 3.606005
+            },
+            {
+             "text": "As a global provider of innovative test and measurement instruments, software and systems, Rohde & Schwarz employs its technical expertise to advance the automotive industry’s vision of autonomous driving, electrification, and connectivity. OEMs, chip suppliers, tier1s and engineering service providers, as well as certification organizations around the world rely on the test solutions for radar, connectivity including antennas, infotainment, in-vehicle networks, electric drivetrain components and electromagnetic compatibility. Rohde & Schwarz supports its customers over the entire automotive lifecycle from R&D to production and beyond.[![](https://assets.rohde-schwarz.com/public/image/market-segment/automotive/connectivity/emergency-call-connectivity_200_58356_320_180_1.jpg)](https://www.rohde-schwarz.com/us/solutions/automotive-testing/automotive-connectivity-and-infotainment/automotive-ecall-testing/overview_231772.html)",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-556d5f1923b99787",
+               "original_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "sha256": "556d5f1923b99787ad6794ec94387463e3c789f2815521e0d1981f230e52be6e",
+               "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "section": 15,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 39.262346
+            },
+            {
+             "text": "► R&S®FPS\nFor further information on R&S signal and spectrum analyzers, please see:\nhttps://www.rohde-schwarz.com/signal-spectrum-analyzers\nThe following test equipment and abbreviations are used in this application note:\n► The R&S®SMW200A vector signal generator is referred to as the SMW",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 38.090325
+            },
+            {
+             "text": "As test instrument, the CMP200 is used. It supports UWB measurements and UWB\nsignal generation via waveform files. The test software on the computer controls the\nCMP200.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-b66968c9ee14341c",
+               "original_ref": "raw/Productions/CMP200_Features_V8-14-22_en_09.md",
+               "sha256": "b66968c9ee14341c4701d4151937dde5207195ae6066d8e14d916c0ebe8e15ad",
+               "raw_ref": "raw/Productions/CMP200_Features_V8-14-22_en_09.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMP200_Features_V8-14-22_en_09.md",
+              "section": 563,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.597301
+            },
+            {
+             "text": "only available if LTE and cellular IoT options are\ninstalled in the instrument",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0db424c28307e318",
+               "original_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+               "sha256": "0db424c28307e318ae3cd27fbc64ca3a128e17325f5d09e27d9fb4911e1695dc",
+               "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+              "section": 1219,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.344262
+            }
+           ],
+           "text": "### Raw-evidence opportunity map\n| Opportunity | Instrument / product | Market / application evidence | Product / option / spec evidence | Raw citations |\n|---|---|---|---|---|\n| Automotive radar test opportunity | Signal generators and signal/spectrum analyzers are not directly tied to radar in the raw passages. | R&S says automotive customers rely on test solutions for radar across OEMs, chip suppliers, tier1s, engineering service providers, and certification organizations. | The raw evidence names R&S®SMW200A as a vector signal generator and R&S®FPS in the context of R&S signal and spectrum analyzers, but does not directly connect either product to automotive radar. | [25], [26] |\n| Automotive connectivity, antennas, infotainment, and in-vehicle networks | Signal generators and signal/spectrum analyzers are not directly tied to these automotive connectivity use cases in the raw passages. | R&S says automotive customers rely on test solutions for connectivity including antennas, infotainment, and in-vehicle networks. | The raw evidence names R&S®SMW200A as a vector signal generator and points to R&S signal and spectrum analyzers including R&S®FPS, but the passage does not state the automotive application for that equipment. | [25], [26] |\n| eCall / emergency-call connectivity | No directly supported signal-generator or analyzer product mapping is present. | The raw passage includes an automotive eCall testing overview link in the automotive connectivity context. | The raw evidence does not identify a signal generator, signal/spectrum analyzer, or option for eCall testing. | [25] |\n| Cellular / LTE / cellular IoT opportunity | Unspecified instrument with LTE and cellular IoT options. | R&S says automotive connectivity is a supported automotive test-solution area. | The raw passage states functionality is only available if LTE and cellular IoT options are installed in the instrument, but it does not name the instrument or automotive use case. | [25], [28] |\n| UWB opportunity, potentially adjacent to digital-key testing | CMP200. | No raw passage directly connects UWB or CMP200 to automotive or digital key. | CMP200 is used as a test instrument and supports UWB measurements and UWB signal generation via waveform files. | [27] |\n| EMC opportunity | No signal-generator or signal/spectrum-analyzer product is directly mapped to EMC in the raw passages. | R&S says automotive customers rely on test solutions for electromagnetic compatibility. | The raw passages do not provide an EMC-specific signal generator, analyzer, option, or specification. | [25] |\n### Supported inference lines\n【推論】Automotive radar, connectivity, in-vehicle networks, and EMC are opportunity areas for R&S automotive test solutions, while R&S®SMW200A and R&S®FPS are candidate signal-generation and signal/spectrum-analysis product families only by separate co-mention, not by a direct raw product-to-application mapping. [25], [26]\n【推論】UWB is a possible automotive-adjacent opportunity for CMP200 because CMP200 supports UWB measurements and UWB signal generation, but the raw evidence does not establish automotive digital-key use. [27]\n【推論】Cellular automotive connectivity may require LTE and cellular IoT options on an instrument, but the raw evidence does not identify the instrument or tie those options directly to eCall, V2X, or automotive testing. [25], [28]",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "As a global provider of innovative test and measurement instruments, software and systems, Rohde & Schwarz employs its technical expertise to advance the automotive industry’s vision of autonomous driving, electrification, and connectivity. OEMs, chip suppliers, tier1s and engineering service providers, as well as certification organizations around the world rely on the test solutions for radar, connectivity including antennas, infotainment, in-vehicle networks, electric drivetrain components and electromagnetic compatibility. Rohde & Schwarz supports its customers over the entire automotive lifecycle from R&D to production and beyond.[![](https://assets.rohde-schwarz.com/public/image/market-segment/automotive/connectivity/emergency-call-connectivity_200_58356_320_180_1.jpg)](https://www.rohde-schwarz.com/us/solutions/automotive-testing/automotive-connectivity-and-infotainment/automotive-ecall-testing/overview_231772.html)",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-556d5f1923b99787",
+              "original_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "sha256": "556d5f1923b99787ad6794ec94387463e3c789f2815521e0d1981f230e52be6e",
+              "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+             "section": 15,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 39.262346
+           },
+           {
+            "text": "► R&S®FPS\nFor further information on R&S signal and spectrum analyzers, please see:\nhttps://www.rohde-schwarz.com/signal-spectrum-analyzers\nThe following test equipment and abbreviations are used in this application note:\n► The R&S®SMW200A vector signal generator is referred to as the SMW",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0acf440ab126eca3",
+              "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+             "section": 16,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 38.090325
+           },
+           {
+            "text": "As test instrument, the CMP200 is used. It supports UWB measurements and UWB\nsignal generation via waveform files. The test software on the computer controls the\nCMP200.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-b66968c9ee14341c",
+              "original_ref": "raw/Productions/CMP200_Features_V8-14-22_en_09.md",
+              "sha256": "b66968c9ee14341c4701d4151937dde5207195ae6066d8e14d916c0ebe8e15ad",
+              "raw_ref": "raw/Productions/CMP200_Features_V8-14-22_en_09.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/CMP200_Features_V8-14-22_en_09.md",
+             "section": 563,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 37.597301
+           },
+           {
+            "text": "only available if LTE and cellular IoT options are\ninstalled in the instrument",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0db424c28307e318",
+              "original_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+              "sha256": "0db424c28307e318ae3cd27fbc64ca3a128e17325f5d09e27d9fb4911e1695dc",
+              "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PVT360A_Features_V8-5-30_en_06.md",
+             "section": 1219,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 35.344262
+           }
+          ],
+          "assessment": {
+           "status": "missing",
+           "facets": [
+            {
+             "name": "market_segment",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Juergen Meyer.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/欣銓.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Juergen Meyer.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/朋程.md"
+              }
+             ],
+             "attempts": 1
+            },
+            {
+             "name": "product_option_spec",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              }
+             ],
+             "attempts": 1
+            }
+           ],
+           "missing_facets": [],
+           "relation_required": true,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_yIBUD7WcxM53oXWWyv3qMo5A",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-8ea4060acad94c5d99e5b59794aea327",
+          "request_id": "request-8ea4060acad94c5d99e5b59794aea327",
+          "span_id": "span-8ea4060acad94c5d99e5b59794aea327",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_insufficient_evidence",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

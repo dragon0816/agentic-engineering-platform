@@ -1,0 +1,1327 @@
+{
+ "question": {
+  "id": "Q0601",
+  "text": "What are the most important signaling test capabilities for applications in AI?",
+  "market": "AI",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "basic",
+  "difficulty": "L1"
+ },
+ "session_id": "conversation-c2410dacdb27419abdeafed0f1230a01",
+ "exchange": {
+  "sent": "What are the most important signaling test capabilities for applications in AI?",
+  "http_status": 200,
+  "seconds": 164.609,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-c2410dacdb27419abdeafed0f1230a01",
+    "actor": "leo.chi",
+    "title": "What are the most important signaling test capabilities for applications…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T13:16:59.322263Z",
+    "updated_at": "2026-10-07T13:19:43.844394Z",
+    "messages": [
+     {
+      "message_id": "message-a8d8f322ddf14c73878defec1879b373",
+      "role": "user",
+      "text": "What are the most important signaling test capabilities for applications in AI?",
+      "created_at": "2026-10-07T13:16:59.331358Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-7c15cacfcfb3409cbfa5e0a75fce4b85",
+      "role": "assistant",
+      "text": "The knowledge base did not return raw-source evidence specifically ranking “AI signaling test capabilities,” so the prioritization below is my engineering synthesis, using the related CMX500 / NTN / UAV signaling notes the knowledge search returned plus general wireless-test reasoning.\n\nFor AI applications, the most important signaling test capabilities are:\n\n1. **Realistic 5G / LTE / Wi‑Fi network emulation**\n   - AI devices often depend on edge/cloud connectivity, so the tester must emulate real network behavior, not only generate RF waveforms.\n   - Key: 5G NR SA/NSA, LTE fallback, Wi‑Fi 6/7, FR1/FR2 where relevant, and multi-RAT operation.\n\n2. **End-to-end application performance testing**\n   - AI workloads care about user-perceived performance: uplink video, sensor streaming, inference request/response, control loops.\n   - Must measure **IP throughput, latency, jitter, packet loss, audio/video quality**, and behavior under changing radio conditions.\n\n3. **Low-latency and QoS / traffic-prioritization validation**\n   - Edge AI, robotics, drones, smart factory, XR and autonomous systems often need deterministic latency.\n   - Important capabilities: QoS flow testing, guaranteed bandwidth behavior, uplink/downlink prioritization, congestion handling, and handover impact on latency.\n\n4. **Mobility, handover, and beam-management testing**\n   - AI-enabled drones, vehicles, robots and mobile devices must keep sessions alive while moving.\n   - Critical tests include cell reselection, handover interruption time, FR2 beam switching, satellite/terrestrial handover, and performance under pedestrian/vehicular/high-speed profiles.\n\n5. **RF performance under realistic channel conditions**\n   - AI applications are often data-heavy and sensitive to degraded links.\n   - Important capabilities: fading, AWGN, MIMO, carrier aggregation, BLER/PER, EVM, sensitivity, throughput degradation curves, and repeatable channel scenarios.\n\n6. **Power-consumption and battery-life testing during connected AI workloads**\n   - Many AI edge devices are battery-powered.\n   - Signaling tests should reproduce realistic connected states: idle, paging, connected mode, high-throughput upload, periodic sensor bursts, and low-power modes.\n\n7. **Multi-radio coexistence and desense testing**\n   - AI devices often combine 5G/LTE, Wi‑Fi, Bluetooth, GNSS, UWB, cameras and high-speed processors.\n   - Key capability: test whether one radio or internal digital activity degrades another, especially cellular + Wi‑Fi coexistence and UAV/robotics links.\n\n8. **Protocol robustness and negative testing**\n   - AI systems should recover gracefully from real network issues.\n   - Important tests: attach/registration failures, bearer/session drops, IMS/audio fallback if relevant, reconnection, roaming-like behavior, malformed or delayed signaling, and long-duration stability.\n\n9. **NTN / Direct-to-Cell readiness where coverage matters**\n   - For AI in remote sensing, drones, logistics, agriculture, defense or maritime, NTN may matter.\n   - Useful capabilities: NB‑NTN / NR‑NTN / LTE-DTC / NR-DTC signaling, long-delay links, Doppler effects, satellite beam switching, gateway integration, and LEO constellation scenarios.\n\n10. **Automation, logging, and regression testing**\n   - AI device software changes frequently, so signaling tests need to run repeatedly.\n   - Important: Python/SCPI/API control, graphical sequencing, log analysis, reproducible scenarios, CI-style regression, and automated pass/fail reporting.\n\nIf I had to reduce this to the top five for AI device validation, I’d pick:\n\n1. **5G/Wi‑Fi signaling network emulation**  \n2. **Latency / throughput / QoS application testing**  \n3. **Mobility and handover testing**  \n4. **Power and battery-life testing under AI traffic**  \n5. **Multi-radio coexistence / desense validation**",
+      "created_at": "2026-10-07T13:19:43.844394Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-68282c471a29466fa14f38cdf5845d8d",
+       "request_id": "request-68282c471a29466fa14f38cdf5845d8d",
+       "span_id": "span-68282c471a29466fa14f38cdf5845d8d",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base did not return raw-source evidence specifically ranking “AI signaling test capabilities,” so the prioritization below is my engineering synthesis, using the related CMX500 / NTN / UAV signaling notes the knowledge search returned plus general wireless-test reasoning.\n\nFor AI applications, the most important signaling test capabilities are:\n\n1. **Realistic 5G / LTE / Wi‑Fi network emulation**\n   - AI devices often depend on edge/cloud connectivity, so the tester must emulate real network behavior, not only generate RF waveforms.\n   - Key: 5G NR SA/NSA, LTE fallback, Wi‑Fi 6/7, FR1/FR2 where relevant, and multi-RAT operation.\n\n2. **End-to-end application performance testing**\n   - AI workloads care about user-perceived performance: uplink video, sensor streaming, inference request/response, control loops.\n   - Must measure **IP throughput, latency, jitter, packet loss, audio/video quality**, and behavior under changing radio conditions.\n\n3. **Low-latency and QoS / traffic-prioritization validation**\n   - Edge AI, robotics, drones, smart factory, XR and autonomous systems often need deterministic latency.\n   - Important capabilities: QoS flow testing, guaranteed bandwidth behavior, uplink/downlink prioritization, congestion handling, and handover impact on latency.\n\n4. **Mobility, handover, and beam-management testing**\n   - AI-enabled drones, vehicles, robots and mobile devices must keep sessions alive while moving.\n   - Critical tests include cell reselection, handover interruption time, FR2 beam switching, satellite/terrestrial handover, and performance under pedestrian/vehicular/high-speed profiles.\n\n5. **RF performance under realistic channel conditions**\n   - AI applications are often data-heavy and sensitive to degraded links.\n   - Important capabilities: fading, AWGN, MIMO, carrier aggregation, BLER/PER, EVM, sensitivity, throughput degradation curves, and repeatable channel scenarios.\n\n6. **Power-consumption and battery-life testing during connected AI workloads**\n   - Many AI edge devices are battery-powered.\n   - Signaling tests should reproduce realistic connected states: idle, paging, connected mode, high-throughput upload, periodic sensor bursts, and low-power modes.\n\n7. **Multi-radio coexistence and desense testing**\n   - AI devices often combine 5G/LTE, Wi‑Fi, Bluetooth, GNSS, UWB, cameras and high-speed processors.\n   - Key capability: test whether one radio or internal digital activity degrades another, especially cellular + Wi‑Fi coexistence and UAV/robotics links.\n\n8. **Protocol robustness and negative testing**\n   - AI systems should recover gracefully from real network issues.\n   - Important tests: attach/registration failures, bearer/session drops, IMS/audio fallback if relevant, reconnection, roaming-like behavior, malformed or delayed signaling, and long-duration stability.\n\n9. **NTN / Direct-to-Cell readiness where coverage matters**\n   - For AI in remote sensing, drones, logistics, agriculture, defense or maritime, NTN may matter.\n   - Useful capabilities: NB‑NTN / NR‑NTN / LTE-DTC / NR-DTC signaling, long-delay links, Doppler effects, satellite beam switching, gateway integration, and LEO constellation scenarios.\n\n10. **Automation, logging, and regression testing**\n   - AI device software changes frequently, so signaling tests need to run repeatedly.\n   - Important: Python/SCPI/API control, graphical sequencing, log analysis, reproducible scenarios, CI-style regression, and automated pass/fail reporting.\n\nIf I had to reduce this to the top five for AI device validation, I’d pick:\n\n1. **5G/Wi‑Fi signaling network emulation**  \n2. **Latency / throughput / QoS application testing**  \n3. **Mobility and handover testing**  \n4. **Power and battery-life testing under AI traffic**  \n5. **Multi-radio coexistence / desense validation**",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-68282c471a29466fa14f38cdf5845d8d",
+      "request_id": "request-68282c471a29466fa14f38cdf5845d8d",
+      "span_id": "span-68282c471a29466fa14f38cdf5845d8d",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-68282c471a29466fa14f38cdf5845d8d",
+       "request_id": "request-68282c471a29466fa14f38cdf5845d8d",
+       "span_id": "span-68282c471a29466fa14f38cdf5845d8d",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base did not return raw-source evidence specifically ranking “AI signaling test capabilities,” so the prioritization below is my engineering synthesis, using the related CMX500 / NTN / UAV signaling notes the knowledge search returned plus general wireless-test reasoning.\n\nFor AI applications, the most important signaling test capabilities are:\n\n1. **Realistic 5G / LTE / Wi‑Fi network emulation**\n   - AI devices often depend on edge/cloud connectivity, so the tester must emulate real network behavior, not only generate RF waveforms.\n   - Key: 5G NR SA/NSA, LTE fallback, Wi‑Fi 6/7, FR1/FR2 where relevant, and multi-RAT operation.\n\n2. **End-to-end application performance testing**\n   - AI workloads care about user-perceived performance: uplink video, sensor streaming, inference request/response, control loops.\n   - Must measure **IP throughput, latency, jitter, packet loss, audio/video quality**, and behavior under changing radio conditions.\n\n3. **Low-latency and QoS / traffic-prioritization validation**\n   - Edge AI, robotics, drones, smart factory, XR and autonomous systems often need deterministic latency.\n   - Important capabilities: QoS flow testing, guaranteed bandwidth behavior, uplink/downlink prioritization, congestion handling, and handover impact on latency.\n\n4. **Mobility, handover, and beam-management testing**\n   - AI-enabled drones, vehicles, robots and mobile devices must keep sessions alive while moving.\n   - Critical tests include cell reselection, handover interruption time, FR2 beam switching, satellite/terrestrial handover, and performance under pedestrian/vehicular/high-speed profiles.\n\n5. **RF performance under realistic channel conditions**\n   - AI applications are often data-heavy and sensitive to degraded links.\n   - Important capabilities: fading, AWGN, MIMO, carrier aggregation, BLER/PER, EVM, sensitivity, throughput degradation curves, and repeatable channel scenarios.\n\n6. **Power-consumption and battery-life testing during connected AI workloads**\n   - Many AI edge devices are battery-powered.\n   - Signaling tests should reproduce realistic connected states: idle, paging, connected mode, high-throughput upload, periodic sensor bursts, and low-power modes.\n\n7. **Multi-radio coexistence and desense testing**\n   - AI devices often combine 5G/LTE, Wi‑Fi, Bluetooth, GNSS, UWB, cameras and high-speed processors.\n   - Key capability: test whether one radio or internal digital activity degrades another, especially cellular + Wi‑Fi coexistence and UAV/robotics links.\n\n8. **Protocol robustness and negative testing**\n   - AI systems should recover gracefully from real network issues.\n   - Important tests: attach/registration failures, bearer/session drops, IMS/audio fallback if relevant, reconnection, roaming-like behavior, malformed or delayed signaling, and long-duration stability.\n\n9. **NTN / Direct-to-Cell readiness where coverage matters**\n   - For AI in remote sensing, drones, logistics, agriculture, defense or maritime, NTN may matter.\n   - Useful capabilities: NB‑NTN / NR‑NTN / LTE-DTC / NR-DTC signaling, long-delay links, Doppler effects, satellite beam switching, gateway integration, and LEO constellation scenarios.\n\n10. **Automation, logging, and regression testing**\n   - AI device software changes frequently, so signaling tests need to run repeatedly.\n   - Important: Python/SCPI/API control, graphical sequencing, log analysis, reproducible scenarios, CI-style regression, and automated pass/fail reporting.\n\nIf I had to reduce this to the top five for AI device validation, I’d pick:\n\n1. **5G/Wi‑Fi signaling network emulation**  \n2. **Latency / throughput / QoS application testing**  \n3. **Mobility and handover testing**  \n4. **Power and battery-life testing under AI traffic**  \n5. **Multi-radio coexistence / desense validation**",
+      "model_turns": 3,
+      "tools": [
+       {
+        "call_id": "call_AuZBeCD1cYGiqMdqsiO8uIco",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-68282c471a29466fa14f38cdf5845d8d",
+          "request_id": "request-68282c471a29466fa14f38cdf5845d8d",
+          "span_id": "span-68282c471a29466fa14f38cdf5845d8d",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-68282c471a29466fa14f38cdf5845d8d",
+           "request_id": "request-68282c471a29466fa14f38cdf5845d8d",
+           "span_id": "span-68282c471a29466fa14f38cdf5845d8d",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "What are the most important signaling test capabilities for applications in AI? Focus on AI-related applications and signaling test capabilities, especially for wireless/mobile test equipment.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- Slide 21 題為 **R&S PCB test solutions**，面向 **PCB Fabricator and System House**，將流程分成 Material Measurement、Material/Stackup selection、Signal Integrity modeling/testing、Sampling testing、PL/Process Monitoring，並列出 impedance (TDR)、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram、Delta-L、ISD/ADK、w/ cable / connector testing 等項目。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 0.597959
+            },
+            {
+             "text": "無線通訊認證實驗室資料清單 › 目前已知內容\n- [[Test House]] 只包含一個本機檔案連結：`無線通訊認證實驗室.pptx`。\n- [[Test House]] 來源 converted 日期為 2026-09-17，但正文未標示正式發布日期或文件版次。\n- 先前 [[Test House]] 沒有可抽取的簡報正文、圖表、標準清單、實驗室名稱、認證範圍或設備配置。\n- [[無線通訊認證實驗室]]已補入該 PPT 的 markitdown 轉檔文字；raw frontmatter 顯示 converted 日期為 2026-09-17，但簡報本身仍未標示正式發布日期與版次。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+             },
+             "score": 2.022531
+            },
+            {
+             "text": "NCC › 衛星 / 通訊監理語境中的 NCC\n- [[低軌衛星通信終端設備技術規範與相關檢測]]（來源標示 111年08月）列出 NCC 電信事業申請衛星固定通信用無線電頻率核配有關事項草案、NCC 衛星地球電臺設置使用管理辦法部分條文修正草案，以及 NCC 衛星地球電臺設備技術規範草案總說明。\n- 上述語境應連到 [[國家通訊傳播委員會]]，不應與交換機光器件圖上的 NCC 混用。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/NCC.md"
+             },
+             "score": 7.4508
+            },
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 0.528973
+            },
+            {
+             "text": "無線通訊認證實驗室資料清單\n[[無線通訊認證實驗室資料清單]]原本由 [[Test House]] 提供待讀材料索引；[[低軌衛星通信終端設備技術規範與相關檢測]]新增了[[電信技術中心]]在 111年08月簡報中的毫米波頻段測試量能描述；[[無線通訊認證實驗室]]則補入 `無線通訊認證實驗室.pptx` 的簡報正文摘要。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+             },
+             "score": 1.655032
+            },
+            {
+             "text": "無線通訊認證實驗室資料清單 › 使用限制\n- 不可把 [[Test House]] 的 OneNote 連結標題解讀為已驗證的實驗室能力、測試範圍或市場資訊。\n- [[無線通訊認證實驗室]]是 company restricted 簡報轉檔，且正式日期 / 版次未標示；其能力、週期與機構列名需官方 accreditation scope、實驗室能力表或法規文件補證。\n- 不可把 `NCC / TAF / FCC 等機構認可` 解讀為所有列名實驗室在所有測項、頻段與地區均已獲認可。\n- 不可把 RF / EMC 測試 3–4 週、GMA 8–12 週解讀為任何產品的保證交期。\n- [[低軌衛星通信終端設備技術規範與相關檢測]]中的 TTC CATR 能力是 111年08月簡報層級說法；不可取代 TTC 官方能力清單、TAF 認證範圍、測試報告或正式報價文件。\n- 若要判斷 [[FCC 無線設備法規測試]]、[[CE RED 無線設備法規測試]]、[[PTCRB]]、[[GCF]]、Wi‑Fi / BLE 認證流程，需回正式規則、標準與 certification body 文件。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+             },
+             "score": 1.691763
+            },
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 關鍵實體與概念\n- [[Dr. Milton Lien]] — 封面列名的作者 / 講者。\n- [[RSTW]] — 封面單位文字之一，來源未展開完整名稱。\n- [[SerDes]] — 本簡報主題之一，並在 standards / eco-chain / transmission channel 脈絡中出現。\n- [[Signal Integrity]] — Slide 20 以 high speed PCB/PCBA signal integrity flow 呈現，包含 [[IL]]、[[Xtalk]]、[[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]] 與 [[TL Calculator]]。\n- [[Power Integrity]] — 封面題名中的 PI；Slide 11 以 [[Power Distribution Network]] 形式出現，並列 scopes 與 network analyzers。\n- [[High speed SerDes standards]] — Slide 4 的高速介面 / 標準列名。\n- [[High speed SerDes eco-chain]] — Slide 9 的上中下游產業鏈分類。\n- [[R&S PCB test solutions]] — Slide 21 的 PCB fabricator / system house 測試流程與工具 / 方法集合。\n- [[HDI vs Package substrate]] — Slide 17 的 HDI、package substrate、CoWoS、ABF、L/S、pitch 對照線索。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] — 既有概念頁可承接 Slide 20–21 的 PCB / PCBA 測試內容。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 0.406726
+            },
+            {
+             "text": "國家通訊傳播委員會 › 來源中的衛星規範脈絡\n[[低軌衛星通信終端設備技術規範與相關檢測]]（來源標示 111年08月）列出：\n\n- NCC 電信事業申請衛星固定通信用無線電頻率核配有關事項草案：釋出同步及非同步衛星固定通信用無線電頻率，以供電信事業新設置衛星通信網路或衛星系統者進行相關申請。\n- NCC 衛星地球電臺設置使用管理辦法部分條文修正草案：因應國際多家衛星系統業者積極布建衛星通信網路，增訂已辦理登錄或依電信法取得衛星地球電臺執照之天線直徑小於三公尺且具雙向通信功能之衛星地球電臺執照核發及換發規定。\n- NCC 衛星地球電臺設備技術規範草案總說明：依電信管理法第六十六條第二項授權，作為衛星地球電臺設備製造商、進口商及經銷商等辦理型式認證之依據。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/國家通訊傳播委員會.md"
+             },
+             "score": 4.43014
+            },
+            {
+             "text": "Shivarudrappa Umesh Yeshwanthpur › 來源中的角色\n依 [[R18 CSI enhancements for high-speed Scenario]]：\n\n- 在 MAC / development discussion 後，來源列出 `Expert persons on: Applications of CSI reports in DL`。\n- 該欄列名 `Shivarudrappa Umesh Yeshwanthpur (1WS6)`。\n\n來源未提供其職稱、公司 email、正式組織、職責範圍或是否為 feature owner。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Shivarudrappa Umesh Yeshwanthpur.md"
+             },
+             "score": 2.116959
+            },
+            {
+             "text": "無線通訊認證實驗室 › 與既有知識的關係\n- 本來源補齊 [[Test House]] 原本只保存 `無線通訊認證實驗室.pptx` 本機簡報連結、尚未擷取正文的缺口。\n- 本來源應更新 [[無線通訊認證實驗室資料清單]]：原本該頁指出 `無線通訊認證實驗室.pptx` 尚未 ingest，現在已由本來源提供正文摘要。\n- 本來源與 [[無線裝置法規符合性測試]]、[[CE RED 無線設備法規測試]]、[[FCC 無線設備法規測試]]屬同一主題群，但層次不同：本來源是市場 / 簡報式的實驗室能力與認證流程總覽；既有頁面保存較細的法規框架與測試項目。\n- 本來源對 [[低軌衛星終端設備檢測]]、[[相控陣列天線]]、[[Satellite User Terminal 外部資料清單]] 提供 LEO satellite user terminal certification / RF validation / beamforming testing 的市場線索，但不提供正式測試標準、量測條件或實驗室 accreditation scope。\n- 本來源中的 [[NCC]] 位於台灣通訊設備認證流程語境，應與 [[NCC]] 既有縮寫碰撞頁中的交換機光器件 NCC 區分，必要時連到 [[國家通訊傳播委員會]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+             },
+             "score": 2.856707
+            },
+            {
+             "text": "Shivarudrappa Umesh Yeshwanthpur\n[[Shivarudrappa Umesh Yeshwanthpur]] 是 [[R18 CSI enhancements for high-speed Scenario]] 中列為 Applications of CSI reports in DL expert person 的人名，括號單位 / 群組標示為 `1WS6`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Shivarudrappa Umesh Yeshwanthpur.md"
+             },
+             "score": 1.662504
+            },
+            {
+             "text": "無線通訊認證實驗室 › 重點摘要\n本來源是由 `無線通訊認證實驗室.pptx` 轉出的 company restricted 簡報，正式發布日期與文件版次未標示；raw frontmatter 顯示 converted 日期為 2026-09-17。\n\n來源將[[無線通訊認證實驗室]]定義為測試與驗證無線設備符合法規、安全與性能標準的實驗室，涵蓋 [[RF 測試]]、[[EMC]]、安規與一致性認證，並稱其可支援 [[Global Market Access]]（GMA）與加速上市。\n\n主要內容包括：\n\n- 無線設備認證實驗室涵蓋 RF、EMC、安規與一致性認證。\n- 主要測試項目包含頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試與 [[PTCRB]] / [[GCF]] 認證。\n- 來源稱認證必要性包括防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端與 6G 等需求。\n- 來源列出台灣 [[NCC]] 認證流程：準備文件 / 樣品 / 電路圖 / 天線規格、提交 [[RCB]] 核驗機構初審、[[TAF]] 認可實驗室 RF / EMC 測試約 3–4 週、報告審查與證書核發，並稱證書有效期 5 年。\n- 來源列出台灣領先認證實驗室：[[耕興]]、[[SGS]]、[[電信技術中心]] / [[ISL]]。\n- 來源稱[[耕興]]具 30 MHz–325 GHz 全頻段測試能力、108 座測試場地、連續 10 年 FCC 最佳實驗室認證、10 米半電波暗室、OTA / SAR / [[相控陣列天線]]測試等能力。\n- 來源簡述 [[FCC 無線設備法規測試]]、[[CE RED 無線設備法規測試]]、Wi‑Fi / BLE 聯盟流程的差異。\n- 來源將 LEO 衛星終端認證應用連到 Starlink / Kuiper user terminal RF validation、[[相控陣列天線]] beamforming 測試、mmWave / MIMO 高頻測試、台灣供應鏈 GMA，以及耕興等 [[RCB]] 提供 8–12 週 GMA 週期的說法。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+             },
+             "score": 1.449521
+            },
+            {
+             "text": "3GPP 38.822 › TDCP-related capabilities 線索\n[[TDCP Reporting]] 在 Spec Changes section 之後列出 38.822: TDCP-related Capabilities listed below，並接續一組 OCR 錯位的 table。可辨識主題包含：\n\n- TDCP report support with Y = 1 delay value。\n- Basic delay value D_basic = 1 slot。\n- Support of amplitude report。\n- CPU occupation parameter X，來源片段為 OCPU = (Y + 1) · X。\n- Support to configure KTRS = 1 TRS resource set。\n- Maximum number of simultaneously active CSI-RS resources for TDCP。\n- Number of delay values Y > 1，candidate values {2,3,4}。\n- Maximum delay value larger than D_basic，candidate values include 2、3、4、5、6、10 slots。\n- Phase report support for Y >= 1。\n- Number of CSI-RS resources for TDCP per CC / across CCs。\n- Maximum number of TRS resource sets in a single CSI-RS resource setting，candidate values {2,3}。\n- Maximum number of TDCP report settings per BWP，candidate values {1,2,3,4}。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/3GPP 38.822.md"
+             },
+             "score": 3.8767
+            },
+            {
+             "text": "無線通訊認證實驗室 › 實體\n- [[NCC]] / [[國家通訊傳播委員會]]：來源中的台灣 NCC 認證流程脈絡，需注意 [[NCC]] 既有頁面是縮寫碰撞頁。\n- [[TAF]]：來源稱 TAF 認可實驗室執行 RF / EMC 測試。\n- [[FCC]]：來源在認可機構、FCC 流程與耕興實驗室亮點中出現。\n- [[RCB]]：來源列為台灣 NCC 流程中的核驗機構。\n- [[耕興]] / SPORTON：來源列為台灣領先認證實驗室之一，並列出多項能力與宣稱。\n- [[SGS]]：來源列為台灣領先認證實驗室之一，核心能力為 EMC / RF / 安規，特色為國際認可與 GMA 一站式。\n- [[電信技術中心]] / TTC：來源以 `TTC / ISL` 列為台灣領先認證實驗室，核心能力為 RF 認證 / 測試，特色為台灣政府 6G 研究支援。\n- [[ISL]]：與 TTC 同列，但來源未展開全名。\n- [[Starlink]]、[[Project Kuiper]]：來源列為 LEO 衛星終端認證應用中的 user terminal RF 驗證對象。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+             },
+             "score": 1.180992
+            },
+            {
+             "text": "3GPP 38.822 › 使用限制\n- 來源未標示 38.822 的文件類型、完整標題、version、release 或發布日期。\n- Capability table OCR 錯位嚴重，不可直接引用為正式 parameter list。\n- 不可從本頁推論 UE capability signaling 的正式欄位、ASN.1 名稱、component carrier scope 或 conformance requirement。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/3GPP 38.822.md"
+             },
+             "score": 1.406386
+            },
+            {
+             "text": "3GPP 38.822 › 與 TS 38.306 的關係\n[[TDCP Reporting]] 同時列出：\n\n- [[3GPP TS 38.306]] UE Capabilities Changes。\n- 38.822: TDCP-related Capabilities listed below。\n\n因此目前只能保守記錄：38.822 在本來源中是 TDCP capability table 的直接出處線索，而 38.306 是 UE capability changes 的 spec-change target。兩者正式關係需回 3GPP 文件確認。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/3GPP 38.822.md"
+             },
+             "score": 0.702834
+            },
+            {
+             "text": "Satellite Applications Catapult › 來源中的資訊\n- [[Space Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）列出連結文字 `Space Capabilities Catalogue - Satellite Applications Catapult`，URL 為 `https://sa.catapult.org.uk/space-capabilities-catalogue/`。\n- 本次 ingest 未擷取該外部網頁正文、更新日期、catalogue 版本、分類規則、公司名單、capabilities 條目或資料來源。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Satellite Applications Catapult.md"
+             },
+             "score": 0.73056
+            },
+            {
+             "text": "Satellite Applications Catapult\n[[Satellite Applications Catapult]]是 [[Space Supply Chain]] 中 `Space Capabilities Catalogue` 外部連結 URL 所指向的組織 / 網站名稱線索；本 vault 目前尚未擷取該 catalogue 正文。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Satellite Applications Catapult.md"
+             },
+             "score": 0.639563
+            },
+            {
+             "text": "Test House › 關鍵實體與概念\n- [[無線通訊認證實驗室資料清單]] — 本來源保存一個本機簡報連結，簡報標題為「無線通訊認證實驗室」，但正文尚未 ingest。\n- [[Test House]] — 來源標題；目前只作為此 OneNote link hub 的名稱，不足以判定為特定公司、實驗室或認證機構。\n- [[無線通訊認證實驗室]] — 由本機簡報檔名 / 連結文字得知的待讀主題；尚無正文支撐任何具體主張。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Test House.md"
+             },
+             "score": 1.397419
+            },
+            {
+             "text": "Satellite Applications Catapult › unresolved\n- 需要擷取 `Space Capabilities Catalogue` 頁面正文。\n- 需要確認 catalogue 的發布者、更新日期、條目範圍、分類欄位與是否提供下載版本。\n- 需要確認 catalogue 是否與本來源嵌入的圖片有直接關係。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Satellite Applications Catapult.md"
+             },
+             "score": 0.479758
+            },
+            {
+             "text": "Test House › 與既有知識的關係\n- 既有 vault 已有多個無線通訊測試相關主題，例如 [[FWA CPE 測試與驗證]]、[[Small Cell BTS 測試資料清單]]、[[5G NR Base Station Conformance Testing]]、[[NR-NTN conformance testing]]、[[Wi-Fi 7 OTA MIMO stress testing]] 與 [[Reverberation chamber OTA testing]]；本來源目前只提供「無線通訊認證實驗室」簡報線索，尚不能補充上述主題的技術或市場內容。\n- 由於簡報正文未擷取，本來源不能作為任何 test house、certification lab、accreditation、conformance testing 或 OTA testing 主張的證據，只能作為待讀材料索引。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Test House.md"
+             },
+             "score": 1.228074
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing › 來源中的 DO-160 定位\n[[2025RS Drone Solution]] 說 [[RTCA DO-160]] is important because it provides the minimum operational performance standards for electronic systems and equipment that support aviation to pursue increased safety, system capacity and efficiency。\n\n來源另說其 purpose 是提供 means of determining performance characteristics of airborne equipment in environmental conditions which may be encountered in airborne operation of the equipment，並可與 applicable standards 一起作為 minimum specification。\n\n使用限制：來源未提供 DO-160 的正式版次文件、section limit table、category matrix 或適用 drone 類型。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 7.510259
+            },
+            {
+             "text": "Test House › 重點摘要\n- 這份來源是從 OneNote / markdown 直接複製的 link hub，converted 日期為 2026-09-17；來源正文未標示正式發布日期、作者、版本或期間。\n- 來源只包含一個本機檔案超連結：`無線通訊認證實驗室.pptx`，顯示此頁可能是關於 [[無線通訊認證實驗室資料清單]] 的待讀材料入口。\n- 原始來源未擷取該 PowerPoint 簡報正文，因此不能從本頁推論實驗室名稱、認證範圍、測試項目、設備配置、標準版本或市場狀態。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Test House.md"
+             },
+             "score": 1.112526
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing\n[[DO-160 airborne equipment EMC testing]] 是 [[2025RS Drone Solution]] 中引用 [[RTCA DO-160]] 作為 airborne equipment environmental conditions and test procedures 的測試線索，用於 military / aviation drone EMC proposal context。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 2.12481
+            },
+            {
+             "text": "CONTEST & AI OUTLOOK\nSUPPORT FOR ON-/OFF-PREM AI VIA MCP\nEnable CONTEST sequencer for agentic AI\nto improve efficiency in daily operation with\nfocus on\n► End-to-end test planning and execution\n− Automated and highly efficient test plan generation\n− Smart execution of complex test scenarios\n− Seamless integration with customer lab management suites\n► DUT management\n− Easy maintenance of DUT capabilities / pics\n► Result analysis\n− Analyze test case logs to verify the test objectives\n− Analyze test case logs to verify pass / fail results including root cause analysis\n− Analyze signaling logs to identify protocol-related issues",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0740647d8975b1f3",
+               "original_ref": "raw/Knowledge/Q2_2026 Conformance & NetOp Updates_Customer.md",
+               "sha256": "0740647d8975b1f34f894473a8e33a2da28f274cf427eb1eee5c756c9729c8ee",
+               "raw_ref": "raw/Knowledge/Q2_2026 Conformance & NetOp Updates_Customer.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/Q2_2026 Conformance & NetOp Updates_Customer.md",
+              "section": 22,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.579408
+            },
+            {
+             "text": "CONTEST & AI OUTLOOK\nSUPPORT FOR ON-/OFF-PREM AI VIA MCP\nEnable CONTEST sequencer for agentic AI\nto improve efficiency in daily operation with\nfocus on\n► End-to-end test planning and execution\n− Automated and highly efficient test plan generation\n− Smart execution of complex test scenarios\n− Seamless integration with customer lab management suites\n► DUT management\n− Easy maintenance of DUT capabilities / pics\n► Result analysis\n− Analyze test case logs to verify the test objectives\n− Analyze test case logs to verify pass / fail results including root cause analysis\n− Analyze signaling logs to identify protocol-related issues",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-db506401672a2bde",
+               "original_ref": "raw/Market/Q2_2026 Conformance & NetOp Updates_Customer.md",
+               "sha256": "db506401672a2bde240310c41b35c230b278d1632d5d3a87c1b6ab0835d010cc",
+               "raw_ref": "raw/Market/Q2_2026 Conformance & NetOp Updates_Customer.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/Q2_2026 Conformance & NetOp Updates_Customer.md",
+              "section": 22,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.579408
+            },
+            {
+             "text": "Wireless Manufacturing Test (WMT)\nModular software framework tailored for high volume production testing and non-signaling R&D applications.\n27",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ae261ae2c6ea49d8",
+               "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+               "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "section": 278,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.271748
+            },
+            {
+             "text": "The successful collaboration between SPEAG and Rohde & Schwarz is testimony to the long-term strategy of both companies for leadership and innovation in test and measurement applications for the wireless industry.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-75010f6c18759b5a",
+               "original_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+               "sha256": "75010f6c18759b5a40842ce1fed2243990191ae6a580ab79596a571c190114db",
+               "raw_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.82976
+            }
+           ],
+           "text": "Short answer: the best-supported AI-related signaling-test capabilities are **AI-assisted end-to-end signaling test planning/execution, DUT capability/PICS management, and AI-assisted log/result analysis for protocol issue diagnosis**; for wireless/mobile equipment, these should be paired with **protocol compatibility/interoperability, PTCRB/GCF-style certification support, and RF/OTA/mmWave/MIMO validation context** where applicable.[25][12]\n### Most important capabilities\n1. **Agentic-AI support for signaling test automation**: CONTEST is described as supporting on-/off-prem AI via MCP and enabling the CONTEST sequencer for agentic AI to improve daily operation efficiency.[25]\n2. **End-to-end test planning and execution**: the AI-enabled CONTEST focus includes automated and highly efficient test plan generation, smart execution of complex test scenarios, and seamless integration with customer lab management suites.[25]\n3. **DUT capability and PICS management**: the same source identifies easy maintenance of DUT capabilities / PICS as a key focus area.[25]\n4. **AI-assisted result and log analysis**: the stated capabilities include analyzing test case logs to verify test objectives, analyzing logs to verify pass/fail results including root-cause analysis, and analyzing signaling logs to identify protocol-related issues.[25]\n5. **Wireless/mobile protocol and certification coverage**: the wireless certification lab source lists protocol compatibility, interoperability testing, and PTCRB / GCF certification among major test items.[12]\n6. **RF/OTA context for mobile, satellite, and advanced wireless devices**: the same wireless lab source also lists spectrum, output power, DFS, SAR, EMI/EMS, ESD, power surge, OTA/SAR/phased-array antenna testing, LEO satellite user-terminal RF validation, beamforming testing, and mmWave / MIMO high-frequency testing.[12]\n7. **3GPP capability-signaling awareness, with caution**: the 38.822 source gives TDCP-related capability topics such as TDCP report support, amplitude report support, phase report support, CSI-RS/TRS resource limits, delay values, and report-setting limits, but the source warns that OCR is misaligned and should not be used as a formal UE capability-signaling parameter list or ASN.1 reference.[13][15]\n8. **Avoid confusing non-signaling production test with signaling test**: Wireless Manufacturing Test is described as a modular software framework for high-volume production testing and non-signaling R&D applications, so it is not itself evidence of signaling-test capability.[27]\n【推論】For AI-related wireless/mobile signaling test equipment, the highest-value capability stack is: agentic-AI test planning/execution, DUT capability/PICS maintenance, protocol/signaling-log analysis with root-cause support, and linkage to mobile certification workflows such as protocol compatibility, interoperability, PTCRB/GCF, RF/OTA, mmWave/MIMO, and beamforming validation.[25][12]\n【推論】TDCP/CSI-style UE capability topics may be relevant to advanced 3GPP signaling test planning, but the provided 38.822 material should be treated only as a capability-topic clue, not as a formal conformance or ASN.1 requirement source.[13][15][16]",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "無線通訊認證實驗室 › 重點摘要\n本來源是由 `無線通訊認證實驗室.pptx` 轉出的 company restricted 簡報，正式發布日期與文件版次未標示；raw frontmatter 顯示 converted 日期為 2026-09-17。\n\n來源將[[無線通訊認證實驗室]]定義為測試與驗證無線設備符合法規、安全與性能標準的實驗室，涵蓋 [[RF 測試]]、[[EMC]]、安規與一致性認證，並稱其可支援 [[Global Market Access]]（GMA）與加速上市。\n\n主要內容包括：\n\n- 無線設備認證實驗室涵蓋 RF、EMC、安規與一致性認證。\n- 主要測試項目包含頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試與 [[PTCRB]] / [[GCF]] 認證。\n- 來源稱認證必要性包括防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端與 6G 等需求。\n- 來源列出台灣 [[NCC]] 認證流程：準備文件 / 樣品 / 電路圖 / 天線規格、提交 [[RCB]] 核驗機構初審、[[TAF]] 認可實驗室 RF / EMC 測試約 3–4 週、報告審查與證書核發，並稱證書有效期 5 年。\n- 來源列出台灣領先認證實驗室：[[耕興]]、[[SGS]]、[[電信技術中心]] / [[ISL]]。\n- 來源稱[[耕興]]具 30 MHz–325 GHz 全頻段測試能力、108 座測試場地、連續 10 年 FCC 最佳實驗室認證、10 米半電波暗室、OTA / SAR / [[相控陣列天線]]測試等能力。\n- 來源簡述 [[FCC 無線設備法規測試]]、[[CE RED 無線設備法規測試]]、Wi‑Fi / BLE 聯盟流程的差異。\n- 來源將 LEO 衛星終端認證應用連到 Starlink / Kuiper user terminal RF validation、[[相控陣列天線]] beamforming 測試、mmWave / MIMO 高頻測試、台灣供應鏈 GMA，以及耕興等 [[RCB]] 提供 8–12 週 GMA 週期的說法。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 1,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+            },
+            "score": 1.449521
+           },
+           {
+            "text": "3GPP 38.822 › TDCP-related capabilities 線索\n[[TDCP Reporting]] 在 Spec Changes section 之後列出 38.822: TDCP-related Capabilities listed below，並接續一組 OCR 錯位的 table。可辨識主題包含：\n\n- TDCP report support with Y = 1 delay value。\n- Basic delay value D_basic = 1 slot。\n- Support of amplitude report。\n- CPU occupation parameter X，來源片段為 OCPU = (Y + 1) · X。\n- Support to configure KTRS = 1 TRS resource set。\n- Maximum number of simultaneously active CSI-RS resources for TDCP。\n- Number of delay values Y > 1，candidate values {2,3,4}。\n- Maximum delay value larger than D_basic，candidate values include 2、3、4、5、6、10 slots。\n- Phase report support for Y >= 1。\n- Number of CSI-RS resources for TDCP per CC / across CCs。\n- Maximum number of TRS resource sets in a single CSI-RS resource setting，candidate values {2,3}。\n- Maximum number of TDCP report settings per BWP，candidate values {1,2,3,4}。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/3GPP 38.822.md"
+            },
+            "score": 3.8767
+           },
+           {
+            "text": "3GPP 38.822 › 使用限制\n- 來源未標示 38.822 的文件類型、完整標題、version、release 或發布日期。\n- Capability table OCR 錯位嚴重，不可直接引用為正式 parameter list。\n- 不可從本頁推論 UE capability signaling 的正式欄位、ASN.1 名稱、component carrier scope 或 conformance requirement。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/3GPP 38.822.md"
+            },
+            "score": 1.406386
+           },
+           {
+            "text": "3GPP 38.822 › 與 TS 38.306 的關係\n[[TDCP Reporting]] 同時列出：\n\n- [[3GPP TS 38.306]] UE Capabilities Changes。\n- 38.822: TDCP-related Capabilities listed below。\n\n因此目前只能保守記錄：38.822 在本來源中是 TDCP capability table 的直接出處線索，而 38.306 是 UE capability changes 的 spec-change target。兩者正式關係需回 3GPP 文件確認。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/3GPP 38.822.md"
+            },
+            "score": 0.702834
+           },
+           {
+            "text": "CONTEST & AI OUTLOOK\nSUPPORT FOR ON-/OFF-PREM AI VIA MCP\nEnable CONTEST sequencer for agentic AI\nto improve efficiency in daily operation with\nfocus on\n► End-to-end test planning and execution\n− Automated and highly efficient test plan generation\n− Smart execution of complex test scenarios\n− Seamless integration with customer lab management suites\n► DUT management\n− Easy maintenance of DUT capabilities / pics\n► Result analysis\n− Analyze test case logs to verify the test objectives\n− Analyze test case logs to verify pass / fail results including root cause analysis\n− Analyze signaling logs to identify protocol-related issues",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0740647d8975b1f3",
+              "original_ref": "raw/Knowledge/Q2_2026 Conformance & NetOp Updates_Customer.md",
+              "sha256": "0740647d8975b1f34f894473a8e33a2da28f274cf427eb1eee5c756c9729c8ee",
+              "raw_ref": "raw/Knowledge/Q2_2026 Conformance & NetOp Updates_Customer.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/Q2_2026 Conformance & NetOp Updates_Customer.md",
+             "section": 22,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.579408
+           },
+           {
+            "text": "Wireless Manufacturing Test (WMT)\nModular software framework tailored for high volume production testing and non-signaling R&D applications.\n27",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-ae261ae2c6ea49d8",
+              "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+              "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+             "section": 278,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 27.271748
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [
+            {
+             "name": "technical_knowledge",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/3GPP 38.822.md"
+              },
+              {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-0740647d8975b1f3",
+                "original_ref": "raw/Knowledge/Q2_2026 Conformance & NetOp Updates_Customer.md",
+                "sha256": "0740647d8975b1f34f894473a8e33a2da28f274cf427eb1eee5c756c9729c8ee",
+                "raw_ref": "raw/Knowledge/Q2_2026 Conformance & NetOp Updates_Customer.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Knowledge/Q2_2026 Conformance & NetOp Updates_Customer.md",
+               "section": 22,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-db506401672a2bde",
+                "original_ref": "raw/Market/Q2_2026 Conformance & NetOp Updates_Customer.md",
+                "sha256": "db506401672a2bde240310c41b35c230b278d1632d5d3a87c1b6ab0835d010cc",
+                "raw_ref": "raw/Market/Q2_2026 Conformance & NetOp Updates_Customer.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/Q2_2026 Conformance & NetOp Updates_Customer.md",
+               "section": 22,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ae261ae2c6ea49d8",
+                "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+                "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+                "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "section": 278,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              }
+             ],
+             "attempts": 1
+            }
+           ],
+           "missing_facets": [],
+           "relation_required": false,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": [
+           {
+            "wiki_page": "wiki/sources/無線通訊認證實驗室.md",
+            "raw_refs": [
+             "raw/Market/OneNote/TestHouse/Test House.md",
+             "raw/Market/OneNote/無線通訊認證實驗室.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/concepts/3GPP 38.822.md",
+            "raw_refs": [
+             "raw/Knowledge/TDCP Reporting.md"
+            ]
+           }
+          ]
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_WegiM7Fi90RtadToiFX7z0RQ",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-68282c471a29466fa14f38cdf5845d8d",
+          "request_id": "request-68282c471a29466fa14f38cdf5845d8d",
+          "span_id": "span-68282c471a29466fa14f38cdf5845d8d",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-68282c471a29466fa14f38cdf5845d8d",
+           "request_id": "request-68282c471a29466fa14f38cdf5845d8d",
+           "span_id": "span-68282c471a29466fa14f38cdf5845d8d",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "AI applications signaling test capabilities CMX500 CMW500 5G signaling protocol throughput latency power consumption mobility NTN Wi-Fi? Provide Raw evidence citations only.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "UAV signaling test solution › CMX500 可涵蓋的 signaling test 範圍\n依 [[Signaling test solution]]，[[R&S CMX500]] RF frequency range 為 400 MHz 至 8 GHz，可提供 [[LTE]]、[[5G]] 與 [[Wi-Fi]] UE 的 signaling test。來源列出的測試類別包含：\n\n- 基本 RF 量測：Power、Frequency、Spectrum、[[EVM]]、[[PER]] / [[BLER]]、[[MIMO]]。\n- Application layer test：IP throughput、Video、Audio。\n- Protocol test。\n\n使用限制：來源未說明 test case、standard version、release、channel bandwidth、MIMO layers、OTA / conducted setup、automation interface、pass / fail limit 或 measurement uncertainty。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/UAV signaling test solution.md"
+             },
+             "score": 7.743191
+            },
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 13.411802
+            },
+            {
+             "text": "cmx500_ntn_customer_questionnaire › 關鍵實體與概念\n- [[R&S NTN signaling solutions]]：來源中的 solution 名稱，針對 [[NTN]] signaling / communication technology 的客戶需求蒐集。\n- [[R&S CMX500]]：來源在 deployment 題目中提到 CMX500 environment，也在檔名中出現 cmx500；本來源不可用來補充正式 CMX500 規格。\n- [[Tim Seyler]]：來源列為 contact，並標示 Product Manager Mobile Radio Testing。\n- [[NTN signaling customer discovery]]：本問卷形成的需求訪談框架，涵蓋 services、live/simulated testing、timeline、test layer、technology、satellite orbit、payload、network complexity、long-term tests、UE、QoS、mobility、handover / beam switching 與 constellation deployment。\n- [[NB-NTN]]、[[NR-NTN]]、[[Direct-to-Cell]] / [[DTC]] / [[D2C]]：來源要求客戶指出相關 technology。\n- [[3GPP Rel. 17]]、[[3GPP Rel. 18]]、[[3GPP Rel. 19]]：來源要求客戶指出 NB-/NR-NTN 相關 3GPP release 與 timeline。\n- [[LEO]]、[[MEO]]、[[GEO]]、[[GSO]]：來源要求客戶說明 NTN services 使用的 satellite orbit。\n- [[transparent satellite payload]]、[[regenerative satellite payload]]：來源要求客戶說明 satellite payload 類型。\n- [[satellite gateway]]：來源詢問是否將 CMX 連接到 satellite gateway，在真實 live satellite network 中測試，以及 gateway 使用哪些 bands。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+             },
+             "score": 3.250267
+            },
+            {
+             "text": "R&S NTN signaling solutions › 需求蒐集範圍\n來源中的問題涵蓋：\n\n- Service offerings：客戶預計透過 NTN 提供 [[IoT]]、broadband、voice 或其他 applications。\n- Test environment：live network environment（包含 satellite gateway）或 simulated environment。\n- Deployment timeline：NTN service deployment timeline、key milestones、deadlines。\n- Test layer：RF、Protocol、Application Testing。\n- Technology：[[NB-NTN]]、[[NR-NTN]]、[[Direct-to-Cell]] / [[DTC]] / [[D2C]]。\n- 3GPP release：[[3GPP Rel. 17]]、[[3GPP Rel. 18]]、[[3GPP Rel. 19]] 及其 timeline。\n- Device platform：NTN devices 使用的 chipset 或 hardware platform。\n- Service link bands：S/L/Ku/Ka-Band。\n- Gateway integration：是否把 CMX 連接到 [[satellite gateway]]，在 real live satellite network 測試；若是，需提供 gateway bands。\n- Satellite orbit：[[LEO]]、[[MEO]]、[[GEO]]、[[GSO]]。\n- Payload type：[[transparent satellite payload]] 或 [[regenerative satellite payload]]。\n- DTC operator：LTE-DTC 與 NR-DTC 需要的 satellite operator。\n- Network complexity：cellular cells 與 satellite cells 的組合。\n- Long-term tests：是否需要 hundreds of satellites，例如 [[LEO]] scenario。\n- UE：specific device model 或 generic UE simulator。\n- Performance metrics：throughput、battery lifetime、latency 等。\n- QoS：不同 traffic type 的 prioritization 或 guaranteed bandwidth。\n- Mobility：stationary、pedestrian、vehicular 或其他 UE mobility pattern。\n- Handover / beam switching：satellite-UE handovers、beam switching、seamless handovers、optimized beam switching。\n- Constellation workflow：是否有興趣 configuring and visualizing constellations，並在 [[R&S CMX500]] environment 中部署其中一部分。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+             },
+             "score": 3.10001
+            },
+            {
+             "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 4.953905
+            },
+            {
+             "text": "UAV signaling test solution › UAV 通訊技術例子\n[[Signaling test solution]] 用下列表格說明 UAV 常使用多種通信技術：\n\n| 機型 | 來源列出的核心通訊技術 | 使用限制 |\n|---|---|---|\n| [[DJI Mini 4 Pro]]、[[DJI Mavic 3]] | O4 / O3+ proprietary image transmission（2.4 / 5.8 GHz） | 未提供官方 datasheet、地區頻段、發射功率、bandwidth 或 regulatory mode。 |\n| [[DJI Mavic 3 Enterprise]] | O3 proprietary radio + 4G LTE module | 未提供 LTE band、module 型號或 operator 條件。 |\n| [[Parrot ANAFI Ai]] | built-in 4G LTE mobile network | 未提供 band list、SIM / carrier、certification 或 throughput。 |\n| [[XAG P100]] | RTK positioning communication + proprietary radio | 未提供 RTK radio frequency、protocol 或 base station setup。 |\n| [[Skydio X2E]] / telecom inspection solution | Wi‑Fi / proprietary radio + 4G LTE | 未提供 telecom inspection solution 的正式文件或型號。 |\n| [[RQ-4 Global Hawk]]、[[Switchblade]] | military SATCOM + encrypted frequency-hopping radio | 未提供軍規文件、頻段、加密方式、跳頻參數或測試方法。 |\n\n這些例子補充 [[UAV 通訊]] 與 [[UAV 通訊頻段]]，但不能取代各產品官方文件與地區法規。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/UAV signaling test solution.md"
+             },
+             "score": 4.060214
+            },
+            {
+             "text": "cmx500_ntn_customer_questionnaire › 重點摘要\n- 文件標題語境為「GETTING STARTED — ROHDE & SCHWARZ NTN SIGNALING SOLUTIONS」，目的在協助 [[Rohde & Schwarz]] 了解客戶針對 [[NTN]] communication technology 的需求與挑戰，並據此 tailoring a solution。\n- 文件明示並非所有問題都一定適用，客戶不必回答全部問題。\n- Contact 標示為 [[Tim Seyler]]（`tim.seyler@rohde-schwarz.com`），角色為 Product Manager Mobile Radio Testing。\n- 產品 / solution 相關型號口徑：來源檔名含 `cmx500`，正文提到「connect the CMX to a satellite gateway」與「CMX500 environment」；但來源未列 [[R&S CMX500]] 的正式規格、硬體配置、option code 或 ordering information。\n- 文件版次：來源未標示正式 version / document number；僅標示 Last Update: August 19, 2026。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+             },
+             "score": 1.534521
+            },
+            {
+             "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 3.756898
+            },
+            {
+             "text": "UAV signaling test solution\n[[UAV signaling test solution]] 是以 [[R&S CMX500]] 對 UAV 常見的 [[LTE]]、[[5G]] 與 [[Wi-Fi]] 通訊鏈路進行 single-technology signaling test 與 multi-technology De-sense validation 的市場方案線索。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/UAV signaling test solution.md"
+             },
+             "score": 2.698387
+            },
+            {
+             "text": "cmx500_ntn_customer_questionnaire › 與既有知識的關係\n- 既有 [[R&S CMX500]] 頁主要依 [[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]] 整理正式 specifications / features；本來源是 customer questionnaire，不能取代正式 specifications，也不能補推硬體、頻段、options 或測試能力。\n- 既有 [[Tim Seyler]] 頁只從 [[AIW_Products_Customer_Questionnaire]] 確認 contact 與 email；本來源新增其在 NTN questionnaire 中的角色文字：Product Manager Mobile Radio Testing。\n- 既有 [[NGeCall over LTE]] 與 [[CMW500 to CMX500 OBT license swap]] 屬於 emergency call / license swap 脈絡；本來源屬 NTN signaling solution discovery，應分開處理。\n- 來源提到 [[NB-NTN]]、[[NR-NTN]]、[[Direct-to-Cell]]，與既有 [[R&S CMX500]] 頁中的 NTN-related options 方向相鄰，但本來源沒有列 option code 或 supported release scope。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+             },
+             "score": 0.733811
+            },
+            {
+             "text": "Tim Seyler › 與相關主題的關係\n- 在 [[AIW_Products_Customer_Questionnaire]] 中，[[Tim Seyler]] 作為 [[R&S AI Workplace Solutions]] customer questionnaire 的 contact 出現。\n- 在 [[cmx500_ntn_customer_questionnaire]] 中，[[Tim Seyler]] 作為 [[R&S NTN signaling solutions]] customer questionnaire 的 contact 出現，並被標示為 Product Manager Mobile Radio Testing。\n- 在 [[CMX_Configuration_Guide_Audio-Testing]] 中，[[Tim Seyler]] 是 [[CMX500 Audio Testing configuration]] 的 contact person；來源未提供 email、職稱或 team。\n- 在 [[CMX_Configuration_Guide_LTE-DTC]] 中，[[Tim Seyler]] 是 [[CMX500 LTE-DTC configuration]] 的 contact person；來源未提供 email、職稱或 team。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Tim Seyler.md"
+             },
+             "score": 4.066861
+            },
+            {
+             "text": "CMX500 Callbox › UI 與 automation\n來源將 [[CMsquares]] 描述為 web based、all-in-one configuration、all tools in one place、modern UI，並列出：\n\n- live views。\n- App Testing。\n- NTN live views。\n- Sequencer。\n- Log analysis。\n- One-click RF testing。\n\n在 RF pre-conformance 脈絡中，來源稱可 quick switch from manual to automated pre-conformance，且使用 same technology specific license，並指向 [[CMX500 Sequencer Test Packages]] 與 `Sequencer-CMX-Test_Packages_Database.xlsx`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 3.416919
+            },
+            {
+             "text": "Signaling test solution › 重點摘要\n- 本來源是 OneNote 複製出的 [[UAV]] signaling test solution 筆記，raw 轉檔日期為 2026-09-17；正文未標示正式發布日期、作者、文件版次或適用客戶 / 專案。\n- 來源指出無人機常使用多種通信技術，例子包含 proprietary radio / image transmission、Wi‑Fi、[[LTE]]、未來 [[5G]]、[[RTK]]、[[SATCOM]] 與 encrypted frequency-hopping radio。\n- 來源以多款無人機 / UAV 產品為例整理核心通訊技術：[[DJI Mini 4 Pro]]、[[DJI Mavic 3]]、[[DJI Mavic 3 Enterprise]]、[[Parrot ANAFI Ai]]、[[XAG P100]]、[[Skydio X2E]]、[[RQ-4 Global Hawk]] 與 [[Switchblade]]。\n- 來源稱 [[R&S CMX500]] RF frequency range 為 **400 MHz 至 8 GHz**，可提供 [[LTE]]、[[5G]] 與 [[Wi-Fi]] UE 的單一技術 signaling test。\n- 來源列出 signaling test 可包含基本 RF 量測、application layer tests 與 protocol test；基本 RF 量測項目包含 Power、Frequency、Spectrum、[[EVM]]、[[PER]] / [[BLER]]、[[MIMO]]。\n- 來源列出一組 [[R&S CMX500]] 5G test configuration，包含 [[R&S CMX-PB70H]]、[[R&S CMX-B200A]]、[[R&S CMX-B300C]]、[[R&S CMX-B600B]]、[[R&S CMX-KA100]] 與 [[R&S CMX-KM600]]。\n- 來源列出一組 [[R&S CMX500]] Wi‑Fi test configuration，包含 WLAN signaling、WLAN TX measurement 與 WLAN ARB generator options，例如 [[R&S CMX-KS350B]]、[[R&S CMX-KS351B]]、[[R&S CMX-KS352B]]、[[R&S CMX-KS355B]]、[[R&S CMX-KS356B]]、[[R&S CMX-KS360B]]、[[R&S CMX-KM350]]、[[R&S CMX-KM351]]、[[R&S CMX-KM352]]、[[R&S CMX-KM360]]、[[R&S CMX-KW350]]、[[R&S CMX-KW351]]、[[R&S CMX-KW352]]。\n- 來源指出如果 UAV 使用兩種以上通訊技術，通訊技術之間可能造成相互干擾；基於 [[R&S CMX500]] 支援多種通訊技術，可進行 De-sense validation。\n- 來源對多技術整合驗證的配置原則是：software options 合併上述 5G 與 Wi‑Fi 表格，hardware 以滿足兩者中最大的 carrier aggregation 或 [[MIMO]] 作為配置。\n- 來源末尾列出兩個待讀材料：本機 PDF `5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.pdf`，以及 SharePoint 上 `Making Deployed 5G Private Networks more Resilient.pptx`；正文未擷取。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Signaling test solution.md"
+             },
+             "score": 5.789486
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 wireless products 的 market access approval testing 分成三類：[[Regulatory Compliance Test]]、[[Telecom Industry Certification Test]]、[[Cellular Network Operator Acceptance Test]]。Regulatory compliance 被描述為各區域法律面 market access 的必要條件；industry certification 例子包含 [[GCF]] / Cellular、[[Bluetooth SIG]]、[[FiRa]] / [[UWB]]、[[Wi-Fi Alliance]]；operator acceptance test 例子包含 AT&T、VzW、T-mobile、CMCC。\n- 來源主張 wireless products 需要 [[CE marking]] / [[FCC ID]]；test results 是 technical documentation 的一部分，需在產品投放市場前準備、可提供給 surveillance authorities，並自 placed on the market 起保存 10 years。\n- 來源列出 Ericsson Mobility Visualizer Jan 2023 的 mobile subscriptions 表，顯示 2022–2028 的 5G subscriptions 由 1046.006 增至 4974.568；但單位與表格數值口徑未在轉檔文字中完整標示。\n- [[CE RED 無線設備法規測試]]被整理成四類 essential requirements：Art 3.1a Health & Safety、Art 3.1b EMC、Art 3.2 Radio Spectrum、Art 3.3 Specific topics。來源列出多個 ETSI EN standards，例如 [[EN 300 328]]、[[EN 301 893]]、[[EN 303 687]]、[[EN 301 908-1]]、[[EN 301 908-13]]、[[EN 301 908-24]]、[[EN 301 908-25]]、[[EN 301 489-52]] 等。\n- 對 [[5G NR SAR testing]]，來源指出 5G NR network emulator is required to drive EUT to extreme transmission condition，multi-radio UE 的 average-SAR feature 需要 flexible signaling functions，涵蓋 cellular standards、Wi-Fi 與 Bluetooth；來源將 [[R&S CMW500]] / [[R&S CMX500]] 稱為 SAR / HAC signaling solution。\n- 對 Art 3.1b EMC，來源指出 EMC tests 需要 radio enabled 與 radio disabled conditions，因此 5G NR 也需要 signaling solution；mobile phone 仍需要 [[Audio Breakthrough]] test，從 GSM 到 VoLTE / VoNR by 5G。來源提到 [[R&S TS9982 EMS Test System]] 與 [[R&S TS9975 EMI Test System]]。\n- 對 Art 3.2 Radio Spectrum，來源指出 5G NR specification 包含 FR1 與 FR2；FR1 test setup stays conducted，FR2 test setup becomes radiated；並把 3GPP test cases、CTIA-OTA test cases、TRP / TRS、RSE 測試連到 [[R&S TS8991]] 與 [[R&S TS8996]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 2.615826
+            },
+            {
+             "text": "R&S CMW500 › 支援技術摘要\n- [[R&S CMW500]] 在 [[CMW_dat-sw_en_5213-9211-22_v1700]] 中是唯一明確支援 GSM small cell、WCDMA small cell、LTE small cell 的 CMW 型號。\n- GSM、NB-IoT、WCDMA、LTE mobile station test 與 NR Sub-6GHz 章節明確標示適用於 [[R&S CMW500]] 與 [[R&S CMW290]]。\n- Four RF paths、DAU B450H/I、Digital I/Q 1 to 4 / 5 to 8、Digital I/Q QUAD 章節明確標示 [[R&S CMW500]] 與 [[R&S CMW270]]。\n- Bluetooth standard：Bluetooth Core Specification Version 5.0；test standard 包含 RF.TS.5.0.0 與 RF-PHY.TS.5.0.0。\n- WLAN 160 MHz bandwidth unit 章節列出 IEEE 802.11a/g/p/n/ac 與 IEEE 802.11ax，bandwidth up to 160 MHz。\n- [[CMW-KA096_PanEUNGeCall_TC_Status]] 補充 [[NGeCall over LTE]]、[[IMS eCall]]、[[IVS]]、[[PSAP]]、[[MSD]]、limited service、callback、clear-down、SRVCC handover 等 eCall 測試語境。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 14,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMW500.md"
+             },
+             "score": 1.865279
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing › R&D：R&S CMX500 single-box signaling testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- [[R&S CMX500]] 是 multi-technology multi-channel signaling tester。\n- 來源稱其已新增 integrated [[Wi-Fi 7]] test functionality。\n- 目的在 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation。\n- Wi-Fi 7 R&D 測試需在 signaling mode 與 real-world conditions 下量測 RF TX / RX characteristics。\n- [[MLO]] 是 [[Wi-Fi 7]] key feature，因此提供 multiple RF chains 的 test environment 很重要。\n- 來源列出的 Wi‑Fi 7-specific tests 包含 2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 3.5086
+            },
+            {
+             "text": "Signaling test solution › UAV 產品通訊技術表\n| 機型 | 核心通訊技術 | 使用限制 |\n|---|---|---|\n| [[DJI Mini 4 Pro]]、[[DJI Mavic 3]] | O4 / O3+ proprietary image transmission（2.4 / 5.8 GHz） | 來源未提供 DJI 官方 datasheet、地區頻段、功率、channel bandwidth 或 regulatory mode。 |\n| [[DJI Mavic 3 Enterprise]] | O3 proprietary radio + 4G LTE module | 來源未提供 LTE bands、SIM / operator 條件或 module 型號。 |\n| [[Parrot ANAFI Ai]] | built-in 4G LTE mobile network | 來源未提供 bands、operator、certification 或 throughput。 |\n| [[XAG P100]] | RTK positioning communication + proprietary radio | 來源未提供 RTK radio frequency、protocol 或基地站條件。 |\n| [[Skydio X2E]] / telecom inspection solution | Wi‑Fi / proprietary radio + 4G LTE | 來源未提供 telecom inspection solution 的正式文件或型號。 |\n| [[RQ-4 Global Hawk]]、[[Switchblade]] | military SATCOM + encrypted frequency-hopping radio | 來源未提供軍規文件、頻段、加密方式或跳頻參數。 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Signaling test solution.md"
+             },
+             "score": 5.491569
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 與既有知識的關係\n- 補強 [[5G NR SAR testing]]：既有頁以 [[SPEAG]] / [[DASY8-3D]] / [[R&S CMX500 OBT]] 的 SAR automation PR 為主；本來源從 CE RED Art 3.1a / FCC SAR / HAC compliance presentation 的角度補入 5G NR network emulator、multi-radio UE、average-SAR 與 CMW/CMX signaling solution。\n- 補強 [[R&S TS9975 EMI Test System]]：既有頁只由 [[2025RS Drone Solution]] 支撐 TS9975 作為 UAV EMI system；本來源新增 wireless devices Art 3.1b EMC / ABT context，並與 [[R&S TS9982 EMS Test System]] 同列。\n- 連接 [[低軌衛星終端設備檢測]]與 [[衛星地球電臺設備技術規範]]：既有頁以台灣 111年08月衛星地球電臺設備草案與 FCC Part 25 對應為主；本來源提供更泛化的 CE RED / ETSI EN 301 681 / EN 303 981 / FCC CFR47 §25 mobile satellite service 視角。\n- 與 [[R&S CMW500]] 既有頁相容：既有頁已保存 CMW500 的 NGeCall / LTE capability 與 datasheet；本來源只是簡報層級稱 latest CMW500 SW supports 3GPP R17 NB-NTN signalling，未提供 software version、license 或 test case ID，不應覆蓋正式 datasheet。\n- 與 [[R&S SMBV100B]] 既有頁相容：既有頁是 Version 13.01 specifications；本來源只是把 SMBV100B列為 EN 301 681 / EN 303 981 測試中的 signal generator solution，不新增產品規格。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 2.546728
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing\n[[Wi-Fi 7 R&D and production testing]] 是 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 中描述的測試方案組合：以 [[R&S CMX500]] 覆蓋 R&D signaling / interworking 測試，以 [[R&S CMP180]] 覆蓋 production non-signaling RF 測試。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 3.50323
+            },
+            {
+             "text": "Signaling test solution › 日期與期間\n| 項目 | 日期 / 期間 | 來源中的標示 |\n|---|---:|---|\n| raw 轉檔日期 | 2026-09-17 | frontmatter `converted: 2026-09-17`，不可當作內容發布日期。 |\n| OneNote 頁面正式日期 | 來源未標示 | 正文未標示正式發布日期、頁面日期或版本。 |\n| CMX500 5G / Wi‑Fi 配置 | 來源未標示配置日期 | 來源沒有說明這些 option list 的適用軟體版本、報價版本或 configuration guide 版本。 |\n| 5G hardening PDF | 來源未標示 | 只保留本機 PDF 檔名與 file URI；正文未擷取。 |\n| 5G private networks resilience PPTX | URL path 含 2025-12-19 | 只保留 SharePoint 檔名 / URL；未擷取簡報正文，不能當作內容發布日期。 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Signaling test solution.md"
+             },
+             "score": 2.944088
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源指出 smartphone Art 3.3g / [[Delegated Regulation (EU) 2019-320]] / E112 是沒有 ETSI EN standard 的 regulatory compliance requirement；當沒有 EN standard available 時需 Notified body involved，並稱 [[R&S TS-LBS]] 是 first test solution available to perform the necessary LBS compliance tests。\n- [[FCC 無線設備法規測試]]部分列出 [[47 CFR]]、[[ANSI C63.26]]、[[ANSI C63.10]]、[[IEEE Std 1528-2013]]、[[C63.19]] 等測試依據，並列出 licensed cellular CFR47 test items：RF power output、modulation characteristics、occupied bandwidth、band edge、spurious emissions、frequency stability、peak to average ratio、field strength of spurious radiation。\n- 來源以 [[ITU-R SM.329-12]] 與 [[47 CFR §2.1057]] 對照 CE RED / FCC 的 frequency range：5G NR FR1 的 CE RED 30 MHz–26 GHz、FCC 9 kHz–40 GHz；5G NR FR2 的 CE RED 30 MHz–90 GHz、FCC 9 kHz–200 GHz；並提到 [[R&S FSV3000]] / [[R&S FSVA3000]]、[[R&S FSW]]、[[R&S ESW]]。\n- [[NTN 裝置法規測試]]部分把 NTN device implementation 分成 proprietary、3GPP < R16、3GPP R17 NTN-IoT、reuse spectrum assets / 3GPP unmodified UE 等路徑，例子包含 iPhone 14 / Globalstar、Qualcomm / Iridium、MTK / Bullitt / Skylo、AT&T / AST Space Mobile、T-Mobile / Starlink、Optus / Lynk。\n- 來源列出衛星 / NTN 相關 EN standards：[[EN 301 441]]、[[EN 301 442]]、[[EN 301 444]]、[[EN 301 681]]、[[EN 302 574]]、[[EN 303 981]]，並將 iPhone14、Bullitt defy satellite link、StarLink Dish 作為 DoC / market product examples。\n- 來源將 [[EN 301 681]] 測試偏向 conducted measurement，列出 spectrum analyzer、signal generator、BER measure / system emulator / mobile radio tester 等 required instruments，並明示 latest [[R&S CMW500]] software can support 3GPP R17 NB-NTN signalling。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 2.074544
+            },
+            {
+             "text": "R&S TS9982 EMS Test System › 來源中的角色\n依 [[Regulatory test for wireless devices with cellular technology]]：\n\n- [[R&S TS9982 EMS Test System]] 與 [[R&S TS9975 EMI Test System]] 同列於 Traditional EMC Art 3.1b tests。\n- 上下文是 [[CE RED 無線設備法規測試]] Art 3.1b [[EMC]] requirements。\n- 來源指出 Art 3.1b EMC test requirements are not changed by 5G NR。\n- EMC tests need both enable radio and disable radio conditions, which means signaling solution for 5G NR。\n- Mobile phones require [[Audio Breakthrough]] test, from GSM to VoLTE and VoNR by 5G。\n- 來源稱 R&S EMC Systems cover 5G NR functionality, powered by latest [[R&S CMX500]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS9982 EMS Test System.md"
+             },
+             "score": 3.11425
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing › Production：R&S CMP180 non-signaling RF testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。\n- [[R&S CMP180]] 被定位為 optimized for this purpose 的 radio communication tester。\n- 來源稱 [[R&S CMP180]] 支援 many cellular and non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform。\n- 來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。\n- 來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。\n- 來源稱 two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 2.613149
+            },
+            {
+             "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 重點摘要\n- 來源未標示發布日期；raw frontmatter `created: 2026-09-11`，本文 ingest 日期為 2026-09-15。\n- [[Rohde & Schwarz]] 宣稱在最終 IEEE standard ratification 之前，已將 first [[Wi-Fi 8 RF signaling tests]] 實作到 [[R&S CMX500]] one-box signaling tester。\n- 展示情境：[[MWC Barcelona 2026]]，[[Rohde & Schwarz]] booth 5A80，Fira Gran Via Barcelona，hall 5。\n- 測試對象：[[Broadcom]] prototype next-generation WLAN device / prototype [[Wi-Fi 8]] device。\n- [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的焦點被描述為從 sheer speed 轉向 ultra-high reliability（[[UHR]]）performance。\n- 來源稱 [[Wi-Fi 8]] 延續 [[Wi-Fi 7]] 的 core PHY parameters：supported frequencies up to 7.125 GHz、channel bandwidths up to 320 MHz、4096QAM modulation、[[MLO]]。\n- 來源列出 [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的新 testing hurdles，包括 [[distributed resource units]]（dRU）與 [[unequal modulation]]（UEQM）。\n- dRU measurements 被描述為可驗證 device boosting uplink transmit power 與 improving connection reliability 的 effectiveness。\n- UEQM analysis 被描述為可評估 test device 是否能依 specified modulation coding scheme（MCS）combinations 正確 adapt modulation。\n- [[R&S CMX500]] 被定位為 modular、powerful one-box signaling tester，支援 [[LTE]]、[[NR]] SA/NSA、[[NR-NTN]]、[[NB-NTN]]、Direct-to-Cell（[[D2C]] / [[DTC]]）與 WLAN including [[Wi‑Fi 7]] and [[Wi‑Fi 8]]。\n- Press & media contact：[[Christian Mokry]]，PR Manager Test & measurement。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+             },
+             "score": 5.058694
+            },
+            {
+             "text": "2) Full Test Lifecycle: R&D → Pre-Conformance → Conformance → Production\n• CMX500 (signaling), CMW500 (legacy), CMP180/CMP200/CMW100 (production).\n• amarisoft has no non-signaling platform, no production scaling path.\n3) Conformance & Operator Acceptance\n• R&S supports PTCRB/GCF aligned RF, RRM, protocol, IMS, VoNR, throughput, CA,",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e141f59158e470e8",
+               "original_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+               "sha256": "e141f59158e470e849778876246460c9f93447816817e416175f8ab030ef3a03",
+               "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.171452
+            },
+            {
+             "text": "Rohde & Schwarz, in collaboration with Broadcom, will display its [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC Barcelona 2026 with newly added Wi-Fi 8 (IEEE 802.11bn) testing capabilities. The setup at the Rohde & Schwarz booth (5A80) will validate a prototype Wi-Fi 8 device from Broadcom, showcasing physical layer features unique to Wi-Fi 8.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f833664f4958cbb4",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.640029
+            },
+            {
+             "text": "Message: R&S offers a single-platform path to FR3 and 6G-ready features; Keysight relies\non a combination of UXM variants and separate tools.\n6) Cellular + Wi-Fi in One Platform\nR&S\n• CMX500: Wi-Fi 6 / 6E / 7 signaling possible to integrate in every CMX500",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3cd0a825d66aa879",
+               "original_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+               "sha256": "3cd0a825d66aa87920658011dcd77c5a045e2ba6fa25667b180261813c4c2950",
+               "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.264299
+            },
+            {
+             "text": "SMW/FSW/Oscilloscopes\nCMX500/CMW500\nATS1800\nCMP200/CMP180\nCMX500/CMW500 (incl. CMsquares)\nCMQ/ATS\nCMX500/CMW500 (incl. CMsquares applications)",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-930719e012588eec",
+               "original_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+               "sha256": "930719e012588eec7cb2f397159386a87d1a5920c6edc93e0410be578603327b",
+               "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+              "section": 97,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.147065
+            }
+           ],
+           "text": "Raw evidence supports CMX500 as a signaling platform and CMW500 as a legacy platform [25].\nRaw evidence states R&S supports PTCRB/GCF-aligned RF, RRM, protocol, IMS, VoNR, throughput, and CA [25].\nRaw evidence states CMX500 is a multi-technology multi-channel signaling tester with newly added Wi‑Fi 8 / IEEE 802.11bn testing capabilities [26].\nRaw evidence states the CMX500 Wi‑Fi 8 setup validates a prototype Wi‑Fi 8 device and showcases Wi‑Fi 8 physical-layer features [26].\nRaw evidence states CMX500 can integrate Wi‑Fi 6, Wi‑Fi 6E, and Wi‑Fi 7 signaling [27].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "2) Full Test Lifecycle: R&D → Pre-Conformance → Conformance → Production\n• CMX500 (signaling), CMW500 (legacy), CMP180/CMP200/CMW100 (production).\n• amarisoft has no non-signaling platform, no production scaling path.\n3) Conformance & Operator Acceptance\n• R&S supports PTCRB/GCF aligned RF, RRM, protocol, IMS, VoNR, throughput, CA,",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-e141f59158e470e8",
+              "original_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "sha256": "e141f59158e470e849778876246460c9f93447816817e416175f8ab030ef3a03",
+              "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 31.171452
+           },
+           {
+            "text": "Rohde & Schwarz, in collaboration with Broadcom, will display its [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC Barcelona 2026 with newly added Wi-Fi 8 (IEEE 802.11bn) testing capabilities. The setup at the Rohde & Schwarz booth (5A80) will validate a prototype Wi-Fi 8 device from Broadcom, showcasing physical layer features unique to Wi-Fi 8.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f833664f4958cbb4",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 29.640029
+           },
+           {
+            "text": "Message: R&S offers a single-platform path to FR3 and 6G-ready features; Keysight relies\non a combination of UXM variants and separate tools.\n6) Cellular + Wi-Fi in One Platform\nR&S\n• CMX500: Wi-Fi 6 / 6E / 7 signaling possible to integrate in every CMX500",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-3cd0a825d66aa879",
+              "original_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+              "sha256": "3cd0a825d66aa87920658011dcd77c5a045e2ba6fa25667b180261813c4c2950",
+              "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.264299
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [
+            {
+             "name": "technical_knowledge",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV signaling test solution.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+              }
+             ],
+             "attempts": 1
+            }
+           ],
+           "missing_facets": [],
+           "relation_required": false,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

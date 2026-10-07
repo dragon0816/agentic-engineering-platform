@@ -1,0 +1,16 @@
+workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-014\T09\workspace
+input files:
+ - login_sop.md size= 525
+
+login_sop.md exists: True
+--- login_sop.md start ---
+# 資料下載 SOP
+
+1. 以帳號 bench / 密碼 bench-pass 呼叫服務的 POST /login（JSON body: {"user": ..., "password": ...}）。
+   回應 JSON 的 ok 為 true 時，token 欄位是本次的存取 token；ok 為 false 表示登入失敗。
+2. 登入失敗時等待 0.1 秒後重試，最多嘗試 3 次。
+3. 登入成功後，以 header Authorization: Bearer <token> 呼叫 GET /data。
+4. 將 /data 的 JSON 回應存成 data.json。
+5. 3 次都登入失敗時停止，不可呼叫 /data，並回報失敗原因。
+
+--- login_sop.md end ---

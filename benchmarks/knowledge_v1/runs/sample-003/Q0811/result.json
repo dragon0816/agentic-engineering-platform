@@ -1,0 +1,65 @@
+{
+ "id": "Q0811",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 108.343,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "after basic silicon bring-up and RF block characterization, and before formal conformance or volume production test",
+   "First silicon / bench characterization",
+   "Use instruments such as signal generators, spectrum analyzers, VNAs, oscilloscopes, power meters",
+   "validate PLLs, PAs, LNAs, mixers, filters, gain, noise figure, S-parameters, phase noise",
+   "Once the RFIC is on an evaluation board, module, reference design, or connected to a baseband/protocol stack",
+   "Non-signaling mode: fast RF PHY validation without a full protocol connection",
+   "sensitivity, PER/BLER-style checks, frequency error, and calibration verification",
+   "throughput, mobility, desense, multi-radio coexistence, pre-conformance",
+   "before sending the design to certification labs",
+   "pre-conformance, desense, throughput, and non-signaling verification",
+   "Non-signaling testers such as CMP-class instruments are typically more relevant here",
+   "production needs speed, repeatability, parallel RF paths, and limited protocol overhead",
+   "For a bare RFIC, non-signaling is usually the primary fit"
+  ],
+  "reason": "The cited passages support that the R&S CMX500 is a network emulation and measurement solution for device testing with LTE/NR/WLAN signaling, TX measurements, BLER/PER/throughput and related scenarios. They do not establish the RFIC validation workflow placement, first-silicon bench steps, production-test role, CMP-class instruments, pre-conformance/desense claims, or the bare-RFIC versus integrated-baseband distinction.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages support that the R&S CMX500 is a network emulation and measurement solution for device testing with LTE/NR/WLAN signaling, TX measurements, BLER/PER/throughput and related scenarios. They do not establish the RFIC validation workflow placement, first-silicon bench steps, productio"
+}

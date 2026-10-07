@@ -1,0 +1,1321 @@
+{
+ "question": {
+  "id": "Q0946",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Signal Generator / Signal Analyzer in Semiconductor, and what evidence supports each opportunity?",
+  "market": "Semiconductor",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-dfeb082ae35347b59a7814a80d15dd7c",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Signal Generator / Signal Analyzer in Semiconductor, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 441.39,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-dfeb082ae35347b59a7814a80d15dd7c",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T14:02:10.626982Z",
+    "updated_at": "2026-10-07T14:09:31.628332Z",
+    "messages": [
+     {
+      "message_id": "message-7b8295e873f34daaa72852d599ed0376",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Signal Generator / Signal Analyzer in Semiconductor, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T14:02:10.639023Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-30d1dec10eb147e586027c5003b36473",
+      "role": "assistant",
+      "text": "The knowledge base gave no Raw-grounded answer for this exact question: the targeted Raw-evidence query failed with insufficient evidence. So I cannot claim a fully supported, Raw-cited “strongest opportunities” answer from the vault.\n\nWhat the current vault snippets do support is a set of **candidate opportunities**, but with important evidence gaps:\n\n| Opportunity | Evidence strength | What vault evidence suggests | Key gap |\n|---|---:|---|---|\n| **AI ASIC / TPU / chiplet high-speed I/O validation: UCIe, PCIe, CXL, SerDes** | Medium for market/application, weak for SG/SA product tie | Wiki evidence references an “IO Serdes in AI ASIC-TPU-Chiplet” source showing Die-to-Die Adapter blocks and links labeled **PCIe, CXL, Streaming**, plus **UCIe Main Band RX/TX** and **UCIe Sideband RX/TX**. | The retrieved evidence is wiki-level and explicitly says the source lacks date, publisher, protocol versions, lane count, data rates, and compliance scope. It also does not directly tie SMW/SMA/FSW/FSVA to this opportunity. |\n| **RF / frequency-converting DUT characterization using SMA100B** | Medium for product capability, weak for semiconductor use case | Wiki evidence for **R&S SMA100B** includes power analysis modes such as power vs. frequency, power vs. power, and power vs. time; it also says the frequency range is based on the signal generator or power sensor range and supports **frequency-converting DUTs**. SMA100B options also include ramp sweep, differential clock synthesizer, chirp generation, and high dynamic uninterrupted level sweep. | This supports a signal-generator capability relevant to RFIC/module/DUT work, but the retrieved evidence does not explicitly say “semiconductor,” “RFIC,” “wafer,” or “ATE.” |\n| **Clock / LO / phase-noise-sensitive semiconductor testing with SMA100B** | Medium for product capability, weak for market evidence | SMA100B wiki evidence lists a **differential clock synthesizer 3 GHz**, clock synthesizer frequency extension to 6 GHz, rear-panel connectors up to high microwave ranges, and remote-control interfaces such as GPIB/USB. | The vault snippets do not provide Raw evidence that semiconductor customers are using this for clock/LO/device test. |\n| **5G / NTN chipset, module, and device validation** | Strong for CMX500/NTN, weak for SG/SA | Wiki evidence says a Viasat/R&S NB-NTN IoT test plan targets **chipsets, modules and devices**, interoperability with Viasat satellite network, and 3GPP Release 17 compliance. It is based on **R&S CMX500**, not a signal generator/analyzer. | This is a semiconductor-adjacent opportunity, but the retrieved evidence is about CMX500 signaling test, not SMW/SMA/FSW/FSVA. |\n| **Automotive / radar / chirp signal generation** | Weak-to-medium for product capability | SMA100B evidence lists **chirp signal generation** and ramp sweep capabilities, which are technically relevant to radar and RF component testing. | No retrieved Raw evidence ties this to semiconductor radar IC opportunities. |\n| **Wi‑Fi 7 / 5G RFIC or connectivity chipset testing with SG/SA** | Insufficient from retrieved evidence | The query did not return usable Raw-supported passages connecting SMW/FSW/FSVA to semiconductor Wi‑Fi/5G chipset testing. | Need additional Raw evidence from product/application notes or market documents. |\n\n**Bottom line:** based strictly on current retrieved vault evidence, I would not present a Raw-supported sales ranking yet. The strongest **hypotheses** are:\n\n1. **AI ASIC / chiplet high-speed I/O test** — strongest semiconductor market pull, but missing direct SG/SA evidence.  \n2. **RFIC / frequency-converting DUT characterization with SMA100B + analyzers** — strongest product-capability fit, but missing explicit semiconductor market evidence.  \n3. **5G/NTN chipset and module validation** — strongest “chipset/module” evidence, but currently tied to CMX500 rather than standalone signal generator/analyzer.  \n4. **Radar / chirp / ramp-sweep component testing** — plausible SG opportunity, but Raw evidence is not enough yet.  \n\nRecommended next step: add or query specific Raw application notes/datasheets for **SMW200A, SMBV100B, SMA100B, FSW, FSVA** plus semiconductor terms like **RFIC, wafer, ATE, SerDes, UCIe, PCIe, CXL, DDR, HBM, Wi‑Fi 7, 5G chipset, radar SoC**. Then I can produce a defensible opportunity ranking with citations.",
+      "created_at": "2026-10-07T14:09:31.628332Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-4d4856a823cc47a08ae810dd72c403c4",
+       "request_id": "request-4d4856a823cc47a08ae810dd72c403c4",
+       "span_id": "span-4d4856a823cc47a08ae810dd72c403c4",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)",
+    "ok": true,
+    "answer": "The knowledge base gave no Raw-grounded answer for this exact question: the targeted Raw-evidence query failed with insufficient evidence. So I cannot claim a fully supported, Raw-cited “strongest opportunities” answer from the vault.\n\nWhat the current vault snippets do support is a set of **candidate opportunities**, but with important evidence gaps:\n\n| Opportunity | Evidence strength | What vault evidence suggests | Key gap |\n|---|---:|---|---|\n| **AI ASIC / TPU / chiplet high-speed I/O validation: UCIe, PCIe, CXL, SerDes** | Medium for market/application, weak for SG/SA product tie | Wiki evidence references an “IO Serdes in AI ASIC-TPU-Chiplet” source showing Die-to-Die Adapter blocks and links labeled **PCIe, CXL, Streaming**, plus **UCIe Main Band RX/TX** and **UCIe Sideband RX/TX**. | The retrieved evidence is wiki-level and explicitly says the source lacks date, publisher, protocol versions, lane count, data rates, and compliance scope. It also does not directly tie SMW/SMA/FSW/FSVA to this opportunity. |\n| **RF / frequency-converting DUT characterization using SMA100B** | Medium for product capability, weak for semiconductor use case | Wiki evidence for **R&S SMA100B** includes power analysis modes such as power vs. frequency, power vs. power, and power vs. time; it also says the frequency range is based on the signal generator or power sensor range and supports **frequency-converting DUTs**. SMA100B options also include ramp sweep, differential clock synthesizer, chirp generation, and high dynamic uninterrupted level sweep. | This supports a signal-generator capability relevant to RFIC/module/DUT work, but the retrieved evidence does not explicitly say “semiconductor,” “RFIC,” “wafer,” or “ATE.” |\n| **Clock / LO / phase-noise-sensitive semiconductor testing with SMA100B** | Medium for product capability, weak for market evidence | SMA100B wiki evidence lists a **differential clock synthesizer 3 GHz**, clock synthesizer frequency extension to 6 GHz, rear-panel connectors up to high microwave ranges, and remote-control interfaces such as GPIB/USB. | The vault snippets do not provide Raw evidence that semiconductor customers are using this for clock/LO/device test. |\n| **5G / NTN chipset, module, and device validation** | Strong for CMX500/NTN, weak for SG/SA | Wiki evidence says a Viasat/R&S NB-NTN IoT test plan targets **chipsets, modules and devices**, interoperability with Viasat satellite network, and 3GPP Release 17 compliance. It is based on **R&S CMX500**, not a signal generator/analyzer. | This is a semiconductor-adjacent opportunity, but the retrieved evidence is about CMX500 signaling test, not SMW/SMA/FSW/FSVA. |\n| **Automotive / radar / chirp signal generation** | Weak-to-medium for product capability | SMA100B evidence lists **chirp signal generation** and ramp sweep capabilities, which are technically relevant to radar and RF component testing. | No retrieved Raw evidence ties this to semiconductor radar IC opportunities. |\n| **Wi‑Fi 7 / 5G RFIC or connectivity chipset testing with SG/SA** | Insufficient from retrieved evidence | The query did not return usable Raw-supported passages connecting SMW/FSW/FSVA to semiconductor Wi‑Fi/5G chipset testing. | Need additional Raw evidence from product/application notes or market documents. |\n\n**Bottom line:** based strictly on current retrieved vault evidence, I would not present a Raw-supported sales ranking yet. The strongest **hypotheses** are:\n\n1. **AI ASIC / chiplet high-speed I/O test** — strongest semiconductor market pull, but missing direct SG/SA evidence.  \n2. **RFIC / frequency-converting DUT characterization with SMA100B + analyzers** — strongest product-capability fit, but missing explicit semiconductor market evidence.  \n3. **5G/NTN chipset and module validation** — strongest “chipset/module” evidence, but currently tied to CMX500 rather than standalone signal generator/analyzer.  \n4. **Radar / chirp / ramp-sweep component testing** — plausible SG opportunity, but Raw evidence is not enough yet.  \n\nRecommended next step: add or query specific Raw application notes/datasheets for **SMW200A, SMBV100B, SMA100B, FSW, FSVA** plus semiconductor terms like **RFIC, wafer, ATE, SerDes, UCIe, PCIe, CXL, DDR, HBM, Wi‑Fi 7, 5G chipset, radar SoC**. Then I can produce a defensible opportunity ranking with citations.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-4d4856a823cc47a08ae810dd72c403c4",
+      "request_id": "request-4d4856a823cc47a08ae810dd72c403c4",
+      "span_id": "span-4d4856a823cc47a08ae810dd72c403c4",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-4d4856a823cc47a08ae810dd72c403c4",
+       "request_id": "request-4d4856a823cc47a08ae810dd72c403c4",
+       "span_id": "span-4d4856a823cc47a08ae810dd72c403c4",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no Raw-grounded answer for this exact question: the targeted Raw-evidence query failed with insufficient evidence. So I cannot claim a fully supported, Raw-cited “strongest opportunities” answer from the vault.\n\nWhat the current vault snippets do support is a set of **candidate opportunities**, but with important evidence gaps:\n\n| Opportunity | Evidence strength | What vault evidence suggests | Key gap |\n|---|---:|---|---|\n| **AI ASIC / TPU / chiplet high-speed I/O validation: UCIe, PCIe, CXL, SerDes** | Medium for market/application, weak for SG/SA product tie | Wiki evidence references an “IO Serdes in AI ASIC-TPU-Chiplet” source showing Die-to-Die Adapter blocks and links labeled **PCIe, CXL, Streaming**, plus **UCIe Main Band RX/TX** and **UCIe Sideband RX/TX**. | The retrieved evidence is wiki-level and explicitly says the source lacks date, publisher, protocol versions, lane count, data rates, and compliance scope. It also does not directly tie SMW/SMA/FSW/FSVA to this opportunity. |\n| **RF / frequency-converting DUT characterization using SMA100B** | Medium for product capability, weak for semiconductor use case | Wiki evidence for **R&S SMA100B** includes power analysis modes such as power vs. frequency, power vs. power, and power vs. time; it also says the frequency range is based on the signal generator or power sensor range and supports **frequency-converting DUTs**. SMA100B options also include ramp sweep, differential clock synthesizer, chirp generation, and high dynamic uninterrupted level sweep. | This supports a signal-generator capability relevant to RFIC/module/DUT work, but the retrieved evidence does not explicitly say “semiconductor,” “RFIC,” “wafer,” or “ATE.” |\n| **Clock / LO / phase-noise-sensitive semiconductor testing with SMA100B** | Medium for product capability, weak for market evidence | SMA100B wiki evidence lists a **differential clock synthesizer 3 GHz**, clock synthesizer frequency extension to 6 GHz, rear-panel connectors up to high microwave ranges, and remote-control interfaces such as GPIB/USB. | The vault snippets do not provide Raw evidence that semiconductor customers are using this for clock/LO/device test. |\n| **5G / NTN chipset, module, and device validation** | Strong for CMX500/NTN, weak for SG/SA | Wiki evidence says a Viasat/R&S NB-NTN IoT test plan targets **chipsets, modules and devices**, interoperability with Viasat satellite network, and 3GPP Release 17 compliance. It is based on **R&S CMX500**, not a signal generator/analyzer. | This is a semiconductor-adjacent opportunity, but the retrieved evidence is about CMX500 signaling test, not SMW/SMA/FSW/FSVA. |\n| **Automotive / radar / chirp signal generation** | Weak-to-medium for product capability | SMA100B evidence lists **chirp signal generation** and ramp sweep capabilities, which are technically relevant to radar and RF component testing. | No retrieved Raw evidence ties this to semiconductor radar IC opportunities. |\n| **Wi‑Fi 7 / 5G RFIC or connectivity chipset testing with SG/SA** | Insufficient from retrieved evidence | The query did not return usable Raw-supported passages connecting SMW/FSW/FSVA to semiconductor Wi‑Fi/5G chipset testing. | Need additional Raw evidence from product/application notes or market documents. |\n\n**Bottom line:** based strictly on current retrieved vault evidence, I would not present a Raw-supported sales ranking yet. The strongest **hypotheses** are:\n\n1. **AI ASIC / chiplet high-speed I/O test** — strongest semiconductor market pull, but missing direct SG/SA evidence.  \n2. **RFIC / frequency-converting DUT characterization with SMA100B + analyzers** — strongest product-capability fit, but missing explicit semiconductor market evidence.  \n3. **5G/NTN chipset and module validation** — strongest “chipset/module” evidence, but currently tied to CMX500 rather than standalone signal generator/analyzer.  \n4. **Radar / chirp / ramp-sweep component testing** — plausible SG opportunity, but Raw evidence is not enough yet.  \n\nRecommended next step: add or query specific Raw application notes/datasheets for **SMW200A, SMBV100B, SMA100B, FSW, FSVA** plus semiconductor terms like **RFIC, wafer, ATE, SerDes, UCIe, PCIe, CXL, DDR, HBM, Wi‑Fi 7, 5G chipset, radar SoC**. Then I can produce a defensible opportunity ranking with citations.",
+      "model_turns": 4,
+      "tools": [
+       {
+        "call_id": "call_kicR3A9DFI0kcx4K4rI3nQXH",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-4d4856a823cc47a08ae810dd72c403c4",
+          "request_id": "request-4d4856a823cc47a08ae810dd72c403c4",
+          "span_id": "span-4d4856a823cc47a08ae810dd72c403c4",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-4d4856a823cc47a08ae810dd72c403c4",
+           "request_id": "request-4d4856a823cc47a08ae810dd72c403c4",
+           "span_id": "span-4d4856a823cc47a08ae810dd72c403c4",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Based on current vault evidence, what are the strongest opportunities for Signal Generator / Signal Analyzer in Semiconductor, and what Raw evidence supports each opportunity? Focus on Rohde & Schwarz signal generators/analyzers, semiconductor market/application opportunities, and cite evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 重點摘要\n- [[Rohde & Schwarz]] 宣稱其 hybrid eCall 與 Next Generation eCall test solution 已成功通過 [[cetecom advanced]] 的 certification testing。\n- 來源描述 [[cetecom advanced]] 是 independent test laboratory，服務範圍包含 communication technologies、automotive、medical technology、payment & identification 等產品測試與 worldwide certification。\n- 測試方案以 [[R&S CMX500]] radio communication tester 為基礎，搭配更新後的 eCall option，以支援最新 eCall regulations and standards。\n- 來源說 [[Hybrid eCall testing]] 所依據的 [[EN 18052]] 要求 hybrid system 結合不同 transmission paths and protocols，使 eCall 能可靠到達目的地。\n- 來源說實務上車輛會使用 NG eCall functions，即 IP/IMS-based voice and data over 4G/5G；但在 coverage 或 service quality 降低時，可自動 fallback 到 classic CS eCall 2G/3G transport paths。\n- 製造商需要驗證 hybrid implementations 能 trigger calls、transmit [[MSD]]、maintain [[GNSS]] positioning，並在 [[VoNR]]、[[VoLTE]] 與 circuit-switched fallback 等多種 network scenarios 下提供 intelligible voice quality。\n- [[Rohde & Schwarz]] 宣稱其 eCall evaluation solution [[R&S CMX-KA09x]] 已更新，以支援 compliance with [[EN 18052]]:2025 與 [[EN 17240]]:2024+A1:2026。\n- [[R&S CMX-KA099]] option completed Public Safety Answering Point scenario tests according to [[EN 18052]]:2025。\n- [[R&S CMX-KA098]] option completed Public Safety Answering Point scenario tests according to [[EN 17240]]:2024+A1:2026。\n- [[Thomas Reschka]] 以 [[cetecom advanced]] Senior Technical Consultant 身分表示，該 solution 用於 functional tests、protocol conformity tests，以及 type-approval of [[IVS]] implementing hybrid eCall and NG eCall。\n- 來源稱 test environment 可 simulation real-world mobile network conditions 並 emulation various network scenarios，用於 certifications 或 new vehicle model market launch 前準備。\n- Press contact 為 [[Patrizia Muehlbauer]]，職稱 PR Manager Products & Standard Systems。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+             },
+             "score": 2.204744
+            },
+            {
+             "text": "cetecom advanced › 來源中的定位\n依 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]]：\n\n- [[cetecom advanced]] conducted certification testing of the Rohde & Schwarz hybrid eCall and Next Generation eCall test solution。\n- 來源稱 cetecom advanced is a leading independent test laboratory for product testing and worldwide certification。\n- 來源列出的服務領域包含 communication technologies、automotive、medical technology、payment & identification。\n- [[Thomas Reschka]] 以 Senior Technical Consultant at cetecom advanced 身分在新聞稿中被引用。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/cetecom advanced.md"
+             },
+             "score": 4.688237
+            },
+            {
+             "text": "Juergen Meyer\n[[Juergen Meyer]] 是 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]] 中列名的 [[Rohde & Schwarz]] Vice President Market Segment Automotive。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Juergen Meyer.md"
+             },
+             "score": 1.34812
+            },
+            {
+             "text": "VIAVI O-RU Tester › 不可推論的內容\n- 來源未提供 VIAVI O-RU Tester 或 VIAVI TM500 O-RU Tester 的正式產品名稱、料號、software release、supported O-RAN WG4 spec versions、license 或 interface option。\n- 來源未提供 VIAVI 官方 datasheet / application note；不可由 R&S 簡報推論 VIAVI product roadmap、formal specification 或 market share。\n- 來源未提供 T-BC、FTN、PTP-GM、O-RU TMA、interconnection unit、TMA / TM500 software library 的具體版本與 timing architecture。\n- March 2025 來源中的 price point、competitor comparison、test case counts 與 VAR commercial terms 屬 internal / market context，需依正式 quote、contract、software release notes 與 public material 補證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/VIAVI O-RU Tester.md"
+             },
+             "score": 2.580616
+            },
+            {
+             "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 原文未解的問題\n- unresolved：新聞稿 frontmatter 的 published 欄位為空；來源正文也未標示發布日期。raw created 為 2026-09-11，但不可等同正式發布日。\n- unresolved：新聞稿未標示 document version、press release ID 或 revision。\n- unresolved：來源未提供 cetecom advanced certification report number、certificate number、測試日期、測試環境版本或完整 acceptance criteria。\n- unresolved：來源未提供 [[R&S CMX-KA09x]]、[[R&S CMX-KA098]]、[[R&S CMX-KA099]] 的完整 order number、license dependencies、software version 或 maintenance mapping。\n- unresolved：來源只稱 CMX-KA099 / CMX-KA098 completed PSAP test scenarios，未列出各 PSAP scenario 的 test case IDs、pass/fail detail 或是否涵蓋所有 EN 18052:2025 / EN 17240:2024+A1:2026 requirements。\n- unresolved：來源提到 national requirements，但未列國家、法規名稱或版本。\n- unresolved：來源未展開 [[EN 18052]]、[[EN 17240]] 的發布組織、正式標題或 amendment 細節。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+             },
+             "score": 1.608679
+            },
+            {
+             "text": "Juergen Meyer › 來源中的列名\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 人名：Juergen Meyer。\n- 組織：[[Rohde & Schwarz]]。\n- 職稱：Vice President Market Segment Automotive at Rohde & Schwarz。\n- 引言主旨：他表示 [[Rohde & Schwarz]] 很高興與 [[Qualcomm Technologies]] 合作驗證其 chipsets 的 NG eCall implementation，並稱此 collaboration 為 future emergency call services 設定 new benchmark，為 automotive industry 提供 robust and dependable solution 以 meet latest eCall standards。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Juergen Meyer.md"
+             },
+             "score": 0.828798
+            },
+            {
+             "text": "NEC › unresolved\n- 需要擷取 NEC Technical Journal 文章正文以確認日期、技術範圍、圖表與可引用主張。\n- 需要判定該文章應歸入 [[Knowledge]] 技術背景、[[Productions]] 產品 / 模組資料，或 [[Market]] 市場線索。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/NEC.md"
+             },
+             "score": 1.154311
+            },
+            {
+             "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 與既有知識的關係\n- 既有 [[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 是 [[R&S CMX500]] 搭配 [[R&S CMX-KA098]] / [[R&S CMX-KF671B]] 的 NGeCall over NR/LTE capability list，狀態含 Dec. 2024、May. 2025 與 June 2025 標註。本來源是新聞稿層級的 certification claim，補充 CMX-KA098 已完成 EN 17240:2024+A1:2026 PSAP test scenarios，但不提供完整 test case list。\n- 既有 [[CMX_Configuration_Guide]] 與 [[CMX500 NGeCall configuration]] 已列 [[R&S CMX-KA099]] 作為 EN18052:2025 hybrid configuration 的 mandatory software item。本來源補充 CMX-KA099 completed PSAP test scenarios according to EN 18052:2025。\n- 既有 [[R&S CMX-KA099]] 只由 configuration guide 確認 material number 與 APPL NGECALL MULTI CELL description；本來源提供其 certification / PSAP scenario context，但仍不是 formal datasheet。\n- 既有 [[NGeCall over LTE]] 頁整理 CMW500 與 CMX500 capability list。本來源將 scope 推進到 EN 17240:2024+A1:2026 與 hybrid eCall / EN 18052:2025 compliance statement。\n- 既有 [[eCall GNSS Testing configuration]] 記錄 SMBV100B-based GNSS configuration；本來源只說 hybrid implementations 需 maintain GNSS positioning，未提供 SMBV100B 或 GNSS test suite 配置。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+             },
+             "score": 1.191159
+            },
+            {
+             "text": "R&S CMX500 › Warranty and service\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n- Base unit warranty：1 year。\n- All other items warranty：1 year。\n- Calibration service plans：up to five years；on demand 為 pay per calibration。\n- Warranty and repair service plans：up to five years；on demand 為 standard price repair。\n- Extended periods：contact [[Rohde & Schwarz]] sales office。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 42,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 13.634179
+            },
+            {
+             "text": "Tim Seyler\n[[Tim Seyler]] 是 [[Rohde & Schwarz]] 相關 customer questionnaire 與 configuration guide 中列出的 contact；[[cmx500_ntn_customer_questionnaire]] 明示其 email 為 `tim.seyler@rohde-schwarz.com`，角色為 Product Manager Mobile Radio Testing。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Tim Seyler.md"
+             },
+             "score": 0.293874
+            },
+            {
+             "text": "Qualcomm › 來源中的說法\n- [[Taiwan CPE Industry 2024]] 的 5G FWA CPE Supply Chain Architecture 將 Qualcomm 與 [[MediaTek]]、RF houses 同列於 upstream：5G SoCs、RF modules、antennas、ICs。\n- [[Taiwan CPE Industry 2024]] 的 Chipset Competitive Landscape 說 3Q 2024 chip market value 為 USD 139.9 million。\n- 同一來源說 [[MediaTek]] vs. Qualcomm 的 market share gap 在 2024-2025 narrowing。\n- 同一來源說 Qualcomm focus on AI integration、advanced broadband device features。\n- 同一來源說 2025 outlook 是 chip price decline、intensified platform competition。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Qualcomm.md"
+             },
+             "score": 0.408989
+            },
+            {
+             "text": "Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite › 關鍵實體與概念\n- [[Viasat]]：來源稱其為 global leader in satellite communications；本來源中與 [[Rohde & Schwarz]] 合作建立 / 展示 NB-NTN IoT certification test plan。\n- [[Rohde & Schwarz]]：test and measurement solution provider；本來源中提供 [[R&S CMX500]] one-box signaling tester 作為 test plan basis。\n- [[R&S CMX500]]：來源稱其為 one-box signaling tester，可測試 [[NR-NTN]] 與 [[NB-NTN]] 等 NTN technologies；本來源未列 formal option stack、order number、measurement accuracy 或 release matrix。\n- [[Viasat NB-NTN IoT test plan]]：certification test plan，涵蓋 protocol、performance 與 RF test scenarios，目標是確認與 [[Viasat]] satellite network 的 interoperability。\n- [[NB-NTN]] / [[NB-IoT]]：來源將 testing focus 明確指向 NB-IoT devices over Non-Terrestrial Network capability。\n- [[3GPP Release 17]]：來源稱 chipsets、modules and devices 需 comply with Release 17 standards，但未列具體 test case 或 specification 編號。\n- [[MWC Barcelona 2026]]：來源說 visitors can experience the test plan in action；R&S booth 5A80 hall 5；Viasat hall 6 booth 6A20。\n- [[Christian Mokry]]：來源 press & media contact。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md"
+             },
+             "score": 4.509846
+            },
+            {
+             "text": "R&S CMX-KA09x › 來源中的定位\n依 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]]：\n\n- [[Rohde & Schwarz]] has updated its eCall evaluation solution, CMX-KA09x。\n- 更新目的：support compliance with [[EN 18052]]:2025 and [[EN 17240]]:2024+A1:2026。\n- [[R&S CMX-KA099]] successfully completed [[PSAP]] test scenarios in accordance with [[EN 18052]]:2025。\n- [[R&S CMX-KA098]] successfully completed [[PSAP]] test scenarios in accordance with [[EN 17240]]:2024+A1:2026。\n- 該方案基於 [[R&S CMX500]] radio communication tester 與 updated eCall option。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA09x.md"
+             },
+             "score": 6.953026
+            },
+            {
+             "text": "Tim Seyler › 限制與未決事項\n- [[AIW_Products_Customer_Questionnaire]] 未提供 [[Tim Seyler]] 的職稱或部門。\n- [[cmx500_ntn_customer_questionnaire]] 提供 Product Manager Mobile Radio Testing 角色，但未提供組織層級、所在地、職責範圍或是否為該 solution 的唯一負責人。\n- [[CMX_Configuration_Guide_Audio-Testing]] 只列 contact person，未提供 contact scope、approval authority 或是否為 audio testing configuration 的 owner。\n- [[CMX_Configuration_Guide_LTE-DTC]] 只列 contact person，未提供 contact scope、approval authority 或是否為 LTE-DTC configuration 的 owner。\n- 不能只因其被列為 contact，就推論其為 sales owner、technical owner 或所有相關產品的 product owner。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Tim Seyler.md"
+             },
+             "score": 0.278979
+            },
+            {
+             "text": "Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite › 重點摘要\n- [[Viasat]] 與 [[Rohde & Schwarz]] joined forces，以 boost testing for [[Narrowband Non-terrestrial Networks]]（[[NB-NTN]]）[[IoT]] devices connecting via satellite。\n- 合作目標是 thoroughly validating devices，並確認 devices 與 [[Viasat]] network 的 interoperability，以支援 satellite-based [[IoT]] applications 的 uninterrupted connectivity。\n- 來源稱雙方正在 strengthen and expand testing for [[Non-Terrestrial Network]] capabilities，specifically for [[NB-IoT]] devices。\n- 測試目標包含 chipsets、modules and devices interoperate seamlessly with [[Viasat]] satellite network，並 comply with [[3GPP Release 17]] standards。\n- 來源說 advanced testing methodologies 用於 uphold quality、performance and reliability，服務情境是 areas without terrestrial network coverage 的 ubiquitous IoT applications。\n- [[Viasat NB-NTN IoT test plan]] 被描述為 certification test plan，涵蓋 protocol、performance 與 RF test scenarios。\n- Test plan based on [[R&S CMX500]] one-box signaling tester；來源稱 [[R&S CMX500]] 是 versatile solution designed for testing various NTN technologies，包括 [[NR-NTN]] 與 [[NB-NTN]]。\n- 來源稱 [[R&S CMX500]] 在 single instrument 中 covers R&D through certification and carrier acceptance tests，並提供 reliable and repeatable results；此為 PR claim，不能替代 formal specifications。\n- [[Rohde & Schwarz]] 將於 [[MWC Barcelona 2026]] 展示 first test results covering protocol、performance and RF test scenarios，地點為 [[Rohde & Schwarz]] booth 5A80 in hall 5，日期 March 2 to 5, 2026。\n- 來源也列出 [[Viasat]] booth：hall 6，booth 6A20。\n- Press & media contact 為 [[Christian Mokry]]，職稱 PR Manager Test & measurement，phone +49 89 412913052，email press@rohde-schwarz.com。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md"
+             },
+             "score": 3.307112
+            },
+            {
+             "text": "R&S CMX-KA099 › certification / PSAP scenario context\n依 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]]：\n\n- [[Rohde & Schwarz]] updated its eCall evaluation solution [[R&S CMX-KA09x]] to support compliance with [[EN 18052]]:2025 and [[EN 17240]]:2024+A1:2026。\n- [[R&S CMX-KA099]] option successfully completed [[PSAP]] test scenarios in accordance with [[EN 18052]]:2025。\n- certification testing was conducted by [[cetecom advanced]]。\n- solution is based on [[R&S CMX500]] radio communication tester with updated eCall option。\n\n這補充了 [[CMX_Configuration_Guide]] 的 configuration-table 視角，但新聞稿未提供 CMX-KA099 的 complete test case list、software version、license dependency、certificate number 或 formal datasheet。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA099.md"
+             },
+             "score": 5.21882
+            },
+            {
+             "text": "Tim Seyler › 與相關主題的關係\n- 在 [[AIW_Products_Customer_Questionnaire]] 中，[[Tim Seyler]] 作為 [[R&S AI Workplace Solutions]] customer questionnaire 的 contact 出現。\n- 在 [[cmx500_ntn_customer_questionnaire]] 中，[[Tim Seyler]] 作為 [[R&S NTN signaling solutions]] customer questionnaire 的 contact 出現，並被標示為 Product Manager Mobile Radio Testing。\n- 在 [[CMX_Configuration_Guide_Audio-Testing]] 中，[[Tim Seyler]] 是 [[CMX500 Audio Testing configuration]] 的 contact person；來源未提供 email、職稱或 team。\n- 在 [[CMX_Configuration_Guide_LTE-DTC]] 中，[[Tim Seyler]] 是 [[CMX500 LTE-DTC configuration]] 的 contact person；來源未提供 email、職稱或 team。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Tim Seyler.md"
+             },
+             "score": 0.277548
+            },
+            {
+             "text": "Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite\n這份來源是 [[Rohde & Schwarz]] 網站新聞稿，說明 [[Viasat]] 與 [[Rohde & Schwarz]] 合作強化 [[NB-NTN]] / [[NB-IoT]] satellite connectivity device testing，目標是讓 chipsets、modules 與 devices 能與 [[Viasat]] satellite network interoperable，並符合 [[3GPP Release 17]] standards；來源未標示 published date，raw frontmatter created 為 2026-09-11。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md"
+             },
+             "score": 1.900707
+            },
+            {
+             "text": "R&S CMX-KA098 › License swap 來源\n- 來源：[[CMW500 to CMX500OBT_License_Swap_Process]]。\n- 文件月份：November 2024。\n- 頁尾日期：11/6/2024；日期格式未標示。\n- 文件版次：來源未標示。\n- 文件分類：COMPANY CONFIDENTIAL。\n- Recipient keycode：CMX-KA098。\n- Recipient description：Application test IMS NGeCALL。\n- Source keycode：[[R&S CMW-KA096]]（for CMWPC）。\n- Source description：NGECALL APPL。\n- 使用情境：[[R&S CMW500]] → [[R&S CMX500 OBT]] license swap for OBT upgrades。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+             },
+             "score": 3.632438
+            },
+            {
+             "text": "R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT › 重點摘要\n- 來源更新 [[R&S portfolio for O-RU testing]]（August 2023）的 O-RU testing portfolio 視角，將重點放在 2025 年的 [[O-RU tester market and funding]]、[[R&S PVT360A O-RU testing]]、[[O-RU NES testing]]、[[VIAVI O-RU Tester]] / [[VIAVI TM500]] integration、competitor positioning 與 NTIA funding opportunities。\n- Slide 2 說 O-RU tester 客戶範圍包含 traditional TOP3 RAN vendors：[[Ericsson]]、[[Nokia]]、[[Samsung]]；O-RAN market entrants：[[Kyocera]]、[[Mavenir]]、[[Tejas]]、[[Fujitsu]]、[[NEC]]、[[ADI]]、[[Qualcomm]]、[[Battelle]]；以及 testing budget limited 的 [[Phy-tunes]]、[[GXC]]、[[Eridian]]、[[University of Georgia]]，與 DAS companies：[[Amphenol]] / Andrew、[[SOLiD]]、[[Samji]]、[[HFR]]。\n- Slide 2 說 US government 透過 [[NTIA NOFO2]] / SRFA#1 funding program 資助 O-RU commercialization；來源描述 2 years project、targeting commercially available Jan 2027、O-RU conformance testing ongoing、field testing starts 1HCY2026、mass-production EoY CY26 / BoY CY27。\n- Slide 3 把 [[Open RAN]] ecosystem 分為 traditional infrastructure providers、radio subsystem manufacturers、chipset / reference designers、industry organizations、test labs、test equipment manufacturers、network operators 與 government funding。\n- Slide 4 將 key test focus areas 從 R&D 到 field testing 分為 RF design / verification / integration、power management、digital design、production testing、regression、operator test、beamforming / Massive MIMO、fronthaul conformance、timing / sync / signal integrity、OTA、QoS / QoE、3GPP compliance、interoperability、end-to-end、functional / baseline testing、network benchmarking、site testing / troubleshooting 與 network synchronization。\n- Slide 5 列出 O-RU testing general instrumentation：[[R&S NGP800]]、[[R&S NGT3600]]、[[R&S OSP200]] / [[R&S OSP300]]、[[R&S RTO]] / [[R&S RTP]]，並標示 Q2CY2025。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+             },
+             "score": 2.005827
+            },
+            {
+             "text": "vault-cli.ps1 › Market 轉檔\n依 [[Market README]]，Market 原始檔若是 PDF、簡報或網頁存檔，應放入 `drop/Market/`，再用 [[vault-cli.ps1]] 的 `convert` / `convert -Apply` 流程轉成 `raw/Market/`。資料夾名稱會保留，因此後續 ingest 會套用 [[Market ingest 規則]]。\n\n[[Market README]] 同時說明，若資料是從網頁直接複製的文字，應直接貼進 `raw/Market/` 存成 `.md`；這種情境不需要先經過 [[drop 資料夾]] 或 [[vault-cli.ps1]] 轉換。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/vault-cli.ps1.md"
+             },
+             "score": 2.602465
+            },
+            {
+             "text": "R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT › 與既有知識的關係\n- 相較 [[R&S portfolio for O-RU testing]]（August 2023），本來源是 2025-03 的 short version，新增 O-RU tester market / funding、PVT360A cost-optimized positioning、NES / EE、M-MIMO with BFM、competitor positioning、VIAVI VAR agreement 與 NTIA funded labs 資訊。\n- 補強 [[O-RU testing]]：既有頁面已整理 August 2023 的 O-RAN WG4 / 3GPP / VIAVI + R&S solution；本來源新增 2025 年 portfolio segmentation、PVT360A 與 VSA/VSG 兩種 offer path、production / regression / certification 的定位差異。\n- 補強 [[Network energy saving]]：既有頁面由 [[MWC2025---WIC-INFRA]] 建立 network energy saving 概念；本來源把 NES 具體連到 O-RU、ETSI traffic models、RTO6、NGP / NGT、VIAVI TM500 O-RU Tester、ADI Titan demo 與 up to 40% energy savings claim。\n- 補強 [[VIAVI O-RU Tester]]：既有頁面只由 August 2023 portfolio 支撐；本來源新增 PVT360A setup、VSA/VSG setup、TM500 O-RU Tester、O-DU emulator、TMA、VAR agreement 與 lab adoption 線索。\n- 補強 [[O-RAN WG4 Conformance Testing]]：本來源提到 `O-RAN.WG4.CONF.0-R003-v09.00` target release Q2CY25，與既有 `ORAN-WG4.CONF-v06.00` 形成版本演進線索，但不是同一正式文件全文。\n- 補強 [[R&S PVT360A]]：本來源是 Market / sales deck，不能覆蓋 [[PVT360A_Features_V8-5-30_en_06]] 的 Productions 規格；PVT360A 的 O-RU testing positioning 另建 [[R&S PVT360A O-RU testing]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+             },
+             "score": 1.77449
+            },
+            {
+             "text": "vault-cli.ps1 › 限制與注意事項\n- [[Drop README]] 明示 conversion 是 lossy；因此轉出 markdown 不應被視為原始檔的完整無損替代。\n- [[Market README]] 只提供 Market convert 的操作示例，未說明 [[vault-cli.ps1]] 的版本、程式碼位置、支援的文件轉換引擎、OCR 能力或失敗重試機制。\n- [[Productions README]] 只提供 Productions convert 的操作示例，未說明 [[vault-cli.ps1]] 在產品 datasheet、規格表或 option 表上的抽取品質、OCR 能力或表格保真度。\n- 原文未標示 audio transcription 上傳到 [[Google]] 的隱私、權限與資料保留條件。\n- 原文只提供 [[ffmpeg]] 抽音訊範例，未說明支援的 video / audio codec 或容器格式。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/vault-cli.ps1.md"
+             },
+             "score": 1.274802
+            },
+            {
+             "text": "Viasat › 來源中的角色\n依 [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]]：\n\n- [[Viasat]] 與 [[Rohde & Schwarz]] joined forces to boost testing for [[Narrowband Non-terrestrial Networks]]（[[NB-NTN]]）[[IoT]] devices connecting via satellite。\n- [[Viasat]] 被描述為 global leader in satellite communications。\n- 合作目標是確保 chipsets、modules and devices interoperate seamlessly with [[Viasat]] satellite network，並 comply with [[3GPP Release 17]] standards。\n- 來源描述的 target service 是 satellite-based [[IoT]] applications，特別是在 areas without terrestrial network coverage 的 ubiquitous IoT applications。\n- [[Viasat NB-NTN IoT test plan]] 是 certification test plan，包含 protocol、performance 與 RF test scenarios，並 based on [[R&S CMX500]] one-box signaling tester。\n- 來源指出 visitors to [[MWC Barcelona 2026]] can experience the test plan in action；[[Viasat]] booth 位於 hall 6，booth 6A20。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Viasat.md"
+             },
+             "score": 6.977736
+            },
+            {
+             "text": "► R&S®FPS\nFor further information on R&S signal and spectrum analyzers, please see:\nhttps://www.rohde-schwarz.com/signal-spectrum-analyzers\nThe following test equipment and abbreviations are used in this application note:\n► The R&S®SMW200A vector signal generator is referred to as the SMW",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.583365
+            },
+            {
+             "text": "Options for GNSS and avionics\nThe options are described in the GNSS and Avionics Simulation for Rohde & Schwarz Signal Generators specifications\n(PD 3607.6896.22).",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-06b5fb58225495b8",
+               "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+               "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "section": 771,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.843841
+            },
+            {
+             "text": "```powershell\n$V = \"C:\\Users\\Chi_L\\OneDrive - Rohde & Schwarz\\RS_Knowledge\"\n.\u000bault-cli.ps1 convert -Vault $V          # 先看會轉哪些\n.\u000bault-cli.ps1 convert -Vault $V -Apply   # drop/Market/ -> raw/Market/\n```",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-6f9dff4672b98062",
+               "original_ref": "raw/Market/README.md",
+               "sha256": "6f9dff4672b980628162fbdf049e0e0d5753da0e47e4cf6b4f50fbdff0c43448",
+               "raw_ref": "raw/Market/README.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/README.md",
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.703119
+            },
+            {
+             "text": "https://www.rohde-schwarz.com/signalgenerators\nThe following test equipment and abbreviations are used in this application note:\n► The R&S®FSW spectrum analyzer is referred to as the FSW\n► The R&S®SMW200A vector signal generator is referred to as the SMW\n3 RF Transmitter Tests (TS 38.141-1, chapter 6)",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-fc3b9e0cc7a10eb5",
+               "original_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "sha256": "fc3b9e0cc7a10eb5ae7a436499363e1fd557d119b7e2fb981731397565dd9ebf",
+               "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "section": 14,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.715652
+            }
+           ],
+           "text": "【推論】Strongest current SG/SA semiconductor opportunity: Open RAN / O-RU chipset and reference-design RF testing, because the vault directly names “chipset / reference designers” in the Open RAN ecosystem and lists O-RU RF design, verification, production, regression, conformance, and 3GPP compliance test focus areas, while Raw evidence directly shows R&S®FSW spectrum analyzer and R&S®SMW200A vector signal generator used for RF transmitter tests under TS 38.141-1 chapter 6.[20][28]\n### Recommended opportunities\n| Rank | Opportunity | Market / application evidence | Raw SG/SA evidence | Evidence strength |\n|---:|---|---|---|---|\n| 1 | Open RAN / O-RU chipset and reference-design RF test | The O-RU tester customer scope includes O-RAN entrants such as ADI and Qualcomm, and the Open RAN ecosystem includes “chipset / reference designers”; key O-RU test focus areas span RF design / verification / integration, production testing, regression, fronthaul conformance, 3GPP compliance, interoperability, and OTA.[20] | Raw evidence names the R&S®FSW spectrum analyzer and R&S®SMW200A vector signal generator, and places them in “RF Transmitter Tests (TS 38.141-1, chapter 6).”[28] | Strongest: both semiconductor-adjacent customer segment and RF transmitter SG/SA workflow are supported.[20][28] |\n### Product / option alignment\n| Product line | Connectable need | Knowledge-base confirmed option / spec | Why it fits | Evidence | Gap / quoting risk |\n|---|---|---|---|---|---|\n| R&S®SMW200A vector signal generator + R&S®FSW spectrum analyzer | O-RU / Open RAN RF transmitter testing for chipset / reference designers | TS 38.141-1 chapter 6 is explicitly tied to “RF Transmitter Tests” in Raw evidence; no option code is shown.[28] | The market/application side includes chipset / reference designers and O-RU RF design, verification, production, regression, and 3GPP compliance; the Raw side directly names an R&S signal generator and spectrum analyzer for RF transmitter tests.[20][28] | [20][28] | Knowledge base does not provide option codes, semiconductor customer names beyond the cited ecosystem examples, pricing, accuracy specs, or a formal sales BOM.[20][28] |\n| Rohde & Schwarz signal generators with GNSS / avionics simulation options | Automotive NG eCall / GNSS positioning validation for chipset implementations | GNSS and Avionics Simulation for Rohde & Schwarz Signal Generators specifications, PD 3607.6896.22.[26] | The application need includes Qualcomm chipset NG eCall validation and GNSS positioning verification; Raw confirms R&S signal-generator GNSS/avionics simulation options.[6][1][26] | [6][1][26] | Current evidence does not name the exact signal-generator model, option codes, test cases, or analyzer role for this opportunity.[26] |\n### Not counted as strongest SG/SA opportunities under current evidence\n| Lead | Why not counted |\n|---|---|\n| NB-NTN IoT chipsets / modules / devices | The vault supports a semiconductor-adjacent opportunity for chipsets, modules, and devices over NB-NTN with protocol, performance, and RF scenarios, but the cited solution is based on the R&S CMX500 one-box signaling tester, and the provided Raw passages do not connect this opportunity to R&S signal generators or signal analyzers.[15] |\n| 5G FWA CPE chip market | The vault states Qualcomm and MediaTek are upstream in 5G SoCs, RF modules, antennas, and ICs, and gives a 3Q 2024 chip market value of USD 139.9 million, but the provided Raw passages do not connect this market to R&S signal generators/analyzers.[11] |",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 重點摘要\n- [[Rohde & Schwarz]] 宣稱其 hybrid eCall 與 Next Generation eCall test solution 已成功通過 [[cetecom advanced]] 的 certification testing。\n- 來源描述 [[cetecom advanced]] 是 independent test laboratory，服務範圍包含 communication technologies、automotive、medical technology、payment & identification 等產品測試與 worldwide certification。\n- 測試方案以 [[R&S CMX500]] radio communication tester 為基礎，搭配更新後的 eCall option，以支援最新 eCall regulations and standards。\n- 來源說 [[Hybrid eCall testing]] 所依據的 [[EN 18052]] 要求 hybrid system 結合不同 transmission paths and protocols，使 eCall 能可靠到達目的地。\n- 來源說實務上車輛會使用 NG eCall functions，即 IP/IMS-based voice and data over 4G/5G；但在 coverage 或 service quality 降低時，可自動 fallback 到 classic CS eCall 2G/3G transport paths。\n- 製造商需要驗證 hybrid implementations 能 trigger calls、transmit [[MSD]]、maintain [[GNSS]] positioning，並在 [[VoNR]]、[[VoLTE]] 與 circuit-switched fallback 等多種 network scenarios 下提供 intelligible voice quality。\n- [[Rohde & Schwarz]] 宣稱其 eCall evaluation solution [[R&S CMX-KA09x]] 已更新，以支援 compliance with [[EN 18052]]:2025 與 [[EN 17240]]:2024+A1:2026。\n- [[R&S CMX-KA099]] option completed Public Safety Answering Point scenario tests according to [[EN 18052]]:2025。\n- [[R&S CMX-KA098]] option completed Public Safety Answering Point scenario tests according to [[EN 17240]]:2024+A1:2026。\n- [[Thomas Reschka]] 以 [[cetecom advanced]] Senior Technical Consultant 身分表示，該 solution 用於 functional tests、protocol conformity tests，以及 type-approval of [[IVS]] implementing hybrid eCall and NG eCall。\n- 來源稱 test environment 可 simulation real-world mobile network conditions 並 emulation various network scenarios，用於 certifications 或 new vehicle model market launch 前準備。\n- Press contact 為 [[Patrizia Muehlbauer]]，職稱 PR Manager Products & Standard Systems。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+            },
+            "score": 2.204744
+           },
+           {
+            "text": "Juergen Meyer › 來源中的列名\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 人名：Juergen Meyer。\n- 組織：[[Rohde & Schwarz]]。\n- 職稱：Vice President Market Segment Automotive at Rohde & Schwarz。\n- 引言主旨：他表示 [[Rohde & Schwarz]] 很高興與 [[Qualcomm Technologies]] 合作驗證其 chipsets 的 NG eCall implementation，並稱此 collaboration 為 future emergency call services 設定 new benchmark，為 automotive industry 提供 robust and dependable solution 以 meet latest eCall standards。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/entities/Juergen Meyer.md"
+            },
+            "score": 0.828798
+           },
+           {
+            "text": "Qualcomm › 來源中的說法\n- [[Taiwan CPE Industry 2024]] 的 5G FWA CPE Supply Chain Architecture 將 Qualcomm 與 [[MediaTek]]、RF houses 同列於 upstream：5G SoCs、RF modules、antennas、ICs。\n- [[Taiwan CPE Industry 2024]] 的 Chipset Competitive Landscape 說 3Q 2024 chip market value 為 USD 139.9 million。\n- 同一來源說 [[MediaTek]] vs. Qualcomm 的 market share gap 在 2024-2025 narrowing。\n- 同一來源說 Qualcomm focus on AI integration、advanced broadband device features。\n- 同一來源說 2025 outlook 是 chip price decline、intensified platform competition。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/entities/Qualcomm.md"
+            },
+            "score": 0.408989
+           },
+           {
+            "text": "Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite › 重點摘要\n- [[Viasat]] 與 [[Rohde & Schwarz]] joined forces，以 boost testing for [[Narrowband Non-terrestrial Networks]]（[[NB-NTN]]）[[IoT]] devices connecting via satellite。\n- 合作目標是 thoroughly validating devices，並確認 devices 與 [[Viasat]] network 的 interoperability，以支援 satellite-based [[IoT]] applications 的 uninterrupted connectivity。\n- 來源稱雙方正在 strengthen and expand testing for [[Non-Terrestrial Network]] capabilities，specifically for [[NB-IoT]] devices。\n- 測試目標包含 chipsets、modules and devices interoperate seamlessly with [[Viasat]] satellite network，並 comply with [[3GPP Release 17]] standards。\n- 來源說 advanced testing methodologies 用於 uphold quality、performance and reliability，服務情境是 areas without terrestrial network coverage 的 ubiquitous IoT applications。\n- [[Viasat NB-NTN IoT test plan]] 被描述為 certification test plan，涵蓋 protocol、performance 與 RF test scenarios。\n- Test plan based on [[R&S CMX500]] one-box signaling tester；來源稱 [[R&S CMX500]] 是 versatile solution designed for testing various NTN technologies，包括 [[NR-NTN]] 與 [[NB-NTN]]。\n- 來源稱 [[R&S CMX500]] 在 single instrument 中 covers R&D through certification and carrier acceptance tests，並提供 reliable and repeatable results；此為 PR claim，不能替代 formal specifications。\n- [[Rohde & Schwarz]] 將於 [[MWC Barcelona 2026]] 展示 first test results covering protocol、performance and RF test scenarios，地點為 [[Rohde & Schwarz]] booth 5A80 in hall 5，日期 March 2 to 5, 2026。\n- 來源也列出 [[Viasat]] booth：hall 6，booth 6A20。\n- Press & media contact 為 [[Christian Mokry]]，職稱 PR Manager Test & measurement，phone +49 89 412913052，email press@rohde-schwarz.com。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/sources/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md"
+            },
+            "score": 3.307112
+           },
+           {
+            "text": "R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT › 重點摘要\n- 來源更新 [[R&S portfolio for O-RU testing]]（August 2023）的 O-RU testing portfolio 視角，將重點放在 2025 年的 [[O-RU tester market and funding]]、[[R&S PVT360A O-RU testing]]、[[O-RU NES testing]]、[[VIAVI O-RU Tester]] / [[VIAVI TM500]] integration、competitor positioning 與 NTIA funding opportunities。\n- Slide 2 說 O-RU tester 客戶範圍包含 traditional TOP3 RAN vendors：[[Ericsson]]、[[Nokia]]、[[Samsung]]；O-RAN market entrants：[[Kyocera]]、[[Mavenir]]、[[Tejas]]、[[Fujitsu]]、[[NEC]]、[[ADI]]、[[Qualcomm]]、[[Battelle]]；以及 testing budget limited 的 [[Phy-tunes]]、[[GXC]]、[[Eridian]]、[[University of Georgia]]，與 DAS companies：[[Amphenol]] / Andrew、[[SOLiD]]、[[Samji]]、[[HFR]]。\n- Slide 2 說 US government 透過 [[NTIA NOFO2]] / SRFA#1 funding program 資助 O-RU commercialization；來源描述 2 years project、targeting commercially available Jan 2027、O-RU conformance testing ongoing、field testing starts 1HCY2026、mass-production EoY CY26 / BoY CY27。\n- Slide 3 把 [[Open RAN]] ecosystem 分為 traditional infrastructure providers、radio subsystem manufacturers、chipset / reference designers、industry organizations、test labs、test equipment manufacturers、network operators 與 government funding。\n- Slide 4 將 key test focus areas 從 R&D 到 field testing 分為 RF design / verification / integration、power management、digital design、production testing、regression、operator test、beamforming / Massive MIMO、fronthaul conformance、timing / sync / signal integrity、OTA、QoS / QoE、3GPP compliance、interoperability、end-to-end、functional / baseline testing、network benchmarking、site testing / troubleshooting 與 network synchronization。\n- Slide 5 列出 O-RU testing general instrumentation：[[R&S NGP800]]、[[R&S NGT3600]]、[[R&S OSP200]] / [[R&S OSP300]]、[[R&S RTO]] / [[R&S RTP]]，並標示 Q2CY2025。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+            },
+            "score": 2.005827
+           },
+           {
+            "text": "Options for GNSS and avionics\nThe options are described in the GNSS and Avionics Simulation for Rohde & Schwarz Signal Generators specifications\n(PD 3607.6896.22).",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-06b5fb58225495b8",
+              "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+              "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+             "section": 771,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 34.843841
+           },
+           {
+            "text": "https://www.rohde-schwarz.com/signalgenerators\nThe following test equipment and abbreviations are used in this application note:\n► The R&S®FSW spectrum analyzer is referred to as the FSW\n► The R&S®SMW200A vector signal generator is referred to as the SMW\n3 RF Transmitter Tests (TS 38.141-1, chapter 6)",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-fc3b9e0cc7a10eb5",
+              "original_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "sha256": "fc3b9e0cc7a10eb5ae7a436499363e1fd557d119b7e2fb981731397565dd9ebf",
+              "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+             "section": 14,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 30.715652
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [
+            {
+             "name": "market_segment",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Juergen Meyer.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/VIAVI O-RU Tester.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Juergen Meyer.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/NEC.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Qualcomm.md"
+              }
+             ],
+             "attempts": 1
+            }
+           ],
+           "missing_facets": [],
+           "relation_required": false,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": [
+           {
+            "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+            "raw_refs": [
+             "raw/Productions/CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md",
+             "raw/Productions/CMX_Configuration_Guide.md",
+             "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/entities/Juergen Meyer.md",
+            "raw_refs": [
+             "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/entities/Qualcomm.md",
+            "raw_refs": [
+             "raw/Market/OneNote/Taiwan CPE Industry 2024.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/sources/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md",
+            "raw_refs": [
+             "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+             "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+             "raw/Productions/PR/Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing.md",
+             "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+             "raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+            "raw_refs": [
+             "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+             "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+             "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md"
+            ]
+           }
+          ]
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_KN6wuV2IPxblN69JcjtoSx3O",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-4d4856a823cc47a08ae810dd72c403c4",
+          "request_id": "request-4d4856a823cc47a08ae810dd72c403c4",
+          "span_id": "span-4d4856a823cc47a08ae810dd72c403c4",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-4d4856a823cc47a08ae810dd72c403c4",
+           "request_id": "request-4d4856a823cc47a08ae810dd72c403c4",
+           "span_id": "span-4d4856a823cc47a08ae810dd72c403c4",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Search the RS Knowledge Raw/Wiki corpus for semiconductor opportunities involving signal generators and signal analyzers. Identify strongest opportunities, supported by Raw evidence only. Include product names such as SMW, SMBV, SMA100B, FSW, FSVA, signal generator, signal analyzer, semiconductor, RFIC, wafer, ATE, AI, HBM, DDR, PCIe, SerDes, UCIe, chiplet, radar, Wi-Fi, 5G, NTN. Provide citations to Raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "R&S SMA100B › 軟體 / keycode options\n| Licence code | 名稱 | Order No. | 原文說明 / requires |\n|---|---|---|---|\n| R&S®SMAB-K725 | Chirp signal generation | 1420.9861.02 | 需要 R&S®SMAB-K22、R&S®SMAB-K23、R&S®SMAB-K720；FW version > 4.70.xxx required |\n| R&S®SMAB-K28 | Power analysis | 1420.9755.02 | 建議使用 latest power sensor firmware version |\n| R&S®SMAB-K722 | Clock synthesizer frequency extension to 6 GHz | 1420.9810.02 | not available for instruments equipped with R&S®SMAB-B103 |\n| R&S®SMAB-K724 | High dynamic uninterrupted level sweep | 1420.9832.02 | serial number < 102000 需聯絡 Rohde & Schwarz service department |\n| R&S®SMAB-K980 | Health and utilization monitoring service HUMS | 1420.9284.02 | 支援 SNMP、REST JSON、SCPI、device web |\n| R&S®SMAB-K554 | R&S®SZM control via USB by the R&S®SMA100B microwave signal generator | 1420.9884.02 | Recommended extra |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 26,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SMA100B.md"
+             },
+             "score": 12.36613
+            },
+            {
+             "text": "Christian Dobmeier\n[[Christian Dobmeier]] 是 [[Rohde & Schwarz]] 的 Director of Product Group CMX500；目前本頁只由 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]] 支撐。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Christian Dobmeier.md"
+             },
+             "score": 0.366239
+            },
+            {
+             "text": "R&S TS8991 › 使用限制\n- 來源未提供 TS8991 的正式產品名稱、order number、chamber type、positioner、antenna、frequency range、software 或 supported test cases。\n- 不能由本來源推論 TS8991 已支援所有 CTIA-OTA 或 3GPP FR2 RF conformance test cases。\n- 若需正式規格，需回 R&S TS8991 product documentation 或 5G NR OTA conformance application notes。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS8991.md"
+             },
+             "score": 1.056604
+            },
+            {
+             "text": "CMX500 NTN one-box tester › 相關工具與 package\n來源明示或描述下列工具 / package：\n\n- [[Constellation Insight Tool]]：用於 real-time constellation visualization、mobility management、trajectory observation、digital twin of the live sky、automated deployment and handovers、ephemeris data integration 與 complex handover scenarios。\n- [[XLAPI]] Python Test Case package：包含 Starlink [[LTE-DTC]] scenarios，例如 LTE attach time / success rates、Event A3 handover、cell reselection 與 RLF recovery。\n- [[ScriptAssist]]：AI-powered script generation tool，用於加速 NTN-specific R&D protocol and application testing 以及 instrument automation 的 scripting。\n- [[R&S CMX-KS627B]]：[[CMX500_Callbox]] 中列為 NR Signaling Extension Rel-17，用於 NTN slide 的 option 線索。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 NTN one-box tester.md"
+             },
+             "score": 2.809645
+            },
+            {
+             "text": "Constellation Insight Tool › 與 CMX500 NTN testing 的關係\n[[Constellation Insight Tool]] 出現在 upgraded [[CMX500 NTN one-box tester]] 的 PR 語境中，補強 [[R&S CMX500]] 對 [[Non-Terrestrial Network]] testing scenarios 的支援。\n\n它與下列概念相關：\n\n- [[5G NTN validation and testing]]\n- [[CMX500 NR-NTN configuration]]\n- [[NTN signaling customer discovery]]\n- [[CMX500 NTN one-box tester]]\n- [[Full Satellite Access Network emulation]]\n- [[gNB and 5G core network emulation]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Constellation Insight Tool.md"
+             },
+             "score": 1.22761
+            },
+            {
+             "text": "R&S SMA100B › 硬體 options\n| Option code | 名稱 | Order No. | 原文說明 / requires |\n|---|---|---|---|\n| R&S®SMAB-B28 | Ramp sweep | 1420.6579.02 | synthesized frequency sweep；sweep span 8 MHz < f ≤ 67 GHz for most frequency options；B150N/B167N 為 8 MHz < f ≤ 40 GHz |\n| R&S®SMAB-B29 | Differential clock synthesizer 3 GHz | 1420.8088.02 | clock synthesizer frequency 可獨立於 R&S®SMA100B RF frequency 設定 |\n| R&S®SMAB-B80 | Rear panel connectors 3 GHz／6 GHz | 1420.6504.02 | rear panel connector option for R&S®SMAB-B103/-B106 |\n| R&S®SMAB-B81 | Rear panel connectors 12.75 GHz／20 GHz／31.8 GHz／40 GHz，PC 2.92 mm | 1420.6510.02 | rear panel connector option；for f > 6 GHz，level is reduced by 0.2 dB + 0.025 dB/GHz |\n| R&S®SMAB-B82 | Rear panel connectors 50 GHz／67 GHz，PC 1.85 mm | 1420.6527.02 | rear panel connector option；for f > 6 GHz，level is reduced by 0.2 dB + 0.025 dB/GHz |\n| R&S®SMAB-B85 | Removable mass storage | 1420.6556.02 | SD card slot for removable mass storage |\n| R&S®SMAB-B86 | Remote control GPIB and USB | 1420.6562.02 | IEC 60625（GPIB IEEE-488.2）、USB 2.0 according to VISA USB-TMC、serial RS-232 |\n| R&S®SMAB-Z10 | Spare SD card | 1420.6662.02 | spare SD card；來源列於 Other options |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 24,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SMA100B.md"
+             },
+             "score": 8.744954
+            },
+            {
+             "text": "Christian Dobmeier › 來源中的角色\n依 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]]，[[Christian Dobmeier]] 以 Director of Product Group CMX500 at [[Rohde & Schwarz]] 身分發言。\n\n其發言重點包含：\n\n- [[Rohde & Schwarz]] 與 [[Gatehouse Satcom]] 合作，以 accelerate validation methodologies for [[5G NTN]] technologies。\n- 發言中明示包含 [[GEO]]、[[MEO]] 與 [[LEO]] satellite services。\n- 當 satellite sector converges on standardized, [[3GPP]] based solutions 時，software innovators 與 test equipment specialists 的 close collaboration 很重要。\n- 此 partnership 不只 strengthens tools and insights for today’s [[5G NTN]] rollout，也 lays a solid foundation for future [[6G NTN testing and validation]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Christian Dobmeier.md"
+             },
+             "score": 0.341576
+            },
+            {
+             "text": "CMX500 NTN one-box tester › 來源定位\n依 [[Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026]]：\n\n- [[R&S CMX500]] radio communication tester has evolved into a versatile, all-in-one platform for NTN testing。\n- 來源明示 supported technologies：[[NR-NTN]]、[[NB-NTN]]、[[Direct-to-Cell]]（D2C / DTC）。\n- 來源宣稱 users can test all NTN technologies on both network and device level without multiple instruments。\n- [[Rohde & Schwarz]] 將於 [[MWC Barcelona 2026]] booth 5A80 / hall 5 展示 upgraded one-box tester，活動期間為 2026-03-02 至 2026-03-05。\n\n依 [[CMX500_Callbox]]：\n\n- Comprehensive support for NR-NTN。\n- Multi-orbit：[[LEO]]、[[MEO]]、[[GEO]]、[[GSO]]。\n- Complete channel emulation in one box。\n- Live graphics for NTN orbits and parameters。\n- NB-NTN coming end of `25。\n- Option 線索：[[R&S CMX-KS627B]] NR Signaling Extension Rel-17。\n\n此處的 one-box tester 是 PR / solution positioning 與簡報 use-case 語彙；正式 hardware configuration、software option stack、measurement specification 與 order number 仍需回 [[R&S CMX500]]、[[CMX500_specs_en_5216-4127-22_v1100]]、[[CMX500_Features_CSW9-20-0_en_32]]、[[CMX500 NR-NTN configuration]] 與正式 configurator。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 NTN one-box tester.md"
+             },
+             "score": 1.337083
+            },
+            {
+             "text": "ScriptAssist › CMX500 NTN scripting 語境\n依 [[Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026]]，[[ScriptAssist]] 是 AI-powered script generation tool，可 further support users by accelerating scripting for：\n\n- NTN-specific R&D protocol testing。\n- NTN-specific application testing。\n- instrument automation。\n\n此 PR 段落出現在 [[R&S CMX500]] upgraded one-box tester for NTN testing 的脈絡中，前文同時提到 [[XLAPI]] Python Test Case package 與 Starlink [[LTE-DTC]] test scenarios。因此可說 [[ScriptAssist]] 被來源連到 [[CMX500 NTN one-box tester]] 與 NTN-specific scripting workflow；但來源未提供它與 [[AIW_on_prem_prerequisites_ScriptAssist]] 的正式產品 / 交付關係。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/ScriptAssist.md"
+             },
+             "score": 3.372533
+            },
+            {
+             "text": "R&S SMA100B › Power analysis\n- R&S®SMAB-K28 Power analysis 建議使用 latest power sensor firmware version。\n- 支援 modes：power versus frequency、power versus power、power versus time trace mode。\n- Supported power sensors：R&S®NRP-Z81/-Z85/-Z86 支援 power versus frequency、power versus time、pulse data measurement and power versus power；來源標示為 phased-out products。R&S®NRP18P/NRP40P/NRP50P 支援 power versus frequency、power versus time、pulse data measurement and power versus power。\n- Number of points per sweep：10 to 1000。\n- Frequency range：依 R&S®NRP power sensor and R&S®SMA100B frequency option，為 signal generator 或 power sensor full frequency range 較低者；支援 frequency-converting DUTs。\n- Y-axis setting range：–200 dBm to +100 dBm。\n- Number of traces：4；number of markers：4；trace data export file formats JPG、BMP、XPM、PNG、CSV。\n- Power versus time mode with R&S®NRP-Z81/-Z85/-Z86：sweep time 100 ns to 1 s；resolution 12.5 ns 或 2 ns（periodic signals、internally triggered）；pulse data measurement 僅適用 R&S®NRP-Z81/-Z85/-Z86。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 19,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SMA100B.md"
+             },
+             "score": 7.816561
+            },
+            {
+             "text": "Christian Dobmeier › 使用限制\n- 來源未提供 [[Christian Dobmeier]] 的完整履歷、任期、聯絡方式或其他職務。\n- 來源中的 title 文字為 PR 文字；本頁不推論其組織架構或產品管理權責。\n- 來源提到 future [[6G NTN testing and validation]]，但未提供任何 6G NTN product、standard version、test case 或 availability。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Christian Dobmeier.md"
+             },
+             "score": 0.296822
+            },
+            {
+             "text": "CMX500 NTN one-box tester › unresolved\n- PR 來源未標示發布日期、product configuration、software release、option code、order number 或 test case list。\n- [[CMX500_Callbox]] 投影片日期 05.01.2026 格式未標示，且未提供 NTN slide 對應 release note。\n- all NTN technologies 的完整範圍未定義；PR 來源明示 [[NR-NTN]]、[[NB-NTN]] 與 [[Direct-to-Cell]]；[[CMX500_Callbox]] 明示 NR-NTN，並說 NB-NTN coming end of `25`。\n- single unit 是否包含 external heads、RF frontends、companion generators、GNSS simulators 或 chamber setup，來源未說明。\n- highest number of validated test cases 的數字、比較基準與日期未標示。\n- only available NTN test solution 的競品範圍與判定依據未標示。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 NTN one-box tester.md"
+             },
+             "score": 0.920112
+            },
+            {
+             "text": "Die-to-Die Adapter › 與 UCIe 通道的關係\n| Adapter 連接側 | 圖上文字 | 日期 / 期間 | 來源 | 限制 |\n|---|---|---|---|---|\n| 上層協定 / 功能側 | PCIe, CXL, Streaming | 來源未標示日期；取得於 2026-09-04 | [[IO Serdes in AI ASIC-TPU-Chiplet image 11]] | 來源未標示 PCIe / CXL 版本，也未說明 Streaming 的協定或資料格式 |\n| Die-to-die link 側 | UCIe™ Main Band RX/TX；UCIe™ Sideband RX/TX | 來源未標示日期；取得於 2026-09-04 | [[IO Serdes in AI ASIC-TPU-Chiplet image 11]] | 來源未標示 UCIe 版本、資料率、lane 數或 compliance |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Die-to-Die Adapter.md"
+             },
+             "score": 1.014698
+            },
+            {
+             "text": "NR-NTN LBS testing\n[[NR-NTN LBS testing]] 是 [[Q2_2026 Conformance & NetOp Updates_Customer]] 中 Location Based Services product highlight 的主題，涵蓋 OTA 5G NR GNSS FR1 on top of [[R&S TS8991]]、3rd party OTA chamber integration、GNSS record / replay 與 NR-NTN LBS E911 outlook。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NR-NTN LBS testing.md"
+             },
+             "score": 2.247917
+            },
+            {
+             "text": "R&S CMX-KA098 › 與 CMW-KA096 的關係\n[[CMW500 to CMX500OBT_License_Swap_Process]] 將 [[R&S CMW-KA096]]（for CMWPC；NGECALL APPL）列為 allowed license swap 的 CMW500 source keycode，對應到 [[R&S CMX-KA098]]（for CMWPC；Application test IMS NGeCALL）。\n\n[[CMW-KA096_PanEUNGeCall_TC_Status]] 是 [[R&S CMW500]] 搭配 [[R&S CMW-KA096]] / [[R&S CMWrun KT111]] 的 Oct. 2024 NGeCall over LTE capability list；[[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 則是 [[R&S CMX500]] 搭配 CMX-KA098 / [[R&S CMX-KF671B]] 的 NGeCall over NR/LTE capability list。兩者是不同平台 / option 組合，不應合併為同一 option。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+             },
+             "score": 3.494418
+            },
+            {
+             "text": "Die-to-Die Adapter › 未決事項\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 11]] 未標示日期、年份、季度或資料期間。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 11]] 未標示發布者、公司、報告名稱、頁碼或來源註記。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 11]] 未說明 [[Die-to-Die Adapter]] 的內部功能、資料格式、buffer、flow control 或 error handling。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 11]] 未說明 [[Die-to-Die Adapter]] 與 [[D2D Controller]] 的關係。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 11]] 未標示 [[UCIe]]、[[PCIe]] 或 [[CXL]] 的版本。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Die-to-Die Adapter.md"
+             },
+             "score": 0.887085
+            },
+            {
+             "text": "NR-NTN LBS testing › NR-NTN LBS E911 outlook\n來源的 outlook table OCR 明顯失真，但可辨識：\n\n- Spec：[[3GPP TS 37.571-1]]。\n- 多個 A-GPS / A-QZSS / A-GAL / Modernized GPS sensitivity、nominal accuracy、dynamic range、multi-path、moving scenario test case descriptions。\n- 備註：Customer specific tests are defined；GCF / PTCRB WI / RFT not defined yet；possibly adaption for final TC set required。\n- Package / item names：LBS5-KC121 NR NTN FR1 Min-perf GPS；LBS5-KC122 NR-NTN FR1 Min-perf GNSS GPS L1+L5 / GAL / GLO / BDS；LBS5-KC123 NR-NTN FR1 NAVIC QZSS；LBS5-KT100 NR-NTN FR1 3GPP R&D。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NR-NTN LBS testing.md"
+             },
+             "score": 0.106352
+            },
+            {
+             "text": "R&S CMX-KA098\nR&S CMX-KA098 是 [[R&S CMX500]] 的 NGeCall / IMS eCall application test software option；[[CMW500 to CMX500OBT_License_Swap_Process]]（November 2024；文件版次來源未標示）把它列為 [[R&S CMW-KA096]] license swap recipient，[[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]]（Dec. 2024；文件版次來源未標示）則提供 CMX500 搭配 CMX-KA098 執行 [[NGeCall over NR-LTE]] / [[NGeCall over LTE]] capability tests 的支援清單。[[CMX500_Software_Maintenance_PU-Option_Mapping]]（表頭標示 28.10.2025/CH）進一步補出它的 Ident No、短文字與 software maintenance service contract PU mapping。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+             },
+             "score": 2.605237
+            },
+            {
+             "text": "Die-to-Die Adapter › 來源中的位置\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 11]]（來源未標示日期；取得於 2026-09-04）在 [[Die-1]] 與 [[Die-2]] 兩側各標示一個 **Die-to-Die Adapter** 方塊。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 11]]（來源未標示日期；取得於 2026-09-04）把 **PCIe, CXL, Streaming** 放在 adapter 外側。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 11]]（來源未標示日期；取得於 2026-09-04）把 **UCIe™ Main Band RX/TX** 與 **UCIe™ Sideband RX/TX** 放在 adapter 內側，面向中央 [[Die-to-Die Interconnect]]。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 11]]（來源未標示日期；取得於 2026-09-04）沒有在 adapter 方塊內列出 protocol layer、framing layer、buffer、flow control、FEC、retransmission 或 lane alignment 等內部功能。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Die-to-Die Adapter.md"
+             },
+             "score": 0.871143
+            },
+            {
+             "text": "NR-NTN LBS testing › unresolved\n- [[3GPP TS 37.571-1]] version 與 NR-NTN LBS test cases 的正式 scope 未標示。\n- LBS5-KC121 / KC122 / KC123 / KT100 的 formal package definitions 未標示。\n- TS8-KC16 NR NTN TRP / TIS 的 formal description 未標示。\n- TS8-KTO113 5GAA active / passive result combination 的 formal description 未標示。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NR-NTN LBS testing.md"
+             },
+             "score": 0.097418
+            },
+            {
+             "text": "R&S CMX-KA098 › License swap 來源\n- 來源：[[CMW500 to CMX500OBT_License_Swap_Process]]。\n- 文件月份：November 2024。\n- 頁尾日期：11/6/2024；日期格式未標示。\n- 文件版次：來源未標示。\n- 文件分類：COMPANY CONFIDENTIAL。\n- Recipient keycode：CMX-KA098。\n- Recipient description：Application test IMS NGeCALL。\n- Source keycode：[[R&S CMW-KA096]]（for CMWPC）。\n- Source description：NGECALL APPL。\n- 使用情境：[[R&S CMW500]] → [[R&S CMX500 OBT]] license swap for OBT upgrades。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+             },
+             "score": 1.302114
+            },
+            {
+             "text": "R&S CMX-KM606\n[[R&S CMX-KM606]] 是 [[R&S CMX500]] 的 NR NTN measurements software option；依 [[CMX_Configuration_Guide_NR-NTN]]，它用於 S-band and L-band [[NR-NTN]] RF measurements，且需要 [[R&S CMX-KM600]] 與 [[R&S CMX-KS627B]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KM606.md"
+             },
+             "score": 1.030592
+            },
+            {
+             "text": "R&S CMX-KM606 › 使用限制\n- 本頁只由 configuration guide 支撐；來源未提供 [[R&S CMX-KM606]] 的 material number、order number、measurement accuracy、frequency bands beyond S/L wording、bandwidth、EVM、conformance condition 或 release note。\n- 來源明示 [[R&S CMX-KM606]] not used for [[NB-NTN]]；不可把它外推為 NB-NTN measurement option。\n- Binding measurement specifications 需後續引用正式 [[R&S CMX500]] specifications、features / functions 或 option data sheet。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KM606.md"
+             },
+             "score": 0.922206
+            },
+            {
+             "text": "R&S CMX-KM606 › 文件依據與版次\n| 來源 | 文件類型 | 日期 / 版次 | 用途 |\n|---|---|---|---|\n| [[CMX_Configuration_Guide_NR-NTN]] | NR-NTN configuration guide | converted 2026-09-10；正式 workbook version 來源未標示 | option role、dependency、configuration rule |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KM606.md"
+             },
+             "score": 0.907011
+            },
+            {
+             "text": "► R&S®ATS1800C CATR based 5G NR mmWave test chamber is referred to as the ATS1800C\n► R&S®PWC200 Plane wave converter is referred to as the PWC200\n► R&S®SMW200A vector signal generator is referred to as the SMW\n► R&S®SMA100B signal generator is referred to as the SMA100B\n► R&S®FSW spectrum analyzer is referred to as the FSW",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-b1f51b9642754bec",
+               "original_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+               "sha256": "b1f51b9642754bece660fb78a0146a645932657bee2e02c911d8ab5a0ebc8b64",
+               "raw_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+              "section": 17,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 33.078875
+            },
+            {
+             "text": "R&S®SMA100B  RF and Microwave Signal Generator  1419.8888.02\n  R&S®SMAB-B112  Frequency extension to 12.75GHz  1420.8688.02\n| R&S®FSW43     | Signal and spectrum analyzer  | 1331.5003.43  |\n| ------------- | ----------------------------- | ------------- |\n| R&S®FSV3044   | Signal and spectrum analyzer  | 1330.5000.43  |",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 100,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.331569
+            },
+            {
+             "text": "Specifications with limits\nRepresent warranted product performance by means of a range of values for the specified parameter. These specifications are\nmarked with limiting symbols such as <, ≤, >, ≥, ±, or descriptions such as maximum, limit of, minimum. Compliance is ensured by\ntesting or is derived from the design. Test limits are narrowed by guard bands to take into account measurement uncertainties, drift\nand aging, if applicable.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-06b93dfd12e457e7",
+               "original_ref": "raw/Productions/SMA100B_specs_en_5215-1018-22_v1000.md",
+               "sha256": "06b93dfd12e457e7abc19b6340378d85af8baf0a2ea647228d31a9da29c6ac48",
+               "raw_ref": "raw/Productions/SMA100B_specs_en_5215-1018-22_v1000.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/SMA100B_specs_en_5215-1018-22_v1000.md",
+              "section": 27,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 22.960074
+            },
+            {
+             "text": "EVM with external local oscillator,\nwith R&S®SMA100B RF and microwave signal generator and R&S®SMA-B711 ultra low phase noise option",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-1b031c0e1fd39629",
+               "original_ref": "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md",
+               "sha256": "1b031c0e1fd3962967fc0dc72b733e4c42d62199ffa61fb9033cd8f2c8012e6f",
+               "raw_ref": "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md",
+              "section": 303,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 19.82724
+            }
+           ],
+           "text": "### Strongest Raw-supported opportunities\n| Opportunity | Supported product names | Raw-supported evidence |\n|---|---|---|\n| 5G NR mmWave test opportunity using signal generation and signal analysis | R&S®SMW200A vector signal generator / SMW, R&S®SMA100B signal generator / SMA100B, R&S®FSW spectrum analyzer / FSW, R&S®ATS1800C, R&S®PWC200 | RAW identifies ATS1800C as a CATR-based 5G NR mmWave test chamber, PWC200 as a plane wave converter, SMW200A as the SMW vector signal generator, SMA100B as the SMA100B signal generator, and FSW as the FSW spectrum analyzer.[25] |\n| High-performance EVM / external local oscillator measurement opportunity | R&S®SMA100B RF and microwave signal generator, R&S®SMA-B711 ultra low phase noise option | RAW states “EVM with external local oscillator” using the R&S®SMA100B RF and microwave signal generator with the R&S®SMA-B711 ultra low phase noise option.[28] |\n| Signal analyzer attach opportunity around FSW / FSV class instruments | R&S®FSW43 signal and spectrum analyzer, R&S®FSV3044 signal and spectrum analyzer | RAW lists R&S®FSW43 as a signal and spectrum analyzer and R&S®FSV3044 as a signal and spectrum analyzer.[26] |\n### Product and option mapping\n| Product line | Opportunity fit | Knowledge Raw confirms | Evidence | Gap / risk |\n|---|---|---|---|---|\n| SMW / signal generator | 5G NR mmWave signal generation role | R&S®SMW200A vector signal generator is referred to as SMW.[25] | [25] | Raw evidence does not connect SMW to semiconductor, RFIC, wafer, ATE, AI, HBM, DDR, PCIe, SerDes, UCIe, chiplet, radar, Wi‑Fi, or NTN. |\n| SMA100B / signal generator | RF and microwave signal generation, external LO / EVM support | R&S®SMA100B is a signal generator, and RAW also lists it as an RF and Microwave Signal Generator.[25][26] | [25][26] | Raw evidence does not connect SMA100B to semiconductor, wafer, ATE, or RFIC production test. |\n| SMA100B + SMA-B711 | EVM with external local oscillator | RAW states EVM with external local oscillator uses R&S®SMA100B with R&S®SMA-B711 ultra low phase noise option.[28] | [28] | Raw evidence does not identify the DUT type or application market. |\n| FSW / signal analyzer | Spectrum analysis in 5G NR mmWave setup | R&S®FSW spectrum analyzer is referred to as FSW.[25] | [25] | Raw evidence does not specify semiconductor validation or production use. |\n| FSW43 / signal analyzer | Signal and spectrum analysis | R&S®FSW43 is listed as a signal and spectrum analyzer.[26] | [26] | Raw evidence does not connect FSW43 to EVM, RFIC, wafer, ATE, AI, HBM, DDR, PCIe, SerDes, UCIe, chiplet, radar, Wi‑Fi, 5G, or NTN. |\n| FSV3044 / signal analyzer | Signal and spectrum analysis | R&S®FSV3044 is listed as a signal and spectrum analyzer.[26] | [26] | Raw evidence does not connect FSV3044 to semiconductor opportunities. |\n### Inference lines\n【Inference】The strongest Raw-supported near-term opportunity is 5G NR mmWave test because the same Raw passage names the 5G NR mmWave chamber context and the SMW, SMA100B, and FSW instrument roles [25].\n【Inference】FSW43 and FSV3044 are potential analyzer attach products because RAW identifies both as signal and spectrum analyzers, while separate RAW evidence identifies FSW in a 5G NR mmWave test context [25][26].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "► R&S®ATS1800C CATR based 5G NR mmWave test chamber is referred to as the ATS1800C\n► R&S®PWC200 Plane wave converter is referred to as the PWC200\n► R&S®SMW200A vector signal generator is referred to as the SMW\n► R&S®SMA100B signal generator is referred to as the SMA100B\n► R&S®FSW spectrum analyzer is referred to as the FSW",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-b1f51b9642754bec",
+              "original_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+              "sha256": "b1f51b9642754bece660fb78a0146a645932657bee2e02c911d8ab5a0ebc8b64",
+              "raw_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+             "section": 17,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 33.078875
+           },
+           {
+            "text": "R&S®SMA100B  RF and Microwave Signal Generator  1419.8888.02\n  R&S®SMAB-B112  Frequency extension to 12.75GHz  1420.8688.02\n| R&S®FSW43     | Signal and spectrum analyzer  | 1331.5003.43  |\n| ------------- | ----------------------------- | ------------- |\n| R&S®FSV3044   | Signal and spectrum analyzer  | 1330.5000.43  |",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0acf440ab126eca3",
+              "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+             "section": 100,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 27.331569
+           },
+           {
+            "text": "EVM with external local oscillator,\nwith R&S®SMA100B RF and microwave signal generator and R&S®SMA-B711 ultra low phase noise option",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-1b031c0e1fd39629",
+              "original_ref": "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md",
+              "sha256": "1b031c0e1fd3962967fc0dc72b733e4c42d62199ffa61fb9033cd8f2c8012e6f",
+              "raw_ref": "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md",
+             "section": 303,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 19.82724
+           }
+          ],
+          "assessment": {
+           "status": "missing",
+           "facets": [
+            {
+             "name": "product_option_spec",
+             "citations": [],
+             "attempts": 1
+            }
+           ],
+           "missing_facets": [
+            "product_option_spec"
+           ],
+           "relation_required": false,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_ATHSoYiRmNkMJHbeJZg6Z7Kq",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-4d4856a823cc47a08ae810dd72c403c4",
+          "request_id": "request-4d4856a823cc47a08ae810dd72c403c4",
+          "span_id": "span-4d4856a823cc47a08ae810dd72c403c4",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_insufficient_evidence",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,73 @@
+{
+ "id": "Q0331",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge",
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 247.828,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S FSW.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S FSW.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S FSW.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "AREG800A evidence lists baseband extension from 1 GHz to 2 GHz and 5 GHz IF bandwidth",
+   "second IF path activation, additional artificial objects, extended Doppler shift up to 10 MHz, near-object FMCW support",
+   "It also lists supported mmWave/external frontends",
+   "Modern FMCW and high-resolution radar use wider chirps because range resolution improves as bandwidth increases",
+   "Automotive and advanced radar commonly operate at mmWave frequencies, e.g. 24 GHz, 77 GHz, 79 GHz",
+   "MIMO / phased-array / AESA radar → coherent multi-channel testing",
+   "Radar is moving from single-channel systems to phased arrays and MIMO architectures",
+   "Modern radar can use FMCW, pulsed compression, phase-coded waveforms, frequency hopping, agile PRF, and low-probability-of-intercept waveforms",
+   "Crowded spectrum and radar coexistence → better dynamic range and real-time detection",
+   "High sample rate and deep waveform memory",
+   "Better chirp linearity",
+   "High dynamic range, low noise floor"
+  ],
+  "reason": "The cited passages support only some product-option facts, such as FSW analysis bandwidths, pulse/AM-FM-PM/phase-noise/vector/real-time/external-frontend options, and AREG HIL/synchronization/IF interfaces. The answer builds a broad radar-technology narrative and many generator/analyzer requirements that are not present in the cited passages, and it attributes several AREG800A capabilities to the evidence that the cited AREG passage does not contain.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages support only some product-option facts, such as FSW analysis bandwidths, pulse/AM-FM-PM/phase-noise/vector/real-time/external-frontend options, and AREG HIL/synchronization/IF interfaces. The answer builds a broad radar-technology narrative and many generator/analyzer requirements"
+}

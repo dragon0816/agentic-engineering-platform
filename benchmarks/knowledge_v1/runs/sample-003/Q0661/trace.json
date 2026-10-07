@@ -1,0 +1,585 @@
+{
+ "question": {
+  "id": "Q0661",
+  "text": "For a AI use case involving AI data centers, where would Oscilloscope fit in the test workflow?",
+  "market": "AI",
+  "product": "Oscilloscope",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-bd9dc94e85854656af6197742b63b6bb",
+ "exchange": {
+  "sent": "For a AI use case involving AI data centers, where would Oscilloscope fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 89.109,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-bd9dc94e85854656af6197742b63b6bb",
+    "actor": "leo.chi",
+    "title": "For a AI use case involving AI data centers, where would Oscilloscope fi…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T13:23:48.075474Z",
+    "updated_at": "2026-10-07T13:25:12.282403Z",
+    "messages": [
+     {
+      "message_id": "message-9998b7244b6c4116855d2bbbc05ed54d",
+      "role": "user",
+      "text": "For a AI use case involving AI data centers, where would Oscilloscope fit in the test workflow?",
+      "created_at": "2026-10-07T13:23:48.085510Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-9f2e40972b3c415c8c19ac4b2a8f3971",
+      "role": "assistant",
+      "text": "The knowledge base gave no direct, citable answer specifically placing an oscilloscope in an AI data center test workflow. The following is general engineering guidance, not from the knowledge base.\n\nIn an AI data center workflow, the oscilloscope fits mainly in **time-domain validation and debug**, especially around **high-speed interconnects, power integrity, and power electronics**.\n\n| Workflow stage | Where oscilloscope fits | What it measures |\n|---|---|---|\n| 1. Component / module bring-up | GPU/ASIC boards, NICs, accelerator trays, optical module electrical interfaces | Signal edges, eye diagrams, jitter, skew, timing margins |\n| 2. High-speed digital validation | PCIe, CXL, DDR, Ethernet/SerDes, backplane, cable, connector interfaces | Eye opening, rise/fall time, reflections, crosstalk symptoms, compliance waveforms |\n| 3. PCB / interconnect debug | Compute tray, switch tray, UBB/baseboard, backplane | Time-domain waveform integrity; complements VNA S-parameter and TDR work |\n| 4. Power integrity validation | GPU/CPU power rails, VRMs, POL converters, memory rails | Ripple, droop, load-step response, rail sequencing, transient events |\n| 5. Rack power / power electronics | PSU, BBU, PDU, 48 V or HVDC distribution, DC/DC stages | Switching waveforms, inrush, transients, efficiency-debug signals, protection events |\n| 6. System-level stress testing | Server under AI workload, rack-level load changes | Correlation of workload events with rail noise, timing errors, thermal/power events |\n| 7. Failure analysis / production debug | Intermittent link failures, boot issues, power instability | Capturing rare glitches, trigger-based event capture, root-cause debug |\n\nA simple positioning statement:\n\n**The oscilloscope is used after simulation and before/alongside compliance testing to verify real time-domain behavior of AI server hardware: high-speed signals, clocks, power rails, and transient events.**\n\nIt complements other instruments:\n\n- **VNA**: channel loss, S-parameters, impedance, TDR characterization  \n- **BERT / protocol tester**: BER, link margin, protocol-level behavior  \n- **Spectrum analyzer / phase noise analyzer**: frequency-domain noise, EMI, phase noise  \n- **Oscilloscope**: real-time waveform, eye/jitter, timing, power ripple, transient debug  \n\nSo for an AI data center use case, the oscilloscope is not usually the “data center performance” tester; it is the **hardware validation and debug tool** used inside the server, rack power, high-speed interconnect, and power-integrity parts of the workflow.",
+      "created_at": "2026-10-07T13:25:12.282403Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-155cd311aaa4479388f2bc85b9beb4c2",
+       "request_id": "request-155cd311aaa4479388f2bc85b9beb4c2",
+       "span_id": "span-155cd311aaa4479388f2bc85b9beb4c2",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base gave no direct, citable answer specifically placing an oscilloscope in an AI data center test workflow. The following is general engineering guidance, not from the knowledge base.\n\nIn an AI data center workflow, the oscilloscope fits mainly in **time-domain validation and debug**, especially around **high-speed interconnects, power integrity, and power electronics**.\n\n| Workflow stage | Where oscilloscope fits | What it measures |\n|---|---|---|\n| 1. Component / module bring-up | GPU/ASIC boards, NICs, accelerator trays, optical module electrical interfaces | Signal edges, eye diagrams, jitter, skew, timing margins |\n| 2. High-speed digital validation | PCIe, CXL, DDR, Ethernet/SerDes, backplane, cable, connector interfaces | Eye opening, rise/fall time, reflections, crosstalk symptoms, compliance waveforms |\n| 3. PCB / interconnect debug | Compute tray, switch tray, UBB/baseboard, backplane | Time-domain waveform integrity; complements VNA S-parameter and TDR work |\n| 4. Power integrity validation | GPU/CPU power rails, VRMs, POL converters, memory rails | Ripple, droop, load-step response, rail sequencing, transient events |\n| 5. Rack power / power electronics | PSU, BBU, PDU, 48 V or HVDC distribution, DC/DC stages | Switching waveforms, inrush, transients, efficiency-debug signals, protection events |\n| 6. System-level stress testing | Server under AI workload, rack-level load changes | Correlation of workload events with rail noise, timing errors, thermal/power events |\n| 7. Failure analysis / production debug | Intermittent link failures, boot issues, power instability | Capturing rare glitches, trigger-based event capture, root-cause debug |\n\nA simple positioning statement:\n\n**The oscilloscope is used after simulation and before/alongside compliance testing to verify real time-domain behavior of AI server hardware: high-speed signals, clocks, power rails, and transient events.**\n\nIt complements other instruments:\n\n- **VNA**: channel loss, S-parameters, impedance, TDR characterization  \n- **BERT / protocol tester**: BER, link margin, protocol-level behavior  \n- **Spectrum analyzer / phase noise analyzer**: frequency-domain noise, EMI, phase noise  \n- **Oscilloscope**: real-time waveform, eye/jitter, timing, power ripple, transient debug  \n\nSo for an AI data center use case, the oscilloscope is not usually the “data center performance” tester; it is the **hardware validation and debug tool** used inside the server, rack power, high-speed interconnect, and power-integrity parts of the workflow.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-155cd311aaa4479388f2bc85b9beb4c2",
+      "request_id": "request-155cd311aaa4479388f2bc85b9beb4c2",
+      "span_id": "span-155cd311aaa4479388f2bc85b9beb4c2",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-155cd311aaa4479388f2bc85b9beb4c2",
+       "request_id": "request-155cd311aaa4479388f2bc85b9beb4c2",
+       "span_id": "span-155cd311aaa4479388f2bc85b9beb4c2",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no direct, citable answer specifically placing an oscilloscope in an AI data center test workflow. The following is general engineering guidance, not from the knowledge base.\n\nIn an AI data center workflow, the oscilloscope fits mainly in **time-domain validation and debug**, especially around **high-speed interconnects, power integrity, and power electronics**.\n\n| Workflow stage | Where oscilloscope fits | What it measures |\n|---|---|---|\n| 1. Component / module bring-up | GPU/ASIC boards, NICs, accelerator trays, optical module electrical interfaces | Signal edges, eye diagrams, jitter, skew, timing margins |\n| 2. High-speed digital validation | PCIe, CXL, DDR, Ethernet/SerDes, backplane, cable, connector interfaces | Eye opening, rise/fall time, reflections, crosstalk symptoms, compliance waveforms |\n| 3. PCB / interconnect debug | Compute tray, switch tray, UBB/baseboard, backplane | Time-domain waveform integrity; complements VNA S-parameter and TDR work |\n| 4. Power integrity validation | GPU/CPU power rails, VRMs, POL converters, memory rails | Ripple, droop, load-step response, rail sequencing, transient events |\n| 5. Rack power / power electronics | PSU, BBU, PDU, 48 V or HVDC distribution, DC/DC stages | Switching waveforms, inrush, transients, efficiency-debug signals, protection events |\n| 6. System-level stress testing | Server under AI workload, rack-level load changes | Correlation of workload events with rail noise, timing errors, thermal/power events |\n| 7. Failure analysis / production debug | Intermittent link failures, boot issues, power instability | Capturing rare glitches, trigger-based event capture, root-cause debug |\n\nA simple positioning statement:\n\n**The oscilloscope is used after simulation and before/alongside compliance testing to verify real time-domain behavior of AI server hardware: high-speed signals, clocks, power rails, and transient events.**\n\nIt complements other instruments:\n\n- **VNA**: channel loss, S-parameters, impedance, TDR characterization  \n- **BERT / protocol tester**: BER, link margin, protocol-level behavior  \n- **Spectrum analyzer / phase noise analyzer**: frequency-domain noise, EMI, phase noise  \n- **Oscilloscope**: real-time waveform, eye/jitter, timing, power ripple, transient debug  \n\nSo for an AI data center use case, the oscilloscope is not usually the “data center performance” tester; it is the **hardware validation and debug tool** used inside the server, rack power, high-speed interconnect, and power-integrity parts of the workflow.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_3qqMj4BgbPyiLmJrZO2OPiS4",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-155cd311aaa4479388f2bc85b9beb4c2",
+          "request_id": "request-155cd311aaa4479388f2bc85b9beb4c2",
+          "span_id": "span-155cd311aaa4479388f2bc85b9beb4c2",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-155cd311aaa4479388f2bc85b9beb4c2",
+           "request_id": "request-155cd311aaa4479388f2bc85b9beb4c2",
+           "span_id": "span-155cd311aaa4479388f2bc85b9beb4c2",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "For an AI data center use case, where does an oscilloscope fit in the test workflow? Include relevant workflow stages and what it measures.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "CMX500 use-case based 5G testing › CMsquares\n來源列出 [[R&S CMsquares]]：\n\n- Web-based Interface。\n- OS independent。\n- State of the art, future proof software。\n- No need for PC license dongle。\n- Seamless switching across applications。\n- All Tools in one Place。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+             },
+             "score": 5.665903
+            },
+            {
+             "text": "AISeverEcosystem R&S solution mapping\n[[AISeverEcosystem R&S solution mapping]] 是用來保存 [[AISeverEcosystem]] 中 AI server ecosystem 分類與 [[R&S Solution]] 欄位對應關係的概念頁；它只表示該 Excel 表中的銷售 / 測試方案線索，不代表正式產品配置、客戶關係或已驗證商機。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+             },
+             "score": 4.372183
+            },
+            {
+             "text": "台光電 › 高階 CCL 表內狀態\n[[AI Server PCB test image 21]]（來源未標示日期；取得於 2026-09-04）對 [[台光電]] 的表內狀態如下。來源未提供 **○** 的圖例定義，因此本表不將其解讀為量產、供貨、客戶導入或已出貨。\n\n| 板型 | 規格 | 表內狀態 | 日期 / 期間 | 來源 |\n|---|---|---|---|---|\n| 一般 PCB板 | M6 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |\n| 一般 PCB板 | M7 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |\n| 一般 PCB板 | M8 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |\n| HDI板 | M6 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |\n| HDI板 | M7 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |\n| HDI板 | M8 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/台光電.md"
+             },
+             "score": 0.572455
+            },
+            {
+             "text": "AI 伺服器 PCB 供應鏈升級 › 升級面向整理\n| 面向 | 來源文字 | 可追溯數字 / 時間 | 限制 |\n|---|---|---|---|\n| AI伺服器趨勢 | 推升 PCB 邁向高層數、大面積與高速傳輸，供應鏈全面翻新 | [[AI Server PCB test image 4]] 來源未標示日期 | 未提供出貨量、平台樣本、PCB 面積或層數分布 |\n| ASIC平台進展 | AWS Trainium 2 Max、Google TPU V6、Meta MTIA 2量產，2026年新平台將陸續推出 | 2026年；量產時間未標示 | 未定義量產、未列出出貨量、客戶或供應鏈 |\n| 材料升級方向 | HVLP銅箔進入第4、5代，CCL以M8為主，導入低介電、低損耗與高散熱設計 | 第4、5代；來源未標示日期 | 未定義 HVLP 世代、M8、低介電、低損耗或高散熱設計的測試條件 |\n| 製程挑戰 | 主板層數達30～40層，縱深比需達12～14倍，需應對厚銅、雷射鑽孔等高階製程 | 30～40層；12～14倍；來源未標示日期 | 未說明板種、平台、線寬線距、孔徑、板厚或良率 |\n| TPCA Show焦點 | 聚焦玻纖布、HVLP銅箔、CCL發展與高縱深比設備 | 來源未標示日期 | 未標示 TPCA Show 年份、場次、展會期間或參展廠商 |\n| GB200 / GB300 / VR200 板件升級比較 | [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 將 ComputeTray 從 GB200 / GB300 的 5層22L列到 VR200 的 6層26L，NVSwitch Tray 從 24L HLC 列到 32L (N+N HLC)，並列出 VR200 Midplane 44L(N+N HLC) | GB200：25Q1試產、25Q2量產；GB300：25H2樣機/2026放量；VR200：26H2樣機/2027放量；來源發布日期未標示 | 未定義試產、量產、樣機、放量；未提供板厚、孔徑、線寬線距、良率、出貨量或平台驗證證據 |\n| VR200 材料升級與供應商列名 | [[HSD PCB image 11]] 列出 VR200 計算板斗山(M8+LDK+HVLP4)+M4、交換板M8(LDK2+HVLP4) 生益科技/台光電/南亞(交期最快)、HVLP4銅箔三井/古河/盧森堡/金居/福田 | VR200：26H2樣機/2027放量；來源發布日期未標示 | 與 [[HSD PCB image 1]] 既有抄錄「南亞(交期最長)」矛盾；未說明南亞完整公司名稱、交期數字、材料型號、認證狀態或供應關係 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+             },
+             "score": 11.659528
+            },
+            {
+             "text": "Data center full-spectrum connectivity\n[[Data center full-spectrum connectivity]] 是 [[full-spectrum-data-center-connectivity-brochure]] 呈現的 portfolio 視角：把 AI / data center 的 high-speed electrical interconnect、optical interconnect、fiber deployment、rack power distribution、busbar、liquid cooling 與 leak detection 放在同一張 data center connectivity brochure 中。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+             },
+             "score": 4.973467
+            },
+            {
+             "text": "CMX500 use-case based 5G testing › OBT\n來源列 OBT：\n\n- Support for FR2 2x2 MIMO and up to 8 CC。\n- Up to 16 CC LTE / FR1。\n- CB RF test up to 50 GHz。\n- 8CC FR2 2x2 + 4CC FR1 4x4。\n- 8CC FR2 2x2 + 8CC LTE 4x4。\n- 8CC FR1 4x4 + 8CC LTE 4x4。\n- >10 Gbps Data Throughput。\n- 3GPP pre-conformance tests。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+             },
+             "score": 4.724609
+            },
+            {
+             "text": "AISeverEcosystem R&S solution mapping › 與既有知識的關係\n- [[R&S PCB test solutions]] 提供 2026.3.4 R&S high-speed digital 簡報中的 PCB fabricator / system house 測試流程；本頁則來自市場 Excel，將 R&S 儀器與 AI server supply-chain 類別做銷售 mapping。\n- [[高頻高速 PCB 測試解決方案]] 與 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 已有 Keysight / PCB test 圖像來源；本頁新增 R&S 方案對應，但未提供可替代正式規格的量測條件。\n- [[AI 伺服器 PCB 供應鏈升級]] 記錄材料與板層升級；本頁只補充對應測試入口，例如 IL、TDR、high speed trace、PDN Target Z。\n- [[資料中心電力電子生態系]]、[[NVIDIA 800V HVDC 架構]] 與 [[AI 資料中心高壓直流供電]] 記錄 data center power electronics；本頁補充 [[MXO]]、[[R&S FSWP]]、[[ZISO]] 與 BMS test 的 sales mapping 線索。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+             },
+             "score": 3.944209
+            },
+            {
+             "text": "台燿 › 可追溯範圍\n- 本頁只記錄來源圖上的台燿列名，不推論供應合約、出貨量、市占率、客戶、材料規格、國別或 R&S 往來關係。\n- 本頁不自動把台燿與 [[台耀]] 合併；需要人工確認命名與同義頁處理。\n- [[AI Server PCB test image 23]] 的「2023 Q1 接獲AI通用基板(UBB) 訂單」只支持圖上說法；來源未提供訂單客戶、合約、數量、金額、出貨期間或公告。\n- [[AI Server PCB test image 23]] 的「800G交換器材料認證中」只支持圖上說法；來源未標示認證對象、測試項目、材料型號、完成時間或結果。\n- [[AI Server PCB test image 23]] 的客戶欄只記錄圖上文字；不得改寫成已驗證直接客戶或現行供應關係。\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]] 的低軌衛星與基地台高頻材料說法只支持該 2026-09-15 報告中的市場定位，不能推論具體產品料號、衛星平台或基地台客戶。\n- [[Switch server- optical switch]] 的 800G 交換器材料供應商句子只支持 OneNote 文字列名；來源未標示材料種類、產品型號、客戶、出貨、認證、合約或原始資料來源，不能升格為已驗證供應關係。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/台燿.md"
+             },
+             "score": 3.392776
+            },
+            {
+             "text": "AI 伺服器 PCB 供應鏈升級 › 來源中的說法\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）標題為「PCB供應鏈升級重點」。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 AI伺服器趨勢推升 [[PCB]] 邁向高層數、大面積與高速傳輸，供應鏈全面翻新。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 [[AWS Trainium 2 Max]]、[[Google TPU V6]]、[[Meta MTIA 2]] 量產，並稱 2026年新平台將陸續推出。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 [[HVLP銅箔]] 進入第4、5代，[[CCL]] 以 [[M8]] 為主，導入低介電、低損耗與高散熱設計。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱主板層數達 30～40 層，縱深比需達 12～14 倍，並需應對厚銅、雷射鑽孔等高階製程。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 TPCA Show 焦點聚焦玻纖布、HVLP銅箔、CCL 發展與高縱深比設備，反映材料與製程全面升級。\n- [[HSD PCB image 1]]（來源發布日期未標示；取得於 2026-09-04）以「GB200/GB300/VR200規格：南亞和臻鼎為亮點」為標題，比較 [[GB200]] NVL72(72GPU)、[[GB300]] NVL72(72GPU) 與 [[VR200]] NVL144(72GPU) 的時間、製程、功耗、載板、CCL 材料、上游材料、ComputeTray、NVSwitch Tray、CPX 與 Midplane。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）與 [[HSD PCB image 1]] 高度重疊，同樣以「GB200/GB300/VR200規格：南亞和臻鼎為亮點」為標題，右上角標示「資料來源：產業調研、福邦投顧整理」。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[GB200]] / [[GB300]] ComputeTray 為 **5層22L**，[[VR200]] ComputeTray 為 **6層26L**；[[GB200]] / [[GB300]] NVSwitch Tray 為 **24L HLC**，[[VR200]] NVSwitch Tray 為 **32L (N+N HLC)**，[[VR200]] Midplane 為 **44L(N+N HLC)**。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[GB300]] 使用 **HVLP3銅箔**，[[VR200]] 使用 **HVLP4銅箔**，並將 [[VR200]] 交換板 CCL 材料列為 **M8(LDK2+HVLP4) 生益科技/台光電/南亞(交期最快)**。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[VR200]] ComputeTray PCB 供應商 / 占比為 **欣興35~40% > 臻鼎25~30% = 勝宏25~30%**。\n\n⚠️ [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）說 [[VR200]] 交換板 CCL 材料供應為「生益科技/台光電/南亞(交期最快)」，但既有頁面 [[AI 伺服器 PCB 供應鏈升級]] 說 [[HSD PCB image 1]] 的對應欄位為「生益科技/台光電/南亞(交期最長)」。判斷：最快 / 最長方向相反，影響對 [[南亞]] 供應鏈定位的解讀；在回看原圖前不得擇一。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+             },
+             "score": 7.489254
+            },
+            {
+             "text": "Data center full-spectrum connectivity › 與既有概念的關係\n- [[Data center server 高速互連產品組合]] 偏向 data center server interconnect portfolio 的分類表；[[Data center full-spectrum connectivity]] 更強調 full-spectrum：electrical interconnect + optical + fiber + power + cooling。\n- [[Compute tray component solutions]] 偏向 compute tray connectors、cables、power connector、busbar 與 backplane interconnect；本頁納入 optical transceiver、CPO、fiber deployment 與 liquid cooling。\n- [[高速伺服器儲存互連]] 可連接本頁中的 [[Mini Cool Edge IO]]、[[Cool Express Link]]、[[Direct Attached Copper Cables]]、[[PCIe CEM 7 Connectors]] 與 storage / EDSFF 類產品。\n- [[CPO]]、[[Optical I-O]]、[[Near-Packaged Optics]] 可連接本頁的 [[Amphenol Co-packaged Optics]] 與 [[LEAP On-Board Transceiver]]，但本來源不是技術標準或市場採用證據。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+             },
+             "score": 2.817565
+            },
+            {
+             "text": "CMX500 use-case based 5G testing › RedCap testing support\n來源列出 [[R&S CMX500]] RedCap testing use cases：\n\n- [[XLAPI]]（Python）scenario package [[R&S CMX-KF678X]] for early R&D protocol verification。\n- Interactive callbox mode for RF and application tests。\n- Sequencer with graphical sequencer blocks for RF、protocol、application tests。\n- Protocol conformance testing for GCF / PTCRB type approval。\n- 3GPP R17 RedCap supported in [[R&S CMsquares]] GUI。\n- 3GPP R17 RedCap tests in [[R&S CMsequencer]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+             },
+             "score": 4.126917
+            },
+            {
+             "text": "AISeverEcosystem R&S solution mapping › 相關來源\n- [[AISeverEcosystem]] — AISeverEcosystem.xlsx 的 lossy markdown 轉檔摘要，保存 ServerRack 與 ICs 兩張表中的供應鏈分類、公司列名、R&S solution 與未決限制。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+             },
+             "score": 0.381226
+            },
+            {
+             "text": "聯茂 › 未決事項\n- [[AI Server PCB test image 19]]、[[AI Server PCB test image 21]]、[[AI Server PCB test image 45]] 與 [[AI Server PCB test image 47]] 均未標示內容日期、年份、季度或資料期間。\n- [[AI Server PCB test image 19]] 與 [[AI Server PCB test image 45]] 未說明 [[Df]] 的完整名稱、測試頻率、測試方法、量測條件或標準版本。\n- [[AI Server PCB test image 45]] 的 `IT-999GS...` 尾端無法完整辨識，與 [[AI Server PCB test image 19]] 抄錄的 `IT-999GS` 不一致。\n- [[AI Server PCB test image 45]] 的 Low Loss 型號 `IT9568` 與 [[AI Server PCB test image 19]] 抄錄的 `IT958G` 不一致。\n- [[AI Server PCB test image 45]] 的 Ultra Low Loss 型號 `IT988G/SE` 重複出現，且與 [[AI Server PCB test image 19]] 抄錄的 `IT988GJ / SE` 不一致。\n- [[AI Server PCB test image 47]] 未說明聯茂 M8 空白格代表無資料、無產品、未導入、未驗證、不可辨識或其他狀態。\n- [[AI Server PCB test image 23]] 未說明「CCL: 驗證中」的驗證對象、客戶、材料、平台或階段。\n- [[AI Server PCB test image 26]] 未標示法說會日期、簡報名稱、文件版次、頁碼或原始網址。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/聯茂.md"
+             },
+             "score": 0.658702
+            },
+            {
+             "text": "AI 伺服器 PCB 供應鏈升級 › 可追溯限制\n- [[AI Server PCB test image 4]] 是一張表格整理圖，不是統計圖表；沒有座標軸、圖例、樣本數、營收、出貨量、市占率、ASP 或產能資料。\n- [[AI Server PCB test image 4]] 的頁尾只標示「資料來源：採訪整理」與「製表：楊絡懸」，未提供完整資料來源。\n- 本頁不能把 [[AWS Trainium 2 Max]]、[[Google TPU V6]]、[[Meta MTIA 2]] 的「量產」改寫成客觀市場事實；只能寫成 [[AI Server PCB test image 4]]（來源未標示日期）的表格說法。\n- [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 都是來源發布日期未標示的規格比較表；圖中雖有 25Q1、25Q2、25H2、2026、26H2、2027 等平台時間，但不能替代來源發布日期。\n- [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 的試產、量產、樣機、放量、供應商占比、價格與交期說法都缺少定義、樣本、資料來源與驗證文件；不得改寫成客觀已發生事實。\n- [[HSD PCB image 11]] 與 [[HSD PCB image 1]] 高度重疊，不能把兩者當作相互獨立的市場驗證來源。\n- 公司列名不可推論為完整供應鏈、市場排名、採購名單、供應合約、R&S 往來對象或投資建議。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+             },
+             "score": 2.698339
+            },
+            {
+             "text": "Data center full-spectrum connectivity › Power 與 cooling connectivity\n- [[Amphenol BarKlip I-O products]] / [[BarKlip Busbar Connectors]] — 來源稱其 distribute high-current power between busbars、cables and circuit boards，適用 power-dense data centers、OCP rack and power solutions。\n- [[60 A Universal AC Input Connector and Cable Assemblies]] — 來源稱其 meet 2OU power distribution architecture standards，將 power 從 busway routing 到 power shelf。\n- [[M-CRPS +54V Connectors and Cable Assemblies]] — 來源稱其 meet OCP M-CRPS power supply input specifications。\n- [[PwrBlade ULTRA HD+ Cable Assembly]] — 來源稱其 Cable-to-Board serves as high-power I/O cable configuration in a low-profile design。\n- [[OSFP-RHS 224G Cold Plate and Cage Assembly]] — 來源稱其 optimizes port thermal efficiency and reliability，meeting MSA requirements，並提供 one-step press assembly。\n- [[Amphenol Liquid Cooling Leakage Detection Sensor Cable Assembly]] — 來源稱其 detects coolant leaks and ensures system reliability。\n- [[Liquid Cooling Quick Disconnect Connectors]] — 來源稱其用於 high-efficiency thermal management。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+             },
+             "score": 2.086605
+            },
+            {
+             "text": "NVIDIA › NVIDIA 800 VDC blog 摘錄\n- [[Power delivery unit]]（raw 路徑含 2026-8-3；converted 2026-09-16）稱：**NVIDIA is leading the transition to 800 VDC data center power infrastructure to support 1 MW IT racks and beyond, starting in 2027.**\n- [[Power delivery unit]]（raw 路徑含 2026-8-3；converted 2026-09-16）稱，為加速 adoption，NVIDIA 正與 data center electrical ecosystem 的 key industry partners 合作。\n- [[Power delivery unit]] 來源附上 NVIDIA developer blog URL：`https://developer.nvidia.com/blog/nvidia-800-v-hvdc-architecture-will-power-the-next-generation-of-ai-factories/`。\n- [[Power delivery unit]] 未擷取完整 blog 正文；目前只能引用 OneNote 中抄出的段落與 partner list。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/NVIDIA.md"
+             },
+             "score": 8.278873
+            },
+            {
+             "text": "AISeverEcosystem › 與既有知識的關係\n- [[AI Server 供應鏈總覽]] 已整理 AI server 從 demand、compute、ODM、networking、PCB/interconnect、power、cooling 到 infrastructure 的八段式供應鏈；本來源新增更偏台股 / customer targeting / R&S solution mapping 的 Excel 表格視角。\n- [[AI 資料中心生態系]] 已整理多張 AI data center ecosystem / industrial chain 圖；本來源提供更細的 server rack 零組件與 IC 分類，但來源未標示日期，不能直接更新為市場現況。\n- [[臺灣 AI 伺服器供應鏈]] 依 TAITRA 2024/4 圖整理上中下游；本來源與其在 [[台光電]]、[[台燿]]、[[聯茂]]、[[欣興]]、[[南電]]、[[景碩]]、[[鴻海]]、[[廣達]]、[[緯創]]、[[英業達]]、[[台達電]]、[[光寶科]]、[[康舒]]、[[建準]]、[[川湖]]、[[勤誠]]等列名上高度相鄰，但本來源另加入 R&S solution 欄。\n- [[AI 伺服器 ODM]] 已整理台系 ODM 比較表與組裝代工列名；本來源在 [[伺服器整合／ODM]] 欄再次列出 [[鴻海]]、[[廣達]]、[[緯創]]、[[緯穎]]、[[英業達]]、[[華碩]]、[[神達]]、[[技嘉]]，但沒有營收、出貨或期間資料。\n- [[AI 伺服器 PCB 供應鏈升級]] 已記錄 GB200 / GB300 / VR200 與 PCB 材料升級；本來源只以 `GB200/NVL72帶動層數、材料等級暴衝` 和 `20+層UBB、高階ABF、低Dk CCL` 補充銷售 / solution mapping 脈絡，沒有新增可量化規格。\n- [[AI 伺服器液冷散熱]] 已整理液冷 / Microchannel lid 與 VR200 散熱估算；本來源新增 [[GPU]] TDP 700 W → 1200 W 與液冷 / 滑軌升級的表格說法，但未標示平台、年份或測試條件。\n- [[資料中心電力電子生態系]] 與 [[NVIDIA 800V HVDC 架構]] 已整理 HVDC、PSU、BBU、PDU 等 power electronics 脈絡；本來源補充電源供應器分類中的 HVDC、5–10 kW PSU、液冷電源櫃、BBU 與 Blackwell 平台功耗翻倍說法，但未提供引用文件或期間。\n- [[R&S PCB test solutions]] 已整理 R&S 2026.3.4 high-speed digital 簡報中的 material measurement、stackup selection、SI testing 與 sampling / process monitoring；本來源把部分 R&S solution 對應到特定市場分類，例如 [[R&S ZNA]] / [[R&S ZNB]] 的 IL / TDR、[[R&S FSWP]] 的 jitter / phase noise / LDO NSD test、[[MXO]] 的 power rail / motor driver analysis。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AISeverEcosystem.md"
+             },
+             "score": 5.404416
+            },
+            {
+             "text": "欣興 › 可追溯範圍\n- 本頁不自行合併不同來源的分類口徑，也不推論[[欣興]]與 AI server、AMD、NVIDIA、網路通訊設備品牌或 R&S 的交易關係。\n- [[AI Server PCB test image 11]] 與 [[AI Server PCB test image 37]] 的主要客戶只能記為表格說法；來源未提供採購金額、出貨量、供貨產品、合約期間或有效日期。\n- [[AI Server PCB test image 12]] 與 [[AI Server PCB test image 38]] 的 24% 只能記為未標題圓餅圖中的圖上數值；不得寫成市場占有率、營收占比、出貨量占比、產能占比或 AI server PCB 供應比例。\n- [[AI Server PCB test image 17]] 的 30% 只能記為來源對 AI PC 市場份額的說法；不得與營收占比或未定義圓餅圖占比互相比較。\n- [[AI Server PCB test image 22]] 與 [[AI Server PCB test image 48]] 的伺服器 / 載板 / 晶片客戶欄只代表表格文字；不得改寫為已驗證直接客戶、採購關係、供應合約或現行狀態。\n- [[AI Server PCB test image 48]] 與 [[AI Server PCB test image 22]] 高度重疊，不可視為兩份獨立市場驗證。\n- [[HSD PCB image 10]] 的台廠ABF載板龍頭與 Blackwell第二大載板供應商只代表該未標示日期圖卡說法；不得改寫為已驗證供應排名或現行狀態。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/欣興.md"
+             },
+             "score": 3.231288
+            },
+            {
+             "text": "南電 › ABF 概念股圖卡列名\n| 來源 | 日期 / 期間 | 圖上分類 | 圖上說法 | 備註 |\n|---|---|---|---|---|\n| [[HSD PCB image 10]] | 來源未標示日期；取得於 2026-09-04 | 台廠ABF概念股 | 客戶涵蓋美系CPU；與高速傳輸晶片業者 | 來源未列出具體客戶名稱、產品、期間或供應關係定義。 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/南電.md"
+             },
+             "score": 5.052714
+            },
+            {
+             "text": "Amphenol Communications Solutions › 來源中的說法\n- [[HSD Cable test image 6]]（來源未標示日期；取得於 2026-09-04）以伺服器 / 加速卡 / 板卡系統內部結構示意圖，列出 [[Mini Cool Edge IO]]、[[CoolPower HD Connector]]、[[Amphenol CoolExpress Link]]、[[Direct Attached Copper Cables]] 與 [[PCI Express Gen 6 CEM Card Edge Connectors]]，內容與 [[HSD Cable test image 2]] 高度重疊。\n- [[HSD Cable test image 7]]（來源未標示日期；轉檔於 2026-09-04）以產品 / 系統示意圖列出 [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]]、[[BarKlip Busbar Connectors]] 與 [[Paladin HD2 224Gb-s Backplane Interconnect System]]，內容與 [[HSD Cable test image 3]] 高度重疊。\n- [[compute-tray-flyer]]（來源未標示日期；raw converted 2026-09-17）標題為 THE CORE OF RELIABLE COMPUTE TRAY DESIGN 與 Amphenol | Next-Gen Compute Tray Component Solutions，並稱 [[Amphenol]] delivers high-performance connectors, cables, and thermal solutions engineered to maximize signal integrity, power efficiency, and reliability within every compute tray design。\n- [[data-center-server-solutions-guide]]（來源未標示日期；raw converted 2026-09-17）以 Data Center Server Solutions 為題，將 [[Amphenol Communications Solutions]] / [[Amphenol]] 的產品組合分成 high-speed backplane、backplane cables、I/O、mezzanine、SSD、power、memory、card edge、magnetic jacks、fan connectors 與 ethernet cables。\n- [[full-spectrum-data-center-connectivity-brochure]]（來源未標示日期；raw converted 2026-09-17）以 amphenol-cs.com 與 Data Center Connectivity 呈現 full-spectrum portfolio，涵蓋 high-speed I/O、backplane、mezzanine、optical transceivers、CPO / NPO、fiber deployment、power shelf / busbar power distribution、custom busbars、liquid cooling、leak detection 與 quick disconnect connectors。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Amphenol Communications Solutions.md"
+             },
+             "score": 4.018201
+            },
+            {
+             "text": "NVIDIA › Yole Group 2025 圖像來源\n- [[Power delivery unit image 6]]（2025；取得於 2026-09-04）標題寫 **POWER ELECTRONICS FOR DATA CENTERS: EVERYONE IS LOOKING TO WORK WITH NVIDIA**。\n- [[Power delivery unit image 6]]（2025；取得於 2026-09-04）中央上方框標示 **Leadership**，框內為 **nvidia.**。\n- [[Power delivery unit image 6]]（2025；取得於 2026-09-04）以 NVIDIA 為中心，周圍列出 Cooling、Data center Infrastructure (rack, PDU)、[[PSU]]、[[Intermediate Bus Converter]]、[[BBU]] 與 Nvidia customers 等區塊。\n- [[Power delivery unit image 6]]（2025；取得於 2026-09-04）在下方藍色說明框稱 [[DELTA]] **working closely with Nvidia across almost the entire powertrain**。\n- [[Power delivery unit image 13]]（2025；raw converted 2026-09-04）是 [[Power delivery unit image 6]] 的高度重疊 OCR / 讀圖來源，見 [[Power delivery unit image 6 與 13 重複來源]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/NVIDIA.md"
+             },
+             "score": 4.026427
+            },
+            {
+             "text": "AISeverEcosystem › 重點摘要\n- [[AISeverEcosystem]] 是一份 AI server ecosystem / server rack / ICs Excel 轉檔來源，主要把 AI server 供應鏈分成 [[GPU模組]]、[[ABF載板]]、[[伺服器主機板]]、[[PCB]]、[[CCL]]、[[連接器]] / 線纜、[[網通交換機]]、[[矽光子]]、[[散熱器]]、[[電源供應器]]、[[伺服器機殼]]、[[伺服器 ODM]]、[[EMC Lab]] 與 IC 相關分類。\n- 來源同時列出部分公司、台股代號、角色亮點、[[R&S Solution]] 與 sales kits 連結；多數欄位為 `NaN`，因此不可推論未填欄位代表不適用、無需求或無 R&S solution。\n- [[ServerRack]] sheet 中，[[伺服器主機板]] / PCBA 的 [[R&S Solution]] 欄列出 [[R&S ZNL]] 用於 PDN Target Z、[[MXO]] 用於 power rail / multiphase DC / PI、[[ZISO]]、[[R&S FSWP]] 用於 LDO NSD test / clock jitter test、[[R&S ZNA]] 用於 high speed trace test。\n- [[伺服器電路板]] / PCB 分類列出關鍵元件為 `20+層UBB、高階ABF、低Dk CCL`，並在 [[博智]] 列寫 `GB200/NVL72帶動層數、材料等級暴衝。`；[[R&S Solution]] 欄列 [[R&S ZNA]] / [[R&S ZNB]]：IL、TDR。\n- [[連接器]] / 線纜分類列出 `CPU/GPU Socket、UQD水冷快接、800 G AOC`，角色亮點稱 [[PCIe 6]] / [[PCIe 7]]、[[InfiniBand]] 800 Gbe 提升 connector ASP；[[R&S Solution]] 欄列 [[R&S ZNA]] / [[R&S ZNB]] + [[OSP]]：high speed cable。\n- [[網通交換機]] 分類列出 [[智邦]]、[[神準]]、[[明泰]]、[[鴻海]]、[[達創]]、[[鈺登]]，[[R&S Solution]] 欄在 [[智邦]] 列出 [[R&S FSWP]]：jitter / phase noise test、VNA（[[R&S ZNA]] / [[R&S ZNB]]）、EMI pretest，並有一個 SharePoint sales kit 連結。\n- [[矽光子]] 分類列出關鍵元件 `40G/100G/400G/800G光收發模組, CPO/NEO（Near-packaged optics) &（pluggable）`；角色亮點稱 [[CPO]] 對有源 / 無源 SiPh、先進封裝、測試需求提升，且提到 [[前鼎]] 提供高速載板、[[光聖]] 提供 ELS 外部雷射源；[[R&S Solution]] 欄列 optical VNA：[[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]，以及 [[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]]。\n- [[散熱器]] 分類列出關鍵元件 `滑軌、液冷板、CDU、風扇`，在 [[建準]] 角色亮點稱 `GPU TDP由700 W升至1200 W，液冷與滑軌結構同步升級。`；[[R&S Solution]] 欄列 [[MXO]]：motor driver analysis。\n- [[電源供應器]] 分類列出關鍵元件 `HVDC、5–10 kW PSU、液冷電源櫃、BBU`，在 [[光寶科]] 角色亮點稱 `Blackwell平台功耗翻倍，推升高密度電源需求`；[[R&S Solution]] 欄列 [[MXO]]：power rail / multiphase DC / PI、[[ZISO]]、[[R&S FSWP]]：LDO NSD test、BMS test，並有一個 SharePoint sales kit 連結。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AISeverEcosystem.md"
+             },
+             "score": 3.256742
+            },
+            {
+             "text": "南電 › 未決事項\n- [[AI Server PCB test image 11]] 與 [[AI Server PCB test image 37]] 未標示[[南電]]的完整公司名稱、英文名稱、股票代號或是否為[[南亞電路板]]。\n- [[AI Server PCB test image 11]] 與 [[AI Server PCB test image 37]] 未標示營收占比的資料年份、季度、統計期間、分類口徑或是否為估算值。\n- [[AI Server PCB test image 12]] 與 [[AI Server PCB test image 38]] 未說明 20% 是否為市占率、營收、出貨量、產能、訂單、客戶、供應占比或其他指標。\n- [[HSD PCB image 10]] 未列出美系CPU與高速傳輸晶片業者的具體公司名、資料來源、期間、產品或客戶關係定義。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/南電.md"
+             },
+             "score": 0.82098
+            },
+            {
+             "text": "Amphenol Communications Solutions\n[[Amphenol Communications Solutions]] 是 [[Amphenol]] 在多份 high-speed server / storage / compute tray / data center connectivity 來源中標示的品牌 / 業務名稱；既有圖像來源、[[compute-tray-flyer]]、[[data-center-server-solutions-guide]] 與 [[full-spectrum-data-center-connectivity-brochure]] 都把它放在 high-speed、high-density server、storage、data center、compute tray、optical、power 與 cooling interconnect solutions 語境中。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Amphenol Communications Solutions.md"
+             },
+             "score": 3.411534
+            },
+            {
+             "text": "Rohde & Schwarz and Qualcomm Technologies are the first to complete all relevant test aspects for this conformance test case. During the verification work, the companies also identified areas where the underlying conformance specification could be improved and supported the submission of a change request to 3GPP RAN5, the group responsible for conformance test specifications. This links practical verification work with ongoing standardization development.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-2a382b33a077c49c",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR.md",
+               "sha256": "2a382b33a077c49cc96578b7528b837cd80c6489666e697465fb76d4081f0aef",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR.md",
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 23.419957
+            },
+            {
+             "text": "For DRBs the network does not include the field\nsetting of",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-484f76aad6f2ea3a",
+               "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+               "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "section": 520,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 23.26445
+            },
+            {
+             "text": "The data unit for the CMX500 allows you to test end-to-end (E2E) IP data transfer and\nto perform user plane tests for an established IP connection to a DUT. To establish\nthe IP connection, you need additional signaling licenses, supporting the relevant radio\naccess technology as prerequisite, which is described in previous sections.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-bc47a8ad4da77a6a",
+               "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+               "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "section": 2852,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 22.97858
+            },
+            {
+             "text": "[Transform Your Data Center Next Gen PCIe Gen5 SSDs for AI and Big Data Acceleration](https://directmacro.com/blog/post/next-gen-pcie-gen5-ssds-for-ai-and-big-data-acceleration)",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d6b73360142315a7",
+               "original_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/SSD in AI server.md",
+               "sha256": "d6b73360142315a7ab0fb40ddcc94a782a41718db0b241511207250fb9b9f5b7",
+               "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/SSD in AI server.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/SSD in AI server.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 22.181222
+            }
+           ],
+           "text": "An oscilloscope fits mainly in the AI data center **board / power / cooling validation workflow**, not in the PCB material IL/TDR workflow.[22]\n| Workflow stage | Where the oscilloscope fits | What it measures |\n|---|---|---|\n| Server motherboard / PCBA validation | The ServerRack PCBA solution mapping lists **MXO** for **power rail / multiphase DC / PI** measurements.[22] | Power rails, multiphase DC behavior, and power integrity.[22] |\n| Power-supply validation | The power-supply category lists **MXO** for **power rail / multiphase DC / PI** in HVDC, 5–10 kW PSU, liquid-cooled power cabinet, and BBU context.[22] | Power rails, multiphase DC behavior, and power integrity in power systems.[22] |\n| Cooling subsystem validation | The heatsink / cooling category lists **MXO** for **motor driver analysis**.[22] | Motor-driver behavior for cooling-related systems.[22] |\n| PCB / high-speed interconnect workflow boundary | The PCB test workflow is described as material measurement, stackup selection, SI testing, and sampling / process monitoring, while the AI server mapping assigns IL / TDR and high-speed trace work to R&S ZNA / ZNB rather than MXO.[17][22] | Not the primary cited tool for IL, TDR, or high-speed trace measurement; those are mapped to VNA products in the passages.[22] |\n【推論】In an AI data center workflow, use the oscilloscope after PCB/material and high-speed interconnect characterization, when validating live board power behavior, PSU behavior, and cooling motor-drive operation.[17][22]",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "AISeverEcosystem › 與既有知識的關係\n- [[AI Server 供應鏈總覽]] 已整理 AI server 從 demand、compute、ODM、networking、PCB/interconnect、power、cooling 到 infrastructure 的八段式供應鏈；本來源新增更偏台股 / customer targeting / R&S solution mapping 的 Excel 表格視角。\n- [[AI 資料中心生態系]] 已整理多張 AI data center ecosystem / industrial chain 圖；本來源提供更細的 server rack 零組件與 IC 分類，但來源未標示日期，不能直接更新為市場現況。\n- [[臺灣 AI 伺服器供應鏈]] 依 TAITRA 2024/4 圖整理上中下游；本來源與其在 [[台光電]]、[[台燿]]、[[聯茂]]、[[欣興]]、[[南電]]、[[景碩]]、[[鴻海]]、[[廣達]]、[[緯創]]、[[英業達]]、[[台達電]]、[[光寶科]]、[[康舒]]、[[建準]]、[[川湖]]、[[勤誠]]等列名上高度相鄰，但本來源另加入 R&S solution 欄。\n- [[AI 伺服器 ODM]] 已整理台系 ODM 比較表與組裝代工列名；本來源在 [[伺服器整合／ODM]] 欄再次列出 [[鴻海]]、[[廣達]]、[[緯創]]、[[緯穎]]、[[英業達]]、[[華碩]]、[[神達]]、[[技嘉]]，但沒有營收、出貨或期間資料。\n- [[AI 伺服器 PCB 供應鏈升級]] 已記錄 GB200 / GB300 / VR200 與 PCB 材料升級；本來源只以 `GB200/NVL72帶動層數、材料等級暴衝` 和 `20+層UBB、高階ABF、低Dk CCL` 補充銷售 / solution mapping 脈絡，沒有新增可量化規格。\n- [[AI 伺服器液冷散熱]] 已整理液冷 / Microchannel lid 與 VR200 散熱估算；本來源新增 [[GPU]] TDP 700 W → 1200 W 與液冷 / 滑軌升級的表格說法，但未標示平台、年份或測試條件。\n- [[資料中心電力電子生態系]] 與 [[NVIDIA 800V HVDC 架構]] 已整理 HVDC、PSU、BBU、PDU 等 power electronics 脈絡；本來源補充電源供應器分類中的 HVDC、5–10 kW PSU、液冷電源櫃、BBU 與 Blackwell 平台功耗翻倍說法，但未提供引用文件或期間。\n- [[R&S PCB test solutions]] 已整理 R&S 2026.3.4 high-speed digital 簡報中的 material measurement、stackup selection、SI testing 與 sampling / process monitoring；本來源把部分 R&S solution 對應到特定市場分類，例如 [[R&S ZNA]] / [[R&S ZNB]] 的 IL / TDR、[[R&S FSWP]] 的 jitter / phase noise / LDO NSD test、[[MXO]] 的 power rail / motor driver analysis。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/sources/AISeverEcosystem.md"
+            },
+            "score": 5.404416
+           },
+           {
+            "text": "AISeverEcosystem › 重點摘要\n- [[AISeverEcosystem]] 是一份 AI server ecosystem / server rack / ICs Excel 轉檔來源，主要把 AI server 供應鏈分成 [[GPU模組]]、[[ABF載板]]、[[伺服器主機板]]、[[PCB]]、[[CCL]]、[[連接器]] / 線纜、[[網通交換機]]、[[矽光子]]、[[散熱器]]、[[電源供應器]]、[[伺服器機殼]]、[[伺服器 ODM]]、[[EMC Lab]] 與 IC 相關分類。\n- 來源同時列出部分公司、台股代號、角色亮點、[[R&S Solution]] 與 sales kits 連結；多數欄位為 `NaN`，因此不可推論未填欄位代表不適用、無需求或無 R&S solution。\n- [[ServerRack]] sheet 中，[[伺服器主機板]] / PCBA 的 [[R&S Solution]] 欄列出 [[R&S ZNL]] 用於 PDN Target Z、[[MXO]] 用於 power rail / multiphase DC / PI、[[ZISO]]、[[R&S FSWP]] 用於 LDO NSD test / clock jitter test、[[R&S ZNA]] 用於 high speed trace test。\n- [[伺服器電路板]] / PCB 分類列出關鍵元件為 `20+層UBB、高階ABF、低Dk CCL`，並在 [[博智]] 列寫 `GB200/NVL72帶動層數、材料等級暴衝。`；[[R&S Solution]] 欄列 [[R&S ZNA]] / [[R&S ZNB]]：IL、TDR。\n- [[連接器]] / 線纜分類列出 `CPU/GPU Socket、UQD水冷快接、800 G AOC`，角色亮點稱 [[PCIe 6]] / [[PCIe 7]]、[[InfiniBand]] 800 Gbe 提升 connector ASP；[[R&S Solution]] 欄列 [[R&S ZNA]] / [[R&S ZNB]] + [[OSP]]：high speed cable。\n- [[網通交換機]] 分類列出 [[智邦]]、[[神準]]、[[明泰]]、[[鴻海]]、[[達創]]、[[鈺登]]，[[R&S Solution]] 欄在 [[智邦]] 列出 [[R&S FSWP]]：jitter / phase noise test、VNA（[[R&S ZNA]] / [[R&S ZNB]]）、EMI pretest，並有一個 SharePoint sales kit 連結。\n- [[矽光子]] 分類列出關鍵元件 `40G/100G/400G/800G光收發模組, CPO/NEO（Near-packaged optics) &（pluggable）`；角色亮點稱 [[CPO]] 對有源 / 無源 SiPh、先進封裝、測試需求提升，且提到 [[前鼎]] 提供高速載板、[[光聖]] 提供 ELS 外部雷射源；[[R&S Solution]] 欄列 optical VNA：[[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]，以及 [[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]]。\n- [[散熱器]] 分類列出關鍵元件 `滑軌、液冷板、CDU、風扇`，在 [[建準]] 角色亮點稱 `GPU TDP由700 W升至1200 W，液冷與滑軌結構同步升級。`；[[R&S Solution]] 欄列 [[MXO]]：motor driver analysis。\n- [[電源供應器]] 分類列出關鍵元件 `HVDC、5–10 kW PSU、液冷電源櫃、BBU`，在 [[光寶科]] 角色亮點稱 `Blackwell平台功耗翻倍，推升高密度電源需求`；[[R&S Solution]] 欄列 [[MXO]]：power rail / multiphase DC / PI、[[ZISO]]、[[R&S FSWP]]：LDO NSD test、BMS test，並有一個 SharePoint sales kit 連結。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/sources/AISeverEcosystem.md"
+            },
+            "score": 3.256742
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [],
+           "missing_facets": [],
+           "relation_required": false,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": [
+           {
+            "wiki_page": "wiki/sources/AISeverEcosystem.md",
+            "raw_refs": [
+             "raw/Market/OneNote/AISeverEcosystem.md"
+            ]
+           }
+          ]
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

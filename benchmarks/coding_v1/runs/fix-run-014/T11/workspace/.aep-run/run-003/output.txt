@@ -1,0 +1,22 @@
+Fetched list page: http://127.0.0.1:63668/t11/list chars= 292
+List markup sample: <!doctype html><html><head><meta charset="utf-8"><title>List</title></head><body><ul id="products"><li><a href="/t11/item/1">Laptop 13</a></li><li><a href="/t11/item/2">Laptop 15</a></li><li><a href="/t11/item/3">Mini PC</a></li><li><a href="/t11/item/4">Tablet 11</a></li></ul></body></html>
+Detail links found: 4
+ - http://127.0.0.1:63668/t11/item/1 label= Laptop 13
+ - http://127.0.0.1:63668/t11/item/2 label= Laptop 15
+ - http://127.0.0.1:63668/t11/item/3 label= Mini PC
+ - http://127.0.0.1:63668/t11/item/4 label= Tablet 11
+Fetched detail 1: http://127.0.0.1:63668/t11/item/1 chars=282 sample='<!doctype html><html><head><meta charset="utf-8"><title>Laptop 13</title></head><body><h1 class="name">Laptop 13</h1><table class="spec"><tr><th>Price</th><td>NT$32,900</td></tr><tr><th>CPU</th><td>Intel i5-1340P</td></tr><tr><th>Memory</th><td>16 GB</td></tr></table></body></html>'
+ Parsed: {'Name': 'Laptop 13', 'Price': '32900', 'Currency': 'NT$', 'CPU': 'Intel i5-1340P', 'MemoryGB': '16', 'URL': 'http://127.0.0.1:63668/t11/item/1'}
+Fetched detail 2: http://127.0.0.1:63668/t11/item/2 chars=281 sample='<!doctype html><html><head><meta charset="utf-8"><title>Laptop 15</title></head><body><h1 class="name">Laptop 15</h1><table class="spec"><tr><th>Price</th><td>NT$45,500</td></tr><tr><th>CPU</th><td>Intel i7-1360P</td></tr><tr><th>Memory</th><td>32GB</td></tr></table></body></html>'
+ Parsed: {'Name': 'Laptop 15', 'Price': '45500', 'Currency': 'NT$', 'CPU': 'Intel i7-1360P', 'MemoryGB': '32', 'URL': 'http://127.0.0.1:63668/t11/item/2'}
+Fetched detail 3: http://127.0.0.1:63668/t11/item/3 chars=234 sample='<!doctype html><html><head><meta charset="utf-8"><title>Mini PC</title></head><body><h1 class="name">Mini PC</h1><table class="spec"><tr><th>Price</th><td>NT$18,800</td></tr><tr><th>Memory</th><td>16 GB</td></tr></table></body></html>'
+ Parsed: {'Name': 'Mini PC', 'Price': '18800', 'Currency': 'NT$', 'CPU': '', 'MemoryGB': '16', 'URL': 'http://127.0.0.1:63668/t11/item/3'}
+Fetched detail 4: http://127.0.0.1:63668/t11/item/4 chars=274 sample='<!doctype html><html><head><meta charset="utf-8"><title>Tablet 11</title></head><body><h1 class="name">Tablet 11</h1><table class="spec"><tr><th>Price</th><td>NT$12,300</td></tr><tr><th>CPU</th><td>ARM A78</td></tr><tr><th>Memory</th><td>8 GB</td></tr></table></body></html>'
+ Parsed: {'Name': 'Tablet 11', 'Price': '12300', 'Currency': 'NT$', 'CPU': 'ARM A78', 'MemoryGB': '8', 'URL': 'http://127.0.0.1:63668/t11/item/4'}
+Saved: output\details.xlsx
+Verified output workbook: output/details.xlsx exists, sheet details, exact columns, 4 rows, numeric Price/MemoryGB, NT$ Currency, blank missing CPU, and detail URLs.
+Rows written:
+('Laptop 13', 32900, 'NT$', 'Intel i5-1340P', 16, 'http://127.0.0.1:63668/t11/item/1')
+('Laptop 15', 45500, 'NT$', 'Intel i7-1360P', 32, 'http://127.0.0.1:63668/t11/item/2')
+('Mini PC', 18800, 'NT$', None, 16, 'http://127.0.0.1:63668/t11/item/3')
+('Tablet 11', 12300, 'NT$', 'ARM A78', 8, 'http://127.0.0.1:63668/t11/item/4')

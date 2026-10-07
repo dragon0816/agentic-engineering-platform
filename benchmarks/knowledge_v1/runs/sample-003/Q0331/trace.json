@@ -1,0 +1,1272 @@
+{
+ "question": {
+  "id": "Q0331",
+  "text": "How do changes in radar technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+  "market": "Aerospace / Defense",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-196cd7da0ba544a385cd6ee4c7fd7392",
+ "exchange": {
+  "sent": "How do changes in radar technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+  "http_status": 200,
+  "seconds": 247.828,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-196cd7da0ba544a385cd6ee4c7fd7392",
+    "actor": "leo.chi",
+    "title": "How do changes in radar technology affect the measurement capability req…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T12:45:10.372058Z",
+    "updated_at": "2026-10-07T12:49:18.036709Z",
+    "messages": [
+     {
+      "message_id": "message-faf3c242132b443980409b3beecbd099",
+      "role": "user",
+      "text": "How do changes in radar technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+      "created_at": "2026-10-07T12:45:10.667231Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-5d4cfaa57ec04fcbbbb2723527eaa137",
+      "role": "assistant",
+      "text": "The knowledge base does not give one complete narrative answer for this exact question, but it does provide relevant evidence: modern radar test setups need wider IF/analysis bandwidth, Doppler/target simulation, multiple paths/objects, pulse and phase-noise analysis. For example, the R&S AREG800A automotive radar echo generator evidence lists baseband extension from 1 GHz to 2 GHz and 5 GHz IF bandwidth, second IF path activation, additional artificial objects, extended Doppler shift up to 10 MHz, near-object FMCW support, synchronization, and hardware-in-the-loop interfaces. It also lists supported mmWave/external frontends. The R&S FSW evidence lists analysis bandwidth options from tens of MHz up to multi-GHz, including 1.2 GHz, 2 GHz, 4.4 GHz, 6.4 GHz and 8.312 GHz, plus pulse measurement, AM/FM/PM modulation analysis, phase-noise measurement, vector signal analysis, real-time spectrum options, and external frontend control.\n\nPutting that into measurement implications:\n\n## 1. Wider radar bandwidth → wider generator and analyzer bandwidth\n\nModern FMCW and high-resolution radar use wider chirps because range resolution improves as bandwidth increases. This drives:\n\n**Signal generator requirements**\n- Wider modulation/IQ bandwidth.\n- Better chirp linearity.\n- High sample rate and deep waveform memory.\n- Accurate frequency sweep control.\n- Low spurious and low phase noise across wide sweeps.\n\n**Signal analyzer requirements**\n- Wide instantaneous analysis bandwidth to capture the full chirp or pulse.\n- Ability to measure chirp linearity, occupied bandwidth, modulation errors, spurs and transient behavior.\n- Enough memory/streaming to capture long pulse trains or radar frames.\n\nR&S example evidence: AREG800A options include IF bandwidth extensions to 2 GHz and 5 GHz; FSW analysis-bandwidth options extend into multi-GHz ranges.\n\n## 2. Move to mmWave radar → higher frequency coverage and external frontends\n\nAutomotive and advanced radar commonly operate at mmWave frequencies, e.g. 24 GHz, 77 GHz, 79 GHz, and beyond depending on application. This changes test needs from “RF only” to “RF + mmWave frontend + calibration.”\n\n**Signal generator requirements**\n- Direct or upconverted mmWave frequency coverage.\n- Phase-stable external frontend support.\n- Accurate output power and flatness at high frequency.\n- Low phase noise, because phase noise affects Doppler sensitivity and close-in target detection.\n\n**Signal analyzer requirements**\n- High-frequency analysis, often with external mixers/frontends.\n- Calibrated amplitude and phase response.\n- Harmonic, spur and emission measurement at mmWave.\n- Low displayed average noise level and high dynamic range.\n\nR&S example evidence: AREG800A evidence lists supported mmWave/external frontends; FSW evidence lists external frontend control and high-frequency models/options.\n\n## 3. Better range/Doppler resolution → stricter phase-noise and timing performance\n\nRadar increasingly needs to detect small, slow, or closely spaced targets. That makes phase noise, timing jitter, and frequency stability much more important.\n\n**Signal generator requirements**\n- Very low phase noise.\n- Stable reference clock.\n- Accurate pulse timing, PRI, chirp slope, and Doppler offset generation.\n- Repeatable waveform timing for regression testing.\n\n**Signal analyzer requirements**\n- Phase-noise measurement.\n- Doppler/frequency-shift accuracy.\n- Time-domain pulse analysis: rise/fall time, pulse width, PRI, duty cycle, pulse-to-pulse stability.\n- Ability to separate close-in signals from noise and spurs.\n\nR&S example evidence: FSW firmware options include pulse measurements, AM/FM/PM modulation analysis, and phase-noise measurements.\n\n## 4. MIMO / phased-array / AESA radar → coherent multi-channel testing\n\nRadar is moving from single-channel systems to phased arrays and MIMO architectures. That means the test system must measure not just “one RF signal,” but relationships between channels.\n\n**Signal generator requirements**\n- Multiple phase-coherent channels.\n- Precise phase and amplitude control per channel.\n- Synchronization between instruments.\n- Ability to emulate angle of arrival, multiple targets, or channel-to-channel delay.\n\n**Signal analyzer requirements**\n- Coherent multi-channel capture or synchronized analyzers.\n- Phase/amplitude mismatch measurement.\n- Beamforming and antenna-pattern validation, often OTA.\n- Cross-channel timing skew and phase stability analysis.\n\nR&S example evidence: AREG800A evidence includes second IF path activation, synchronization interface, and multiple/artificial object related options.\n\n## 5. More realistic target scenarios → target/echo simulation, not just waveform generation\n\nRadar validation is no longer only “generate a CW or pulse.” Engineers need repeatable target scenes: near/far targets, multiple objects, Doppler, RCS changes, delay, and interference.\n\n**Signal generator / radar echo generator requirements**\n- Programmable delay to emulate range.\n- Doppler shift to emulate velocity.\n- Multiple simultaneous artificial objects.\n- Near-object simulation for FMCW.\n- Hardware-in-the-loop control for scenario testing.\n\n**Signal analyzer requirements**\n- Ability to verify the radar output under dynamic scenes.\n- Triggering and time correlation with scenario events.\n- Capture of complete radar frames, not only isolated pulses.\n- Automation for repeatable regression tests.\n\nR&S example evidence: AREG800A evidence lists additional artificial object, extended Doppler frequency shift, near-object range for FMCW, and hardware-in-the-loop control interface.\n\n## 6. More complex waveforms → vector signal generation and vector analysis\n\nModern radar can use FMCW, pulsed compression, phase-coded waveforms, frequency hopping, agile PRF, and low-probability-of-intercept waveforms.\n\n**Signal generator requirements**\n- Arbitrary waveform generation.\n- Wideband IQ modulation.\n- Frequency agility and fast switching.\n- Pulse modulation and modulation-on-pulse capability.\n- Accurate reproduction of impairments or intentional interference.\n\n**Signal analyzer requirements**\n- Vector signal analysis.\n- Pulse compression and modulation-on-pulse analysis.\n- AM/FM/PM analysis.\n- Real-time spectrum monitoring to catch short events.\n- Long acquisition memory for bursty or agile signals.\n\nR&S example evidence: FSW evidence includes vector signal analysis, AM/FM/PM analysis, pulse measurement, and real-time spectrum analyzer options.\n\n## 7. Crowded spectrum and radar coexistence → better dynamic range and real-time detection\n\nRadar now often operates near other radars, communications signals, and interference sources. The measurement system must detect weak targets near strong interferers.\n\n**Signal generator requirements**\n- Ability to inject interferers, blockers, jammers, or coexistence signals.\n- Accurate level control over a wide dynamic range.\n- Multi-signal generation.\n\n**Signal analyzer requirements**\n- High dynamic range.\n- Low noise floor.\n- Real-time spectrum analysis for intermittent signals.\n- Spur search, emission mask, and out-of-band measurement.\n- Good preselection/filtering and overload behavior.\n\n## Bottom line\n\nAs radar evolves from narrowband, single-channel, simple pulse systems toward wideband FMCW, mmWave, phased-array/MIMO, adaptive and scenario-based systems, the required Signal Generator / Signal Analyzer capability shifts as follows:\n\n| Radar technology change | Generator must improve in… | Analyzer must improve in… |\n|---|---|---|\n| Wider chirps / higher range resolution | Modulation bandwidth, chirp linearity | Instantaneous bandwidth, chirp analysis |\n| mmWave operation | Frequency range, frontend support, phase noise | High-frequency coverage, calibrated mmWave analysis |\n| Doppler sensitivity | Frequency stability, Doppler emulation | Phase noise, frequency accuracy |\n| MIMO / phased array | Coherent multi-channel generation | Coherent multi-channel phase/amplitude analysis |\n| Complex waveforms | AWG/IQ capability, pulse agility | Vector, pulse, AM/FM/PM, real-time analysis |\n| Realistic target scenes | Delay/Doppler/object simulation, HIL | Long capture, triggering, scenario correlation |\n| Interference/coexistence | Multi-signal/interference generation | Dynamic range, real-time capture, spur/emission analysis |\n\nIn short: newer radar makes the signal generator more like a **wideband, phase-coherent, scenario/echo emulator**, and makes the signal analyzer more like a **wideband, high-dynamic-range, real-time vector/pulse/phase-noise measurement system**.",
+      "created_at": "2026-10-07T12:49:18.036709Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-b5eb42348dc846a0a279cdc845cb82d7",
+       "request_id": "request-b5eb42348dc846a0a279cdc845cb82d7",
+       "span_id": "span-b5eb42348dc846a0a279cdc845cb82d7",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base does not give one complete narrative answer for this exact question, but it does provide relevant evidence: modern radar test setups need wider IF/analysis bandwidth, Doppler/target simulation, multiple paths/objects, pulse and phase-noise analysis. For example, the R&S AREG800A automotive radar echo generator evidence lists baseband extension from 1 GHz to 2 GHz and 5 GHz IF bandwidth, second IF path activation, additional artificial objects, extended Doppler shift up to 10 MHz, near-object FMCW support, synchronization, and hardware-in-the-loop interfaces. It also lists supported mmWave/external frontends. The R&S FSW evidence lists analysis bandwidth options from tens of MHz up to multi-GHz, including 1.2 GHz, 2 GHz, 4.4 GHz, 6.4 GHz and 8.312 GHz, plus pulse measurement, AM/FM/PM modulation analysis, phase-noise measurement, vector signal analysis, real-time spectrum options, and external frontend control.\n\nPutting that into measurement implications:\n\n## 1. Wider radar bandwidth → wider generator and analyzer bandwidth\n\nModern FMCW and high-resolution radar use wider chirps because range resolution improves as bandwidth increases. This drives:\n\n**Signal generator requirements**\n- Wider modulation/IQ bandwidth.\n- Better chirp linearity.\n- High sample rate and deep waveform memory.\n- Accurate frequency sweep control.\n- Low spurious and low phase noise across wide sweeps.\n\n**Signal analyzer requirements**\n- Wide instantaneous analysis bandwidth to capture the full chirp or pulse.\n- Ability to measure chirp linearity, occupied bandwidth, modulation errors, spurs and transient behavior.\n- Enough memory/streaming to capture long pulse trains or radar frames.\n\nR&S example evidence: AREG800A options include IF bandwidth extensions to 2 GHz and 5 GHz; FSW analysis-bandwidth options extend into multi-GHz ranges.\n\n## 2. Move to mmWave radar → higher frequency coverage and external frontends\n\nAutomotive and advanced radar commonly operate at mmWave frequencies, e.g. 24 GHz, 77 GHz, 79 GHz, and beyond depending on application. This changes test needs from “RF only” to “RF + mmWave frontend + calibration.”\n\n**Signal generator requirements**\n- Direct or upconverted mmWave frequency coverage.\n- Phase-stable external frontend support.\n- Accurate output power and flatness at high frequency.\n- Low phase noise, because phase noise affects Doppler sensitivity and close-in target detection.\n\n**Signal analyzer requirements**\n- High-frequency analysis, often with external mixers/frontends.\n- Calibrated amplitude and phase response.\n- Harmonic, spur and emission measurement at mmWave.\n- Low displayed average noise level and high dynamic range.\n\nR&S example evidence: AREG800A evidence lists supported mmWave/external frontends; FSW evidence lists external frontend control and high-frequency models/options.\n\n## 3. Better range/Doppler resolution → stricter phase-noise and timing performance\n\nRadar increasingly needs to detect small, slow, or closely spaced targets. That makes phase noise, timing jitter, and frequency stability much more important.\n\n**Signal generator requirements**\n- Very low phase noise.\n- Stable reference clock.\n- Accurate pulse timing, PRI, chirp slope, and Doppler offset generation.\n- Repeatable waveform timing for regression testing.\n\n**Signal analyzer requirements**\n- Phase-noise measurement.\n- Doppler/frequency-shift accuracy.\n- Time-domain pulse analysis: rise/fall time, pulse width, PRI, duty cycle, pulse-to-pulse stability.\n- Ability to separate close-in signals from noise and spurs.\n\nR&S example evidence: FSW firmware options include pulse measurements, AM/FM/PM modulation analysis, and phase-noise measurements.\n\n## 4. MIMO / phased-array / AESA radar → coherent multi-channel testing\n\nRadar is moving from single-channel systems to phased arrays and MIMO architectures. That means the test system must measure not just “one RF signal,” but relationships between channels.\n\n**Signal generator requirements**\n- Multiple phase-coherent channels.\n- Precise phase and amplitude control per channel.\n- Synchronization between instruments.\n- Ability to emulate angle of arrival, multiple targets, or channel-to-channel delay.\n\n**Signal analyzer requirements**\n- Coherent multi-channel capture or synchronized analyzers.\n- Phase/amplitude mismatch measurement.\n- Beamforming and antenna-pattern validation, often OTA.\n- Cross-channel timing skew and phase stability analysis.\n\nR&S example evidence: AREG800A evidence includes second IF path activation, synchronization interface, and multiple/artificial object related options.\n\n## 5. More realistic target scenarios → target/echo simulation, not just waveform generation\n\nRadar validation is no longer only “generate a CW or pulse.” Engineers need repeatable target scenes: near/far targets, multiple objects, Doppler, RCS changes, delay, and interference.\n\n**Signal generator / radar echo generator requirements**\n- Programmable delay to emulate range.\n- Doppler shift to emulate velocity.\n- Multiple simultaneous artificial objects.\n- Near-object simulation for FMCW.\n- Hardware-in-the-loop control for scenario testing.\n\n**Signal analyzer requirements**\n- Ability to verify the radar output under dynamic scenes.\n- Triggering and time correlation with scenario events.\n- Capture of complete radar frames, not only isolated pulses.\n- Automation for repeatable regression tests.\n\nR&S example evidence: AREG800A evidence lists additional artificial object, extended Doppler frequency shift, near-object range for FMCW, and hardware-in-the-loop control interface.\n\n## 6. More complex waveforms → vector signal generation and vector analysis\n\nModern radar can use FMCW, pulsed compression, phase-coded waveforms, frequency hopping, agile PRF, and low-probability-of-intercept waveforms.\n\n**Signal generator requirements**\n- Arbitrary waveform generation.\n- Wideband IQ modulation.\n- Frequency agility and fast switching.\n- Pulse modulation and modulation-on-pulse capability.\n- Accurate reproduction of impairments or intentional interference.\n\n**Signal analyzer requirements**\n- Vector signal analysis.\n- Pulse compression and modulation-on-pulse analysis.\n- AM/FM/PM analysis.\n- Real-time spectrum monitoring to catch short events.\n- Long acquisition memory for bursty or agile signals.\n\nR&S example evidence: FSW evidence includes vector signal analysis, AM/FM/PM analysis, pulse measurement, and real-time spectrum analyzer options.\n\n## 7. Crowded spectrum and radar coexistence → better dynamic range and real-time detection\n\nRadar now often operates near other radars, communications signals, and interference sources. The measurement system must detect weak targets near strong interferers.\n\n**Signal generator requirements**\n- Ability to inject interferers, blockers, jammers, or coexistence signals.\n- Accurate level control over a wide dynamic range.\n- Multi-signal generation.\n\n**Signal analyzer requirements**\n- High dynamic range.\n- Low noise floor.\n- Real-time spectrum analysis for intermittent signals.\n- Spur search, emission mask, and out-of-band measurement.\n- Good preselection/filtering and overload behavior.\n\n## Bottom line\n\nAs radar evolves from narrowband, single-channel, simple pulse systems toward wideband FMCW, mmWave, phased-array/MIMO, adaptive and scenario-based systems, the required Signal Generator / Signal Analyzer capability shifts as follows:\n\n| Radar technology change | Generator must improve in… | Analyzer must improve in… |\n|---|---|---|\n| Wider chirps / higher range resolution | Modulation bandwidth, chirp linearity | Instantaneous bandwidth, chirp analysis |\n| mmWave operation | Frequency range, frontend support, phase noise | High-frequency coverage, calibrated mmWave analysis |\n| Doppler sensitivity | Frequency stability, Doppler emulation | Phase noise, frequency accuracy |\n| MIMO / phased array | Coherent multi-channel generation | Coherent multi-channel phase/amplitude analysis |\n| Complex waveforms | AWG/IQ capability, pulse agility | Vector, pulse, AM/FM/PM, real-time analysis |\n| Realistic target scenes | Delay/Doppler/object simulation, HIL | Long capture, triggering, scenario correlation |\n| Interference/coexistence | Multi-signal/interference generation | Dynamic range, real-time capture, spur/emission analysis |\n\nIn short: newer radar makes the signal generator more like a **wideband, phase-coherent, scenario/echo emulator**, and makes the signal analyzer more like a **wideband, high-dynamic-range, real-time vector/pulse/phase-noise measurement system**.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-b5eb42348dc846a0a279cdc845cb82d7",
+      "request_id": "request-b5eb42348dc846a0a279cdc845cb82d7",
+      "span_id": "span-b5eb42348dc846a0a279cdc845cb82d7",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-b5eb42348dc846a0a279cdc845cb82d7",
+       "request_id": "request-b5eb42348dc846a0a279cdc845cb82d7",
+       "span_id": "span-b5eb42348dc846a0a279cdc845cb82d7",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base does not give one complete narrative answer for this exact question, but it does provide relevant evidence: modern radar test setups need wider IF/analysis bandwidth, Doppler/target simulation, multiple paths/objects, pulse and phase-noise analysis. For example, the R&S AREG800A automotive radar echo generator evidence lists baseband extension from 1 GHz to 2 GHz and 5 GHz IF bandwidth, second IF path activation, additional artificial objects, extended Doppler shift up to 10 MHz, near-object FMCW support, synchronization, and hardware-in-the-loop interfaces. It also lists supported mmWave/external frontends. The R&S FSW evidence lists analysis bandwidth options from tens of MHz up to multi-GHz, including 1.2 GHz, 2 GHz, 4.4 GHz, 6.4 GHz and 8.312 GHz, plus pulse measurement, AM/FM/PM modulation analysis, phase-noise measurement, vector signal analysis, real-time spectrum options, and external frontend control.\n\nPutting that into measurement implications:\n\n## 1. Wider radar bandwidth → wider generator and analyzer bandwidth\n\nModern FMCW and high-resolution radar use wider chirps because range resolution improves as bandwidth increases. This drives:\n\n**Signal generator requirements**\n- Wider modulation/IQ bandwidth.\n- Better chirp linearity.\n- High sample rate and deep waveform memory.\n- Accurate frequency sweep control.\n- Low spurious and low phase noise across wide sweeps.\n\n**Signal analyzer requirements**\n- Wide instantaneous analysis bandwidth to capture the full chirp or pulse.\n- Ability to measure chirp linearity, occupied bandwidth, modulation errors, spurs and transient behavior.\n- Enough memory/streaming to capture long pulse trains or radar frames.\n\nR&S example evidence: AREG800A options include IF bandwidth extensions to 2 GHz and 5 GHz; FSW analysis-bandwidth options extend into multi-GHz ranges.\n\n## 2. Move to mmWave radar → higher frequency coverage and external frontends\n\nAutomotive and advanced radar commonly operate at mmWave frequencies, e.g. 24 GHz, 77 GHz, 79 GHz, and beyond depending on application. This changes test needs from “RF only” to “RF + mmWave frontend + calibration.”\n\n**Signal generator requirements**\n- Direct or upconverted mmWave frequency coverage.\n- Phase-stable external frontend support.\n- Accurate output power and flatness at high frequency.\n- Low phase noise, because phase noise affects Doppler sensitivity and close-in target detection.\n\n**Signal analyzer requirements**\n- High-frequency analysis, often with external mixers/frontends.\n- Calibrated amplitude and phase response.\n- Harmonic, spur and emission measurement at mmWave.\n- Low displayed average noise level and high dynamic range.\n\nR&S example evidence: AREG800A evidence lists supported mmWave/external frontends; FSW evidence lists external frontend control and high-frequency models/options.\n\n## 3. Better range/Doppler resolution → stricter phase-noise and timing performance\n\nRadar increasingly needs to detect small, slow, or closely spaced targets. That makes phase noise, timing jitter, and frequency stability much more important.\n\n**Signal generator requirements**\n- Very low phase noise.\n- Stable reference clock.\n- Accurate pulse timing, PRI, chirp slope, and Doppler offset generation.\n- Repeatable waveform timing for regression testing.\n\n**Signal analyzer requirements**\n- Phase-noise measurement.\n- Doppler/frequency-shift accuracy.\n- Time-domain pulse analysis: rise/fall time, pulse width, PRI, duty cycle, pulse-to-pulse stability.\n- Ability to separate close-in signals from noise and spurs.\n\nR&S example evidence: FSW firmware options include pulse measurements, AM/FM/PM modulation analysis, and phase-noise measurements.\n\n## 4. MIMO / phased-array / AESA radar → coherent multi-channel testing\n\nRadar is moving from single-channel systems to phased arrays and MIMO architectures. That means the test system must measure not just “one RF signal,” but relationships between channels.\n\n**Signal generator requirements**\n- Multiple phase-coherent channels.\n- Precise phase and amplitude control per channel.\n- Synchronization between instruments.\n- Ability to emulate angle of arrival, multiple targets, or channel-to-channel delay.\n\n**Signal analyzer requirements**\n- Coherent multi-channel capture or synchronized analyzers.\n- Phase/amplitude mismatch measurement.\n- Beamforming and antenna-pattern validation, often OTA.\n- Cross-channel timing skew and phase stability analysis.\n\nR&S example evidence: AREG800A evidence includes second IF path activation, synchronization interface, and multiple/artificial object related options.\n\n## 5. More realistic target scenarios → target/echo simulation, not just waveform generation\n\nRadar validation is no longer only “generate a CW or pulse.” Engineers need repeatable target scenes: near/far targets, multiple objects, Doppler, RCS changes, delay, and interference.\n\n**Signal generator / radar echo generator requirements**\n- Programmable delay to emulate range.\n- Doppler shift to emulate velocity.\n- Multiple simultaneous artificial objects.\n- Near-object simulation for FMCW.\n- Hardware-in-the-loop control for scenario testing.\n\n**Signal analyzer requirements**\n- Ability to verify the radar output under dynamic scenes.\n- Triggering and time correlation with scenario events.\n- Capture of complete radar frames, not only isolated pulses.\n- Automation for repeatable regression tests.\n\nR&S example evidence: AREG800A evidence lists additional artificial object, extended Doppler frequency shift, near-object range for FMCW, and hardware-in-the-loop control interface.\n\n## 6. More complex waveforms → vector signal generation and vector analysis\n\nModern radar can use FMCW, pulsed compression, phase-coded waveforms, frequency hopping, agile PRF, and low-probability-of-intercept waveforms.\n\n**Signal generator requirements**\n- Arbitrary waveform generation.\n- Wideband IQ modulation.\n- Frequency agility and fast switching.\n- Pulse modulation and modulation-on-pulse capability.\n- Accurate reproduction of impairments or intentional interference.\n\n**Signal analyzer requirements**\n- Vector signal analysis.\n- Pulse compression and modulation-on-pulse analysis.\n- AM/FM/PM analysis.\n- Real-time spectrum monitoring to catch short events.\n- Long acquisition memory for bursty or agile signals.\n\nR&S example evidence: FSW evidence includes vector signal analysis, AM/FM/PM analysis, pulse measurement, and real-time spectrum analyzer options.\n\n## 7. Crowded spectrum and radar coexistence → better dynamic range and real-time detection\n\nRadar now often operates near other radars, communications signals, and interference sources. The measurement system must detect weak targets near strong interferers.\n\n**Signal generator requirements**\n- Ability to inject interferers, blockers, jammers, or coexistence signals.\n- Accurate level control over a wide dynamic range.\n- Multi-signal generation.\n\n**Signal analyzer requirements**\n- High dynamic range.\n- Low noise floor.\n- Real-time spectrum analysis for intermittent signals.\n- Spur search, emission mask, and out-of-band measurement.\n- Good preselection/filtering and overload behavior.\n\n## Bottom line\n\nAs radar evolves from narrowband, single-channel, simple pulse systems toward wideband FMCW, mmWave, phased-array/MIMO, adaptive and scenario-based systems, the required Signal Generator / Signal Analyzer capability shifts as follows:\n\n| Radar technology change | Generator must improve in… | Analyzer must improve in… |\n|---|---|---|\n| Wider chirps / higher range resolution | Modulation bandwidth, chirp linearity | Instantaneous bandwidth, chirp analysis |\n| mmWave operation | Frequency range, frontend support, phase noise | High-frequency coverage, calibrated mmWave analysis |\n| Doppler sensitivity | Frequency stability, Doppler emulation | Phase noise, frequency accuracy |\n| MIMO / phased array | Coherent multi-channel generation | Coherent multi-channel phase/amplitude analysis |\n| Complex waveforms | AWG/IQ capability, pulse agility | Vector, pulse, AM/FM/PM, real-time analysis |\n| Realistic target scenes | Delay/Doppler/object simulation, HIL | Long capture, triggering, scenario correlation |\n| Interference/coexistence | Multi-signal/interference generation | Dynamic range, real-time capture, spur/emission analysis |\n\nIn short: newer radar makes the signal generator more like a **wideband, phase-coherent, scenario/echo emulator**, and makes the signal analyzer more like a **wideband, high-dynamic-range, real-time vector/pulse/phase-noise measurement system**.",
+      "model_turns": 3,
+      "tools": [
+       {
+        "call_id": "call_MlZiNV4h3NckmFMxt8cpyWpL",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-b5eb42348dc846a0a279cdc845cb82d7",
+          "request_id": "request-b5eb42348dc846a0a279cdc845cb82d7",
+          "span_id": "span-b5eb42348dc846a0a279cdc845cb82d7",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-b5eb42348dc846a0a279cdc845cb82d7",
+           "request_id": "request-b5eb42348dc846a0a279cdc845cb82d7",
+           "span_id": "span-b5eb42348dc846a0a279cdc845cb82d7",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "How do changes in radar technology affect the measurement capability required from Signal Generator / Signal Analyzer? Please explain implications for signal generator and signal analyzer requirements.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "R&S CMX-KA401 › 來源中的配置資料\n| 來源 | Description | Conditions |\n|---|---|---|\n| [[CMX_Configuration_Guide_Audio-Testing]] | Advanced audio measurement / generator and playback；SAP Kurztext: IP Analysis | Add for OTT voice quality、injected customer WAV files UL/DL、VoIP wave injection、E2E audio delay、IP streaming、playback/record、non-realtime IMS e.g. SlowIQ；requires [[R&S CMX-KA100]] + [[R&S CMX-KA180]]；not required for basic POLQA |\n| [[CMX_Configuration_Guide]] | CMX Audio Test Test Feature Set 2 | NGeCall context 中支援 Audio player and recorder function with ZG180A；對 TS17240 In-Band Modem over IP Tests 為 mandatory |\n| [[CMX500_Features_CSW9-20-0_en_32]] | CMX application test audio, feature set 2 | features overview；order no. 1222.8125.xx |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA401.md"
+             },
+             "score": 4.220188
+            },
+            {
+             "text": "R&S AREG800A › Intermediate frequency ports and control interfaces\n| 代碼 | 名稱 | Order No. | 原文的一句說明 |\n|---|---|---|---|\n| [[R&S AREG8-K740]] | Analog IF output interfaces | `1437.9830.02` | Analog IF output interfaces |\n| [[R&S AREG8-K741]] | Analog IF input interface | `1437.9847.02` | Analog IF input interface |\n| [[R&S AREG8-K109]] | Hardware-in-the-loop control interface | `1437.9860.02` | Hardware-in-the-loop control interface |\n| [[R&S AREG8-K549]] | Synchronization interface | `1437.9876.02` | Synchronization interface, for multiple AREG800A units and for using the R&S OSP Open Switching and Control Platform |\n| [[R&S AREG8-K986]] | Remote control GPIB | `1437.9818.02` | Remote control GPIB |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 39,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 10.867272
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 wireless products 的 market access approval testing 分成三類：[[Regulatory Compliance Test]]、[[Telecom Industry Certification Test]]、[[Cellular Network Operator Acceptance Test]]。Regulatory compliance 被描述為各區域法律面 market access 的必要條件；industry certification 例子包含 [[GCF]] / Cellular、[[Bluetooth SIG]]、[[FiRa]] / [[UWB]]、[[Wi-Fi Alliance]]；operator acceptance test 例子包含 AT&T、VzW、T-mobile、CMCC。\n- 來源主張 wireless products 需要 [[CE marking]] / [[FCC ID]]；test results 是 technical documentation 的一部分，需在產品投放市場前準備、可提供給 surveillance authorities，並自 placed on the market 起保存 10 years。\n- 來源列出 Ericsson Mobility Visualizer Jan 2023 的 mobile subscriptions 表，顯示 2022–2028 的 5G subscriptions 由 1046.006 增至 4974.568；但單位與表格數值口徑未在轉檔文字中完整標示。\n- [[CE RED 無線設備法規測試]]被整理成四類 essential requirements：Art 3.1a Health & Safety、Art 3.1b EMC、Art 3.2 Radio Spectrum、Art 3.3 Specific topics。來源列出多個 ETSI EN standards，例如 [[EN 300 328]]、[[EN 301 893]]、[[EN 303 687]]、[[EN 301 908-1]]、[[EN 301 908-13]]、[[EN 301 908-24]]、[[EN 301 908-25]]、[[EN 301 489-52]] 等。\n- 對 [[5G NR SAR testing]]，來源指出 5G NR network emulator is required to drive EUT to extreme transmission condition，multi-radio UE 的 average-SAR feature 需要 flexible signaling functions，涵蓋 cellular standards、Wi-Fi 與 Bluetooth；來源將 [[R&S CMW500]] / [[R&S CMX500]] 稱為 SAR / HAC signaling solution。\n- 對 Art 3.1b EMC，來源指出 EMC tests 需要 radio enabled 與 radio disabled conditions，因此 5G NR 也需要 signaling solution；mobile phone 仍需要 [[Audio Breakthrough]] test，從 GSM 到 VoLTE / VoNR by 5G。來源提到 [[R&S TS9982 EMS Test System]] 與 [[R&S TS9975 EMI Test System]]。\n- 對 Art 3.2 Radio Spectrum，來源指出 5G NR specification 包含 FR1 與 FR2；FR1 test setup stays conducted，FR2 test setup becomes radiated；並把 3GPP test cases、CTIA-OTA test cases、TRP / TRS、RSE 測試連到 [[R&S TS8991]] 與 [[R&S TS8996]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 1.966112
+            },
+            {
+             "text": "R&S CMW500 › 支援技術摘要\n- [[R&S CMW500]] 在 [[CMW_dat-sw_en_5213-9211-22_v1700]] 中是唯一明確支援 GSM small cell、WCDMA small cell、LTE small cell 的 CMW 型號。\n- GSM、NB-IoT、WCDMA、LTE mobile station test 與 NR Sub-6GHz 章節明確標示適用於 [[R&S CMW500]] 與 [[R&S CMW290]]。\n- Four RF paths、DAU B450H/I、Digital I/Q 1 to 4 / 5 to 8、Digital I/Q QUAD 章節明確標示 [[R&S CMW500]] 與 [[R&S CMW270]]。\n- Bluetooth standard：Bluetooth Core Specification Version 5.0；test standard 包含 RF.TS.5.0.0 與 RF-PHY.TS.5.0.0。\n- WLAN 160 MHz bandwidth unit 章節列出 IEEE 802.11a/g/p/n/ac 與 IEEE 802.11ax，bandwidth up to 160 MHz。\n- [[CMW-KA096_PanEUNGeCall_TC_Status]] 補充 [[NGeCall over LTE]]、[[IMS eCall]]、[[IVS]]、[[PSAP]]、[[MSD]]、limited service、callback、clear-down、SRVCC handover 等 eCall 測試語境。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 14,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMW500.md"
+             },
+             "score": 1.865279
+            },
+            {
+             "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 3.646489
+            },
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 8.63149
+            },
+            {
+             "text": "R&S CMX-KA401\n[[R&S CMX-KA401]] 是 [[R&S CMX500]] 的 advanced audio measurement / generator and playback software option；[[CMX_Configuration_Guide_Audio-Testing]] 中將它列為 OTT voice quality、customer WAV injection、VoIP wave injection、E2E audio delay、IP streaming、playback/record 與 non-realtime IMS 等 scope 的 conditional option。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA401.md"
+             },
+             "score": 2.074963
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 [[EN 303 981]] 測試描述為 antenna characterizations 的 radiated measurement，列出 antenna beam pointing、off/on-axis spurious radiation、carrier suppression / cessation、blocking performance、adjacent signal selectivity、image frequency rejection、WBES location / identification、control and monitoring functions、receive antenna off-axis gain pattern，並連到 [[R&S SMBV100B]]、[[R&S ELEKTRA]]、[[R&S TS8996]]。\n- 來源列出 FCC CFR47 §25 Mobile Satellite Service / Mobile Earth Station test items：RF output power、occupied bandwidth、emission mask within 25% of authorized BW、out of band emissions、additional unwanted emission 1559–1610 MHz、carrier-off state emissions 1559–1610 MHz、frequency stability，並提到 ANSI C63.26 / FCC KDBs。\n- 最後來源把 primary test instruments for wireless regulatory test labs 分成 wireless communication tester、EMI test receiver、signal & spectrum analyzer、network analyzer、vector signal generator、broadband amplifier 等類別。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 1.37847
+            },
+            {
+             "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 3.371309
+            },
+            {
+             "text": "R&S CMP180 › Transmitter test functions\n- 8 input signals to be multiplexed to RF analyzer no. 1。\n- 8 input signals to be multiplexed to RF analyzer no. 2。\n- frequency-dependent attenuation（FDA）tables for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP180.md"
+             },
+             "score": 4.359797
+            },
+            {
+             "text": "R&S CMX-KA401 › 與 POLQA / OTT 的關係\n- OTT voice quality no POLQA：[[R&S CMX-KS600B]] + [[R&S CMX-KA100]] + [[R&S CMX-KA180]] + [[R&S CMX-KA401]]。\n- OTT voice + POLQA via OTT：再加 [[R&S CMX-KA181]]。\n- Basic POLQA：使用 [[R&S CMX-KA181]]；來源明示 KA401 not required for basic POLQA。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA401.md"
+             },
+             "score": 1.548932
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 與既有知識的關係\n- 補強 [[5G NR SAR testing]]：既有頁以 [[SPEAG]] / [[DASY8-3D]] / [[R&S CMX500 OBT]] 的 SAR automation PR 為主；本來源從 CE RED Art 3.1a / FCC SAR / HAC compliance presentation 的角度補入 5G NR network emulator、multi-radio UE、average-SAR 與 CMW/CMX signaling solution。\n- 補強 [[R&S TS9975 EMI Test System]]：既有頁只由 [[2025RS Drone Solution]] 支撐 TS9975 作為 UAV EMI system；本來源新增 wireless devices Art 3.1b EMC / ABT context，並與 [[R&S TS9982 EMS Test System]] 同列。\n- 連接 [[低軌衛星終端設備檢測]]與 [[衛星地球電臺設備技術規範]]：既有頁以台灣 111年08月衛星地球電臺設備草案與 FCC Part 25 對應為主；本來源提供更泛化的 CE RED / ETSI EN 301 681 / EN 303 981 / FCC CFR47 §25 mobile satellite service 視角。\n- 與 [[R&S CMW500]] 既有頁相容：既有頁已保存 CMW500 的 NGeCall / LTE capability 與 datasheet；本來源只是簡報層級稱 latest CMW500 SW supports 3GPP R17 NB-NTN signalling，未提供 software version、license 或 test case ID，不應覆蓋正式 datasheet。\n- 與 [[R&S SMBV100B]] 既有頁相容：既有頁是 Version 13.01 specifications；本來源只是把 SMBV100B列為 EN 301 681 / EN 303 981 測試中的 signal generator solution，不新增產品規格。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 1.293603
+            },
+            {
+             "text": "R&S TS9982 EMS Test System › 來源中的角色\n依 [[Regulatory test for wireless devices with cellular technology]]：\n\n- [[R&S TS9982 EMS Test System]] 與 [[R&S TS9975 EMI Test System]] 同列於 Traditional EMC Art 3.1b tests。\n- 上下文是 [[CE RED 無線設備法規測試]] Art 3.1b [[EMC]] requirements。\n- 來源指出 Art 3.1b EMC test requirements are not changed by 5G NR。\n- EMC tests need both enable radio and disable radio conditions, which means signaling solution for 5G NR。\n- Mobile phones require [[Audio Breakthrough]] test, from GSM to VoLTE and VoNR by 5G。\n- 來源稱 R&S EMC Systems cover 5G NR functionality, powered by latest [[R&S CMX500]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS9982 EMS Test System.md"
+             },
+             "score": 2.499485
+            },
+            {
+             "text": "CMX500 Callbox › Callbox 定位\n依 [[CMX500_Callbox]]，callbox 的核心敘事是：\n\n- Easy to set up。\n- Easy to get in a call。\n- Easy to test with。\n- Focus on [[RF Testing]]，including [[3GPP pre-conformance]]。\n\n來源以 [[Device Under Test]]、cell tower 與 smartphone 圖示描述 [[R&S CMX500]] 作為 DUT 連線與測試環境的中心。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 2.496604
+            },
+            {
+             "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG800A]] — Automotive Radar Echo Generator；本來源主要產品實體。\n- [[Rohde & Schwarz]] — 製造商與文件發布者。\n- [[R&S AREG8-B9]] — Digital baseband，1 GHz IF bandwidth、1 IF path、1 individual artificial object；Order No. `1437.8011.02`。\n- [[R&S AREG8-B63]] — Analog stepped delay line，用於 short object generation；Order No. `1437.8205.02`。\n- [[R&S AREG8-K527]] — Baseband extension from 1 GHz to 2 GHz IF bandwidth；Order No. `1437.9882.02`。\n- [[R&S AREG8-K528]] — Baseband extension from 2 GHz to 5 GHz IF bandwidth；Order No. `1437.9799.02`。\n- [[R&S AREG8-K570]] — Activation of second IF path；Order No. `1437.9899.02`。\n- [[R&S AREG8-K812]] — One additional artificial object；Order No. `1437.9853.02`。\n- [[R&S AREG8-K813]] — Extended Doppler frequency shift up to 10 MHz；Order No. `1437.9901.02`。\n- [[R&S AREG8-K814]] — Near object range for FMCW；Order No. `1437.9776.02`。\n- [[R&S AREG8-K740]] — Analog IF output interfaces；Order No. `1437.9830.02`。\n- [[R&S AREG8-K741]] — Analog IF input interface；Order No. `1437.9847.02`。\n- [[R&S AREG8-K109]] — Hardware-in-the-loop control interface；Order No. `1437.9860.02`。\n- [[R&S AREG8-K549]] — Synchronization interface；Order No. `1437.9876.02`。\n- [[R&S AREG8-K986]] — Remote control GPIB；Order No. `1437.9818.02`。\n- [[R&S AREG8-B97]] — System alignment backend；Order No. `1437.9001.02`。\n- [[R&S AREG-P1]] / [[R&S AREG-DBP1]]、[[R&S AREG-P2]] / [[R&S AREG-DBP2]]、[[R&S AREG-P3]] / [[R&S AREG-DBP3]] — automotive radar production configurations / production base unit options。\n- [[R&S AREG8-24S]]、[[R&S AREG8-24D]]、[[R&S AREG8-81S]]、[[R&S AREG8-81D]]、[[R&S AREG8-81WS]]、[[R&S AREG8-81WD]]、[[R&S FE44S]] — 支援的 mmWave 或 external frontends。\n- [[R&S QAT100]]、[[R&S QAT-B2]]、[[R&S QAT-Z50]] — advanced antenna array 及其相關 option/accessory。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+             },
+             "score": 7.674802
+            },
+            {
+             "text": "R&S TS9975 EMI Test System › 使用限制\n- 本頁只記錄 Market 類簡報中的系統列名；不是 Productions 類 datasheet。\n- 不可由 [[2025RS Drone Solution]] 推論 [[R&S TS9975 EMI Test System]] 可覆蓋所有 drone standards 或所有 frequency ranges。\n- 不可由 [[Regulatory test for wireless devices with cellular technology]] 推論 TS9975 可覆蓋所有 CE RED Art 3.1b EMC tests、所有 5G NR bands、所有 [[Audio Breakthrough]] configurations 或所有 mobile phone categories。\n- 正式規格、可報價配置、標準 coverage、receiver / chamber / antenna / software / CMX500 option stack 需由產品手冊或 R&S configuration source 補證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS9975 EMI Test System.md"
+             },
+             "score": 1.133361
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing\n[[Wi-Fi 7 R&D and production testing]] 是 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 中描述的測試方案組合：以 [[R&S CMX500]] 覆蓋 R&D signaling / interworking 測試，以 [[R&S CMP180]] 覆蓋 production non-signaling RF 測試。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 2.937203
+            },
+            {
+             "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+             },
+             "score": 7.092395
+            },
+            {
+             "text": "R&S CMX500 › Fading / test scenario / application options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. |\n|---|---|---|\n| R&S CMX-KE500 | LTE fading according to 3GPP TS 36.101 | 1222.6674.xx |\n| R&S CMX-KE501 | LTE fading profiles higher order MIMO | 1222.8131.xx |\n| R&S CMX-KE600 | NR fading according to 3GPP TS 38.101 | 1222.2985.xx |\n| R&S CMX-KE601 | NR fading profiles higher order MIMO | 1222.6980.xx |\n| R&S CMX-KE611 | NR NTN fading profiles according to 3GPP TS 38.101 | 1222.8148.xx |\n| R&S CMX-KE620 | User defined fading profiles for LTE, NR and NTN | 1222.9950.xx |\n| R&S CMX-KE621 | User defined UE antenna pattern import | 1222.9996.xx |\n| R&S CMX-KT600 | ASN.1 import for NR | 1222.8183.xx |\n| R&S CMX-KT620 | DL IQ recorder | 1222.9715.xx |\n| R&S CMX-KC550B | LTE 3GPP RF test scenarios | 1222.9067.xx |\n| R&S CMX-KC660B | NR NSA FR1 3GPP RF test scenarios | 1222.4507.xx |\n| R&S CMX-KC661B | NR SA FR1 3GPP RF test scenarios | 1222.4513.xx |\n| R&S CMX-KC665B | NR-NTN 3GPP RF test scenarios | 1222.8748.xx |\n| R&S CMX-KA100 | CMX application test, feature set 1 | 1222.1595.xx |\n| R&S CMX-KA110 | CMX application test, feature set 2 | 1222.4142.xx |\n| R&S CMX-KA150 | CMX IP traffic analysis | 1222.4159.xx |\n| R&S CMX-KA180 | CMX audio enabler | 1222.4165.xx |\n| R&S CMX-KA181 | CMX audio POLQA measurement | 1222.4936.xx |\n| R&S CMX-KA401 | CMX application test audio, feature set 2 | 1222.8125.xx |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 28,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 4.857323
+            },
+            {
+             "text": "R&S TS8991\n[[R&S TS8991]] 是 [[Regulatory test for wireless devices with cellular technology]] 中列於 5G NR radio spectrum Art 3.2 / CTIA-OTA / radiated test setup 的 R&S solution mapping 名稱。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS8991.md"
+             },
+             "score": 2.422184
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing › R&D：R&S CMX500 single-box signaling testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- [[R&S CMX500]] 是 multi-technology multi-channel signaling tester。\n- 來源稱其已新增 integrated [[Wi-Fi 7]] test functionality。\n- 目的在 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation。\n- Wi-Fi 7 R&D 測試需在 signaling mode 與 real-world conditions 下量測 RF TX / RX characteristics。\n- [[MLO]] 是 [[Wi-Fi 7]] key feature，因此提供 multiple RF chains 的 test environment 很重要。\n- 來源列出的 Wi‑Fi 7-specific tests 包含 2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 2.89976
+            },
+            {
+             "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG-MFP]]、[[R&S AREG-BFP]] — production frontend options，支援 monostatic 或 bistatic。\n- [[Automotive radar echo generation]]、[[FMCW radar]]、[[Radar cross-section]]、[[Doppler frequency shift]]、[[Hardware-in-the-loop]]、[[Open Simulation Interface]]、[[SCPI]]、[[Air gap]] — 本來源涉及的技術概念。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+             },
+             "score": 4.878986
+            },
+            {
+             "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 4.830438
+            },
+            {
+             "text": "R&S TS8996 › 來源中的角色\n依 [[Regulatory test for wireless devices with cellular technology]]：\n\n- 在 cellular technology RF test for radio spectrum Art 3.2 投影片中，[[R&S TS8996]] 與 RSE test case 同列。\n- 來源寫 Radiated Spurious Emissions measurement up to 200 GHz for FCC for 5G FR2 with high sensitivity of -40 dBm/MHz。\n- 來源同頁列出 special signaling、conditioning for carrier、all standards support。\n- 在 [[EN 303 981]] 測試投影片中，[[R&S ELEKTRA]] 與 TS8996 RSE & customization 同列。\n- 在 FCC CFR47 §25 Mobile Satellite Service 投影片中，[[R&S ELEKTRA]] 與 TS8996 RSE & customization 同列。\n\n依 [[RSE Test System TS8996 (1)]]（07/2025）：\n\n- 簡報標題為 `Radited Spurious Emission (RSE) Test System TS8996`，頁尾日期標示 07/2025；`Radited` 為原文拼字。\n- TS8996 的 basic RSE test solution 適用 2G / 3G / 4G / 5G FR1 / WLAN / BT DUTs with radio functionality。\n- Basic setup 類似 commercial EMI test，可用 FAR with azimuth and optional elevation scan，也可用 SAC with height scan。\n- 基本 frequency range 為 **30 MHz to 12.75 / 26 GHz / 40 GHz**。\n- 測試可用 spectrum analyzer，或 spectrum analyzer 搭配 test receiver。\n- Test distance 標示為 **3 m**，或為 improved sensitivity 使用 **1 m**。\n- 系統需求包含 high sensitivity、stable radiated radiocommunication link、signal conditioning、full automation by [[R&S ELEKTRA]]。\n- 來源稱可作 turnkey solution，也可與 EMC test system 或 regulatory test system（[[R&S TS8997]]）combination / extension。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS8996.md"
+             },
+             "score": 5.730816
+            },
+            {
+             "text": "1) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the second path of the SMW.\n2) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the AWGN B block in RF path B of the SMW. In this application note we will explain the second\noption in the respective test case chapter.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0acf440ab126eca3",
+               "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+              "section": 20,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.437281
+            },
+            {
+             "text": "![](Picture35.jpg)\nFlexible signal generation and analysis software\nR&S®PVT360A\nCombined Vector signal generator and analyzer in one instrument",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c478cd76758e3230",
+               "original_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+               "sha256": "c478cd76758e32304c76f6cddcc468bbab6c09f305ddd986166116e13cef3c38",
+               "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+              "section": 89,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 23.173775
+            },
+            {
+             "text": "How to configure the R&S®SMW200A vector signal generator",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f77e733cba92509b",
+               "original_ref": "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+               "sha256": "f77e733cba92509bcb44452d7e704af2d5e684ad62733653bf72c09ec5c489b7",
+               "raw_ref": "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 23.0162
+            },
+            {
+             "text": "see CDMA2000® 1xEV-DO RF generator\nsee CDMA2000® 1xEV-DO RF analyzer",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-84f0ccff28cb329b",
+               "original_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+               "sha256": "84f0ccff28cb329ba83809be58133fb1b917290733c05f3f34a8f44c32526203",
+               "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+              "section": 1470,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 22.883308
+            }
+           ],
+           "text": "The passages do not give a direct generic rule for all radar Signal Generators / Signal Analyzers, but they show that modern automotive radar testing involves FMCW radar, radar cross-section, Doppler frequency shift, hardware-in-the-loop, Open Simulation Interface and air-gap concepts [22], and that the R&S AREG800A source is specifically for automotive radar echo generation rather than a conventional RF signal generator or spectrum analyzer [15][18].\n**Signal generator implications:** Radar stimulus capability has to become more radar-echo-oriented: the AREG800A configuration shows 1 GHz IF bandwidth in the digital baseband, extensions from 1 GHz to 2 GHz and from 2 GHz to 5 GHz IF bandwidth, activation of a second IF path, additional artificial objects, extended Doppler frequency shift up to 10 MHz, and near-object range for FMCW [15]. It also needs integration interfaces such as analog IF output/input, hardware-in-the-loop control, synchronization for multiple AREG800A units, and remote-control GPIB [2].\n**Signal analyzer implications:** The analyzer side must be able to verify the same kinds of effects the radar stimulus creates: wide IF-bandwidth behavior, multiple IF paths, artificial-object scenarios, Doppler shift up to 10 MHz, and FMCW near-object behavior are all explicit radar echo-generation capabilities in the source [15]. Where systems are integrated, the measurement setup also has to handle analog IF input/output and synchronization / HIL interfaces because those interfaces are listed as AREG800A control and IF options [2].\n【推論】As radar technology moves toward wider-bandwidth FMCW, multi-object, multi-path and dynamic Doppler scenarios, the signal generator requirement shifts from simple RF stimulus toward wideband, synchronized radar-echo generation with controllable range, object count, Doppler and HIL behavior [15][22].  \n【推論】The signal analyzer requirement correspondingly shifts toward capturing and validating wideband IF/RF radar responses, multi-path timing, Doppler accuracy, near-range FMCW behavior and synchronized multi-unit test conditions, because those are the capabilities and interfaces exposed by the radar echo-generation setup [2][15][22].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "R&S AREG800A › Intermediate frequency ports and control interfaces\n| 代碼 | 名稱 | Order No. | 原文的一句說明 |\n|---|---|---|---|\n| [[R&S AREG8-K740]] | Analog IF output interfaces | `1437.9830.02` | Analog IF output interfaces |\n| [[R&S AREG8-K741]] | Analog IF input interface | `1437.9847.02` | Analog IF input interface |\n| [[R&S AREG8-K109]] | Hardware-in-the-loop control interface | `1437.9860.02` | Hardware-in-the-loop control interface |\n| [[R&S AREG8-K549]] | Synchronization interface | `1437.9876.02` | Synchronization interface, for multiple AREG800A units and for using the R&S OSP Open Switching and Control Platform |\n| [[R&S AREG8-K986]] | Remote control GPIB | `1437.9818.02` | Remote control GPIB |",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 39,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/entities/R&S AREG800A.md"
+            },
+            "score": 10.867272
+           },
+           {
+            "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG800A]] — Automotive Radar Echo Generator；本來源主要產品實體。\n- [[Rohde & Schwarz]] — 製造商與文件發布者。\n- [[R&S AREG8-B9]] — Digital baseband，1 GHz IF bandwidth、1 IF path、1 individual artificial object；Order No. `1437.8011.02`。\n- [[R&S AREG8-B63]] — Analog stepped delay line，用於 short object generation；Order No. `1437.8205.02`。\n- [[R&S AREG8-K527]] — Baseband extension from 1 GHz to 2 GHz IF bandwidth；Order No. `1437.9882.02`。\n- [[R&S AREG8-K528]] — Baseband extension from 2 GHz to 5 GHz IF bandwidth；Order No. `1437.9799.02`。\n- [[R&S AREG8-K570]] — Activation of second IF path；Order No. `1437.9899.02`。\n- [[R&S AREG8-K812]] — One additional artificial object；Order No. `1437.9853.02`。\n- [[R&S AREG8-K813]] — Extended Doppler frequency shift up to 10 MHz；Order No. `1437.9901.02`。\n- [[R&S AREG8-K814]] — Near object range for FMCW；Order No. `1437.9776.02`。\n- [[R&S AREG8-K740]] — Analog IF output interfaces；Order No. `1437.9830.02`。\n- [[R&S AREG8-K741]] — Analog IF input interface；Order No. `1437.9847.02`。\n- [[R&S AREG8-K109]] — Hardware-in-the-loop control interface；Order No. `1437.9860.02`。\n- [[R&S AREG8-K549]] — Synchronization interface；Order No. `1437.9876.02`。\n- [[R&S AREG8-K986]] — Remote control GPIB；Order No. `1437.9818.02`。\n- [[R&S AREG8-B97]] — System alignment backend；Order No. `1437.9001.02`。\n- [[R&S AREG-P1]] / [[R&S AREG-DBP1]]、[[R&S AREG-P2]] / [[R&S AREG-DBP2]]、[[R&S AREG-P3]] / [[R&S AREG-DBP3]] — automotive radar production configurations / production base unit options。\n- [[R&S AREG8-24S]]、[[R&S AREG8-24D]]、[[R&S AREG8-81S]]、[[R&S AREG8-81D]]、[[R&S AREG8-81WS]]、[[R&S AREG8-81WD]]、[[R&S FE44S]] — 支援的 mmWave 或 external frontends。\n- [[R&S QAT100]]、[[R&S QAT-B2]]、[[R&S QAT-Z50]] — advanced antenna array 及其相關 option/accessory。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+            },
+            "score": 7.674802
+           },
+           {
+            "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+            },
+            "score": 7.092395
+           },
+           {
+            "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG-MFP]]、[[R&S AREG-BFP]] — production frontend options，支援 monostatic 或 bistatic。\n- [[Automotive radar echo generation]]、[[FMCW radar]]、[[Radar cross-section]]、[[Doppler frequency shift]]、[[Hardware-in-the-loop]]、[[Open Simulation Interface]]、[[SCPI]]、[[Air gap]] — 本來源涉及的技術概念。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+            },
+            "score": 4.878986
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [
+            {
+             "name": "technical_knowledge",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA401.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA401.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+              }
+             ],
+             "attempts": 1
+            }
+           ],
+           "missing_facets": [],
+           "relation_required": false,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": [
+           {
+            "wiki_page": "wiki/entities/R&S AREG800A.md",
+            "raw_refs": [
+             "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+            "raw_refs": [
+             "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+            ]
+           }
+          ]
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_3jl5dWcOMgzBpntQQXtYrg6v",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-b5eb42348dc846a0a279cdc845cb82d7",
+          "request_id": "request-b5eb42348dc846a0a279cdc845cb82d7",
+          "span_id": "span-b5eb42348dc846a0a279cdc845cb82d7",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-b5eb42348dc846a0a279cdc845cb82d7",
+           "request_id": "request-b5eb42348dc846a0a279cdc845cb82d7",
+           "span_id": "span-b5eb42348dc846a0a279cdc845cb82d7",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "radar technology trends higher bandwidth phased array MIMO FMCW chirp pulse compression affect requirements for signal generator and signal analyzer phase noise bandwidth analysis R&S FSW SMW radar",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "R&S FSW › Firmware / licence options（摘錄）\n- R&S FSW-K6 Pulse measurements，Order No. 1313.1322.02。\n- R&S FSW-K7 AM/FM/PM modulation analysis，Order No. 1313.1339.02。\n- R&S FSW-K8 Bluetooth BR/EDR/LE measurements，Order No. 1313.1351.02；R&S FSW-K8E Bluetooth 6.0 channel sounding，Order No. 1353.3284.02，需 R&S FSW-K8。\n- R&S FSW-K40 Phase noise measurements，Order No. 1313.1397.02。\n- R&S FSW-K54 EMI measurements，Order No. 1313.1400.02。\n- R&S FSW-K70 Vector signal analysis，Order No. 1313.1416.02。\n- WLAN options：R&S FSW-K91、K91N、K91AC、K91AX、K91BE、K91P、K91BN、K95、K97；其中 K95/K97 需 R&S FSW-B2001/-B800R/-B4001/-B6001/-B8001 option。\n- 5G NR options：R&S FSW-K144、K145、K147、K147C、K148、K171、K175、K184；requires 依原文列示，報價前需回查 [[FSW_specs_en_5215-6749-22_v1701]]。\n- Real-time application firmware：R&S FSW-K161R、K512RE、K800RE，各自有 bandwidth option requires/excludes。\n- R&S FSW-K553 External frontend control，Order No. 1350.6118.02；支援 [[R&S FE44S]]、[[R&S FE50DTR]]、[[R&S FE110SR]]、[[R&S FE170SR]]。\n- R&S FSW-K575 I/Q noise cancellation，Order No. 1353.2894.02。\n- R&S FSW-K980 Health and utilization monitoring service（HUMS），Order No. 1350.6718.02。\n- 標註 59 的 firmware 也可作為 floating license；order number 由 `.02` 改為 `.51`，並需 R&S FSW-FL hardware option。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSW.md"
+             },
+             "score": 10.430883
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 wireless products 的 market access approval testing 分成三類：[[Regulatory Compliance Test]]、[[Telecom Industry Certification Test]]、[[Cellular Network Operator Acceptance Test]]。Regulatory compliance 被描述為各區域法律面 market access 的必要條件；industry certification 例子包含 [[GCF]] / Cellular、[[Bluetooth SIG]]、[[FiRa]] / [[UWB]]、[[Wi-Fi Alliance]]；operator acceptance test 例子包含 AT&T、VzW、T-mobile、CMCC。\n- 來源主張 wireless products 需要 [[CE marking]] / [[FCC ID]]；test results 是 technical documentation 的一部分，需在產品投放市場前準備、可提供給 surveillance authorities，並自 placed on the market 起保存 10 years。\n- 來源列出 Ericsson Mobility Visualizer Jan 2023 的 mobile subscriptions 表，顯示 2022–2028 的 5G subscriptions 由 1046.006 增至 4974.568；但單位與表格數值口徑未在轉檔文字中完整標示。\n- [[CE RED 無線設備法規測試]]被整理成四類 essential requirements：Art 3.1a Health & Safety、Art 3.1b EMC、Art 3.2 Radio Spectrum、Art 3.3 Specific topics。來源列出多個 ETSI EN standards，例如 [[EN 300 328]]、[[EN 301 893]]、[[EN 303 687]]、[[EN 301 908-1]]、[[EN 301 908-13]]、[[EN 301 908-24]]、[[EN 301 908-25]]、[[EN 301 489-52]] 等。\n- 對 [[5G NR SAR testing]]，來源指出 5G NR network emulator is required to drive EUT to extreme transmission condition，multi-radio UE 的 average-SAR feature 需要 flexible signaling functions，涵蓋 cellular standards、Wi-Fi 與 Bluetooth；來源將 [[R&S CMW500]] / [[R&S CMX500]] 稱為 SAR / HAC signaling solution。\n- 對 Art 3.1b EMC，來源指出 EMC tests 需要 radio enabled 與 radio disabled conditions，因此 5G NR 也需要 signaling solution；mobile phone 仍需要 [[Audio Breakthrough]] test，從 GSM 到 VoLTE / VoNR by 5G。來源提到 [[R&S TS9982 EMS Test System]] 與 [[R&S TS9975 EMI Test System]]。\n- 對 Art 3.2 Radio Spectrum，來源指出 5G NR specification 包含 FR1 與 FR2；FR1 test setup stays conducted，FR2 test setup becomes radiated；並把 3GPP test cases、CTIA-OTA test cases、TRP / TRS、RSE 測試連到 [[R&S TS8991]] 與 [[R&S TS8996]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 1.966112
+            },
+            {
+             "text": "R&S CMW500 › 支援技術摘要\n- [[R&S CMW500]] 在 [[CMW_dat-sw_en_5213-9211-22_v1700]] 中是唯一明確支援 GSM small cell、WCDMA small cell、LTE small cell 的 CMW 型號。\n- GSM、NB-IoT、WCDMA、LTE mobile station test 與 NR Sub-6GHz 章節明確標示適用於 [[R&S CMW500]] 與 [[R&S CMW290]]。\n- Four RF paths、DAU B450H/I、Digital I/Q 1 to 4 / 5 to 8、Digital I/Q QUAD 章節明確標示 [[R&S CMW500]] 與 [[R&S CMW270]]。\n- Bluetooth standard：Bluetooth Core Specification Version 5.0；test standard 包含 RF.TS.5.0.0 與 RF-PHY.TS.5.0.0。\n- WLAN 160 MHz bandwidth unit 章節列出 IEEE 802.11a/g/p/n/ac 與 IEEE 802.11ax，bandwidth up to 160 MHz。\n- [[CMW-KA096_PanEUNGeCall_TC_Status]] 補充 [[NGeCall over LTE]]、[[IMS eCall]]、[[IVS]]、[[PSAP]]、[[MSD]]、limited service、callback、clear-down、SRVCC handover 等 eCall 測試語境。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 14,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMW500.md"
+             },
+             "score": 1.865279
+            },
+            {
+             "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 3.646489
+            },
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 8.63149
+            },
+            {
+             "text": "R&S FSW › Analysis bandwidth options（硬體 options）\n| Option code | 名稱 | Order No. | 適用與限制 |\n|---|---|---|---|\n| R&S FSW-B40 | 40 MHz analysis bandwidth | 1313.0861.02 | user-retrofittable |\n| R&S FSW-B80 | 80 MHz analysis bandwidth | 1313.0878.02 | user-retrofittable |\n| R&S FSW-B160 | 160 MHz analysis bandwidth | 1325.4850.14 | contact service center |\n| R&S FSW-B320 | 320 MHz analysis bandwidth | 1325.4867.14 | includes 200 MHz IF filter |\n| R&S FSW-B512 | 512 MHz analysis bandwidth | 1331.7106.14 | includes 200 MHz IF filter |\n| R&S FSW-B512R | Real-time spectrum analyzer 512 MHz, POI ≤ 15 µs | 1331.7106.16 | contact service center；includes 512 MHz analysis bandwidth and 200 MHz IF filter |\n| R&S FSW-B1200 | 1.2 GHz analysis bandwidth | 1331.6400.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory；不適用 [[R&S FSW8]]、[[R&S FSW13]] |\n| R&S FSW-B2001 | 2 GHz analysis bandwidth | 1331.6916.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory |\n| R&S FSW-B4001 | 4.4 GHz analysis bandwidth | 1338.5215.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；contact service center |\n| R&S FSW-B6001 | 6.4 GHz analysis bandwidth | 1338.5221.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B8001 | 8.312 GHz analysis bandwidth | 1338.5238.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B800R | Real-time spectrum analyzer 800 MHz, POI ≤ 15 µs | 1331.6400.16 | 適用 [[R&S FSW26]]/43/50/67/85；export license required |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSW.md"
+             },
+             "score": 8.896204
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 [[EN 303 981]] 測試描述為 antenna characterizations 的 radiated measurement，列出 antenna beam pointing、off/on-axis spurious radiation、carrier suppression / cessation、blocking performance、adjacent signal selectivity、image frequency rejection、WBES location / identification、control and monitoring functions、receive antenna off-axis gain pattern，並連到 [[R&S SMBV100B]]、[[R&S ELEKTRA]]、[[R&S TS8996]]。\n- 來源列出 FCC CFR47 §25 Mobile Satellite Service / Mobile Earth Station test items：RF output power、occupied bandwidth、emission mask within 25% of authorized BW、out of band emissions、additional unwanted emission 1559–1610 MHz、carrier-off state emissions 1559–1610 MHz、frequency stability，並提到 ANSI C63.26 / FCC KDBs。\n- 最後來源把 primary test instruments for wireless regulatory test labs 分成 wireless communication tester、EMI test receiver、signal & spectrum analyzer、network analyzer、vector signal generator、broadband amplifier 等類別。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 1.37847
+            },
+            {
+             "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 3.371309
+            },
+            {
+             "text": "R&S CMP180 › Transmitter test functions\n- 8 input signals to be multiplexed to RF analyzer no. 1。\n- 8 input signals to be multiplexed to RF analyzer no. 2。\n- frequency-dependent attenuation（FDA）tables for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP180.md"
+             },
+             "score": 4.359797
+            },
+            {
+             "text": "R&S FSW › 其他硬體 options（摘錄）\n| Option code | 名稱 | Order No. | 原文說明 / 限制 |\n|---|---|---|---|\n| R&S FSW-B4 | OCXO precision frequency reference | 1313.0703.02 | user-retrofittable |\n| R&S FSW-B8E | Resolution bandwidth up to 40 MHz | 1338.6911.02 | 適用 [[R&S FSW8]]/13/26/43/50/67/85；signal analysis bandwidth 不由 B8E 定義 |\n| R&S FSW-B8 | Resolution bandwidth up to 80 MHz | 1313.2464.26 或 1313.2464.02 | 1313.2464.26 適用 [[R&S FSW8]]/13/26；1313.2464.02 適用 [[R&S FSW43]]/50/67/85 且 export license required |\n| R&S FSW-B10 | External generator control | 1313.1622.02 | contact service center |\n| R&S FSW-B13 | Highpass filter for harmonic measurements | 1313.0761.02 | user-retrofittable |\n| R&S FSW-B17 | Digital baseband Interface | 1313.0784.02 | user-retrofittable |\n| R&S FSW-B18 | Spare solid state drive | 1313.0790.21 | user-retrofittable |\n| R&S FSW-B21 | LO/IF connections for external mixers | 1313.1100.28 / 1313.1100.86 | 不適用 [[R&S FSW8]]、[[R&S FSW13]]；.28 適用 [[R&S FSW26]]/43/50/67；.86 適用 [[R&S FSW85]] |\n| R&S FSW-B24 | RF preamplifier | 1313.0832.13/.26/.43/.49/.51/.66/.67 | 適用範圍依型號與 order no.；來源未列 [[R&S FSW85]] 適用 B24 |\n| R&S FSW-B25 | Electronic attenuator, 1 dB steps | 1313.0990.02 | 適用 [[R&S FSW8]]/13/26 |\n| R&S FSW-B33 | USB mass memory write protection | 1313.3602.02 | 不可 retrofittable；factory pre-installed |\n| R&S FSW-B71 | Analog baseband inputs | 1313.1651.13/.26/.67/.86 | order no. 依型號範圍不同 |\n| R&S FSW-B71E | 80 MHz analysis bandwidth for analog baseband inputs | 1313.6547.02 | 需 R&S FSW-B71；user-retrofittable |\n| R&S FSW-B2071 | Oscilloscope baseband inputs | 1331.8302.02 | 適用所有 FSW models；user-retrofittable |\n| R&S FSW-B90G | Frequency extension 90 GHz | 1331.7693.02 | 不可 retrofittable；僅適用 [[R&S FSW85]]；f > 85 GHz without preselection |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSW.md"
+             },
+             "score": 6.797422
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 與既有知識的關係\n- 補強 [[5G NR SAR testing]]：既有頁以 [[SPEAG]] / [[DASY8-3D]] / [[R&S CMX500 OBT]] 的 SAR automation PR 為主；本來源從 CE RED Art 3.1a / FCC SAR / HAC compliance presentation 的角度補入 5G NR network emulator、multi-radio UE、average-SAR 與 CMW/CMX signaling solution。\n- 補強 [[R&S TS9975 EMI Test System]]：既有頁只由 [[2025RS Drone Solution]] 支撐 TS9975 作為 UAV EMI system；本來源新增 wireless devices Art 3.1b EMC / ABT context，並與 [[R&S TS9982 EMS Test System]] 同列。\n- 連接 [[低軌衛星終端設備檢測]]與 [[衛星地球電臺設備技術規範]]：既有頁以台灣 111年08月衛星地球電臺設備草案與 FCC Part 25 對應為主；本來源提供更泛化的 CE RED / ETSI EN 301 681 / EN 303 981 / FCC CFR47 §25 mobile satellite service 視角。\n- 與 [[R&S CMW500]] 既有頁相容：既有頁已保存 CMW500 的 NGeCall / LTE capability 與 datasheet；本來源只是簡報層級稱 latest CMW500 SW supports 3GPP R17 NB-NTN signalling，未提供 software version、license 或 test case ID，不應覆蓋正式 datasheet。\n- 與 [[R&S SMBV100B]] 既有頁相容：既有頁是 Version 13.01 specifications；本來源只是把 SMBV100B列為 EN 301 681 / EN 303 981 測試中的 signal generator solution，不新增產品規格。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 1.293603
+            },
+            {
+             "text": "R&S TS9982 EMS Test System › 來源中的角色\n依 [[Regulatory test for wireless devices with cellular technology]]：\n\n- [[R&S TS9982 EMS Test System]] 與 [[R&S TS9975 EMI Test System]] 同列於 Traditional EMC Art 3.1b tests。\n- 上下文是 [[CE RED 無線設備法規測試]] Art 3.1b [[EMC]] requirements。\n- 來源指出 Art 3.1b EMC test requirements are not changed by 5G NR。\n- EMC tests need both enable radio and disable radio conditions, which means signaling solution for 5G NR。\n- Mobile phones require [[Audio Breakthrough]] test, from GSM to VoLTE and VoNR by 5G。\n- 來源稱 R&S EMC Systems cover 5G NR functionality, powered by latest [[R&S CMX500]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS9982 EMS Test System.md"
+             },
+             "score": 2.499485
+            },
+            {
+             "text": "CMX500 Callbox › Callbox 定位\n依 [[CMX500_Callbox]]，callbox 的核心敘事是：\n\n- Easy to set up。\n- Easy to get in a call。\n- Easy to test with。\n- Focus on [[RF Testing]]，including [[3GPP pre-conformance]]。\n\n來源以 [[Device Under Test]]、cell tower 與 smartphone 圖示描述 [[R&S CMX500]] 作為 DUT 連線與測試環境的中心。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 2.496604
+            },
+            {
+             "text": "R&S SMA100B › Power analysis\n- R&S®SMAB-K28 Power analysis 建議使用 latest power sensor firmware version。\n- 支援 modes：power versus frequency、power versus power、power versus time trace mode。\n- Supported power sensors：R&S®NRP-Z81/-Z85/-Z86 支援 power versus frequency、power versus time、pulse data measurement and power versus power；來源標示為 phased-out products。R&S®NRP18P/NRP40P/NRP50P 支援 power versus frequency、power versus time、pulse data measurement and power versus power。\n- Number of points per sweep：10 to 1000。\n- Frequency range：依 R&S®NRP power sensor and R&S®SMA100B frequency option，為 signal generator 或 power sensor full frequency range 較低者；支援 frequency-converting DUTs。\n- Y-axis setting range：–200 dBm to +100 dBm。\n- Number of traces：4；number of markers：4；trace data export file formats JPG、BMP、XPM、PNG、CSV。\n- Power versus time mode with R&S®NRP-Z81/-Z85/-Z86：sweep time 100 ns to 1 s；resolution 12.5 ns 或 2 ns（periodic signals、internally triggered）；pulse data measurement 僅適用 R&S®NRP-Z81/-Z85/-Z86。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 19,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SMA100B.md"
+             },
+             "score": 13.193469
+            },
+            {
+             "text": "R&S TS9975 EMI Test System › 使用限制\n- 本頁只記錄 Market 類簡報中的系統列名；不是 Productions 類 datasheet。\n- 不可由 [[2025RS Drone Solution]] 推論 [[R&S TS9975 EMI Test System]] 可覆蓋所有 drone standards 或所有 frequency ranges。\n- 不可由 [[Regulatory test for wireless devices with cellular technology]] 推論 TS9975 可覆蓋所有 CE RED Art 3.1b EMC tests、所有 5G NR bands、所有 [[Audio Breakthrough]] configurations 或所有 mobile phone categories。\n- 正式規格、可報價配置、標準 coverage、receiver / chamber / antenna / software / CMX500 option stack 需由產品手冊或 R&S configuration source 補證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS9975 EMI Test System.md"
+             },
+             "score": 1.133361
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing\n[[Wi-Fi 7 R&D and production testing]] 是 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 中描述的測試方案組合：以 [[R&S CMX500]] 覆蓋 R&D signaling / interworking 測試，以 [[R&S CMP180]] 覆蓋 production non-signaling RF 測試。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 2.937203
+            },
+            {
+             "text": "R&S SMA100B › Analog modulation、pulse 與 avionics 功能\n| 功能 | Option / prerequisite | 規格摘錄 |\n|---|---|---|\n| AM/FM/φM | R&S®SMAB-K720 | AM f ≥ 100 kHz；AM depth internal 0 % to 100 %；FM maximum deviation high bandwidth = N × 10 MHz、low noise = N × 100 kHz；φM maximum deviation high deviation = N × 20 rad、high bandwidth = N × 1 rad、low noise = N × 0.25 rad |\n| Scan AM | R&S®SMAB-K721 requires R&S®SMAB-K720 | f > 52 MHz；maximum attenuation > 60 dB，70 dB typ.；serial number < 102000 需聯絡 service department |\n| Pulse modulation | R&S®SMAB-K22 | source external；with R&S®SMAB-K23 支援 external、internal；on/off ratio > 80 dB；rise/fall time 700 MHz < f ≤ 50 GHz 為 < 10 ns，5 ns typ. |\n| Pulse generator | R&S®SMAB-K23 | pulse modes single pulse、double pulse；period 20 ns to 100 s；pulse width 5 ns to 100 s；resolution 5 ns |\n| Pulse train | R&S®SMAB-K27 requires R&S®SMAB-K23 | number of bursts 1 to 2047；identical pulses per burst 1 to 32767；pulse on/off time resolution 5 ns |\n| Chirped pulses | R&S®SMAB-K725 requires R&S®SMAB-K22、R&S®SMAB-K23、R&S®SMAB-K720；FW version > 4.70.xxx required | maximum bandwidth N × 20 MHz；pulse period 1.0 µs to 100 s；pulse width 100 ns to 100 s 且 < pulse period – 600 ns；maximum chirp rate N × 20 MHz/µs nominal |\n| VOR/ILS/MKR BCN/ADF | R&S®SMAB-K25 | VOR carrier 108 MHz to 118 MHz；ILS-LOC 108 MHz to 118 MHz；ILS-GS 329 MHz to 335 MHz；MKR-BCN 74 MHz to 76 MHz；ADF mode 提供 carrier frequency 190 kHz、AM depth 30%、modulation rate 1 kHz |\n| Multifunction generator | R&S®SMAB-K24 | LF generator sine 0.1 Hz to 10 MHz；square 0.1 Hz to 1 MHz；pulse/triangle/trapezoid 0.01 Hz to 1 MHz；noise bandwidth 100 kHz to 10 MHz |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 17,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SMA100B.md"
+             },
+             "score": 13.111196
+            },
+            {
+             "text": "R&S CMX500 › Fading / test scenario / application options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. |\n|---|---|---|\n| R&S CMX-KE500 | LTE fading according to 3GPP TS 36.101 | 1222.6674.xx |\n| R&S CMX-KE501 | LTE fading profiles higher order MIMO | 1222.8131.xx |\n| R&S CMX-KE600 | NR fading according to 3GPP TS 38.101 | 1222.2985.xx |\n| R&S CMX-KE601 | NR fading profiles higher order MIMO | 1222.6980.xx |\n| R&S CMX-KE611 | NR NTN fading profiles according to 3GPP TS 38.101 | 1222.8148.xx |\n| R&S CMX-KE620 | User defined fading profiles for LTE, NR and NTN | 1222.9950.xx |\n| R&S CMX-KE621 | User defined UE antenna pattern import | 1222.9996.xx |\n| R&S CMX-KT600 | ASN.1 import for NR | 1222.8183.xx |\n| R&S CMX-KT620 | DL IQ recorder | 1222.9715.xx |\n| R&S CMX-KC550B | LTE 3GPP RF test scenarios | 1222.9067.xx |\n| R&S CMX-KC660B | NR NSA FR1 3GPP RF test scenarios | 1222.4507.xx |\n| R&S CMX-KC661B | NR SA FR1 3GPP RF test scenarios | 1222.4513.xx |\n| R&S CMX-KC665B | NR-NTN 3GPP RF test scenarios | 1222.8748.xx |\n| R&S CMX-KA100 | CMX application test, feature set 1 | 1222.1595.xx |\n| R&S CMX-KA110 | CMX application test, feature set 2 | 1222.4142.xx |\n| R&S CMX-KA150 | CMX IP traffic analysis | 1222.4159.xx |\n| R&S CMX-KA180 | CMX audio enabler | 1222.4165.xx |\n| R&S CMX-KA181 | CMX audio POLQA measurement | 1222.4936.xx |\n| R&S CMX-KA401 | CMX application test audio, feature set 2 | 1222.8125.xx |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 28,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 4.857323
+            },
+            {
+             "text": "R&S TS8991\n[[R&S TS8991]] 是 [[Regulatory test for wireless devices with cellular technology]] 中列於 5G NR radio spectrum Art 3.2 / CTIA-OTA / radiated test setup 的 R&S solution mapping 名稱。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS8991.md"
+             },
+             "score": 2.422184
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing › R&D：R&S CMX500 single-box signaling testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- [[R&S CMX500]] 是 multi-technology multi-channel signaling tester。\n- 來源稱其已新增 integrated [[Wi-Fi 7]] test functionality。\n- 目的在 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation。\n- Wi-Fi 7 R&D 測試需在 signaling mode 與 real-world conditions 下量測 RF TX / RX characteristics。\n- [[MLO]] 是 [[Wi-Fi 7]] key feature，因此提供 multiple RF chains 的 test environment 很重要。\n- 來源列出的 Wi‑Fi 7-specific tests 包含 2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 2.89976
+            },
+            {
+             "text": "R&S SMA100B\nR&S SMA100B 是 Rohde & Schwarz 的 RF and Microwave Signal Generator，依 Specifications Version 10.00（February 2026）透過 R&S®SMAB-B1xx frequency options 覆蓋 8 kHz to 3 GHz 到 8 kHz to 67 GHz，並可依 options 增加 high output power、ultra low phase noise、analog modulation、clock synthesizer、power analysis 與 remote control 功能。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SMA100B.md"
+             },
+             "score": 11.843196
+            },
+            {
+             "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 4.830438
+            },
+            {
+             "text": "R&S TS8996 › 來源中的角色\n依 [[Regulatory test for wireless devices with cellular technology]]：\n\n- 在 cellular technology RF test for radio spectrum Art 3.2 投影片中，[[R&S TS8996]] 與 RSE test case 同列。\n- 來源寫 Radiated Spurious Emissions measurement up to 200 GHz for FCC for 5G FR2 with high sensitivity of -40 dBm/MHz。\n- 來源同頁列出 special signaling、conditioning for carrier、all standards support。\n- 在 [[EN 303 981]] 測試投影片中，[[R&S ELEKTRA]] 與 TS8996 RSE & customization 同列。\n- 在 FCC CFR47 §25 Mobile Satellite Service 投影片中，[[R&S ELEKTRA]] 與 TS8996 RSE & customization 同列。\n\n依 [[RSE Test System TS8996 (1)]]（07/2025）：\n\n- 簡報標題為 `Radited Spurious Emission (RSE) Test System TS8996`，頁尾日期標示 07/2025；`Radited` 為原文拼字。\n- TS8996 的 basic RSE test solution 適用 2G / 3G / 4G / 5G FR1 / WLAN / BT DUTs with radio functionality。\n- Basic setup 類似 commercial EMI test，可用 FAR with azimuth and optional elevation scan，也可用 SAC with height scan。\n- 基本 frequency range 為 **30 MHz to 12.75 / 26 GHz / 40 GHz**。\n- 測試可用 spectrum analyzer，或 spectrum analyzer 搭配 test receiver。\n- Test distance 標示為 **3 m**，或為 improved sensitivity 使用 **1 m**。\n- 系統需求包含 high sensitivity、stable radiated radiocommunication link、signal conditioning、full automation by [[R&S ELEKTRA]]。\n- 來源稱可作 turnkey solution，也可與 EMC test system 或 regulatory test system（[[R&S TS8997]]）combination / extension。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS8996.md"
+             },
+             "score": 5.730816
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing › Production：R&S CMP180 non-signaling RF testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。\n- [[R&S CMP180]] 被定位為 optimized for this purpose 的 radio communication tester。\n- 來源稱 [[R&S CMP180]] 支援 many cellular and non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform。\n- 來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。\n- 來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。\n- 來源稱 two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 2.613149
+            },
+            {
+             "text": "SIGNAL GENERATOR\nSIGNAL AND SPECTRUM ANALYZER\nFILTERS (R&S®SMW200A AND R&S®FSW) OSCILLATORS/SYNTHESIZERS (R&S®FSW)\n| ► Passband and stopband  | ► Frequency response       | ► Phase noise  |\n| ------------------------ | -------------------------- | -------------- |",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4eedd79b08d7a305",
+               "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+               "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+              "section": 28,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 37.70282
+            },
+            {
+             "text": "# R&S Instrument: FSW67 High-End Signal Analyzer\nAdvantages: Industry-leading low phase noise and up to 8.3 GHz internal analysis bandwidth.\nR&D Value: The optimal tool for fine-tuning mmWave product limits and complex signal analysis.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-600ddf3fc41d2bb2",
+               "original_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+               "sha256": "600ddf3fc41d2bb26d1bb08bbc2ea64ee64033937c66f026df48f8040dcfd7cc",
+               "raw_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+              "section": 50,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 34.815562
+            },
+            {
+             "text": "radar signal generation with\nradar signal generation using PDW\nstreaming with R&S®SMW-K503/-K504\noperating mode: pulse sequencer",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-06da2c5f1d2f72f1",
+               "original_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+               "sha256": "06da2c5f1d2f72f119e80e8c7c835aa45e792602f9337b4e7dee78622469a272",
+               "raw_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+              "section": 1153,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.814629
+            },
+            {
+             "text": "![](Picture35.jpg)\nFlexible signal generation and analysis software\nR&S®PVT360A\nCombined Vector signal generator and analyzer in one instrument",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c478cd76758e3230",
+               "original_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+               "sha256": "c478cd76758e32304c76f6cddcc468bbab6c09f305ddd986166116e13cef3c38",
+               "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+              "section": 89,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.757065
+            }
+           ],
+           "text": "### 推薦先賣\nR&S FSW 可主打 phase noise measurements，因為 FSW-K40 明確是 Phase noise measurements option [1]。\nR&S FSW 可主打 pulse radar analysis，因為 FSW-K6 明確是 Pulse measurements option [1]。\nR&S FSW 可主打 wideband radar analysis，因為 FSW analysis bandwidth options 從 40 MHz 到 8.312 GHz [6]。\nR&S FSW67 可主打 mmWave complex signal analysis，因為 RAW passage 稱其有 industry-leading low phase noise and up to 8.3 GHz internal analysis bandwidth [26]。\nR&S SMW200A 可對接 radar signal generation using PDW streaming with R&S SMW-K503/-K504 in pulse sequencer operating mode [27]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S FSW | Phase noise analysis | R&S FSW-K40 Phase noise measurements | 雷達本振、合成器或收發鏈路若要看 phase noise，FSW-K40 是知識庫明確列出的 phase noise measurement option。 | [1] | 未提供 radar-specific phase-noise limit 或 FMCW chirp 相位雜訊需求。 |\n| R&S FSW | Pulse radar analysis | R&S FSW-K6 Pulse measurements | 脈衝雷達或 chirped-pulse 場景需要脈衝量測時，FSW-K6 是明確列出的 pulse measurement option。 | [1] | 未提供 pulse compression analysis option 或 matched-filter 指標。 |\n| R&S FSW | Complex modulation / vector analysis | R&S FSW-K70 Vector signal analysis | 若雷達波形被視為複雜 I/Q 或 vector signal，FSW-K70 是知識庫明確列出的 vector signal analysis option。 | [1] | 未直接標示 FMCW、MIMO radar 或 phased-array beam analysis。 |\n| R&S FSW | Higher bandwidth analysis | FSW-B40、B80、B160、B320、B512、B1200、B2001、B4001、B6001、B8001；最高 8.312 GHz analysis bandwidth | 更寬 radar waveform 會推動更高 analysis bandwidth，而 FSW 知識庫列出最高 8.312 GHz analysis bandwidth option。 | [6] | 各 bandwidth option 有型號、出廠、頻率與出口限制，報價前需逐項確認。[6] |\n| R&S FSW67 | mmWave radar / complex signal analysis | RAW 稱 FSW67 有 low phase noise and up to 8.3 GHz internal analysis bandwidth | FSW67 的 RAW 定位是 fine-tuning mmWave product limits and complex signal analysis。 | [26] | RAW 未列 option code、order number 或 radar test application。 |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Phase-noise-driven radar LO / synthesizer validation | R&S FSW + FSW-K40 | 以 phase noise measurements 作為切入，因為 FSW-K40 是 phase noise measurements option。 | 未提供 radar LO offset range、measurement floor 或 SMW phase-noise 對接資料。[1] |\n| Wideband FMCW / chirp receiver analysis | R&S FSW + 適用的 FSW-B 系列 bandwidth option | 以 40 MHz 到 8.312 GHz analysis bandwidth 覆蓋較寬波形分析需求。 | 未提供 FMCW chirp linearity、range resolution 或 pulse compression analysis 規格。[6] |\n| Pulsed radar analysis | R&S FSW + FSW-K6 | 以 pulse measurements 對接 pulsed radar 或 chirped-pulse 量測。 | 未提供 pulse compression、PRI agility 或 deinterleaving 規格。[1] |\n### 限制\n提供的 passages 只支持 FSW 的 phase noise、pulse、vector analysis 與 analysis bandwidth options，以及 SMW200A 的 PDW streaming / pulse sequencer radar generation 關聯 [1][6][27]。",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "R&S FSW › Firmware / licence options（摘錄）\n- R&S FSW-K6 Pulse measurements，Order No. 1313.1322.02。\n- R&S FSW-K7 AM/FM/PM modulation analysis，Order No. 1313.1339.02。\n- R&S FSW-K8 Bluetooth BR/EDR/LE measurements，Order No. 1313.1351.02；R&S FSW-K8E Bluetooth 6.0 channel sounding，Order No. 1353.3284.02，需 R&S FSW-K8。\n- R&S FSW-K40 Phase noise measurements，Order No. 1313.1397.02。\n- R&S FSW-K54 EMI measurements，Order No. 1313.1400.02。\n- R&S FSW-K70 Vector signal analysis，Order No. 1313.1416.02。\n- WLAN options：R&S FSW-K91、K91N、K91AC、K91AX、K91BE、K91P、K91BN、K95、K97；其中 K95/K97 需 R&S FSW-B2001/-B800R/-B4001/-B6001/-B8001 option。\n- 5G NR options：R&S FSW-K144、K145、K147、K147C、K148、K171、K175、K184；requires 依原文列示，報價前需回查 [[FSW_specs_en_5215-6749-22_v1701]]。\n- Real-time application firmware：R&S FSW-K161R、K512RE、K800RE，各自有 bandwidth option requires/excludes。\n- R&S FSW-K553 External frontend control，Order No. 1350.6118.02；支援 [[R&S FE44S]]、[[R&S FE50DTR]]、[[R&S FE110SR]]、[[R&S FE170SR]]。\n- R&S FSW-K575 I/Q noise cancellation，Order No. 1353.2894.02。\n- R&S FSW-K980 Health and utilization monitoring service（HUMS），Order No. 1350.6718.02。\n- 標註 59 的 firmware 也可作為 floating license；order number 由 `.02` 改為 `.51`，並需 R&S FSW-FL hardware option。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 8,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/entities/R&S FSW.md"
+            },
+            "score": 10.430883
+           },
+           {
+            "text": "R&S FSW › Analysis bandwidth options（硬體 options）\n| Option code | 名稱 | Order No. | 適用與限制 |\n|---|---|---|---|\n| R&S FSW-B40 | 40 MHz analysis bandwidth | 1313.0861.02 | user-retrofittable |\n| R&S FSW-B80 | 80 MHz analysis bandwidth | 1313.0878.02 | user-retrofittable |\n| R&S FSW-B160 | 160 MHz analysis bandwidth | 1325.4850.14 | contact service center |\n| R&S FSW-B320 | 320 MHz analysis bandwidth | 1325.4867.14 | includes 200 MHz IF filter |\n| R&S FSW-B512 | 512 MHz analysis bandwidth | 1331.7106.14 | includes 200 MHz IF filter |\n| R&S FSW-B512R | Real-time spectrum analyzer 512 MHz, POI ≤ 15 µs | 1331.7106.16 | contact service center；includes 512 MHz analysis bandwidth and 200 MHz IF filter |\n| R&S FSW-B1200 | 1.2 GHz analysis bandwidth | 1331.6400.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory；不適用 [[R&S FSW8]]、[[R&S FSW13]] |\n| R&S FSW-B2001 | 2 GHz analysis bandwidth | 1331.6916.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory |\n| R&S FSW-B4001 | 4.4 GHz analysis bandwidth | 1338.5215.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；contact service center |\n| R&S FSW-B6001 | 6.4 GHz analysis bandwidth | 1338.5221.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B8001 | 8.312 GHz analysis bandwidth | 1338.5238.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B800R | Real-time spectrum analyzer 800 MHz, POI ≤ 15 µs | 1331.6400.16 | 適用 [[R&S FSW26]]/43/50/67/85；export license required |",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 5,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/entities/R&S FSW.md"
+            },
+            "score": 8.896204
+           },
+           {
+            "text": "# R&S Instrument: FSW67 High-End Signal Analyzer\nAdvantages: Industry-leading low phase noise and up to 8.3 GHz internal analysis bandwidth.\nR&D Value: The optimal tool for fine-tuning mmWave product limits and complex signal analysis.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-600ddf3fc41d2bb2",
+              "original_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+              "sha256": "600ddf3fc41d2bb26d1bb08bbc2ea64ee64033937c66f026df48f8040dcfd7cc",
+              "raw_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/R&S for JIO Project.md",
+             "section": 50,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 34.815562
+           },
+           {
+            "text": "radar signal generation with\nradar signal generation using PDW\nstreaming with R&S®SMW-K503/-K504\noperating mode: pulse sequencer",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-06da2c5f1d2f72f1",
+              "original_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+              "sha256": "06da2c5f1d2f72f119e80e8c7c835aa45e792602f9337b4e7dee78622469a272",
+              "raw_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+             "section": 1153,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 31.814629
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [
+            {
+             "name": "technical_knowledge",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              }
+             ],
+             "attempts": 1
+            }
+           ],
+           "missing_facets": [],
+           "relation_required": false,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": [
+           {
+            "wiki_page": "wiki/entities/R&S FSW.md",
+            "raw_refs": [
+             "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md"
+            ]
+           }
+          ]
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,127 @@
+{
+ "question": {
+  "id": "Q0261",
+  "text": "For a Aerospace / Defense use case involving radar, where would Oscilloscope fit in the test workflow?",
+  "market": "Aerospace / Defense",
+  "product": "Oscilloscope",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-8a3a99eed2794ce0a4e5959fa968e782",
+ "exchange": {
+  "sent": "For a Aerospace / Defense use case involving radar, where would Oscilloscope fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 76.844,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-8a3a99eed2794ce0a4e5959fa968e782",
+    "actor": "leo.chi",
+    "title": "For a Aerospace / Defense use case involving radar, where would Oscillos…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T12:34:22.954434Z",
+    "updated_at": "2026-10-07T12:35:36.608592Z",
+    "messages": [
+     {
+      "message_id": "message-2f0e7cf6a4134b5491fe3f326601c24a",
+      "role": "user",
+      "text": "For a Aerospace / Defense use case involving radar, where would Oscilloscope fit in the test workflow?",
+      "created_at": "2026-10-07T12:34:22.964848Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-fa77b3bd5cb74c8895bf97664df18b02",
+      "role": "assistant",
+      "text": "The knowledge base gave no answer: evidence was insufficient for a grounded RS-corpus answer.\n\nFrom general test knowledge, not from the knowledge base: in an Aerospace / Defense radar workflow, an oscilloscope usually fits around the **time-domain, pulse, trigger, and mixed-signal validation parts** of the radar chain, rather than replacing RF signal analyzers or vector network analyzers.\n\nTypical fit:\n\n1. **Radar timing and pulse generation**\n   - Validate pulse repetition interval/frequency: PRI/PRF\n   - Measure pulse width, rise/fall time, duty cycle, pulse-to-pulse stability\n   - Check trigger timing between exciter, modulator, T/R switch, blanking, and receiver gates\n\n2. **Transmitter / modulator validation**\n   - Observe control signals driving high-power amplifiers, modulators, limiters, or T/R modules\n   - Check envelope shape, overshoot, ringing, droop, settling time\n   - Debug pulsed power behavior and protection timing\n\n3. **T/R module and phased-array timing**\n   - Verify synchronization of digital control lines, beam-steering commands, phase shifter control, enable lines\n   - Measure timing skew between channels or modules\n   - Correlate analog RF envelope behavior with digital control events using mixed-signal oscilloscope capability\n\n4. **Receiver and IF/baseband debugging**\n   - Inspect IF, video, I/Q, ADC input/output timing, detector outputs\n   - Validate receiver gating, blanking recovery, limiter recovery, and transient behavior after transmit pulses\n   - Check noise, glitches, clipping, saturation, and dynamic range issues in analog paths\n\n5. **System integration and troubleshooting**\n   - Correlate radar events across domains: trigger, RF envelope, IF/baseband, digital control, power rails\n   - Diagnose intermittent timing faults, synchronization problems, and transient disturbances\n   - Confirm latency through signal-processing or control chains\n\n6. **Power integrity and EMI-related debugging**\n   - Measure supply rail droop during high-current transmit pulses\n   - Check switching noise, ground bounce, ripple, transient load response\n   - Correlate power events with radar pulse activity\n\nWhere it sits relative to other instruments:\n\n- **Signal generator:** creates radar-like RF, IF, or baseband stimuli.\n- **Spectrum/signal analyzer:** measures RF spectrum, modulation quality, phase noise, spurs, occupied bandwidth, chirp quality.\n- **VNA:** characterizes RF components, antennas, cables, filters, S-parameters.\n- **Oscilloscope:** verifies **time-domain behavior**, pulse fidelity, synchronization, transients, control timing, IF/baseband waveforms, and power integrity.\n\nSo, in a radar A&D workflow, the oscilloscope is most useful during **design validation, integration, and troubleshooting**, especially when you need to see exactly *when* things happen and how analog/digital/power signals interact during radar pulses.",
+      "created_at": "2026-10-07T12:35:36.608592Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-b6e956077cf549bbb7b998c1decbafdb",
+       "request_id": "request-b6e956077cf549bbb7b998c1decbafdb",
+       "span_id": "span-b6e956077cf549bbb7b998c1decbafdb",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)",
+    "ok": true,
+    "answer": "The knowledge base gave no answer: evidence was insufficient for a grounded RS-corpus answer.\n\nFrom general test knowledge, not from the knowledge base: in an Aerospace / Defense radar workflow, an oscilloscope usually fits around the **time-domain, pulse, trigger, and mixed-signal validation parts** of the radar chain, rather than replacing RF signal analyzers or vector network analyzers.\n\nTypical fit:\n\n1. **Radar timing and pulse generation**\n   - Validate pulse repetition interval/frequency: PRI/PRF\n   - Measure pulse width, rise/fall time, duty cycle, pulse-to-pulse stability\n   - Check trigger timing between exciter, modulator, T/R switch, blanking, and receiver gates\n\n2. **Transmitter / modulator validation**\n   - Observe control signals driving high-power amplifiers, modulators, limiters, or T/R modules\n   - Check envelope shape, overshoot, ringing, droop, settling time\n   - Debug pulsed power behavior and protection timing\n\n3. **T/R module and phased-array timing**\n   - Verify synchronization of digital control lines, beam-steering commands, phase shifter control, enable lines\n   - Measure timing skew between channels or modules\n   - Correlate analog RF envelope behavior with digital control events using mixed-signal oscilloscope capability\n\n4. **Receiver and IF/baseband debugging**\n   - Inspect IF, video, I/Q, ADC input/output timing, detector outputs\n   - Validate receiver gating, blanking recovery, limiter recovery, and transient behavior after transmit pulses\n   - Check noise, glitches, clipping, saturation, and dynamic range issues in analog paths\n\n5. **System integration and troubleshooting**\n   - Correlate radar events across domains: trigger, RF envelope, IF/baseband, digital control, power rails\n   - Diagnose intermittent timing faults, synchronization problems, and transient disturbances\n   - Confirm latency through signal-processing or control chains\n\n6. **Power integrity and EMI-related debugging**\n   - Measure supply rail droop during high-current transmit pulses\n   - Check switching noise, ground bounce, ripple, transient load response\n   - Correlate power events with radar pulse activity\n\nWhere it sits relative to other instruments:\n\n- **Signal generator:** creates radar-like RF, IF, or baseband stimuli.\n- **Spectrum/signal analyzer:** measures RF spectrum, modulation quality, phase noise, spurs, occupied bandwidth, chirp quality.\n- **VNA:** characterizes RF components, antennas, cables, filters, S-parameters.\n- **Oscilloscope:** verifies **time-domain behavior**, pulse fidelity, synchronization, transients, control timing, IF/baseband waveforms, and power integrity.\n\nSo, in a radar A&D workflow, the oscilloscope is most useful during **design validation, integration, and troubleshooting**, especially when you need to see exactly *when* things happen and how analog/digital/power signals interact during radar pulses.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-b6e956077cf549bbb7b998c1decbafdb",
+      "request_id": "request-b6e956077cf549bbb7b998c1decbafdb",
+      "span_id": "span-b6e956077cf549bbb7b998c1decbafdb",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-b6e956077cf549bbb7b998c1decbafdb",
+       "request_id": "request-b6e956077cf549bbb7b998c1decbafdb",
+       "span_id": "span-b6e956077cf549bbb7b998c1decbafdb",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no answer: evidence was insufficient for a grounded RS-corpus answer.\n\nFrom general test knowledge, not from the knowledge base: in an Aerospace / Defense radar workflow, an oscilloscope usually fits around the **time-domain, pulse, trigger, and mixed-signal validation parts** of the radar chain, rather than replacing RF signal analyzers or vector network analyzers.\n\nTypical fit:\n\n1. **Radar timing and pulse generation**\n   - Validate pulse repetition interval/frequency: PRI/PRF\n   - Measure pulse width, rise/fall time, duty cycle, pulse-to-pulse stability\n   - Check trigger timing between exciter, modulator, T/R switch, blanking, and receiver gates\n\n2. **Transmitter / modulator validation**\n   - Observe control signals driving high-power amplifiers, modulators, limiters, or T/R modules\n   - Check envelope shape, overshoot, ringing, droop, settling time\n   - Debug pulsed power behavior and protection timing\n\n3. **T/R module and phased-array timing**\n   - Verify synchronization of digital control lines, beam-steering commands, phase shifter control, enable lines\n   - Measure timing skew between channels or modules\n   - Correlate analog RF envelope behavior with digital control events using mixed-signal oscilloscope capability\n\n4. **Receiver and IF/baseband debugging**\n   - Inspect IF, video, I/Q, ADC input/output timing, detector outputs\n   - Validate receiver gating, blanking recovery, limiter recovery, and transient behavior after transmit pulses\n   - Check noise, glitches, clipping, saturation, and dynamic range issues in analog paths\n\n5. **System integration and troubleshooting**\n   - Correlate radar events across domains: trigger, RF envelope, IF/baseband, digital control, power rails\n   - Diagnose intermittent timing faults, synchronization problems, and transient disturbances\n   - Confirm latency through signal-processing or control chains\n\n6. **Power integrity and EMI-related debugging**\n   - Measure supply rail droop during high-current transmit pulses\n   - Check switching noise, ground bounce, ripple, transient load response\n   - Correlate power events with radar pulse activity\n\nWhere it sits relative to other instruments:\n\n- **Signal generator:** creates radar-like RF, IF, or baseband stimuli.\n- **Spectrum/signal analyzer:** measures RF spectrum, modulation quality, phase noise, spurs, occupied bandwidth, chirp quality.\n- **VNA:** characterizes RF components, antennas, cables, filters, S-parameters.\n- **Oscilloscope:** verifies **time-domain behavior**, pulse fidelity, synchronization, transients, control timing, IF/baseband waveforms, and power integrity.\n\nSo, in a radar A&D workflow, the oscilloscope is most useful during **design validation, integration, and troubleshooting**, especially when you need to see exactly *when* things happen and how analog/digital/power signals interact during radar pulses.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_sk1goljchkLYQ7xxkqJmHGDX",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-b6e956077cf549bbb7b998c1decbafdb",
+          "request_id": "request-b6e956077cf549bbb7b998c1decbafdb",
+          "span_id": "span-b6e956077cf549bbb7b998c1decbafdb",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_insufficient_evidence",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,1984 @@
+{
+ "question": {
+  "id": "Q0046",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Wireless Communication, and what evidence supports each opportunity?",
+  "market": "Wireless Communication",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-c47ddd7a240247e2ad7e16ba686b6875",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Wireless Communication, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 375.547,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-c47ddd7a240247e2ad7e16ba686b6875",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T12:02:26.554565Z",
+    "updated_at": "2026-10-07T12:08:38.292015Z",
+    "messages": [
+     {
+      "message_id": "message-1b637844b2754d96a4f9eddb4cc0983b",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Wireless Communication, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T12:02:26.562078Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-98ea8f8cd9b74e51bbf4704d5f32b697",
+      "role": "assistant",
+      "text": "The knowledge base gave an answer, but the retrieved citations are mostly vault Wiki/source summaries with `raw_ref: null`, not page-level Raw excerpts. So the opportunity ranking below is based on current vault-grounded evidence returned by the RS knowledge tool, with the limitation that I cannot cite exact Raw page/slide IDs from this run.\n\n## Strongest opportunities for Signaling / Non-signaling Testers in Wireless Communication\n\n| Priority | Opportunity | Best-fit tester angle | Why it looks strong | Vault evidence |\n|---:|---|---|---|---|\n| 1 | **Wi‑Fi 7 R&D signaling / real-world operation testing** | **CMX500** as multi-technology, multi-channel signaling tester | Strong because the evidence explicitly links CMX500 to Wi‑Fi 7 R&D, signaling mode, cellular + non-cellular coexistence, MLO, 2x2 MIMO, 6 GHz, coexistence, and E2E testing. | Vault summary of *“Rohde & Schwarz presents its Wi‑Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024”* says CMX500 is a **multi-technology multi-channel signaling tester** with integrated Wi‑Fi 7 functionality, intended to test wireless devices in a single-instrument setup across cellular and non-cellular latest-generation standards. It also says Wi‑Fi 7 R&D requires signaling mode under real-world conditions for RF TX/RX, and lists MLO, multiple RF chains, 2x2 MIMO, 6 GHz out-of-band discovery, coexistence and E2E tests. Citation returned: `wiki/concepts/Wi-Fi 7 R&D and production testing.md`, sections 1–2. |\n| 2 | **Wi‑Fi 7 production non-signaling RF testing, with Wi‑Fi 8 early waveform exploration** | **CMP180** as production / R&D non-signaling tester | Strong because it maps directly to production test economics: non-signaling RF measurements are used to save time, and CMP180 is explicitly positioned for that purpose. The Wi‑Fi 8 / 480 MHz waveform point is an early-positioning opportunity, though not a formal standard claim. | Vault summary says in WLAN device production, **all RF measurements are executed in non-signaling mode to save time**, and **CMP180 is optimized for this purpose**. It supports Wi‑Fi 6E, Wi‑Fi 7 and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz; includes two analyzers, two generators and two sets of eight RF ports for single-box 2x2 MIMO, and two CMP180s can scale to 4x4 MIMO access point testing. It also mentions loopback verification of a 480 MHz WLAN waveform as a potential Wi‑Fi 8 / 802.11bn candidate, not a formal Wi‑Fi 8 spec. Citation returned: `wiki/concepts/Wi-Fi 7 R&D and production testing.md`, sections 4 and 6; source page `wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3. |\n| 3 | **5G NR / LTE device R&D callbox, pre-conformance, new bands and advanced RF verification** | **CMX500 Callbox** for signaling plus non-signaling R&D verification | Strong because this is broad, near-term, and product-aligned: new bands, RedCap, sensitivity, desense, pre-conformance, UL MIMO/CA, UL TX switching, multi-SIM and high throughput are all named use cases. | Vault summary of `CMX500_Callbox` says CMX500 Callbox is positioned to quickly establish DUT connection and perform **RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance and non-signaling R&D verification**. Example use cases include **R&D verification of new bands, sensitivity testing, RedCap, desense testing, 3GPP pre-conformance, SRS RF measurements, UL MIMO and UL CA RF measurements, UL TX switching, multi-SIM testing, high E2E throughput testing, and non-signaling verification**. Citation returned: `wiki/concepts/CMX500 Callbox.md`, sections 1, 2, 5, 6. |\n| 4 | **NTN / Direct-to-Cell / satellite communication validation** | **CMX500 / NTN signaling solutions** for NB‑NTN, NR‑NTN, LTE-DTC/NR-DTC, gateway and constellation scenarios | Strong because NTN is repeatedly evidenced as a customer-discovery and product-positioning area: NB‑NTN, NR‑NTN, Direct-to-Cell, LEO/MEO/GEO, service-link bands, satellite gateway integration, handover/beam switching, constellation workflows and future 6G NTN validation. | Vault summary of `cmx500_ntn_customer_questionnaire` says the questionnaire is for **Rohde & Schwarz NTN signaling solutions**, collecting customer requirements for NTN communication technology and tailoring a solution. It covers service offerings, live/simulated environments, RF/protocol/application testing, NB‑NTN, NR‑NTN, Direct-to-Cell/DTC/D2C, 3GPP Rel. 17/18/19 timelines, S/L/Ku/Ka bands, gateway integration, LEO/MEO/GEO/GSO, payload types, long-term LEO scenarios, QoS, mobility, handover/beam switching and constellation visualization/deployment in a CMX500 environment. Citation returned: `wiki/sources/cmx500_ntn_customer_questionnaire.md`, sections 2–4; `wiki/entities/R&S NTN signaling solutions.md`, section 4. Additional PR-related evidence says R&S and Gatehouse Satcom collaborate to accelerate validation methodologies for 5G NTN across GEO/MEO/LEO and lay foundation for future 6G NTN testing and validation. Citation returned: `wiki/entities/Christian Dobmeier.md`, section 2. |\n| 5 | **Wireless certification labs / Global Market Access / PTCRB-GCF / regulatory pre-test support** | **CMX500 / CMW500 / CMP180** depending on signaling, RF, WLAN/cellular, and production/non-signaling needs | Strong because the evidence identifies market-access pressure and test-house needs: RF, protocol compatibility, interoperability, PTCRB/GCF, FCC/CE/NCC, GMA, satellite terminals, 6G, mmWave/MIMO, OTA/SAR/phased-array testing. This is an opportunity to sell into labs and ODMs preparing devices for certification, not necessarily a single formal conformance claim. | Vault summary of `無線通訊認證實驗室.pptx` says wireless certification labs test and verify wireless devices for regulatory, safety and performance standards; scope includes RF, EMC, safety and conformity certification; main tests include spectrum, output power, DFS, SAR, EMI/EMS, ESD, surge, protocol compatibility, interoperability, PTCRB/GCF certification; value includes preventing interference, accelerating market access, reducing recall/legal risk, and meeting Taiwan supply-chain needs for satellite terminals and 6G. It also lists Taiwan NCC flow, TAF labs, RF/EMC 3–4 weeks, and leading labs such as Sporton, SGS, TTC/ISL. Citation returned: `wiki/sources/無線通訊認證實驗室.md`, sections 1–3; `wiki/concepts/無線通訊認證實驗室資料清單.md`, sections 3 and 8. Limitation: this source is company-restricted, converted 2026-09-17, and lacks formal release date/version; it should be backed by official accreditation scope before making formal claims. |\n| 6 | **Wi‑Fi / cellular interworking and voice continuity testing** | **CMX500** for single-box interworking, N3IWF, POLQA / voice quality | Strong as an application-specific extension of Wi‑Fi 7 and cellular convergence. It is narrower than opportunities 1–4 but useful for high-end devices that must handle WLAN offload and voice quality. | The MWC 2024 Wi‑Fi 7 source summary identifies CMX500 as adding Wi‑Fi 7 test functionality and also mentions **WLAN offloading, N3IWF, and POLQA voice quality measurement** in the PR context. Citation returned: `wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3. |\n\n## Bottom line\n\nThe strongest evidence-supported opportunities are:\n\n1. **Wi‑Fi 7 R&D signaling testing with CMX500** — strongest explicit product/application fit.  \n2. **Wi‑Fi 7 production non-signaling testing with CMP180** — strongest production-volume / time-saving story.  \n3. **5G NR/LTE advanced R&D and pre-conformance callbox use cases with CMX500** — broadest cellular test coverage.  \n4. **NTN / Direct-to-Cell signaling validation with CMX500** — strongest emerging-growth opportunity.  \n5. **Wireless certification labs and GMA support** — strong channel/customer segment opportunity, but evidence needs formal accreditation documents before making precise lab-scope claims.",
+      "created_at": "2026-10-07T12:08:38.292015Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-9c3f0caeca194d8a8d560382ce2fba62",
+       "request_id": "request-9c3f0caeca194d8a8d560382ce2fba62",
+       "span_id": "span-9c3f0caeca194d8a8d560382ce2fba62",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base gave an answer, but the retrieved citations are mostly vault Wiki/source summaries with `raw_ref: null`, not page-level Raw excerpts. So the opportunity ranking below is based on current vault-grounded evidence returned by the RS knowledge tool, with the limitation that I cannot cite exact Raw page/slide IDs from this run.\n\n## Strongest opportunities for Signaling / Non-signaling Testers in Wireless Communication\n\n| Priority | Opportunity | Best-fit tester angle | Why it looks strong | Vault evidence |\n|---:|---|---|---|---|\n| 1 | **Wi‑Fi 7 R&D signaling / real-world operation testing** | **CMX500** as multi-technology, multi-channel signaling tester | Strong because the evidence explicitly links CMX500 to Wi‑Fi 7 R&D, signaling mode, cellular + non-cellular coexistence, MLO, 2x2 MIMO, 6 GHz, coexistence, and E2E testing. | Vault summary of *“Rohde & Schwarz presents its Wi‑Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024”* says CMX500 is a **multi-technology multi-channel signaling tester** with integrated Wi‑Fi 7 functionality, intended to test wireless devices in a single-instrument setup across cellular and non-cellular latest-generation standards. It also says Wi‑Fi 7 R&D requires signaling mode under real-world conditions for RF TX/RX, and lists MLO, multiple RF chains, 2x2 MIMO, 6 GHz out-of-band discovery, coexistence and E2E tests. Citation returned: `wiki/concepts/Wi-Fi 7 R&D and production testing.md`, sections 1–2. |\n| 2 | **Wi‑Fi 7 production non-signaling RF testing, with Wi‑Fi 8 early waveform exploration** | **CMP180** as production / R&D non-signaling tester | Strong because it maps directly to production test economics: non-signaling RF measurements are used to save time, and CMP180 is explicitly positioned for that purpose. The Wi‑Fi 8 / 480 MHz waveform point is an early-positioning opportunity, though not a formal standard claim. | Vault summary says in WLAN device production, **all RF measurements are executed in non-signaling mode to save time**, and **CMP180 is optimized for this purpose**. It supports Wi‑Fi 6E, Wi‑Fi 7 and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz; includes two analyzers, two generators and two sets of eight RF ports for single-box 2x2 MIMO, and two CMP180s can scale to 4x4 MIMO access point testing. It also mentions loopback verification of a 480 MHz WLAN waveform as a potential Wi‑Fi 8 / 802.11bn candidate, not a formal Wi‑Fi 8 spec. Citation returned: `wiki/concepts/Wi-Fi 7 R&D and production testing.md`, sections 4 and 6; source page `wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3. |\n| 3 | **5G NR / LTE device R&D callbox, pre-conformance, new bands and advanced RF verification** | **CMX500 Callbox** for signaling plus non-signaling R&D verification | Strong because this is broad, near-term, and product-aligned: new bands, RedCap, sensitivity, desense, pre-conformance, UL MIMO/CA, UL TX switching, multi-SIM and high throughput are all named use cases. | Vault summary of `CMX500_Callbox` says CMX500 Callbox is positioned to quickly establish DUT connection and perform **RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance and non-signaling R&D verification**. Example use cases include **R&D verification of new bands, sensitivity testing, RedCap, desense testing, 3GPP pre-conformance, SRS RF measurements, UL MIMO and UL CA RF measurements, UL TX switching, multi-SIM testing, high E2E throughput testing, and non-signaling verification**. Citation returned: `wiki/concepts/CMX500 Callbox.md`, sections 1, 2, 5, 6. |\n| 4 | **NTN / Direct-to-Cell / satellite communication validation** | **CMX500 / NTN signaling solutions** for NB‑NTN, NR‑NTN, LTE-DTC/NR-DTC, gateway and constellation scenarios | Strong because NTN is repeatedly evidenced as a customer-discovery and product-positioning area: NB‑NTN, NR‑NTN, Direct-to-Cell, LEO/MEO/GEO, service-link bands, satellite gateway integration, handover/beam switching, constellation workflows and future 6G NTN validation. | Vault summary of `cmx500_ntn_customer_questionnaire` says the questionnaire is for **Rohde & Schwarz NTN signaling solutions**, collecting customer requirements for NTN communication technology and tailoring a solution. It covers service offerings, live/simulated environments, RF/protocol/application testing, NB‑NTN, NR‑NTN, Direct-to-Cell/DTC/D2C, 3GPP Rel. 17/18/19 timelines, S/L/Ku/Ka bands, gateway integration, LEO/MEO/GEO/GSO, payload types, long-term LEO scenarios, QoS, mobility, handover/beam switching and constellation visualization/deployment in a CMX500 environment. Citation returned: `wiki/sources/cmx500_ntn_customer_questionnaire.md`, sections 2–4; `wiki/entities/R&S NTN signaling solutions.md`, section 4. Additional PR-related evidence says R&S and Gatehouse Satcom collaborate to accelerate validation methodologies for 5G NTN across GEO/MEO/LEO and lay foundation for future 6G NTN testing and validation. Citation returned: `wiki/entities/Christian Dobmeier.md`, section 2. |\n| 5 | **Wireless certification labs / Global Market Access / PTCRB-GCF / regulatory pre-test support** | **CMX500 / CMW500 / CMP180** depending on signaling, RF, WLAN/cellular, and production/non-signaling needs | Strong because the evidence identifies market-access pressure and test-house needs: RF, protocol compatibility, interoperability, PTCRB/GCF, FCC/CE/NCC, GMA, satellite terminals, 6G, mmWave/MIMO, OTA/SAR/phased-array testing. This is an opportunity to sell into labs and ODMs preparing devices for certification, not necessarily a single formal conformance claim. | Vault summary of `無線通訊認證實驗室.pptx` says wireless certification labs test and verify wireless devices for regulatory, safety and performance standards; scope includes RF, EMC, safety and conformity certification; main tests include spectrum, output power, DFS, SAR, EMI/EMS, ESD, surge, protocol compatibility, interoperability, PTCRB/GCF certification; value includes preventing interference, accelerating market access, reducing recall/legal risk, and meeting Taiwan supply-chain needs for satellite terminals and 6G. It also lists Taiwan NCC flow, TAF labs, RF/EMC 3–4 weeks, and leading labs such as Sporton, SGS, TTC/ISL. Citation returned: `wiki/sources/無線通訊認證實驗室.md`, sections 1–3; `wiki/concepts/無線通訊認證實驗室資料清單.md`, sections 3 and 8. Limitation: this source is company-restricted, converted 2026-09-17, and lacks formal release date/version; it should be backed by official accreditation scope before making formal claims. |\n| 6 | **Wi‑Fi / cellular interworking and voice continuity testing** | **CMX500** for single-box interworking, N3IWF, POLQA / voice quality | Strong as an application-specific extension of Wi‑Fi 7 and cellular convergence. It is narrower than opportunities 1–4 but useful for high-end devices that must handle WLAN offload and voice quality. | The MWC 2024 Wi‑Fi 7 source summary identifies CMX500 as adding Wi‑Fi 7 test functionality and also mentions **WLAN offloading, N3IWF, and POLQA voice quality measurement** in the PR context. Citation returned: `wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3. |\n\n## Bottom line\n\nThe strongest evidence-supported opportunities are:\n\n1. **Wi‑Fi 7 R&D signaling testing with CMX500** — strongest explicit product/application fit.  \n2. **Wi‑Fi 7 production non-signaling testing with CMP180** — strongest production-volume / time-saving story.  \n3. **5G NR/LTE advanced R&D and pre-conformance callbox use cases with CMX500** — broadest cellular test coverage.  \n4. **NTN / Direct-to-Cell signaling validation with CMX500** — strongest emerging-growth opportunity.  \n5. **Wireless certification labs and GMA support** — strong channel/customer segment opportunity, but evidence needs formal accreditation documents before making precise lab-scope claims.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-9c3f0caeca194d8a8d560382ce2fba62",
+      "request_id": "request-9c3f0caeca194d8a8d560382ce2fba62",
+      "span_id": "span-9c3f0caeca194d8a8d560382ce2fba62",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-9c3f0caeca194d8a8d560382ce2fba62",
+       "request_id": "request-9c3f0caeca194d8a8d560382ce2fba62",
+       "span_id": "span-9c3f0caeca194d8a8d560382ce2fba62",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave an answer, but the retrieved citations are mostly vault Wiki/source summaries with `raw_ref: null`, not page-level Raw excerpts. So the opportunity ranking below is based on current vault-grounded evidence returned by the RS knowledge tool, with the limitation that I cannot cite exact Raw page/slide IDs from this run.\n\n## Strongest opportunities for Signaling / Non-signaling Testers in Wireless Communication\n\n| Priority | Opportunity | Best-fit tester angle | Why it looks strong | Vault evidence |\n|---:|---|---|---|---|\n| 1 | **Wi‑Fi 7 R&D signaling / real-world operation testing** | **CMX500** as multi-technology, multi-channel signaling tester | Strong because the evidence explicitly links CMX500 to Wi‑Fi 7 R&D, signaling mode, cellular + non-cellular coexistence, MLO, 2x2 MIMO, 6 GHz, coexistence, and E2E testing. | Vault summary of *“Rohde & Schwarz presents its Wi‑Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024”* says CMX500 is a **multi-technology multi-channel signaling tester** with integrated Wi‑Fi 7 functionality, intended to test wireless devices in a single-instrument setup across cellular and non-cellular latest-generation standards. It also says Wi‑Fi 7 R&D requires signaling mode under real-world conditions for RF TX/RX, and lists MLO, multiple RF chains, 2x2 MIMO, 6 GHz out-of-band discovery, coexistence and E2E tests. Citation returned: `wiki/concepts/Wi-Fi 7 R&D and production testing.md`, sections 1–2. |\n| 2 | **Wi‑Fi 7 production non-signaling RF testing, with Wi‑Fi 8 early waveform exploration** | **CMP180** as production / R&D non-signaling tester | Strong because it maps directly to production test economics: non-signaling RF measurements are used to save time, and CMP180 is explicitly positioned for that purpose. The Wi‑Fi 8 / 480 MHz waveform point is an early-positioning opportunity, though not a formal standard claim. | Vault summary says in WLAN device production, **all RF measurements are executed in non-signaling mode to save time**, and **CMP180 is optimized for this purpose**. It supports Wi‑Fi 6E, Wi‑Fi 7 and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz; includes two analyzers, two generators and two sets of eight RF ports for single-box 2x2 MIMO, and two CMP180s can scale to 4x4 MIMO access point testing. It also mentions loopback verification of a 480 MHz WLAN waveform as a potential Wi‑Fi 8 / 802.11bn candidate, not a formal Wi‑Fi 8 spec. Citation returned: `wiki/concepts/Wi-Fi 7 R&D and production testing.md`, sections 4 and 6; source page `wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3. |\n| 3 | **5G NR / LTE device R&D callbox, pre-conformance, new bands and advanced RF verification** | **CMX500 Callbox** for signaling plus non-signaling R&D verification | Strong because this is broad, near-term, and product-aligned: new bands, RedCap, sensitivity, desense, pre-conformance, UL MIMO/CA, UL TX switching, multi-SIM and high throughput are all named use cases. | Vault summary of `CMX500_Callbox` says CMX500 Callbox is positioned to quickly establish DUT connection and perform **RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance and non-signaling R&D verification**. Example use cases include **R&D verification of new bands, sensitivity testing, RedCap, desense testing, 3GPP pre-conformance, SRS RF measurements, UL MIMO and UL CA RF measurements, UL TX switching, multi-SIM testing, high E2E throughput testing, and non-signaling verification**. Citation returned: `wiki/concepts/CMX500 Callbox.md`, sections 1, 2, 5, 6. |\n| 4 | **NTN / Direct-to-Cell / satellite communication validation** | **CMX500 / NTN signaling solutions** for NB‑NTN, NR‑NTN, LTE-DTC/NR-DTC, gateway and constellation scenarios | Strong because NTN is repeatedly evidenced as a customer-discovery and product-positioning area: NB‑NTN, NR‑NTN, Direct-to-Cell, LEO/MEO/GEO, service-link bands, satellite gateway integration, handover/beam switching, constellation workflows and future 6G NTN validation. | Vault summary of `cmx500_ntn_customer_questionnaire` says the questionnaire is for **Rohde & Schwarz NTN signaling solutions**, collecting customer requirements for NTN communication technology and tailoring a solution. It covers service offerings, live/simulated environments, RF/protocol/application testing, NB‑NTN, NR‑NTN, Direct-to-Cell/DTC/D2C, 3GPP Rel. 17/18/19 timelines, S/L/Ku/Ka bands, gateway integration, LEO/MEO/GEO/GSO, payload types, long-term LEO scenarios, QoS, mobility, handover/beam switching and constellation visualization/deployment in a CMX500 environment. Citation returned: `wiki/sources/cmx500_ntn_customer_questionnaire.md`, sections 2–4; `wiki/entities/R&S NTN signaling solutions.md`, section 4. Additional PR-related evidence says R&S and Gatehouse Satcom collaborate to accelerate validation methodologies for 5G NTN across GEO/MEO/LEO and lay foundation for future 6G NTN testing and validation. Citation returned: `wiki/entities/Christian Dobmeier.md`, section 2. |\n| 5 | **Wireless certification labs / Global Market Access / PTCRB-GCF / regulatory pre-test support** | **CMX500 / CMW500 / CMP180** depending on signaling, RF, WLAN/cellular, and production/non-signaling needs | Strong because the evidence identifies market-access pressure and test-house needs: RF, protocol compatibility, interoperability, PTCRB/GCF, FCC/CE/NCC, GMA, satellite terminals, 6G, mmWave/MIMO, OTA/SAR/phased-array testing. This is an opportunity to sell into labs and ODMs preparing devices for certification, not necessarily a single formal conformance claim. | Vault summary of `無線通訊認證實驗室.pptx` says wireless certification labs test and verify wireless devices for regulatory, safety and performance standards; scope includes RF, EMC, safety and conformity certification; main tests include spectrum, output power, DFS, SAR, EMI/EMS, ESD, surge, protocol compatibility, interoperability, PTCRB/GCF certification; value includes preventing interference, accelerating market access, reducing recall/legal risk, and meeting Taiwan supply-chain needs for satellite terminals and 6G. It also lists Taiwan NCC flow, TAF labs, RF/EMC 3–4 weeks, and leading labs such as Sporton, SGS, TTC/ISL. Citation returned: `wiki/sources/無線通訊認證實驗室.md`, sections 1–3; `wiki/concepts/無線通訊認證實驗室資料清單.md`, sections 3 and 8. Limitation: this source is company-restricted, converted 2026-09-17, and lacks formal release date/version; it should be backed by official accreditation scope before making formal claims. |\n| 6 | **Wi‑Fi / cellular interworking and voice continuity testing** | **CMX500** for single-box interworking, N3IWF, POLQA / voice quality | Strong as an application-specific extension of Wi‑Fi 7 and cellular convergence. It is narrower than opportunities 1–4 but useful for high-end devices that must handle WLAN offload and voice quality. | The MWC 2024 Wi‑Fi 7 source summary identifies CMX500 as adding Wi‑Fi 7 test functionality and also mentions **WLAN offloading, N3IWF, and POLQA voice quality measurement** in the PR context. Citation returned: `wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`, section 3. |\n\n## Bottom line\n\nThe strongest evidence-supported opportunities are:\n\n1. **Wi‑Fi 7 R&D signaling testing with CMX500** — strongest explicit product/application fit.  \n2. **Wi‑Fi 7 production non-signaling testing with CMP180** — strongest production-volume / time-saving story.  \n3. **5G NR/LTE advanced R&D and pre-conformance callbox use cases with CMX500** — broadest cellular test coverage.  \n4. **NTN / Direct-to-Cell signaling validation with CMX500** — strongest emerging-growth opportunity.  \n5. **Wireless certification labs and GMA support** — strong channel/customer segment opportunity, but evidence needs formal accreditation documents before making precise lab-scope claims.",
+      "model_turns": 4,
+      "tools": [
+       {
+        "call_id": "call_gOapoHy9adfS2SpkLrIwZxAb",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-9c3f0caeca194d8a8d560382ce2fba62",
+          "request_id": "request-9c3f0caeca194d8a8d560382ce2fba62",
+          "span_id": "span-9c3f0caeca194d8a8d560382ce2fba62",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-9c3f0caeca194d8a8d560382ce2fba62",
+           "request_id": "request-9c3f0caeca194d8a8d560382ce2fba62",
+           "span_id": "span-9c3f0caeca194d8a8d560382ce2fba62",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Wireless Communication, and what evidence supports each opportunity? Please identify strongest opportunities and cite Raw evidence for each.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 11.197526
+            },
+            {
+             "text": "無線通訊認證實驗室資料清單 › 目前已知內容\n- [[Test House]] 只包含一個本機檔案連結：`無線通訊認證實驗室.pptx`。\n- [[Test House]] 來源 converted 日期為 2026-09-17，但正文未標示正式發布日期或文件版次。\n- 先前 [[Test House]] 沒有可抽取的簡報正文、圖表、標準清單、實驗室名稱、認證範圍或設備配置。\n- [[無線通訊認證實驗室]]已補入該 PPT 的 markitdown 轉檔文字；raw frontmatter 顯示 converted 日期為 2026-09-17，但簡報本身仍未標示正式發布日期與版次。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+             },
+             "score": 2.022531
+            },
+            {
+             "text": "NCC › 衛星 / 通訊監理語境中的 NCC\n- [[低軌衛星通信終端設備技術規範與相關檢測]]（來源標示 111年08月）列出 NCC 電信事業申請衛星固定通信用無線電頻率核配有關事項草案、NCC 衛星地球電臺設置使用管理辦法部分條文修正草案，以及 NCC 衛星地球電臺設備技術規範草案總說明。\n- 上述語境應連到 [[國家通訊傳播委員會]]，不應與交換機光器件圖上的 NCC 混用。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/NCC.md"
+             },
+             "score": 7.4508
+            },
+            {
+             "text": "R&S CMX500 › Base unit 與主要訂購資訊\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n| 項目 | Type / code | Order No. | 原文說明 |\n|---|---|---|---|\n| CMX500 Radio communication tester | CMX500 | 1201.0002K70 | accessories 包含 power cords、operating manual (getting started)、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters |\n| CMX500 basic assembly | R&S CMX-PB70H | 1222.0676.09 | basic assembly |\n| R&S CMX accelerator unit | R&S CMX-B200A | 1222.0747.02 | accelerated digital signal processing capabilities |\n| R&S CMX processing unit | R&S CMX-B300C | 1222.0801.04 | generic high-performance computing platform for advanced data processing |\n| R&S CMX IF unit | R&S CMX-B500A | 1222.0924.02 | IF frequency range vector signal analysis and ARB based generator |\n| R&S CMX RF unit | R&S CMX-B600B | 1222.0953.03 | FR1 frequency range vector signal analysis and ARB based generator |\n\n[[CMX500_Features_CSW9-20-0_en_32]] 使用 generic code [[R&S CMX-B500x]] 與 [[R&S CMX-B600x]]；[[CMX500_specs_en_5216-4127-22_v1100]] 在 ordering information 中列出具體 orderable unit 為 [[R&S CMX-B500A]] 與 [[R&S CMX-B600B]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 9.831508
+            },
+            {
+             "text": "無線通訊認證實驗室資料清單\n[[無線通訊認證實驗室資料清單]]原本由 [[Test House]] 提供待讀材料索引；[[低軌衛星通信終端設備技術規範與相關檢測]]新增了[[電信技術中心]]在 111年08月簡報中的毫米波頻段測試量能描述；[[無線通訊認證實驗室]]則補入 `無線通訊認證實驗室.pptx` 的簡報正文摘要。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+             },
+             "score": 1.655032
+            },
+            {
+             "text": "無線通訊認證實驗室資料清單 › 使用限制\n- 不可把 [[Test House]] 的 OneNote 連結標題解讀為已驗證的實驗室能力、測試範圍或市場資訊。\n- [[無線通訊認證實驗室]]是 company restricted 簡報轉檔，且正式日期 / 版次未標示；其能力、週期與機構列名需官方 accreditation scope、實驗室能力表或法規文件補證。\n- 不可把 `NCC / TAF / FCC 等機構認可` 解讀為所有列名實驗室在所有測項、頻段與地區均已獲認可。\n- 不可把 RF / EMC 測試 3–4 週、GMA 8–12 週解讀為任何產品的保證交期。\n- [[低軌衛星通信終端設備技術規範與相關檢測]]中的 TTC CATR 能力是 111年08月簡報層級說法；不可取代 TTC 官方能力清單、TAF 認證範圍、測試報告或正式報價文件。\n- 若要判斷 [[FCC 無線設備法規測試]]、[[CE RED 無線設備法規測試]]、[[PTCRB]]、[[GCF]]、Wi‑Fi / BLE 認證流程，需回正式規則、標準與 certification body 文件。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+             },
+             "score": 1.691763
+            },
+            {
+             "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 8.494786
+            },
+            {
+             "text": "國家通訊傳播委員會 › 來源中的衛星規範脈絡\n[[低軌衛星通信終端設備技術規範與相關檢測]]（來源標示 111年08月）列出：\n\n- NCC 電信事業申請衛星固定通信用無線電頻率核配有關事項草案：釋出同步及非同步衛星固定通信用無線電頻率，以供電信事業新設置衛星通信網路或衛星系統者進行相關申請。\n- NCC 衛星地球電臺設置使用管理辦法部分條文修正草案：因應國際多家衛星系統業者積極布建衛星通信網路，增訂已辦理登錄或依電信法取得衛星地球電臺執照之天線直徑小於三公尺且具雙向通信功能之衛星地球電臺執照核發及換發規定。\n- NCC 衛星地球電臺設備技術規範草案總說明：依電信管理法第六十六條第二項授權，作為衛星地球電臺設備製造商、進口商及經銷商等辦理型式認證之依據。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/國家通訊傳播委員會.md"
+             },
+             "score": 4.43014
+            },
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- Slide 21 題為 **R&S PCB test solutions**，面向 **PCB Fabricator and System House**，將流程分成 Material Measurement、Material/Stackup selection、Signal Integrity modeling/testing、Sampling testing、PL/Process Monitoring，並列出 impedance (TDR)、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram、Delta-L、ISD/ADK、w/ cable / connector testing 等項目。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 0.432493
+            },
+            {
+             "text": "無線通訊認證實驗室 › 與既有知識的關係\n- 本來源補齊 [[Test House]] 原本只保存 `無線通訊認證實驗室.pptx` 本機簡報連結、尚未擷取正文的缺口。\n- 本來源應更新 [[無線通訊認證實驗室資料清單]]：原本該頁指出 `無線通訊認證實驗室.pptx` 尚未 ingest，現在已由本來源提供正文摘要。\n- 本來源與 [[無線裝置法規符合性測試]]、[[CE RED 無線設備法規測試]]、[[FCC 無線設備法規測試]]屬同一主題群，但層次不同：本來源是市場 / 簡報式的實驗室能力與認證流程總覽；既有頁面保存較細的法規框架與測試項目。\n- 本來源對 [[低軌衛星終端設備檢測]]、[[相控陣列天線]]、[[Satellite User Terminal 外部資料清單]] 提供 LEO satellite user terminal certification / RF validation / beamforming testing 的市場線索，但不提供正式測試標準、量測條件或實驗室 accreditation scope。\n- 本來源中的 [[NCC]] 位於台灣通訊設備認證流程語境，應與 [[NCC]] 既有縮寫碰撞頁中的交換機光器件 NCC 區分，必要時連到 [[國家通訊傳播委員會]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+             },
+             "score": 2.856707
+            },
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 0.386557
+            },
+            {
+             "text": "無線通訊認證實驗室 › 重點摘要\n本來源是由 `無線通訊認證實驗室.pptx` 轉出的 company restricted 簡報，正式發布日期與文件版次未標示；raw frontmatter 顯示 converted 日期為 2026-09-17。\n\n來源將[[無線通訊認證實驗室]]定義為測試與驗證無線設備符合法規、安全與性能標準的實驗室，涵蓋 [[RF 測試]]、[[EMC]]、安規與一致性認證，並稱其可支援 [[Global Market Access]]（GMA）與加速上市。\n\n主要內容包括：\n\n- 無線設備認證實驗室涵蓋 RF、EMC、安規與一致性認證。\n- 主要測試項目包含頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試與 [[PTCRB]] / [[GCF]] 認證。\n- 來源稱認證必要性包括防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端與 6G 等需求。\n- 來源列出台灣 [[NCC]] 認證流程：準備文件 / 樣品 / 電路圖 / 天線規格、提交 [[RCB]] 核驗機構初審、[[TAF]] 認可實驗室 RF / EMC 測試約 3–4 週、報告審查與證書核發，並稱證書有效期 5 年。\n- 來源列出台灣領先認證實驗室：[[耕興]]、[[SGS]]、[[電信技術中心]] / [[ISL]]。\n- 來源稱[[耕興]]具 30 MHz–325 GHz 全頻段測試能力、108 座測試場地、連續 10 年 FCC 最佳實驗室認證、10 米半電波暗室、OTA / SAR / [[相控陣列天線]]測試等能力。\n- 來源簡述 [[FCC 無線設備法規測試]]、[[CE RED 無線設備法規測試]]、Wi‑Fi / BLE 聯盟流程的差異。\n- 來源將 LEO 衛星終端認證應用連到 Starlink / Kuiper user terminal RF validation、[[相控陣列天線]] beamforming 測試、mmWave / MIMO 高頻測試、台灣供應鏈 GMA，以及耕興等 [[RCB]] 提供 8–12 週 GMA 週期的說法。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+             },
+             "score": 1.449521
+            },
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 關鍵實體與概念\n- [[Dr. Milton Lien]] — 封面列名的作者 / 講者。\n- [[RSTW]] — 封面單位文字之一，來源未展開完整名稱。\n- [[SerDes]] — 本簡報主題之一，並在 standards / eco-chain / transmission channel 脈絡中出現。\n- [[Signal Integrity]] — Slide 20 以 high speed PCB/PCBA signal integrity flow 呈現，包含 [[IL]]、[[Xtalk]]、[[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]] 與 [[TL Calculator]]。\n- [[Power Integrity]] — 封面題名中的 PI；Slide 11 以 [[Power Distribution Network]] 形式出現，並列 scopes 與 network analyzers。\n- [[High speed SerDes standards]] — Slide 4 的高速介面 / 標準列名。\n- [[High speed SerDes eco-chain]] — Slide 9 的上中下游產業鏈分類。\n- [[R&S PCB test solutions]] — Slide 21 的 PCB fabricator / system house 測試流程與工具 / 方法集合。\n- [[HDI vs Package substrate]] — Slide 17 的 HDI、package substrate、CoWoS、ABF、L/S、pitch 對照線索。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] — 既有概念頁可承接 Slide 20–21 的 PCB / PCBA 測試內容。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 0.277065
+            },
+            {
+             "text": "無線通訊認證實驗室 › 實體\n- [[NCC]] / [[國家通訊傳播委員會]]：來源中的台灣 NCC 認證流程脈絡，需注意 [[NCC]] 既有頁面是縮寫碰撞頁。\n- [[TAF]]：來源稱 TAF 認可實驗室執行 RF / EMC 測試。\n- [[FCC]]：來源在認可機構、FCC 流程與耕興實驗室亮點中出現。\n- [[RCB]]：來源列為台灣 NCC 流程中的核驗機構。\n- [[耕興]] / SPORTON：來源列為台灣領先認證實驗室之一，並列出多項能力與宣稱。\n- [[SGS]]：來源列為台灣領先認證實驗室之一，核心能力為 EMC / RF / 安規，特色為國際認可與 GMA 一站式。\n- [[電信技術中心]] / TTC：來源以 `TTC / ISL` 列為台灣領先認證實驗室，核心能力為 RF 認證 / 測試，特色為台灣政府 6G 研究支援。\n- [[ISL]]：與 TTC 同列，但來源未展開全名。\n- [[Starlink]]、[[Project Kuiper]]：來源列為 LEO 衛星終端認證應用中的 user terminal RF 驗證對象。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+             },
+             "score": 1.180992
+            },
+            {
+             "text": "R&S CMW500 › 硬體 options 與相依關係\n| 代碼 | 名稱 / 原文說明 | 相依關係 / 限制 |\n|---|---|---|\n| R&S®CMW-B110A | ARB option，memory size 1.024 Gbyte | 40/80 MHz bandwidth unit 的 RF generator prerequisite |\n| R&S®CMW-B110D | ARB option，memory size 4.096 Gbyte | 40/80 MHz bandwidth unit 的 RF generator prerequisite |\n| R&S®CMW-B100H | ARB included option for 160 MHz bandwidth unit | R&S®CMW-H100H；maximum possible RF bandwidth 160 MHz |\n| R&S®CMW-B690A | basic OCXO | Timebase option |\n| R&S®CMW-B690B | highly stable OCXO | Timebase option |\n| R&S®CMW-B400B | Audio specifications prerequisite | Audio analyzer / generator 與 CDMA speech codecs 章節引用 |\n| R&S®CMW-B450B | Data application unit | max. 350 Mbit；rear panel Gigabit Ethernet connector |\n| R&S®CMW-B450D | Data application unit | max. 900 Mbit；Ethernet RJ-45 100 Mbps / 1 Gbps |\n| R&S®CMW-B450H | Data application unit | max. 2000 Mbit；僅適用 R&S®CMW500 and R&S®CMW270；Ethernet 1 Gbps / 10 Gbps；USB 3.0 |\n| R&S®CMW-B450I | Data application unit | max. 4000 Mbit；僅適用 R&S®CMW500 and R&S®CMW270；Ethernet 1 Gbps / 10 Gbps；USB 3.0 |\n| R&S®CMW-B500I | SUA option | NB-IoT / LTE / WLAN signaling prerequisites；Digital I/Q 1 to 4 / 5 to 8 不可搭配；Digital I/Q QUAD 僅可搭配 |\n| R&S®CMW-B510F | Digital I/Q 1 to 4 | 僅適用 R&S®CMW500 and R&S®CMW270；不可搭配 R&S®CMW-B500I |\n| R&S®CMW-B520F | Digital I/Q 5 to 8 | 僅適用 R&S®CMW500 and R&S®CMW270；不可搭配 R&S®CMW-B500I |\n| R&S®CMW-B540I | Digital I/Q QUAD | 僅適用 R&S®CMW500 and R&S®CMW270；僅可搭配 R&S®CMW-B500I |\n| R&S®CMW-B612A | IEEE bus interface option，single | IEC 60625-2（IEEE 488.2），24-pin Amphenol connector |\n| R&S®CMW-B612B | IEEE bus interface option，dual | 2 × IEC 60625-2（IEEE 488.2），24-pin Amphenol connector |\n| R&S®CMW-B620A | DVI interface option | Rear panel DVI-D connector |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMW500.md"
+             },
+             "score": 5.419107
+            },
+            {
+             "text": "R&S CMW500 › 訂購資訊\n| 項目 | Type | Order No. | 原文說明 |\n|---|---|---:|---|\n| Wideband radio communication tester | R&S®CMW500 | 1201.0002K50 | Base unit accessories: power cord, operating manual (quick start guide) |\n\n來源指出更多 available options 的 ordering information 需參考 product brochure PD 5214.2833.12 或 local Rohde & Schwarz expert；本 data sheet 未列完整 option order no.。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMW500.md"
+             },
+             "score": 3.876553
+            },
+            {
+             "text": "R&S CMW500\nR&S CMW500 是 Rohde & Schwarz 的 Wideband radio communication tester；[[CMW_dat-sw_en_5213-9211-22_v1700]]（Version 17.00，April 2023）列出的訂購型號為 R&S®CMW500，Order No. 1201.0002K50；[[CMW-KA096_PanEUNGeCall_TC_Status]]（Oct. 2024，文件版次來源未標示）補充其搭配 [[R&S CMW-KA096]] 或 [[R&S CMWrun KT111]] 時的 [[NGeCall over LTE]] 測試支援狀態。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMW500.md"
+             },
+             "score": 3.70922
+            },
+            {
+             "text": "Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024 › 關鍵實體與概念\n- [[Rohde & Schwarz]]：新聞稿發布者與測試解決方案供應商。\n- [[Rohde & Schwarz GmbH & Co KG]]：frontmatter author 與 R&S registered trademark 所屬公司名。\n- [[R&S CMX500]]：R&D single-box signaling tester；本來源新增 Wi‑Fi 7 test functionality、WLAN offloading、N3IWF 與 POLQA voice quality measurement 的 PR 語境。\n- [[R&S CMP180]]：production / R&D non-signaling tester；本來源宣稱支援 Wi-Fi 6E、Wi-Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz，並展示 480 MHz WLAN waveform loopback。\n- [[Wi-Fi 7 R&D and production testing]]：本來源的主題概念，區分 CMX500 R&D signaling 與 CMP180 production non-signaling 測試。\n- [[WLAN offloading with Voice over WLAN]]：本來源描述的 CMX500 single-box interworking / voice continuity 測試情境。\n- [[Wi-Fi 7]] / [[IEEE 802.11be]]：來源列出 320 MHz channel bandwidth、up to 16 spatial streams、4096 QAM、低延遲與 high throughput。\n- [[Wi-Fi 8]] / [[IEEE 802.11bn]]：來源稱 yet-to-be-defined，且 wider channel bandwidths are in discussion；CMP180 480 MHz waveform 被稱為 potential waveform candidate。\n- [[MLO]]：Wi-Fi 7 key feature，使 multiple RF chains 的 test environment 變重要。\n- [[N3IWF]]：Non-3GPP Interworking Function gateway；來源稱 newly integrated in R&S CMX500。\n- [[POLQA]]：來源稱 R&S CMX500 integrated POLQA voice quality measurement function 可用於 Voice over WLAN applications。\n- [[MWC 2024]]：展示場合。\n- [[Christian Mokry]]：Press & media contact。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             },
+             "score": 5.64245
+            },
+            {
+             "text": "Test House › 關鍵實體與概念\n- [[無線通訊認證實驗室資料清單]] — 本來源保存一個本機簡報連結，簡報標題為「無線通訊認證實驗室」，但正文尚未 ingest。\n- [[Test House]] — 來源標題；目前只作為此 OneNote link hub 的名稱，不足以判定為特定公司、實驗室或認證機構。\n- [[無線通訊認證實驗室]] — 由本機簡報檔名 / 連結文字得知的待讀主題；尚無正文支撐任何具體主張。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Test House.md"
+             },
+             "score": 1.397419
+            },
+            {
+             "text": "Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024 › 重點摘要\n- [[Rohde & Schwarz]] 將在 [[MWC 2024]] 展示最新 [[Wi-Fi 7]] R&D 與 production 測試方案，用於應對 [[Wi-Fi 7]] / [[IEEE 802.11be]]、[[LTE]] 與 [[5G]] parallel operation 的測試挑戰。\n- [[R&S CMX500]] 被描述為 multi-technology multi-channel signaling tester，新增 integrated [[Wi-Fi 7]] test functionality，可讓 R&D engineers 以 single instrument setup 測試 cellular 與 non-cellular standards。\n- [[R&S CMX500]] 的 Wi‑Fi 7 R&D 測試情境包含 signaling mode、real-world RF TX/RX characteristics、[[MLO]]、multiple RF chains、2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。\n- [[R&S CMX500]] 也被用於展示 cellular [[5G]] 與 [[WLAN]] 的 traffic offloading / interworking；來源稱其 newly integrated [[N3IWF]] gateway 可測試 [[WLAN offloading with Voice over WLAN]]，並搭配 integrated [[POLQA]] voice quality measurement。\n- [[R&S CMP180]] 被描述為 production phase 的 non-signaling RF measurement tester，支援 cellular 與 non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將在 MWC 展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform；來源稱這是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate。\n- [[R&S CMP180]] 來源說法：two analyzers、two generators、two sets of eight RF ports integrated，可在 single box 支援 2x2 [[MIMO]] testing；兩台 CMP180 可 combined / scaled，支援 four analyzers and generators，用於 4x4 MIMO access points。\n- 展示地點：Fira Gran Via, Barcelona，hall 5，booth 5A80。\n- Press & media contact：[[Christian Mokry]]，PR Manager Test & measurement。\n- 公司段落稱 [[Rohde & Schwarz]] 在 2024/2025 fiscal year（July to June）net revenue 為 EUR 3.16 billion，且 2025-06-30 有 more than 15,000 employees worldwide。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             },
+             "score": 3.457826
+            },
+            {
+             "text": "Test House › 與既有知識的關係\n- 既有 vault 已有多個無線通訊測試相關主題，例如 [[FWA CPE 測試與驗證]]、[[Small Cell BTS 測試資料清單]]、[[5G NR Base Station Conformance Testing]]、[[NR-NTN conformance testing]]、[[Wi-Fi 7 OTA MIMO stress testing]] 與 [[Reverberation chamber OTA testing]]；本來源目前只提供「無線通訊認證實驗室」簡報線索，尚不能補充上述主題的技術或市場內容。\n- 由於簡報正文未擷取，本來源不能作為任何 test house、certification lab、accreditation、conformance testing 或 OTA testing 主張的證據，只能作為待讀材料索引。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Test House.md"
+             },
+             "score": 1.228074
+            },
+            {
+             "text": "Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024 › 與既有知識的關係\n- 既有 [[R&S CMX500]] 頁已依 [[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]] 記錄 CMX500 的 WLAN signaling / measurement options；本來源補充的是 2024 MWC PR / solution demonstration 語境，不提供正式 option code、software version 或硬體 BOM。\n- 既有 [[R&S CMP180]] 頁已依 [[CMP180 Specifications Version 08.00]] 記錄 8 GHz frequency extension 與 500 MHz bandwidth options；本來源補充 MWC 2024 對 Wi‑Fi 7 production testing 與 480 MHz WLAN waveform loopback demonstration 的 positioning。\n- 既有 [[Wi-Fi 7 OTA MIMO stress testing]] 主要來自 Bluetest / EMITE OTA chamber PR；本來源不描述 OTA chamber，而是 R&S own CMX500 / CMP180 single-box R&D / production workflow。\n- 既有 [[Wi-Fi 8]] 頁依較晚的 R&S / Broadcom PR 記錄 Wi-Fi 8 保留 up to 320 MHz channel bandwidth；本來源較早期說 wider channel bandwidths are in discussion，且 480 MHz waveform 是 potential candidate，因此需在 [[Wi-Fi 8]] 並列而不調和。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             },
+             "score": 2.558369
+            },
+            {
+             "text": "Test House › 重點摘要\n- 這份來源是從 OneNote / markdown 直接複製的 link hub，converted 日期為 2026-09-17；來源正文未標示正式發布日期、作者、版本或期間。\n- 來源只包含一個本機檔案超連結：`無線通訊認證實驗室.pptx`，顯示此頁可能是關於 [[無線通訊認證實驗室資料清單]] 的待讀材料入口。\n- 原始來源未擷取該 PowerPoint 簡報正文，因此不能從本頁推論實驗室名稱、認證範圍、測試項目、設備配置、標準版本或市場狀態。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Test House.md"
+             },
+             "score": 1.112526
+            },
+            {
+             "text": "CMX500_Features_CSW9-20-0_en_32 › Signaling options\n| Code | 原文名稱 / 用途 | Order no. |\n|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx |\n| R&S CMX-KS500B / KS500M / KS500X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx |\n| R&S CMX-KS527B / KS527X | NB-NTN signaling, Rel. 17, basic / expert | 1222.9738.xx / 1222.9744.xx |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx |\n| R&S CMX-KS600B / KS600M / KS600X | NR signaling enabler, Rel. 15, basic / medium / expert | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx |\n| R&S CMX-KS610B / KS610M / KS610X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx |\n| R&S CMX-KS611B / KS611M / KS611X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx |\n| R&S CMX-KS612B / KS612M / KS612X | NR signaling extension, CA 10 to 12 CC | 1222.6574.xx / 1222.6580.xx / 1222.6597.xx |\n| R&S CMX-KS613B / KS613X | Multi-SIM enabler, basic / expert | 1222.9580.xx / 1222.9596.xx |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+             },
+             "score": 5.638642
+            },
+            {
+             "text": ".\\vault-cli.ps1 convert          see what would be converted\n  .\\vault-cli.ps1 convert -Apply   write them into raw/ as markdown",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ea90fce69e235bab",
+               "original_ref": "raw/drop/README.md",
+               "sha256": "ea90fce69e235bab585cdb428ef3f0ff2df3b8fe757839583a4489ff5446b72d",
+               "raw_ref": "raw/drop/README.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/drop/README.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.903642
+            },
+            {
+             "text": "![](Picture4.jpg)\nWireless communication tester\nEMI test receiver\nSignal & spectrum analyzer\nWireless communication tester",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-4a179a13677acd8f",
+               "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+               "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+               "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+              "section": 175,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.824768
+            },
+            {
+             "text": "EMITE’s enhanced OTA chambers are fully equipped to handle the rigorous testing requirements of current and future wireless technologies. The next step of the collaboration is looking at integrating test capabilities for NB-IoT NTN and NR NTN, which are already covered by the [R&S CMW500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmw500-wideband-radio-communication-tester_63493-10844.html \"CMW500\") and [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\").",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-756bf47cc8d552b2",
+               "original_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "sha256": "756bf47cc8d552b2f81a075e02c426b8ba6db8e562f2c8b97811bccb10bba84e",
+               "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.640714
+            },
+            {
+             "text": "To address future test requirements, SmartViser and Rohde & Schwarz have paired up and combined their solutions. The [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") wireless communication tester supports the latest wireless technologies, including LTE, 5G NR and WLAN. Its energy efficiency test solution offers seamless power consumption measurements in parallel to RF measurements, protocol tests or application tests.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-dd68e5dc1441065f",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+               "sha256": "dd68e5dc1441065f2fbf2d407d0bbe26428678aa25384ee2bc235895393f13c1",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 26.580307
+            }
+           ],
+           "text": "### Strongest opportunities with RAW evidence\n| Opportunity | Tester role | Evidence-supported fit | RAW evidence |\n|---|---|---|---|\n| LTE / 5G NR / WLAN energy-efficiency and power-consumption testing | Signaling / wireless communication tester | R&S CMX500 supports LTE, 5G NR and WLAN, and its energy-efficiency solution measures power consumption in parallel with RF measurements, protocol tests or application tests [28]. | [28] |\n| NB-IoT NTN / NR NTN OTA test expansion | Signaling / network-emulation tester with OTA chamber ecosystem | EMITE enhanced OTA chambers target current and future wireless technologies, and the next collaboration step is integrating NB-IoT NTN and NR NTN capabilities already covered by R&S CMW500 and R&S CMX500 [27]. | [27] |\n| Wireless certification-lab instrumentation bundle | Wireless communication tester plus adjacent RF/EMI instruments | The RAW evidence lists wireless communication tester, EMI test receiver, and signal & spectrum analyzer as relevant equipment categories [26]. | [26] |",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "![](Picture4.jpg)\nWireless communication tester\nEMI test receiver\nSignal & spectrum analyzer\nWireless communication tester",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-4a179a13677acd8f",
+              "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+              "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+              "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+             "section": 175,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 27.824768
+           },
+           {
+            "text": "EMITE’s enhanced OTA chambers are fully equipped to handle the rigorous testing requirements of current and future wireless technologies. The next step of the collaboration is looking at integrating test capabilities for NB-IoT NTN and NR NTN, which are already covered by the [R&S CMW500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmw500-wideband-radio-communication-tester_63493-10844.html \"CMW500\") and [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\").",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-756bf47cc8d552b2",
+              "original_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "sha256": "756bf47cc8d552b2f81a075e02c426b8ba6db8e562f2c8b97811bccb10bba84e",
+              "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 26.640714
+           },
+           {
+            "text": "To address future test requirements, SmartViser and Rohde & Schwarz have paired up and combined their solutions. The [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") wireless communication tester supports the latest wireless technologies, including LTE, 5G NR and WLAN. Its energy efficiency test solution offers seamless power consumption measurements in parallel to RF measurements, protocol tests or application tests.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-dd68e5dc1441065f",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+              "sha256": "dd68e5dc1441065f2fbf2d407d0bbe26428678aa25384ee2bc235895393f13c1",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 26.580307
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [
+            {
+             "name": "technical_knowledge",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW500.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+              }
+             ],
+             "attempts": 1
+            }
+           ],
+           "missing_facets": [],
+           "relation_required": false,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_ER1hlJziImGPQODvTJvXCPSs",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-9c3f0caeca194d8a8d560382ce2fba62",
+          "request_id": "request-9c3f0caeca194d8a8d560382ce2fba62",
+          "span_id": "span-9c3f0caeca194d8a8d560382ce2fba62",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-9c3f0caeca194d8a8d560382ce2fba62",
+           "request_id": "request-9c3f0caeca194d8a8d560382ce2fba62",
+           "span_id": "span-9c3f0caeca194d8a8d560382ce2fba62",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Using Raw evidence only, identify market/application opportunities in Wireless Communication for R&S signaling/non-signaling testers (CMX500, CMW500, CMP180/200). For each opportunity, give the supporting Raw source citation and exact evidence. Focus on strongest opportunities.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 11.78848
+            },
+            {
+             "text": "無線通訊認證實驗室資料清單 › 已擷取的無線通訊認證實驗室簡報內容\n依 [[無線通訊認證實驗室]]：\n\n- [[無線通訊認證實驗室]]用於測試與驗證無線設備符合法規、安全與性能標準，涵蓋 [[RF 測試]]、[[EMC]]、安規及一致性認證。\n- 來源稱其可經 [[NCC]]、[[TAF]]、[[FCC]] 等機構認可，並支援 [[Global Market Access]] 與上市加速。\n- 主要測試項目包含：頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試、[[PTCRB]] / [[GCF]] 認證。\n- 認證必要性包含防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端、6G 等需求。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+             },
+             "score": 2.454629
+            },
+            {
+             "text": "NCC › 衛星 / 通訊監理語境中的 NCC\n- [[低軌衛星通信終端設備技術規範與相關檢測]]（來源標示 111年08月）列出 NCC 電信事業申請衛星固定通信用無線電頻率核配有關事項草案、NCC 衛星地球電臺設置使用管理辦法部分條文修正草案，以及 NCC 衛星地球電臺設備技術規範草案總說明。\n- 上述語境應連到 [[國家通訊傳播委員會]]，不應與交換機光器件圖上的 NCC 混用。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/NCC.md"
+             },
+             "score": 7.4508
+            },
+            {
+             "text": "無線通訊認證實驗室資料清單 › 目前已知內容\n- [[Test House]] 只包含一個本機檔案連結：`無線通訊認證實驗室.pptx`。\n- [[Test House]] 來源 converted 日期為 2026-09-17，但正文未標示正式發布日期或文件版次。\n- 先前 [[Test House]] 沒有可抽取的簡報正文、圖表、標準清單、實驗室名稱、認證範圍或設備配置。\n- [[無線通訊認證實驗室]]已補入該 PPT 的 markitdown 轉檔文字；raw frontmatter 顯示 converted 日期為 2026-09-17，但簡報本身仍未標示正式發布日期與版次。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+             },
+             "score": 2.022531
+            },
+            {
+             "text": "R&S CMX500 › ARB 與 FFT spectrum analyzer\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n- Modulation source：arbitrary waveform generator（ARB）。\n- ARB 先決條件：[[R&S CMX-B500A]] 或 [[R&S CMX-B600B]]，以及 [[R&S CMX-KW601]] options。\n- ARB with [[R&S CMX-B600B]]：memory size **16 Gbyte**；I/Q word length **32 bit**；marker word length **8 bit**；sample length **up to 1.5 Gsample**；maximum sample rate **1.25 GHz**；maximum possible RF bandwidth **1 GHz**，取決於 arbitrary waveform file。\n- FFT spectrum analyzer frequency span：10 MHz、20 MHz、40 MHz、160 MHz、250 MHz；with [[R&S CMX-B600B]] RF unit in broadband mode **500 MHz**；[[R&S CMX-B500A]] IF unit only **1 GHz**。\n- FFT length：1k、2k、4k、8k、16k；detector：peak、RMS。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 8.007501
+            },
+            {
+             "text": "無線通訊認證實驗室資料清單\n[[無線通訊認證實驗室資料清單]]原本由 [[Test House]] 提供待讀材料索引；[[低軌衛星通信終端設備技術規範與相關檢測]]新增了[[電信技術中心]]在 111年08月簡報中的毫米波頻段測試量能描述；[[無線通訊認證實驗室]]則補入 `無線通訊認證實驗室.pptx` 的簡報正文摘要。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+             },
+             "score": 0.707606
+            },
+            {
+             "text": "R&S CMX500 › Rear panel interfaces\n- LAN：Ethernet RJ-45 connector，1000 Mbps。\n- Trigger interfaces：Trig. A、Trig. B，2 × BNC connector，3.3 V TTL；Trig. C、Trig. D、Trig. E，3 × BNC connector，3.3 V TTL；AST Out，1 × BNC connector。\n- Flexx Sync interface：for future use；In 為 1 × mini SAS HD connector；Loop 為 2 × mini SAS HD connector；Out 為 1 × mini SAS HD connector。\n- Flexx Data interface：for future use；In/Out 各 1 × QSFP-DD connector。\n- Flexx IQ interface：for future use；In/Out 各 1 × QSFP-DD connector。\n- LAN Switch Subnet Only interface：for future use；port 1、port 2 各 1 × SFP+ connector。\n- USB：for keyboard、mouse、USB flash drive；2 × USB 3.1 type A connector。\n- HDMI：for external monitor；DisplayPort：for external monitor。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 37,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 7.688986
+            },
+            {
+             "text": "國家通訊傳播委員會 › 來源中的衛星規範脈絡\n[[低軌衛星通信終端設備技術規範與相關檢測]]（來源標示 111年08月）列出：\n\n- NCC 電信事業申請衛星固定通信用無線電頻率核配有關事項草案：釋出同步及非同步衛星固定通信用無線電頻率，以供電信事業新設置衛星通信網路或衛星系統者進行相關申請。\n- NCC 衛星地球電臺設置使用管理辦法部分條文修正草案：因應國際多家衛星系統業者積極布建衛星通信網路，增訂已辦理登錄或依電信法取得衛星地球電臺執照之天線直徑小於三公尺且具雙向通信功能之衛星地球電臺執照核發及換發規定。\n- NCC 衛星地球電臺設備技術規範草案總說明：依電信管理法第六十六條第二項授權，作為衛星地球電臺設備製造商、進口商及經銷商等辦理型式認證之依據。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/國家通訊傳播委員會.md"
+             },
+             "score": 4.43014
+            },
+            {
+             "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 6.728156
+            },
+            {
+             "text": "無線通訊認證實驗室 › 與既有知識的關係\n- 本來源補齊 [[Test House]] 原本只保存 `無線通訊認證實驗室.pptx` 本機簡報連結、尚未擷取正文的缺口。\n- 本來源應更新 [[無線通訊認證實驗室資料清單]]：原本該頁指出 `無線通訊認證實驗室.pptx` 尚未 ingest，現在已由本來源提供正文摘要。\n- 本來源與 [[無線裝置法規符合性測試]]、[[CE RED 無線設備法規測試]]、[[FCC 無線設備法規測試]]屬同一主題群，但層次不同：本來源是市場 / 簡報式的實驗室能力與認證流程總覽；既有頁面保存較細的法規框架與測試項目。\n- 本來源對 [[低軌衛星終端設備檢測]]、[[相控陣列天線]]、[[Satellite User Terminal 外部資料清單]] 提供 LEO satellite user terminal certification / RF validation / beamforming testing 的市場線索，但不提供正式測試標準、量測條件或實驗室 accreditation scope。\n- 本來源中的 [[NCC]] 位於台灣通訊設備認證流程語境，應與 [[NCC]] 既有縮寫碰撞頁中的交換機光器件 NCC 區分，必要時連到 [[國家通訊傳播委員會]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+             },
+             "score": 2.856707
+            },
+            {
+             "text": "CMX500 Callbox › Callbox 定位\n依 [[CMX500_Callbox]]，callbox 的核心敘事是：\n\n- Easy to set up。\n- Easy to get in a call。\n- Easy to test with。\n- Focus on [[RF Testing]]，including [[3GPP pre-conformance]]。\n\n來源以 [[Device Under Test]]、cell tower 與 smartphone 圖示描述 [[R&S CMX500]] 作為 DUT 連線與測試環境的中心。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 6.497182
+            },
+            {
+             "text": "無線通訊認證實驗室 › 重點摘要\n本來源是由 `無線通訊認證實驗室.pptx` 轉出的 company restricted 簡報，正式發布日期與文件版次未標示；raw frontmatter 顯示 converted 日期為 2026-09-17。\n\n來源將[[無線通訊認證實驗室]]定義為測試與驗證無線設備符合法規、安全與性能標準的實驗室，涵蓋 [[RF 測試]]、[[EMC]]、安規與一致性認證，並稱其可支援 [[Global Market Access]]（GMA）與加速上市。\n\n主要內容包括：\n\n- 無線設備認證實驗室涵蓋 RF、EMC、安規與一致性認證。\n- 主要測試項目包含頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試與 [[PTCRB]] / [[GCF]] 認證。\n- 來源稱認證必要性包括防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端與 6G 等需求。\n- 來源列出台灣 [[NCC]] 認證流程：準備文件 / 樣品 / 電路圖 / 天線規格、提交 [[RCB]] 核驗機構初審、[[TAF]] 認可實驗室 RF / EMC 測試約 3–4 週、報告審查與證書核發，並稱證書有效期 5 年。\n- 來源列出台灣領先認證實驗室：[[耕興]]、[[SGS]]、[[電信技術中心]] / [[ISL]]。\n- 來源稱[[耕興]]具 30 MHz–325 GHz 全頻段測試能力、108 座測試場地、連續 10 年 FCC 最佳實驗室認證、10 米半電波暗室、OTA / SAR / [[相控陣列天線]]測試等能力。\n- 來源簡述 [[FCC 無線設備法規測試]]、[[CE RED 無線設備法規測試]]、Wi‑Fi / BLE 聯盟流程的差異。\n- 來源將 LEO 衛星終端認證應用連到 Starlink / Kuiper user terminal RF validation、[[相控陣列天線]] beamforming 測試、mmWave / MIMO 高頻測試、台灣供應鏈 GMA，以及耕興等 [[RCB]] 提供 8–12 週 GMA 週期的說法。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+             },
+             "score": 1.449521
+            },
+            {
+             "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 4.933003
+            },
+            {
+             "text": "無線通訊認證實驗室 › 實體\n- [[NCC]] / [[國家通訊傳播委員會]]：來源中的台灣 NCC 認證流程脈絡，需注意 [[NCC]] 既有頁面是縮寫碰撞頁。\n- [[TAF]]：來源稱 TAF 認可實驗室執行 RF / EMC 測試。\n- [[FCC]]：來源在認可機構、FCC 流程與耕興實驗室亮點中出現。\n- [[RCB]]：來源列為台灣 NCC 流程中的核驗機構。\n- [[耕興]] / SPORTON：來源列為台灣領先認證實驗室之一，並列出多項能力與宣稱。\n- [[SGS]]：來源列為台灣領先認證實驗室之一，核心能力為 EMC / RF / 安規，特色為國際認可與 GMA 一站式。\n- [[電信技術中心]] / TTC：來源以 `TTC / ISL` 列為台灣領先認證實驗室，核心能力為 RF 認證 / 測試，特色為台灣政府 6G 研究支援。\n- [[ISL]]：與 TTC 同列，但來源未展開全名。\n- [[Starlink]]、[[Project Kuiper]]：來源列為 LEO 衛星終端認證應用中的 user terminal RF 驗證對象。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+             },
+             "score": 1.180992
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing › Production：R&S CMP180 non-signaling RF testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。\n- [[R&S CMP180]] 被定位為 optimized for this purpose 的 radio communication tester。\n- 來源稱 [[R&S CMP180]] 支援 many cellular and non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform。\n- 來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。\n- 來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。\n- 來源稱 two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 5.298332
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing › R&D：R&S CMX500 single-box signaling testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- [[R&S CMX500]] 是 multi-technology multi-channel signaling tester。\n- 來源稱其已新增 integrated [[Wi-Fi 7]] test functionality。\n- 目的在 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation。\n- Wi-Fi 7 R&D 測試需在 signaling mode 與 real-world conditions 下量測 RF TX / RX characteristics。\n- [[MLO]] 是 [[Wi-Fi 7]] key feature，因此提供 multiple RF chains 的 test environment 很重要。\n- 來源列出的 Wi‑Fi 7-specific tests 包含 2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 4.507081
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing\n[[Wi-Fi 7 R&D and production testing]] 是 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 中描述的測試方案組合：以 [[R&S CMX500]] 覆蓋 R&D signaling / interworking 測試，以 [[R&S CMP180]] 覆蓋 production non-signaling RF 測試。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 4.320292
+            },
+            {
+             "text": "Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024 › 關鍵實體與概念\n- [[Rohde & Schwarz]]：新聞稿發布者與測試解決方案供應商。\n- [[Rohde & Schwarz GmbH & Co KG]]：frontmatter author 與 R&S registered trademark 所屬公司名。\n- [[R&S CMX500]]：R&D single-box signaling tester；本來源新增 Wi‑Fi 7 test functionality、WLAN offloading、N3IWF 與 POLQA voice quality measurement 的 PR 語境。\n- [[R&S CMP180]]：production / R&D non-signaling tester；本來源宣稱支援 Wi-Fi 6E、Wi-Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz，並展示 480 MHz WLAN waveform loopback。\n- [[Wi-Fi 7 R&D and production testing]]：本來源的主題概念，區分 CMX500 R&D signaling 與 CMP180 production non-signaling 測試。\n- [[WLAN offloading with Voice over WLAN]]：本來源描述的 CMX500 single-box interworking / voice continuity 測試情境。\n- [[Wi-Fi 7]] / [[IEEE 802.11be]]：來源列出 320 MHz channel bandwidth、up to 16 spatial streams、4096 QAM、低延遲與 high throughput。\n- [[Wi-Fi 8]] / [[IEEE 802.11bn]]：來源稱 yet-to-be-defined，且 wider channel bandwidths are in discussion；CMP180 480 MHz waveform 被稱為 potential waveform candidate。\n- [[MLO]]：Wi-Fi 7 key feature，使 multiple RF chains 的 test environment 變重要。\n- [[N3IWF]]：Non-3GPP Interworking Function gateway；來源稱 newly integrated in R&S CMX500。\n- [[POLQA]]：來源稱 R&S CMX500 integrated POLQA voice quality measurement function 可用於 Voice over WLAN applications。\n- [[MWC 2024]]：展示場合。\n- [[Christian Mokry]]：Press & media contact。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             },
+             "score": 5.384791
+            },
+            {
+             "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告\n這份來源是 2026-09-15 的台灣無線通訊代工製造市場分析，涵蓋 [[Wi-Fi 7 網通設備代工製造]]、[[低軌衛星零組件與地面終端供應鏈]]與[[手機直連衛星供應鏈]]三個主題。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+             },
+             "score": 0.98099
+            },
+            {
+             "text": "Test House › 關鍵實體與概念\n- [[無線通訊認證實驗室資料清單]] — 本來源保存一個本機簡報連結，簡報標題為「無線通訊認證實驗室」，但正文尚未 ingest。\n- [[Test House]] — 來源標題；目前只作為此 OneNote link hub 的名稱，不足以判定為特定公司、實驗室或認證機構。\n- [[無線通訊認證實驗室]] — 由本機簡報檔名 / 連結文字得知的待讀主題；尚無正文支撐任何具體主張。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Test House.md"
+             },
+             "score": 1.397419
+            },
+            {
+             "text": "Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024 › 重點摘要\n- [[Rohde & Schwarz]] 將在 [[MWC 2024]] 展示最新 [[Wi-Fi 7]] R&D 與 production 測試方案，用於應對 [[Wi-Fi 7]] / [[IEEE 802.11be]]、[[LTE]] 與 [[5G]] parallel operation 的測試挑戰。\n- [[R&S CMX500]] 被描述為 multi-technology multi-channel signaling tester，新增 integrated [[Wi-Fi 7]] test functionality，可讓 R&D engineers 以 single instrument setup 測試 cellular 與 non-cellular standards。\n- [[R&S CMX500]] 的 Wi‑Fi 7 R&D 測試情境包含 signaling mode、real-world RF TX/RX characteristics、[[MLO]]、multiple RF chains、2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。\n- [[R&S CMX500]] 也被用於展示 cellular [[5G]] 與 [[WLAN]] 的 traffic offloading / interworking；來源稱其 newly integrated [[N3IWF]] gateway 可測試 [[WLAN offloading with Voice over WLAN]]，並搭配 integrated [[POLQA]] voice quality measurement。\n- [[R&S CMP180]] 被描述為 production phase 的 non-signaling RF measurement tester，支援 cellular 與 non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將在 MWC 展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform；來源稱這是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate。\n- [[R&S CMP180]] 來源說法：two analyzers、two generators、two sets of eight RF ports integrated，可在 single box 支援 2x2 [[MIMO]] testing；兩台 CMP180 可 combined / scaled，支援 four analyzers and generators，用於 4x4 MIMO access points。\n- 展示地點：Fira Gran Via, Barcelona，hall 5，booth 5A80。\n- Press & media contact：[[Christian Mokry]]，PR Manager Test & measurement。\n- 公司段落稱 [[Rohde & Schwarz]] 在 2024/2025 fiscal year（July to June）net revenue 為 EUR 3.16 billion，且 2025-06-30 有 more than 15,000 employees worldwide。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             },
+             "score": 3.993008
+            },
+            {
+             "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 概念\n- [[Wi-Fi 7 網通設備代工製造]] — 2026 年台灣網通 ODM / OEM 成長主題，核心規格包含 320 MHz、4096-QAM、MLO、6 GHz 與散熱設計。\n- [[低軌衛星零組件與地面終端供應鏈]] — 來源中的 LEO 供應鏈主題，包含高頻 PCB、RF 元件、相控陣列天線、UT、系統整合與測試驗證。\n- [[手機直連衛星供應鏈]] — 來源中的 Direct-to-Cell 主題，涵蓋衛星端天線、RF front-end、baseband、衛星內建基地台、手機品牌與電信商服務方案。\n- [[網路通訊設備產業鏈]] — 既有頁面記錄未標示日期的網路通訊設備四層供應鏈；本來源提供 2026-09-15 的 Wi-Fi 7 / FWA / CPE 市場補充。\n- [[整體通訊產業鏈]] — 既有頁面記錄未標示日期的整體通訊產業鏈；本來源提供 2026-09-15 的無線通訊代工與衛星通訊補充。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+             },
+             "score": 0.961762
+            },
+            {
+             "text": "Test House › 與既有知識的關係\n- 既有 vault 已有多個無線通訊測試相關主題，例如 [[FWA CPE 測試與驗證]]、[[Small Cell BTS 測試資料清單]]、[[5G NR Base Station Conformance Testing]]、[[NR-NTN conformance testing]]、[[Wi-Fi 7 OTA MIMO stress testing]] 與 [[Reverberation chamber OTA testing]]；本來源目前只提供「無線通訊認證實驗室」簡報線索，尚不能補充上述主題的技術或市場內容。\n- 由於簡報正文未擷取，本來源不能作為任何 test house、certification lab、accreditation、conformance testing 或 OTA testing 主張的證據，只能作為待讀材料索引。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Test House.md"
+             },
+             "score": 1.228074
+            },
+            {
+             "text": "Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024 › 與既有知識的關係\n- 既有 [[R&S CMX500]] 頁已依 [[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]] 記錄 CMX500 的 WLAN signaling / measurement options；本來源補充的是 2024 MWC PR / solution demonstration 語境，不提供正式 option code、software version 或硬體 BOM。\n- 既有 [[R&S CMP180]] 頁已依 [[CMP180 Specifications Version 08.00]] 記錄 8 GHz frequency extension 與 500 MHz bandwidth options；本來源補充 MWC 2024 對 Wi‑Fi 7 production testing 與 480 MHz WLAN waveform loopback demonstration 的 positioning。\n- 既有 [[Wi-Fi 7 OTA MIMO stress testing]] 主要來自 Bluetest / EMITE OTA chamber PR；本來源不描述 OTA chamber，而是 R&S own CMX500 / CMP180 single-box R&D / production workflow。\n- 既有 [[Wi-Fi 8]] 頁依較晚的 R&S / Broadcom PR 記錄 Wi-Fi 8 保留 up to 320 MHz channel bandwidth；本來源較早期說 wider channel bandwidths are in discussion，且 480 MHz waveform 是 potential candidate，因此需在 [[Wi-Fi 8]] 並列而不調和。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             },
+             "score": 3.336538
+            },
+            {
+             "text": "For more information on the CMX500 for NTN testing, visit: [https://www.rohde-schwarz.com/\\_258274.html](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-communications-testers-systems/wireless-communication-testers-systems/cmx-for-non-terrestrial-networks_258274.html \"https://www.rohde-schwarz.com/_258274.html\")",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3d734db5747f7adf",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md",
+               "sha256": "3d734db5747f7adfa9c648eab6d46068339923c8ae8fe2c124e66da98d5c8e6d",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 35.63907
+            },
+            {
+             "text": "EMITE’s enhanced OTA chambers are fully equipped to handle the rigorous testing requirements of current and future wireless technologies. The next step of the collaboration is looking at integrating test capabilities for NB-IoT NTN and NR NTN, which are already covered by the [R&S CMW500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmw500-wideband-radio-communication-tester_63493-10844.html \"CMW500\") and [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\").",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-756bf47cc8d552b2",
+               "original_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "sha256": "756bf47cc8d552b2f81a075e02c426b8ba6db8e562f2c8b97811bccb10bba84e",
+               "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.95709
+            },
+            {
+             "text": "Rohde & Schwarz will display its [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities. With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup. In addition to this, the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 32.779647
+            },
+            {
+             "text": "For more information on the R&S CMX500, visit: [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\")",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-54cc8cb2ee42584d",
+               "original_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+               "sha256": "54cc8cb2ee42584d7782fc776b5114e91fddf5f57b891a177556a7f8bdfd3d42",
+               "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.777901
+            }
+           ],
+           "text": "### Strongest Raw-supported opportunities\n| Opportunity | R&S tester(s) | Supporting Raw source citation | Exact Raw evidence |\n|---|---|---:|---|\n| NTN OTA chamber testing for NB-IoT NTN and NR NTN | CMW500, CMX500 | [26] | “The next step of the collaboration is looking at integrating test capabilities for NB-IoT NTN and NR NTN, which are already covered by the R&S CMW500 and R&S CMX500.” [26] |\n| Wi-Fi 7 R&D signaling test for latest-generation cellular and non-cellular device operation | CMX500 | [27] | “Rohde & Schwarz will display its R&S CMX500 multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities.” [27] |\n| Single-instrument R&D testing across cellular and non-cellular standards | CMX500 | [27] | “With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup.” [27] |\n| Future-proof R&D and production non-signaling testing beyond Wi-Fi 7 using 480 MHz waveform loopback | CMP180 | [27] | “the R&S CMP180 radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.” [27] |",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "EMITE’s enhanced OTA chambers are fully equipped to handle the rigorous testing requirements of current and future wireless technologies. The next step of the collaboration is looking at integrating test capabilities for NB-IoT NTN and NR NTN, which are already covered by the [R&S CMW500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmw500-wideband-radio-communication-tester_63493-10844.html \"CMW500\") and [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\").",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-756bf47cc8d552b2",
+              "original_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "sha256": "756bf47cc8d552b2f81a075e02c426b8ba6db8e562f2c8b97811bccb10bba84e",
+              "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md",
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 32.95709
+           },
+           {
+            "text": "Rohde & Schwarz will display its [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities. With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup. In addition to this, the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-d0a8f03c4120b8e2",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 32.779647
+           }
+          ],
+          "assessment": {
+           "status": "missing",
+           "facets": [
+            {
+             "name": "market_segment",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+              }
+             ],
+             "attempts": 1
+            },
+            {
+             "name": "technical_knowledge",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              }
+             ],
+             "attempts": 1
+            }
+           ],
+           "missing_facets": [],
+           "relation_required": true,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_jseXaJopv9CQPgvNXqlsYLwn",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-9c3f0caeca194d8a8d560382ce2fba62",
+          "request_id": "request-9c3f0caeca194d8a8d560382ce2fba62",
+          "span_id": "span-9c3f0caeca194d8a8d560382ce2fba62",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-9c3f0caeca194d8a8d560382ce2fba62",
+           "request_id": "request-9c3f0caeca194d8a8d560382ce2fba62",
+           "span_id": "span-9c3f0caeca194d8a8d560382ce2fba62",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Find Raw passages (not wiki summaries) that support opportunities for signaling/non-signaling testers in wireless communication: Wi-Fi 7/8 R&D and production testing; CMX500 callbox 5G/NTN/RedCap/pre-conformance/desense; wireless certification labs/GMA/PTCRB/GCF/LEO satellite terminals; Taiwan wireless ODM market report Wi-Fi 7/LEO/smartphone direct satellite. Return citations with source/page/slide where available.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Wi-Fi 7 R&D and production testing › Production：R&S CMP180 non-signaling RF testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。\n- [[R&S CMP180]] 被定位為 optimized for this purpose 的 radio communication tester。\n- 來源稱 [[R&S CMP180]] 支援 many cellular and non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform。\n- 來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。\n- 來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。\n- 來源稱 two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 7.92722
+            },
+            {
+             "text": "R&S CMP180\n[[R&S CMP180]] 是 [[Rohde & Schwarz]] 的 **Radio Communication Tester**，用於 production / wireless communication device 測試，依文件可配置多埠 RF generator/analyzer、通訊標準 measurement options、waveform options 與 [[R&S VSE]] 分析能力。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP180.md"
+             },
+             "score": 9.327474
+            },
+            {
+             "text": "Christian Dobmeier\n[[Christian Dobmeier]] 是 [[Rohde & Schwarz]] 的 Director of Product Group CMX500；目前本頁只由 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]] 支撐。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Christian Dobmeier.md"
+             },
+             "score": 1.193902
+            },
+            {
+             "text": "R&S TS8991 › unresolved\n- 正式 datasheet 與 configuration 未取得。\n- 與 [[R&S CMX500]]、[[R&S CMW500]] 或其他 signaling solution 的配置關係未標示。\n- TRP / TRS support、quiet zone、frequency range 與 uncertainty 未標示。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS8991.md"
+             },
+             "score": 1.373903
+            },
+            {
+             "text": "cmx500_ntn_customer_questionnaire › 關鍵實體與概念\n- [[R&S NTN signaling solutions]]：來源中的 solution 名稱，針對 [[NTN]] signaling / communication technology 的客戶需求蒐集。\n- [[R&S CMX500]]：來源在 deployment 題目中提到 CMX500 environment，也在檔名中出現 cmx500；本來源不可用來補充正式 CMX500 規格。\n- [[Tim Seyler]]：來源列為 contact，並標示 Product Manager Mobile Radio Testing。\n- [[NTN signaling customer discovery]]：本問卷形成的需求訪談框架，涵蓋 services、live/simulated testing、timeline、test layer、technology、satellite orbit、payload、network complexity、long-term tests、UE、QoS、mobility、handover / beam switching 與 constellation deployment。\n- [[NB-NTN]]、[[NR-NTN]]、[[Direct-to-Cell]] / [[DTC]] / [[D2C]]：來源要求客戶指出相關 technology。\n- [[3GPP Rel. 17]]、[[3GPP Rel. 18]]、[[3GPP Rel. 19]]：來源要求客戶指出 NB-/NR-NTN 相關 3GPP release 與 timeline。\n- [[LEO]]、[[MEO]]、[[GEO]]、[[GSO]]：來源要求客戶說明 NTN services 使用的 satellite orbit。\n- [[transparent satellite payload]]、[[regenerative satellite payload]]：來源要求客戶說明 satellite payload 類型。\n- [[satellite gateway]]：來源詢問是否將 CMX 連接到 satellite gateway，在真實 live satellite network 中測試，以及 gateway 使用哪些 bands。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+             },
+             "score": 3.250267
+            },
+            {
+             "text": "R&S NTN signaling solutions › 需求蒐集範圍\n來源中的問題涵蓋：\n\n- Service offerings：客戶預計透過 NTN 提供 [[IoT]]、broadband、voice 或其他 applications。\n- Test environment：live network environment（包含 satellite gateway）或 simulated environment。\n- Deployment timeline：NTN service deployment timeline、key milestones、deadlines。\n- Test layer：RF、Protocol、Application Testing。\n- Technology：[[NB-NTN]]、[[NR-NTN]]、[[Direct-to-Cell]] / [[DTC]] / [[D2C]]。\n- 3GPP release：[[3GPP Rel. 17]]、[[3GPP Rel. 18]]、[[3GPP Rel. 19]] 及其 timeline。\n- Device platform：NTN devices 使用的 chipset 或 hardware platform。\n- Service link bands：S/L/Ku/Ka-Band。\n- Gateway integration：是否把 CMX 連接到 [[satellite gateway]]，在 real live satellite network 測試；若是，需提供 gateway bands。\n- Satellite orbit：[[LEO]]、[[MEO]]、[[GEO]]、[[GSO]]。\n- Payload type：[[transparent satellite payload]] 或 [[regenerative satellite payload]]。\n- DTC operator：LTE-DTC 與 NR-DTC 需要的 satellite operator。\n- Network complexity：cellular cells 與 satellite cells 的組合。\n- Long-term tests：是否需要 hundreds of satellites，例如 [[LEO]] scenario。\n- UE：specific device model 或 generic UE simulator。\n- Performance metrics：throughput、battery lifetime、latency 等。\n- QoS：不同 traffic type 的 prioritization 或 guaranteed bandwidth。\n- Mobility：stationary、pedestrian、vehicular 或其他 UE mobility pattern。\n- Handover / beam switching：satellite-UE handovers、beam switching、seamless handovers、optimized beam switching。\n- Constellation workflow：是否有興趣 configuring and visualizing constellations，並在 [[R&S CMX500]] environment 中部署其中一部分。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+             },
+             "score": 3.10001
+            },
+            {
+             "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 4.953905
+            },
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 11.318946
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing › R&D：R&S CMX500 single-box signaling testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- [[R&S CMX500]] 是 multi-technology multi-channel signaling tester。\n- 來源稱其已新增 integrated [[Wi-Fi 7]] test functionality。\n- 目的在 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation。\n- Wi-Fi 7 R&D 測試需在 signaling mode 與 real-world conditions 下量測 RF TX / RX characteristics。\n- [[MLO]] 是 [[Wi-Fi 7]] key feature，因此提供 multiple RF chains 的 test environment 很重要。\n- 來源列出的 Wi‑Fi 7-specific tests 包含 2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 5.927121
+            },
+            {
+             "text": "Christian Dobmeier › 來源中的角色\n依 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]]，[[Christian Dobmeier]] 以 Director of Product Group CMX500 at [[Rohde & Schwarz]] 身分發言。\n\n其發言重點包含：\n\n- [[Rohde & Schwarz]] 與 [[Gatehouse Satcom]] 合作，以 accelerate validation methodologies for [[5G NTN]] technologies。\n- 發言中明示包含 [[GEO]]、[[MEO]] 與 [[LEO]] satellite services。\n- 當 satellite sector converges on standardized, [[3GPP]] based solutions 時，software innovators 與 test equipment specialists 的 close collaboration 很重要。\n- 此 partnership 不只 strengthens tools and insights for today’s [[5G NTN]] rollout，也 lays a solid foundation for future [[6G NTN testing and validation]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Christian Dobmeier.md"
+             },
+             "score": 0.918271
+            },
+            {
+             "text": "cmx500_ntn_customer_questionnaire › 重點摘要\n- 文件標題語境為「GETTING STARTED — ROHDE & SCHWARZ NTN SIGNALING SOLUTIONS」，目的在協助 [[Rohde & Schwarz]] 了解客戶針對 [[NTN]] communication technology 的需求與挑戰，並據此 tailoring a solution。\n- 文件明示並非所有問題都一定適用，客戶不必回答全部問題。\n- Contact 標示為 [[Tim Seyler]]（`tim.seyler@rohde-schwarz.com`），角色為 Product Manager Mobile Radio Testing。\n- 產品 / solution 相關型號口徑：來源檔名含 `cmx500`，正文提到「connect the CMX to a satellite gateway」與「CMX500 environment」；但來源未列 [[R&S CMX500]] 的正式規格、硬體配置、option code 或 ordering information。\n- 文件版次：來源未標示正式 version / document number；僅標示 Last Update: August 19, 2026。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+             },
+             "score": 1.534521
+            },
+            {
+             "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 3.756898
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing › 使用限制\n- 本頁目前只由 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 支撐。\n- 來源是 PR / demonstration positioning，不是正式 datasheet、configuration guide、test case list 或 certification document。\n- 不可從本來源推論 [[R&S CMX500]] Wi‑Fi 7 的 option code、software release、支援 RF chains 數量、MLO link combination、measurement uncertainty 或完整 test coverage。\n- 不可從本來源推論 [[R&S CMP180]] 480 MHz waveform 的正式 [[Wi-Fi 8]] 標準地位、量測規格或 production throughput。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 3.935849
+            },
+            {
+             "text": "Christian Dobmeier › 使用限制\n- 來源未提供 [[Christian Dobmeier]] 的完整履歷、任期、聯絡方式或其他職務。\n- 來源中的 title 文字為 PR 文字；本頁不推論其組織架構或產品管理權責。\n- 來源提到 future [[6G NTN testing and validation]]，但未提供任何 6G NTN product、standard version、test case 或 availability。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Christian Dobmeier.md"
+             },
+             "score": 0.416958
+            },
+            {
+             "text": "cmx500_ntn_customer_questionnaire › 與既有知識的關係\n- 既有 [[R&S CMX500]] 頁主要依 [[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]] 整理正式 specifications / features；本來源是 customer questionnaire，不能取代正式 specifications，也不能補推硬體、頻段、options 或測試能力。\n- 既有 [[Tim Seyler]] 頁只從 [[AIW_Products_Customer_Questionnaire]] 確認 contact 與 email；本來源新增其在 NTN questionnaire 中的角色文字：Product Manager Mobile Radio Testing。\n- 既有 [[NGeCall over LTE]] 與 [[CMW500 to CMX500 OBT license swap]] 屬於 emergency call / license swap 脈絡；本來源屬 NTN signaling solution discovery，應分開處理。\n- 來源提到 [[NB-NTN]]、[[NR-NTN]]、[[Direct-to-Cell]]，與既有 [[R&S CMX500]] 頁中的 NTN-related options 方向相鄰，但本來源沒有列 option code 或 supported release scope。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+             },
+             "score": 0.733811
+            },
+            {
+             "text": "Tim Seyler › 與相關主題的關係\n- 在 [[AIW_Products_Customer_Questionnaire]] 中，[[Tim Seyler]] 作為 [[R&S AI Workplace Solutions]] customer questionnaire 的 contact 出現。\n- 在 [[cmx500_ntn_customer_questionnaire]] 中，[[Tim Seyler]] 作為 [[R&S NTN signaling solutions]] customer questionnaire 的 contact 出現，並被標示為 Product Manager Mobile Radio Testing。\n- 在 [[CMX_Configuration_Guide_Audio-Testing]] 中，[[Tim Seyler]] 是 [[CMX500 Audio Testing configuration]] 的 contact person；來源未提供 email、職稱或 team。\n- 在 [[CMX_Configuration_Guide_LTE-DTC]] 中，[[Tim Seyler]] 是 [[CMX500 LTE-DTC configuration]] 的 contact person；來源未提供 email、職稱或 team。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Tim Seyler.md"
+             },
+             "score": 4.066861
+            },
+            {
+             "text": "CMX500 Callbox › UI 與 automation\n來源將 [[CMsquares]] 描述為 web based、all-in-one configuration、all tools in one place、modern UI，並列出：\n\n- live views。\n- App Testing。\n- NTN live views。\n- Sequencer。\n- Log analysis。\n- One-click RF testing。\n\n在 RF pre-conformance 脈絡中，來源稱可 quick switch from manual to automated pre-conformance，且使用 same technology specific license，並指向 [[CMX500 Sequencer Test Packages]] 與 `Sequencer-CMX-Test_Packages_Database.xlsx`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 3.416919
+            },
+            {
+             "text": "NR-NTN LBS testing\n[[NR-NTN LBS testing]] 是 [[Q2_2026 Conformance & NetOp Updates_Customer]] 中 Location Based Services product highlight 的主題，涵蓋 OTA 5G NR GNSS FR1 on top of [[R&S TS8991]]、3rd party OTA chamber integration、GNSS record / replay 與 NR-NTN LBS E911 outlook。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NR-NTN LBS testing.md"
+             },
+             "score": 2.340402
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 wireless products 的 market access approval testing 分成三類：[[Regulatory Compliance Test]]、[[Telecom Industry Certification Test]]、[[Cellular Network Operator Acceptance Test]]。Regulatory compliance 被描述為各區域法律面 market access 的必要條件；industry certification 例子包含 [[GCF]] / Cellular、[[Bluetooth SIG]]、[[FiRa]] / [[UWB]]、[[Wi-Fi Alliance]]；operator acceptance test 例子包含 AT&T、VzW、T-mobile、CMCC。\n- 來源主張 wireless products 需要 [[CE marking]] / [[FCC ID]]；test results 是 technical documentation 的一部分，需在產品投放市場前準備、可提供給 surveillance authorities，並自 placed on the market 起保存 10 years。\n- 來源列出 Ericsson Mobility Visualizer Jan 2023 的 mobile subscriptions 表，顯示 2022–2028 的 5G subscriptions 由 1046.006 增至 4974.568；但單位與表格數值口徑未在轉檔文字中完整標示。\n- [[CE RED 無線設備法規測試]]被整理成四類 essential requirements：Art 3.1a Health & Safety、Art 3.1b EMC、Art 3.2 Radio Spectrum、Art 3.3 Specific topics。來源列出多個 ETSI EN standards，例如 [[EN 300 328]]、[[EN 301 893]]、[[EN 303 687]]、[[EN 301 908-1]]、[[EN 301 908-13]]、[[EN 301 908-24]]、[[EN 301 908-25]]、[[EN 301 489-52]] 等。\n- 對 [[5G NR SAR testing]]，來源指出 5G NR network emulator is required to drive EUT to extreme transmission condition，multi-radio UE 的 average-SAR feature 需要 flexible signaling functions，涵蓋 cellular standards、Wi-Fi 與 Bluetooth；來源將 [[R&S CMW500]] / [[R&S CMX500]] 稱為 SAR / HAC signaling solution。\n- 對 Art 3.1b EMC，來源指出 EMC tests 需要 radio enabled 與 radio disabled conditions，因此 5G NR 也需要 signaling solution；mobile phone 仍需要 [[Audio Breakthrough]] test，從 GSM 到 VoLTE / VoNR by 5G。來源提到 [[R&S TS9982 EMS Test System]] 與 [[R&S TS9975 EMI Test System]]。\n- 對 Art 3.2 Radio Spectrum，來源指出 5G NR specification 包含 FR1 與 FR2；FR1 test setup stays conducted，FR2 test setup becomes radiated；並把 3GPP test cases、CTIA-OTA test cases、TRP / TRS、RSE 測試連到 [[R&S TS8991]] 與 [[R&S TS8996]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 2.615826
+            },
+            {
+             "text": "R&S CMW500 › 支援技術摘要\n- [[R&S CMW500]] 在 [[CMW_dat-sw_en_5213-9211-22_v1700]] 中是唯一明確支援 GSM small cell、WCDMA small cell、LTE small cell 的 CMW 型號。\n- GSM、NB-IoT、WCDMA、LTE mobile station test 與 NR Sub-6GHz 章節明確標示適用於 [[R&S CMW500]] 與 [[R&S CMW290]]。\n- Four RF paths、DAU B450H/I、Digital I/Q 1 to 4 / 5 to 8、Digital I/Q QUAD 章節明確標示 [[R&S CMW500]] 與 [[R&S CMW270]]。\n- Bluetooth standard：Bluetooth Core Specification Version 5.0；test standard 包含 RF.TS.5.0.0 與 RF-PHY.TS.5.0.0。\n- WLAN 160 MHz bandwidth unit 章節列出 IEEE 802.11a/g/p/n/ac 與 IEEE 802.11ax，bandwidth up to 160 MHz。\n- [[CMW-KA096_PanEUNGeCall_TC_Status]] 補充 [[NGeCall over LTE]]、[[IMS eCall]]、[[IVS]]、[[PSAP]]、[[MSD]]、limited service、callback、clear-down、SRVCC handover 等 eCall 測試語境。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 14,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMW500.md"
+             },
+             "score": 1.865279
+            },
+            {
+             "text": "NR-NTN LBS testing › OTA 5G NR FR1 GNSS on 3rd party OTA solution\n來源描述 upgrade on ETS OTA 3rd party solution：\n\n- Reuse all 3rd party HW + SW。\n- Adding [[R&S CMX500]] as OBT。\n- Adding [[R&S SMBV100B]]。\n- Adding LBS Framework。\n- Adding LBS API（Remote API Control Software）。\n- LBS OTA API enables integration with 3rd party suppliers。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NR-NTN LBS testing.md"
+             },
+             "score": 2.128678
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 與既有知識的關係\n- 補強 [[5G NR SAR testing]]：既有頁以 [[SPEAG]] / [[DASY8-3D]] / [[R&S CMX500 OBT]] 的 SAR automation PR 為主；本來源從 CE RED Art 3.1a / FCC SAR / HAC compliance presentation 的角度補入 5G NR network emulator、multi-radio UE、average-SAR 與 CMW/CMX signaling solution。\n- 補強 [[R&S TS9975 EMI Test System]]：既有頁只由 [[2025RS Drone Solution]] 支撐 TS9975 作為 UAV EMI system；本來源新增 wireless devices Art 3.1b EMC / ABT context，並與 [[R&S TS9982 EMS Test System]] 同列。\n- 連接 [[低軌衛星終端設備檢測]]與 [[衛星地球電臺設備技術規範]]：既有頁以台灣 111年08月衛星地球電臺設備草案與 FCC Part 25 對應為主；本來源提供更泛化的 CE RED / ETSI EN 301 681 / EN 303 981 / FCC CFR47 §25 mobile satellite service 視角。\n- 與 [[R&S CMW500]] 既有頁相容：既有頁已保存 CMW500 的 NGeCall / LTE capability 與 datasheet；本來源只是簡報層級稱 latest CMW500 SW supports 3GPP R17 NB-NTN signalling，未提供 software version、license 或 test case ID，不應覆蓋正式 datasheet。\n- 與 [[R&S SMBV100B]] 既有頁相容：既有頁是 Version 13.01 specifications；本來源只是把 SMBV100B列為 EN 301 681 / EN 303 981 測試中的 signal generator solution，不新增產品規格。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 2.546728
+            },
+            {
+             "text": "NR-NTN LBS testing › unresolved\n- [[3GPP TS 37.571-1]] version 與 NR-NTN LBS test cases 的正式 scope 未標示。\n- LBS5-KC121 / KC122 / KC123 / KT100 的 formal package definitions 未標示。\n- TS8-KC16 NR NTN TRP / TIS 的 formal description 未標示。\n- TS8-KTO113 5GAA active / passive result combination 的 formal description 未標示。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NR-NTN LBS testing.md"
+             },
+             "score": 0.156946
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源指出 smartphone Art 3.3g / [[Delegated Regulation (EU) 2019-320]] / E112 是沒有 ETSI EN standard 的 regulatory compliance requirement；當沒有 EN standard available 時需 Notified body involved，並稱 [[R&S TS-LBS]] 是 first test solution available to perform the necessary LBS compliance tests。\n- [[FCC 無線設備法規測試]]部分列出 [[47 CFR]]、[[ANSI C63.26]]、[[ANSI C63.10]]、[[IEEE Std 1528-2013]]、[[C63.19]] 等測試依據，並列出 licensed cellular CFR47 test items：RF power output、modulation characteristics、occupied bandwidth、band edge、spurious emissions、frequency stability、peak to average ratio、field strength of spurious radiation。\n- 來源以 [[ITU-R SM.329-12]] 與 [[47 CFR §2.1057]] 對照 CE RED / FCC 的 frequency range：5G NR FR1 的 CE RED 30 MHz–26 GHz、FCC 9 kHz–40 GHz；5G NR FR2 的 CE RED 30 MHz–90 GHz、FCC 9 kHz–200 GHz；並提到 [[R&S FSV3000]] / [[R&S FSVA3000]]、[[R&S FSW]]、[[R&S ESW]]。\n- [[NTN 裝置法規測試]]部分把 NTN device implementation 分成 proprietary、3GPP < R16、3GPP R17 NTN-IoT、reuse spectrum assets / 3GPP unmodified UE 等路徑，例子包含 iPhone 14 / Globalstar、Qualcomm / Iridium、MTK / Bullitt / Skylo、AT&T / AST Space Mobile、T-Mobile / Starlink、Optus / Lynk。\n- 來源列出衛星 / NTN 相關 EN standards：[[EN 301 441]]、[[EN 301 442]]、[[EN 301 444]]、[[EN 301 681]]、[[EN 302 574]]、[[EN 303 981]]，並將 iPhone14、Bullitt defy satellite link、StarLink Dish 作為 DoC / market product examples。\n- 來源將 [[EN 301 681]] 測試偏向 conducted measurement，列出 spectrum analyzer、signal generator、BER measure / system emulator / mobile radio tester 等 required instruments，並明示 latest [[R&S CMW500]] software can support 3GPP R17 NB-NTN signalling。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 2.074544
+            },
+            {
+             "text": "Wi-Fi + NTN + RedCap in one box is not available in a single Keysight model.\nMessage: R&S = cellular + Wi-Fi in every config; Keysight = cellular + Wi-Fi only on specific\nmodels (P or W).\n7) NTN, RedCap, Operator Certification Leadership\nR&S",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3cd0a825d66aa879",
+               "original_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+               "sha256": "3cd0a825d66aa87920658011dcd77c5a045e2ba6fa25667b180261813c4c2950",
+               "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 56.302215
+            },
+            {
+             "text": "2) Full Test Lifecycle: R&D → Pre-Conformance → Conformance → Production\n• CMX500 (signaling), CMW500 (legacy), CMP180/CMP200/CMW100 (production).\n• amarisoft has no non-signaling platform, no production scaling path.\n3) Conformance & Operator Acceptance\n• R&S supports PTCRB/GCF aligned RF, RRM, protocol, IMS, VoNR, throughput, CA,",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-e141f59158e470e8",
+               "original_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+               "sha256": "e141f59158e470e849778876246460c9f93447816817e416175f8ab030ef3a03",
+               "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 52.919746
+            },
+            {
+             "text": "The CMX500 is a modular, powerful one-box signaling tester enabling comprehensive multi-technology testing. It covers LTE and NR in SA/NSA modes, NR-NTN, NB-NTN, Direct-to-Cell (D2C/DTC) testing and WLAN including Wi‑Fi 7 and Wi‑Fi 8. Consequently, the CMX500 allows R&D engineers of wireless devices to comprehensively test their design’s operation in both cellular and non-cellular standards of the latest generation in a single instrument setup.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f833664f4958cbb4",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 47.756052
+            },
+            {
+             "text": "Engineered for data rates up to 20 Gbps, the CMX500 is one of the most versatile mobile device test platforms, supporting wide dynamic range, 4096QAM and up to 16 device antenna ports for advanced spatial multiplexing. With its multi-band capabilities, it covers LTE and NR in SA/NSA modes, NR-NTN, NB-NTN, Direct-to-Cell (D2C/DTC) testing, and WLAN including Wi‑Fi 7 and future [Wi‑Fi 8](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/wlan-wi-fi/wi-fi-8-testing/wi-fi-8-testing_258504.html \"Wi‑Fi 8\").",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ab38a8570454352c",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+               "sha256": "ab38a8570454352c14233ad38034e899b4334f82973df51445422e9cec41fcdd",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 45.641191
+            }
+           ],
+           "text": "### RAW-supported opportunities\n| Opportunity area | Supporting RAW passage(s) | Source/page/slide |\n|---|---|---|\n| Wi‑Fi 7/8 R&D signaling tester opportunity | CMX500 is described as a “one-box signaling tester” covering LTE, NR SA/NSA, NR‑NTN, NB‑NTN, D2C/DTC, and WLAN including Wi‑Fi 7 and Wi‑Fi 8, enabling R&D engineers to test cellular and non-cellular latest-generation standards in one setup [27]. | Not provided |\n| Wi‑Fi 7 / future Wi‑Fi 8 high-end device testing | CMX500 is described as supporting up to 20 Gbps, 4096QAM, up to 16 device antenna ports, LTE/NR, NR‑NTN, NB‑NTN, D2C/DTC, and WLAN including Wi‑Fi 7 and future Wi‑Fi 8 [28]. | Not provided |\n| Production / non-signaling lifecycle opportunity | RAW passage states the full test lifecycle includes R&D, pre-conformance, conformance, and production, with CMX500 for signaling and CMP180/CMP200/CMW100 for production [26]. | Not provided |\n| Competitive opportunity versus non-signaling gap | RAW passage states “amarisoft has no non-signaling platform, no production scaling path” [26]. | Not provided |\n| CMX500 signaling opportunity for 5G / NTN / D2C | CMX500 is described as covering LTE and NR in SA/NSA modes, NR‑NTN, NB‑NTN, Direct‑to‑Cell testing, and WLAN including Wi‑Fi 7/8 [27]. | Not provided |\n| RedCap / NTN / operator certification opportunity | RAW passage lists “NTN, RedCap, Operator Certification Leadership” under R&S [25]. | Not provided |\n| PTCRB/GCF-aligned certification opportunity | RAW passage states R&S supports “PTCRB/GCF aligned RF, RRM, protocol, IMS, VoNR, throughput, CA” [26]. | Not provided |\n| Cellular + Wi‑Fi single-vendor / single-box positioning | RAW passage states “R&S = cellular + Wi‑Fi in every config” and contrasts Keysight availability as model-specific [25]. | Not provided |\n### Not supported by provided RAW passages\n| Requested item | RAW support status |\n|---|---|\n| CMX500 pre-conformance specifically tied to callbox | RAW supports pre-conformance in lifecycle, but not the callbox framing [26]. |",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Wi-Fi + NTN + RedCap in one box is not available in a single Keysight model.\nMessage: R&S = cellular + Wi-Fi in every config; Keysight = cellular + Wi-Fi only on specific\nmodels (P or W).\n7) NTN, RedCap, Operator Certification Leadership\nR&S",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-3cd0a825d66aa879",
+              "original_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+              "sha256": "3cd0a825d66aa87920658011dcd77c5a045e2ba6fa25667b180261813c4c2950",
+              "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 56.302215
+           },
+           {
+            "text": "2) Full Test Lifecycle: R&D → Pre-Conformance → Conformance → Production\n• CMX500 (signaling), CMW500 (legacy), CMP180/CMP200/CMW100 (production).\n• amarisoft has no non-signaling platform, no production scaling path.\n3) Conformance & Operator Acceptance\n• R&S supports PTCRB/GCF aligned RF, RRM, protocol, IMS, VoNR, throughput, CA,",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-e141f59158e470e8",
+              "original_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "sha256": "e141f59158e470e849778876246460c9f93447816817e416175f8ab030ef3a03",
+              "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/2026_02_CMX500_Amarisoft_Sales_Battle_Card.md",
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 52.919746
+           },
+           {
+            "text": "The CMX500 is a modular, powerful one-box signaling tester enabling comprehensive multi-technology testing. It covers LTE and NR in SA/NSA modes, NR-NTN, NB-NTN, Direct-to-Cell (D2C/DTC) testing and WLAN including Wi‑Fi 7 and Wi‑Fi 8. Consequently, the CMX500 allows R&D engineers of wireless devices to comprehensively test their design’s operation in both cellular and non-cellular standards of the latest generation in a single instrument setup.",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-f833664f4958cbb4",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+             "section": 9,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 47.756052
+           },
+           {
+            "text": "Engineered for data rates up to 20 Gbps, the CMX500 is one of the most versatile mobile device test platforms, supporting wide dynamic range, 4096QAM and up to 16 device antenna ports for advanced spatial multiplexing. With its multi-band capabilities, it covers LTE and NR in SA/NSA modes, NR-NTN, NB-NTN, Direct-to-Cell (D2C/DTC) testing, and WLAN including Wi‑Fi 7 and future [Wi‑Fi 8](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/wlan-wi-fi/wi-fi-8-testing/wi-fi-8-testing_258504.html \"Wi‑Fi 8\").",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-ab38a8570454352c",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+              "sha256": "ab38a8570454352c14233ad38034e899b4334f82973df51445422e9cec41fcdd",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+             "section": 10,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 45.641191
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [
+            {
+             "name": "market_segment",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Christian Dobmeier.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Christian Dobmeier.md"
+              }
+             ],
+             "attempts": 1
+            },
+            {
+             "name": "technical_knowledge",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS8991.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              }
+             ],
+             "attempts": 1
+            }
+           ],
+           "missing_facets": [],
+           "relation_required": true,
+           "relation_citations": [
+            {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+            }
+           ],
+           "relations": [
+            {
+             "left": "market_segment",
+             "right": "technical_knowledge",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+             }
+            }
+           ]
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

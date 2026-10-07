@@ -1,0 +1,62 @@
+{
+ "id": "Q0501",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 111.438,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "cellular/eCall test signaling",
+   "Based on that evidence plus clearly marked general T&M knowledge",
+   "Realistic dynamic scenario simulation",
+   "mmWave-capable, low-phase-noise RF generation",
+   "Automotive radar commonly operates around 76 GHz to 81 GHz",
+   "Wideband modulation and arbitrary waveform generation",
+   "R&S CMX500 with the R&S CMX-KA098 software option can be used for NG eCall testing under realistic network conditions",
+   "Multi-standard connectivity support",
+   "Synchronization and multi-channel coherence",
+   "Repeatability, automation, and scenario libraries"
+  ],
+  "reason": "The cited passages support the AREG800A automotive radar echo generation details, including dynamic artificial objects, hybrid/digital echo generation, FMCW use, and distance ranges. Most other main points are explicitly general knowledge or are not in the passages, and the claimed CMX500 eCall/NG eCall evidence is not present in the cited CMX500 passage.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages support the AREG800A automotive radar echo generation details, including dynamic artificial objects, hybrid/digital echo generation, FMCW use, and distance ranges. Most other main points are explicitly general knowledge or are not in the passages, and the claimed CMX500 eCall/NG e"
+}

@@ -1,0 +1,1793 @@
+{
+ "question": {
+  "id": "Q0296",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+  "market": "Aerospace / Defense",
+  "product": "Oscilloscope",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-8c47a906ab104486aa4db7fb1650ef67",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 545.968,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-8c47a906ab104486aa4db7fb1650ef67",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T12:37:46.961242Z",
+    "updated_at": "2026-10-07T12:46:52.840360Z",
+    "messages": [
+     {
+      "message_id": "message-42c6fd1af54e449680acebc6a9ec2e42",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+      "created_at": "2026-10-07T12:37:46.974415Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-04aee313e42a4a5f90731bfff3b3db44",
+      "role": "assistant",
+      "text": "The knowledge base gave **no direct answer** for “oscilloscope + aerospace/defense + drone/avionics” as a fully grounded opportunity set. The best-supported opportunities below are therefore ranked by how directly the vault links **oscilloscope-relevant test needs** to **Aerospace / Defense context**. Where the oscilloscope link or A&D link is indirect, I call that out.\n\n## Strongest opportunities for Oscilloscope in Aerospace / Defense\n\n### 1) High-speed digital / SerDes / SI-PI validation for A&D electronics  \n**Why this looks strongest:** The vault has explicit oscilloscope evidence in high-speed electrical-interface validation, and A&D platforms increasingly contain high-speed digital links, FPGA/SoC boards, radar processors, mission computers, satcom terminals, and sensor-fusion electronics. The A&D link is an application inference, but the oscilloscope test need is directly evidenced.\n\n**Evidence from vault**\n- A Rohde & Schwarz digital-test presentation frames **SerDes, Signal Integrity, Power Integrity, PCB/PCBA testing** as part of the Digital / high-speed digital test context. It lists high-speed interfaces including **GMSL, OIF CEI-112G, LVDS, JESD204D, DisplayPort, HDMI, MIPI, USB, PCIe, NVLink, Ultra Ethernet, InfiniBand, SATA, SAS**.  \n  Citation: `wiki/sources/0 Digital Test - What are SIPI and Serdes.md`, section 1.\n- The same source’s Slide 11, **“Transmission Channel and validation challenges electrical Interfaces,”** breaks validation into transmission channel, measurement path to DUT / test-board development, **Power Distribution Network**, ADC/DAC frontend performance, RefClk/PLL jitter performance, and interface test — and explicitly lists **scopes** alongside BERTs, AWGs, switch matrices, phase-noise analyzers, signal generators, network analyzers, and spectrum analyzers.  \n  Citation: `wiki/sources/0 Digital Test - What are SIPI and Serdes.md`, section 1.\n- Slide 20 covers **high-speed PCB/PCBA signal integrity flow**, including **insertion loss, crosstalk, eye diagram, TDR impedance, stackup planner, TL calculator**.  \n  Citation: `wiki/sources/0 Digital Test - What are SIPI and Serdes.md`, section 1.\n- Slide 21, **“R&S PCB test solutions,”** targets **PCB Fabricator and System House** and covers material measurement, stackup selection, signal-integrity modeling/testing, sampling testing, and process monitoring, including **TDR impedance, DK/DF extraction, insertion loss, crosstalk, eye diagram, cable/connector testing**.  \n  Citation: `wiki/concepts/R&S PCB test solutions.md`, sections 1–3.\n\n**Opportunity angle**\n- Position oscilloscopes for **SI/PI debug, eye-diagram validation, jitter/debug, TDR impedance, high-speed interconnect validation, power-rail noise/transient analysis** in A&D electronics programs.\n- Best targets: avionics electronics suppliers, radar/EW digital back-end teams, satellite payload/terminal electronics teams, secure networking/5G tactical equipment suppliers, high-speed PCB fabricators serving A&D.\n\n**Evidence caveat:** The vault directly supports the oscilloscope/SI-PI need, but does not explicitly say “A&D customers are buying scopes for these tests.”\n\n---\n\n### 2) Military / aviation drone EMC and airborne-equipment pre-compliance/debug  \n**Why this is strong:** The vault explicitly links **DO-160** to a **military / aviation drone EMC proposal context**. Oscilloscopes are not explicitly named in that DO-160 passage, so the scope opportunity is for debug/pre-compliance support around EMC/environmental tests rather than formal compliance instrumentation alone.\n\n**Evidence from vault**\n- `DO-160 airborne equipment EMC testing` is described as coming from **`2025RS Drone Solution`**, where **RTCA DO-160** is used as an airborne-equipment environmental conditions and test-procedure reference in a **military / aviation drone EMC proposal context**.  \n  Citation: `wiki/concepts/DO-160 airborne equipment EMC testing.md`, section 1.\n- The source says DO-160 provides minimum operational performance standards for electronic systems and equipment supporting aviation safety, capacity, and efficiency, and provides means of determining performance characteristics of airborne equipment under environmental conditions encountered in operation.  \n  Citation: `wiki/concepts/DO-160 airborne equipment EMC testing.md`, section 2.\n- The vault warns that the source does **not** provide DO-160 section limits, waveform tables, category matrix, pass/fail criteria, or a specific drone/eVTOL/avionics qualification plan.  \n  Citation: `wiki/concepts/DO-160 airborne equipment EMC testing.md`, section 9.\n\n**Opportunity angle**\n- Sell oscilloscopes as part of the **engineering debug layer** around DO-160 / airborne EMC preparation: transient capture, power integrity under stress, conducted susceptibility debugging, serial bus behavior during RF/EMC exposure, and fault isolation.\n- Best targets: UAV/drone developers, avionics module suppliers, flight-control electronics, payload electronics, airborne comms/navigation suppliers.\n\n**Evidence caveat:** Vault evidence supports the **drone/aviation EMC need**, but not a direct oscilloscope BOM or DO-160 scope-specific test case.\n\n---\n\n### 3) Tactical private 5G, smart-jamming resilience, EW-adjacent communications, and SDR roadmaps  \n**Why this is attractive:** The vault has direct A&D evidence around **tactical 5G**, **smart jamming**, **EW**, contested spectrum, SDR migration, drones, and command-and-control networks. The oscilloscope connection is less direct than SI/PI, but these systems require digital/RF hardware validation and time-domain debug.\n\n**Evidence from vault**\n- A source titled **`2025-12-19 Making Deployed 5G Private Networks more Resilient`** is associated with **Aerospace & Defense Test** and focuses on deployed 5G private networks in **smart-jamming / EW environments**.  \n  Citation: `wiki/entities/Randy Schnell.md`, sections 1–2.\n- The mission / market drivers include **tactical edge connectivity**, rise of **smart jamming** and improved **EW tactics**, complex RF environment and contested spectrum, adoption of private 5G networks, autonomous systems and drones requiring low latency, expansion of tactical private 5G networks on military bases, and secure command-and-control networks.  \n  Citation: `wiki/concepts/5G private network resilience against smart jamming.md`, section 3.\n- The roadmap includes:  \n  - 2025–2028: widespread deployment of **5G tactical networks**, mmWave phased arrays for field testing, hybrid commercial/military networks such as 5G.MIL-style architectures.  \n  - 2028–2032: 5G/6G-capable **software-defined radios** replacing multi-radio tactical stacks, early ISAC for drone detection and perimeter defense, URLLC for autonomy.  \n  - 2032–2035+: full 6G networks with integrated sensing, AI-native battlefield connectivity, precision location sensing, spectrum-aware autonomy.  \n  Citation: `wiki/concepts/5G private network resilience against smart jamming.md`, section 7.\n\n**Opportunity angle**\n- Position oscilloscopes for **digital/RF subsystem debug** in tactical 5G/6G, SDR, phased-array control electronics, synchronization, timing, power integrity, fast transient events, interface validation, and hardware bring-up.\n- Pair with CMX500 / RF signal generation / spectrum analysis solutions rather than selling scope alone.\n\n**Evidence caveat:** The vault strongly supports the A&D communications opportunity, but does not explicitly name oscilloscopes in this 5G/jamming evidence. The scope use case is inferred from engineering workflow, not directly cited.\n\n---\n\n### 4) Satellite user terminals, phased-array terminals, and space electronics supply chain  \n**Why this is promising:** The vault contains several satellite / LEO / user-terminal supply-chain leads, including Kuiper, Starlink, OneWeb, phased-array testing references, and Taiwanese space-industry mapping. The oscilloscope tie is indirect but plausible through high-speed digital, power, RF-control, and terminal electronics validation.\n\n**Evidence from vault**\n- The vault’s satellite ground equipment page links existing pages on **LEO satellite components and ground-terminal supply chain**, including companies such as 啟碁, 耀登, 鐳洋科技, 稜研科技, and 濰元科技.  \n  Citation: `wiki/concepts/衛星地面設備.md`, section 7.\n- A **User Terminal** source, current as of Jan. 7, 2026 and raw-converted Sep. 17, 2026, is described as a link hub for satellite user terminals, OEM terminal manufacturers, RF components, infrastructure, Kuiper / Starlink test flow, and supply-chain materials.  \n  Citation: `wiki/concepts/衛星地面設備.md`, section 5.\n- The same passage lists terminal ecosystem leads: **Intellian, Hughes, Kymeta, Sharp, Gilat ESR-2030Ku, ThinKom Ka2517, SatixFy ESMA, Intelsat ESA, Qorvo QPA1722, MediaTek M80, Analog Devices / ADAR1000**, plus **Project Kuiper, Starlink**, and references to R&S / Keysight phased-array testing links.  \n  Citation: `wiki/concepts/衛星地面設備.md`, section 5.\n- The vault notes that **TASA / National Space Organization** released a **Taiwan Space Industry Map** at Satellite 2025, covering **222 companies and institutions** and emphasizing supply-chain and international-cooperation potential.  \n  Citation: `wiki/entities/國家太空中心.md`, section 2, as returned in the satellite evidence set.\n\n**Opportunity angle**\n- Target satellite terminal and phased-array ecosystem with scopes for **high-speed board validation, power sequencing/transients, beamforming-control electronics, interface timing, embedded bus debug, and manufacturing troubleshooting**.\n- Combine with VNA/spectrum/signal-generator positioning for phased-array and RF-chain validation.\n\n**Evidence caveat:** Many satellite pages are link hubs or external-source indexes; the vault explicitly warns that some external contents were **not ingested**, so this is a prospecting opportunity, not confirmed scope demand.\n\n---\n\n### 5) A&D PCB / interconnect manufacturing and process monitoring  \n**Why this is solid:** The vault directly supports PCB/interconnect test flows where scopes/TDR/eye diagrams are relevant. A&D is indirect, but A&D electronics depend heavily on controlled-impedance, rugged, high-reliability PCB/interconnect supply chains.\n\n**Evidence from vault**\n- `R&S PCB test solutions` covers **PCB Fabricator and System House** workflows: material measurement, material/stackup selection, signal-integrity modeling/testing, sampling testing, and process monitoring.  \n  Citation: `wiki/concepts/R&S PCB test solutions.md`, section 1.\n- Specific measured items include **TDR impedance, DK/DF extraction, insertion loss, roughness, crosstalk, TL modeling, eye diagram, Delta-L, ISD/ADK, cable/connector testing**.  \n  Citation: `wiki/concepts/R&S PCB test solutions.md`, section 2.\n- The structured flow table maps stages to measurements: material measurement with **TDR impedance** and DK/DF; stackup selection with IL, DK/DF, roughness, impedance, crosstalk, TL modeling, eye diagram; signal-integrity modeling/testing; sampling testing; and process monitoring.  \n  Citation: `wiki/concepts/R&S PCB test solutions.md`, section 3.\n\n**Opportunity angle**\n- Sell oscilloscopes/TDR-capable solutions into **A&D PCB suppliers, rugged electronics manufacturers, connector/cable assembly suppliers, and system houses**.\n- Position around **quality control, impedance verification, SI failure analysis, process monitoring, and design-manufacturing feedback loops**.\n\n**Evidence caveat:** The evidence is strong for PCB/system-house digital test, but the vault does not explicitly identify those PCB fabricators as A&D suppliers.\n\n---\n\n## Opportunities with insufficient current vault support\n\n- **Radar / pulsed-RF oscilloscope opportunity:** The current retrieved evidence did not provide a direct radar/pulsed-RF oscilloscope use case. There is A&D/EW context and RF-instrument evidence, but not enough to claim a vault-supported oscilloscope radar opportunity.\n- **Formal DO-160 oscilloscope test setup:** The vault supports DO-160 as a drone/aviation EMC context, but not exact scope waveforms, limits, or required instrumentation.\n- **Specific A&D customer wins for oscilloscopes:** No retrieved evidence named a specific A&D oscilloscope customer, purchase, or win.\n\n## Bottom line\n\nThe strongest evidence-backed oscilloscope opportunities are:\n\n1. **High-speed digital / SerDes / SI-PI validation** — strongest direct oscilloscope evidence.  \n2. **Military / aviation drone EMC debug around DO-160** — strongest direct A&D/drone evidence, but scope role is inferred.  \n3. **Tactical 5G / EW / smart-jamming / SDR systems** — strong A&D market driver evidence, indirect scope tie.  \n4. **Satellite user terminals and phased-array terminal electronics** — promising supply-chain evidence, indirect scope tie.  \n5. **PCB / interconnect manufacturing and process monitoring for A&D supply chain** — strong test-flow evidence, indirect A&D tie.",
+      "created_at": "2026-10-07T12:46:52.840360Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-ba64d7d794d74970b15f02fce3cd6a3e",
+       "request_id": "request-ba64d7d794d74970b15f02fce3cd6a3e",
+       "span_id": "span-ba64d7d794d74970b15f02fce3cd6a3e",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: failed (knowledge_insufficient_evidence)\n- knowledge__rs-knowledge: succeeded\n- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base gave **no direct answer** for “oscilloscope + aerospace/defense + drone/avionics” as a fully grounded opportunity set. The best-supported opportunities below are therefore ranked by how directly the vault links **oscilloscope-relevant test needs** to **Aerospace / Defense context**. Where the oscilloscope link or A&D link is indirect, I call that out.\n\n## Strongest opportunities for Oscilloscope in Aerospace / Defense\n\n### 1) High-speed digital / SerDes / SI-PI validation for A&D electronics  \n**Why this looks strongest:** The vault has explicit oscilloscope evidence in high-speed electrical-interface validation, and A&D platforms increasingly contain high-speed digital links, FPGA/SoC boards, radar processors, mission computers, satcom terminals, and sensor-fusion electronics. The A&D link is an application inference, but the oscilloscope test need is directly evidenced.\n\n**Evidence from vault**\n- A Rohde & Schwarz digital-test presentation frames **SerDes, Signal Integrity, Power Integrity, PCB/PCBA testing** as part of the Digital / high-speed digital test context. It lists high-speed interfaces including **GMSL, OIF CEI-112G, LVDS, JESD204D, DisplayPort, HDMI, MIPI, USB, PCIe, NVLink, Ultra Ethernet, InfiniBand, SATA, SAS**.  \n  Citation: `wiki/sources/0 Digital Test - What are SIPI and Serdes.md`, section 1.\n- The same source’s Slide 11, **“Transmission Channel and validation challenges electrical Interfaces,”** breaks validation into transmission channel, measurement path to DUT / test-board development, **Power Distribution Network**, ADC/DAC frontend performance, RefClk/PLL jitter performance, and interface test — and explicitly lists **scopes** alongside BERTs, AWGs, switch matrices, phase-noise analyzers, signal generators, network analyzers, and spectrum analyzers.  \n  Citation: `wiki/sources/0 Digital Test - What are SIPI and Serdes.md`, section 1.\n- Slide 20 covers **high-speed PCB/PCBA signal integrity flow**, including **insertion loss, crosstalk, eye diagram, TDR impedance, stackup planner, TL calculator**.  \n  Citation: `wiki/sources/0 Digital Test - What are SIPI and Serdes.md`, section 1.\n- Slide 21, **“R&S PCB test solutions,”** targets **PCB Fabricator and System House** and covers material measurement, stackup selection, signal-integrity modeling/testing, sampling testing, and process monitoring, including **TDR impedance, DK/DF extraction, insertion loss, crosstalk, eye diagram, cable/connector testing**.  \n  Citation: `wiki/concepts/R&S PCB test solutions.md`, sections 1–3.\n\n**Opportunity angle**\n- Position oscilloscopes for **SI/PI debug, eye-diagram validation, jitter/debug, TDR impedance, high-speed interconnect validation, power-rail noise/transient analysis** in A&D electronics programs.\n- Best targets: avionics electronics suppliers, radar/EW digital back-end teams, satellite payload/terminal electronics teams, secure networking/5G tactical equipment suppliers, high-speed PCB fabricators serving A&D.\n\n**Evidence caveat:** The vault directly supports the oscilloscope/SI-PI need, but does not explicitly say “A&D customers are buying scopes for these tests.”\n\n---\n\n### 2) Military / aviation drone EMC and airborne-equipment pre-compliance/debug  \n**Why this is strong:** The vault explicitly links **DO-160** to a **military / aviation drone EMC proposal context**. Oscilloscopes are not explicitly named in that DO-160 passage, so the scope opportunity is for debug/pre-compliance support around EMC/environmental tests rather than formal compliance instrumentation alone.\n\n**Evidence from vault**\n- `DO-160 airborne equipment EMC testing` is described as coming from **`2025RS Drone Solution`**, where **RTCA DO-160** is used as an airborne-equipment environmental conditions and test-procedure reference in a **military / aviation drone EMC proposal context**.  \n  Citation: `wiki/concepts/DO-160 airborne equipment EMC testing.md`, section 1.\n- The source says DO-160 provides minimum operational performance standards for electronic systems and equipment supporting aviation safety, capacity, and efficiency, and provides means of determining performance characteristics of airborne equipment under environmental conditions encountered in operation.  \n  Citation: `wiki/concepts/DO-160 airborne equipment EMC testing.md`, section 2.\n- The vault warns that the source does **not** provide DO-160 section limits, waveform tables, category matrix, pass/fail criteria, or a specific drone/eVTOL/avionics qualification plan.  \n  Citation: `wiki/concepts/DO-160 airborne equipment EMC testing.md`, section 9.\n\n**Opportunity angle**\n- Sell oscilloscopes as part of the **engineering debug layer** around DO-160 / airborne EMC preparation: transient capture, power integrity under stress, conducted susceptibility debugging, serial bus behavior during RF/EMC exposure, and fault isolation.\n- Best targets: UAV/drone developers, avionics module suppliers, flight-control electronics, payload electronics, airborne comms/navigation suppliers.\n\n**Evidence caveat:** Vault evidence supports the **drone/aviation EMC need**, but not a direct oscilloscope BOM or DO-160 scope-specific test case.\n\n---\n\n### 3) Tactical private 5G, smart-jamming resilience, EW-adjacent communications, and SDR roadmaps  \n**Why this is attractive:** The vault has direct A&D evidence around **tactical 5G**, **smart jamming**, **EW**, contested spectrum, SDR migration, drones, and command-and-control networks. The oscilloscope connection is less direct than SI/PI, but these systems require digital/RF hardware validation and time-domain debug.\n\n**Evidence from vault**\n- A source titled **`2025-12-19 Making Deployed 5G Private Networks more Resilient`** is associated with **Aerospace & Defense Test** and focuses on deployed 5G private networks in **smart-jamming / EW environments**.  \n  Citation: `wiki/entities/Randy Schnell.md`, sections 1–2.\n- The mission / market drivers include **tactical edge connectivity**, rise of **smart jamming** and improved **EW tactics**, complex RF environment and contested spectrum, adoption of private 5G networks, autonomous systems and drones requiring low latency, expansion of tactical private 5G networks on military bases, and secure command-and-control networks.  \n  Citation: `wiki/concepts/5G private network resilience against smart jamming.md`, section 3.\n- The roadmap includes:  \n  - 2025–2028: widespread deployment of **5G tactical networks**, mmWave phased arrays for field testing, hybrid commercial/military networks such as 5G.MIL-style architectures.  \n  - 2028–2032: 5G/6G-capable **software-defined radios** replacing multi-radio tactical stacks, early ISAC for drone detection and perimeter defense, URLLC for autonomy.  \n  - 2032–2035+: full 6G networks with integrated sensing, AI-native battlefield connectivity, precision location sensing, spectrum-aware autonomy.  \n  Citation: `wiki/concepts/5G private network resilience against smart jamming.md`, section 7.\n\n**Opportunity angle**\n- Position oscilloscopes for **digital/RF subsystem debug** in tactical 5G/6G, SDR, phased-array control electronics, synchronization, timing, power integrity, fast transient events, interface validation, and hardware bring-up.\n- Pair with CMX500 / RF signal generation / spectrum analysis solutions rather than selling scope alone.\n\n**Evidence caveat:** The vault strongly supports the A&D communications opportunity, but does not explicitly name oscilloscopes in this 5G/jamming evidence. The scope use case is inferred from engineering workflow, not directly cited.\n\n---\n\n### 4) Satellite user terminals, phased-array terminals, and space electronics supply chain  \n**Why this is promising:** The vault contains several satellite / LEO / user-terminal supply-chain leads, including Kuiper, Starlink, OneWeb, phased-array testing references, and Taiwanese space-industry mapping. The oscilloscope tie is indirect but plausible through high-speed digital, power, RF-control, and terminal electronics validation.\n\n**Evidence from vault**\n- The vault’s satellite ground equipment page links existing pages on **LEO satellite components and ground-terminal supply chain**, including companies such as 啟碁, 耀登, 鐳洋科技, 稜研科技, and 濰元科技.  \n  Citation: `wiki/concepts/衛星地面設備.md`, section 7.\n- A **User Terminal** source, current as of Jan. 7, 2026 and raw-converted Sep. 17, 2026, is described as a link hub for satellite user terminals, OEM terminal manufacturers, RF components, infrastructure, Kuiper / Starlink test flow, and supply-chain materials.  \n  Citation: `wiki/concepts/衛星地面設備.md`, section 5.\n- The same passage lists terminal ecosystem leads: **Intellian, Hughes, Kymeta, Sharp, Gilat ESR-2030Ku, ThinKom Ka2517, SatixFy ESMA, Intelsat ESA, Qorvo QPA1722, MediaTek M80, Analog Devices / ADAR1000**, plus **Project Kuiper, Starlink**, and references to R&S / Keysight phased-array testing links.  \n  Citation: `wiki/concepts/衛星地面設備.md`, section 5.\n- The vault notes that **TASA / National Space Organization** released a **Taiwan Space Industry Map** at Satellite 2025, covering **222 companies and institutions** and emphasizing supply-chain and international-cooperation potential.  \n  Citation: `wiki/entities/國家太空中心.md`, section 2, as returned in the satellite evidence set.\n\n**Opportunity angle**\n- Target satellite terminal and phased-array ecosystem with scopes for **high-speed board validation, power sequencing/transients, beamforming-control electronics, interface timing, embedded bus debug, and manufacturing troubleshooting**.\n- Combine with VNA/spectrum/signal-generator positioning for phased-array and RF-chain validation.\n\n**Evidence caveat:** Many satellite pages are link hubs or external-source indexes; the vault explicitly warns that some external contents were **not ingested**, so this is a prospecting opportunity, not confirmed scope demand.\n\n---\n\n### 5) A&D PCB / interconnect manufacturing and process monitoring  \n**Why this is solid:** The vault directly supports PCB/interconnect test flows where scopes/TDR/eye diagrams are relevant. A&D is indirect, but A&D electronics depend heavily on controlled-impedance, rugged, high-reliability PCB/interconnect supply chains.\n\n**Evidence from vault**\n- `R&S PCB test solutions` covers **PCB Fabricator and System House** workflows: material measurement, material/stackup selection, signal-integrity modeling/testing, sampling testing, and process monitoring.  \n  Citation: `wiki/concepts/R&S PCB test solutions.md`, section 1.\n- Specific measured items include **TDR impedance, DK/DF extraction, insertion loss, roughness, crosstalk, TL modeling, eye diagram, Delta-L, ISD/ADK, cable/connector testing**.  \n  Citation: `wiki/concepts/R&S PCB test solutions.md`, section 2.\n- The structured flow table maps stages to measurements: material measurement with **TDR impedance** and DK/DF; stackup selection with IL, DK/DF, roughness, impedance, crosstalk, TL modeling, eye diagram; signal-integrity modeling/testing; sampling testing; and process monitoring.  \n  Citation: `wiki/concepts/R&S PCB test solutions.md`, section 3.\n\n**Opportunity angle**\n- Sell oscilloscopes/TDR-capable solutions into **A&D PCB suppliers, rugged electronics manufacturers, connector/cable assembly suppliers, and system houses**.\n- Position around **quality control, impedance verification, SI failure analysis, process monitoring, and design-manufacturing feedback loops**.\n\n**Evidence caveat:** The evidence is strong for PCB/system-house digital test, but the vault does not explicitly identify those PCB fabricators as A&D suppliers.\n\n---\n\n## Opportunities with insufficient current vault support\n\n- **Radar / pulsed-RF oscilloscope opportunity:** The current retrieved evidence did not provide a direct radar/pulsed-RF oscilloscope use case. There is A&D/EW context and RF-instrument evidence, but not enough to claim a vault-supported oscilloscope radar opportunity.\n- **Formal DO-160 oscilloscope test setup:** The vault supports DO-160 as a drone/aviation EMC context, but not exact scope waveforms, limits, or required instrumentation.\n- **Specific A&D customer wins for oscilloscopes:** No retrieved evidence named a specific A&D oscilloscope customer, purchase, or win.\n\n## Bottom line\n\nThe strongest evidence-backed oscilloscope opportunities are:\n\n1. **High-speed digital / SerDes / SI-PI validation** — strongest direct oscilloscope evidence.  \n2. **Military / aviation drone EMC debug around DO-160** — strongest direct A&D/drone evidence, but scope role is inferred.  \n3. **Tactical 5G / EW / smart-jamming / SDR systems** — strong A&D market driver evidence, indirect scope tie.  \n4. **Satellite user terminals and phased-array terminal electronics** — promising supply-chain evidence, indirect scope tie.  \n5. **PCB / interconnect manufacturing and process monitoring for A&D supply chain** — strong test-flow evidence, indirect A&D tie.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-ba64d7d794d74970b15f02fce3cd6a3e",
+      "request_id": "request-ba64d7d794d74970b15f02fce3cd6a3e",
+      "span_id": "span-ba64d7d794d74970b15f02fce3cd6a3e",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-ba64d7d794d74970b15f02fce3cd6a3e",
+       "request_id": "request-ba64d7d794d74970b15f02fce3cd6a3e",
+       "span_id": "span-ba64d7d794d74970b15f02fce3cd6a3e",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave **no direct answer** for “oscilloscope + aerospace/defense + drone/avionics” as a fully grounded opportunity set. The best-supported opportunities below are therefore ranked by how directly the vault links **oscilloscope-relevant test needs** to **Aerospace / Defense context**. Where the oscilloscope link or A&D link is indirect, I call that out.\n\n## Strongest opportunities for Oscilloscope in Aerospace / Defense\n\n### 1) High-speed digital / SerDes / SI-PI validation for A&D electronics  \n**Why this looks strongest:** The vault has explicit oscilloscope evidence in high-speed electrical-interface validation, and A&D platforms increasingly contain high-speed digital links, FPGA/SoC boards, radar processors, mission computers, satcom terminals, and sensor-fusion electronics. The A&D link is an application inference, but the oscilloscope test need is directly evidenced.\n\n**Evidence from vault**\n- A Rohde & Schwarz digital-test presentation frames **SerDes, Signal Integrity, Power Integrity, PCB/PCBA testing** as part of the Digital / high-speed digital test context. It lists high-speed interfaces including **GMSL, OIF CEI-112G, LVDS, JESD204D, DisplayPort, HDMI, MIPI, USB, PCIe, NVLink, Ultra Ethernet, InfiniBand, SATA, SAS**.  \n  Citation: `wiki/sources/0 Digital Test - What are SIPI and Serdes.md`, section 1.\n- The same source’s Slide 11, **“Transmission Channel and validation challenges electrical Interfaces,”** breaks validation into transmission channel, measurement path to DUT / test-board development, **Power Distribution Network**, ADC/DAC frontend performance, RefClk/PLL jitter performance, and interface test — and explicitly lists **scopes** alongside BERTs, AWGs, switch matrices, phase-noise analyzers, signal generators, network analyzers, and spectrum analyzers.  \n  Citation: `wiki/sources/0 Digital Test - What are SIPI and Serdes.md`, section 1.\n- Slide 20 covers **high-speed PCB/PCBA signal integrity flow**, including **insertion loss, crosstalk, eye diagram, TDR impedance, stackup planner, TL calculator**.  \n  Citation: `wiki/sources/0 Digital Test - What are SIPI and Serdes.md`, section 1.\n- Slide 21, **“R&S PCB test solutions,”** targets **PCB Fabricator and System House** and covers material measurement, stackup selection, signal-integrity modeling/testing, sampling testing, and process monitoring, including **TDR impedance, DK/DF extraction, insertion loss, crosstalk, eye diagram, cable/connector testing**.  \n  Citation: `wiki/concepts/R&S PCB test solutions.md`, sections 1–3.\n\n**Opportunity angle**\n- Position oscilloscopes for **SI/PI debug, eye-diagram validation, jitter/debug, TDR impedance, high-speed interconnect validation, power-rail noise/transient analysis** in A&D electronics programs.\n- Best targets: avionics electronics suppliers, radar/EW digital back-end teams, satellite payload/terminal electronics teams, secure networking/5G tactical equipment suppliers, high-speed PCB fabricators serving A&D.\n\n**Evidence caveat:** The vault directly supports the oscilloscope/SI-PI need, but does not explicitly say “A&D customers are buying scopes for these tests.”\n\n---\n\n### 2) Military / aviation drone EMC and airborne-equipment pre-compliance/debug  \n**Why this is strong:** The vault explicitly links **DO-160** to a **military / aviation drone EMC proposal context**. Oscilloscopes are not explicitly named in that DO-160 passage, so the scope opportunity is for debug/pre-compliance support around EMC/environmental tests rather than formal compliance instrumentation alone.\n\n**Evidence from vault**\n- `DO-160 airborne equipment EMC testing` is described as coming from **`2025RS Drone Solution`**, where **RTCA DO-160** is used as an airborne-equipment environmental conditions and test-procedure reference in a **military / aviation drone EMC proposal context**.  \n  Citation: `wiki/concepts/DO-160 airborne equipment EMC testing.md`, section 1.\n- The source says DO-160 provides minimum operational performance standards for electronic systems and equipment supporting aviation safety, capacity, and efficiency, and provides means of determining performance characteristics of airborne equipment under environmental conditions encountered in operation.  \n  Citation: `wiki/concepts/DO-160 airborne equipment EMC testing.md`, section 2.\n- The vault warns that the source does **not** provide DO-160 section limits, waveform tables, category matrix, pass/fail criteria, or a specific drone/eVTOL/avionics qualification plan.  \n  Citation: `wiki/concepts/DO-160 airborne equipment EMC testing.md`, section 9.\n\n**Opportunity angle**\n- Sell oscilloscopes as part of the **engineering debug layer** around DO-160 / airborne EMC preparation: transient capture, power integrity under stress, conducted susceptibility debugging, serial bus behavior during RF/EMC exposure, and fault isolation.\n- Best targets: UAV/drone developers, avionics module suppliers, flight-control electronics, payload electronics, airborne comms/navigation suppliers.\n\n**Evidence caveat:** Vault evidence supports the **drone/aviation EMC need**, but not a direct oscilloscope BOM or DO-160 scope-specific test case.\n\n---\n\n### 3) Tactical private 5G, smart-jamming resilience, EW-adjacent communications, and SDR roadmaps  \n**Why this is attractive:** The vault has direct A&D evidence around **tactical 5G**, **smart jamming**, **EW**, contested spectrum, SDR migration, drones, and command-and-control networks. The oscilloscope connection is less direct than SI/PI, but these systems require digital/RF hardware validation and time-domain debug.\n\n**Evidence from vault**\n- A source titled **`2025-12-19 Making Deployed 5G Private Networks more Resilient`** is associated with **Aerospace & Defense Test** and focuses on deployed 5G private networks in **smart-jamming / EW environments**.  \n  Citation: `wiki/entities/Randy Schnell.md`, sections 1–2.\n- The mission / market drivers include **tactical edge connectivity**, rise of **smart jamming** and improved **EW tactics**, complex RF environment and contested spectrum, adoption of private 5G networks, autonomous systems and drones requiring low latency, expansion of tactical private 5G networks on military bases, and secure command-and-control networks.  \n  Citation: `wiki/concepts/5G private network resilience against smart jamming.md`, section 3.\n- The roadmap includes:  \n  - 2025–2028: widespread deployment of **5G tactical networks**, mmWave phased arrays for field testing, hybrid commercial/military networks such as 5G.MIL-style architectures.  \n  - 2028–2032: 5G/6G-capable **software-defined radios** replacing multi-radio tactical stacks, early ISAC for drone detection and perimeter defense, URLLC for autonomy.  \n  - 2032–2035+: full 6G networks with integrated sensing, AI-native battlefield connectivity, precision location sensing, spectrum-aware autonomy.  \n  Citation: `wiki/concepts/5G private network resilience against smart jamming.md`, section 7.\n\n**Opportunity angle**\n- Position oscilloscopes for **digital/RF subsystem debug** in tactical 5G/6G, SDR, phased-array control electronics, synchronization, timing, power integrity, fast transient events, interface validation, and hardware bring-up.\n- Pair with CMX500 / RF signal generation / spectrum analysis solutions rather than selling scope alone.\n\n**Evidence caveat:** The vault strongly supports the A&D communications opportunity, but does not explicitly name oscilloscopes in this 5G/jamming evidence. The scope use case is inferred from engineering workflow, not directly cited.\n\n---\n\n### 4) Satellite user terminals, phased-array terminals, and space electronics supply chain  \n**Why this is promising:** The vault contains several satellite / LEO / user-terminal supply-chain leads, including Kuiper, Starlink, OneWeb, phased-array testing references, and Taiwanese space-industry mapping. The oscilloscope tie is indirect but plausible through high-speed digital, power, RF-control, and terminal electronics validation.\n\n**Evidence from vault**\n- The vault’s satellite ground equipment page links existing pages on **LEO satellite components and ground-terminal supply chain**, including companies such as 啟碁, 耀登, 鐳洋科技, 稜研科技, and 濰元科技.  \n  Citation: `wiki/concepts/衛星地面設備.md`, section 7.\n- A **User Terminal** source, current as of Jan. 7, 2026 and raw-converted Sep. 17, 2026, is described as a link hub for satellite user terminals, OEM terminal manufacturers, RF components, infrastructure, Kuiper / Starlink test flow, and supply-chain materials.  \n  Citation: `wiki/concepts/衛星地面設備.md`, section 5.\n- The same passage lists terminal ecosystem leads: **Intellian, Hughes, Kymeta, Sharp, Gilat ESR-2030Ku, ThinKom Ka2517, SatixFy ESMA, Intelsat ESA, Qorvo QPA1722, MediaTek M80, Analog Devices / ADAR1000**, plus **Project Kuiper, Starlink**, and references to R&S / Keysight phased-array testing links.  \n  Citation: `wiki/concepts/衛星地面設備.md`, section 5.\n- The vault notes that **TASA / National Space Organization** released a **Taiwan Space Industry Map** at Satellite 2025, covering **222 companies and institutions** and emphasizing supply-chain and international-cooperation potential.  \n  Citation: `wiki/entities/國家太空中心.md`, section 2, as returned in the satellite evidence set.\n\n**Opportunity angle**\n- Target satellite terminal and phased-array ecosystem with scopes for **high-speed board validation, power sequencing/transients, beamforming-control electronics, interface timing, embedded bus debug, and manufacturing troubleshooting**.\n- Combine with VNA/spectrum/signal-generator positioning for phased-array and RF-chain validation.\n\n**Evidence caveat:** Many satellite pages are link hubs or external-source indexes; the vault explicitly warns that some external contents were **not ingested**, so this is a prospecting opportunity, not confirmed scope demand.\n\n---\n\n### 5) A&D PCB / interconnect manufacturing and process monitoring  \n**Why this is solid:** The vault directly supports PCB/interconnect test flows where scopes/TDR/eye diagrams are relevant. A&D is indirect, but A&D electronics depend heavily on controlled-impedance, rugged, high-reliability PCB/interconnect supply chains.\n\n**Evidence from vault**\n- `R&S PCB test solutions` covers **PCB Fabricator and System House** workflows: material measurement, material/stackup selection, signal-integrity modeling/testing, sampling testing, and process monitoring.  \n  Citation: `wiki/concepts/R&S PCB test solutions.md`, section 1.\n- Specific measured items include **TDR impedance, DK/DF extraction, insertion loss, roughness, crosstalk, TL modeling, eye diagram, Delta-L, ISD/ADK, cable/connector testing**.  \n  Citation: `wiki/concepts/R&S PCB test solutions.md`, section 2.\n- The structured flow table maps stages to measurements: material measurement with **TDR impedance** and DK/DF; stackup selection with IL, DK/DF, roughness, impedance, crosstalk, TL modeling, eye diagram; signal-integrity modeling/testing; sampling testing; and process monitoring.  \n  Citation: `wiki/concepts/R&S PCB test solutions.md`, section 3.\n\n**Opportunity angle**\n- Sell oscilloscopes/TDR-capable solutions into **A&D PCB suppliers, rugged electronics manufacturers, connector/cable assembly suppliers, and system houses**.\n- Position around **quality control, impedance verification, SI failure analysis, process monitoring, and design-manufacturing feedback loops**.\n\n**Evidence caveat:** The evidence is strong for PCB/system-house digital test, but the vault does not explicitly identify those PCB fabricators as A&D suppliers.\n\n---\n\n## Opportunities with insufficient current vault support\n\n- **Radar / pulsed-RF oscilloscope opportunity:** The current retrieved evidence did not provide a direct radar/pulsed-RF oscilloscope use case. There is A&D/EW context and RF-instrument evidence, but not enough to claim a vault-supported oscilloscope radar opportunity.\n- **Formal DO-160 oscilloscope test setup:** The vault supports DO-160 as a drone/aviation EMC context, but not exact scope waveforms, limits, or required instrumentation.\n- **Specific A&D customer wins for oscilloscopes:** No retrieved evidence named a specific A&D oscilloscope customer, purchase, or win.\n\n## Bottom line\n\nThe strongest evidence-backed oscilloscope opportunities are:\n\n1. **High-speed digital / SerDes / SI-PI validation** — strongest direct oscilloscope evidence.  \n2. **Military / aviation drone EMC debug around DO-160** — strongest direct A&D/drone evidence, but scope role is inferred.  \n3. **Tactical 5G / EW / smart-jamming / SDR systems** — strong A&D market driver evidence, indirect scope tie.  \n4. **Satellite user terminals and phased-array terminal electronics** — promising supply-chain evidence, indirect scope tie.  \n5. **PCB / interconnect manufacturing and process monitoring for A&D supply chain** — strong test-flow evidence, indirect A&D tie.",
+      "model_turns": 3,
+      "tools": [
+       {
+        "call_id": "call_6PUeVuzvlqxIySOx5Aqjpepa",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-ba64d7d794d74970b15f02fce3cd6a3e",
+          "request_id": "request-ba64d7d794d74970b15f02fce3cd6a3e",
+          "span_id": "span-ba64d7d794d74970b15f02fce3cd6a3e",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-ba64d7d794d74970b15f02fce3cd6a3e",
+           "request_id": "request-ba64d7d794d74970b15f02fce3cd6a3e",
+           "span_id": "span-ba64d7d794d74970b15f02fce3cd6a3e",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity? Please cite Raw evidence for each opportunity.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- Slide 21 題為 **R&S PCB test solutions**，面向 **PCB Fabricator and System House**，將流程分成 Material Measurement、Material/Stackup selection、Signal Integrity modeling/testing、Sampling testing、PL/Process Monitoring，並列出 impedance (TDR)、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram、Delta-L、ISD/ADK、w/ cable / connector testing 等項目。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 0.432493
+            },
+            {
+             "text": "Satellite Applications Catapult\n[[Satellite Applications Catapult]]是 [[Space Supply Chain]] 中 `Space Capabilities Catalogue` 外部連結 URL 所指向的組織 / 網站名稱線索；本 vault 目前尚未擷取該 catalogue 正文。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Satellite Applications Catapult.md"
+             },
+             "score": 1.553513
+            },
+            {
+             "text": "5G private network resilience against smart jamming › Program / roadmap 脈絡\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 把 private 5G resilience 放入 defense / Future-G roadmap：\n\n| 期間 | 來源說法 |\n|---|---|\n| 2025–2028 | widespread deployment of 5G tactical networks；mmWave phased arrays available for field testing；hybrid commercial / military networks such as 5G.MIL-style architectures |\n| 2028–2032 | 5G/6G-capable software-defined radios replacing multi-radio tactical stacks；early [[ISAC]] deployment for drone detection and perimeter defense；[[URLLC]] services for autonomy |\n| 2032–2035+ | full 6G networks with integrated sensing；AI-native battlefield connectivity；high-precision location sensing and spectrum-aware autonomy |\n\n來源也列出 [[5G.MIL]]、[[Raytheon OXYGEN]]、[[L3Harris Tactical Network Demo]]、[[DoD EMS Superiority Strategy]] 與 [[FutureG ISAC]] / spectrum sharing programs，作為 FHSS 與 5G convergence 的 program examples。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+             },
+             "score": 1.683943
+            },
+            {
+             "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 3.606005
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing › 使用限制\n- 本頁不是 [[RTCA DO-160]] 正式標準摘要；只保存 [[2025RS Drone Solution]] 的簡報文字。\n- 不得由本頁推論 DO-160G / DO-160 任何 section 的完整 category、limit、waveform、test setup 或 pass / fail criteria。\n- 來源把 DO-160 放在 military / aviation drone example 中，但未說明特定 drone、eVTOL 或 avionics equipment 的 qualification plan。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 3.16751
+            },
+            {
+             "text": "衛星地面設備 › Satellite Ground Station / Operation and Control Center 線索\n- [[Satellite Ground Station]]（raw converted 2026-09-17；來源正文未標示正式發布日期）列出 TASA | Satellite Operation and Control Center 外部連結。\n- 該連結指向 TASA 網站的 `space-facilities/satellite/satellite-operation-and-control-center` URL。\n- 本來源只提供 link hub 與未 OCR 圖片，尚未提供 [[Satellite Operation and Control Center]] 的正文內容。\n- 因此，這筆資料只可作為後續查證 [[TASA]] / [[國家太空中心]] 衛星地面站或操作控制中心的入口，不可視為設施規格或能力證據。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/衛星地面設備.md"
+             },
+             "score": 5.317672
+            },
+            {
+             "text": "Satellite Operation and Control Center › 可追溯限制\n- [[Satellite Ground Station]] 尚未擷取 TASA 外部頁正文，因此不能確認 [[Satellite Operation and Control Center]] 的中文正式名稱、法律 / 組織歸屬、地址、設備、任務、操作衛星、天線規格或服務能力。\n- 不得把外部連結標題改寫為 TASA 已公開某項地面站技術規格。\n- 不得從檔名或圖片嵌入推論設施照片內容、天線數量、frequency band、tracking capability、mission control workflow 或客戶 / 任務關係。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Satellite Operation and Control Center.md"
+             },
+             "score": 3.261989
+            },
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 0.386557
+            },
+            {
+             "text": "PARPRO\n[[PARPRO]]是 [[Space Supply Chain]] 中 `parpro.com.tw/solutions/aerospace-defense/` 外部連結所指向的公司 / 品牌名稱線索；本 vault 目前尚未擷取該頁正文。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/PARPRO.md"
+             },
+             "score": 1.881217
+            },
+            {
+             "text": "5G private network resilience against smart jamming › Mission context 與 industry drivers\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 列出的 mission / market drivers 包含：\n\n- tactical edge connectivity needs；\n- rise of smart jamming and improved [[EW]] tactics；\n- complex RF environment 與 contested spectrum；\n- growing adoption of private 5G networks；\n- autonomous systems and drones requiring low latency；\n- expansion of tactical private 5G networks on military bases；\n- demand for secure command-and-control networks；\n- strategic partnerships，例如來源提到 Nokia + L3Harris in 2024；\n- multi-year contracts，例如來源提到 Northrop Grumman 5G battlefield networking in 2024。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 另稱 United States Department of Defense has recently embarked on a strategy leveraging both public and private 5G networks，並說 5G could become the de-facto communications network between NATO members。此為 white paper statement；來源未附完整 DoD / NATO 文件引用。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+             },
+             "score": 1.281171
+            },
+            {
+             "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 2.354196
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing\n[[DO-160 airborne equipment EMC testing]] 是 [[2025RS Drone Solution]] 中引用 [[RTCA DO-160]] 作為 airborne equipment environmental conditions and test procedures 的測試線索，用於 military / aviation drone EMC proposal context。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 2.269403
+            },
+            {
+             "text": "衛星地面設備 › 與既有頁面的關係\n- [[低軌衛星零組件與地面終端供應鏈]] 已整理 2026-09-15 市場報告中的地面設備與用戶終端公司，例如 [[啟碁]]、[[耀登]]、[[鐳洋科技]]、[[稜研科技]]與[[濰元科技]]。\n- [[Satellite User Terminal 外部資料清單]] 保存 [[User Terminal]] 來源中的 OneWeb / Kuiper / Starlink user terminal、test flow 與 supply-chain 待讀材料。\n- [[相控陣列天線]] 是地面終端與電子掃描天線相關的主題；[[User Terminal]] 補入 flat-panel antenna、ESA、phased array OTA testing、active phased array characterization 等待讀連結。\n- [[手機直連衛星供應鏈]] 涉及衛星通訊服務與手機終端，但 [[0.Satcom Industry]] 的「衛星地面設備」數字不可直接套用到手機直連衛星市場。\n- [[Satellite Operation and Control Center]] 是 [[Satellite Ground Station]] 新增的 TASA 外部頁線索，應待外部正文擷取後再判斷其與地面設備、ground station、mission control 或 satellite operations 的關係。\n- [[低軌衛星通信終端設備技術規範與相關檢測]]補入規範 / 檢測視角，連到 [[衛星地球電臺設備技術規範]]、[[低軌衛星終端設備檢測]]與[[電信技術中心]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/衛星地面設備.md"
+             },
+             "score": 3.646841
+            },
+            {
+             "text": "TASA › Satellite Operation and Control Center 待讀線索\n- [[Satellite Ground Station]] 只提供外部連結標題與 URL，未擷取 TASA 頁面正文。\n- 本線索連到 [[Satellite Operation and Control Center]]，可作為後續補強 [[衛星地面設備]]、[[台灣太空產業]] 與 TASA space facilities 資料的入口。\n- 目前不能根據該 link hub 判斷 TASA 地面站的地點、設備、操作衛星、任務範圍、建置年份或技術規格。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/TASA.md"
+             },
+             "score": 4.303038
+            },
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 關鍵實體與概念\n- [[Dr. Milton Lien]] — 封面列名的作者 / 講者。\n- [[RSTW]] — 封面單位文字之一，來源未展開完整名稱。\n- [[SerDes]] — 本簡報主題之一，並在 standards / eco-chain / transmission channel 脈絡中出現。\n- [[Signal Integrity]] — Slide 20 以 high speed PCB/PCBA signal integrity flow 呈現，包含 [[IL]]、[[Xtalk]]、[[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]] 與 [[TL Calculator]]。\n- [[Power Integrity]] — 封面題名中的 PI；Slide 11 以 [[Power Distribution Network]] 形式出現，並列 scopes 與 network analyzers。\n- [[High speed SerDes standards]] — Slide 4 的高速介面 / 標準列名。\n- [[High speed SerDes eco-chain]] — Slide 9 的上中下游產業鏈分類。\n- [[R&S PCB test solutions]] — Slide 21 的 PCB fabricator / system house 測試流程與工具 / 方法集合。\n- [[HDI vs Package substrate]] — Slide 17 的 HDI、package substrate、CoWoS、ABF、L/S、pitch 對照線索。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] — 既有概念頁可承接 Slide 20–21 的 PCB / PCBA 測試內容。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 0.277065
+            },
+            {
+             "text": "5G private network resilience against smart jamming › 與既有頁面的關係\n- [[DUT]]：本概念的限制條件是 unmodified 5G DUT。\n- [[Handover frequency hopping]]：白皮書中最具體的 implementation。\n- [[Frequency hopping for 5G resilience]]：本概念的主要技術方向。\n- [[Smart Jamming]]：本概念要處理的 threat model。\n- [[R&S CMX500]]：白皮書明示測試使用 CMX500 作為 network emulator；但該 Market source 不是 CMX500 binding specifications。\n- [[Counter-UAV 技術]]：簡報 mid-term roadmap 提到 drone detection 與 perimeter defense，但不是 counter-UAV 系統評估來源。\n- [[Beamforming]]：簡報短期 roadmap 提到 mmWave phased arrays field testing，但沒有 beamforming 定義或測試方法。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+             },
+             "score": 1.143075
+            },
+            {
+             "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 2.082402
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing › 來源中的 DO-160 定位\n[[2025RS Drone Solution]] 說 [[RTCA DO-160]] is important because it provides the minimum operational performance standards for electronic systems and equipment that support aviation to pursue increased safety, system capacity and efficiency。\n\n來源另說其 purpose 是提供 means of determining performance characteristics of airborne equipment in environmental conditions which may be encountered in airborne operation of the equipment，並可與 applicable standards 一起作為 minimum specification。\n\n使用限制：來源未提供 DO-160 的正式版次文件、section limit table、category matrix 或適用 drone 類型。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 0.396179
+            },
+            {
+             "text": "衛星地面設備 › Satellite user terminal link hub\n[[User Terminal]]（來源正文標示 links current as of January 7, 2026, 1:33 PM CST；raw converted 2026-09-17）提供一組衛星 user terminal、OEM terminal manufacturers、RF components、infrastructure、Kuiper / Starlink test flow 與 supply chain 待讀資料索引。\n\n該來源列出三個本機附件但未擷取正文：\n\n- `oneweb_ut_final_presentation.html`。\n- `Kuiper UT Test & Supply Chain.pptx`。\n- `Starlink UT Test Flow.pptx`。\n\n該來源表格列出 user terminal / terminal ecosystem 線索：\n\n- Primary OEM Terminal Manufacturers：[[Intellian]]、[[Hughes]]、[[Kymeta]]、[[Sharp]]。\n- Expanded OEM Ecosystem：[[Gilat ESR-2030Ku]]、[[ThinKom Ka2517]]、[[SatixFy ESMA]]、[[Intelsat ESA]]。\n- RF Components & Semiconductors：[[Qorvo QPA1722]]、[[MediaTek M80]]、[[Analog Devices]] / [[ADAR1000]]。\n- Infrastructure & Distribution：[[Hughes Network]]、[[Airbus OneWeb]]、[[Eutelsat]]、[[KVH]]。\n- Kuiper / Amazon：[[Project Kuiper]]、[[Amazon Leo]]、[[Amazon]] official terminal links、FCC appendix、R&S / Keysight phased array testing references。\n- Starlink：[[Starlink]] user terminal supply chain、teardown、FCC filings、R&S / Keysight / GSOA testing links、Taiwan Focus references。\n\n這些內容目前只可作為 [[Satellite User Terminal 外部資料清單]] 的待讀索引；不可直接視為產品規格、供應鏈驗證、測試報告或商用狀態證據。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/衛星地面設備.md"
+             },
+             "score": 3.235659
+            },
+            {
+             "text": "國家太空中心 › 來源中的說法\n- [[0.Satcom Industry]]（來源正文未標示正式發布日期；內容含 2025 年資料點；raw converted 2026-09-17）稱[[國家太空中心]] / [[TASA]] 於美國 [[Satellite 2025]] 展會中首度發表《[[台灣太空產業地圖]]》。\n- 同一來源稱《[[台灣太空產業地圖]]》涵蓋 222 家企業與機構，展現完整供應鏈與國際合作潛力。\n- 同一來源將台灣太空產業描述為歷經三期國家太空科技發展長程計畫，並稱第三期計畫強調「韌性」與「產業化」。\n- [[02160280]]（頁尾標示《科儀新知》216期 `107.9`；raw converted 2026-09-17）稱 [[FORMOSAT-5]] 是台灣首次由 National Space Organization, Taiwan 自行完成 design、analysis、assembly、validation and test 的 spacecraft。\n- [[02160280]] 稱 [[FORMOSAT-5]] [[衛星電力次系統]]由太空中心主導；[[PCDU]]由中科院與太空中心設計、製作與驗證測試；衛星線束由太空中心設計並委託國外製作；演算法與控制軟體由太空中心設計、編碼與系統驗證。\n- [[02160280]] 文末作者簡介稱[[葉嘉靖]]為 National Space Organization, NARLabs 的 Electrical Engineering Division principal engineer。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/國家太空中心.md"
+             },
+             "score": 3.228805
+            },
+            {
+             "text": "Randy Schnell › 來源中的列名\n依 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]]（檔名 / raw title 含 2025-12-19；raw converted 2026-09-17）：\n\n- 封面列名：Randy Schnell。\n- 職稱 / 角色列名：Business Development Manager。\n- 組織 / 業務領域列名：Aerospace & Defense Test。\n- 簡報主題為 deployed [[5G]] private networks 在 [[Smart Jamming]] / [[EW]] 環境下的 resilience，以及 legacy [[Frequency hopping for 5G resilience]] 能否在不修改 [[DUT]] 的前提下提升連線韌性。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Randy Schnell.md"
+             },
+             "score": 2.929814
+            },
+            {
+             "text": "NTN test and measurement aspects › NTN 對 T&M 的 paradigm change\n來源指出 [[NTN]] 改變傳統 wireless T&M 假設：\n\n- 傳統假設 UE mobile、network entities stationary。\n- NTN 需考慮 UE 與 network entities 兩者 mobility。\n- 測試條件需 reproducible、accurate、comparable，但 setup 需加入 high path loss、Doppler shift、time delay、delay variance、atmospheric effects、Faraday effect、scintillation、weather influences。\n- satellite 入軌後 maintenance / replacement 困難，使 simulation、software-assisted testing、digital twin、in-orbit monitoring 更重要。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+             },
+             "score": 5.946902
+            },
+            {
+             "text": "軍用無人機 EMC 與 EME testing › Common MIL EMC standards\n[[2025RS Drone Solution]] 列出：\n\n- [[MIL-STD-461]] — requirements for the control of electromagnetic interference emission and susceptibility。\n- [[MIL-STD-464]] — electromagnetic environmental effects requirements for systems。\n- [[RTCA DO-160]] — environmental conditions and test procedures for airborne equipment。\n\n來源另在 example 頁將 military / aviation drone EMC test standards 分為 component level 與 full system level：\n\n| 層級 | 來源列名 |\n|---|---|\n| Component level | [[RTCA DO-160G]]、[[MIL-STD-461G]]、[[DEF STAN 59-411 Part 3]]、[[GJB 151B]] |\n| Full system level | [[MIL-STD-464D]]、[[DEF STAN 59-411 Part 4]]、[[GJB 1389A]] |\n\n使用限制：來源同時在另一頁將 applicable standards 列為 [[MIL-STD-464C]]，而 example 頁列 [[MIL-STD-464D]]；目前只保留為版本線索，未裁決適用版本。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+             },
+             "score": 5.798748
+            },
+            {
+             "text": "經緯航太\n[[經緯航太]] 是 [[0. UAV產業分析報告架構]] 中列於 [[台灣無人機供應鏈]] 下游的公司，來源描述其與智慧農業與多用途無人機相關；[[4. UAV Eco-chain in Taiwan]] 另在 System Integrator 區段列出經緯航太名稱。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/經緯航太.md"
+             },
+             "score": 0.70924
+            },
+            {
+             "text": ".\\vault-cli.ps1 convert          see what would be converted\n  .\\vault-cli.ps1 convert -Apply   write them into raw/ as markdown",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ea90fce69e235bab",
+               "original_ref": "raw/drop/README.md",
+               "sha256": "ea90fce69e235bab585cdb428ef3f0ff2df3b8fe757839583a4489ff5446b72d",
+               "raw_ref": "raw/drop/README.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/drop/README.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.903642
+            },
+            {
+             "text": "3.  What is the anticipated timeline for deploying your NTN services, and what are the",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3b343d1990f39b17",
+               "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.708398
+            },
+            {
+             "text": "https://www.parpro.com.tw/solutions/aerospace-defense/",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-6ae422456b68416f",
+               "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+               "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+               "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 23.758653
+            },
+            {
+             "text": "Beam selection is performed across the L cells from configured cells, i.e. M beams for each of the L cells. M x L\nbeams are reported in a single report instance. Maximum values of M and L are based on UE capability, and at\nleast M x L=4 is supported as a UE capability. The values of M and L are configured to the UE in the reporting\nconfiguration.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-484f76aad6f2ea3a",
+               "original_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "sha256": "484f76aad6f2ea3af117005a40bc7d9ab361e59d138e11cde08c31dc538205d2",
+               "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/L1_L2 Triggered Mobility (LTM).md",
+              "section": 494,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 21.735961
+            }
+           ],
+           "text": "### Strongest opportunities for Oscilloscope in Aerospace / Defense\n| Rank | Opportunity | Why it is strong for Oscilloscope | Raw evidence required by question | Supporting vault evidence | Caveat |\n|---|---|---|---|---|---|\n| 1 | 【推論】High-speed digital / SerDes / PCB-PCBA signal-integrity validation for Aerospace / Defense electronics suppliers | Oscilloscopes are explicitly listed among instruments for transmission-channel validation, DUT/test-board measurement paths, PDN, ADC/DAC frontend performance, RefClk/PLL jitter, and interface test; the same vault source also frames R&S PCB test flow around eye diagram, TDR impedance, insertion loss, crosstalk, stackup, and process monitoring needs. [8][11][17] | The Raw vault contains an Aerospace/Defense solution URL for PARPRO. [27] | R&S PCB test solutions target PCB fabricators and system houses, with material measurement, stackup selection, SI modeling/testing, sampling testing, and process monitoring. [11][17] | Raw evidence only proves the A&D page/link exists; it does not provide the PARPRO page body or prove oscilloscope demand. [27] |\n### Not promoted as “Raw-supported strongest” yet\n| Candidate | Why it is promising in Wiki | Why it is not included above |\n|---|---|---|\n| Military / aviation drone EMC and EME testing | The vault lists MIL-STD-461, MIL-STD-464, and RTCA DO-160 as military / aviation drone EMC or airborne-equipment testing references. [23] DO-160 is positioned as airborne-equipment environmental conditions and test procedures in a drone EMC proposal context. [12][18] | No provided Raw passage states the drone EMC content, oscilloscope role, or A&D drone test opportunity, so it cannot satisfy the request to cite Raw evidence for each opportunity. |\n### Product / option status\n| Product line | Knowledge-base-confirmed option / specification | Evidence | Gap / quote risk |\n|---|---|---|---|\n| Oscilloscope | 知識庫未標示 | The vault only states “scopes” as an instrument class in high-speed electrical-interface validation. [8] | No oscilloscope model, bandwidth, option code, compliance package, price, or A&D customer fit is stated in the provided passages. |",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 1,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+            },
+            "score": 0.386557
+           },
+           {
+            "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+            },
+            "score": 2.354196
+           },
+           {
+            "text": "DO-160 airborne equipment EMC testing\n[[DO-160 airborne equipment EMC testing]] 是 [[2025RS Drone Solution]] 中引用 [[RTCA DO-160]] 作為 airborne equipment environmental conditions and test procedures 的測試線索，用於 military / aviation drone EMC proposal context。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 1,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+            },
+            "score": 2.269403
+           },
+           {
+            "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+            },
+            "score": 2.082402
+           },
+           {
+            "text": "DO-160 airborne equipment EMC testing › 來源中的 DO-160 定位\n[[2025RS Drone Solution]] 說 [[RTCA DO-160]] is important because it provides the minimum operational performance standards for electronic systems and equipment that support aviation to pursue increased safety, system capacity and efficiency。\n\n來源另說其 purpose 是提供 means of determining performance characteristics of airborne equipment in environmental conditions which may be encountered in airborne operation of the equipment，並可與 applicable standards 一起作為 minimum specification。\n\n使用限制：來源未提供 DO-160 的正式版次文件、section limit table、category matrix 或適用 drone 類型。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+            },
+            "score": 0.396179
+           },
+           {
+            "text": "軍用無人機 EMC 與 EME testing › Common MIL EMC standards\n[[2025RS Drone Solution]] 列出：\n\n- [[MIL-STD-461]] — requirements for the control of electromagnetic interference emission and susceptibility。\n- [[MIL-STD-464]] — electromagnetic environmental effects requirements for systems。\n- [[RTCA DO-160]] — environmental conditions and test procedures for airborne equipment。\n\n來源另在 example 頁將 military / aviation drone EMC test standards 分為 component level 與 full system level：\n\n| 層級 | 來源列名 |\n|---|---|\n| Component level | [[RTCA DO-160G]]、[[MIL-STD-461G]]、[[DEF STAN 59-411 Part 3]]、[[GJB 151B]] |\n| Full system level | [[MIL-STD-464D]]、[[DEF STAN 59-411 Part 4]]、[[GJB 1389A]] |\n\n使用限制：來源同時在另一頁將 applicable standards 列為 [[MIL-STD-464C]]，而 example 頁列 [[MIL-STD-464D]]；目前只保留為版本線索，未裁決適用版本。",
+            "citation": {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+            },
+            "score": 5.798748
+           },
+           {
+            "text": "https://www.parpro.com.tw/solutions/aerospace-defense/",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-6ae422456b68416f",
+              "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+              "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+              "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+             "section": 11,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 23.758653
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [],
+           "missing_facets": [],
+           "relation_required": false,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": [
+           {
+            "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+            "raw_refs": [
+             "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/concepts/R&S PCB test solutions.md",
+            "raw_refs": [
+             "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md",
+            "raw_refs": [
+             "raw/Market/OneNote/2025RS Drone Solution.md"
+            ]
+           },
+           {
+            "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md",
+            "raw_refs": [
+             "raw/Market/OneNote/2025RS Drone Solution.md"
+            ]
+           }
+          ]
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_EywlzVQSpXFYdfI206F5My3c",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-ba64d7d794d74970b15f02fce3cd6a3e",
+          "request_id": "request-ba64d7d794d74970b15f02fce3cd6a3e",
+          "span_id": "span-ba64d7d794d74970b15f02fce3cd6a3e",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_insufficient_evidence",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_KcI9B45rTogWlyZ5iO2rrbCy",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-ba64d7d794d74970b15f02fce3cd6a3e",
+          "request_id": "request-ba64d7d794d74970b15f02fce3cd6a3e",
+          "span_id": "span-ba64d7d794d74970b15f02fce3cd6a3e",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-ba64d7d794d74970b15f02fce3cd6a3e",
+           "request_id": "request-ba64d7d794d74970b15f02fce3cd6a3e",
+           "span_id": "span-ba64d7d794d74970b15f02fce3cd6a3e",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Raw evidence only: oscilloscope opportunities in aerospace defense radar EW pulsed RF power analysis EMI debugging. What evidence supports each? Cite Raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "Randy Schnell › 來源中的列名\n依 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]]（檔名 / raw title 含 2025-12-19；raw converted 2026-09-17）：\n\n- 封面列名：Randy Schnell。\n- 職稱 / 角色列名：Business Development Manager。\n- 組織 / 業務領域列名：Aerospace & Defense Test。\n- 簡報主題為 deployed [[5G]] private networks 在 [[Smart Jamming]] / [[EW]] 環境下的 resilience，以及 legacy [[Frequency hopping for 5G resilience]] 能否在不修改 [[DUT]] 的前提下提升連線韌性。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Randy Schnell.md"
+             },
+             "score": 2.929814
+            },
+            {
+             "text": "Satellite Applications Catapult › 來源中的資訊\n- [[Space Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）列出連結文字 `Space Capabilities Catalogue - Satellite Applications Catapult`，URL 為 `https://sa.catapult.org.uk/space-capabilities-catalogue/`。\n- 本次 ingest 未擷取該外部網頁正文、更新日期、catalogue 版本、分類規則、公司名單、capabilities 條目或資料來源。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Satellite Applications Catapult.md"
+             },
+             "score": 1.164855
+            },
+            {
+             "text": "5G private network resilience against smart jamming › Program / roadmap 脈絡\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 把 private 5G resilience 放入 defense / Future-G roadmap：\n\n| 期間 | 來源說法 |\n|---|---|\n| 2025–2028 | widespread deployment of 5G tactical networks；mmWave phased arrays available for field testing；hybrid commercial / military networks such as 5G.MIL-style architectures |\n| 2028–2032 | 5G/6G-capable software-defined radios replacing multi-radio tactical stacks；early [[ISAC]] deployment for drone detection and perimeter defense；[[URLLC]] services for autonomy |\n| 2032–2035+ | full 6G networks with integrated sensing；AI-native battlefield connectivity；high-precision location sensing and spectrum-aware autonomy |\n\n來源也列出 [[5G.MIL]]、[[Raytheon OXYGEN]]、[[L3Harris Tactical Network Demo]]、[[DoD EMS Superiority Strategy]] 與 [[FutureG ISAC]] / spectrum sharing programs，作為 FHSS 與 5G convergence 的 program examples。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+             },
+             "score": 1.683943
+            },
+            {
+             "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 3.606005
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing › 使用限制\n- 本頁不是 [[RTCA DO-160]] 正式標準摘要；只保存 [[2025RS Drone Solution]] 的簡報文字。\n- 不得由本頁推論 DO-160G / DO-160 任何 section 的完整 category、limit、waveform、test setup 或 pass / fail criteria。\n- 來源把 DO-160 放在 military / aviation drone example 中，但未說明特定 drone、eVTOL 或 avionics equipment 的 qualification plan。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 3.16751
+            },
+            {
+             "text": "衛星地面設備 › Satellite Ground Station / Operation and Control Center 線索\n- [[Satellite Ground Station]]（raw converted 2026-09-17；來源正文未標示正式發布日期）列出 TASA | Satellite Operation and Control Center 外部連結。\n- 該連結指向 TASA 網站的 `space-facilities/satellite/satellite-operation-and-control-center` URL。\n- 本來源只提供 link hub 與未 OCR 圖片，尚未提供 [[Satellite Operation and Control Center]] 的正文內容。\n- 因此，這筆資料只可作為後續查證 [[TASA]] / [[國家太空中心]] 衛星地面站或操作控制中心的入口，不可視為設施規格或能力證據。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/衛星地面設備.md"
+             },
+             "score": 5.317672
+            },
+            {
+             "text": "Satellite Operation and Control Center › 可追溯限制\n- [[Satellite Ground Station]] 尚未擷取 TASA 外部頁正文，因此不能確認 [[Satellite Operation and Control Center]] 的中文正式名稱、法律 / 組織歸屬、地址、設備、任務、操作衛星、天線規格或服務能力。\n- 不得把外部連結標題改寫為 TASA 已公開某項地面站技術規格。\n- 不得從檔名或圖片嵌入推論設施照片內容、天線數量、frequency band、tracking capability、mission control workflow 或客戶 / 任務關係。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Satellite Operation and Control Center.md"
+             },
+             "score": 3.261989
+            },
+            {
+             "text": "Randy Schnell\n[[Randy Schnell]] 是 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 封面列名的 Business Development Manager，Aerospace & Defense Test。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Randy Schnell.md"
+             },
+             "score": 1.393525
+            },
+            {
+             "text": "PARPRO › 來源中的資訊\n- [[Space Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）列出 URL：`https://www.parpro.com.tw/solutions/aerospace-defense/`。\n- URL path 顯示 `aerospace-defense`，但本次 ingest 未擷取網頁正文、頁面標題、產品、服務、認證、客戶、產線、供應鏈位置或日期。\n- 來源在該 URL 後嵌入多張 `Space Supply Chain image 1.jpg` 到 `Space Supply Chain image 10.png` 圖片；本次 raw 未提供 OCR，不能確認圖片是否來自 [[PARPRO]] 網站或 Teams 轉貼材料。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/PARPRO.md"
+             },
+             "score": 1.794004
+            },
+            {
+             "text": "5G private network resilience against smart jamming › Mission context 與 industry drivers\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 列出的 mission / market drivers 包含：\n\n- tactical edge connectivity needs；\n- rise of smart jamming and improved [[EW]] tactics；\n- complex RF environment 與 contested spectrum；\n- growing adoption of private 5G networks；\n- autonomous systems and drones requiring low latency；\n- expansion of tactical private 5G networks on military bases；\n- demand for secure command-and-control networks；\n- strategic partnerships，例如來源提到 Nokia + L3Harris in 2024；\n- multi-year contracts，例如來源提到 Northrop Grumman 5G battlefield networking in 2024。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 另稱 United States Department of Defense has recently embarked on a strategy leveraging both public and private 5G networks，並說 5G could become the de-facto communications network between NATO members。此為 white paper statement；來源未附完整 DoD / NATO 文件引用。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+             },
+             "score": 1.281171
+            },
+            {
+             "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 2.354196
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing\n[[DO-160 airborne equipment EMC testing]] 是 [[2025RS Drone Solution]] 中引用 [[RTCA DO-160]] 作為 airborne equipment environmental conditions and test procedures 的測試線索，用於 military / aviation drone EMC proposal context。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 2.269403
+            },
+            {
+             "text": "衛星地面設備 › 與既有頁面的關係\n- [[低軌衛星零組件與地面終端供應鏈]] 已整理 2026-09-15 市場報告中的地面設備與用戶終端公司，例如 [[啟碁]]、[[耀登]]、[[鐳洋科技]]、[[稜研科技]]與[[濰元科技]]。\n- [[Satellite User Terminal 外部資料清單]] 保存 [[User Terminal]] 來源中的 OneWeb / Kuiper / Starlink user terminal、test flow 與 supply-chain 待讀材料。\n- [[相控陣列天線]] 是地面終端與電子掃描天線相關的主題；[[User Terminal]] 補入 flat-panel antenna、ESA、phased array OTA testing、active phased array characterization 等待讀連結。\n- [[手機直連衛星供應鏈]] 涉及衛星通訊服務與手機終端，但 [[0.Satcom Industry]] 的「衛星地面設備」數字不可直接套用到手機直連衛星市場。\n- [[Satellite Operation and Control Center]] 是 [[Satellite Ground Station]] 新增的 TASA 外部頁線索，應待外部正文擷取後再判斷其與地面設備、ground station、mission control 或 satellite operations 的關係。\n- [[低軌衛星通信終端設備技術規範與相關檢測]]補入規範 / 檢測視角，連到 [[衛星地球電臺設備技術規範]]、[[低軌衛星終端設備檢測]]與[[電信技術中心]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/衛星地面設備.md"
+             },
+             "score": 3.646841
+            },
+            {
+             "text": "TASA › Satellite Operation and Control Center 待讀線索\n- [[Satellite Ground Station]] 只提供外部連結標題與 URL，未擷取 TASA 頁面正文。\n- 本線索連到 [[Satellite Operation and Control Center]]，可作為後續補強 [[衛星地面設備]]、[[台灣太空產業]] 與 TASA space facilities 資料的入口。\n- 目前不能根據該 link hub 判斷 TASA 地面站的地點、設備、操作衛星、任務範圍、建置年份或技術規格。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/TASA.md"
+             },
+             "score": 4.303038
+            },
+            {
+             "text": "Space Supply Chain › 重點摘要\n- 來源 frontmatter 顯示 raw converted 日期為 2026-09-17；來源正文未標示正式發布日期、作者、版本或完整資料期間。\n- 來源列出 [[Satellite Applications Catapult]] 的 `Space Capabilities Catalogue` 連結；本次 ingest 未擷取該外部網頁正文、catalogue 版本、公司名單、分類欄位或更新日期。\n- 來源嵌入 `Space Supply Chain image.png`，但 raw 未提供 OCR 或圖說。\n- 來源以文字標示 `202507:`，其後嵌入 `Space Supply Chain image 1.png`；目前只能記錄為圖像前的日期 / 期間標示，無法判定是否為圖片日期、資料期間或筆記標註。\n- 來源以文字標示 `2022:`，其後嵌入 `Space Supply Chain image.jpg`；目前無法判定該年份的資料口徑或圖片內容。\n- 來源以文字標示 `2021:`，其後嵌入 `Space Supply Chain image 2.png`；目前無法判定該年份的資料口徑或圖片內容。\n- 來源列出 Yahoo 股市文章連結，連結文字包含「低軌衛星黑馬出列！它『拿下 AST 訂單』在手訂單突破 1.3 億美元 股價勁揚逾 8%（事欣科）」；本次 ingest 未擷取 Yahoo 文章正文，因此只能保留為待讀新聞線索，不能視為已驗證的訂單、金額或股價主張。\n- 來源列出 `https://www.parpro.com.tw/solutions/aerospace-defense/`，指向 [[PARPRO]] aerospace & defense solution；本次 ingest 未擷取該網頁正文、產品、客戶、認證或供應鏈內容。\n- 來源後段有 `來自 <https://teams.microsoft.com/v2/>` 與多張圖片嵌入；本次 raw 未提供 Teams 內容、圖片 OCR 或附件來源。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Space Supply Chain.md"
+             },
+             "score": 2.670656
+            },
+            {
+             "text": "5G private network resilience against smart jamming › 與既有頁面的關係\n- [[DUT]]：本概念的限制條件是 unmodified 5G DUT。\n- [[Handover frequency hopping]]：白皮書中最具體的 implementation。\n- [[Frequency hopping for 5G resilience]]：本概念的主要技術方向。\n- [[Smart Jamming]]：本概念要處理的 threat model。\n- [[R&S CMX500]]：白皮書明示測試使用 CMX500 作為 network emulator；但該 Market source 不是 CMX500 binding specifications。\n- [[Counter-UAV 技術]]：簡報 mid-term roadmap 提到 drone detection 與 perimeter defense，但不是 counter-UAV 系統評估來源。\n- [[Beamforming]]：簡報短期 roadmap 提到 mmWave phased arrays field testing，但沒有 beamforming 定義或測試方法。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+             },
+             "score": 1.143075
+            },
+            {
+             "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 2.082402
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing › 來源中的 DO-160 定位\n[[2025RS Drone Solution]] 說 [[RTCA DO-160]] is important because it provides the minimum operational performance standards for electronic systems and equipment that support aviation to pursue increased safety, system capacity and efficiency。\n\n來源另說其 purpose 是提供 means of determining performance characteristics of airborne equipment in environmental conditions which may be encountered in airborne operation of the equipment，並可與 applicable standards 一起作為 minimum specification。\n\n使用限制：來源未提供 DO-160 的正式版次文件、section limit table、category matrix 或適用 drone 類型。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 0.396179
+            },
+            {
+             "text": "衛星地面設備 › Satellite user terminal link hub\n[[User Terminal]]（來源正文標示 links current as of January 7, 2026, 1:33 PM CST；raw converted 2026-09-17）提供一組衛星 user terminal、OEM terminal manufacturers、RF components、infrastructure、Kuiper / Starlink test flow 與 supply chain 待讀資料索引。\n\n該來源列出三個本機附件但未擷取正文：\n\n- `oneweb_ut_final_presentation.html`。\n- `Kuiper UT Test & Supply Chain.pptx`。\n- `Starlink UT Test Flow.pptx`。\n\n該來源表格列出 user terminal / terminal ecosystem 線索：\n\n- Primary OEM Terminal Manufacturers：[[Intellian]]、[[Hughes]]、[[Kymeta]]、[[Sharp]]。\n- Expanded OEM Ecosystem：[[Gilat ESR-2030Ku]]、[[ThinKom Ka2517]]、[[SatixFy ESMA]]、[[Intelsat ESA]]。\n- RF Components & Semiconductors：[[Qorvo QPA1722]]、[[MediaTek M80]]、[[Analog Devices]] / [[ADAR1000]]。\n- Infrastructure & Distribution：[[Hughes Network]]、[[Airbus OneWeb]]、[[Eutelsat]]、[[KVH]]。\n- Kuiper / Amazon：[[Project Kuiper]]、[[Amazon Leo]]、[[Amazon]] official terminal links、FCC appendix、R&S / Keysight phased array testing references。\n- Starlink：[[Starlink]] user terminal supply chain、teardown、FCC filings、R&S / Keysight / GSOA testing links、Taiwan Focus references。\n\n這些內容目前只可作為 [[Satellite User Terminal 外部資料清單]] 的待讀索引；不可直接視為產品規格、供應鏈驗證、測試報告或商用狀態證據。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/衛星地面設備.md"
+             },
+             "score": 3.235659
+            },
+            {
+             "text": "國家太空中心 › 來源中的說法\n- [[0.Satcom Industry]]（來源正文未標示正式發布日期；內容含 2025 年資料點；raw converted 2026-09-17）稱[[國家太空中心]] / [[TASA]] 於美國 [[Satellite 2025]] 展會中首度發表《[[台灣太空產業地圖]]》。\n- 同一來源稱《[[台灣太空產業地圖]]》涵蓋 222 家企業與機構，展現完整供應鏈與國際合作潛力。\n- 同一來源將台灣太空產業描述為歷經三期國家太空科技發展長程計畫，並稱第三期計畫強調「韌性」與「產業化」。\n- [[02160280]]（頁尾標示《科儀新知》216期 `107.9`；raw converted 2026-09-17）稱 [[FORMOSAT-5]] 是台灣首次由 National Space Organization, Taiwan 自行完成 design、analysis、assembly、validation and test 的 spacecraft。\n- [[02160280]] 稱 [[FORMOSAT-5]] [[衛星電力次系統]]由太空中心主導；[[PCDU]]由中科院與太空中心設計、製作與驗證測試；衛星線束由太空中心設計並委託國外製作；演算法與控制軟體由太空中心設計、編碼與系統驗證。\n- [[02160280]] 文末作者簡介稱[[葉嘉靖]]為 National Space Organization, NARLabs 的 Electrical Engineering Division principal engineer。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/國家太空中心.md"
+             },
+             "score": 3.228805
+            },
+            {
+             "text": "Space Supply Chain › 與既有知識的關係\n- 與 [[4. Satellite Eco-chain in Taiwan]] 類似，本來源主要是 satellite / space supply chain link hub；兩者都含未擷取外部資料與未 OCR 圖片，不可直接當成已驗證供應鏈證據。\n- 與 [[3. Satcom market summary]] 類似，本來源列出外部新聞與文章連結；在正文未擷取前，只能作為待讀索引。\n- 與 [[0.Satcom Industry]]、[[台灣太空產業]]、[[台灣太空產業地圖]]、[[通訊衛星製造產業平台]]相關，但本來源沒有提供可直接增補的台灣太空產業地圖版本、公司名單、分類規則或政策資料。\n- 與 [[低軌衛星零組件與地面終端供應鏈]]相關，但 Yahoo 連結標題中的 [[事欣科]] / AST 訂單說法尚未取得正文或公告，不更新該供應鏈表格。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Space Supply Chain.md"
+             },
+             "score": 1.521338
+            },
+            {
+             "text": "NTN test and measurement aspects › NTN 對 T&M 的 paradigm change\n來源指出 [[NTN]] 改變傳統 wireless T&M 假設：\n\n- 傳統假設 UE mobile、network entities stationary。\n- NTN 需考慮 UE 與 network entities 兩者 mobility。\n- 測試條件需 reproducible、accurate、comparable，但 setup 需加入 high path loss、Doppler shift、time delay、delay variance、atmospheric effects、Faraday effect、scintillation、weather influences。\n- satellite 入軌後 maintenance / replacement 困難，使 simulation、software-assisted testing、digital twin、in-orbit monitoring 更重要。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+             },
+             "score": 5.946902
+            },
+            {
+             "text": "軍用無人機 EMC 與 EME testing › Common MIL EMC standards\n[[2025RS Drone Solution]] 列出：\n\n- [[MIL-STD-461]] — requirements for the control of electromagnetic interference emission and susceptibility。\n- [[MIL-STD-464]] — electromagnetic environmental effects requirements for systems。\n- [[RTCA DO-160]] — environmental conditions and test procedures for airborne equipment。\n\n來源另在 example 頁將 military / aviation drone EMC test standards 分為 component level 與 full system level：\n\n| 層級 | 來源列名 |\n|---|---|\n| Component level | [[RTCA DO-160G]]、[[MIL-STD-461G]]、[[DEF STAN 59-411 Part 3]]、[[GJB 151B]] |\n| Full system level | [[MIL-STD-464D]]、[[DEF STAN 59-411 Part 4]]、[[GJB 1389A]] |\n\n使用限制：來源同時在另一頁將 applicable standards 列為 [[MIL-STD-464C]]，而 example 頁列 [[MIL-STD-464D]]；目前只保留為版本線索，未裁決適用版本。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+             },
+             "score": 5.798748
+            },
+            {
+             "text": "經緯航太\n[[經緯航太]] 是 [[0. UAV產業分析報告架構]] 中列於 [[台灣無人機供應鏈]] 下游的公司，來源描述其與智慧農業與多用途無人機相關；[[4. UAV Eco-chain in Taiwan]] 另在 System Integrator 區段列出經緯航太名稱。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/經緯航太.md"
+             },
+             "score": 0.70924
+            },
+            {
+             "text": "https://www.parpro.com.tw/solutions/aerospace-defense/",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-6ae422456b68416f",
+               "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+               "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+               "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 23.758653
+            },
+            {
+             "text": "![Pulsed signal analysis](Picture2.jpg)",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ae261ae2c6ea49d8",
+               "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+               "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "section": 206,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 20.529866
+            },
+            {
+             "text": "<!-- Slide number: 1 -->\n# Making Deployed 5G Private Networks more Resilient\nRandy Schnell\nBusiness Development Manager\nAerospace & Defense Test",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ee03d2faf62e9553",
+               "original_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+               "sha256": "ee03d2faf62e95530401e678c264a927c21cc58e47bb7aadc133b34233fc6940",
+               "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 19.139055
+            },
+            {
+             "text": "![](Picture2.jpg)\nOSP200/300\nRF switch matrix\nConfigurable\nReliably connects different RUs /\nRF ports\nR&S® RTO/RTP\nOscilloscope\nVoltage, Current\nRF signals (FFT)\nSignal analysis with VSE software",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-8ea3b55008b7c337",
+               "original_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+               "sha256": "8ea3b55008b7c337d029721ca2f0a210e3b1b6cf0fc902f9409ce7834ac35594",
+               "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+              "section": 49,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 17.773338
+            }
+           ],
+           "text": "| Item | Raw evidence support |\n|---|---|\n| Aerospace & defense context | A raw source is an aerospace/defense page URL, and another raw slide identifies the presenter as “Business Development Manager, Aerospace & Defense Test.” [25][27] |\n| Oscilloscope | Raw evidence lists “R&S® RTO/RTP Oscilloscope.” [28] |\n| RF signal analysis | Raw evidence says the oscilloscope handles “RF signals (FFT)” and “Signal analysis with VSE software.” [28] |\n| Voltage / current measurement | Raw evidence lists “Voltage, Current” under the R&S RTO/RTP oscilloscope. [28] |\n| Pulsed signal analysis | Raw evidence labels an image “Pulsed signal analysis.” [26] |\n| RF-port / RU switching setup | Raw evidence lists an “OSP200/300 RF switch matrix” that “reliably connects different RUs / RF ports.” [28] |\n| Pulsed RF power analysis | Raw evidence supports pulsed signal analysis, RF signal FFT analysis, and voltage/current measurement, but it does not directly state “pulsed RF power analysis.” [26][28] |",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "https://www.parpro.com.tw/solutions/aerospace-defense/",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-6ae422456b68416f",
+              "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+              "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+              "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+             "section": 11,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 23.758653
+           },
+           {
+            "text": "![Pulsed signal analysis](Picture2.jpg)",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-ae261ae2c6ea49d8",
+              "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+              "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+             "section": 206,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 20.529866
+           },
+           {
+            "text": "<!-- Slide number: 1 -->\n# Making Deployed 5G Private Networks more Resilient\nRandy Schnell\nBusiness Development Manager\nAerospace & Defense Test",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-ee03d2faf62e9553",
+              "original_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+              "sha256": "ee03d2faf62e95530401e678c264a927c21cc58e47bb7aadc133b34233fc6940",
+              "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+             "section": 2,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 19.139055
+           },
+           {
+            "text": "![](Picture2.jpg)\nOSP200/300\nRF switch matrix\nConfigurable\nReliably connects different RUs /\nRF ports\nR&S® RTO/RTP\nOscilloscope\nVoltage, Current\nRF signals (FFT)\nSignal analysis with VSE software",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-8ea3b55008b7c337",
+              "original_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+              "sha256": "8ea3b55008b7c337d029721ca2f0a210e3b1b6cf0fc902f9409ce7834ac35594",
+              "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+             "section": 49,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 17.773338
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [],
+           "missing_facets": [],
+           "relation_required": false,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       },
+       {
+        "call_id": "call_qJzIeoI64UqnwioiBQdNkNwq",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-ba64d7d794d74970b15f02fce3cd6a3e",
+          "request_id": "request-ba64d7d794d74970b15f02fce3cd6a3e",
+          "span_id": "span-ba64d7d794d74970b15f02fce3cd6a3e",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-ba64d7d794d74970b15f02fce3cd6a3e",
+           "request_id": "request-ba64d7d794d74970b15f02fce3cd6a3e",
+           "span_id": "span-ba64d7d794d74970b15f02fce3cd6a3e",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "Raw evidence only: oscilloscope opportunities in aerospace defense high-speed digital SerDes signal integrity power integrity avionics satellite systems. What evidence supports each? Cite Raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 關鍵實體與概念\n- [[Dr. Milton Lien]] — 封面列名的作者 / 講者。\n- [[RSTW]] — 封面單位文字之一，來源未展開完整名稱。\n- [[SerDes]] — 本簡報主題之一，並在 standards / eco-chain / transmission channel 脈絡中出現。\n- [[Signal Integrity]] — Slide 20 以 high speed PCB/PCBA signal integrity flow 呈現，包含 [[IL]]、[[Xtalk]]、[[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]] 與 [[TL Calculator]]。\n- [[Power Integrity]] — 封面題名中的 PI；Slide 11 以 [[Power Distribution Network]] 形式出現，並列 scopes 與 network analyzers。\n- [[High speed SerDes standards]] — Slide 4 的高速介面 / 標準列名。\n- [[High speed SerDes eco-chain]] — Slide 9 的上中下游產業鏈分類。\n- [[R&S PCB test solutions]] — Slide 21 的 PCB fabricator / system house 測試流程與工具 / 方法集合。\n- [[HDI vs Package substrate]] — Slide 17 的 HDI、package substrate、CoWoS、ABF、L/S、pitch 對照線索。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] — 既有概念頁可承接 Slide 20–21 的 PCB / PCBA 測試內容。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 3.566647
+            },
+            {
+             "text": "Sentry HD High-Speed Backplane Connector › 來源中的說法\n- [[full-spectrum-data-center-connectivity-brochure]]（來源未標示日期；raw converted 2026-09-17）在 featured product 區塊列出 Sentry HD High-Speed Backplane Connector。\n- 來源稱 Sentry HD is Amphenol's next-generation high-speed backplane connector platform。\n- 來源稱它 purpose-built to power the future of AI data center architectures。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Sentry HD High-Speed Backplane Connector.md"
+             },
+             "score": 1.800054
+            },
+            {
+             "text": "高速互連 probing 與 de-embedding 測試案例 › 可學到的 sales / solution pattern\n- 來源明示的 win factor 不是單一儀器規格，而是 total solution：probe、mount-kit、de-embedding tool 與 local partner。這與 [[R&S PCB test solutions]] 中 material measurement / sampling testing / process monitoring 的流程視角互補。\n- Bare board for SoCs、socket / transmission line evaluation 與 board-to-board connector DUT 都落在 [[Signal Integrity]]、[[Insertion Loss]]、[[Return Loss]]、[[Impedance]] 與 de-embedding 的交界。\n- Samsung 5G SoC including VCO case 顯示 [[R&S FSWP50]]、[[R&S SMW200A]] 與 automated VCO tuning software 可以被包裝成 RF / analog enablement 測試方案，但來源未提供正式 software product name 或 version。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+             },
+             "score": 3.182817
+            },
+            {
+             "text": "R&S FSWP50 › Spectrum analyzer、bandwidth 與 frequency extension options\n| Option code | 名稱 | Order No. | 原文說明 / 限制 |\n|---|---|---|---|\n| R&S®FSWP-B1 | Spectrum analyzer, 10 Hz to 50 GHz | 1322.9997.50 | for R&S®FSWP50 |\n| R&S®FSWP-B8 | Resolution bandwidth up to 80 MHz | 1325.5028.02 | not retrofittable，for R&S®FSWP50 with R&S®FSWP-B80 option；export license required |\n| R&S®FSWP-B21 | LO/IF connections for external mixers | 1325.3848.02 | retrofittable，for R&S®FSWP26/50，contact service center，includes two cables for IF and LO ports, length 1 m |\n| R&S®FSWP-B24 | RF preamplifier, 100 kHz to 50 GHz | 1325.3725.50 | for R&S®FSWP50 |\n| R&S®FSWP-B56G | Frequency extension up to 56 GHz | 1357.7878.02 | retrofittable，for R&S®FSWP50 with model .51 或 R&S®FSWP-B61 option model .51 |\n| R&S®FSWP-B80 | 80 MHz analysis bandwidth | 1325.4338.02 | retrofittable，for R&S®FSWP8/26/50 |\n| R&S®FSWP-B320 | 320 MHz analysis bandwidth | 1338.3235.04 | retrofittable，for R&S®FSWP8/26/50 |\n\n- R&S®FSWP-B1 spectrum analyzer mode：DC coupled 10 Hz to 50 GHz；AC coupled 10 MHz to 50 GHz；with R&S®FSWP-B56G 時 DC coupled 1 MHz to 56 GHz，AC coupled 10 MHz to 56 GHz。\n- Signal analysis bandwidth：standard 10 MHz nominal；with R&S®FSWP-B80 option 80 MHz nominal；with R&S®FSWP-B320 option 320 MHz nominal。\n- R&S®FSWP-B24 RF preamplifier frequency range：100 kHz to 50 GHz；RF preamplifier gain setting range 15 dB / 30 dB nominal；RF preamplifier 對 phase noise analyzer specifications 無影響。\n- R&S®FSWP-B320：signal analysis bandwidth 標稱 320 MHz；f ≥ 8 GHz 時 YIG preselector off。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSWP50.md"
+             },
+             "score": 3.083992
+            },
+            {
+             "text": "R&S FSWP › 共通功能\n- Frequency resolution：0.01 Hz。\n- 主要量測：[[Phase noise measurement]]、[[AM noise measurement]]、[[Baseband noise measurement]]、[[VCO characterization]]、[[Transient analysis]]、[[Allan deviation]] / [[Allan variance]]。\n- Phase noise measurement results：SSB phase noise、spurious signals、integrated RMS phase deviation、residual FM、time jitter。\n- Number of traces：phase noise 6；spectrum analyzer mode level display 6。\n- Cross-correlations 改善量：10 cross-correlations 改善 5 dB；100 改善 10 dB；1000 改善 15 dB；10 000 改善 20 dB。\n- Signal levels below +10 dBm 時，phase noise sensitivity 受 thermal noise floor −177 dBm (1 Hz) 限制。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSWP.md"
+             },
+             "score": 8.203849
+            },
+            {
+             "text": "Wi-Fi 7 and 5G RedCap OTA measurements › 使用限制\n- 來源未標示發布日期。\n- 來源未標示 [[R&S CMX500]] 搭配 [[EMITE]] OTA chambers 的硬體 BOM、software option code、CSW version、RF chain count 或 license requirement。\n- 來源未標示 [[EMITE]] chamber 型號、頻率範圍、DUT 尺寸、load condition、校準程序、measurement uncertainty 或 conformance applicability。\n- 來源使用 full compliance with [[IEEE 802.11be]] and [[5G RedCap]] 的語句，但未展開 compliance 的標準版本、測試項目、pass/fail criteria 或認證機構。\n- 來源未列出 [[Wi-Fi 7]]、[[5G RedCap]]、[[LTE]]、[[NR FR1]]、[[NR FR2]] 的完整 test case list。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+             },
+             "score": 2.556472
+            },
+            {
+             "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx | WLAN SISO signaling |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx | 802.11ax station testing |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx | 802.11be station testing |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx | 802.11bn station testing |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx | 802.11ax AP testing |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx | 802.11be AP testing |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx | 802.11bn AP testing |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx | 2x2 MIMO support |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx | Enterprise security support |\n| R&S CMX-KS500B / M / X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx | 僅 LTE standalone 需要；NR NSA LTE anchor cells 包含於 NR signaling options |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx | D2C fixed / variable delay |\n| R&S CMX-KS600B / M / X | NR signaling enabler, Rel. 15 | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx | 包含 5G NR SA option 2、NSA option 3、DL 2x2/4x4 MIMO、one CC、UL 256QAM |\n| R&S CMX-KS610B / M / X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx | UL 2x2 MIMO、CA up to 9 CC |\n| R&S CMX-KS611B / M / X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx | SUL / Rel. 16 features |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 25,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 9.748054
+            },
+            {
+             "text": "R&S FSWX › 產品定位與架構\n- 產品定位：multiport signal and spectrum analyzer。\n- 內部 multipath architecture 支援 1-port 與 2-port instruments。\n- 可用於 spectrum、noise measurement、phase noise、modulation quality（EVM）的 [[Cross-correlation]]。\n- 提供 extended [[Spurious free dynamic range]]（SFDR）。\n- 改善 [[Displayed average noise level]]（DANL）以尋找 hidden spurs。\n- 可在 high-power carrier 存在時量測 distortion 與 noise。\n- 可針對 EVM 要求嚴苛的 components 做 characterization。\n- Multipath wideband phase coherent receivers 可使用 independent receivers 同時進行 signal analysis 與 spectrum analysis。\n- 可在 spectrum 任意位置、相同或不同頻率同時觀察 signals。\n- 可同時量測 antenna 的 H 或 V polarizations、device input 與 output，並直接比較 ports 之間的 amplitude、frequency、phase。\n- Image free I/Q and vector signal analysis 使用 preselected capture and analysis，避免 unwanted signals 干擾量測。\n- Operating system：Linux based operating system，目標為 high security 與 long-term support。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSWX.md"
+             },
+             "score": 11.279761
+            },
+            {
+             "text": "R&S SMW200A › 產品定位與架構\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]（Version 31.00，May 2026）與 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（Version 06.00，May 2024）：\n\n- [[R&S SMW200A]] 可從 single-path vector signal generator 擴充到 multichannel [[MIMO]] receiver tester。\n- 支援最多 `8` 個 signal sources 與最多 `64` 個 fading channels。\n- 可連接 [[R&S SGT100A]] signal generator modules，提供最多 `8` 條 RF paths。\n- 最多可在 `2` 個 internal baseband modules 上配置 `8` 個 baseband generators，具 real-time coder 與 ARB。\n- 單機可配置最多兩個 internal RF paths：RF path A 為 mandatory，RF path B 為 optional second RF path。\n- Baseband section 分成 standard baseband section 與 wideband baseband section；standard baseband 最高 `160 MHz` RF modulation bandwidth，wideband baseband 最高 `2 GHz` RF modulation bandwidth。\n- 可選 integrated fading section，channel emulation bandwidth 最高 `800 MHz`；最多可安裝 `4` 個 fading modules，提供最多 `64` 個 logical faders。\n- 單一儀器可實作 MIMO fading scenarios：`2x2`、`3x3`、`4x4`、`8x4`、`4x8`、`2x4x4`。\n- Path-specific、baseband-specific 與 fading/MIMO software options 採 floating license concept；若同一 feature 需同時在兩個 paths 或兩個 baseband generators 使用，通常需安裝兩份對應 option。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SMW200A.md"
+             },
+             "score": 15.657365
+            },
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 3.512896
+            },
+            {
+             "text": "Sentry HD High-Speed Backplane Connector › 可追溯限制\n- 來源未標示正式內容日期、datasheet 版次、料號、支援速率、pin count、impedance、insertion loss、crosstalk 或 compliance 資訊。\n- `next-generation`、`purpose-built` 與 `AI data center architectures` 是 brochure marketing claim；不可推論市占率、客戶導入或量產狀態。\n- 來源未說明 [[Sentry HD High-Speed Backplane Connector]] 與既有 [[Paladin HD]]、[[Paladin HD2 224Gb-s Backplane Interconnect System]]、[[EXAMAX2]] 或 [[XCede HD2]] 的產品階層關係。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Sentry HD High-Speed Backplane Connector.md"
+             },
+             "score": 1.362327
+            },
+            {
+             "text": "高速互連 probing 與 de-embedding 測試案例 › 與既有知識的關係\n- [[R&S PCB test solutions]] — 保存 R&S high-speed digital 簡報中的 PCB test flow；本頁補入 case-sharing 中的 customer / partner / competitor context。\n- [[SerDes 與 SI PI 測試概覽]] — 本頁提供 PCB / interconnect probing 的實務案例語境。\n- [[Keysight ENA]] — 在 LSmtron case 中作為 competitor。\n- [[R&S ZNB3044]]、[[R&S ZNA43]]、[[R&S FSWP50]]、[[R&S SMW200A]] — 本來源提供 Market 應用案例，不改寫 Productions 規格。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+             },
+             "score": 1.757136
+            },
+            {
+             "text": "R&S SMW200A\n[[R&S SMW200A]] 是 Rohde & Schwarz 的 vector signal generator；依 `R&S®SMW200A Vector Signal Generator Specifications` `Version 31.00`（`May 2026`），RF path A 可覆蓋 `100 kHz to 67 GHz`，RF path B 可覆蓋至 `44 GHz`，並可由 single-path vector signal generator 擴充到 multichannel MIMO receiver tester（來源：[[SMW200A_specs_en_3606-8037-22_v3100]]）。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SMW200A.md"
+             },
+             "score": 6.419938
+            },
+            {
+             "text": "R&S FSWP\nR&S FSWP 是 Rohde & Schwarz 的 Phase Noise Analyzer and VCO Tester 系列，依 Version 09.01（January 2026）涵蓋 [[R&S FSWP8]]、[[R&S FSWP26]]、[[R&S FSWP50]]，其中 [[R&S FSWP50]] 搭配 R&S®FSWP-B56G 可延伸至 56 GHz。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSWP.md"
+             },
+             "score": 4.504678
+            },
+            {
+             "text": "Wi-Fi 7 and 5G RedCap OTA measurements\n[[Wi-Fi 7 and 5G RedCap OTA measurements]] 是 [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 中描述的 OTA 測試解決方案情境：將 [[R&S CMX500]] 的 latest test capabilities 整合到 [[EMITE]] over-the-air chambers，以評估 [[Wi-Fi 7]] / [[IEEE 802.11be]] 與 [[5G RedCap]] devices 的 performance。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+             },
+             "score": 2.20097
+            },
+            {
+             "text": "EMITE › 與 Rohde & Schwarz 的合作\n[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 說明 [[EMITE]] 與 [[Rohde & Schwarz]] 延續合作，將 [[R&S CMX500]] multi-technology、multi-channel one-box signaling tester 的 latest test capabilities fully integrated 到 [[EMITE]] OTA measurement solutions。\n\n來源中的合作重點：\n\n- [[EMITE]] state-of-the-art over-the-air chambers 可與 [[R&S CMX500]] 最新 testing features combined。\n- 整合能力涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]、[[IEEE 802.11be]] / [[Wi-Fi 7]] 與 [[5G RedCap]]。\n- 對 EMITE customers 的目標是提供 comprehensive environment，用於 assessing performance of [[Wi-Fi 7]] and [[5G RedCap]] devices。\n- 下一步合作方向是整合 [[NB-IoT NTN]] 與 [[NR NTN]] test capabilities；來源稱兩者 already covered by [[R&S CMW500]] and [[R&S CMX500]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/EMITE.md"
+             },
+             "score": 3.234524
+            },
+            {
+             "text": "R&S FSWX › Firmware / licence options（摘錄）\n| Option code | 名稱 | Order No. | Requires / 原文說明 |\n|---|---|---|---|\n| R&S FSW3-KR110 | User defined frequency correction | 1347.8113.02 | 來源未標示 |\n| R&S FSW3-KR200 | External frontend control | 1347.8107.02 | 支援 [[R&S FE110SR]]、[[R&S FE170SR]] |\n| R&S FSW3-KM100 | I/Q spectrum analyzer | 1347.7600.02 | 來源未標示 |\n| R&S FSW3-KM101 | Vector signal analysis | 1347.7846.02 | 來源未標示 |\n| R&S FSW3-KM102 | Multi-modulation analysis | 1347.7852.02 | 需要 R&S FSW3-KM101 |\n| R&S FSW3-KM103 | BER PRBS Measurements | 1347.7869.02 | 需要 R&S FSW3-KM101 |\n| R&S FSW3-KM105 | Cross-correlation for I/Q spectrum analyzer | 1349.2170.02 | 需要 R&S FSW3-KM100 |\n| R&S FSW3-KM107 | Analog demodulation application | 1347.7646.02 | 來源未標示 |\n| R&S FSW3-KM112 | OFDM vector signal analysis | 1348.5930.02 | 來源未標示 |\n| R&S FSW3-KM113 | Cross-correlation for OFDM vector signal analysis | 3852.5400.02 | 需要 R&S FSW3-KM112 |\n| R&S FSW3-KM118 | Amplifier measurements | 1347.7675.02 | 來源未標示 |\n| R&S FSW3-KM119 | Frequency response measurements | 1347.7698.02 | 需要 R&S FSW3-KM118 |\n| R&S FSW3-KM120 | Direct DPD measurements | 1347.7681.02 | 需要 R&S FSW3-KM118 |\n| R&S FSW3-KM121 | Memory-polynomial DPD measurements | 1347.8388.02 | 需要 R&S FSW3-KM118 |\n| R&S FSW3-KM125 | Noise figure measurement application | 1347.7723.02 | 來源未標示 |\n| R&S FSW3-KM126 | Cross-correlation for noise figure measurement application | 1347.7730.02 | 需要 R&S FSW3-KM125 |\n| R&S FSW3-KM129 | Phase noise measurement application | 1347.7752.02 | 來源未標示 |\n| R&S FSW3-KM130 | Cross-correlation for phase noise | 1347.7769.02 | 需要 R&S FSW3-KM129 |\n| R&S FSW3-KM135 | Cross-application control and triggering | 1349.2129.02 | 來源未標示 |\n| R&S FSW3-KM310 | EUTRA/LTE FDD downlink | 1347.7969.02 | 來源未標示 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSWX.md"
+             },
+             "score": 7.935428
+            },
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 與既有知識的關係\n- 既有 [[SerDes]] 頁主要來自 D2D / SoC IP / XPU-HBM-Optical I/O 圖像來源；本來源補充 2026.3.4 簡報層級的 high speed SerDes standards、產業鏈與驗證挑戰脈絡，但不提供 SerDes 的資料率、lane 數或具體標準條文。\n- 既有 [[高頻高速 PCB 測試解決方案]] 主要記錄 Keysight 圖像中的原材料表徵、材料選擇、抽樣測試與量產監控；本來源的 [[R&S PCB test solutions]] 以 R&S 簡報角度列出 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 PL / process monitoring，可作為平行視角。\n- 既有 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 已記錄 Keysight 圖像來源；本來源 Slide 21 再次把 DK/DF extraction、TDR、Delta-L 與 ISD/ADK 放在 PCB test solutions 流程中，但沒有新增標準版本、儀器型號或 option code。\n- 既有 [[Package Substrate]] 與 [[ABF載板]] 頁已有多份市場圖像來源；本來源 Slide 17 顯示 HDI vs Package substrate / CoWoS / ABF 對照，但因 OCR / 轉檔結果不足，僅作為待回看原始投影片的線索。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 1.391606
+            },
+            {
+             "text": "Sentry HD High-Speed Backplane Connector › 未決事項\n- 來源未提供 Sentry HD 的完整型號、order number、可訂購狀態、測試條件或正式規格表。\n- 來源未提供 AI data center architecture 的具體系統、客戶、平台或設計導入案例。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Sentry HD High-Speed Backplane Connector.md"
+             },
+             "score": 0.720734
+            },
+            {
+             "text": "高速互連 probing 與 de-embedding 測試案例\n[[高速互連 probing 與 de-embedding 測試案例]] 是從 [[TRI_AMD_RSKR Sharing1]] 抽出的 Market 層級案例集合，描述以 VNA、probe、mount-kit、de-embedding tool 與 local partner 解決 PCB、socket、connector 與 SoC validation 量測問題。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+             },
+             "score": 0.279874
+            },
+            {
+             "text": "R&S FSWP › 硬體 options（系列總覽，型號頁另列適用性）\n| Option code | 名稱 | Order No. | 原文適用 / 限制 |\n|---|---|---|---|\n| R&S®FSWP-B60 | Cross-correlation, 8 GHz | 1322.9800.08 | retrofittable，for [[R&S FSWP8]] |\n| R&S®FSWP-B60 | Cross-correlation, 26 GHz | 1322.9800.26 | retrofittable，for [[R&S FSWP26]] |\n| R&S®FSWP-B60 | Cross-correlation, 50 GHz | 1322.9800.50 | retrofittable，for [[R&S FSWP50]] |\n| R&S®FSWP-B60 | Cross-correlation, 50 GHz | 1322.9800.51 | retrofittable，for [[R&S FSWP50]] |\n| R&S®FSWP-B61 | Cross-correlation low phase noise, 8 GHz | 1325.3719.08 | retrofittable，for [[R&S FSWP8]]，contact service center，includes R&S®FSWP-B4 option |\n| R&S®FSWP-B61 | Cross-correlation low phase noise, 26 GHz | 1325.3719.26 | retrofittable in factory，for [[R&S FSWP26]] |\n| R&S®FSWP-B61 | Cross-correlation low phase noise, 50 GHz | 1325.3719.50 | retrofittable in factory，for [[R&S FSWP50]] with R&S®FSWP-B60 option model .50 |\n| R&S®FSWP-B61 | Cross-correlation low phase noise, 50 GHz | 1325.3719.51 | retrofittable in factory，for [[R&S FSWP50]] model .51 |\n| R&S®FSWP-B64 | Additive phase noise measurements | 1322.9900.27 | retrofittable，for [[R&S FSWP8]]、[[R&S FSWP26]]、model .50 或 R&S®FSWP-B61 option model .50；frequency range 10 MHz to 8 GHz for [[R&S FSWP8]]，10 MHz to 18 GHz for [[R&S FSWP26]] and [[R&S FSWP50]]；contact service center |\n| R&S®FSWP-B64 | Additive phase noise measurements | 1322.9900.51 | retrofittable，for [[R&S FSWP50]] with model .51 或 R&S®FSWP-B61 option model .51；100 MHz to 50 GHz for [[R&S FSWP50]]，100 MHz to 54 GHz with internal signal source，100 MHz to 56 GHz with external signal source for R&S®FSWP-B56G option |\n| R&S®FSWP-B4 | High stability OCXO | 1325.3890.02 | user-retrofittable |\n| R&S®FSWP-B1 | Spectrum analyzer, 10 Hz to 8 GHz | 1322.9997.08 | retrofittable in factory，for [[R&S FSWP8]] |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSWP.md"
+             },
+             "score": 4.190978
+            },
+            {
+             "text": "Wi-Fi 7 and 5G RedCap OTA measurements › 下一步：NTN\n來源說明下一步合作方向是 integrating test capabilities for [[NB-IoT NTN]] and [[NR NTN]]，且這些能力 already covered by [[R&S CMW500]] and [[R&S CMX500]]。\n\n這句話只能證明該 PR 對 roadmap / collaboration next step 的描述；來源未提供 [[NB-IoT NTN]] 或 [[NR NTN]] 的 option code、software version、test case list、hardware configuration 或正式規格條件。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+             },
+             "score": 1.963176
+            },
+            {
+             "text": "R&S FSWX\nR&S FSWX 是 Rohde & Schwarz 的 multiport Signal and Spectrum Analyzer 系列，依 Version 12.00（May 2026）提供 [[R&S FSWX3026]] 與 [[R&S FSWX3044]]，可配置 1 或 2 個 RF inputs，且每個 RF input 有完整 RF receive path。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSWX.md"
+             },
+             "score": 7.454867
+            },
+            {
+             "text": "R&S SMW200A › Signal routing and baseband main module\n| Code | Name / description | Order No. | 原文說明 / 限制 |\n|---|---|---:|---|\n| `R&S®SMW-B13` | Signal routing and baseband main module，one I/Q path to RF section | `1413.2807.02` | Standard baseband section；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13T` | Signal routing and baseband main module，two I/Q paths to RF section | `1413.3003.02` | Standard baseband section；若要安裝 RF path B 需 `B13T` 或 `B13XT`；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13XT` | Wideband baseband main module，two I/Q paths to RF section | `1413.8005.02` | Wideband baseband section；RF modulation bandwidth up to `2 GHz`。 |\n\n- Standard baseband section：`R&S®SMW-B13` 或 `R&S®SMW-B13T`；RF modulation bandwidth 最高 `160 MHz`；可安裝 `R&S®SMW-B10` standard baseband generator 與 `R&S®SMW-B14` fading simulator。\n- Wideband baseband section：`R&S®SMW-B13XT`；RF modulation bandwidth 最高 `2 GHz`；可安裝 `R&S®SMW-B9` / `R&S®SMW-B9F` wideband baseband generator 與 `R&S®SMW-B15` fading simulator and signal processor。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SMW200A.md"
+             },
+             "score": 9.293179
+            },
+            {
+             "text": "# Users in high speed serdes application",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-74f44a4409e2b694",
+               "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+               "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "section": 57,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.542675
+            },
+            {
+             "text": "# High speed Serdes ecochain",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-74f44a4409e2b694",
+               "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+               "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "section": 53,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.751088
+            },
+            {
+             "text": "# High speed Serdes standards\nGMSL :",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-74f44a4409e2b694",
+               "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+               "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.081012
+            },
+            {
+             "text": "# High speed Serdes eco-chain (Customers)",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-74f44a4409e2b694",
+               "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+               "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "section": 49,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.444925
+            }
+           ],
+           "text": "| Topic | RAW evidence support |\n|---|---|\n| High-speed digital / SerDes | RAW evidence shows sections titled “Users in high speed serdes application,” “High speed Serdes ecochain,” and “High speed Serdes standards.” [25][26][27] |\n| Customers / eco-chain | RAW evidence shows a section titled “High speed Serdes eco-chain (Customers).” [28] |\n| Specific SerDes standard | RAW evidence lists “GMSL” under “High speed Serdes standards.” [27] |",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "# Users in high speed serdes application",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-74f44a4409e2b694",
+              "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+              "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+             "section": 57,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 28.542675
+           },
+           {
+            "text": "# High speed Serdes ecochain",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-74f44a4409e2b694",
+              "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+              "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+             "section": 53,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 25.751088
+           },
+           {
+            "text": "# High speed Serdes standards\nGMSL :",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-74f44a4409e2b694",
+              "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+              "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+             "section": 12,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 25.081012
+           },
+           {
+            "text": "# High speed Serdes eco-chain (Customers)",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-74f44a4409e2b694",
+              "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+              "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+             "section": 49,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 24.444925
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [],
+           "missing_facets": [],
+           "relation_required": false,
+           "relation_citations": [],
+           "relations": []
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

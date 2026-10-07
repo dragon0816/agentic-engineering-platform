@@ -1,0 +1,738 @@
+{
+ "question": {
+  "id": "Q1061",
+  "text": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+  "technical": "Instrument & Measurement Principles",
+  "topic": "non-signaling tester",
+  "product_related": "true"
+ },
+ "session_id": "conversation-0b2288ae4ebd4a45b7adab5a730b7b1a",
+ "exchange": {
+  "sent": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 142.515,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-0b2288ae4ebd4a45b7adab5a730b7b1a",
+    "actor": "leo.chi",
+    "title": "What is non-signaling tester, and which product-related measurement deci…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T14:24:09.868884Z",
+    "updated_at": "2026-10-07T14:26:32.069635Z",
+    "messages": [
+     {
+      "message_id": "message-bab6cb17ce5b4e24a5387c802fff0bad",
+      "role": "user",
+      "text": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-07T14:24:09.896511Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-e7cbe60c8e5e499986ed92ba70e86ff9",
+      "role": "assistant",
+      "text": "The knowledge base did not return Raw-cited evidence sufficient to give a grounded definition, so the explanation below is **general industry knowledge, not from the knowledge base**.\n\nA **non-signaling tester** is an RF test instrument that measures or generates wireless signals **without establishing a full protocol-level connection** with the device under test. In other words, it does not behave like a real base station or access point that performs registration, call setup, attach, handover, IMS, etc. Instead, the DUT is usually put into a special test mode by software, chipset control, AT commands, or factory test commands, and the tester measures RF performance directly.\n\nTypical non-signaling measurements include:\n\n- Transmitter output power  \n- EVM / modulation quality  \n- Frequency error  \n- Spectrum emission mask / ACLR  \n- Occupied bandwidth  \n- Receiver sensitivity, PER/BLER-like checks depending on setup  \n- Multi-port RF calibration or production-line tests  \n\nUnderstanding whether a test is **signaling** or **non-signaling** affects several product-related measurement decisions:\n\n1. **Tester selection**\n   - Need protocol/network emulation? Choose a signaling tester or callbox.\n   - Need fast RF parametric/production testing? A non-signaling tester may be enough.\n\n2. **Product positioning**\n   - Products like callboxes/network emulators are positioned for connection-based, protocol-aware testing.\n   - Non-signaling testers are positioned more for RF validation, manufacturing, calibration, and throughput-efficient parametric testing.\n\n3. **Required options and licenses**\n   - Signaling tests often require technology, protocol, application, IMS, or conformance-related options.\n   - Non-signaling tests usually depend more on RF bandwidth, frequency range, MIMO ports, waveform support, and analyzer/generator capabilities.\n\n4. **Measurement workflow**\n   - Signaling: tester controls the device through a simulated network.\n   - Non-signaling: external DUT control is needed, often through chipset tools or factory test interfaces.\n\n5. **R&D vs production decision**\n   - R&D and conformance pre-checks often need signaling.\n   - Production lines usually prefer non-signaling because it is faster, simpler, and easier to automate.\n\n6. **DUT access requirements**\n   - If the customer cannot access chipset test mode, non-signaling may not be practical.\n   - If the DUT must behave as in a real network, signaling is needed.\n\n7. **Measurement validity**\n   - Some measurements are only meaningful when the device is in a real connection state.\n   - Others are better isolated in non-signaling mode to remove protocol behavior from the RF result.\n\nIn short: understanding “non-signaling” helps decide **which tester family, options, automation method, DUT control method, and measurement claims** are appropriate for a product.",
+      "created_at": "2026-10-07T14:26:32.069635Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-e564b684b7794575a9f2821c94439dde",
+       "request_id": "request-e564b684b7794575a9f2821c94439dde",
+       "span_id": "span-e564b684b7794575a9f2821c94439dde",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded",
+    "ok": true,
+    "answer": "The knowledge base did not return Raw-cited evidence sufficient to give a grounded definition, so the explanation below is **general industry knowledge, not from the knowledge base**.\n\nA **non-signaling tester** is an RF test instrument that measures or generates wireless signals **without establishing a full protocol-level connection** with the device under test. In other words, it does not behave like a real base station or access point that performs registration, call setup, attach, handover, IMS, etc. Instead, the DUT is usually put into a special test mode by software, chipset control, AT commands, or factory test commands, and the tester measures RF performance directly.\n\nTypical non-signaling measurements include:\n\n- Transmitter output power  \n- EVM / modulation quality  \n- Frequency error  \n- Spectrum emission mask / ACLR  \n- Occupied bandwidth  \n- Receiver sensitivity, PER/BLER-like checks depending on setup  \n- Multi-port RF calibration or production-line tests  \n\nUnderstanding whether a test is **signaling** or **non-signaling** affects several product-related measurement decisions:\n\n1. **Tester selection**\n   - Need protocol/network emulation? Choose a signaling tester or callbox.\n   - Need fast RF parametric/production testing? A non-signaling tester may be enough.\n\n2. **Product positioning**\n   - Products like callboxes/network emulators are positioned for connection-based, protocol-aware testing.\n   - Non-signaling testers are positioned more for RF validation, manufacturing, calibration, and throughput-efficient parametric testing.\n\n3. **Required options and licenses**\n   - Signaling tests often require technology, protocol, application, IMS, or conformance-related options.\n   - Non-signaling tests usually depend more on RF bandwidth, frequency range, MIMO ports, waveform support, and analyzer/generator capabilities.\n\n4. **Measurement workflow**\n   - Signaling: tester controls the device through a simulated network.\n   - Non-signaling: external DUT control is needed, often through chipset tools or factory test interfaces.\n\n5. **R&D vs production decision**\n   - R&D and conformance pre-checks often need signaling.\n   - Production lines usually prefer non-signaling because it is faster, simpler, and easier to automate.\n\n6. **DUT access requirements**\n   - If the customer cannot access chipset test mode, non-signaling may not be practical.\n   - If the DUT must behave as in a real network, signaling is needed.\n\n7. **Measurement validity**\n   - Some measurements are only meaningful when the device is in a real connection state.\n   - Others are better isolated in non-signaling mode to remove protocol behavior from the RF result.\n\nIn short: understanding “non-signaling” helps decide **which tester family, options, automation method, DUT control method, and measurement claims** are appropriate for a product.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-e564b684b7794575a9f2821c94439dde",
+      "request_id": "request-e564b684b7794575a9f2821c94439dde",
+      "span_id": "span-e564b684b7794575a9f2821c94439dde",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-e564b684b7794575a9f2821c94439dde",
+       "request_id": "request-e564b684b7794575a9f2821c94439dde",
+       "span_id": "span-e564b684b7794575a9f2821c94439dde",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base did not return Raw-cited evidence sufficient to give a grounded definition, so the explanation below is **general industry knowledge, not from the knowledge base**.\n\nA **non-signaling tester** is an RF test instrument that measures or generates wireless signals **without establishing a full protocol-level connection** with the device under test. In other words, it does not behave like a real base station or access point that performs registration, call setup, attach, handover, IMS, etc. Instead, the DUT is usually put into a special test mode by software, chipset control, AT commands, or factory test commands, and the tester measures RF performance directly.\n\nTypical non-signaling measurements include:\n\n- Transmitter output power  \n- EVM / modulation quality  \n- Frequency error  \n- Spectrum emission mask / ACLR  \n- Occupied bandwidth  \n- Receiver sensitivity, PER/BLER-like checks depending on setup  \n- Multi-port RF calibration or production-line tests  \n\nUnderstanding whether a test is **signaling** or **non-signaling** affects several product-related measurement decisions:\n\n1. **Tester selection**\n   - Need protocol/network emulation? Choose a signaling tester or callbox.\n   - Need fast RF parametric/production testing? A non-signaling tester may be enough.\n\n2. **Product positioning**\n   - Products like callboxes/network emulators are positioned for connection-based, protocol-aware testing.\n   - Non-signaling testers are positioned more for RF validation, manufacturing, calibration, and throughput-efficient parametric testing.\n\n3. **Required options and licenses**\n   - Signaling tests often require technology, protocol, application, IMS, or conformance-related options.\n   - Non-signaling tests usually depend more on RF bandwidth, frequency range, MIMO ports, waveform support, and analyzer/generator capabilities.\n\n4. **Measurement workflow**\n   - Signaling: tester controls the device through a simulated network.\n   - Non-signaling: external DUT control is needed, often through chipset tools or factory test interfaces.\n\n5. **R&D vs production decision**\n   - R&D and conformance pre-checks often need signaling.\n   - Production lines usually prefer non-signaling because it is faster, simpler, and easier to automate.\n\n6. **DUT access requirements**\n   - If the customer cannot access chipset test mode, non-signaling may not be practical.\n   - If the DUT must behave as in a real network, signaling is needed.\n\n7. **Measurement validity**\n   - Some measurements are only meaningful when the device is in a real connection state.\n   - Others are better isolated in non-signaling mode to remove protocol behavior from the RF result.\n\nIn short: understanding “non-signaling” helps decide **which tester family, options, automation method, DUT control method, and measurement claims** are appropriate for a product.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_xD9X8MTRiDaagzAqfirgEbqZ",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-e564b684b7794575a9f2821c94439dde",
+          "request_id": "request-e564b684b7794575a9f2821c94439dde",
+          "span_id": "span-e564b684b7794575a9f2821c94439dde",
+          "parent_span_id": null
+         },
+         "status": "succeeded",
+         "data": {
+          "asset": {
+           "namespace": "engineering",
+           "name": "rs-knowledge",
+           "version": "1.0.2"
+          },
+          "trace": {
+           "trace_id": "trace-e564b684b7794575a9f2821c94439dde",
+           "request_id": "request-e564b684b7794575a9f2821c94439dde",
+           "span_id": "span-e564b684b7794575a9f2821c94439dde",
+           "parent_span_id": null
+          },
+          "answer": {
+           "question": "What is a non-signaling tester, and which product-related measurement decisions depend on understanding it? Please answer with citations to Raw evidence.",
+           "status": "answered",
+           "passages": [
+            {
+             "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 14.241721
+            },
+            {
+             "text": "Anritsu MX844030PC › RF / accessory items\n- [[Anritsu MD8190A]] — Universal RF Unit。\n- MD8190A-001 — 0.4-6GHz TRX RF Unit。\n- [[MX819020A]] — Virtual Signalling Tester RF Platform。\n- MX819020A-020 — RF Interface For NR RedCap。\n- MX844030PC-AK001 — Standard PC for Virtual Signalling Tester。\n- [[Z1320G]] — Standard PC for RTD with monitor。\n- [[MT8000A-AK003]] — IP Test Server PC。\n- [[Z1591A]] — USB Dongle Protocol。\n- [[J1440A]] — LAN Cable。\n- [[G0408A]] — 10 Gig Ethernet SR 850nm SFP+。\n- [[J1581A]] — Optical cable MM LC/PC to LC/PC 3 meter。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Anritsu MX844030PC.md"
+             },
+             "score": 5.910013
+            },
+            {
+             "text": "Productions 類資料\n[[Productions 類資料]] 是此 vault 中用於長期、少變動產品資料的分類，涵蓋產品 spec、datasheet、option、licence 清單與 product brochure。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Productions 類資料.md"
+             },
+             "score": 1.697314
+            },
+            {
+             "text": "R&S CMX-KA098 › 與 CMW-KA096 的關係\n[[CMW500 to CMX500OBT_License_Swap_Process]] 將 [[R&S CMW-KA096]]（for CMWPC；NGECALL APPL）列為 allowed license swap 的 CMW500 source keycode，對應到 [[R&S CMX-KA098]]（for CMWPC；Application test IMS NGeCALL）。\n\n[[CMW-KA096_PanEUNGeCall_TC_Status]] 是 [[R&S CMW500]] 搭配 [[R&S CMW-KA096]] / [[R&S CMWrun KT111]] 的 Oct. 2024 NGeCall over LTE capability list；[[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 則是 [[R&S CMX500]] 搭配 CMX-KA098 / [[R&S CMX-KF671B]] 的 NGeCall over NR/LTE capability list。兩者是不同平台 / option 組合，不應合併為同一 option。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+             },
+             "score": 3.494418
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 wireless products 的 market access approval testing 分成三類：[[Regulatory Compliance Test]]、[[Telecom Industry Certification Test]]、[[Cellular Network Operator Acceptance Test]]。Regulatory compliance 被描述為各區域法律面 market access 的必要條件；industry certification 例子包含 [[GCF]] / Cellular、[[Bluetooth SIG]]、[[FiRa]] / [[UWB]]、[[Wi-Fi Alliance]]；operator acceptance test 例子包含 AT&T、VzW、T-mobile、CMCC。\n- 來源主張 wireless products 需要 [[CE marking]] / [[FCC ID]]；test results 是 technical documentation 的一部分，需在產品投放市場前準備、可提供給 surveillance authorities，並自 placed on the market 起保存 10 years。\n- 來源列出 Ericsson Mobility Visualizer Jan 2023 的 mobile subscriptions 表，顯示 2022–2028 的 5G subscriptions 由 1046.006 增至 4974.568；但單位與表格數值口徑未在轉檔文字中完整標示。\n- [[CE RED 無線設備法規測試]]被整理成四類 essential requirements：Art 3.1a Health & Safety、Art 3.1b EMC、Art 3.2 Radio Spectrum、Art 3.3 Specific topics。來源列出多個 ETSI EN standards，例如 [[EN 300 328]]、[[EN 301 893]]、[[EN 303 687]]、[[EN 301 908-1]]、[[EN 301 908-13]]、[[EN 301 908-24]]、[[EN 301 908-25]]、[[EN 301 489-52]] 等。\n- 對 [[5G NR SAR testing]]，來源指出 5G NR network emulator is required to drive EUT to extreme transmission condition，multi-radio UE 的 average-SAR feature 需要 flexible signaling functions，涵蓋 cellular standards、Wi-Fi 與 Bluetooth；來源將 [[R&S CMW500]] / [[R&S CMX500]] 稱為 SAR / HAC signaling solution。\n- 對 Art 3.1b EMC，來源指出 EMC tests 需要 radio enabled 與 radio disabled conditions，因此 5G NR 也需要 signaling solution；mobile phone 仍需要 [[Audio Breakthrough]] test，從 GSM 到 VoLTE / VoNR by 5G。來源提到 [[R&S TS9982 EMS Test System]] 與 [[R&S TS9975 EMI Test System]]。\n- 對 Art 3.2 Radio Spectrum，來源指出 5G NR specification 包含 FR1 與 FR2；FR1 test setup stays conducted，FR2 test setup becomes radiated；並把 3GPP test cases、CTIA-OTA test cases、TRP / TRS、RSE 測試連到 [[R&S TS8991]] 與 [[R&S TS8996]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 1.966112
+            },
+            {
+             "text": "R&S CMW500 › 支援技術摘要\n- [[R&S CMW500]] 在 [[CMW_dat-sw_en_5213-9211-22_v1700]] 中是唯一明確支援 GSM small cell、WCDMA small cell、LTE small cell 的 CMW 型號。\n- GSM、NB-IoT、WCDMA、LTE mobile station test 與 NR Sub-6GHz 章節明確標示適用於 [[R&S CMW500]] 與 [[R&S CMW290]]。\n- Four RF paths、DAU B450H/I、Digital I/Q 1 to 4 / 5 to 8、Digital I/Q QUAD 章節明確標示 [[R&S CMW500]] 與 [[R&S CMW270]]。\n- Bluetooth standard：Bluetooth Core Specification Version 5.0；test standard 包含 RF.TS.5.0.0 與 RF-PHY.TS.5.0.0。\n- WLAN 160 MHz bandwidth unit 章節列出 IEEE 802.11a/g/p/n/ac 與 IEEE 802.11ax，bandwidth up to 160 MHz。\n- [[CMW-KA096_PanEUNGeCall_TC_Status]] 補充 [[NGeCall over LTE]]、[[IMS eCall]]、[[IVS]]、[[PSAP]]、[[MSD]]、limited service、callback、clear-down、SRVCC handover 等 eCall 測試語境。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 14,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMW500.md"
+             },
+             "score": 1.865279
+            },
+            {
+             "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 3.646489
+            },
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 8.63149
+            },
+            {
+             "text": "Productions 類資料 › 範圍\n依 [[Productions README]]，[[Productions 類資料]] 包含：\n\n- 產品 datasheet\n- 規格書\n- 軟硬體 option\n- licence 清單\n- product brochure\n\n這類資料的核心可信度要求是可追溯到明確的型號、文件版次與原文條件；若原文未標示，不能推論補齊。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Productions 類資料.md"
+             },
+             "score": 1.358087
+            },
+            {
+             "text": "R&S CMX-KA098\nR&S CMX-KA098 是 [[R&S CMX500]] 的 NGeCall / IMS eCall application test software option；[[CMW500 to CMX500OBT_License_Swap_Process]]（November 2024；文件版次來源未標示）把它列為 [[R&S CMW-KA096]] license swap recipient，[[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]]（Dec. 2024；文件版次來源未標示）則提供 CMX500 搭配 CMX-KA098 執行 [[NGeCall over NR-LTE]] / [[NGeCall over LTE]] capability tests 的支援清單。[[CMX500_Software_Maintenance_PU-Option_Mapping]]（表頭標示 28.10.2025/CH）進一步補出它的 Ident No、短文字與 software maintenance service contract PU mapping。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+             },
+             "score": 2.605237
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 重點摘要\n- 來源將 [[EN 303 981]] 測試描述為 antenna characterizations 的 radiated measurement，列出 antenna beam pointing、off/on-axis spurious radiation、carrier suppression / cessation、blocking performance、adjacent signal selectivity、image frequency rejection、WBES location / identification、control and monitoring functions、receive antenna off-axis gain pattern，並連到 [[R&S SMBV100B]]、[[R&S ELEKTRA]]、[[R&S TS8996]]。\n- 來源列出 FCC CFR47 §25 Mobile Satellite Service / Mobile Earth Station test items：RF output power、occupied bandwidth、emission mask within 25% of authorized BW、out of band emissions、additional unwanted emission 1559–1610 MHz、carrier-off state emissions 1559–1610 MHz、frequency stability，並提到 ANSI C63.26 / FCC KDBs。\n- 最後來源把 primary test instruments for wireless regulatory test labs 分成 wireless communication tester、EMI test receiver、signal & spectrum analyzer、network analyzer、vector signal generator、broadband amplifier 等類別。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 1.37847
+            },
+            {
+             "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 3.371309
+            },
+            {
+             "text": "R&S CMP180 › Transmitter test functions\n- 8 input signals to be multiplexed to RF analyzer no. 1。\n- 8 input signals to be multiplexed to RF analyzer no. 2。\n- frequency-dependent attenuation（FDA）tables for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP180.md"
+             },
+             "score": 4.359797
+            },
+            {
+             "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 7.606473
+            },
+            {
+             "text": "Productions 類資料 › Ingest 原則\n依 [[Productions README]]，處理 [[Productions 類資料]] 時：\n\n- 不生成原文沒有的 option code、料號或價格。\n- 原文沒有的欄位要寫「datasheet 未列出」或「來源未標示」。\n- 每條規格需標示型號與文件版次；來源沒標版次，就明說沒標。\n- 規格數字要連條件一起抄，例如頻寬、溫度、測試模式。\n- option 的相依關係照抄原文，不自行推論相容性。\n- 缺漏需記進該頁的 unresolved。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Productions 類資料.md"
+             },
+             "score": 0.296282
+            },
+            {
+             "text": "R&S CMX-KA098 › License swap 來源\n- 來源：[[CMW500 to CMX500OBT_License_Swap_Process]]。\n- 文件月份：November 2024。\n- 頁尾日期：11/6/2024；日期格式未標示。\n- 文件版次：來源未標示。\n- 文件分類：COMPANY CONFIDENTIAL。\n- Recipient keycode：CMX-KA098。\n- Recipient description：Application test IMS NGeCALL。\n- Source keycode：[[R&S CMW-KA096]]（for CMWPC）。\n- Source description：NGECALL APPL。\n- 使用情境：[[R&S CMW500]] → [[R&S CMX500 OBT]] license swap for OBT upgrades。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+             },
+             "score": 1.302114
+            },
+            {
+             "text": "Regulatory test for wireless devices with cellular technology › 與既有知識的關係\n- 補強 [[5G NR SAR testing]]：既有頁以 [[SPEAG]] / [[DASY8-3D]] / [[R&S CMX500 OBT]] 的 SAR automation PR 為主；本來源從 CE RED Art 3.1a / FCC SAR / HAC compliance presentation 的角度補入 5G NR network emulator、multi-radio UE、average-SAR 與 CMW/CMX signaling solution。\n- 補強 [[R&S TS9975 EMI Test System]]：既有頁只由 [[2025RS Drone Solution]] 支撐 TS9975 作為 UAV EMI system；本來源新增 wireless devices Art 3.1b EMC / ABT context，並與 [[R&S TS9982 EMS Test System]] 同列。\n- 連接 [[低軌衛星終端設備檢測]]與 [[衛星地球電臺設備技術規範]]：既有頁以台灣 111年08月衛星地球電臺設備草案與 FCC Part 25 對應為主；本來源提供更泛化的 CE RED / ETSI EN 301 681 / EN 303 981 / FCC CFR47 §25 mobile satellite service 視角。\n- 與 [[R&S CMW500]] 既有頁相容：既有頁已保存 CMW500 的 NGeCall / LTE capability 與 datasheet；本來源只是簡報層級稱 latest CMW500 SW supports 3GPP R17 NB-NTN signalling，未提供 software version、license 或 test case ID，不應覆蓋正式 datasheet。\n- 與 [[R&S SMBV100B]] 既有頁相容：既有頁是 Version 13.01 specifications；本來源只是把 SMBV100B列為 EN 301 681 / EN 303 981 測試中的 signal generator solution，不新增產品規格。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+             },
+             "score": 1.293603
+            },
+            {
+             "text": "R&S TS9982 EMS Test System › 來源中的角色\n依 [[Regulatory test for wireless devices with cellular technology]]：\n\n- [[R&S TS9982 EMS Test System]] 與 [[R&S TS9975 EMI Test System]] 同列於 Traditional EMC Art 3.1b tests。\n- 上下文是 [[CE RED 無線設備法規測試]] Art 3.1b [[EMC]] requirements。\n- 來源指出 Art 3.1b EMC test requirements are not changed by 5G NR。\n- EMC tests need both enable radio and disable radio conditions, which means signaling solution for 5G NR。\n- Mobile phones require [[Audio Breakthrough]] test, from GSM to VoLTE and VoNR by 5G。\n- 來源稱 R&S EMC Systems cover 5G NR functionality, powered by latest [[R&S CMX500]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS9982 EMS Test System.md"
+             },
+             "score": 2.499485
+            },
+            {
+             "text": "CMX500 Callbox › Callbox 定位\n依 [[CMX500_Callbox]]，callbox 的核心敘事是：\n\n- Easy to set up。\n- Easy to get in a call。\n- Easy to test with。\n- Focus on [[RF Testing]]，including [[3GPP pre-conformance]]。\n\n來源以 [[Device Under Test]]、cell tower 與 smartphone 圖示描述 [[R&S CMX500]] 作為 DUT 連線與測試環境的中心。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 2.496604
+            },
+            {
+             "text": "mx844030pc-j1200\n這份來源是 [[Anritsu MX844030PC]] Virtual Signalling Tester NR Software 的日文 product brochure。來源頁尾標示本型錄記載內容為 **2026年2月10日現在**，型錄號碼為 **No. MX844030PC-J-A-1-(2.00)**，轉檔來源為 `mx844030pc-j1200.pdf`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/mx844030pc-j1200.md"
+             },
+             "score": 3.952269
+            },
+            {
+             "text": "3GPP TS 38.321 › Table 6.2.1-2b：UL signaling MAC CEs\n依 [[Extended Logical Channel IDs]] 抄錄，Table 6.2.1-2b 包含 64–319 的 UL signaling eLCIDs，其中：\n\n| eLCID | Meaning | Feature / 備註 |\n|---:|---|---|\n| 64–313 | Reserved | 來源表格標示 `//`。 |\n| 314 | BFR (four octets Ci) | Rel16 Beam Failure Recovery。 |\n| 315 | Truncated BFR (four octets Ci) | Rel16 Beam Failure Recovery。 |\n| 316 | Multiple Entry Configured Grant Confirmation | Rel16 UL Configured Grant type 2。 |\n| 317 | Sidelink Configured Grant Confirmation | Sidelink。 |\n| 318 | Desired Guard Symbols | 轉檔後 feature 欄未可靠保留。 |\n| 319 | Pre-emptive BSR | 轉檔後 feature 欄未可靠保留。 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/3GPP TS 38.321.md"
+             },
+             "score": 2.156363
+            },
+            {
+             "text": "R&S CMX-KF671B\nR&S CMX-KF671B 是 [[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 中列為 CMWrun 相關的 CMX500 NGeCall / PanEUNGeCall 測試 option / application；來源標示 `CMWrun CMX-KF671B / CMWrun >=1.9.15.37`。[[CMX500_Software_Maintenance_PU-Option_Mapping]]（表頭標示 28.10.2025/CH）進一步補出它的 Ident No、短文字與 software maintenance service contract PU mapping。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KF671B.md"
+             },
+             "score": 2.897609
+            },
+            {
+             "text": "R&S TS9975 EMI Test System › 使用限制\n- 本頁只記錄 Market 類簡報中的系統列名；不是 Productions 類 datasheet。\n- 不可由 [[2025RS Drone Solution]] 推論 [[R&S TS9975 EMI Test System]] 可覆蓋所有 drone standards 或所有 frequency ranges。\n- 不可由 [[Regulatory test for wireless devices with cellular technology]] 推論 TS9975 可覆蓋所有 CE RED Art 3.1b EMC tests、所有 5G NR bands、所有 [[Audio Breakthrough]] configurations 或所有 mobile phone categories。\n- 正式規格、可報價配置、標準 coverage、receiver / chamber / antenna / software / CMX500 option stack 需由產品手冊或 R&S configuration source 補證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS9975 EMI Test System.md"
+             },
+             "score": 1.133361
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing\n[[Wi-Fi 7 R&D and production testing]] 是 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 中描述的測試方案組合：以 [[R&S CMX500]] 覆蓋 R&D signaling / interworking 測試，以 [[R&S CMP180]] 覆蓋 production non-signaling RF 測試。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 2.937203
+            },
+            {
+             "text": "b.  What does “minimal human intervention” mean in your context—which decisions",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c733beba88ba4b3a",
+               "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "section": 37,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.556692
+            },
+            {
+             "text": "Questions\nTo what is a PRS configuration bound ? BWP ?\nPRS is not bound to a BWP but to a numerology.\nIn VSE the PRS is bound to the slot configuration of a certain BWP and the BWP is bound to a numerology.\nHow many and which numerologies need to support PRS ?",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-1e756ed82ba721c0",
+               "original_ref": "raw/Knowledge/PRS (NR).md",
+               "sha256": "1e756ed82ba721c00169cf3adbf60aaf7f82e9cf64f48600f851b0d6ce561ce7",
+               "raw_ref": "raw/Knowledge/PRS (NR).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Knowledge/PRS (NR).md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.122922
+            },
+            {
+             "text": "<!-- Slide number: 4 -->\n# What is a callbox\nWhat is a callbox\nEasy…\nto set up",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-094dfa34f112d59b",
+               "original_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+               "sha256": "094dfa34f112d59b36ac5657e84e88379ec21b54fd169328c309f062cf839f95",
+               "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 22.55989
+            },
+            {
+             "text": "The test setup is based on the CMX500 OBT, a future-proof multi-technology, multi-channel one-box signaling tester from Rohde & Schwarz. Its versatility allows for easy adaptation to different NR numerologies, making it the ideal choice for FR3 research and development. In this demonstration, the CMX500 OBT is used to:",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-0a4192ea568814a6",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+               "sha256": "0a4192ea568814a63c93157ed8e1e379f10d5eb95266ca384a8151b5cd4f0793",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 21.892113
+            }
+           ],
+           "text": "It does state that CMX500 OBT is a multi-technology, multi-channel one-box **signaling** tester, adaptable to different NR numerologies for FR3 R&D [28].\nProduct-related measurement decisions supported by Raw evidence include whether PRS configuration is treated as bound to BWP or numerology, how VSE binds PRS to a BWP slot configuration and numerology, and which numerologies must support PRS [26].",
+           "synthesized_by": "company",
+           "failure": null
+          },
+          "cited_passages": [
+           {
+            "text": "Questions\nTo what is a PRS configuration bound ? BWP ?\nPRS is not bound to a BWP but to a numerology.\nIn VSE the PRS is bound to the slot configuration of a certain BWP and the BWP is bound to a numerology.\nHow many and which numerologies need to support PRS ?",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-1e756ed82ba721c0",
+              "original_ref": "raw/Knowledge/PRS (NR).md",
+              "sha256": "1e756ed82ba721c00169cf3adbf60aaf7f82e9cf64f48600f851b0d6ce561ce7",
+              "raw_ref": "raw/Knowledge/PRS (NR).md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Knowledge/PRS (NR).md",
+             "section": 6,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 24.122922
+           },
+           {
+            "text": "The test setup is based on the CMX500 OBT, a future-proof multi-technology, multi-channel one-box signaling tester from Rohde & Schwarz. Its versatility allows for easy adaptation to different NR numerologies, making it the ideal choice for FR3 research and development. In this demonstration, the CMX500 OBT is used to:",
+            "citation": {
+             "kind": "raw",
+             "source": {
+              "source_id": "src-0a4192ea568814a6",
+              "original_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+              "sha256": "0a4192ea568814a63c93157ed8e1e379f10d5eb95266ca384a8151b5cd4f0793",
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+              "page": null,
+              "slide": null,
+              "parent_source_id": null
+             },
+             "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+             "section": 4,
+             "page": null,
+             "slide": null,
+             "wiki_page": null
+            },
+            "score": 21.892113
+           }
+          ],
+          "assessment": {
+           "status": "covered",
+           "facets": [
+            {
+             "name": "product_option_spec",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW500.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              }
+             ],
+             "attempts": 1
+            },
+            {
+             "name": "technical_knowledge",
+             "citations": [
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Regulatory test for wireless devices with cellular technology.md"
+              },
+              {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              }
+             ],
+             "attempts": 1
+            }
+           ],
+           "missing_facets": [],
+           "relation_required": true,
+           "relation_citations": [
+            {
+             "kind": "wiki",
+             "source": null,
+             "raw_ref": null,
+             "section": 3,
+             "page": null,
+             "slide": null,
+             "wiki_page": "wiki/entities/R&S CMX500.md"
+            }
+           ],
+           "relations": [
+            {
+             "left": "product_option_spec",
+             "right": "technical_knowledge",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             }
+            }
+           ]
+          },
+          "citation_policy": "wiki_primary",
+          "wiki_provenance": []
+         },
+         "failure": null,
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

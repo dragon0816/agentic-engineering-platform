@@ -1,0 +1,86 @@
+{
+ "id": "Q0751",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 98.719,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "wiki",
+   "ref": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "wiki",
+   "ref": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 6,
+   "kind": "wiki",
+   "ref": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "For AI hardware, “S-parameters” matter mainly because AI accelerators and data-center systems depend on very high-speed serial links",
+   "AI servers use dense packages, sockets, mezzanine connectors, backplanes, and high-layer-count PCBs",
+   "Most AI-related high-speed links are differential",
+   "SDD21 insertion loss, SDD11 return loss, SCD/SDC mode conversion",
+   "probe-tip calibration, fixture removal, 2x-thru/TRL/LRM-style de-embedding",
+   "AI boards often use low-loss laminates, advanced package substrates, ABF, CoWoS-related interposers/substrates",
+   "For 112G/224G-class SerDes channels",
+   "Wide frequency coverage and high dynamic range",
+   "4-port is often minimum; 8/16+ port or switching is useful",
+   "These map directly to AI data-center pain points"
+  ],
+  "reason": "The passages support several general high-speed PCB/SerDes SI capabilities such as insertion loss, return loss, impedance/TDR, crosstalk, de-embedding, Dk/Df, eye diagrams, and process monitoring. However, the answer repeatedly makes AI-specific and detailed measurement claims—112/224G, differential mixed-mode terms, multiport requirements, backplanes, advanced packaging use cases—that are not stated in the cited passages, and it does not clearly qualify that the evidence is only high-speed SerDes/PCB context rather than AI-specific.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The passages support several general high-speed PCB/SerDes SI capabilities such as insertion loss, return loss, impedance/TDR, crosstalk, de-embedding, Dk/Df, eye diagrams, and process monitoring. However, the answer repeatedly makes AI-specific and detailed measurement claims—112/224G, differential"
+}

@@ -1,0 +1,77 @@
+{
+ "id": "Q0321",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 140.094,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 10,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G private network resilience against smart jamming.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 24,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NTN test and measurement aspects.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 25,
+   "kind": "raw",
+   "ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G private network resilience against smart jamming.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 19,
+   "kind": "wiki",
+   "ref": "wiki/concepts/DO-160 airborne equipment EMC testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "wiki",
+   "ref": "wiki/concepts/DO-160 airborne equipment EMC testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "Signal Generator 需能產生可重現 RF impairments",
+   "Signal Analyzer 需支援在可重現測試條件下量測與比較 DUT 表現",
+   "Signal Generator / Analyzer 組合需支援 tactical 5G / 6G 與 sensing 類場景的可重現 channel / impairment 測試"
+  ],
+  "reason": "The answer's core chain is backed by the cited passages: defense/private-5G drivers in [10], reproducible NTN impairment/test conditions in [24], AWGN/C/N/Eb/N0 signal-generator capability in [25], roadmap context in [3], and DO-160 limitations in [5]/[19]. The less direct Signal Generator/Analyzer requirements are explicitly labeled as inferences or as not specified in the knowledge base, making the overall framing reasonable.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

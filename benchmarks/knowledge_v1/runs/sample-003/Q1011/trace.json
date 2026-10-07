@@ -1,0 +1,126 @@
+{
+ "question": {
+  "id": "Q1011",
+  "text": "What is frequency error, and which product-related measurement decisions depend on understanding it?",
+  "technical": "RF / Measurement Fundamentals",
+  "topic": "frequency error",
+  "product_related": "true"
+ },
+ "session_id": "conversation-042f91775a3e49a0a2c752fa13b2ede3",
+ "exchange": {
+  "sent": "What is frequency error, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 148.672,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-042f91775a3e49a0a2c752fa13b2ede3",
+    "actor": "leo.chi",
+    "title": "What is frequency error, and which product-related measurement decisions…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-07T14:13:43.919553Z",
+    "updated_at": "2026-10-07T14:16:06.367479Z",
+    "messages": [
+     {
+      "message_id": "message-eb43289b7e3040aa9ede9d0ac62cdefd",
+      "role": "user",
+      "text": "What is frequency error, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-07T14:13:43.933327Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null
+     },
+     {
+      "message_id": "message-60e74f17eb2c469393ea7a21523e224c",
+      "role": "assistant",
+      "text": "The knowledge base gave no answer: the RS knowledge query failed grounding, so I don’t have citable Raw evidence from the installed corpus for the product-specific part.\n\nNot from the knowledge base / uncited general explanation:\n\n**Frequency error** is the difference between a signal’s actual measured carrier frequency and its intended or nominal frequency. It is usually expressed in Hz, ppm, or as part of modulation-quality results. In wireless testing, it shows how accurately a transmitter or receiver is locked to the required frequency reference.\n\nProduct-related measurement decisions that commonly depend on understanding frequency error include:\n\n1. **Whether a signal analyzer or communication tester needs enough frequency accuracy**\n   - For transmitter tests, the instrument’s reference accuracy must be better than the DUT tolerance, otherwise you cannot tell whether the DUT or the tester caused the observed offset.\n\n2. **Whether to use an external frequency reference**\n   - If the required frequency-error limit is tight, engineers may need a 10 MHz reference, GPS-disciplined reference, rubidium standard, or shared reference between generator and analyzer.\n\n3. **Which RF tester is suitable for cellular conformance or production**\n   - 5G NR, LTE, Wi‑Fi, Bluetooth, and GNSS-related tests may require measuring carrier frequency offset as part of modulation or transmitter quality.\n\n4. **How to configure vector signal generator / analyzer measurements**\n   - Frequency error affects EVM, demodulation, constellation rotation, and synchronization. Decisions include center frequency, tracking mode, reference source, and correction settings.\n\n5. **Whether a DUT passes transmitter quality requirements**\n   - In production or compliance testing, excessive frequency error can indicate oscillator drift, PLL lock issues, calibration problems, or thermal instability.\n\n6. **Whether chamber, OTA, or conducted testing is appropriate**\n   - OTA paths can add Doppler-like or synchronization complications, so conducted testing may be preferred when isolating pure oscillator/frequency-offset behavior.\n\n7. **Whether temperature, aging, or calibration tests are needed**\n   - Frequency error often varies with temperature, oscillator aging, and supply conditions, so it influences environmental test planning.\n\nIn short: frequency error is a basic measure of carrier accuracy, and understanding it affects tester selection, reference-clock strategy, modulation-quality setup, pass/fail limits, and calibration/debug decisions.",
+      "created_at": "2026-10-07T14:16:06.367479Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-95b0e88014c2444191c586b430dddcdb",
+       "request_id": "request-95b0e88014c2444191c586b430dddcdb",
+       "span_id": "span-95b0e88014c2444191c586b430dddcdb",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_grounded)"
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_grounded)",
+    "ok": true,
+    "answer": "The knowledge base gave no answer: the RS knowledge query failed grounding, so I don’t have citable Raw evidence from the installed corpus for the product-specific part.\n\nNot from the knowledge base / uncited general explanation:\n\n**Frequency error** is the difference between a signal’s actual measured carrier frequency and its intended or nominal frequency. It is usually expressed in Hz, ppm, or as part of modulation-quality results. In wireless testing, it shows how accurately a transmitter or receiver is locked to the required frequency reference.\n\nProduct-related measurement decisions that commonly depend on understanding frequency error include:\n\n1. **Whether a signal analyzer or communication tester needs enough frequency accuracy**\n   - For transmitter tests, the instrument’s reference accuracy must be better than the DUT tolerance, otherwise you cannot tell whether the DUT or the tester caused the observed offset.\n\n2. **Whether to use an external frequency reference**\n   - If the required frequency-error limit is tight, engineers may need a 10 MHz reference, GPS-disciplined reference, rubidium standard, or shared reference between generator and analyzer.\n\n3. **Which RF tester is suitable for cellular conformance or production**\n   - 5G NR, LTE, Wi‑Fi, Bluetooth, and GNSS-related tests may require measuring carrier frequency offset as part of modulation or transmitter quality.\n\n4. **How to configure vector signal generator / analyzer measurements**\n   - Frequency error affects EVM, demodulation, constellation rotation, and synchronization. Decisions include center frequency, tracking mode, reference source, and correction settings.\n\n5. **Whether a DUT passes transmitter quality requirements**\n   - In production or compliance testing, excessive frequency error can indicate oscillator drift, PLL lock issues, calibration problems, or thermal instability.\n\n6. **Whether chamber, OTA, or conducted testing is appropriate**\n   - OTA paths can add Doppler-like or synchronization complications, so conducted testing may be preferred when isolating pure oscillator/frequency-offset behavior.\n\n7. **Whether temperature, aging, or calibration tests are needed**\n   - Frequency error often varies with temperature, oscillator aging, and supply conditions, so it influences environmental test planning.\n\nIn short: frequency error is a basic measure of carrier accuracy, and understanding it affects tester selection, reference-clock strategy, modulation-quality setup, pass/fail limits, and calibration/debug decisions.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-95b0e88014c2444191c586b430dddcdb",
+      "request_id": "request-95b0e88014c2444191c586b430dddcdb",
+      "span_id": "span-95b0e88014c2444191c586b430dddcdb",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-95b0e88014c2444191c586b430dddcdb",
+       "request_id": "request-95b0e88014c2444191c586b430dddcdb",
+       "span_id": "span-95b0e88014c2444191c586b430dddcdb",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no answer: the RS knowledge query failed grounding, so I don’t have citable Raw evidence from the installed corpus for the product-specific part.\n\nNot from the knowledge base / uncited general explanation:\n\n**Frequency error** is the difference between a signal’s actual measured carrier frequency and its intended or nominal frequency. It is usually expressed in Hz, ppm, or as part of modulation-quality results. In wireless testing, it shows how accurately a transmitter or receiver is locked to the required frequency reference.\n\nProduct-related measurement decisions that commonly depend on understanding frequency error include:\n\n1. **Whether a signal analyzer or communication tester needs enough frequency accuracy**\n   - For transmitter tests, the instrument’s reference accuracy must be better than the DUT tolerance, otherwise you cannot tell whether the DUT or the tester caused the observed offset.\n\n2. **Whether to use an external frequency reference**\n   - If the required frequency-error limit is tight, engineers may need a 10 MHz reference, GPS-disciplined reference, rubidium standard, or shared reference between generator and analyzer.\n\n3. **Which RF tester is suitable for cellular conformance or production**\n   - 5G NR, LTE, Wi‑Fi, Bluetooth, and GNSS-related tests may require measuring carrier frequency offset as part of modulation or transmitter quality.\n\n4. **How to configure vector signal generator / analyzer measurements**\n   - Frequency error affects EVM, demodulation, constellation rotation, and synchronization. Decisions include center frequency, tracking mode, reference source, and correction settings.\n\n5. **Whether a DUT passes transmitter quality requirements**\n   - In production or compliance testing, excessive frequency error can indicate oscillator drift, PLL lock issues, calibration problems, or thermal instability.\n\n6. **Whether chamber, OTA, or conducted testing is appropriate**\n   - OTA paths can add Doppler-like or synchronization complications, so conducted testing may be preferred when isolating pure oscillator/frequency-offset behavior.\n\n7. **Whether temperature, aging, or calibration tests are needed**\n   - Frequency error often varies with temperature, oscillator aging, and supply conditions, so it influences environmental test planning.\n\nIn short: frequency error is a basic measure of carrier accuracy, and understanding it affects tester selection, reference-clock strategy, modulation-quality setup, pass/fail limits, and calibration/debug decisions.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_37JsIcXGavkEKoZ4uii4pVPV",
+        "name": "knowledge__rs-knowledge",
+        "decision": {
+         "kind": "capability",
+         "target": {
+          "namespace": "knowledge-query",
+          "name": "ask",
+          "version": "1.0.0"
+         },
+         "reason": "Model selected an installed conversation tool"
+        },
+        "capability": {
+         "trace": {
+          "trace_id": "trace-95b0e88014c2444191c586b430dddcdb",
+          "request_id": "request-95b0e88014c2444191c586b430dddcdb",
+          "span_id": "span-95b0e88014c2444191c586b430dddcdb",
+          "parent_span_id": null
+         },
+         "status": "failed",
+         "data": null,
+         "failure": {
+          "code": "knowledge_not_grounded",
+          "message": "Capability invocation did not complete",
+          "retryable": false
+         },
+         "warnings": [],
+         "handler_invoked": true
+        },
+        "workflow": null,
+        "host": null,
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

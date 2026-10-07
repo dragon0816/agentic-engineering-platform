@@ -1,0 +1,47 @@
+{
+ "id": "Q0031",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "answered",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 129.313,
+ "grader": "1.1",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/entities/Broadcom.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "Wi‑Fi 8 continues Wi‑Fi 7 core PHY parameters including frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz, 4096QAM modulation, and MLO",
+   "Wi‑Fi 8 shifts focus from sheer speed to ultra-high reliability",
+   "CMW500 WLAN bandwidth support up to 160 MHz",
+   "CMX500 evidence ... lists WLAN signaling and WLAN TX measurements including 802.11be and 802.11bn, plus PER / throughput measurements and 2x2 MIMO support",
+   "MLO means the DUT may use multiple links across bands/channels simultaneously",
+   "Wi‑Fi 7 introduced puncturing concepts, and Wi‑Fi 8 adds further PHY complexity",
+   "Wi‑Fi 8 testing hurdles such as distributed resource units, dRU, and unequal modulation, UEQM",
+   "dRU measurements verify whether a device can boost uplink transmit power",
+   "UEQM analysis checks whether a device adapts modulation correctly",
+   "latency, jitter, failover, recovery time, consistent QoS",
+   "Bandwidth doubles vs. many Wi‑Fi 6/6E test setups: up to 320 MHz"
+  ],
+  "reason": "The only cited passage supports that R&S and Broadcom will demonstrate a CMX500 multi-technology, multi-channel signaling tester with newly added Wi‑Fi 8/802.11bn testing capabilities for a prototype device. It does not support the answer’s main technical claims about 320 MHz, 4096QAM, MLO behavior, UHR, dRU/UEQM, CMW500 limits, PER/throughput, EVM, or specific signaling/non-signaling tester requirements.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The only cited passage supports that R&S and Broadcom will demonstrate a CMX500 multi-technology, multi-channel signaling tester with newly added Wi‑Fi 8/802.11bn testing capabilities for a prototype device. It does not support the answer’s main technical claims about 320 MHz, 4096QAM, MLO behavior,"
+}
