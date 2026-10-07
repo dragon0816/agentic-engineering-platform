@@ -22,8 +22,10 @@ import argparse
 import html
 import json
 import subprocess
+import sys
 import tempfile
 import threading
+import time
 from dataclasses import dataclass
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -182,24 +184,97 @@ margin:40px;line-height:1.7} h1{font-size:22px} li{margin:6px 0}</style></head><
 </body></html>"""
 
 
+#: How long printing the SOP may take before it counts as failed.
+PRINT_TIMEOUT_SECONDS = 120.0
+#: How long a browser that exited is still given to leave a PDF behind (the
+#: process started may be a launcher that handed off and exited at once).
+PRINT_AFTER_EXIT_SECONDS = 5.0
+
+
+def _complete_pdf(path: Path) -> bytes | None:
+    """The file's bytes once they form a whole PDF, otherwise None."""
+    try:
+        data = path.read_bytes()
+    except OSError:
+        return None
+    if data.startswith(b"%PDF-") and data.rstrip().endswith(b"%%EOF"):
+        return data
+    return None
+
+
+def _stop_printer(process: subprocess.Popen[bytes]) -> None:
+    """End the browser and its helper processes; the PDF is already read."""
+    if process.poll() is None:
+        if sys.platform == "win32":
+            # While the main process is alive, /T reaches the helpers too.
+            subprocess.run(
+                ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                check=False,
+            )
+        else:
+            process.kill()
+    try:
+        process.wait(timeout=10)
+    except subprocess.TimeoutExpired:  # pragma: no cover - a wedged browser
+        process.kill()
+
+
 def write_sop_pdf(path: Path, browser: str | None = None) -> Path:
-    """Print the SOP to PDF with the installed Edge or Chrome, headless."""
+    """Print the SOP to PDF with the installed Edge or Chrome, headless.
+
+    The PDF being complete is what is waited for, not the browser exiting.
+    Measured on 2026-10-07: headless Edge writes this PDF within about six
+    seconds, then often stays alive for tens of seconds more and sometimes
+    never exits, so waiting for the process timed out although the PDF was
+    long finished. Once the file is a whole PDF and reads the same twice, it
+    is taken and the browser is stopped. The PDF is printed into the
+    temporary folder and only then written to `path`, so `path` never holds
+    a partial file.
+
+    Removing the throwaway profile is best effort, as in
+    `Browser.discard_profile`: helper processes can still hold it for a
+    moment, and a print that succeeded must not fail over a temporary folder.
+    """
     from integrations.browser import browser_path
 
     executable = browser or browser_path()
     if executable is None:
         raise RuntimeError("no Chromium browser is installed to print the SOP")
-    with tempfile.TemporaryDirectory() as folder:
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as folder:
         source = Path(folder) / "sop.html"
         source.write_text(SOP_HTML, encoding="utf-8")
-        subprocess.run(
+        printed = Path(folder) / "sop.pdf"
+        process = subprocess.Popen(
             [executable, "--headless", "--disable-gpu", "--no-pdf-header-footer",
              f"--user-data-dir={Path(folder) / 'profile'}",
-             f"--print-to-pdf={path}", source.as_uri()],
-            check=True, capture_output=True, timeout=120,
+             f"--print-to-pdf={printed}", source.as_uri()],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
         )
-    if not path.is_file():
+        data: bytes | None = None
+        try:
+            deadline = time.monotonic() + PRINT_TIMEOUT_SECONDS
+            exited_at: float | None = None
+            previous: bytes | None = None
+            while time.monotonic() < deadline:
+                current = _complete_pdf(printed)
+                if current is not None and current == previous:
+                    data = current
+                    break
+                previous = current
+                if process.poll() is not None:
+                    exited_at = exited_at or time.monotonic()
+                    if time.monotonic() - exited_at > PRINT_AFTER_EXIT_SECONDS:
+                        break
+                time.sleep(0.2)
+        finally:
+            _stop_printer(process)
+    if data is None:
         raise RuntimeError("the browser did not write the SOP PDF")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
     return path
 
 
