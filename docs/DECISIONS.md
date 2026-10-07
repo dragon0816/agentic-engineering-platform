@@ -1547,3 +1547,24 @@ Knowledge turns normally end after one or two calls.
 **Lab template Instructions.** Two rules are now stated in the Instructions: layout stays as is, and missing values stay blank. Grading had relied on both without the templates saying so.
 
 **Coding runner gains `tzdata`.** It was installed offline from a wheel downloaded by the system Python. Apache-2.0, maintained by Python core developers.
+
+## 2026-10-07: Ask before guessing a rule that changes the result (shared prompt)
+
+Decision (owner, after lab X02 failed three times): the shared conversation system prompt says that when a request for work leaves open a rule that would change the result (which records count, which period or status, what to flag), the model asks that question first and does no other work in that turn.
+
+Verified after the change:
+- Knowledge asking, direct and in chat, answered without extra questions.
+- The W14 dry run and `run-task` were unchanged.
+- coding_v1 fix-run-008 asked no needless questions. Its two FAILs were a parsing error and a validator layout defect.
+
+Rejected alternatives:
+- the coding Skill hint alone: three runs showed no effect;
+- a per-task operator nudge: it would be the operator doing the Agent's work.
+
+## 2026-10-07: Smaller lab-driven fixes
+
+- **The output limit.** A reply cut at the limit is retried twice within the turn, with a notice to answer more briefly. A reply that keeps getting cut still fails with `model_output_truncated`.
+- **Desktop Save As.** `replace: true` overwrites a file left by an earlier run, still only inside the workspace's `output/`.
+- **The draft guide.** It says to put run values in output file names, so reruns do not collide with earlier results.
+- **coding Skill 1.6.0.** It fills a copy of a given template and follows the template's instructions; it never rebuilds a look-alike workbook.
+- **coding_v1 validator 1.4.** T14's Overall statistics may be name/value rows. The owner's acceptance names the values; the expected values are unchanged.
