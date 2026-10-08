@@ -188,6 +188,20 @@ def _parser() -> argparse.ArgumentParser:
                          choices=("claude-code", "codex", "copilot"))
     connect.add_argument("--project", required=True, type=Path,
                          help="the folder the agent works in")
+    # One-click Agent Web (owner 2026-10-08): the running server keeps its
+    # address in the workspace; `open` starts it when needed and opens it.
+    opened = commands.add_parser(
+        "open", help="open Agent Web in the browser, starting it first if it is not running"
+    )
+    opened.add_argument("--config", required=True, type=Path)
+    opened.add_argument("--port", type=int, default=53583)
+    opened.add_argument("--no-schedules", action="store_true",
+                        help="when starting it, do not run scheduled tasks in it")
+    shortcut = commands.add_parser(
+        "shortcut", help="put an 'AEP Agent' shortcut on the desktop and in the Start menu"
+    )
+    shortcut.add_argument("--config", required=True, type=Path)
+    shortcut.add_argument("--port", type=int, default=53583)
     mcp = commands.add_parser("mcp", help="serve authoring tools to a coding agent over stdio")
     mcp.add_argument("--config", required=True, type=Path)
     mcp.add_argument("--agent", default="mcp", help="who is connecting, e.g. codex")
@@ -539,7 +553,11 @@ def _web(
     server = AgentWebServer(web, port=port)
     loop = resident_schedule_loop(runtime, lock=web.request_lock, requested=schedules)
     web.schedule_loop = loop
+    from host_runtime.launcher import clear_record, write_record
+
     with server:
+        # Where `aep-host open` finds the address; removed when this stops.
+        write_record(runtime.layout.workspace_root, server.address, server.server_address[1])
         if loop is not None:
             loop.start()
             print(
@@ -565,10 +583,28 @@ def _web(
         except KeyboardInterrupt:  # pragma: no cover - interactive only
             print("stopped")
         finally:
+            clear_record(runtime.layout.workspace_root)
             if loop is not None:
                 loop.stop()
             if web.telegram_loop is not None:
                 web.telegram_loop.stop(timeout=2)
+    return 0
+
+
+def _launch(args: argparse.Namespace, workspace_root: Path) -> int:
+    from host_runtime.launcher import LauncherError, create_shortcuts, open_agent
+
+    try:
+        if args.command == "shortcut":
+            for made in create_shortcuts(args.config, args.port):
+                print(f"made {made}")
+            return 0
+        outcome = open_agent(workspace_root, args.config, port=args.port,
+                             schedules=not args.no_schedules)
+    except LauncherError as error:
+        print(str(error), file=sys.stderr)
+        return 1
+    print("opened Agent Web" if outcome == "opened" else "started and opened Agent Web")
     return 0
 
 
@@ -931,6 +967,8 @@ def main(argv: Sequence[str] | None = None) -> int:
             print(line, file=sys.stderr)
         return 2
     layout = HostLayout.under(config.workspace_root)
+    if args.command in ("open", "shortcut"):
+        return _launch(args, layout.workspace_root)
     if args.command == "doctor":
         report = host_report(config, layout)
         if args.json:

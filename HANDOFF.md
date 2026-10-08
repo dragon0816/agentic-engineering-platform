@@ -5,7 +5,8 @@ Updated: 2026-10-08 (Asia/Taipei), by Claude Code
 ## Repository and runtime state
 
 - Branch `main`, all work committed locally, nothing pushed.
-- Live Agent Web: `aep-host web --config %LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json --port 53583 --open --schedules`
+- **Starting Agent Web (since 2026-10-08).** The desktop/Start menu shortcut "AEP Agent" runs `aep-host open --config <host.json>`. It opens the running server's address (recorded in `workspace\agent-web.json`), or starts the server in the background first with the environment re-read from the registry. Logs go to `workspace\logs\agent-web-*.log`. To restart, stop the process listening on 53583 and use the shortcut, or run `.venv\Scripts\python.exe -m host_runtime.cli open --config ...`.
+- Live Agent Web, the older manual way: `aep-host web --config %LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json --port 53583 --open --schedules`
   started from the repo `.venv` (editable install), logs `.scratch/agent-web-*.log`.
   Start it with the user environment refreshed (AEP_* and LITELLM_MASTER_KEY),
   or credentials set after the shell started are missing. The token changes on

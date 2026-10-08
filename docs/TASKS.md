@@ -1525,4 +1525,8 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [ ] Workflow 13 push: its own approval against the real GitLab (needs a
   valid GitLab token), the pipeline watch, upload sets from attachments, and a
   dry-run comparison against the real release repository.
+- [x] One-click Agent Web (owner 2026-10-08): `aep-host open` opens the running
+  server's recorded address, or starts it in the background first;
+  `aep-host shortcut` made "AEP Agent" on the desktop and in the Start menu.
+  The token still changes every start. `tests/test_launcher.py`.
 

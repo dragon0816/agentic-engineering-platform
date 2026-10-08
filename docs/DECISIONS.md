@@ -1833,3 +1833,18 @@ Rejected alternatives:
 - Prepare and commit in one run with one approval: the owner wanted the commit approved on its own.
 - Running the source job directly as a script: that bypasses Bridge admission and grants (decision of 2026-10-03).
 - Porting upload sets now: on AEP files arrive as attachments, and that route needs its own design.
+
+## 2026-10-08: Agent Web opens from a desktop shortcut; the token still changes every start
+
+Decision (owner): pasting the token address was tedious, so Agent Web now opens with one click.
+
+How it works (`host_runtime/launcher.py`):
+- **The server records its address.** `aep-host web` writes `<workspace>/agent-web.json` (address, port and process) once it listens, and removes it on stop. The workspace is under the user's own profile.
+- **`aep-host open`.** It opens that address in the browser when the server answers. Otherwise it starts `aep-host web --schedules` in the background with no console window, re-reads the user's and machine's `AEP_*`, `LITELLM_*`, `ARTIFACTORY_*` and `OPS_*` variables from the registry, and then opens the page.
+  - Output goes to `<workspace>/logs/agent-web-*.log`.
+  - A record left by a server that died is discarded.
+- **`aep-host shortcut`.** It puts "AEP Agent" on the desktop and in the Start menu. The shortcut runs `pythonw -m host_runtime.cli open --config <host.json>`.
+
+Reason: the owner wanted it easier to open, and chose the shortcut over a fixed address.
+
+Rejected alternative: a fixed token plus a cookie, so a plain bookmark would work. It would leave a long-lived key to the machine's Agent, and the owner did not choose it.
