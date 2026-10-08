@@ -1535,4 +1535,11 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Installed Workflows run without asking again and without a restart
   (owner 2026-10-08); drafts card under the capability browser; Agent
   profile moved to Settings.
+- [x] Conversation feedback to the Shared Platform (owner 2026-10-08): Agent
+  Web ratings, with the question and answer, are queued locally
+  (`feedback_outbox`) and sent by the `feedback` Bridge operation once the
+  platform answers; the platform keeps the newest rating per answer and
+  `aep-platform feedback` exports it. `tests/test_feedback_sync.py`.
+- [ ] Feedback follow-ups: a platform page to read and triage feedback;
+  Telegram ratings.
 

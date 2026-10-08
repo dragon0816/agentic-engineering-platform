@@ -360,6 +360,7 @@ class AgentWeb:
         self.schedule_loop: Any = None
         # Telegram polling inside this process; replaced when its settings change.
         self.telegram_loop: ResidentTelegram | None = None
+        self.feedback_sync: Any = None
         self.user_environment = windows_user_environment
         # Reads the configured Gateway's model list for the Settings picker.
         self.model_listing_transport: MethodTransport = UrllibTransport()
@@ -942,6 +943,13 @@ class AgentWeb:
         ]
         return status
 
+    def start_feedback_sync(self) -> None:
+        """Send queued feedback to the Shared Platform while this runs."""
+        from host_runtime.feedback_sync import FeedbackSync
+
+        self.feedback_sync = FeedbackSync(self.runtime.state, lambda: self.runtime.platform)
+        self.feedback_sync.start()
+
     def start_telegram(self) -> None:
         """Poll with the host's current Telegram ingress, if it has one."""
         if self.runtime.telegram is not None:
@@ -1354,9 +1362,14 @@ class AgentWeb:
                     MessageFeedback(
                         rating=item.rating, note=note, updated_at=datetime.now(UTC)
                     ),
+                    # Queued for the Shared Platform with the question and
+                    # answer (owner 2026-10-08); sent now or once it answers.
+                    queue=True,
                 )
         except LocalStateError as error:
             return {"ok": False, "code": error.code}
+        if self.feedback_sync is not None:
+            self.feedback_sync.soon()
         message = next(m for m in saved.messages if m.message_id == item.message_id)
         return {
             "ok": True, "message_id": item.message_id,

@@ -299,4 +299,4 @@ def test_version_four_local_state_migrates_additively(tmp_path: Path) -> None:
     with sqlite3.connect(path) as connection:
         assert connection.execute(
             "SELECT value FROM local_meta WHERE key = 'schema_version'"
-        ).fetchone() == ("5",)
+        ).fetchone() == ("6",)

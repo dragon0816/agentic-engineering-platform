@@ -16,9 +16,16 @@ refuses to hold with a credential in them.
 
 import base64
 import binascii
-from typing import Literal, Self
+from typing import Annotated, Literal, Self
 
-from pydantic import AwareDatetime, Field, StrictBool, field_validator, model_validator
+from pydantic import (
+    AwareDatetime,
+    Field,
+    StrictBool,
+    StringConstraints,
+    field_validator,
+    model_validator,
+)
 
 from common.assets import AssetIdentity, reject_embedded_secrets
 from common.authorization import DeviceAuthorization
@@ -36,7 +43,8 @@ from workflow.host_bridge import BridgeRegistration
 
 # The operations, as they appear in a path. A name not in this list is not an
 # operation, whatever the caller thinks.
-Operation = Literal["probe", "catalog", "advertise", "sync", "report", "poll", "settle"]
+Operation = Literal[
+    "probe", "catalog", "advertise", "sync", "report", "poll", "settle", "feedback"]
 OPERATIONS: tuple[Operation, ...] = (
     "probe",
     "catalog",
@@ -45,6 +53,7 @@ OPERATIONS: tuple[Operation, ...] = (
     "report",
     "poll",
     "settle",
+    "feedback",
 )
 
 WireErrorCode = Literal[
@@ -215,6 +224,42 @@ class ReportRequest(Contract):
 
 class ReportReply(Contract):
     received_at: AwareDatetime
+
+
+# -- conversation feedback (owner 2026-10-08) ----------------------------------
+# A person's rating of an answer, with the question and the answer, so the
+# platform can improve Skills and Workflows. The owner decided ratings made
+# from this release on are uploaded with their question and answer text.
+
+MAX_FEEDBACK_TEXT = 20_000
+MAX_FEEDBACK_BATCH = 50
+
+
+class FeedbackRecord(Contract):
+    # One per rated answer: rating it again replaces the earlier record.
+    feedback_id: Annotated[str, StringConstraints(pattern=r"^fb-[0-9a-f]{32}$")]
+    bridge_id: Symbol
+    actor: Symbol
+    session_id: Symbol
+    message_id: Symbol
+    rating: Literal["up", "down", "neutral"]
+    note: str | None = Field(default=None, max_length=2000)
+    question: str = Field(default="", max_length=MAX_FEEDBACK_TEXT)
+    answer: str = Field(default="", max_length=MAX_FEEDBACK_TEXT)
+    tools: str | None = Field(default=None, max_length=4000)
+    backend: Symbol = "gateway"
+    data_classification: Literal["UNCLASSIFIED", "PUBLIC"] = "UNCLASSIFIED"
+    trace_id: Symbol | None = None
+    answered_at: AwareDatetime
+    rated_at: AwareDatetime
+
+
+class FeedbackRequest(Contract):
+    records: tuple[FeedbackRecord, ...] = Field(min_length=1, max_length=MAX_FEEDBACK_BATCH)
+
+
+class FeedbackReply(Contract):
+    accepted: tuple[str, ...]
 
 
 class PollRequest(Contract):

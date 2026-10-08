@@ -26,6 +26,8 @@ from common.sync import (
     ArtifactPayload,
     CatalogReply,
     CatalogRequest,
+    FeedbackReply,
+    FeedbackRequest,
     Operation,
     PollReply,
     PollRequest,
@@ -41,6 +43,7 @@ from common.sync import (
 from control_plane.authorization import InMemoryAuthorizationRegistry
 from control_plane.distribution import ControlError, InMemoryRemoteControl, PackageRegistry
 from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
+from control_plane.feedback import FeedbackStore
 from control_plane.identity import AccessError, InMemoryAccessTokens
 
 # How far ahead of the platform's clock a Bridge's observation may be and
@@ -104,7 +107,9 @@ class ControlPlaneService:
         control: InMemoryRemoteControl,
         artifacts: Mapping[str, bytes],
         clock: Callable[[], datetime] | None = None,
+        feedback: FeedbackStore | None = None,
     ) -> None:
+        self.feedback_store = feedback if feedback is not None else FeedbackStore()
         self.enrollment = enrollment
         self.tokens = tokens
         self.packages = packages
@@ -238,6 +243,17 @@ class ControlPlaneService:
                 raise ServiceError(_CONTROL_CODES.get(error.code, "internal_error")) from None
         return SettleReply(job=record)
 
+    def feedback(self, token_id: str, secret: str, request: FeedbackRequest) -> FeedbackReply:
+        """Ratings a Bridge's people gave, with the question and answer
+        (owner 2026-10-08). Every record must be this device's own."""
+        item = FeedbackRequest.model_validate(request)
+        now = self._clock()
+        with self._lock:
+            _, device = self._who(token_id, secret, now)
+            if any(record.bridge_id != device for record in item.records):
+                raise ServiceError("device_mismatch")
+        return FeedbackReply(accepted=self.feedback_store.record(item.records, now))
+
     def handle(self, operation: str, token_id: str, secret: str, body: object) -> Contract:
         """One entry for a transport: the operation by name, the credential
         as presented, the body as parsed. Every refusal is a `ServiceError`;
@@ -263,6 +279,8 @@ class ControlPlaneService:
                 return self.report(token_id, secret, ReportRequest.model_validate(body))
             if named == "poll":
                 return self.poll(token_id, secret, PollRequest.model_validate(body))
+            if named == "feedback":
+                return self.feedback(token_id, secret, FeedbackRequest.model_validate(body))
             return self.settle(token_id, secret, SettleRequest.model_validate(body))
         except ValidationError as error:
             # Only the body's own validation reaches here: every method
@@ -276,5 +294,6 @@ class ControlPlaneService:
 
 _REQUEST_TITLES = frozenset(
     model.__name__
-    for model in (AdvertiseRequest, SyncRequest, ReportRequest, PollRequest, SettleRequest)
+    for model in (AdvertiseRequest, SyncRequest, ReportRequest, PollRequest, SettleRequest,
+                  FeedbackRequest)
 )

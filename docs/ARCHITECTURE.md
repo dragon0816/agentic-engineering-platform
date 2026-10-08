@@ -381,6 +381,15 @@ owner, lifecycle, approval or publication fields. Both forms remain local,
 non-publishable drafts with independent pending business and technical-policy
 reviews. Capturing one executes nothing and writes to no external system.
 
+Answer ratings are different (owner decision 2026-10-08). A rating given in
+Agent Web is uploaded to the Shared Platform together with its question,
+answer, tools and trace, so Skills and Workflows can be improved. It is queued
+in the Host's `feedback_outbox` in the same transaction that keeps it. It is
+sent by the authenticated `feedback` Bridge operation, and it leaves the outbox
+only when the platform acknowledges it. The platform keeps the newest rating
+of each answer. Uploading a rating changes no asset: improvements still go
+through the governed draft, review and publication path.
+
 Shared discovery crosses the existing authenticated Bridge/platform transport
 through a read-only `catalog` operation. The Team Platform filters published
 package metadata using the authenticated member and the platform's trusted

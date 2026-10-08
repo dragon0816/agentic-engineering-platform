@@ -27,6 +27,7 @@ from control_plane.distribution import (
     PackageRegistry,
 )
 from control_plane.enrollment import EnrollmentError, InMemoryEnrollmentRegistry
+from control_plane.feedback import FeedbackStore
 from control_plane.http import ControlPlaneServer
 from control_plane.identity import InMemoryAccessTokens
 from control_plane.identity_store import SqliteIdentityStorage
@@ -115,6 +116,7 @@ class SharedPlatformState:
     applications: ApplicationCatalog = field(default_factory=ApplicationCatalog)
     identity_storage: SqliteIdentityStorage | None = None
     logins: InMemoryMemberLogins = field(default_factory=InMemoryMemberLogins)
+    feedback: FeedbackStore = field(default_factory=FeedbackStore)
 
     @classmethod
     def empty(cls, *, administrators: tuple[Symbol, ...]) -> Self:
@@ -156,6 +158,7 @@ class SharedPlatformState:
             applications=ApplicationCatalog(),
             identity_storage=storage,
             logins=InMemoryMemberLogins(storage=storage),
+            feedback=FeedbackStore(path),
         )
 
 
@@ -189,6 +192,7 @@ class SharedPlatformApplication:
             control=state.control,
             artifacts=state.artifacts,
             clock=moment,
+            feedback=state.feedback,
         )
         self.member_service = MemberService(
             enrollment=state.enrollment,

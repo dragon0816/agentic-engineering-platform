@@ -56,6 +56,9 @@ from common.sync import (
     AdvertiseRequest,
     CatalogReply,
     CatalogRequest,
+    FeedbackRecord,
+    FeedbackReply,
+    FeedbackRequest,
     JobDisposition,
     PollReply,
     PollRequest,
@@ -144,6 +147,12 @@ class SyncOutcome(Contract):
     failure: Failure | None = None
     installed: tuple[AssetIdentity, ...] = ()
     selections: int | None = Field(default=None, ge=0, strict=True)
+
+
+class FeedbackOutcome(Contract):
+    status: Reachability
+    failure: Failure | None = None
+    accepted: tuple[str, ...] = ()
 
 
 class ReportOutcome(Contract):
@@ -533,6 +542,18 @@ class PlatformClient:
         except ValidationError:
             return ReportOutcome(status="unreachable", failure=_bad_reply())
         return ReportOutcome(status="answered", received_at=reply.received_at)
+
+    async def feedback(self, records: tuple[FeedbackRecord, ...]) -> FeedbackOutcome:
+        """Upload conversation feedback (owner 2026-10-08)."""
+        answer = await asyncio.to_thread(self._call, "feedback",
+                                         FeedbackRequest(records=records))
+        if answer.status != "answered":
+            return FeedbackOutcome(status=answer.status, failure=answer.failure)
+        try:
+            reply = FeedbackReply.model_validate(answer.data)
+        except ValidationError:
+            return FeedbackOutcome(status="unreachable", failure=_bad_reply())
+        return FeedbackOutcome(status="answered", accepted=reply.accepted)
 
     async def poll_jobs(self, agent: LocalAgent, *, limit: int = 10) -> JobsOutcome:
         """Fetch the jobs waiting for this device, run each through the

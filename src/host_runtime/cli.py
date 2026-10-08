@@ -567,6 +567,7 @@ def _web(
         web.start_telegram()
         if web.telegram_loop is not None:
             print("Telegram messages are answered while this runs.")
+        web.start_feedback_sync()
         print("This machine's Agent is at:")
         print(f"  {server.address}")
         print(
@@ -584,6 +585,8 @@ def _web(
             print("stopped")
         finally:
             clear_record(runtime.layout.workspace_root)
+            if web.feedback_sync is not None:
+                web.feedback_sync.stop()
             if loop is not None:
                 loop.stop()
             if web.telegram_loop is not None:

@@ -1872,3 +1872,25 @@ Page layout (owner):
 - "Agent profile" moved from Capabilities to Settings.
 
 This supersedes the 2026-10-06 rule that every non-read run of a conversation Workflow waits for the button. That rule still applies to drafts and changed versions.
+
+## 2026-10-08: Conversation feedback goes to the Shared Platform, queued locally until it answers
+
+Decision (owner): a person's rating in Agent Web is uploaded to the Shared Platform, so Skills and Workflows can be improved. The upload carries the rating, the reason, the question and answer text, the tools used, the actor, the session and the trace. When the platform cannot be reached, the rating waits on the machine and is sent automatically once the platform answers.
+
+This changes the earlier boundary (ARCHITECTURE "Conversation feedback uses a separate local contribution boundary"; conversations are "local-only"). From now on, rated exchanges leave the machine.
+
+Scope (owner choices):
+- Only ratings made from this release on are uploaded. Earlier ratings were given without knowing they would leave the machine.
+- Agent Web only. Telegram has no rating yet.
+
+How it works:
+- **Wire.** A new Bridge operation, `feedback` (`common.sync.FeedbackRequest`/`FeedbackRecord`/`FeedbackReply`), authenticated by the device token. Every record must name the calling device.
+  - There is one `feedback_id` per rated answer, so a newer rating replaces the older one. A late copy of an older rating never overwrites a newer one.
+  - Question and answer are capped at 20,000 characters each, and a batch at 50 records.
+- **Platform** (`control_plane/feedback.FeedbackStore`): a `feedback` table in the registry's SQLite file. `aep-platform feedback --config ...` prints it as JSON lines, newest first.
+- **Host.**
+  - `SqliteLocalState` schema 6 adds `feedback_outbox`. `set_message_feedback(..., queue=True)` keeps the rating and queues its record in one transaction.
+  - `host_runtime/feedback_sync.FeedbackSync` runs inside Agent Web. It sends the outbox every 60 seconds, and soon after each rating.
+  - A record leaves the outbox only when the platform acknowledges it, and only if it was not rated again while in flight. Without a platform binding, or while unreachable, records wait and their attempts and last error are kept.
+
+Not done: a page on the platform for reading feedback (the CLI export is the reader for now), and Telegram ratings.

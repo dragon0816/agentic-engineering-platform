@@ -31,6 +31,11 @@ def _parser() -> argparse.ArgumentParser:
         type=Path,
         help="new file receiving generated invitation links; required when config has invitations",
     )
+    # Conversation feedback the Bridges uploaded (owner 2026-10-08), as JSON
+    # lines, newest first, for whoever improves Skills and Workflows.
+    feedback = subcommands.add_parser("feedback", help="print uploaded conversation feedback")
+    feedback.add_argument("--config", type=Path, required=True)
+    feedback.add_argument("--limit", type=int, default=1000)
     return parser
 
 
@@ -62,8 +67,26 @@ def _write_invitations(
         pass
 
 
+def _feedback(config: Path, limit: int) -> int:
+    from control_plane.feedback import FeedbackStore
+
+    configuration = _load(config)
+    if configuration.registry_path is None:
+        print("this platform keeps feedback in memory only (no registry_path)", file=sys.stderr)
+        return 2
+    store = FeedbackStore(configuration.registry_path)
+    try:
+        for item in store.list(limit):
+            print(item.model_dump_json())
+    finally:
+        store.close()
+    return 0
+
+
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
+    if args.command == "feedback":
+        return _feedback(args.config, args.limit)
     try:
         configuration = _load(args.config)
         if configuration.invitations and args.invitation_output is None:

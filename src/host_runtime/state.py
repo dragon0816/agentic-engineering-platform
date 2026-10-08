@@ -33,13 +33,16 @@ from common.distribution import (
     verify_installation,
 )
 from common.enrollment import BridgeDevice
+from common.sync import FeedbackRecord
 from host_runtime.contributions import ContributionDraft
 from host_runtime.conversations import MAX_STORED_MESSAGES, ConversationRecord, MessageFeedback
+from host_runtime.feedback_sync import feedback_record
 
-# Version 5 adds portable task-run evidence. Tables are additive and
-# every open creates them, so older files migrate rather than being refused.
-SCHEMA_VERSION = "5"
-_MIGRATABLE = frozenset({"1", "2", "3", "4"})
+# Version 5 adds portable task-run evidence; version 6 the feedback outbox
+# (owner 2026-10-08). Tables are additive and every open creates them, so
+# older files migrate rather than being refused.
+SCHEMA_VERSION = "6"
+_MIGRATABLE = frozenset({"1", "2", "3", "4", "5"})
 _SCHEMA = (
     "CREATE TABLE IF NOT EXISTS local_meta (key TEXT PRIMARY KEY, value TEXT NOT NULL)",
     "CREATE TABLE IF NOT EXISTS installed ("
@@ -61,6 +64,10 @@ _SCHEMA = (
     "CREATE TABLE IF NOT EXISTS task_runs ("
     " task_id TEXT PRIMARY KEY, actor TEXT NOT NULL, updated_at TEXT NOT NULL,"
     " record TEXT NOT NULL)",
+    # Ratings waiting for the Shared Platform; one row per rated answer.
+    "CREATE TABLE IF NOT EXISTS feedback_outbox ("
+    " feedback_id TEXT PRIMARY KEY, rated_at TEXT NOT NULL, attempts INTEGER NOT NULL,"
+    " last_error TEXT, record TEXT NOT NULL)",
 )
 # Commit outcomes SQLite reports as definitely not committed; anything else is ambiguous.
 _NOT_COMMITTED = frozenset({"SQLITE_BUSY", "SQLITE_LOCKED"})
@@ -415,7 +422,7 @@ class SqliteLocalState:
 
     def set_message_feedback(
         self, session_id: Symbol, actor: Symbol, message_id: Symbol,
-        feedback: MessageFeedback,
+        feedback: MessageFeedback, *, queue: bool = False,
     ) -> ConversationRecord:
         """Annotate one answer with the user's feedback.
 
@@ -445,7 +452,50 @@ class SqliteLocalState:
                 "UPDATE conversations SET record = ? WHERE session_id = ?",
                 (checked.model_dump_json(), session_id),
             )
+            if queue:
+                # In the same transaction: a rating is never kept without
+                # its upload, or queued without being kept.
+                item = feedback_record(self.bridge_id, checked, message_id)
+                conn.execute(
+                    "INSERT INTO feedback_outbox (feedback_id, rated_at, attempts, last_error,"
+                    " record) VALUES (?, ?, 0, NULL, ?) ON CONFLICT(feedback_id) DO UPDATE SET"
+                    " rated_at = excluded.rated_at, attempts = 0, last_error = NULL,"
+                    " record = excluded.record",
+                    (item.feedback_id, item.rated_at.isoformat(), item.model_dump_json()),
+                )
         return checked
+
+    def queued_feedback(self, limit: int) -> list[FeedbackRecord]:
+        with self._read() as conn:
+            rows = conn.execute(
+                "SELECT record FROM feedback_outbox ORDER BY rated_at LIMIT ?", (limit,)
+            ).fetchall()
+        return [FeedbackRecord.model_validate_json(row[0]) for row in rows]
+
+    def feedback_attempted(self, feedback_ids: list[str], code: str) -> None:
+        with self._write() as conn:
+            for ident in feedback_ids:
+                conn.execute(
+                    "UPDATE feedback_outbox SET attempts = attempts + 1, last_error = ?"
+                    " WHERE feedback_id = ?", (code[:200], ident))
+
+    def feedback_delivered(
+        self, sent: list[FeedbackRecord], accepted: tuple[str, ...]
+    ) -> None:
+        """Forget what the platform acknowledged, unless it was rated again
+        while on its way."""
+        done = set(accepted)
+        with self._write() as conn:
+            for item in sent:
+                if item.feedback_id in done:
+                    conn.execute(
+                        "DELETE FROM feedback_outbox WHERE feedback_id = ? AND rated_at = ?",
+                        (item.feedback_id, item.rated_at.isoformat()))
+
+    def feedback_backlog(self) -> int:
+        with self._read() as conn:
+            row = conn.execute("SELECT COUNT(*) FROM feedback_outbox").fetchone()
+        return int(row[0])
 
     def conversation(self, session_id: Symbol, actor: Symbol) -> ConversationRecord | None:
         with self._read() as conn:
