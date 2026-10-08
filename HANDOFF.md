@@ -202,9 +202,11 @@ Decisions are in `docs/DECISIONS.md` under 2026-10-06 and 2026-10-07:
 
 ## Verification
 
-HEAD `7cc9cb7`, with the repo `.venv`:
+HEAD at the latest handoff commit, with the repo `.venv`:
 - ruff passes on `src` and `tests`.
 - mypy (`src`) passes.
+- Full pytest at `a2bceda`: **2365 passed, 1 failed, 6 skipped**. The failure was the export-assets list in `test_weekly_report_workflow.py`, which did not yet name the two new Workflow 13 Workflows. The list is fixed in the handoff commit, and that file now passes (16 passed).
+- `benchmarks/w13_parity` p001: the source job and AEP match on all 4 cases.
 - Full pytest at `059f54c` (before the last catalog field): **2351 passed, 6 skipped, 0 failed**. The authoring tests passed again after that change: 28 passed. The skips are environment-dependent: symlink rights, no IPv6, an unbuilt lab mock, and the GUI test without `AEP_GUI_TESTS=1`.
 - Live run of `benchmarks/authoring_v1` r001: Claude Code PASS on W1, W2 and S1; Codex and Copilot NOT_RUN because they are not installed.
 
@@ -223,18 +225,34 @@ Scope and owner decisions are in `docs/phases/EXTERNAL_AUTHORING.md` and DECISIO
 - Skills now have candidates and installs (`skill_authoring.py`, `ChatAuthoring.install_skill`).
 - Agent Web lists external submissions under Installed (`/api/approvals/external`).
 - `aep-host assets --config <host.json> connect --for claude-code|codex|copilot --project DIR` installs the creator skills.
-- **The live Agent Web has not been restarted since `059f54c`.** The external-submission panel and Skill-install approvals need a restart. Restart it when the owner is not mid-conversation.
+- Agent Web was restarted at 10:13 on 2026-10-08 (log `.scratch/agent-web-20261008-101259.*`). External submissions, the workspace-root fix and the two Workflow 13 Workflows are live in code. The Workflow 13 Workflows are shipped assets (`export-assets`) but are not installed on the live host.
+
+## Current work (2026-10-08): task folders and Workflow 13
+
+- **Task folders** (`af1450d`):
+  - A drafted Workflow whose fixed run-python or browser workspace lies outside `coding.workspace_roots` is refused, and the problem names the roots.
+  - A missing folder inside a root is created at draft time.
+  - The system prompt lists the roots.
+  - Live host.json now has `C:\Users\Chi_L\Documents\aep-workflows` as the first root (backup `*-before-aep-workflows-root`).
+  - The owner's failed `yahoo-stock-last-price` candidate still names the old folder; it needs a redraft.
+- **Workflow 13 up to the commit** (`a2bceda`):
+  - `release-package-prepare` and `release-package-commit`, two approved runs. See `docs/WORKFLOW_13_SOURCE_CONTRACT.md` (2026-10-08 section).
+  - The source checkout is at `C:\Users\Chi_L\Documents\claude\n8n_workflow_system` (GH_TOKEN cannot read the GitHub repo).
+  - Parity: `benchmarks/w13_parity` p001 matches on all 4 cases. Rerun it with the system Python, which has `requests`.
+  - The real release working copy at `C:\Users\Chi_L\Documents\git_repository\_release_repository` was not touched.
+  - **Push is not built.** It needs a valid GitLab token (`AEP_GITLAB_TOKEN` expired on 2026-10-06), the owner's approval for each push, and lifting the isolated-root rule for that install.
 - Codex and Copilot CLIs are not on this machine. Run authoring_v1 r002 for them after they are installed and signed in.
 
 ## Next recommended action
 
-1. Restart Agent Web so external submissions show in the page, then have the owner connect their own Claude Code project (`assets connect`) and try a real asset.
-2. Install and sign in to Codex and Copilot, then run `benchmarks/authoring_v1/run.py --run-id r002 --agents codex,copilot`.
-3. Check the owner's first real Telegram photo or file, since download has only been tested with a fake transport.
-4. **Paused by the owner, who will check the Agent by hand first:**
+1. The owner redrafts the stock Workflow; the Agent should now suggest a folder under `aep-workflows`. Then the owner connects their own Claude Code project (`assets connect`) and tries a real asset.
+2. Workflow 13 push round: ask the owner for the release remote, the working copy and a new GitLab token; then add push with its own approval, a dry-run comparison on the real repository, and the pipeline watch.
+3. Install and sign in to Codex and Copilot, then run `benchmarks/authoring_v1/run.py --run-id r002 --agents codex,copilot`.
+4. Check the owner's first real Telegram photo or file, since download has only been tested with a fake transport.
+5. **Paused by the owner, who will check the Agent by hand first:**
    - the phase gate (coding Skill 1.8.0 wording: read rules in full, missing values follow the request or template, keep template formulas, check outputs against inputs; X02's period/as-of wording to be tested separately);
    - the Knowledge tool route: (a) return the harness answer as it is, (b) route more questions directly, or (c) leave it.
-5. The knowledge_v1 full 1,100 run (`--set all`, several hours, no GUI) once the tool-route choice is made.
-6. Later:
+6. The knowledge_v1 full 1,100 run (`--set all`, several hours, no GUI) once the tool-route choice is made.
+7. Later:
    - asset ownership step 2 follow-ups: member publish route with a review queue, a UI, and a Shared Platform restart to go live;
    - conversational authoring A1–A3, A7, A8.
