@@ -244,7 +244,18 @@ Scope and owner decisions are in `docs/phases/EXTERNAL_AUTHORING.md` and DECISIO
   - **Push is not built.** It needs a valid GitLab token (`AEP_GITLAB_TOKEN` expired on 2026-10-06), the owner's approval for each push, and lifting the isolated-root rule for that install.
 - Codex and Copilot CLIs are not on this machine. Run authoring_v1 r002 for them after they are installed and signed in.
 
+## Current work (2026-10-08, afternoon): drafts, installed runs, feedback upload
+
+- **Drafts card** (`879afc8`, `fdf05d9`): Capabilities lists uninstalled drafts under the capability browser; Install is the owner's approval. The old SOP and contribution forms are gone, and Agent profile moved to Settings.
+- **Installed Workflows** run without asking again, and an install takes effect without a restart.
+- **Feedback upload** (`462f4d7`): Agent Web ratings are queued in `feedback_outbox` (state schema 6) and sent through the `feedback` Bridge operation.
+  - **The local Shared Platform (127.0.0.1:18765) was not running on 2026-10-08**, so ratings wait in the outbox. They are sent automatically when a platform built from this code is started.
+  - The platform must be restarted from this code before it knows the `feedback` operation. `aep-platform feedback --config <platform.json>` exports what it holds.
+- Full pytest before the last test fix: 2378 passed, 2 failed. One was the schema-version test, now fixed. The other, `test_workflow_preview`, passed when rerun alone and is timing-dependent.
+
 ## Next recommended action
+
+0. Start the Shared Platform from this code, then check that a new rating leaves `feedback_outbox` and shows in `aep-platform feedback`.
 
 1. The owner redrafts the stock Workflow; the Agent should now suggest a folder under `aep-workflows`. Then the owner connects their own Claude Code project (`assets connect`) and tries a real asset.
 2. Workflow 13 push round: ask the owner for the release remote, the working copy and a new GitLab token; then add push with its own approval, a dry-run comparison on the real repository, and the pipeline watch.
