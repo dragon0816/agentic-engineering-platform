@@ -253,6 +253,15 @@ Scope and owner decisions are in `docs/phases/EXTERNAL_AUTHORING.md` and DECISIO
   - The platform must be restarted from this code before it knows the `feedback` operation. `aep-platform feedback --config <platform.json>` exports what it holds.
 - Full pytest before the last test fix: 2378 passed, 2 failed. One was the schema-version test, now fixed. The other, `test_workflow_preview`, passed when rerun alone and is timing-dependent.
 
+## Current work (2026-10-08, evening): MCP servers and harness telemetry
+
+- **MCP servers** (`f3175fc`): Settings → "MCP servers" adds stdio or HTTP servers. Their tools become granted Bridge capabilities `mcp-<server>/<tool>@1.0.0`. No server is configured yet.
+- **Harness telemetry** (`3dd08bc`, contract v0.2 in `docs/telemetry/`): recording is live in Agent Web. The store is `workspace\telemetry.sqlite`, with 30 days / 500 MB retention. Atlas reads `http://127.0.0.1:53583/api/v1/telemetry/...` without a token, and only from local origins.
+  - The strategy label goes in `workspace\telemetry.json` (`{"strategy_label": "..."}`) and takes effect at restart.
+  - Export with `aep-host telemetry export --config <host.json> --out x.jsonl`.
+  - The Atlas side (an event-stream provider and the views) is not built; see contract §8.
+- Full pytest at `3dd08bc`: **2394 passed, 6 skipped, 0 failed**.
+
 ## Next recommended action
 
 0. Start the Shared Platform from this code, then check that a new rating leaves `feedback_outbox` and shows in `aep-platform feedback`.
