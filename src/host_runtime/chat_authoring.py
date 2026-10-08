@@ -38,9 +38,10 @@ from pydantic import Field, JsonValue, ValidationError
 
 from agent.gateway import HostTool, HostToolOutcome
 from agent.skills import SkillManifest
+from capabilities.coding_change.workspaces import containing_root, workspace_note
 from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
 from capabilities.workflow_author.conversation import assemble
-from common.assets import AssetIdentity, WorkflowManifest, WorkflowStep
+from common.assets import AssetIdentity, FixedInput, WorkflowManifest, WorkflowStep
 from common.base import Contract, Symbol, Text
 from common.execution import Failure, RequestContext, TraceIdentifiers
 from host_runtime.skill_authoring import (
@@ -198,9 +199,13 @@ class ChatAuthoring:
         grants_file: Path,
         run_timeout_seconds: float = RUN_TIMEOUT_SECONDS,
         skills_dir: Path | None = None,
+        coding_workspace_roots: tuple[str, ...] = (),
     ) -> None:
         self.root = root
         self.skills_dir = skills_dir
+        # Where a run-python or browser step's fixed workspace may be; checked
+        # at draft time so a Workflow never fails only at its approved run.
+        self.coding_workspace_roots = coding_workspace_roots
         self._bridge = bridge
         self.namespace = namespace
         self.workflows_dir = workflows_dir
@@ -337,9 +342,36 @@ class ChatAuthoring:
             elif self.installed.get(step.capability) is None:
                 problems.append(
                     f"step {index}: capability {_key(step.capability)} is not installed")
+            else:
+                problems.extend(self._workspace_problems(index, step))
         if not manifest.steps:
             problems.append("the Workflow has no steps")
         return (None, problems) if problems else (manifest, [])
+
+    def _workspace_problems(self, index: int, step: WorkflowStep) -> list[str]:
+        """A fixed task folder must lie under the coding roots. One that does
+        not exist yet is created there, with input/ and output/."""
+        name = (step.capability.namespace, step.capability.name)
+        source = None
+        if name == ("coding", "run-python"):
+            request = step.inputs.get("request")
+            value = request.value if isinstance(request, FixedInput) else None
+            source = value.get("workspace") if isinstance(value, dict) else None
+        elif name == ("browser", "operate"):
+            fixed = step.inputs.get("workspace")
+            source = fixed.value if isinstance(fixed, FixedInput) else None
+        if not isinstance(source, str):
+            return []
+        roots = self.coding_workspace_roots
+        resolved = containing_root(source, roots)
+        if resolved is None:
+            allowed = "; ".join(roots) if roots else "none are configured on this host"
+            return [f"step {index}: workspace {source} is outside the allowed task folders "
+                    f"({allowed}); use a folder under one of them"]
+        if not resolved.is_dir():
+            for part in ("input", "output"):
+                (resolved / part).mkdir(parents=True, exist_ok=True)
+        return []
 
     def _published(self, namespace: str, name: str) -> list[WorkflowManifest]:
         """The versions of one Workflow name installed on this Host."""
@@ -805,7 +837,10 @@ class ChatAuthoring:
         values = {"arguments": {"type": "object", "description": "run values by parameter name"}}
         return (
             HostTool(ModelTool(
-                name="authoring__draft_workflow", description=DRAFT_GUIDE,
+                name="authoring__draft_workflow",
+                description=" ".join(
+                    part for part in (DRAFT_GUIDE, workspace_note(self.coding_workspace_roots))
+                    if part),
                 input_contract="host.authoring.draft.v1",
                 input_schema={"type": "object", "properties": {
                     "title": {"type": "string"}, "workflow": {"type": "object"},

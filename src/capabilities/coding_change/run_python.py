@@ -28,6 +28,7 @@ from pathlib import Path
 from pydantic import Field, JsonValue
 
 from capabilities.coding_change.contracts import CodingHostBinding
+from capabilities.coding_change.workspaces import containing_root
 from capabilities.contracts import CapabilitySpec
 from capabilities.runtime import CapabilityRefused
 from common.base import Contract, Text
@@ -100,16 +101,12 @@ class RunPythonHandler:
         path = Path(raw.strip())
         if not path.is_absolute():
             raise CapabilityRefused("coding_workspace_not_absolute")
-        resolved = path.resolve()
-        for root in self.binding.workspace_roots:
-            try:
-                resolved.relative_to(Path(root).resolve())
-            except ValueError:
-                continue
-            if not resolved.is_dir():
-                raise CapabilityRefused("coding_workspace_missing")
-            return resolved
-        raise CapabilityRefused("coding_workspace_not_allowed")
+        resolved = containing_root(raw, self.binding.workspace_roots)
+        if resolved is None:
+            raise CapabilityRefused("coding_workspace_not_allowed")
+        if not resolved.is_dir():
+            raise CapabilityRefused("coding_workspace_missing")
+        return resolved
 
     def run(
         self, request: RunPythonRequest, arguments: dict[str, JsonValue] | None = None

@@ -716,3 +716,14 @@ def test_pictures_on_the_newest_message_reach_the_model_and_need_vision() -> Non
              ModelMessage(role="assistant", text="ok"), ModelMessage(role="user", text="new"))
     refused = asyncio.run(built.converse(request("new"), older))
     assert refused.failure is not None and refused.failure.code == "conversation_history_invalid"
+
+
+def test_the_system_prompt_names_the_task_folder_roots_when_the_host_has_them() -> None:
+    """Owner 2026-10-08: the Agent suggested a folder outside the coding roots."""
+    built, model = _host_gateway([], [_text("ok"), _text("ok")])
+    built._workspace_note = "Task folders ... under one of these roots: C:\aep-workflows."
+    asyncio.run(built.converse(request("go"), (ModelMessage(role="user", text="go"),)))
+    assert "C:\aep-workflows" in model.calls[0].messages[0].text
+    built._workspace_note = ""
+    asyncio.run(built.converse(request("go"), (ModelMessage(role="user", text="go"),)))
+    assert "aep-workflows" not in model.calls[1].messages[0].text

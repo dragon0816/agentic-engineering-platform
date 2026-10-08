@@ -82,15 +82,10 @@ SKILL_FORMAT: dict[str, JsonValue] = {
 
 
 class ExternalAuthoring:
-    def __init__(
-        self, chat: ChatAuthoring, actor: str, agent: str,
-        workspace_roots: tuple[str, ...] = (),
-    ) -> None:
+    def __init__(self, chat: ChatAuthoring, actor: str, agent: str) -> None:
         if not AGENT_NAME.match(agent):
             raise ChatAuthoringError("agent_name_invalid")
         self.chat = chat
-        # Where a coding/run-python step's workspace may be: a folder under one of these.
-        self.workspace_roots = workspace_roots
         self.actor = actor
         self.source = f"external:{agent}"
 
@@ -125,7 +120,8 @@ class ExternalAuthoring:
             ]
         return {"actor": self.actor, "namespace": self.chat.namespace,
                 "workflow_format": WORKFLOW_FORMAT, "skill_format": SKILL_FORMAT,
-                "coding_workspace_roots": list(self.workspace_roots),
+                # Where a coding/run-python step's workspace may be.
+                "coding_workspace_roots": list(self.chat.coding_workspace_roots),
                 "capabilities": capabilities, "workflows": workflows, "skills": skills}
 
     def list(self) -> dict[str, JsonValue]:
@@ -258,9 +254,10 @@ def build(config_path: Path, agent: str) -> ExternalAuthoring:
         workflows_dir=layout.workflows,
         grants_file=layout.grants,
         skills_dir=layout.skills,
+        coding_workspace_roots=(
+            () if config.coding is None else tuple(config.coding.workspace_roots)),
     )
-    roots = () if config.coding is None else tuple(config.coding.workspace_roots)
-    return ExternalAuthoring(chat, config.device.registered_by, agent, roots)
+    return ExternalAuthoring(chat, config.device.registered_by, agent)
 
 
 # -- connecting an agent (X4) -------------------------------------------------

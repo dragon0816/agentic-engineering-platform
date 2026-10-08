@@ -1800,3 +1800,19 @@ Rejected alternatives:
 - Letting agents write manifest files into the workspace: that bypasses review and ownership.
 - Returning run data to the external agent: it would break the PUBLIC rule. The owner and the resident Agent see the data in Agent Web.
 - Editing `~/.codex/config.toml` or `~/.copilot/mcp-config.json` automatically: those are the person's own settings.
+
+## 2026-10-08: Task folders are checked when a Workflow is drafted, and the Agent is told the roots
+
+Decision (owner): the Agent is told where task folders may be, and a drafted Workflow is checked against that. The owner's live host also gets a narrow personal root.
+
+Trigger: the resident Agent suggested `C:\Users\Chi_L\Documents\ChatGPT\stock-workflow` for a stock-price Workflow. That folder is outside `coding.workspace_roots` and did not exist. The draft and its preview passed, and only the approved run failed, with `coding_workspace_not_allowed`.
+
+Changes:
+- **One containment rule** (`capabilities/coding_change/workspaces.containing_root`). The run-python handler uses it at run time, and Workflow drafting uses it before anything runs.
+- **Draft-time check.** `ChatAuthoring.check` refuses a fixed `coding/run-python` or `browser/operate` workspace outside the roots, and names the roots in the problem. A folder that is inside a root but missing is created at draft time, with `input/` and `output/`.
+  - The resident Agent and external agents share this check.
+  - `ExternalAuthoring` now reads the roots from `ChatAuthoring`.
+- **The Agent is told.** The Gateway's system prompt and the `authoring__draft_workflow` description list the roots, and say to suggest a new folder under the first root, named after the task.
+- **Live host.json** (backup `*-before-aep-workflows-root`): `C:\Users\Chi_L\Documents\aep-workflows` added as the first root.
+
+Rejected alternative: widening the roots to `Documents\ChatGPT`. It would let scripts write next to this repository and would not stop the Agent from inventing the next folder.

@@ -54,6 +54,7 @@ from capabilities.coding_change.run_python import (
     RunPythonResult,
     RunPythonStepInput,
 )
+from capabilities.coding_change.workspaces import workspace_note
 from capabilities.company_agent.manifest import personal_proof_fixture_read_spec
 from capabilities.desktop_session.handlers import SPEC as DESKTOP_SPEC
 from capabilities.desktop_session.handlers import (
@@ -978,6 +979,8 @@ def build_gateway(
         knowledge_capability=KNOWLEDGE_QUERY_SPEC.identity,
         knowledge_procedure=_harness_knowledge_procedure(router.commands.skills),
         accelerator_excluded_aliases=frozenset({coding_skill().alias}),
+        workspace_note=workspace_note(
+            () if config.coding is None else tuple(config.coding.workspace_roots)),
     )
 
 
@@ -1678,6 +1681,8 @@ def build_runtime(
         workflows_dir=place.workflows,
         grants_file=place.grants,
         skills_dir=place.skills,
+        coding_workspace_roots=(
+            () if checked.coding is None else tuple(checked.coding.workspace_roots)),
     )
     gateway.host_tools = lambda: (*chat_authoring.tools(), *bridge_tools(gateway.bridge))
     try:

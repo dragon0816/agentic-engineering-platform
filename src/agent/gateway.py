@@ -316,6 +316,7 @@ class Gateway:
         knowledge_procedure: Callable[[], dict[str, JsonValue] | None] | None = None,
         accelerator_excluded_aliases: frozenset[str] = frozenset(),
         host_tools: Callable[[], Sequence[HostTool]] | None = None,
+        workspace_note: str = "",
     ):
         # Host-owned conversation tools (G4 authoring); the host may set it after
         # construction, once the services behind the tools exist.
@@ -353,6 +354,9 @@ class Gateway:
         # The procedure of the Knowledge Skill the host's direct route uses, for
         # vault tools offered by a Skill that has none (owner 2026-10-07).
         self._knowledge_procedure = knowledge_procedure
+        # Which folders task work may use (the host's coding roots), so the
+        # model never proposes one the Bridge will refuse (owner 2026-10-08).
+        self._workspace_note = workspace_note
 
     def _vault_tools(
         self,
@@ -520,6 +524,8 @@ class Gateway:
             "uncited. After a "
             "tool result, explain what happened and what the user should do next."
         )
+        if self._workspace_note:
+            prompt += " " + self._workspace_note
         if persona_guidance:
             prompt += (
                 "\n\nThe following local persona controls name and speaking style only. "
