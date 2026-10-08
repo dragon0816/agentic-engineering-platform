@@ -1848,3 +1848,13 @@ How it works (`host_runtime/launcher.py`):
 Reason: the owner wanted it easier to open, and chose the shortcut over a fixed address.
 
 Rejected alternative: a fixed token plus a cookie, so a plain bookmark would work. It would leave a long-lived key to the machine's Agent, and the owner did not choose it.
+
+## 2026-10-08: Capabilities shows the owner's uninstalled drafts; the old authoring forms are gone
+
+Decision (owner):
+- **Two sections removed.** "Create a Workflow from an SOP" (the AuthoringStudio form) and "Create a Skill or Workflow draft" (the contribution form) are removed from Agent Web's Capabilities page. Workflows are now drafted in the conversation or by an external agent. Their backend routes stay for now, unlinked from the page.
+- **A "我的草稿（尚未安裝）" card replaces them.** It sits under Installed and lists every Workflow and Skill candidate that is not installed. Each entry shows its steps or commands, its parameters, its last run, and the full draft.
+  - **Install** is the owner's approval. `ChatAuthoring.install_now` makes an install request and decides it in the same press. A Workflow is reusable at once; a Skill takes effect after a restart.
+  - **Delete** forgets the draft and closes its waiting requests as rejected. An installed version is untouched.
+
+Reason: the owner approved runs of a drafted Workflow and then could not find it installed. "Run once" never installs, and nothing on the page showed drafts.

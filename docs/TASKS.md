@@ -1529,4 +1529,7 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   server's recorded address, or starts it in the background first;
   `aep-host shortcut` made "AEP Agent" on the desktop and in the Start menu.
   The token still changes every start. `tests/test_launcher.py`.
+- [x] Capabilities page (owner 2026-10-08): the SOP authoring and contribution
+  forms are removed; "我的草稿（尚未安裝）" lists uninstalled Workflow and Skill
+  drafts with Install (the owner's approval) and Delete (`/api/drafts`).
 

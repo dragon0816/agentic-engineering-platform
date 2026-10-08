@@ -686,6 +686,32 @@ class ChatAuthoring:
                 "digest": skill_digest(candidate.draft), "set_aside": list(set_aside),
                 "note": "The host uses it after a restart."}
 
+    # -- the owner's draft list in Agent Web (owner 2026-10-08) -------------
+
+    def install_now(self, actor: str, candidate_id: str) -> ApprovalRequest:
+        """The owner pressed Install on a draft: that press is the approval."""
+        skill = candidate_id.startswith("sk-")
+        source = (self.skill_candidate(candidate_id, actor) if skill
+                  else self.candidate(candidate_id, actor)).source
+        request = self.request(actor, None, "install_skill" if skill else "install",
+                               candidate_id, source=source)
+        return self.decide(request.approval_id, actor, True)
+
+    def delete_candidate(self, actor: str, candidate_id: str) -> None:
+        """Forget a draft. An installed version stays installed; requests still
+        waiting for it are closed as rejected."""
+        if candidate_id.startswith("sk-"):
+            self.skill_candidate(candidate_id, actor)
+            path = self._file("skill-candidate", candidate_id)
+        else:
+            self.candidate(candidate_id, actor)
+            path = self._file("candidate", candidate_id)
+        for item in self.approvals(actor):
+            if item.candidate_id == candidate_id:
+                self._save_approval(item.model_copy(update={
+                    "status": "rejected", "decided_at": _now()}))
+        path.unlink(missing_ok=True)
+
     # -- what an external agent may see -------------------------------------
 
     def external_view(self, item: ApprovalRequest) -> dict[str, JsonValue]:

@@ -79,10 +79,12 @@ def test_requests_need_the_token_and_a_bad_pdf_is_refused(
     assert garbled.json()["code"] == "authoring_request_invalid"
 
 
-def test_the_page_offers_authoring_without_unsafe_html() -> None:
-    assert 'id="sop-authoring"' in PAGE and 'id="authoring-install"' in PAGE
+def test_the_sop_form_is_gone_and_the_draft_list_builds_no_html_from_text() -> None:
+    """Owner 2026-10-08: drafting happens in the conversation; the page lists
+    drafts instead, built with text nodes only."""
+    assert 'id="sop-authoring"' not in PAGE and 'id="authoring-install"' not in PAGE
     script = PAGE.split("<script>", 1)[1].split("</script>", 1)[0]
-    section = script.split("// -- SOP to Workflow authoring", 1)[1].split(
-        "// -- end SOP to Workflow authoring", 1)[0]
+    section = script.split("async function loadDrafts()", 1)[1].split(
+        "async function loadExternalApprovals()", 1)[0]
     for unsafe in ("innerHTML", "insertAdjacentHTML", "outerHTML"):
         assert unsafe not in section

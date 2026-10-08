@@ -746,8 +746,8 @@ def test_page_exposes_setup_commands_and_capability_management(served: AgentWebS
     assert "127.0.0.1:4000/v1" in page
     assert "Bridge Extensions" in page
     assert 'id="tab-feedback"' not in page
-    assert 'id="contribution-form"' in page
-    assert "Create a Skill or Workflow draft" in page
+    assert 'id="contribution-form"' not in page and 'id="sop-authoring"' not in page
+    assert "Create a Skill or Workflow draft" not in page and 'id="drafts"' in page
     assert 'id="persona-settings"' in page
     assert 'id="persona-soul"' in page
 

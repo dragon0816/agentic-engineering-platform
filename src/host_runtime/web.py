@@ -405,6 +405,69 @@ class AgentWeb:
             for item in chat.approvals(self.runtime.actor, session_id=session_id)
         ]}
 
+    def drafts(self) -> dict[str, Any]:
+        """The owner's Workflow and Skill drafts that are not installed yet
+        (owner 2026-10-08): from conversations and from external agents."""
+        chat = self.runtime.chat_authoring
+        if chat is None:
+            return {"drafts": []}
+        actor = self.runtime.actor
+        runs: dict[str, dict[str, Any]] = {}
+        for item in chat.approvals(actor, pending_only=False):
+            if item.kind == "run":
+                result = item.result if isinstance(item.result, dict) else {}
+                runs[item.candidate_id] = {"status": item.status,
+                                           "result": result.get("status"),
+                                           "at": item.decided_at or item.created_at}
+        found: list[dict[str, Any]] = []
+        for workflow in chat.candidates(actor):
+            if workflow.status == "installed":
+                continue
+            identity = workflow.draft.metadata.identity
+            found.append({
+                "candidate_id": workflow.candidate_id, "kind": "workflow",
+                "asset": f"{identity.namespace}/{identity.name}@{identity.version}",
+                "title": workflow.title, "description": workflow.draft.description,
+                "source": workflow.source, "updated_at": workflow.updated_at,
+                "steps": [f"{s.capability.namespace}/{s.capability.name}@{s.capability.version}"
+                          for s in workflow.draft.steps if hasattr(s, "capability")],
+                "parameters": [p.name for p in workflow.draft.parameters],
+                "last_run": runs.get(workflow.candidate_id),
+                "detail": workflow.draft.model_dump_json(indent=2)})
+        if chat.skills_dir is not None:
+            for skill in chat.skill_candidates(actor):
+                if skill.status == "installed":
+                    continue
+                identity = skill.draft.metadata.identity
+                found.append({
+                    "candidate_id": skill.candidate_id, "kind": "skill",
+                    "asset": f"{identity.namespace}/{identity.name}@{identity.version}",
+                    "title": skill.title, "description": skill.draft.selector_hint or "",
+                    "source": skill.source, "updated_at": skill.updated_at,
+                    "steps": [c.name for c in skill.draft.commands], "parameters": [],
+                    "last_run": None, "detail": skill.draft.model_dump_json(indent=2)})
+        found.sort(key=lambda item: str(item["updated_at"]), reverse=True)
+        return {"drafts": found}
+
+    def draft_action(self, action: str, candidate_id: str) -> dict[str, Any]:
+        """Install (the owner's press is the approval) or delete a draft."""
+        chat = self.runtime.chat_authoring
+        if chat is None or action not in {"install", "delete"}:
+            return {"ok": False, "code": "draft_request_invalid"}
+        try:
+            with self._one_at_a_time:
+                if action == "delete":
+                    chat.delete_candidate(self.runtime.actor, candidate_id)
+                    return {"ok": True}
+                decided = chat.install_now(self.runtime.actor, candidate_id)
+        except ChatAuthoringError as error:
+            return {"ok": False, "code": error.code}
+        result = decided.result if isinstance(decided.result, dict) else {}
+        if decided.status != "approved":
+            return {"ok": False, "code": str(result.get("failure") or decided.status)}
+        return {"ok": True, "installed_as": result.get("installed_as"),
+                "note": result.get("note"), "text": approval_text(decided)}
+
     def external_approvals(self) -> dict[str, Any]:
         """What Claude Code, Codex or Copilot submitted and wait for the
         owner (EXTERNAL_AUTHORING X5), with the whole draft to review: a
@@ -2790,6 +2853,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.available_models())
         elif parsed.path == "/api/authoring":
             self._json(200, web.authoring_sessions())
+        elif parsed.path == "/api/drafts":
+            self._json(200, web.drafts())
         elif parsed.path == "/api/approvals/external":
             self._json(200, web.external_approvals())
         elif parsed.path == "/api/approvals":
@@ -2847,6 +2912,8 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/backends/authenticate",
             "/api/contributions",
             "/api/approvals/decide",
+            "/api/drafts/install",
+            "/api/drafts/delete",
             *AUTHORING_ROUTES,
         ):
             self._refuse_unread(404, {"error": "no such page"})
@@ -2868,6 +2935,14 @@ class _Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(length) or b"{}")
         except (ValueError, TypeError):
             self._json(400, {"error": "the request was not valid JSON"})
+            return
+        if path in ("/api/drafts/install", "/api/drafts/delete"):
+            if not isinstance(body, dict):
+                self._json(400, {"ok": False, "code": "draft_request_invalid"})
+                return
+            result = self.server.web.draft_action(
+                path.rsplit("/", 1)[1], str(body.get("candidate_id") or ""))
+            self._json(200 if result.get("ok") else 409, result)
             return
         if path == "/api/approvals/decide":
             if not isinstance(body, dict):
