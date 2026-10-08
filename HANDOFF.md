@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-10-07 (Asia/Taipei), by Claude Code
+Updated: 2026-10-08 (Asia/Taipei), by Claude Code
 
 ## Repository and runtime state
 
@@ -202,10 +202,11 @@ Decisions are in `docs/DECISIONS.md` under 2026-10-06 and 2026-10-07:
 
 ## Verification
 
-HEAD `286e30c`, with the repo `.venv`:
-- ruff passes.
+HEAD `7cc9cb7`, with the repo `.venv`:
+- ruff passes on `src` and `tests`.
 - mypy (`src`) passes.
-- Full pytest: **2333 passed, 6 skipped, 0 failed**. The skips are environment-dependent: symlink rights, no IPv6, an unbuilt lab mock, and the GUI test without `AEP_GUI_TESTS=1`.
+- Full pytest at `059f54c` (before the last catalog field): **2351 passed, 6 skipped, 0 failed**. The authoring tests passed again after that change: 28 passed. The skips are environment-dependent: symlink rights, no IPv6, an unbuilt lab mock, and the GUI test without `AEP_GUI_TESTS=1`.
+- Live run of `benchmarks/authoring_v1` r001: Claude Code PASS on W1, W2 and S1; Codex and Copilot NOT_RUN because they are not installed.
 
 The 2026-10-08 test-stability work fixed the cp950 loader test, the Windows rename locks (`common/filesystem.publish_directory`), the SOP PDF wait, the Agent Web refused-POST reset and the snapshot line endings.
 
@@ -215,13 +216,25 @@ Use the repo `.venv`: the system Python has matplotlib 3.7.3 with numpy 2.2.6.
 
 Left over: headless Edge PID 7956 (child 13048) from the test-stability probe, which the owner should close, and an unrelated headless Edge, PID 10352, that has run since 2026-10-06 23:08.
 
+## Current work (2026-10-08): external agents author Skills and Workflows
+
+Scope and owner decisions are in `docs/phases/EXTERNAL_AUTHORING.md` and DECISIONS 2026-10-08.
+- `aep-host assets ...` (CLI) and `aep-host mcp` (stdio MCP) are the same operations (`host_runtime/external_authoring.py`, `mcp_server.py`).
+- Skills now have candidates and installs (`skill_authoring.py`, `ChatAuthoring.install_skill`).
+- Agent Web lists external submissions under Installed (`/api/approvals/external`).
+- `aep-host assets --config <host.json> connect --for claude-code|codex|copilot --project DIR` installs the creator skills.
+- **The live Agent Web has not been restarted since `059f54c`.** The external-submission panel and Skill-install approvals need a restart. Restart it when the owner is not mid-conversation.
+- Codex and Copilot CLIs are not on this machine. Run authoring_v1 r002 for them after they are installed and signed in.
+
 ## Next recommended action
 
-1. Check the owner's first real Telegram photo or file, since download has only been tested with a fake transport.
-2. **Paused by the owner, who will check the Agent by hand first:**
+1. Restart Agent Web so external submissions show in the page, then have the owner connect their own Claude Code project (`assets connect`) and try a real asset.
+2. Install and sign in to Codex and Copilot, then run `benchmarks/authoring_v1/run.py --run-id r002 --agents codex,copilot`.
+3. Check the owner's first real Telegram photo or file, since download has only been tested with a fake transport.
+4. **Paused by the owner, who will check the Agent by hand first:**
    - the phase gate (coding Skill 1.8.0 wording: read rules in full, missing values follow the request or template, keep template formulas, check outputs against inputs; X02's period/as-of wording to be tested separately);
    - the Knowledge tool route: (a) return the harness answer as it is, (b) route more questions directly, or (c) leave it.
-3. The knowledge_v1 full 1,100 run (`--set all`, several hours, no GUI) once the tool-route choice is made.
-4. Later:
+5. The knowledge_v1 full 1,100 run (`--set all`, several hours, no GUI) once the tool-route choice is made.
+6. Later:
    - asset ownership step 2 follow-ups: member publish route with a review queue, a UI, and a Shared Platform restart to go live;
    - conversational authoring A1–A3, A7, A8.

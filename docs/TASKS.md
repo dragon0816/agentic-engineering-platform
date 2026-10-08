@@ -1507,5 +1507,8 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   installs are new. The catalog and results keep the PUBLIC rule. Creator
   Skills are installed with `aep-host assets connect`.
   `tests/test_external_authoring.py`.
-- [ ] External authoring X6: `benchmarks/authoring_v1` live per agent;
-  Codex and Copilot CLIs are not installed on this machine yet.
+- [x] External authoring X6, Claude Code: `benchmarks/authoring_v1` r001,
+  PASS on W1, W2 and S1 (installed Workflows rerun with hidden values; the
+  Skill loads beside all others) (`7cc9cb7`).
+- [ ] External authoring X6, Codex and Copilot: CLIs not installed on this
+  machine; run r002 once they are installed and signed in.
