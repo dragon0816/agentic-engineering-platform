@@ -200,8 +200,14 @@ class ChatAuthoring:
         run_timeout_seconds: float = RUN_TIMEOUT_SECONDS,
         skills_dir: Path | None = None,
         coding_workspace_roots: tuple[str, ...] = (),
+        on_installed: Callable[[WorkflowManifest, tuple[CapabilityGrant, ...]], None]
+        | None = None,
     ) -> None:
         self.root = root
+        # Makes an installed Workflow usable at once, without a restart
+        # (owner 2026-10-08: a Workflow installed from the draft list said
+        # workflow_not_installed when run from the Capabilities page).
+        self.on_installed = on_installed
         self.skills_dir = skills_dir
         # Where a run-python or browser step's fixed workspace may be; checked
         # at draft time so a Workflow never fails only at its approved run.
@@ -518,13 +524,19 @@ class ChatAuthoring:
         self.workflows_dir.mkdir(parents=True, exist_ok=True)
         write_atomically(target, (json.dumps(published.model_dump(mode="json"),
                                              ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
-        self._add_grants(published, actor, f"chat-approval:{approval_id}")
+        ref = f"chat-approval:{approval_id}"
+        self._add_grants(published, actor, ref)
         self._save_candidate(candidate.model_copy(update={
             "status": "installed", "installed_as": _key(identity),
             "installed_digest": digest(candidate.draft)}))
+        live = self.on_installed is not None
+        if self.on_installed is not None:
+            self.on_installed(published, self.grants(published, actor, ref))
         return {"installed_as": _key(identity), "file": target.name,
                 "digest": digest(candidate.draft),
-                "note": "Reuse it from a conversation now; other channels see it after a restart."}
+                "note": "It runs now, in conversations and from the Capabilities page."
+                if live else "Reuse it from a conversation now; other channels see it after a "
+                             "restart."}
 
     # -- Skills (external authoring X1) -------------------------------------
 
@@ -805,6 +817,10 @@ class ChatAuthoring:
             def work() -> HostToolOutcome:
                 item = self.candidate(str(args.get("candidate_id") or ""), context.actor)
                 arguments = _arguments(args)
+                if item.status == "installed" and item.installed_digest == digest(item.draft):
+                    # The installed version, unchanged: installing was the approval.
+                    return HostToolOutcome(status="succeeded", data=self.execute(
+                        context.actor, item, arguments, f"chat-installed:{item.candidate_id}"))
                 if self.read_only(item.draft):
                     return HostToolOutcome(status="succeeded", data=self.execute(
                         context.actor, item, arguments, f"chat-read-only:{item.candidate_id}"))

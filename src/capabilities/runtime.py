@@ -120,6 +120,12 @@ class LocalPolicy:
                 raise ValueError("duplicate actor/asset policy grant")
             self._grants[key] = checked
 
+    def add(self, grant: CapabilityGrant) -> None:
+        """A grant made while the host runs (an install the owner approved).
+        An existing grant for the same actor and asset is kept."""
+        checked = CapabilityGrant.model_validate(grant)
+        self._grants.setdefault((checked.actor, checked.asset.key), checked)
+
     def authorize(self, context: RequestContext, spec: CapabilitySpec) -> ExecutionAuthorization:
         grant = self._grants.get((context.actor, spec.identity.key))
         if grant is None:

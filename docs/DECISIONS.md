@@ -1858,3 +1858,17 @@ Decision (owner):
   - **Delete** forgets the draft and closes its waiting requests as rejected. An installed version is untouched.
 
 Reason: the owner approved runs of a drafted Workflow and then could not find it installed. "Run once" never installs, and nothing on the page showed drafts.
+
+## 2026-10-08: An installed Workflow runs without asking again and works without a restart
+
+Decision (owner): installing a Workflow is the approval. A run of the installed version, unchanged, does not ask again.
+
+Changes:
+- `authoring__run_workflow` runs a candidate directly when it is installed and its digest equals the installed digest. A revised draft is no longer the installed version, so it asks again.
+- **Live registration.** On install, `ChatAuthoring.on_installed` registers the Workflow in the running engine and adds its grants to the running `LocalPolicy` (`LocalPolicy.add`). The Capabilities page and conversations can then run it immediately. Before this, running it said `workflow_not_installed` until a restart.
+
+Page layout (owner):
+- The draft list sits under the capability browser.
+- "Agent profile" moved from Capabilities to Settings.
+
+This supersedes the 2026-10-06 rule that every non-read run of a conversation Workflow waits for the button. That rule still applies to drafts and changed versions.

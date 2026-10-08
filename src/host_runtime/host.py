@@ -1665,6 +1665,18 @@ def host_report(
     )
 
 
+def _use_now(
+    gateway: Gateway, manifest: WorkflowManifest, grants: tuple[CapabilityGrant, ...]
+) -> None:
+    """An install the owner approved, usable without a restart."""
+    if gateway.engine.workflows.get(manifest.metadata.identity) is None:
+        gateway.engine.workflows.register(manifest)
+    policy = gateway.bridge.policy
+    if isinstance(policy, LocalPolicy):
+        for grant in grants:
+            policy.add(grant)
+
+
 def build_runtime(
     config: CompanyHostConfiguration,
     *,
@@ -1705,6 +1717,7 @@ def build_runtime(
         skills_dir=place.skills,
         coding_workspace_roots=(
             () if checked.coding is None else tuple(checked.coding.workspace_roots)),
+        on_installed=lambda manifest, grants: _use_now(gateway, manifest, grants),
     )
     gateway.host_tools = lambda: (*chat_authoring.tools(), *bridge_tools(gateway.bridge))
     try:

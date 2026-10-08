@@ -166,10 +166,12 @@ def test_install_needs_approval_and_a_rerun_keeps_the_same_digest(tmp_path: Path
     assert listed.data[0]["digest"] == digest(item.draft) == installed.result["digest"]
     again = call(chat, "authoring__install_workflow", {"candidate_id": candidate_id})
     assert again.status == "failed" and again.failure.code == "candidate_already_installed"
+    # Installing was the approval (owner 2026-10-08): reruns of the installed
+    # version run at once.
     for month in ("2026-09", "2026-10"):
         run = call(chat, "authoring__run_workflow",
                    {"candidate_id": candidate_id, "arguments": {"month": month}})
-        chat.decide(run.data["approval_id"], "owner", approve=True)
+        assert run.status == "succeeded"
     assert recorder.calls == ["2026-09", "2026-10"]
 
 
@@ -218,3 +220,42 @@ def test_a_name_someone_else_installed_is_refused_with_its_owner(tmp_path: Path)
     refused = draft(chat, "write-it")
     assert refused.status == "failed"
     assert "colleague" in json.dumps(refused.model_dump(mode="json"), ensure_ascii=False)
+
+
+def test_an_installed_workflow_runs_without_asking_again_and_is_usable_at_once(
+    tmp_path: Path,
+) -> None:
+    """Owner 2026-10-08: after Install, a run asked for approval again, and the
+    Capabilities page said workflow_not_installed until a restart."""
+    chat, recorder = studio(tmp_path)
+    used: list[tuple[str, int]] = []
+    chat.on_installed = lambda manifest, grants: used.append(
+        (manifest.metadata.identity.name, len(grants)))
+    candidate_id = draft(chat, "write-it").data["candidate_id"]
+    decided = chat.install_now("owner", candidate_id)
+    assert decided.status == "approved" and used == [("echo-month", 1)]
+    assert "runs now" in decided.result["note"]  # type: ignore[index]
+    ran = call(chat, "authoring__run_workflow",
+               {"candidate_id": candidate_id, "arguments": {"month": "2026-10"}})
+    assert ran.status == "succeeded" and recorder.calls == ["2026-10"]
+    # A changed draft is no longer the installed version: it asks again.
+    revised = workflow("write-it")
+    revised["description"] = "Echo the month, revised."
+    call(chat, "authoring__draft_workflow",
+         {"title": "Echo", "workflow": revised, "candidate_id": candidate_id})
+    again = call(chat, "authoring__run_workflow",
+                 {"candidate_id": candidate_id, "arguments": {"month": "2026-11"}})
+    assert again.status == "awaiting_approval" and recorder.calls == ["2026-10"]
+
+
+def test_the_host_registers_an_install_and_its_grants_while_running() -> None:
+    from capabilities.runtime import CapabilityGrant, LocalPolicy
+    from common.assets import AssetIdentity
+
+    policy = LocalPolicy(())
+    grant = CapabilityGrant(actor="owner", asset=AssetIdentity(
+        namespace="lab", name="write-it", version="1.0.0"),
+        permissions=("lab.write-it",), policy_refs=("lab-policy",), approval_ref="x")
+    policy.add(grant)
+    policy.add(grant.model_copy(update={"approval_ref": "y"}))  # the first one stays
+    assert policy._grants[("owner", grant.asset.key)].approval_ref == "x"

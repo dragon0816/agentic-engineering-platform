@@ -1532,4 +1532,7 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Capabilities page (owner 2026-10-08): the SOP authoring and contribution
   forms are removed; "我的草稿（尚未安裝）" lists uninstalled Workflow and Skill
   drafts with Install (the owner's approval) and Delete (`/api/drafts`).
+- [x] Installed Workflows run without asking again and without a restart
+  (owner 2026-10-08); drafts card under the capability browser; Agent
+  profile moved to Settings.
 

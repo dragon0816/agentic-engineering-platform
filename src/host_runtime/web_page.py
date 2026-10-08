@@ -595,6 +595,12 @@ tr:last-child td { border-bottom: none; }
         <div id="telegram-unknown"></div>
       </form>
     </div>
+    <div class="card settings" style="margin-top: 14px">
+      <h2>Agent profile</h2>
+      <p class="note">Profiles narrow the Agent's Skills, Knowledge, capabilities and
+        model requirements. Restart after activation.</p>
+      <div id="profiles" class="empty">reading&hellip;</div>
+    </div>
     <h2>Capability management</h2>
     <div class="grid">
       <div class="status-card"><strong>Skills, Workflows and Knowledge</strong>
@@ -620,13 +626,6 @@ tr:last-child td { border-bottom: none; }
       <p class="note">Claude Code、Codex 或 Copilot 送來的 Skill 與 Workflow。核准前請看完整內容；
         Skill 會在主機重新啟動後生效。</p>
       <div id="external-approvals" class="empty">reading&hellip;</div>
-    </div>
-    <div class="card" id="drafts-card">
-      <h3>我的草稿（尚未安裝）</h3>
-      <p class="note">在對話中或由外部 Agent 做出、還沒安裝的 Workflow 與 Skill。
-        按「安裝」就是你的核准；Workflow 立即可在對話中重用，Skill 在主機重新啟動後生效。
-        「執行一次」不等於安裝。</p>
-      <div id="drafts" class="empty">reading&hellip;</div>
     </div>
     <div class="cap-tabs" role="tablist" aria-label="Installed capability types">
       <button id="cap-tab-skills" role="tab" aria-selected="true" data-kind="skills">
@@ -684,11 +683,12 @@ tr:last-child td { border-bottom: none; }
         </div>
       </article>
     </div>
-    <div class="card settings" style="margin-top: 14px">
-      <h2>Agent profile</h2>
-      <p class="note">Profiles narrow the Agent's Skills, Knowledge, capabilities and
-        model requirements. Restart after activation.</p>
-      <div id="profiles" class="empty">reading&hellip;</div>
+    <div class="card" id="drafts-card" style="margin-top: 14px">
+      <h3>我的草稿（尚未安裝）</h3>
+      <p class="note">在對話中或由外部 Agent 做出、還沒安裝的 Workflow 與 Skill。
+        按「安裝」就是你的核准；Workflow 立即可在對話中重用，Skill 在主機重新啟動後生效。
+        「執行一次」不等於安裝。</p>
+      <div id="drafts" class="empty">reading&hellip;</div>
     </div>
     <div hidden aria-hidden="true">
       <select id="workflow-target" disabled></select>
