@@ -615,6 +615,12 @@ tr:last-child td { border-bottom: none; }
         <button class="go" id="cap-refresh" type="button">Refresh status</button>
       </div>
     </div>
+    <div class="card" id="external-card">
+      <h3>外部 Agent 提交，等待你核准</h3>
+      <p class="note">Claude Code、Codex 或 Copilot 送來的 Skill 與 Workflow。核准前請看完整內容；
+        Skill 會在主機重新啟動後生效。</p>
+      <div id="external-approvals" class="empty">reading&hellip;</div>
+    </div>
     <div class="cap-tabs" role="tablist" aria-label="Installed capability types">
       <button id="cap-tab-skills" role="tab" aria-selected="true" data-kind="skills">
         Skills<span class="cap-count" id="count-skills">0</span></button>
@@ -1843,7 +1849,50 @@ field.addEventListener("keydown", event => {
   }
 });
 
+async function loadExternalApprovals() {
+  const box = el("external-approvals");
+  const listed = await call("/api/approvals/external");
+  if (!listed.approvals.length) {
+    box.className = "empty"; box.textContent = "目前沒有外部提交。"; return;
+  }
+  box.className = ""; box.replaceChildren();
+  const labels = {install: "安裝 Workflow", install_skill: "安裝 Skill", run: "執行 Workflow"};
+  for (const item of listed.approvals) {
+    const card = document.createElement("div"); card.className = "approval-card";
+    card.dataset.approvalId = item.approval_id;
+    const title = document.createElement("strong");
+    title.textContent = (labels[item.kind] || item.kind) + "（" + item.source + "）";
+    const summary = document.createElement("p"); summary.textContent = item.summary;
+    const details = document.createElement("details");
+    const label = document.createElement("summary"); label.textContent = "完整內容";
+    const body = document.createElement("pre"); body.textContent = item.detail;
+    details.append(label, body);
+    const approve = document.createElement("button"); approve.type = "button";
+    approve.className = "approve"; approve.textContent = "核准";
+    const reject = document.createElement("button"); reject.type = "button";
+    reject.className = "reject"; reject.textContent = "拒絕";
+    const note = document.createElement("span"); note.className = "approval-note";
+    const decide = async (decision) => {
+      approve.disabled = reject.disabled = true;
+      note.textContent = decision === "approve" ? "處理中…" : "";
+      try {
+        const done = await call("/api/approvals/decide",
+          {approval_id: item.approval_id, decision: decision});
+        if (!done.ok) throw new Error(done.code || "approval failed");
+        await loadExternalApprovals();
+      } catch (failure) {
+        note.textContent = failure.message; approve.disabled = reject.disabled = false;
+      }
+    };
+    approve.addEventListener("click", () => decide("approve"));
+    reject.addEventListener("click", () => decide("reject"));
+    card.append(title, summary, details, approve, reject, note);
+    box.append(card);
+  }
+}
+
 async function loadAssets() {
+  loadExternalApprovals().catch(() => {});
   const assets = await call("/api/assets");
   el("profiles").replaceChildren(table(
     ["Asset", "State", "Action", "What it is"], assets.profiles,

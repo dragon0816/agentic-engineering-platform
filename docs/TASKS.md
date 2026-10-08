@@ -1499,3 +1499,13 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   is one turn. Size, count, type and Telegram's 20 MB download limit are
   refused with Chinese replies. `/new` deletes the chat's files, and the
   token never leaves the download call. `tests/test_telegram_attachments.py`.
+- [x] External authoring X1-X5 (owner 2026-10-08,
+  `docs/phases/EXTERNAL_AUTHORING.md`): Claude Code, Codex and Copilot check,
+  submit, test and request installs of Workflows and Skills through
+  `aep-host assets` or the stdio MCP server `aep-host mcp`. Approvals are the
+  owner's (Agent Web: Installed, "外部 Agent 提交"). Skill candidates and
+  installs are new. The catalog and results keep the PUBLIC rule. Creator
+  Skills are installed with `aep-host assets connect`.
+  `tests/test_external_authoring.py`.
+- [ ] External authoring X6: `benchmarks/authoring_v1` live per agent;
+  Codex and Copilot CLIs are not installed on this machine yet.

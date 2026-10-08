@@ -1761,3 +1761,42 @@ Reason: the owner's Telegram use needed the same files as Agent Web (decision of
 Rejected alternatives:
 - Waiting a short time to gather every album item across polls: it adds state and timing to the cursor-confirmed loop for a rare case.
 - POSTing the download like other Bot API calls: the file endpoint is read with GET, and the transport already offers `request`.
+
+## 2026-10-08: Claude Code, Codex and Copilot author Skills and Workflows through AEP
+
+Decision (owner): the resident harness may not yet be strong enough for advanced coding and Knowledge work, so connected coding agents build assets with AEP's own creators.
+
+Owner choices:
+- **Connection:** a CLI and an MCP server, both offering the same operations.
+- **Scope:** Workflows and Skills.
+- **Data:** the PUBLIC rule is kept.
+
+Full scope: `docs/phases/EXTERNAL_AUTHORING.md`.
+
+How it works:
+- **One facade.** `host_runtime/external_authoring.py` serves both `aep-host assets ...` and `aep-host mcp`. The MCP server is a stdio JSON-RPC server written with the standard library only; it covers initialize, ping, `tools/list` and `tools/call`. The facade wraps `ChatAuthoring`, so external submissions share the resident Agent's candidates and approval queue. Each one is marked `source: external:<agent>`; the agent name is self-declared.
+- **Nothing installs without the owner.** An external agent can check, submit and revise a candidate:
+  - a read-only Workflow runs at once;
+  - every other run, and every install, becomes an approval decided only by the owner's button. Agent Web lists these submissions under Installed with the whole draft.
+- **What the agent can see** (PUBLIC rule):
+  - the catalog gives the platform's capabilities (descriptions and input schemas), the run-python workspace roots, and installed asset names, owners and parameter names;
+  - it never gives a Workflow's description or steps, or a Skill's instructions or selector hint;
+  - run results are statuses and failure codes only.
+- **Skill authoring** (`host_runtime/skill_authoring.py`):
+  - the host sets owner, version and lifecycle;
+  - `rules` and `script_tools` are refused; commands must target installed capabilities or Workflows;
+  - a `procedure` is allowed only on a Knowledge Skill and must validate as a `KnowledgeProcedure`; secrets in instructions are refused;
+  - name ownership and alias uniqueness follow the 2026-10-07 rule;
+  - install rechecks everything, writes the Skill published, and moves the actor's earlier versions to `skills/disabled/`. It takes effect after a restart.
+- **Creator Skills ship as package data.** `aep-host assets connect --for claude-code|codex|copilot --project DIR` writes them where each agent reads project skills (`.claude/skills`, `.agents/skills`, `.github/skills`).
+  - For Claude Code it also writes the project's `.mcp.json`.
+  - For Codex and Copilot it prints the MCP block for the person's own configuration, which AEP never edits.
+- **Verification.** `benchmarks/authoring_v1` runs each agent headless in a sandbox Host. The runner approves as the owner. The installed Workflows are run with hidden values, and the installed Skill is loaded beside all the others.
+
+Reason: the creators already existed only inside the resident Agent. The external agents needed the same governed path, without a second, unreviewed way to install.
+
+Rejected alternatives:
+- The `mcp` Python SDK: it adds a web stack the Host does not use, and the needed protocol surface is small.
+- Letting agents write manifest files into the workspace: that bypasses review and ownership.
+- Returning run data to the external agent: it would break the PUBLIC rule. The owner and the resident Agent see the data in Agent Web.
+- Editing `~/.codex/config.toml` or `~/.copilot/mcp-config.json` automatically: those are the person's own settings.

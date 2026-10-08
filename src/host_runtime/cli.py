@@ -158,7 +158,88 @@ def _parser() -> argparse.ArgumentParser:
         "--out", required=True, type=Path, help="a directory; assets/ of a workspace"
     )
     commands.add_parser("version", help="show the installed package version")
+    # External authoring (docs/phases/EXTERNAL_AUTHORING.md): Claude Code, Codex
+    # or Copilot build Skills and Workflows; the owner approves in Agent Web.
+    assets = commands.add_parser(
+        "assets", help="let a coding agent check, submit and test Skills and Workflows"
+    )
+    assets.add_argument("--config", required=True, type=Path)
+    assets.add_argument("--agent", default="cli", help="who is submitting, e.g. claude-code")
+    asset_actions = assets.add_subparsers(dest="asset_action", required=True)
+    asset_actions.add_parser("catalog", help="formats, capabilities, Workflows and Skills")
+    asset_actions.add_parser("list", help="your candidates and their last approval")
+    for action in ("check-workflow", "submit-workflow", "check-skill", "submit-skill"):
+        drafted = asset_actions.add_parser(action)
+        drafted.add_argument("--file", required=True, type=Path, help="the JSON draft")
+        if action.startswith("submit"):
+            drafted.add_argument("--title", default="")
+            drafted.add_argument("--candidate", help="revise this candidate")
+    for action in ("get", "run-workflow", "install-workflow", "install-skill"):
+        chosen = asset_actions.add_parser(action)
+        chosen.add_argument("--candidate", required=True)
+        if action == "run-workflow":
+            chosen.add_argument("--arguments", default="{}", help="run values as JSON")
+    asset_status = asset_actions.add_parser("status", help="an approval's outcome")
+    asset_status.add_argument("--approval", required=True)
+    connect = asset_actions.add_parser(
+        "connect", help="install the creator skills for an agent and show its MCP setup"
+    )
+    connect.add_argument("--for", dest="target", required=True,
+                         choices=("claude-code", "codex", "copilot"))
+    connect.add_argument("--project", required=True, type=Path,
+                         help="the folder the agent works in")
+    mcp = commands.add_parser("mcp", help="serve authoring tools to a coding agent over stdio")
+    mcp.add_argument("--config", required=True, type=Path)
+    mcp.add_argument("--agent", default="mcp", help="who is connecting, e.g. codex")
     return parser
+
+
+def _assets(args: argparse.Namespace) -> int:
+    import json
+
+    from host_runtime.external_authoring import build, connect
+    from host_runtime.mcp_server import dispatch
+
+    if args.asset_action == "connect":
+        try:
+            lines = connect(args.target, args.project, args.config, sys.executable)
+        except (OSError, ValueError) as error:
+            print(f"cannot connect: {type(error).__name__}", file=sys.stderr)
+            return 2
+        print("\n".join(lines))
+        return 0
+    try:
+        authoring = build(args.config, args.agent)
+    except HostError as error:
+        print(json.dumps({"ok": False, "code": f"host_unavailable:{error.code}"}))
+        return 2
+    action = args.asset_action
+    call: dict[str, object] = {}
+    if hasattr(args, "file"):
+        try:
+            call["workflow" if "workflow" in action else "skill"] = json.loads(
+                args.file.read_text(encoding="utf-8-sig"))
+        except (OSError, ValueError):
+            print(json.dumps({"ok": False, "code": "draft_unreadable"}))
+            return 2
+        call["title"] = getattr(args, "title", "")
+    for name in ("candidate", "approval"):
+        if getattr(args, name, None):
+            call[f"{name}_id"] = getattr(args, name)
+    if action == "run-workflow":
+        call["arguments"] = args.arguments
+    outcome = dispatch(authoring, "aep_" + action.replace("-", "_"), call)
+    print(json.dumps(outcome, ensure_ascii=False, indent=2))
+    return 1 if outcome.get("ok") is False else 0
+
+
+def _mcp(args: argparse.Namespace) -> int:
+    from host_runtime.external_authoring import build
+    from host_runtime.mcp_server import Server
+
+    Server(lambda: build(args.config, args.agent), _package_version()).serve(
+        sys.stdin.buffer, sys.stdout.buffer)
+    return 0
 
 
 def _load(path: Path) -> CompanyHostConfiguration:
@@ -836,6 +917,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         for written in export_assets(args.out):
             print(f"wrote {written}")
         return 0
+    if args.command == "assets":
+        return _assets(args)
+    if args.command == "mcp":
+        return _mcp(args)
     try:
         config = _load(args.config)
     except OSError:

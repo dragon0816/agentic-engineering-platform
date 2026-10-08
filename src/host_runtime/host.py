@@ -1677,6 +1677,7 @@ def build_runtime(
         namespace=checked.namespace or "engineering",
         workflows_dir=place.workflows,
         grants_file=place.grants,
+        skills_dir=place.skills,
     )
     gateway.host_tools = lambda: (*chat_authoring.tools(), *bridge_tools(gateway.bridge))
     try:

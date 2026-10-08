@@ -61,3 +61,29 @@ def test_the_owner_decides_over_http_and_the_result_joins_the_conversation(
     assert fetch(url + "/api/approvals?session_id=" + session_id,
                  token=token).json()["approvals"] == []
     assert "approval-card" in PAGE and "/api/approvals/decide" in PAGE
+
+
+def test_external_submissions_wait_in_their_own_list_with_the_whole_draft(
+    served: AgentWebServer, tmp_path: Path  # noqa: F811
+) -> None:
+    from test_external_authoring import desk, skill
+
+    from host_runtime.external_authoring import ExternalAuthoring
+
+    authoring, _ = desk(tmp_path)
+    actor = served.web.runtime.actor
+    served.web.runtime.chat_authoring = authoring.chat
+    external = ExternalAuthoring(authoring.chat, actor, "claude-code")
+    submitted = external.submit_skill(skill(), "Echo helper")
+    asked = external.install_skill(str(submitted["candidate_id"]))
+    url, token = base(served), served.token
+    (item,) = fetch(url + "/api/approvals/external", token=token).json()["approvals"]
+    assert item["source"] == "external:claude-code" and item["kind"] == "install_skill"
+    assert "When asked to echo a month" in item["detail"]
+    assert fetch(url + "/api/approvals/external").status == 401
+    decided = fetch(url + "/api/approvals/decide", token=token,
+                    body={"approval_id": asked["approval_id"], "decision": "approve"}).json()
+    assert decided["ok"] and "已核准安裝 Skill" in decided["text"]
+    assert (tmp_path / "skills" / "engineering__echo-helper__1.0.0.json").is_file()
+    assert fetch(url + "/api/approvals/external", token=token).json()["approvals"] == []
+    assert 'id="external-approvals"' in PAGE and "/api/approvals/external" in PAGE

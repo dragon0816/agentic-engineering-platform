@@ -15,6 +15,12 @@ run it once or to install it. The owner's decisions of 2026-10-06 bound it:
 
 Records live under `<workspace>/authoring/chat/`: one JSON file per
 candidate and per approval request.
+
+External authoring (owner 2026-10-08, `docs/phases/EXTERNAL_AUTHORING.md`)
+uses the same candidates and approvals: Claude Code, Codex or Copilot submit
+through `aep-host assets` or `aep-host mcp`, marked `source: external:<agent>`,
+and may also submit Skills, which install into the skills folder once the
+owner approves. An external agent sees only statuses and codes, never data.
 """
 
 from __future__ import annotations
@@ -31,18 +37,26 @@ from typing import Any, Literal
 from pydantic import Field, JsonValue, ValidationError
 
 from agent.gateway import HostTool, HostToolOutcome
+from agent.skills import SkillManifest
 from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
 from capabilities.workflow_author.conversation import assemble
 from common.assets import AssetIdentity, WorkflowManifest, WorkflowStep
 from common.base import Contract, Symbol, Text
 from common.execution import Failure, RequestContext, TraceIdentifiers
+from host_runtime.skill_authoring import (
+    SkillCandidate,
+    assemble_skill,
+    check_skill,
+    installed_skills,
+    skill_digest,
+)
 from host_runtime.workspace import documents, write_atomically
 from models.contracts import ModelTool
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine, WorkflowRunSnapshot
 
 CandidateStatus = Literal["draft", "previewed", "installed"]
-ApprovalKind = Literal["run", "install"]
+ApprovalKind = Literal["run", "install", "install_skill"]
 ApprovalStatus = Literal["pending", "approved", "rejected", "failed"]
 MAX_DATA_CHARS = 4_000
 MAX_DRAFT_CHARS = 14_000
@@ -60,6 +74,8 @@ class ChatCandidate(Contract):
     candidate_id: Symbol
     actor: Symbol
     session_id: Text | None = None
+    # Who drafted it: "conversation" (the resident Agent) or "external:<agent>".
+    source: Text = "conversation"
     title: Text
     created_at: Text
     updated_at: Text
@@ -77,6 +93,7 @@ class ApprovalRequest(Contract):
     actor: Symbol
     session_id: Text | None = None
     kind: ApprovalKind
+    source: Text = "conversation"
     candidate_id: Symbol
     digest: Text
     workflow: Text
@@ -180,8 +197,10 @@ class ChatAuthoring:
         workflows_dir: Path,
         grants_file: Path,
         run_timeout_seconds: float = RUN_TIMEOUT_SECONDS,
+        skills_dir: Path | None = None,
     ) -> None:
         self.root = root
+        self.skills_dir = skills_dir
         self._bridge = bridge
         self.namespace = namespace
         self.workflows_dir = workflows_dir
@@ -261,12 +280,34 @@ class ChatAuthoring:
 
     def draft(
         self, actor: str, session_id: str | None, title: str, raw: dict[str, Any],
-        candidate_id: str | None = None,
+        candidate_id: str | None = None, *, source: str = "conversation",
     ) -> tuple[ChatCandidate | None, list[str]]:
         """Validate the model's Workflow and keep it as a candidate. Returns
         the candidate, or None with the problems the model must fix."""
         previous = self.candidate(candidate_id, actor) if candidate_id else None
-        revision = previous.revision + 1 if previous is not None else 1
+        manifest, problems = self.check(actor, raw, previous)
+        if manifest is None:
+            return None, problems
+        now = _now()
+        item = ChatCandidate(
+            candidate_id=previous.candidate_id if previous is not None
+            else f"wf-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
+            actor=actor, session_id=session_id, source=source,
+            title=title.strip() or manifest.description,
+            created_at=previous.created_at if previous is not None else now, updated_at=now,
+            revision=previous.revision + 1 if previous is not None else 1, draft=manifest,
+            installed_as=previous.installed_as if previous is not None else None,
+            installed_digest=previous.installed_digest if previous is not None else None,
+            status="installed" if previous is not None and previous.installed_digest == digest(
+                manifest) else "draft",
+        )
+        return self._save_candidate(item), []
+
+    def check(
+        self, actor: str, raw: dict[str, Any], previous: ChatCandidate | None = None
+    ) -> tuple[WorkflowManifest | None, list[str]]:
+        """The Workflow the host would keep, or the problems to fix; saves
+        nothing."""
         assembled = assemble(raw, namespace=self.namespace, owner=actor, installed=self.installed)
         identity = assembled["metadata"]["identity"]
         # A name belongs to whoever installed it first; its versions only go up,
@@ -298,21 +339,7 @@ class ChatAuthoring:
                     f"step {index}: capability {_key(step.capability)} is not installed")
         if not manifest.steps:
             problems.append("the Workflow has no steps")
-        if problems:
-            return None, problems
-        now = _now()
-        item = ChatCandidate(
-            candidate_id=previous.candidate_id if previous is not None
-            else f"wf-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
-            actor=actor, session_id=session_id, title=title.strip() or manifest.description,
-            created_at=previous.created_at if previous is not None else now, updated_at=now,
-            revision=revision, draft=manifest,
-            installed_as=previous.installed_as if previous is not None else None,
-            installed_digest=previous.installed_digest if previous is not None else None,
-            status="installed" if previous is not None and previous.installed_digest == digest(
-                manifest) else "draft",
-        )
-        return self._save_candidate(item), []
+        return (None, problems) if problems else (manifest, [])
 
     def _published(self, namespace: str, name: str) -> list[WorkflowManifest]:
         """The versions of one Workflow name installed on this Host."""
@@ -389,8 +416,10 @@ class ChatAuthoring:
 
     def request(
         self, actor: str, session_id: str | None, kind: ApprovalKind, candidate_id: str,
-        arguments: dict[str, JsonValue] | None = None,
+        arguments: dict[str, JsonValue] | None = None, *, source: str = "conversation",
     ) -> ApprovalRequest:
+        if kind == "install_skill":
+            return self.request_skill_install(actor, candidate_id, source=source)
         item = self.candidate(candidate_id, actor)
         if kind == "install" and item.status == "installed":
             raise ChatAuthoringError("candidate_already_installed")
@@ -403,7 +432,8 @@ class ChatAuthoring:
         ) + f" — steps: {steps}"
         return self._save_approval(ApprovalRequest(
             approval_id=f"ap-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
-            actor=actor, session_id=session_id, kind=kind, candidate_id=candidate_id,
+            actor=actor, session_id=session_id, kind=kind, source=source,
+            candidate_id=candidate_id,
             digest=digest(item.draft), workflow=_key(identity), arguments=arguments or {},
             summary=summary[:600], created_at=_now(),
         ))
@@ -416,6 +446,8 @@ class ChatAuthoring:
         if not approve:
             return self._save_approval(item.model_copy(update={
                 "status": "rejected", "decided_at": _now()}))
+        if item.kind == "install_skill":
+            return self._decide_skill(item, actor)
         candidate = self.candidate(item.candidate_id, actor)
         if digest(candidate.draft) != item.digest:
             return self._save_approval(item.model_copy(update={
@@ -461,6 +493,186 @@ class ChatAuthoring:
         return {"installed_as": _key(identity), "file": target.name,
                 "digest": digest(candidate.draft),
                 "note": "Reuse it from a conversation now; other channels see it after a restart."}
+
+    # -- Skills (external authoring X1) -------------------------------------
+
+    def skill_candidate(self, candidate_id: str, actor: str) -> SkillCandidate:
+        path = self._file("skill-candidate", candidate_id)
+        if not path.is_file():
+            raise ChatAuthoringError("candidate_unknown")
+        item = SkillCandidate.model_validate_json(path.read_text(encoding="utf-8"))
+        if item.actor != actor:
+            raise ChatAuthoringError("candidate_unknown")
+        return item
+
+    def _save_skill_candidate(self, item: SkillCandidate) -> SkillCandidate:
+        stamped = item.model_copy(update={"updated_at": _now()})
+        path = self._file("skill-candidate", stamped.candidate_id)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        write_atomically(path, stamped.model_dump_json(indent=2).encode("utf-8"))
+        return stamped
+
+    def skill_candidates(self, actor: str) -> list[SkillCandidate]:
+        found = []
+        for path in sorted((self.root / "skill-candidates").glob("*.json")):
+            try:
+                item = SkillCandidate.model_validate_json(path.read_text(encoding="utf-8"))
+            except ValueError:
+                continue
+            if item.actor == actor:
+                found.append(item)
+        return sorted(found, key=lambda item: item.updated_at, reverse=True)
+
+    def _skills_dir(self) -> Path:
+        if self.skills_dir is None:
+            raise ChatAuthoringError("skills_not_configured")
+        return self.skills_dir
+
+    def installed_workflows(self) -> list[WorkflowManifest]:
+        found = []
+        for path in sorted(self.workflows_dir.glob("*.json")):
+            try:
+                found.append(WorkflowManifest.model_validate_json(path.read_text(encoding="utf-8")))
+            except (OSError, ValueError):
+                continue
+        return found
+
+    def check_skill(
+        self, actor: str, raw: dict[str, Any], previous: SkillCandidate | None = None
+    ) -> tuple[SkillManifest | None, list[str]]:
+        """The Skill the host would keep, or the problems to fix; saves nothing."""
+        assembled = assemble_skill(raw, namespace=self.namespace, owner=actor)
+        skills = installed_skills(self._skills_dir())
+        identity = assembled["metadata"]["identity"]
+        taken = [_core(m.metadata.identity.version) for m in skills
+                 if (m.metadata.identity.namespace, m.metadata.identity.name)
+                 == (identity["namespace"], identity["name"])]
+        disabled = self._skills_dir() / "disabled"
+        taken.extend(_core(m.metadata.identity.version) for m in installed_skills(disabled)
+                     if (m.metadata.identity.namespace, m.metadata.identity.name)
+                     == (identity["namespace"], identity["name"]))
+        if previous is not None and previous.draft.metadata.identity.name == identity["name"]:
+            taken.append(_core(previous.draft.metadata.identity.version))
+        major, minor, patch = max(taken) if taken else (1, 0, -1)
+        identity["version"] = f"{major}.{minor}.{patch + 1}"
+        return check_skill(raw, assembled, actor=actor, installed=self.installed,
+                           workflows=self.installed_workflows(), skills=skills)
+
+    def draft_skill(
+        self, actor: str, title: str, raw: dict[str, Any], candidate_id: str | None = None,
+        *, source: str = "conversation",
+    ) -> tuple[SkillCandidate | None, list[str]]:
+        previous = self.skill_candidate(candidate_id, actor) if candidate_id else None
+        manifest, problems = self.check_skill(actor, raw, previous)
+        if manifest is None:
+            return None, problems
+        now = _now()
+        item = SkillCandidate(
+            candidate_id=previous.candidate_id if previous is not None
+            else f"sk-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
+            actor=actor, source=source, title=title.strip() or manifest.alias,
+            created_at=previous.created_at if previous is not None else now, updated_at=now,
+            revision=previous.revision + 1 if previous is not None else 1, draft=manifest,
+        )
+        return self._save_skill_candidate(item), []
+
+    def request_skill_install(
+        self, actor: str, candidate_id: str, *, source: str = "conversation"
+    ) -> ApprovalRequest:
+        item = self.skill_candidate(candidate_id, actor)
+        if item.status == "installed":
+            raise ChatAuthoringError("candidate_already_installed")
+        identity = item.draft.metadata.identity
+        commands = ", ".join(f"{c.name}→{_key(c.target)}" for c in item.draft.commands) or "none"
+        summary = (f"Install Skill {_key(identity)} (alias {item.draft.alias}) — commands: "
+                   f"{commands}; used after the host restarts")
+        return self._save_approval(ApprovalRequest(
+            approval_id=f"ap-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
+            actor=actor, session_id=None, kind="install_skill", source=source,
+            candidate_id=candidate_id, digest=skill_digest(item.draft), workflow=_key(identity),
+            summary=summary[:600], created_at=_now(),
+        ))
+
+    def _decide_skill(self, item: ApprovalRequest, actor: str) -> ApprovalRequest:
+        candidate = self.skill_candidate(item.candidate_id, actor)
+        if skill_digest(candidate.draft) != item.digest:
+            return self._save_approval(item.model_copy(update={
+                "status": "failed", "decided_at": _now(),
+                "result": {"failure": "the candidate changed after the request; ask again"}}))
+        try:
+            result = self.install_skill(candidate, actor, item.approval_id)
+        except ChatAuthoringError as error:
+            return self._save_approval(item.model_copy(update={
+                "status": "failed", "decided_at": _now(), "result": {"failure": error.code}}))
+        return self._save_approval(item.model_copy(update={
+            "status": "approved", "decided_at": _now(), "result": result}))
+
+    def install_skill(
+        self, candidate: SkillCandidate, actor: str, approval_id: str
+    ) -> dict[str, JsonValue]:
+        """Write the Skill published, and set the actor's earlier versions of
+        the name aside: one installed version per name."""
+        folder = self._skills_dir()
+        identity = candidate.draft.metadata.identity
+        target = folder / f"{identity.namespace}__{identity.name}__{identity.version}.json"
+        if target.exists():
+            raise ChatAuthoringError("skill_version_exists")
+        # Checked again at install: something may have been installed since.
+        others = [m for m in installed_skills(folder)
+                  if (m.metadata.identity.namespace, m.metadata.identity.name)
+                  != (identity.namespace, identity.name)
+                  or (m.metadata.owner.type, m.metadata.owner.id) != ("user", actor)]
+        _, problems = check_skill(
+            {"instructions": candidate.draft.instructions},
+            candidate.draft.model_dump(mode="json"), actor=actor, installed=self.installed,
+            workflows=self.installed_workflows(), skills=others,
+        )
+        if problems:
+            raise ChatAuthoringError("skill_no_longer_valid")
+        metadata = candidate.draft.metadata.model_dump(mode="json")
+        metadata.update({
+            "lifecycle": "published",
+            "business_approval": {"status": "approved", "reviewer": actor,
+                                  "evidence": f"chat-approval:{approval_id}"},
+            "validation_refs": [
+                f"skill-candidate:{candidate.candidate_id}:{skill_digest(candidate.draft)}"],
+        })
+        published = SkillManifest.model_validate(
+            {**candidate.draft.model_dump(mode="json"), "metadata": metadata})
+        set_aside: list[str] = []
+        for path in sorted(folder.glob(f"{identity.namespace}__{identity.name}__*.json")):
+            (folder / "disabled").mkdir(parents=True, exist_ok=True)
+            path.replace(folder / "disabled" / path.name)
+            set_aside.append(path.name)
+        folder.mkdir(parents=True, exist_ok=True)
+        write_atomically(target, (json.dumps(published.model_dump(mode="json"),
+                                             ensure_ascii=False, indent=2) + "\n").encode("utf-8"))
+        self._save_skill_candidate(candidate.model_copy(update={
+            "status": "installed", "installed_as": _key(identity),
+            "installed_digest": skill_digest(candidate.draft)}))
+        return {"installed_as": _key(identity), "file": target.name,
+                "digest": skill_digest(candidate.draft), "set_aside": list(set_aside),
+                "note": "The host uses it after a restart."}
+
+    # -- what an external agent may see -------------------------------------
+
+    def external_view(self, item: ApprovalRequest) -> dict[str, JsonValue]:
+        """An approval's outcome without data: statuses and codes only, so
+        nothing a run read reaches an external agent (PUBLIC rule)."""
+        view: dict[str, JsonValue] = {
+            "approval_id": item.approval_id, "kind": item.kind, "status": item.status,
+            "workflow": item.workflow, "candidate_id": item.candidate_id,
+            "decided_at": item.decided_at}
+        result = item.result if isinstance(item.result, dict) else {}
+        if item.status == "failed":
+            failure = result.get("failure")
+            view["failure"] = failure if isinstance(failure, str) and " " not in failure \
+                else "failed"
+        elif item.status == "approved" and item.kind != "run":
+            view.update({k: result.get(k) for k in ("installed_as", "digest", "note")})
+        elif item.status == "approved":
+            view["run"] = run_codes(result)
+        return view
 
     # -- grants ------------------------------------------------------------
 
@@ -654,6 +866,23 @@ def _refused(code: str, message: str) -> HostToolOutcome:
     return HostToolOutcome(status="failed", failure=Failure(code=code, message=message))
 
 
+def run_codes(result: JsonValue) -> dict[str, JsonValue]:
+    """A run summary reduced to statuses and failure codes."""
+    body = result if isinstance(result, dict) else {}
+    failure = body.get("failure")
+    steps = body.get("steps")
+    return {
+        "status": body.get("status"),
+        "failure": failure.get("code") if isinstance(failure, dict) else None,
+        "steps": [
+            {"index": step.get("index"), "status": step.get("status"),
+             "failure": str(step.get("failure")).split(":", 1)[0]
+             if step.get("failure") else None}
+            for step in (steps if isinstance(steps, list) else []) if isinstance(step, dict)
+        ],
+    }
+
+
 def approval_text(item: ApprovalRequest) -> str:
     """What the conversation shows, and the Agent reads, after a decision."""
     if item.status == "rejected":
@@ -661,6 +890,9 @@ def approval_text(item: ApprovalRequest) -> str:
     result = item.result if isinstance(item.result, dict) else {}
     if item.status == "failed":
         return f"【未執行】{item.summary}。原因：{result.get('failure')}"
+    if item.kind == "install_skill":
+        return (f"【已核准安裝 Skill】{result.get('installed_as')}"
+                f"（digest {result.get('digest')}）。主機重新啟動後生效。")
     if item.kind == "install":
         return (f"【已核准安裝】{result.get('installed_as')}（digest {result.get('digest')}）。"
                 "之後可以在對話中用新的參數重跑它。")

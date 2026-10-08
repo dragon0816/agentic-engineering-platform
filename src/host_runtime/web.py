@@ -405,6 +405,31 @@ class AgentWeb:
             for item in chat.approvals(self.runtime.actor, session_id=session_id)
         ]}
 
+    def external_approvals(self) -> dict[str, Any]:
+        """What Claude Code, Codex or Copilot submitted and wait for the
+        owner (EXTERNAL_AUTHORING X5), with the whole draft to review: a
+        Skill's instructions reach the model's prompt."""
+        chat = self.runtime.chat_authoring
+        if chat is None:
+            return {"approvals": []}
+        found = []
+        for item in chat.approvals(self.runtime.actor):
+            if not item.source.startswith("external:"):
+                continue
+            try:
+                draft = (chat.skill_candidate(item.candidate_id, self.runtime.actor).draft
+                         if item.kind == "install_skill"
+                         else chat.candidate(item.candidate_id, self.runtime.actor).draft)
+                detail = draft.model_dump_json(indent=2)
+            except ChatAuthoringError:
+                detail = ""
+            found.append({
+                "approval_id": item.approval_id, "kind": item.kind, "source": item.source,
+                "workflow": item.workflow, "summary": item.summary,
+                "arguments": item.arguments, "created_at": item.created_at,
+                "detail": detail})
+        return {"approvals": found}
+
     def decide_approval(self, approval_id: str, decision: str) -> dict[str, Any]:
         """The owner pressed approve or reject. The result is added to the
         conversation so the Agent sees it on the next turn."""
@@ -2765,6 +2790,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.available_models())
         elif parsed.path == "/api/authoring":
             self._json(200, web.authoring_sessions())
+        elif parsed.path == "/api/approvals/external":
+            self._json(200, web.external_approvals())
         elif parsed.path == "/api/approvals":
             session_id = parse_qs(parsed.query).get("session_id", [None])[0]
             self._json(200, web.approvals(session_id))
