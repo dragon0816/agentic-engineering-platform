@@ -43,6 +43,7 @@ import secrets
 import threading
 import uuid
 from collections.abc import Callable, Mapping
+from contextlib import ExitStack
 from datetime import UTC, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -50,6 +51,7 @@ from types import TracebackType
 from typing import Any, Literal, Self
 from urllib.parse import parse_qs, urlparse
 
+import telemetry.recorder as telemetry
 from agent.contracts import ActiveAgentProfile, AgentProfile
 from agent.data_policy import ContextMaterial, OutboundContext
 from agent.gateway import GatewayConversationResult
@@ -79,6 +81,7 @@ from common.workflow_parameters import (
 )
 from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
+from host_runtime import telemetry_api
 from host_runtime.answers import readable
 from host_runtime.attachments import (
     AttachmentError,
@@ -1573,6 +1576,12 @@ class AgentWeb:
                 # Known commands keep their deterministic path and never pay
                 # for model selection. Ordinary language enters the bounded
                 # tool loop with only recent local conversation text.
+                # The turn is one Harness run (telemetry v0.2); an exception
+                # leaves it incomplete, which the contract allows.
+                turn_run = ExitStack()
+                turn_run.enter_context(telemetry.run(
+                    "conversation_turn", trace_id=trace.trace_id,
+                    attributes={"ingress": "agent_web", "attachments": len(attached)}))
                 matrix_intent = self._market_matrix_intent(item.message)
                 named_knowledge = self._named_knowledge(routed_message)
                 if named_knowledge is None and matrix_intent:
@@ -1584,6 +1593,14 @@ class AgentWeb:
                 if attached:
                     # Files are for the conversation and its tools to work on.
                     named_knowledge, command_match, explicit_command = None, None, False
+                route = (
+                    "command" if command_match is not None and explicit_command
+                    else ("market_matrix" if matrix_intent else "knowledge_direct")
+                    if named_knowledge is not None
+                    else "command_rule" if command_match is not None
+                    else "converse")
+                telemetry.emit("routing.completed", state="routing", attributes={
+                    "router": "agent_web", "route": route})
                 if command_match is not None and explicit_command:
                     with self._one_at_a_time:
                         direct = asyncio.run(self.runtime.agent.handle(local))
@@ -1643,6 +1660,10 @@ class AgentWeb:
                         "status": result.status if result is not None else "failed",
                         "outcome": json.loads(conversational.model_dump_json()),
                     }
+                telemetry.set_run(
+                    outcome=answer.get("status"),
+                    status="failed" if answer.get("status") == "failed" else "succeeded")
+                turn_run.close()
             finished = datetime.now(UTC)
             outcome = answer.get("outcome")
             status = (
@@ -2482,6 +2503,13 @@ class AgentWeb:
 
     def ask_knowledge(self, request: KnowledgeAskRequest) -> dict[str, Any]:
         """Ask one exact installed Knowledge version through Bridge policy."""
+        with telemetry.run("knowledge_query", attributes={"ingress": "agent_web"}):
+            result = self._ask_knowledge(request)
+            telemetry.set_run(outcome=result.get("status"),
+                              status="succeeded" if result.get("ok") else "failed")
+            return result
+
+    def _ask_knowledge(self, request: KnowledgeAskRequest) -> dict[str, Any]:
         item = KnowledgeAskRequest.model_validate(request)
         if item.skill is None:
             return self._ask_knowledge_bridge(item, _trace())
@@ -2879,6 +2907,10 @@ class _Handler(BaseHTTPRequestHandler):
                 self._send(401, b"Open the address this command printed.", "text/plain")
                 return
             self._send(200, self.server.page(), "text/html; charset=utf-8")
+            return
+        # Redacted harness telemetry, read by Atlas without the page token
+        # (owner 2026-10-08); see host_runtime/telemetry_api.py.
+        if telemetry_api.handle(self, parsed.path, parsed.query):
             return
         if not self._authorized():
             self._json(401, {"error": "this request carried no usable token"})

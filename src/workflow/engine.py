@@ -17,6 +17,7 @@ from typing import Literal
 
 from pydantic import Field, JsonValue, TypeAdapter, ValidationError
 
+import telemetry.recorder as telemetry
 from capabilities.runtime import CapabilityInvocation, CapabilityRefused
 from common.assets import (
     AssetIdentity,
@@ -933,6 +934,28 @@ class WorkflowEngine:
         arguments: dict[str, JsonValue],
         start: int = 0,
     ) -> None:
+        identity = record.workflow
+        with telemetry.run("workflow_run", run_id=record.run_id,
+                           trace_id=context.trace.trace_id, attributes={
+                               "workflow_id": f"{identity.namespace}/{identity.name}@"
+                                              f"{identity.version}",
+                               "steps": len(manifest.steps), "resumed_from_step": start}):
+            try:
+                await self._drive_steps(record, manifest, context, arguments, start)
+            finally:
+                telemetry.set_run(
+                    outcome=record.status,
+                    status="succeeded" if record.status == "succeeded" else "failed",
+                    failure_code=None if record.failure is None else record.failure.code)
+
+    async def _drive_steps(
+        self,
+        record: _RunRecord,
+        manifest: WorkflowManifest,
+        context: RequestContext,
+        arguments: dict[str, JsonValue],
+        start: int = 0,
+    ) -> None:
         try:
             for index in range(start, len(manifest.steps)):
                 step = manifest.steps[index]
@@ -963,7 +986,14 @@ class WorkflowEngine:
                     # Not acknowledged: the step must not be dispatched at all.
                     return
                 self._emit(record, "step_started", step_index=index)
-                result = await self._execute_step(record, index, step, context, inputs)
+                target = _target(step)
+                with telemetry.span("step", attributes={
+                        "step_index": index,
+                        "tool_id": f"{target.namespace}/{target.name}@{target.version}"}) as span:
+                    result = await self._execute_step(record, index, step, context, inputs)
+                    if result.status != "succeeded":
+                        span.update(status="failed", failure_code=None if result.failure is None
+                                    else result.failure.code)
                 record.step_results.append(result)
                 code = result.failure.code if result.failure is not None else None
                 record.append_log(
@@ -1235,5 +1265,7 @@ class WorkflowEngine:
             ):
                 return result
             record.append_log(f"step {index + 1} attempt {attempt} failed transient_failure; retry")
+            telemetry.emit("retry.scheduled", state="step", attributes={
+                "step_index": index, "attempt": attempt, "retry_reason": "transient_failure"})
             await asyncio.sleep(retry.delay_ms / 1000)
         raise AssertionError("validated retry policy always permits an attempt")

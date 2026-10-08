@@ -1547,4 +1547,12 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   capability `mcp-<server>/<tool>@1.0.0`, offered in conversations (also
   during coding) and usable as a Workflow step; secrets only in the user's
   environment. `tests/test_mcp_servers.py`.
+- [x] Harness telemetry for Atlas (owner 2026-10-08): `aep.telemetry.v1` events
+  from routing, Skill selection, every model and Bridge call, Workflow,
+  Knowledge and coding harness states; non-blocking recorder, local SQLite
+  (30 days / 500 MB), read API + WebSocket stream for Atlas without a token
+  (local origins only), JSONL export. Contract v0.2 in `docs/telemetry/`.
+  `tests/test_telemetry.py`.
+- [ ] Atlas side (owner: Atlas): event-stream provider, run timeline, state
+  graph, heatmap (contract v0.2 §8).
 

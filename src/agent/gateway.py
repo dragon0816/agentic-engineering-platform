@@ -9,12 +9,14 @@ deterministic ones, so a trigger's origin never changes what may execute.
 import asyncio
 import json
 from collections.abc import Awaitable, Callable, Sequence
+from contextlib import nullcontext
 from contextvars import ContextVar
 from dataclasses import dataclass
-from typing import Literal, Self
+from typing import Any, Literal, Self
 
 from pydantic import Field, JsonValue, TypeAdapter, model_validator
 
+import telemetry.recorder as telemetry
 from agent.backend_contracts import (
     CONVERSATION_MAX_OUTPUT_TOKENS,
     MAX_CONVERSATION_TOOL_CALLS,
@@ -406,10 +408,20 @@ class Gateway:
         max_turns: int = MAX_CONVERSATION_TURNS,
         max_history_messages: int = MAX_CONVERSATION_HISTORY,
     ) -> GatewayConversationResult:
-        result = await self._converse(
-            request, history, persona_guidance=persona_guidance, allowed_tools=allowed_tools,
-            max_turns=max_turns, max_history_messages=max_history_messages,
-        )
+        # A conversation turn is a Harness run, unless an ingress (Agent Web)
+        # already opened one around its routing (telemetry contract v0.2).
+        opened = telemetry.run("conversation_turn", trace_id=request.trace.trace_id) \
+            if telemetry.current_run() is None else nullcontext()
+        with opened:
+            result = await self._converse(
+                request, history, persona_guidance=persona_guidance,
+                allowed_tools=allowed_tools, max_turns=max_turns,
+                max_history_messages=max_history_messages,
+            )
+            telemetry.set_run(
+                outcome=result.status, model_turns=result.model_turns,
+                status="failed" if result.status == "failed" else "succeeded",
+                failure_code=None if result.failure is None else result.failure.code)
         if self._conversation_observer is not None:
             try:
                 self._conversation_observer(result)
@@ -567,10 +579,14 @@ class Gateway:
                 ),
                 selector_hints=hints,
             )
-            selected_names = set(
-                self.skill_decisions.decide(candidate_request, decision_type="skill_selection")
-                .result.value
-            )
+            decision = self.skill_decisions.decide(
+                candidate_request, decision_type="skill_selection")
+            selected_names = set(decision.result.value)
+            telemetry.emit("skill.selected", state="skill_selection", attributes={
+                "offered": len(tools), "selected": len(selected_names),
+                "skill_ids": sorted({name.split("__", 1)[0] for name in selected_names})[:20],
+                "provider": getattr(getattr(decision, "trace", None), "provider_id", None),
+                "fallback": getattr(getattr(decision, "trace", None), "fallback", None)})
             tools = [tool for tool in tools if tool.name in selected_names]
             bindings = {
                 name: binding for name, binding in bindings.items() if name in selected_names
@@ -600,7 +616,11 @@ class Gateway:
                 max_output_tokens=CONVERSATION_MAX_OUTPUT_TOKENS,
             )
             try:
-                response = await asyncio.to_thread(self.router.model.generate, model_request)
+                with telemetry.span("model", attributes={"loop_index": turn}) as step:
+                    response = await asyncio.to_thread(
+                        self.router.model.generate, model_request)
+                    if response.failure is not None:
+                        step.update(status="failed", failure_code=response.failure.code)
             except Exception:
                 return self._conversation_failure(
                     context, "model_unavailable", turn, tuple(evidence)
@@ -614,6 +634,8 @@ class Gateway:
                 # The reply was cut at the output limit (lab fix-005 D04): say so
                 # and let the model answer again more briefly within this turn.
                 truncated_retries += 1
+                telemetry.emit("retry.scheduled", state="model", attributes={
+                    "retry_reason": "model_output_truncated", "loop_index": turn})
                 messages.append(ModelMessage(role="user", text=TRUNCATED_NOTICE))
                 continue
             if response.failure is not None:
@@ -653,31 +675,15 @@ class Gateway:
             )
             for call in response.tool_calls:
                 if len(evidence) >= MAX_CONVERSATION_TOOL_CALLS:
+                    telemetry.emit("tool.completed", status="skipped", state="tool", attributes={
+                        "tool_id": call.name, "loop_index": turn,
+                        "failure_code": "tool_budget_exhausted"})
                     messages.append(ModelMessage(
                         role="tool", tool_call_id=call.call_id,
                         text=json.dumps({"skipped": "the turn's tool budget is used up"}),
                     ))
                     continue
-                binding = bindings.get(call.name)
-                if call.name in host:
-                    _tool_progress(call.name, "running")
-                    item = await self._execute_host_tool(context, call, host[call.name])
-                    _tool_progress(call.name, "succeeded" if _tool_succeeded(item) else "failed")
-                elif binding is None:
-                    item = ConversationToolExecution(
-                        call_id=call.call_id,
-                        name=call.name,
-                        failure=Failure(
-                            code="uninstalled_tool",
-                            message="The model named a tool that is not installed",
-                        ),
-                    )
-                else:
-                    _tool_progress(call.name, "running")
-                    item = await self._execute_conversation_tool(
-                        context, call, binding, bound.get(call.name)
-                    )
-                    _tool_progress(call.name, "succeeded" if _tool_succeeded(item) else "failed")
+                item = await self._telemetered_tool(context, call, turn, host, bindings, bound)
                 evidence.append(item)
                 observation = json.dumps(item.model_dump(mode="json"), ensure_ascii=False)
                 if len(observation) > MAX_TOOL_OBSERVATION_CHARS:
@@ -700,6 +706,46 @@ class Gateway:
         return self._conversation_failure(
             context, "tool_loop_limit", min(max_turns, len(evidence)), tuple(evidence)
         )
+
+    async def _telemetered_tool(
+        self, context: RequestContext, call: ModelToolCall, turn: int,
+        host: dict[str, HostTool], bindings: dict[str, Any], bound: dict[str, Any],
+    ) -> ConversationToolExecution:
+        """One tool call, as a `tool.completed` span (telemetry contract v0.2)."""
+        telemetry.note_tool()
+        with telemetry.span("tool", attributes={"tool_id": call.name, "loop_index": turn},
+                            completed="tool.completed") as step:
+            item = await self._one_tool(context, call, host, bindings, bound)
+            if not _tool_succeeded(item):
+                step.update(status="failed",
+                            failure_code=None if item.failure is None else item.failure.code)
+            return item
+
+    async def _one_tool(
+        self, context: RequestContext, call: ModelToolCall, host: dict[str, HostTool],
+        bindings: dict[str, Any], bound: dict[str, Any],
+    ) -> ConversationToolExecution:
+        binding = bindings.get(call.name)
+        if call.name in host:
+            _tool_progress(call.name, "running")
+            item = await self._execute_host_tool(context, call, host[call.name])
+            _tool_progress(call.name, "succeeded" if _tool_succeeded(item) else "failed")
+        elif binding is None:
+            item = ConversationToolExecution(
+                call_id=call.call_id,
+                name=call.name,
+                failure=Failure(
+                    code="uninstalled_tool",
+                    message="The model named a tool that is not installed",
+                ),
+            )
+        else:
+            _tool_progress(call.name, "running")
+            item = await self._execute_conversation_tool(
+                context, call, binding, bound.get(call.name)
+            )
+            _tool_progress(call.name, "succeeded" if _tool_succeeded(item) else "failed")
+        return item
 
     @staticmethod
     async def _execute_host_tool(

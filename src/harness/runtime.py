@@ -6,6 +6,7 @@ from collections.abc import Callable
 from difflib import unified_diff
 from typing import Protocol
 
+import telemetry.recorder as telemetry
 from common.execution import Failure, TraceIdentifiers
 from harness.contracts import (
     ArtifactRecord,
@@ -71,6 +72,7 @@ class CodingHarness:
 
     def run(self, trace: TraceIdentifiers, request: CodingHarnessRequest) -> CodingHarnessResult:
         checked = CodingHarnessRequest.model_validate(request)
+        telemetry.emit("state.entered", status="started", state="plan")
         plan = self.author.plan(checked)
         events = [HarnessEvent(sequence=0, kind="planned")]
         outcomes: list[CommandOutcome] = []
@@ -82,9 +84,18 @@ class CodingHarness:
             self._validate_plan(checked, plan)
             candidate = self.author.initial_change(checked, plan)
             for attempt in range(checked.budget.max_repair_attempts + 1):
+                telemetry.emit("state.entered", status="started", state="change",
+                               attributes={"loop_index": attempt})
                 self._apply(workspace, checked, candidate, changes)
                 events.append(HarnessEvent(sequence=len(events), kind="changed"))
+                telemetry.emit("state.entered", status="started", state="validate",
+                               attributes={"loop_index": attempt})
                 outcome = self._validate(workspace, checked, plan, outcomes)
+                telemetry.emit(
+                    "verification.completed", state="validate",
+                    status="succeeded" if outcome.status == "passed" else "failed",
+                    attributes={"validator": "declared_commands", "loop_index": attempt,
+                                "commands": len(outcomes)})
                 events.append(
                     HarnessEvent(
                         sequence=len(events),
@@ -120,6 +131,8 @@ class CodingHarness:
                         changes,
                     )
                 events.append(HarnessEvent(sequence=len(events), kind="repair_requested"))
+                telemetry.emit("retry.scheduled", state="repair", attributes={
+                    "retry_reason": "validation_failed", "loop_index": attempt + 1})
                 candidate = self.author.repair(checked, plan, outcome, attempt + 1)
         except WorkspaceRefused as error:
             return self._stopped(trace, checked, plan, events, error.code, outcomes, changes)

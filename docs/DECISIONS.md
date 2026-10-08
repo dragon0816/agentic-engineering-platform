@@ -1918,3 +1918,31 @@ How it works:
 Rejected alternatives:
 - The `mcp` Python SDK: it brings a web stack, and the protocol surface needed is small.
 - Approving each tool or each call: the owner chose server-level approval.
+
+## 2026-10-08: Harness telemetry for Atlas (aep.telemetry.v1, contract v0.2)
+
+Decision (owner): expose the harness's state so real operation can be observed, strategy changes compared, and problems traced, without hurting performance. The target is the Atlas dashboard, with realtime tracking and history replay.
+
+The owner supplied contract v0.1. v0.2 (`docs/telemetry/AEP_ATLAS_TELEMETRY_CONTRACT.md`) settles its problems:
+- Atlas has no ingest or replay today. The owner chose to build the AEP side only, so AEP is the store and the stream.
+- Atlas cannot send a token. The owner decided the reads need none. They are loopback only, GET only, and readable cross-origin only by pages on this machine, so other web sites stay out.
+- `ingest_seq` is a host-wide stream cursor, beside the per-run `sequence`.
+- New attributes `run_kind` and `parent_run_id`.
+- `strategy_id` is generated from build, model, accelerator, limits and Skill versions, plus an optional `strategy_label`.
+- Token usage that was not reported is null, not zero.
+- Each harness gets a recommended state vocabulary.
+
+How it works (`src/telemetry`):
+- **Events.** `TelemetryEvent` with `sanitize`, which keeps metadata only and redacts credential-shaped text.
+- **Recorder.** Runs and spans live in context variables, which flow through `asyncio.to_thread` and tasks. `emit` uses `put_nowait` onto a bounded queue, a writer thread stores batches, and nothing raises into the harness. Measured at about 8 µs per event.
+- **Store.** `TelemetryStore` is `<workspace>/telemetry.sqlite` (WAL): idempotent by `event_id`, with a runs summary. Retention is 30 days or 500 MB (owner).
+- **Hooks.** Agent Web routing, the Gateway loop (skill selection, model state, tool spans, truncation retry), every model call (`ApprovedModelClient`), every Bridge capability call, the Workflow engine (runs, steps, retries), the Knowledge harness runner (phases, verifications, retries) and the coding harness (plan, change, validate, repair).
+- **Read API.** `/api/v1/telemetry/...` on Agent Web, with a WebSocket stream (backfill, then live). The CLI is `aep-host telemetry runs|export`.
+- **Recording processes.** `web`, `ask`, `run-task`, `chat`, `telegram`, `jobs` and `schedules`.
+
+Not changed: routing strategy, `ExecutionTrace`, Bridge authorization.
+
+Rejected alternatives:
+- A token on the reads: Atlas cannot send one, and the owner declined it.
+- Writing synchronously on the caller's thread, as `jev-shadow.jsonl` does: it would add disk latency to every model and tool call.
+- Building Atlas's ingest here: the owner kept it to the AEP side.

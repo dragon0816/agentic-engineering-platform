@@ -202,6 +202,16 @@ def _parser() -> argparse.ArgumentParser:
     )
     shortcut.add_argument("--config", required=True, type=Path)
     shortcut.add_argument("--port", type=int, default=53583)
+    # Harness telemetry (telemetry contract v0.2, owner 2026-10-08).
+    tele = commands.add_parser("telemetry", help="list or export harness telemetry")
+    tele.add_argument("--config", required=True, type=Path)
+    tele_actions = tele.add_subparsers(dest="telemetry_action", required=True)
+    tele_runs = tele_actions.add_parser("runs", help="the newest runs")
+    tele_runs.add_argument("--limit", type=int, default=20)
+    tele_export = tele_actions.add_parser("export", help="events as JSON Lines")
+    tele_export.add_argument("--out", type=Path, help="a .jsonl file; the screen by default")
+    tele_export.add_argument("--since", help="RFC3339 time; only events from then on")
+    tele_export.add_argument("--run", help="only this run")
     mcp = commands.add_parser("mcp", help="serve authoring tools to a coding agent over stdio")
     mcp.add_argument("--config", required=True, type=Path)
     mcp.add_argument("--agent", default="mcp", help="who is connecting, e.g. codex")
@@ -595,6 +605,38 @@ def _web(
     return 0
 
 
+def _telemetry(args: argparse.Namespace, workspace_root: Path) -> int:
+    import json
+
+    from host_runtime.telemetry_setup import STORE_FILE
+    from telemetry.store import TelemetryStore
+
+    path = workspace_root / STORE_FILE
+    if not path.is_file():
+        print(f"no telemetry recorded yet ({path})", file=sys.stderr)
+        return 1
+    store = TelemetryStore(path)
+    try:
+        if args.telemetry_action == "runs":
+            for run in store.runs(limit=args.limit):
+                print(json.dumps(run, ensure_ascii=False))
+            return 0
+        lines = store.export(since=args.since, run_id=args.run)
+        if args.out is None:
+            for line in lines:
+                print(line)
+        else:
+            with args.out.open("w", encoding="utf-8", newline="\n") as handle:
+                count = 0
+                for line in lines:
+                    handle.write(line + "\n")
+                    count += 1
+            print(f"wrote {count} events to {args.out}")
+        return 0
+    finally:
+        store.close()
+
+
 def _launch(args: argparse.Namespace, workspace_root: Path) -> int:
     from host_runtime.launcher import LauncherError, create_shortcuts, open_agent
 
@@ -973,6 +1015,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     layout = HostLayout.under(config.workspace_root)
     if args.command in ("open", "shortcut"):
         return _launch(args, layout.workspace_root)
+    if args.command == "telemetry":
+        return _telemetry(args, layout.workspace_root)
     if args.command == "doctor":
         report = host_report(config, layout)
         if args.json:
@@ -995,6 +1039,10 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"this host is not ready: {error.code} ({error.path})", file=sys.stderr)
         return 2
     with runtime:
+        if args.command in ("ask", "run-task", "chat", "web", "telegram", "jobs", "schedules"):
+            from host_runtime import telemetry_setup
+
+            telemetry_setup.start(runtime)
         if args.command == "ask":
             return _ask(runtime, args.message, args.actor, args.namespace, args.json, args.output)
         if args.command == "run-task":

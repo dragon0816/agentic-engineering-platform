@@ -7,6 +7,7 @@ from typing import Literal, Self
 
 from pydantic import Field, JsonValue, ValidationError, model_validator
 
+import telemetry.recorder as telemetry
 from agent.decisions import (
     DecisionAcceleratorConfig,
     DecisionResult,
@@ -167,6 +168,10 @@ class RequestRouter:
             for item in self.commands.candidates(context.namespace)
         ):
             return needs_input(context, "uninstalled_decision_target")
+        telemetry.emit("routing.completed", state="routing", attributes={
+            "router": "request_router", "origin": getattr(outcome, "origin", None),
+            "decision_kind": outcome.decision.kind,
+            "failure_code": None if outcome.failure is None else outcome.failure.code})
         return outcome
 
     def _model_route(self, context: RequestContext) -> RoutingOutcome:

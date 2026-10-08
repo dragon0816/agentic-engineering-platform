@@ -9,6 +9,7 @@ from typing import Literal
 
 from pydantic import ValidationError
 
+import telemetry.recorder as telemetry
 from capabilities.runtime import (
     CapabilityInvocation,
     CapabilityRefused,
@@ -89,6 +90,21 @@ class BridgeExecutor:
         )
 
     async def execute(self, invocation: CapabilityInvocation) -> CapabilityResult:
+        """Every capability call, as a Bridge-layer `tool.completed` span."""
+        target = getattr(invocation, "target", None)
+        tool_id = None if target is None else (
+            f"{target.namespace}/{target.name}@{target.version}")
+        telemetry.note_tool()
+        with telemetry.span("capability", attributes={"tool_id": tool_id, "layer": "bridge"},
+                            completed="tool.completed") as step:
+            result = await self._execute(invocation)
+            if result.status != "succeeded":
+                step.update(status="failed", outcome=result.status,
+                            failure_code=None if result.failure is None
+                            else result.failure.code)
+            return result
+
+    async def _execute(self, invocation: CapabilityInvocation) -> CapabilityResult:
         call = CapabilityInvocation.model_validate(invocation)
         binding = self.installed.get(call.target)
         if binding is None:
