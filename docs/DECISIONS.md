@@ -1816,3 +1816,20 @@ Changes:
 - **Live host.json** (backup `*-before-aep-workflows-root`): `C:\Users\Chi_L\Documents\aep-workflows` added as the first root.
 
 Rejected alternative: widening the roots to `Documents\ChatGPT`. It would let scripts write next to this repository and would not stop the Agent from inventing the next folder.
+
+## 2026-10-08: Workflow 13 runs up to the commit, as two approved Workflows
+
+Decision (owner): migrate Workflow 13 `release_package` from `rs_workflow_system` (local checkout at the pinned revision) up to the commit. Push follows in a later round, still behind the owner's approval.
+
+What was built:
+- **Two Workflows.** The source's one job becomes `release-package-prepare` (resolve, checkout and write; it reports the plan and a fingerprint) and `release-package-commit` (commits only the reviewed fingerprint, and only if nothing has changed). Each is a separate approved run, so the commit has its own approval.
+- **Settings.** Only a local origin inside a marked isolated root is accepted until push is approved. That keeps the real GitLab out of reach in this round.
+- **Git runs without a shell.** It is called with an argument list. The commit text still follows the source's quoting rule, so both produce the same message.
+- **Parity.** `benchmarks/w13_parity` runs the unchanged source job against AEP on identical repositories. All four cases matched.
+
+Details: `docs/WORKFLOW_13_SOURCE_CONTRACT.md`.
+
+Rejected alternatives:
+- Prepare and commit in one run with one approval: the owner wanted the commit approved on its own.
+- Running the source job directly as a script: that bypasses Bridge admission and grants (decision of 2026-10-03).
+- Porting upload sets now: on AEP files arrive as attachments, and that route needs its own design.

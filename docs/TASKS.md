@@ -1512,3 +1512,17 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   Skill loads beside all others) (`7cc9cb7`).
 - [ ] External authoring X6, Codex and Copilot: CLIs not installed on this
   machine; run r002 once they are installed and signed in.
+- [x] Task folders checked when a Workflow is drafted (owner 2026-10-08, after
+  `coding_workspace_not_allowed` at an approved run): the Agent is told the
+  coding roots, a draft is refused if a fixed run-python or browser
+  workspace lies outside them, and a missing folder inside them is created.
+  Live root `C:\Users\Chi_L\Documents\aep-workflows` added (`af1450d`).
+- [x] Workflow 13 up to the commit (owner 2026-10-08): `release-package-prepare`
+  (version lookup, branch from template, files, plan and fingerprint) and
+  `release-package-commit` (only the reviewed, unchanged prepare), two
+  approved runs, isolated local origin only. `benchmarks/w13_parity` p001:
+  the source job and AEP match on all 4 cases. `tests/test_release_run.py`.
+- [ ] Workflow 13 push: its own approval against the real GitLab (needs a
+  valid GitLab token), the pipeline watch, upload sets from attachments, and a
+  dry-run comparison against the real release repository.
+

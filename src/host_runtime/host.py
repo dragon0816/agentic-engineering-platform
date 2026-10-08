@@ -103,11 +103,21 @@ from capabilities.release_package.contracts import (
     ReleasePreview,
     ReleasePreviewStepInput,
 )
+from capabilities.release_package.manifest import COMMIT_SPEC as RELEASE_COMMIT_SPEC
 from capabilities.release_package.manifest import ISOLATED_APPLY as ISOLATED_APPLY_WORKFLOW
 from capabilities.release_package.manifest import ISOLATED_APPLY_SPEC
+from capabilities.release_package.manifest import PREPARE_SPEC as RELEASE_PREPARE_SPEC
 from capabilities.release_package.manifest import PREVIEW as RELEASE_PREVIEW_WORKFLOW
 from capabilities.release_package.manifest import PREVIEW_SPEC as RELEASE_PREVIEW_SPEC
 from capabilities.release_package.preview import ReleasePreviewHandler
+from capabilities.release_package.release_run import (
+    CommitHandler,
+    CommitResult,
+    CommitStepInput,
+    PreparedRelease,
+    PrepareHandler,
+    PrepareStepInput,
+)
 from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
 from capabilities.script_tools import (
     ScriptToolHandler,
@@ -467,6 +477,18 @@ def build_integrations(
             IsolatedApplyHandler(),
             IsolatedApplyStepInput,
             IsolatedApplyOutput,
+            ExecutionDependencies(central_required=False),
+        )
+    # Workflow 13's release run up to the commit (owner 2026-10-08): two
+    # approved runs, isolated root only until push is approved.
+    if RELEASE_PREPARE_SPEC.identity.key in uses:
+        installed.register(
+            RELEASE_PREPARE_SPEC, PrepareHandler(), PrepareStepInput, PreparedRelease,
+            ExecutionDependencies(central_required=False),
+        )
+    if RELEASE_COMMIT_SPEC.identity.key in uses:
+        installed.register(
+            RELEASE_COMMIT_SPEC, CommitHandler(), CommitStepInput, CommitResult,
             ExecutionDependencies(central_required=False),
         )
     # Workflow 14: its paths are per-install Workflow settings.

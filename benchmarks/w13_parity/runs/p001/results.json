@@ -1,0 +1,309 @@
+{
+  "source_revision": "896046e8fe2170d21f9213e56e5ce2f93c05ba43",
+  "cases": [
+    {
+      "case": "new-branch",
+      "match": true,
+      "mismatched": [],
+      "fields": {
+        "branch": {
+          "source": "Acme-Labs_kt326_demo",
+          "aep": "Acme-Labs_kt326_demo"
+        },
+        "branchState": {
+          "source": "created",
+          "aep": "created"
+        },
+        "chipsetVersion": {
+          "source": "2.0.17",
+          "aep": "2.0.17"
+        },
+        "previousVersion": {
+          "source": null,
+          "aep": null
+        },
+        "releaseVersion": {
+          "source": "0.0.1",
+          "aep": "0.0.1"
+        },
+        "requirements": {
+          "source": [
+            "rs-wmt-kt326==2.0.17",
+            "rs-wmt-general-testcase==3.0.17"
+          ],
+          "aep": [
+            "rs-wmt-kt326==2.0.17",
+            "rs-wmt-general-testcase==3.0.17"
+          ]
+        },
+        "changedFiles": {
+          "source": 5,
+          "aep": 5
+        },
+        "committed": {
+          "source": true,
+          "aep": true
+        },
+        "pushed": {
+          "source": false,
+          "aep": false
+        },
+        "repository": {
+          "source": {
+            "message": "Release Acme Labs kt326 2.0.17 v0.0.1 (general-testcase v3.0.17)\n\nfixed the 'throughput' plan 'again'\n\n",
+            "tree": [
+              "100644 blob 49106f93a9afc187c6ad3a62b3854ab54a6d839a\tREADME.md",
+              "100644 blob 734960f3046bd24a46c7c98a7d0430c14de3d802\tconfigurations/lab.yaml",
+              "100644 blob 8ac68a31eafaee94163fb9bdc1fc983d076b5e57\toverlay/patch.txt",
+              "100644 blob 79d8c833d854969904d909198c31ed24b6986feb\trelease.yaml",
+              "100644 blob bef2701af5c3d206855750e24d0c39397ceb5e86\trequirements.txt",
+              "100644 blob 262fc93ffc66da17422a110ce0a2ac7e1850b3b0\trswmt/base.py",
+              "100644 blob fccb5c630fde4d0123888c271fd147cb213f7af5\ttestplans/throughput.json"
+            ],
+            "branch": "Acme-Labs_kt326_demo"
+          },
+          "aep": {
+            "message": "Release Acme Labs kt326 2.0.17 v0.0.1 (general-testcase v3.0.17)\n\nfixed the 'throughput' plan 'again'\n\n",
+            "tree": [
+              "100644 blob 49106f93a9afc187c6ad3a62b3854ab54a6d839a\tREADME.md",
+              "100644 blob 734960f3046bd24a46c7c98a7d0430c14de3d802\tconfigurations/lab.yaml",
+              "100644 blob 8ac68a31eafaee94163fb9bdc1fc983d076b5e57\toverlay/patch.txt",
+              "100644 blob 79d8c833d854969904d909198c31ed24b6986feb\trelease.yaml",
+              "100644 blob bef2701af5c3d206855750e24d0c39397ceb5e86\trequirements.txt",
+              "100644 blob 262fc93ffc66da17422a110ce0a2ac7e1850b3b0\trswmt/base.py",
+              "100644 blob fccb5c630fde4d0123888c271fd147cb213f7af5\ttestplans/throughput.json"
+            ],
+            "branch": "Acme-Labs_kt326_demo"
+          }
+        }
+      }
+    },
+    {
+      "case": "existing-branch",
+      "match": true,
+      "mismatched": [],
+      "fields": {
+        "branch": {
+          "source": "Foxconn_kt326",
+          "aep": "Foxconn_kt326"
+        },
+        "branchState": {
+          "source": "existing",
+          "aep": "existing"
+        },
+        "chipsetVersion": {
+          "source": "2.0.18",
+          "aep": "2.0.18"
+        },
+        "previousVersion": {
+          "source": "0.0.15",
+          "aep": "0.0.15"
+        },
+        "releaseVersion": {
+          "source": "0.1.0",
+          "aep": "0.1.0"
+        },
+        "requirements": {
+          "source": [
+            "rs-wmt-kt326==2.0.18",
+            "rs-wmt-general-testcase==3.0.18"
+          ],
+          "aep": [
+            "rs-wmt-kt326==2.0.18",
+            "rs-wmt-general-testcase==3.0.18"
+          ]
+        },
+        "changedFiles": {
+          "source": 3,
+          "aep": 3
+        },
+        "committed": {
+          "source": true,
+          "aep": true
+        },
+        "pushed": {
+          "source": false,
+          "aep": false
+        },
+        "repository": {
+          "source": {
+            "message": "Release Foxconn kt326 2.0.18 v0.1.0 (general-testcase 3.0.18)\n\nsecond release\n\n",
+            "tree": [
+              "100644 blob 49106f93a9afc187c6ad3a62b3854ab54a6d839a\tREADME.md",
+              "100644 blob a61e1429f50256c8d2074531aeefb2dd3d81662c\trelease.yaml",
+              "100644 blob 58de3c8d9bf349335741941ca7d8d6f95f128525\trequirements.txt",
+              "100644 blob 262fc93ffc66da17422a110ce0a2ac7e1850b3b0\trswmt/base.py",
+              "100644 blob 9e26dfeeb6e641a33dae4961196235bdb965b21b\ttestplans/old.json",
+              "100644 blob fccb5c630fde4d0123888c271fd147cb213f7af5\ttestplans/throughput.json"
+            ],
+            "branch": "Foxconn_kt326"
+          },
+          "aep": {
+            "message": "Release Foxconn kt326 2.0.18 v0.1.0 (general-testcase 3.0.18)\n\nsecond release\n\n",
+            "tree": [
+              "100644 blob 49106f93a9afc187c6ad3a62b3854ab54a6d839a\tREADME.md",
+              "100644 blob a61e1429f50256c8d2074531aeefb2dd3d81662c\trelease.yaml",
+              "100644 blob 58de3c8d9bf349335741941ca7d8d6f95f128525\trequirements.txt",
+              "100644 blob 262fc93ffc66da17422a110ce0a2ac7e1850b3b0\trswmt/base.py",
+              "100644 blob 9e26dfeeb6e641a33dae4961196235bdb965b21b\ttestplans/old.json",
+              "100644 blob fccb5c630fde4d0123888c271fd147cb213f7af5\ttestplans/throughput.json"
+            ],
+            "branch": "Foxconn_kt326"
+          }
+        }
+      }
+    },
+    {
+      "case": "dry-run",
+      "match": true,
+      "mismatched": [],
+      "fields": {
+        "branch": {
+          "source": "Foxconn_kt326",
+          "aep": "Foxconn_kt326"
+        },
+        "branchState": {
+          "source": "existing",
+          "aep": "existing"
+        },
+        "chipsetVersion": {
+          "source": "2.0.18",
+          "aep": "2.0.18"
+        },
+        "previousVersion": {
+          "source": "0.0.15",
+          "aep": "0.0.15"
+        },
+        "releaseVersion": {
+          "source": "0.1.0",
+          "aep": "0.1.0"
+        },
+        "requirements": {
+          "source": [
+            "rs-wmt-kt326==2.0.18",
+            "rs-wmt-general-testcase==3.0.18"
+          ],
+          "aep": [
+            "rs-wmt-kt326==2.0.18",
+            "rs-wmt-general-testcase==3.0.18"
+          ]
+        },
+        "changedFiles": {
+          "source": 3,
+          "aep": 3
+        },
+        "committed": {
+          "source": false,
+          "aep": false
+        },
+        "pushed": {
+          "source": false,
+          "aep": false
+        },
+        "repository": {
+          "source": {
+            "status": [
+              " M release.yaml",
+              "?? configurations/lab.yaml",
+              "?? requirements.txt"
+            ],
+            "files": {
+              "release.yaml": "8a5c24b995c9b849e4ee7d68f1b06d6ae7c87f37f631044c790b182414cb49d7",
+              "configurations/lab.yaml": "7aee5c391db1060fd46d65d2b2673d5a13359f36afdfc30c0afc272dc458b6d1",
+              "requirements.txt": "8f789a9f070db9d889d84a19f458128bf0768fe1d959d84081bdad19b7358d45"
+            },
+            "branch": "Foxconn_kt326",
+            "head": "earlier release"
+          },
+          "aep": {
+            "status": [
+              " M release.yaml",
+              "?? configurations/lab.yaml",
+              "?? requirements.txt"
+            ],
+            "files": {
+              "release.yaml": "8a5c24b995c9b849e4ee7d68f1b06d6ae7c87f37f631044c790b182414cb49d7",
+              "configurations/lab.yaml": "7aee5c391db1060fd46d65d2b2673d5a13359f36afdfc30c0afc272dc458b6d1",
+              "requirements.txt": "8f789a9f070db9d889d84a19f458128bf0768fe1d959d84081bdad19b7358d45"
+            },
+            "branch": "Foxconn_kt326",
+            "head": "earlier release"
+          }
+        }
+      }
+    },
+    {
+      "case": "explicit-version",
+      "match": true,
+      "mismatched": [],
+      "fields": {
+        "branch": {
+          "source": "Foxconn_kt326",
+          "aep": "Foxconn_kt326"
+        },
+        "branchState": {
+          "source": "existing",
+          "aep": "existing"
+        },
+        "chipsetVersion": {
+          "source": "2.0.18",
+          "aep": "2.0.18"
+        },
+        "previousVersion": {
+          "source": "0.0.15",
+          "aep": "0.0.15"
+        },
+        "releaseVersion": {
+          "source": "1.2.3",
+          "aep": "1.2.3"
+        },
+        "requirements": {
+          "source": [
+            "rs-wmt-kt326==2.0.18",
+            "rs-wmt-general-testcase==3.0.18"
+          ],
+          "aep": [
+            "rs-wmt-kt326==2.0.18",
+            "rs-wmt-general-testcase==3.0.18"
+          ]
+        },
+        "changedFiles": {
+          "source": 2,
+          "aep": 2
+        },
+        "committed": {
+          "source": true,
+          "aep": true
+        },
+        "pushed": {
+          "source": false,
+          "aep": false
+        },
+        "repository": {
+          "source": {
+            "message": "Release Foxconn kt326 2.0.18 v1.2.3 (general-testcase 3.0.18)\n\n",
+            "tree": [
+              "100644 blob 49106f93a9afc187c6ad3a62b3854ab54a6d839a\tREADME.md",
+              "100644 blob 9224bb281ae0643269a59d5aebaf115d23b1f70a\trelease.yaml",
+              "100644 blob 58de3c8d9bf349335741941ca7d8d6f95f128525\trequirements.txt",
+              "100644 blob 262fc93ffc66da17422a110ce0a2ac7e1850b3b0\trswmt/base.py",
+              "100644 blob 9e26dfeeb6e641a33dae4961196235bdb965b21b\ttestplans/old.json"
+            ],
+            "branch": "Foxconn_kt326"
+          },
+          "aep": {
+            "message": "Release Foxconn kt326 2.0.18 v1.2.3 (general-testcase 3.0.18)\n\n",
+            "tree": [
+              "100644 blob 49106f93a9afc187c6ad3a62b3854ab54a6d839a\tREADME.md",
+              "100644 blob 9224bb281ae0643269a59d5aebaf115d23b1f70a\trelease.yaml",
+              "100644 blob 58de3c8d9bf349335741941ca7d8d6f95f128525\trequirements.txt",
+              "100644 blob 262fc93ffc66da17422a110ce0a2ac7e1850b3b0\trswmt/base.py",
+              "100644 blob 9e26dfeeb6e641a33dae4961196235bdb965b21b\ttestplans/old.json"
+            ],
+            "branch": "Foxconn_kt326"
+          }
+        }
+      }
+    }
+  ]
+}

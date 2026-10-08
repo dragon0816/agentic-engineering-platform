@@ -1,7 +1,7 @@
 # Workflow 13 source contract and first AEP slice
 
 Source: read-only `dragon0816/rs_workflow_system` at
-`896046e8fe2170d21f9213e56e5ce2f93c05ba43d`, especially
+`896046e8fe2170d21f9213e56e5ce2f93c05ba43`, especially
 `host-bridge/jobs/release_package.py`, `_release_yaml.py`,
 `tests/test_release_yaml.py`, `tests/test_release_dry_run_plan.py`, and
 `workflows/13_release_package.json`. Strategy: **PRESERVE + ADAPT**. The
@@ -66,3 +66,29 @@ steps. Compare normalized files and Git diff in an isolated test repository,
 then collect company-host dry-run parity evidence. Publishing a Workflow asset
 cannot grant release authority. No production repository push is authorized by
 this slice.
+
+## Release run up to the commit (2026-10-08)
+
+The owner asked for Workflow 13 to be migrated, up to the commit; push comes in a later round. The source checkout used is `C:\Users\Chi_L\Documents\claude\n8n_workflow_system` at the pinned revision above (the earlier hash in this document had one extra character).
+
+AEP splits the source job into two Workflows, each a separate approved run:
+
+- `engineering/release-package-prepare@1.0.0` runs capability `release-package/prepare@1.0.0`, which covers the source's `resolve`, `checkout` and `write` steps:
+  - It finds the chipset version: the newest published release on the PEP 503 index (dev builds are never chosen), then the readiness table.
+  - It clones or fetches the repository, then checks out an existing branch (with `reset --hard origin/<branch>`) or creates one from the template.
+  - It writes `requirements.txt`, the named inbox files and `release.yaml` the way the source writes them: text mode for the generated files, `copy2` for inputs.
+  - It reports the source's dry-run plan and a fingerprint, and keeps a record of what it prepared in the checkout's `.git`. It never commits.
+- `engineering/release-package-commit@1.0.0` runs capability `release-package/commit@1.0.0`. It commits only when the branch and fingerprint the person reviewed match the record, and the branch, HEAD and every changed file are unchanged. The commit message follows the source's subject and quoting (`_quote_for_git`). It skips a dry run and an unchanged release. It never pushes.
+
+Both capabilities are `write` with `approval_required`, and they run under a lock, one run per working copy. Git runs as an argument list with no shell and never prompts.
+
+Until push is approved, the settings accept only a local origin inside a root carrying `.aep-isolated-release-root`; https and ssh remotes are refused with `remote_not_isolated`.
+
+Adaptations from the source:
+- Inputs are validated before anything is written. The source wrote `requirements.txt` before it checked the inbox names.
+- Upload sets (the source's ops dashboard) are refused with `upload_sets_not_supported`, because on AEP files arrive as attachments and that route is not wired yet.
+- The source derives the working-copy folder from the part of the URL after the last `/`, so a backslash Windows path would put it in the wrong place. AEP accepts either separator.
+
+Parity (`benchmarks/w13_parity`, run p001): the source job ran unchanged, through a stand-in Bridge that runs PowerShell inside the isolated root and refuses `git push`. AEP ran prepare and then commit on an identical copy. All four cases match: a new branch from the template, an existing branch, a dry run and an explicit version. The comparison covered branch, state, versions, requirements, the changed count, committed/pushed, the commit message and every committed blob hash (or, for the dry run, the status and the bytes of changed files).
+
+Still open: push with its own approval against the real GitLab, the pipeline watch, upload sets from attachments, and a dry-run comparison against the real release repository.

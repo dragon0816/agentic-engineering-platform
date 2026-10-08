@@ -1,5 +1,7 @@
 """Installed read-only Workflow 13 preview and its explicit Skill command."""
 
+from typing import Any
+
 from agent.skills import SkillManifest
 from capabilities.contracts import CapabilitySpec
 from common.assets import AssetIdentity, WorkflowManifest
@@ -156,5 +158,144 @@ def isolated_apply_workflow() -> WorkflowManifest:
                     },
                 }
             ],
+        }
+    )
+
+
+# -- the release run up to the commit (owner 2026-10-08) -----------------------
+
+PREPARE = AssetIdentity(namespace="engineering", name="release-package-prepare", version="1.0.0")
+COMMIT = AssetIdentity(namespace="engineering", name="release-package-commit", version="1.0.0")
+
+PREPARE_SPEC = CapabilitySpec.model_validate(
+    {
+        "identity": {"namespace": "release-package", "name": "prepare", "version": "1.0.0"},
+        "name": "release_package.prepare",
+        "description": "Resolve the chipset version, check out or create the release branch and "
+                       "write the package files; never commits",
+        "input_contract": "release-package.prepare.input.v1",
+        "output_contract": "release-package.prepare.output.v1",
+        "side_effect": "write",
+        "policy": {
+            "required_permissions": ["release-package.prepare"],
+            "policy_refs": ["release-package-isolated-write-policy"],
+            "approval_required": True,
+        },
+    }
+)
+
+COMMIT_SPEC = CapabilitySpec.model_validate(
+    {
+        "identity": {"namespace": "release-package", "name": "commit", "version": "1.0.0"},
+        "name": "release_package.commit",
+        "description": "Commit exactly the release that was prepared and reviewed; never pushes",
+        "input_contract": "release-package.commit.input.v1",
+        "output_contract": "release-package.commit.output.v1",
+        "side_effect": "write",
+        "policy": {
+            "required_permissions": ["release-package.commit"],
+            "policy_refs": ["release-package-isolated-write-policy"],
+            "approval_required": True,
+        },
+    }
+)
+
+_RUN_SETTINGS: list[dict[str, Any]] = [
+    {"name": "release_repo_url", "label": "Release repository", "kind": "text",
+     "scope": "static", "required": True,
+     "description": "For now a local repository inside the isolated root; GitLab comes with push."},
+    {"name": "template_branch", "label": "Template branch", "kind": "text", "scope": "static",
+     "default": "template"},
+    {"name": "work_root", "label": "Working copy folder", "kind": "text", "scope": "static",
+     "required": True},
+    {"name": "inbox_path", "label": "Input inbox", "kind": "text", "scope": "static",
+     "required": True},
+    {"name": "allowed_root", "label": "Isolated root", "kind": "text", "scope": "static",
+     "required": True, "description": "Must carry the AEP isolated-release marker."},
+    {"name": "artifactory_base_url", "label": "Published package index", "kind": "text",
+     "scope": "static", "description": "PEP 503 simple-index root, for the chipset version."},
+    {"name": "readiness_base_url", "label": "Readiness table", "kind": "text", "scope": "static",
+     "description": "Fallback chipset version lookup (Workflow 12's table)."},
+]
+_SETTING_INPUTS = {item["name"]: {"source": "run", "path": [item["name"]]}
+                   for item in _RUN_SETTINGS}
+
+
+def prepare_workflow() -> WorkflowManifest:
+    return WorkflowManifest.model_validate(
+        {
+            "metadata": {"identity": PREPARE.model_dump(), **_METADATA},
+            "kind": "workflow",
+            "description": (
+                "Workflow 13, step 1: resolve the chipset version, check out or create the "
+                "customer release branch, and write requirements.txt, the chosen files and "
+                "release.yaml. Shows what a commit would contain; never commits or pushes."
+            ),
+            "execution": {"mode": "local"},
+            "dependencies": {"central_required": False,
+                             "local_capabilities": [PREPARE_SPEC.name]},
+            "parameters": [
+                *_RUN_SETTINGS,
+                {"name": "companyName", "label": "Which company is this release for?",
+                 "kind": "text", "required": True, "examples": ["Foxconn"], "order": 10,
+                 "group": "identity"},
+                {"name": "chipsetId", "label": "Which chipset or licence id?", "kind": "text",
+                 "required": True, "examples": ["kt326"], "order": 20, "group": "identity"},
+                {"name": "chipsetVersion", "label": "Which version of it?", "kind": "text",
+                 "description": "Empty: the newest published release.", "order": 25},
+                {"name": "info", "label": "Any extra tag for the branch name?", "kind": "text",
+                 "examples": ["demo"], "order": 30, "group": "identity"},
+                {"name": "cmpKtOption", "label": "Which CMP_KT_OPTION?", "kind": "select",
+                 "required": True, "options": ["KT160", "KT161"], "order": 40},
+                {"name": "generalTestcaseVersion", "label": "Which general testcase version?",
+                 "kind": "text", "required": True, "examples": ["v3.0.17"], "order": 50},
+                {"name": "notes", "label": "What changed in this release?", "kind": "text",
+                 "order": 60},
+                {"name": "testPlans", "label": "Test plan files (.json) in the inbox",
+                 "kind": "text_list", "order": 70},
+                {"name": "configurations", "label": "Configuration files (.yaml) in the inbox",
+                 "kind": "text_list", "order": 80},
+                {"name": "overlays", "label": "Overlay files in the inbox", "kind": "text_list",
+                 "order": 90},
+                {"name": "suffix", "label": "SUFFIX in release.yaml (KT160 only)",
+                 "kind": "text", "order": 100},
+                {"name": "releaseVersion", "label": "VERSION override", "kind": "text",
+                 "description": "Empty: one more than the branch already has.", "order": 110},
+                {"name": "dryRun", "label": "Dry run (the commit step will refuse)",
+                 "kind": "boolean", "default": False, "order": 120},
+            ],
+            "input_contract": "release-package.prepare.input.v1",
+            "output_contract": "release-package.prepare.output.v1",
+            "steps": [{"capability": PREPARE_SPEC.identity.model_dump(),
+                       "inputs": {"request": {"source": "run"}, **_SETTING_INPUTS}}],
+        }
+    )
+
+
+def commit_workflow() -> WorkflowManifest:
+    return WorkflowManifest.model_validate(
+        {
+            "metadata": {"identity": COMMIT.model_dump(), **_METADATA},
+            "kind": "workflow",
+            "description": (
+                "Workflow 13, step 2: commit the release that was prepared and reviewed. "
+                "Refuses if anything changed since; never pushes."
+            ),
+            "execution": {"mode": "local"},
+            "dependencies": {"central_required": False,
+                             "local_capabilities": [COMMIT_SPEC.name]},
+            "parameters": [
+                *_RUN_SETTINGS,
+                {"name": "branch", "label": "Which prepared branch?", "kind": "text",
+                 "required": True, "order": 10},
+                {"name": "fingerprint", "label": "The fingerprint the prepare step showed",
+                 "kind": "text", "required": True, "order": 20, "min_length": 12},
+            ],
+            "input_contract": "release-package.commit.input.v1",
+            "output_contract": "release-package.commit.output.v1",
+            "steps": [{"capability": COMMIT_SPEC.identity.model_dump(),
+                       "inputs": {"branch": {"source": "run", "path": ["branch"]},
+                                  "fingerprint": {"source": "run", "path": ["fingerprint"]},
+                                  **_SETTING_INPUTS}}],
         }
     )
