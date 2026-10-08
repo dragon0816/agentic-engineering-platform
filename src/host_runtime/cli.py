@@ -568,6 +568,7 @@ def _web(
         if web.telegram_loop is not None:
             print("Telegram messages are answered while this runs.")
         web.start_feedback_sync()
+        web.start_mcp()
         print("This machine's Agent is at:")
         print(f"  {server.address}")
         print(

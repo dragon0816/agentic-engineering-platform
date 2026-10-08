@@ -1542,4 +1542,9 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   `aep-platform feedback` exports it. `tests/test_feedback_sync.py`.
 - [ ] Feedback follow-ups: a platform page to read and triage feedback;
   Telegram ratings.
+- [x] MCP servers in Agent Web Settings (owner 2026-10-08): stdio and
+  Streamable HTTP; every tool of an added server becomes a granted Bridge
+  capability `mcp-<server>/<tool>@1.0.0`, offered in conversations (also
+  during coding) and usable as a Workflow step; secrets only in the user's
+  environment. `tests/test_mcp_servers.py`.
 

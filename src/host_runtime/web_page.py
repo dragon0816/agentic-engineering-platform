@@ -595,6 +595,55 @@ tr:last-child td { border-bottom: none; }
         <div id="telegram-unknown"></div>
       </form>
     </div>
+    <div class="card settings" id="mcp-card" style="margin-top: 14px">
+      <h2>MCP servers</h2>
+      <p class="note">Add a Model Context Protocol server to give this Agent more tools: a local
+        command (stdio) or a remote URL (Streamable HTTP). Adding a server approves all of its
+        tools; the Agent can use them in conversations and coding, and a Workflow can use them
+        as steps. Secrets are kept only in this Windows user's environment and never shown.</p>
+      <div id="mcp-list" class="empty">reading&hellip;</div>
+      <details id="mcp-editor">
+        <summary><strong>Add or edit a server</strong></summary>
+        <form id="mcp-form">
+          <div class="two">
+            <div><label for="mcp-name">Name (lowercase, e.g. github)</label>
+              <input id="mcp-name" required pattern="[a-z0-9]+(-[a-z0-9]+)*" maxlength="32"></div>
+            <div><label for="mcp-transport">Connection</label>
+              <select id="mcp-transport"><option value="stdio">Local command (stdio)</option>
+                <option value="http">Remote URL (HTTP)</option></select></div>
+          </div>
+          <div id="mcp-stdio">
+            <label for="mcp-command">Command</label>
+            <input id="mcp-command" placeholder="npx">
+            <label for="mcp-args">Arguments (one per line)</label>
+            <textarea id="mcp-args" rows="3"
+              placeholder="-y&#10;@modelcontextprotocol/server-filesystem"></textarea>
+            <label for="mcp-cwd">Working folder (optional)</label>
+            <input id="mcp-cwd">
+            <label for="mcp-env">Environment, not secret (NAME=value per line)</label>
+            <textarea id="mcp-env" rows="2"></textarea>
+            <label for="mcp-secret-env">Secret environment (NAME=value per line; an empty value
+              keeps the stored one)</label>
+            <textarea id="mcp-secret-env" rows="2" autocomplete="off"></textarea>
+          </div>
+          <div id="mcp-http" hidden>
+            <label for="mcp-url">URL (starting with https or http)</label>
+            <input id="mcp-url" placeholder="mcp.example.com/mcp">
+            <label for="mcp-headers">Headers, not secret (Name: value per line)</label>
+            <textarea id="mcp-headers" rows="2"></textarea>
+            <label for="mcp-token">Bearer token (empty keeps the stored one)</label>
+            <input id="mcp-token" type="password" autocomplete="new-password">
+          </div>
+          <div class="two">
+            <div><label for="mcp-timeout">Timeout per call (seconds)</label>
+              <input id="mcp-timeout" type="number" min="1" max="900" value="60"></div>
+            <div><label><input id="mcp-enabled" type="checkbox" checked> Enabled</label></div>
+          </div>
+          <p><button class="go" id="mcp-save" type="submit">Save and connect</button></p>
+          <p id="mcp-result" class="note" role="status"></p>
+        </form>
+      </details>
+    </div>
     <div class="card settings" style="margin-top: 14px">
       <h2>Agent profile</h2>
       <p class="note">Profiles narrow the Agent's Skills, Knowledge, capabilities and
@@ -2102,6 +2151,135 @@ for (const button of document.querySelectorAll(".cap-tabs button")) {
 }
 el("capability-search").addEventListener("input", renderCapabilityBrowser);
 
+// -- MCP servers (owner 2026-10-08) ---------------------------------------
+
+const MCP_STATUS = {connected: "已連線", connecting: "連線中…", failed: "連線失敗",
+  disabled: "已停用"};
+
+function linesToMap(text, separator) {
+  const map = {};
+  for (const line of text.split("\n")) {
+    const at = line.indexOf(separator);
+    if (at <= 0) continue;
+    map[line.slice(0, at).trim()] = line.slice(at + separator.length).trim();
+  }
+  return map;
+}
+
+function showMcpTransport() {
+  const http = el("mcp-transport").value === "http";
+  el("mcp-http").hidden = !http; el("mcp-stdio").hidden = http;
+}
+
+function editMcp(server) {
+  const c = server.config;
+  el("mcp-name").value = c.name; el("mcp-transport").value = c.transport;
+  el("mcp-command").value = c.command; el("mcp-args").value = c.args.join("\n");
+  el("mcp-cwd").value = c.cwd || "";
+  el("mcp-env").value = Object.entries(c.env).map(([k, v]) => k + "=" + v).join("\n");
+  el("mcp-secret-env").value = c.secret_env.map((k) => k + "=").join("\n");
+  el("mcp-url").value = c.url;
+  el("mcp-headers").value = Object.entries(c.headers).map(([k, v]) => k + ": " + v).join("\n");
+  el("mcp-token").value = ""; el("mcp-token").placeholder = server.secrets_present.TOKEN
+    ? "stored; empty keeps it" : "";
+  el("mcp-timeout").value = c.timeout_seconds; el("mcp-enabled").checked = c.enabled;
+  showMcpTransport(); el("mcp-editor").open = true;
+}
+
+async function mcpAct(action, body) {
+  const done = await call("/api/mcp/" + action, body);
+  if (!done.ok) throw new Error(done.message || done.code || action + " failed");
+  renderMcp(done.servers);
+  return done;
+}
+
+function renderMcp(servers) {
+  const box = el("mcp-list");
+  if (!servers.length) {
+    box.className = "empty"; box.textContent = "No MCP server yet."; return;
+  }
+  box.className = ""; box.replaceChildren();
+  for (const server of servers) {
+    const c = server.config;
+    const card = document.createElement("div"); card.className = "approval-card";
+    const title = document.createElement("strong");
+    title.textContent = c.name + " (" + (c.transport === "http" ? c.url : c.command) + ") — "
+      + (MCP_STATUS[server.status] || server.status);
+    const detail = document.createElement("p");
+    detail.textContent = server.error ? "Error: " + server.error
+      : server.tools.length + " tool(s)";
+    const tools = document.createElement("details");
+    const label = document.createElement("summary"); label.textContent = "Tools";
+    const list = document.createElement("ul");
+    for (const tool of server.tools) {
+      const item = document.createElement("li");
+      item.textContent = tool.name + " — " + tool.capability
+        + (tool.description ? " — " + tool.description : "");
+      list.append(item);
+    }
+    tools.append(label, list);
+    const edit = document.createElement("button"); edit.type = "button"; edit.textContent = "Edit";
+    edit.addEventListener("click", () => editMcp(server));
+    const again = document.createElement("button"); again.type = "button";
+    again.textContent = "Reconnect";
+    const remove = document.createElement("button"); remove.type = "button";
+    remove.className = "reject"; remove.textContent = "Remove";
+    const note = document.createElement("span"); note.className = "approval-note";
+    again.addEventListener("click", async () => {
+      note.textContent = "connecting…";
+      try { await mcpAct("reconnect", {name: c.name}); } catch (f) { note.textContent = f.message; }
+    });
+    remove.addEventListener("click", async () => {
+      if (!confirm("Remove MCP server " + c.name + "? Its tools stop working.")) return;
+      try { await mcpAct("delete", {name: c.name}); } catch (f) { note.textContent = f.message; }
+    });
+    card.append(title, detail, tools, edit, again, remove, note);
+    box.append(card);
+  }
+}
+
+async function loadMcp() {
+  const listed = await call("/api/mcp");
+  renderMcp(listed.servers);
+  if (listed.servers.some((s) => s.status === "connecting")) {
+    setTimeout(() => loadMcp().catch(() => {}), 3000);
+  }
+}
+
+el("mcp-transport").addEventListener("change", showMcpTransport);
+el("mcp-form").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const transport = el("mcp-transport").value;
+  const secrets = linesToMap(el("mcp-secret-env").value, "=");
+  const config = {
+    name: el("mcp-name").value.trim(), transport: transport,
+    enabled: el("mcp-enabled").checked,
+    timeout_seconds: Number(el("mcp-timeout").value) || 60,
+  };
+  if (transport === "stdio") {
+    Object.assign(config, {command: el("mcp-command").value.trim(),
+      args: el("mcp-args").value.split("\n").map((a) => a.trim()).filter(Boolean),
+      cwd: el("mcp-cwd").value.trim() || null, env: linesToMap(el("mcp-env").value, "="),
+      secret_env: Object.keys(secrets)});
+  } else {
+    Object.assign(config, {url: el("mcp-url").value.trim(),
+      headers: linesToMap(el("mcp-headers").value, ":"),
+      bearer_token: !!el("mcp-token").value || !!el("mcp-token").placeholder});
+    if (el("mcp-token").value) secrets.TOKEN = el("mcp-token").value;
+  }
+  const result = el("mcp-result"), button = el("mcp-save");
+  button.disabled = true; result.textContent = "Saving…";
+  try {
+    await mcpAct("save", {config: config, secrets: secrets});
+    el("mcp-token").value = ""; el("mcp-secret-env").value = Object.keys(secrets)
+      .filter((k) => k !== "TOKEN").map((k) => k + "=").join("\n");
+    result.textContent = "Saved. Connecting in the background…";
+    setTimeout(() => loadMcp().catch(() => {}), 2000);
+  } catch (failure) {
+    result.textContent = "Not saved: " + failure.message;
+  } finally { button.disabled = false; }
+});
+
 async function loadSettings() {
   const settings = await call("/api/settings"), model = settings.model,
     persona = settings.persona;
@@ -3271,7 +3449,7 @@ el("nav-capabilities").addEventListener("click", () => selectPrimaryTab("install
 el("nav-settings").addEventListener("click", () => selectPrimaryTab("settings"));
 el("nav-schedules").addEventListener("click", () => selectPrimaryTab("schedules"));
 
-Promise.all([loadAbout(), loadAssets(), loadChat(), loadSlashCommands(), loadAvatars()])
+Promise.all([loadAbout(), loadAssets(), loadChat(), loadSlashCommands(), loadAvatars(), loadMcp()])
   .catch(showBootError);
 field.focus();
 </script>

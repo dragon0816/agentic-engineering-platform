@@ -197,12 +197,14 @@ from host_runtime.contracts import (
 # can take one without importing this module, and callers still find it here.
 from host_runtime.contracts import HostLayout as HostLayout
 from host_runtime.jev_shadow import SHADOW_LOG_FILE, JevShadowLog, skill_accelerator
+from host_runtime.mcp_servers import McpHub
 from host_runtime.profiles import ProfileError, load_active_profile
 from host_runtime.reference_sets import REFERENCE_SETS_FILE, ReferenceItem, ReferenceSetStore
 from host_runtime.runtime import inspect_host
 from host_runtime.state import SqliteLocalState
 from host_runtime.sync import PlatformClient
 from host_runtime.task_artifacts import LocalTaskArtifacts
+from host_runtime.telegram_settings import windows_user_environment
 from host_runtime.workflow_settings import SETTINGS_FILE, WorkflowSettingsStore, settings_key
 from host_runtime.workspace import documents
 from integrations import excel
@@ -328,6 +330,9 @@ class HostRuntime:
         self.telegram = telegram
         self.platform = platform
         self.chat_authoring = chat_authoring
+        # MCP servers the owner added in Agent Web (owner 2026-10-08); they
+        # connect when a long-running command starts them.
+        self.mcp: McpHub | None = None
 
     @property
     def actor(self) -> str:
@@ -345,6 +350,8 @@ class HostRuntime:
                     closing()
                 except Exception:  # noqa: BLE001 - shutting down continues regardless
                     pass
+        if self.mcp is not None:
+            self.mcp.close()
         self.state.close()
 
     def __enter__(self) -> Self:
@@ -1719,7 +1726,10 @@ def build_runtime(
             () if checked.coding is None else tuple(checked.coding.workspace_roots)),
         on_installed=lambda manifest, grants: _use_now(gateway, manifest, grants),
     )
-    gateway.host_tools = lambda: (*chat_authoring.tools(), *bridge_tools(gateway.bridge))
+    mcp = McpHub(place.workspace_root, gateway.bridge.installed, lambda: gateway.bridge.policy,
+                 checked.device.registered_by, store_secret=windows_user_environment)
+    gateway.host_tools = lambda: (*chat_authoring.tools(), *bridge_tools(gateway.bridge),
+                                  *mcp.tools(gateway.bridge))
     try:
         state = SqliteLocalState(place.state, bridge_id=checked.device.bridge_id)
     except (LocalStateError, OSError, ValueError) as error:
@@ -1748,4 +1758,6 @@ def build_runtime(
     except BaseException:
         state.close()
         raise
-    return HostRuntime(checked, place, agent, state, telegram, platform, chat_authoring)
+    runtime = HostRuntime(checked, place, agent, state, telegram, platform, chat_authoring)
+    runtime.mcp = mcp
+    return runtime

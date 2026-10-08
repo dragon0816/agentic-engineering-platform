@@ -1894,3 +1894,27 @@ How it works:
   - A record leaves the outbox only when the platform acknowledges it, and only if it was not rated again while in flight. Without a platform binding, or while unreachable, records wait and their attempts and last error are kept.
 
 Not done: a page on the platform for reading feedback (the CLI export is the reader for now), and Telegram ratings.
+
+## 2026-10-08: MCP servers add capabilities to the Bridge from Agent Web Settings
+
+Decision (owner): the Settings page gains MCP servers, so the Bridge can be extended through the Model Context Protocol.
+
+Owner choices:
+- **Connection:** a local command (stdio) or a remote URL (Streamable HTTP).
+- **Permission:** adding a server makes all of its tools usable.
+- **Use:** conversations, Workflows and coding.
+
+How it works:
+- **Client** (`integrations/mcp_client.py`, standard library only). The stdio client keeps one long-lived process, sends JSON-RPC lines and logs stderr to `workspace\logs\mcp-<name>.log`. The HTTP client POSTs, accepts JSON or an event stream, and keeps the `Mcp-Session-Id`. Both run initialize, then `tools/list` (paged) and `tools/call`, one request at a time per server.
+- **Hub** (`host_runtime/mcp_servers.McpHub`). Settings live in `workspace\mcp-servers.json`, and servers connect in the background when Agent Web starts or a server is saved.
+  - Each tool becomes the capability `mcp-<server>/<tool>@1.0.0`. It is `read` when the server marks it `readOnlyHint`, otherwise `external_side_effect` with approval required.
+  - Each tool is granted to the host's actor with `approval_ref settings:mcp:<server>`: adding the server is the approval.
+  - Each connected tool is offered as the conversation tool `mcp__<server>__<tool>` and dispatched through the Bridge (`CapabilityInvocation`). Host tools are added after Skill selection, so they are present during coding too.
+  - A Workflow step can name the capability, and drafting finds it installed.
+  - A removed or disconnected server's capability refuses with `mcp_server_unavailable`.
+- **Secrets.** Secret environment values (stdio) and a bearer token (HTTP) are written only to the Windows user environment as `AEP_MCP_<SERVER>_<NAME>`. The page shows only whether one is present. Plain `env` and `headers` refuse credential-shaped values and an `Authorization` header.
+- **Limit.** A coding/run-python script cannot call an MCP tool: its sandbox has no network. The Agent calls the tool in the conversation instead.
+
+Rejected alternatives:
+- The `mcp` Python SDK: it brings a web stack, and the protocol surface needed is small.
+- Approving each tool or each call: the owner chose server-level approval.

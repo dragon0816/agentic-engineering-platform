@@ -943,6 +943,41 @@ class AgentWeb:
         ]
         return status
 
+    # -- MCP servers (owner 2026-10-08) ------------------------------------
+
+    def start_mcp(self) -> None:
+        if self.runtime.mcp is not None:
+            self.runtime.mcp.start()
+
+    def mcp_servers(self) -> dict[str, Any]:
+        hub = self.runtime.mcp
+        return {"servers": [] if hub is None else hub.status()}
+
+    def mcp_action(self, action: str, body: dict[str, Any]) -> dict[str, Any]:
+        from pydantic import SecretStr
+
+        from host_runtime.mcp_servers import McpServerConfig
+
+        hub = self.runtime.mcp
+        if hub is None:
+            return {"ok": False, "code": "mcp_unavailable"}
+        name = str(body.get("name") or "")
+        try:
+            if action == "save":
+                config = McpServerConfig.model_validate(body.get("config"))
+                secrets = {str(key): SecretStr(str(value))
+                           for key, value in (body.get("secrets") or {}).items()}
+                hub.save(config, secrets)
+            elif action == "delete":
+                hub.delete(name)
+            elif action == "reconnect":
+                hub.connect(name)
+            else:
+                return {"ok": False, "code": "mcp_request_invalid"}
+        except ValueError as error:
+            return {"ok": False, "code": "mcp_settings_invalid", "message": str(error)[:300]}
+        return {"ok": True, **self.mcp_servers()}
+
     def start_feedback_sync(self) -> None:
         """Send queued feedback to the Shared Platform while this runs."""
         from host_runtime.feedback_sync import FeedbackSync
@@ -2873,6 +2908,8 @@ class _Handler(BaseHTTPRequestHandler):
         elif parsed.path == "/api/approvals":
             session_id = parse_qs(parsed.query).get("session_id", [None])[0]
             self._json(200, web.approvals(session_id))
+        elif parsed.path == "/api/mcp":
+            self._json(200, web.mcp_servers())
         elif parsed.path == "/api/settings/workflows":
             self._json(200, web.workflow_settings())
         elif parsed.path == "/api/backends":
@@ -2911,6 +2948,9 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/knowledge/ask",
             "/api/settings/model",
             "/api/settings/telegram",
+            "/api/mcp/save",
+            "/api/mcp/delete",
+            "/api/mcp/reconnect",
             "/api/settings/workflows",
             "/api/workflow-options",
             "/api/settings/persona",
@@ -2979,6 +3019,13 @@ class _Handler(BaseHTTPRequestHandler):
             except (OSError, ValueError, TypeError):
                 self._json(400, {"error": "the request was not valid model settings"})
                 return
+            self._json(200 if result.get("ok") else 409, result)
+            return
+        if path in ("/api/mcp/save", "/api/mcp/delete", "/api/mcp/reconnect"):
+            if not isinstance(body, dict):
+                self._json(400, {"ok": False, "code": "mcp_request_invalid"})
+                return
+            result = self.server.web.mcp_action(path.rsplit("/", 1)[1], body)
             self._json(200 if result.get("ok") else 409, result)
             return
         if path == "/api/settings/telegram":
