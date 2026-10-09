@@ -1946,3 +1946,15 @@ Rejected alternatives:
 - A token on the reads: Atlas cannot send one, and the owner declined it.
 - Writing synchronously on the caller's thread, as `jev-shadow.jsonl` does: it would add disk latency to every model and tool call.
 - Building Atlas's ingest here: the owner kept it to the AEP side.
+
+## 2026-10-09: One Harness skeleton for Coding, Workflow, Knowledge and conversation
+
+Decision (owner, after reviewing `docs/HARNESS_DESIGN.zh-TW.md`): the four domains run on one skeleton, the shared plan → collect → execute → validate → retry state machine. Their differences live in Skills (guidance, evidence, Host checks, retry budget) and in domain adapters. The Workflow engine's journal and recovery, the coding runner's isolation and the Bridge's authorization stay as they are, as ways of executing. The Knowledge tool route returns the Harness-validated answer: option (a) of the paused choice. GUI benchmarks wait for the owner's absence.
+
+Reason: the separate loops were history, not need. The Workflow engine and the Coding Harness predate the shared contract (G1/G2, 2026-10-04), and their loops duplicate it. The real differences are ways of executing and security boundaries, and the skeleton keeps them.
+
+Rejected alternatives:
+- Rewriting the Workflow engine's journal and recovery into the state machine: high risk to installed Workflows for no gain in control.
+- Only patching gaps: it would leave four loops with different stop reasons, retries and evidence.
+
+Plan: `docs/phases/HARNESS_UNIFICATION.md` (U1-U7).
