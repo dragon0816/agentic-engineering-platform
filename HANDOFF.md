@@ -4,31 +4,31 @@ Updated: 2026-10-09 (Asia/Taipei), by Claude Code
 
 ## Where the current work stopped (2026-10-09)
 
-knowledge_v1 is now measured against Claude Code reference answers.
+knowledge_v1 is measured against Claude Code reference answers, and the
+Knowledge retrieval was changed after the first comparison.
 
 - References: `benchmarks/knowledge_v1/references/` (36 core questions,
-  283 key points, all quotes verified). Made by `reference.py`; do not
-  regenerate them without the owner (about $49 of Claude Code usage).
-- Grading: `reference_grade.py --run-id <id>` (company gpt-5.5 labels each
-  key point). `run.py` grader 1.3.
-- Latest run: `runs/core-001`, review in `runs/core-001/review.zh-TW.md`.
-  30/36 acceptable, but 7 answerable questions came back as insufficient, and
-  all 6 foundation questions stop at a `product_option_spec` facet with no
-  retrieval retry (`retrieval_attempts` empty).
-- Post-unification benchmarks: coding_v1 fix-run-016 20/20 (was 19/20); lab
-  fix-012 13 pass, X02/X03 fail (was 12/3); knowledge sample-004 lost 14
-  questions to company LLM 503s, and its tool-route traces predate the cited-passage record.
+  283 verified key points). Do not regenerate them without the owner (about
+  $49 of Claude Code usage). Grade a run with `reference_grade.py --run-id <id>`.
+- `runs/core-001` (Skill 1.6.0) and `runs/core-002` (Skill 1.7.0,
+  `bilingual_retrieval`); compare them in `runs/core-002/review.zh-TW.md`.
+  On the 22 answerable questions: PASS 13 -> 16, false "insufficient" 6 -> 0,
+  coverage 0.27 -> 0.32. FAIL rose 3 -> 6, mostly answers stretching beyond
+  their passages.
+- Live: Knowledge Skill `company-agent/knowledge-query@1.7.0` installed in
+  the workspace (1.6.0 moved to `disabled/`); Agent Web restarted on f729827.
+- The company LLM had a 503 outage from about 12:54 to 20:56 (UTC+8 log
+  times differ); `.scratch` probe script logic is in the conversation, not
+  needed again.
 - The JEV/Laya tunnel host 172.25.228.141 is unreachable from this PC's new
-  network (owner, 2026-10-09). The `decision_accelerator` shadow calls fail
-  until that changes.
+  network (owner, 2026-10-09).
+- Post-unification benchmarks: coding_v1 fix-run-016 20/20, lab fix-012 13
+  pass (X02/X03 fail), knowledge sample-004 (grader 1.3).
 
-Next actions, in order:
-1. Owner decision: may the Knowledge Harness facet assessment change, so
-   definition questions are not held to `product_option_spec`, and why does the
-   retry not run? Investigate first, change only with approval.
-2. For the 7 retrieval misses, compare the reference's cited files with the
-   passages AEP retrieved.
-3. Re-run only `run.py --run-id core-002 --set <core ids>` + `reference_grade.py`.
+Next actions, owner decides which:
+1. Knowledge Skill guidance to stop stretching related passages into
+   conclusions (Skill-only change), then re-run core questions.
+2. Model-driven multi-round retrieval (architecture change; ask first).
 
 ## Repository and runtime state
 

@@ -1,0 +1,128 @@
+{
+ "question": {
+  "id": "Q0211",
+  "text": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "market": "Aerospace / Defense",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-4e23fff0d84e4076b6e82c0c77056e2d",
+ "exchange": {
+  "sent": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 192.078,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-4e23fff0d84e4076b6e82c0c77056e2d",
+    "actor": "leo.chi",
+    "title": "For a Aerospace / Defense use case involving radar, where would Signalin…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T13:04:55.949455Z",
+    "updated_at": "2026-10-09T13:08:07.884414Z",
+    "messages": [
+     {
+      "message_id": "message-167bde67ddab4390a7e238d64729ecfb",
+      "role": "user",
+      "text": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+      "created_at": "2026-10-09T13:04:55.973007Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-66b3b85d3ae14317ba54db83de34a1ae",
+      "role": "assistant",
+      "text": "The knowledge base gave no answer: it did not return validated evidence for this technical question.\n\nNot from the knowledge base: in a radar Aerospace/Defense workflow, a **Signaling / Non-signaling Tester** generally does **not** sit at the core of the radar RF characterization chain. Radar test workflows usually center on:\n\n1. **Radar waveform generation / scenario simulation**  \n   Signal generator or radar echo simulator creates pulses, chirps, Doppler, range delay, clutter, jamming, or multi-target scenarios.\n\n2. **RF front-end / transmitter testing**  \n   Spectrum or signal analyzer measures output power, pulse parameters, modulation quality, phase noise, spurious emissions, harmonics, occupied bandwidth, etc.\n\n3. **Receiver / sensitivity testing**  \n   Signal generator injects controlled radar echoes or interference to test detection threshold, dynamic range, selectivity, false alarm behavior.\n\n4. **Antenna / array / beamforming testing**  \n   OTA chamber, positioner, VNA, signal generator/analyzer setup validates patterns, beam steering, gain, sidelobes, calibration.\n\n5. **System-level radar scenario validation**  \n   Radar target simulator or HIL setup validates tracking, range/Doppler accuracy, clutter rejection, ECCM, and mission scenarios.\n\nA **Signaling / Non-signaling Tester**—such as cellular/Wi‑Fi/Bluetooth/IoT communication testers—would fit only if the radar platform also includes a **communications subsystem**. For example:\n\n- UAV, aircraft, missile, ship, or ground radar platform with **LTE/5G/SATCOM/tactical radio/Wi‑Fi** connectivity.\n- Radar sensor module that reports data over a wireless link.\n- Maintenance, telemetry, command-and-control, or data-link validation.\n- Coexistence or interference testing between radar and onboard communication radios.\n\nSo the fit is usually **adjacent to the radar workflow**, not inside the radar measurement chain:\n\n> **Radar RF/performance path:** signal generator, radar echo simulator, spectrum/signal analyzer, VNA, oscilloscope, OTA/chamber tools.  \n> **Communication subsystem path:** signaling/non-signaling tester validates cellular or wireless connectivity, protocol behavior, RF parametrics, throughput, attach/call/session behavior, coexistence, and regression tests.\n\nIn short: for a radar Aerospace/Defense use case, the Signaling / Non-signaling Tester is relevant when testing the **communication links around the radar system**, not the radar sensing function itself.",
+      "created_at": "2026-10-09T13:08:07.884414Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-9b93648d46df4b37ae4d904f12390c17",
+       "request_id": "request-9b93648d46df4b37ae4d904f12390c17",
+       "span_id": "span-9b93648d46df4b37ae4d904f12390c17",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+    "ok": true,
+    "answer": "The knowledge base gave no answer: it did not return validated evidence for this technical question.\n\nNot from the knowledge base: in a radar Aerospace/Defense workflow, a **Signaling / Non-signaling Tester** generally does **not** sit at the core of the radar RF characterization chain. Radar test workflows usually center on:\n\n1. **Radar waveform generation / scenario simulation**  \n   Signal generator or radar echo simulator creates pulses, chirps, Doppler, range delay, clutter, jamming, or multi-target scenarios.\n\n2. **RF front-end / transmitter testing**  \n   Spectrum or signal analyzer measures output power, pulse parameters, modulation quality, phase noise, spurious emissions, harmonics, occupied bandwidth, etc.\n\n3. **Receiver / sensitivity testing**  \n   Signal generator injects controlled radar echoes or interference to test detection threshold, dynamic range, selectivity, false alarm behavior.\n\n4. **Antenna / array / beamforming testing**  \n   OTA chamber, positioner, VNA, signal generator/analyzer setup validates patterns, beam steering, gain, sidelobes, calibration.\n\n5. **System-level radar scenario validation**  \n   Radar target simulator or HIL setup validates tracking, range/Doppler accuracy, clutter rejection, ECCM, and mission scenarios.\n\nA **Signaling / Non-signaling Tester**—such as cellular/Wi‑Fi/Bluetooth/IoT communication testers—would fit only if the radar platform also includes a **communications subsystem**. For example:\n\n- UAV, aircraft, missile, ship, or ground radar platform with **LTE/5G/SATCOM/tactical radio/Wi‑Fi** connectivity.\n- Radar sensor module that reports data over a wireless link.\n- Maintenance, telemetry, command-and-control, or data-link validation.\n- Coexistence or interference testing between radar and onboard communication radios.\n\nSo the fit is usually **adjacent to the radar workflow**, not inside the radar measurement chain:\n\n> **Radar RF/performance path:** signal generator, radar echo simulator, spectrum/signal analyzer, VNA, oscilloscope, OTA/chamber tools.  \n> **Communication subsystem path:** signaling/non-signaling tester validates cellular or wireless connectivity, protocol behavior, RF parametrics, throughput, attach/call/session behavior, coexistence, and regression tests.\n\nIn short: for a radar Aerospace/Defense use case, the Signaling / Non-signaling Tester is relevant when testing the **communication links around the radar system**, not the radar sensing function itself.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-9b93648d46df4b37ae4d904f12390c17",
+      "request_id": "request-9b93648d46df4b37ae4d904f12390c17",
+      "span_id": "span-9b93648d46df4b37ae4d904f12390c17",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-9b93648d46df4b37ae4d904f12390c17",
+       "request_id": "request-9b93648d46df4b37ae4d904f12390c17",
+       "span_id": "span-9b93648d46df4b37ae4d904f12390c17",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no answer: it did not return validated evidence for this technical question.\n\nNot from the knowledge base: in a radar Aerospace/Defense workflow, a **Signaling / Non-signaling Tester** generally does **not** sit at the core of the radar RF characterization chain. Radar test workflows usually center on:\n\n1. **Radar waveform generation / scenario simulation**  \n   Signal generator or radar echo simulator creates pulses, chirps, Doppler, range delay, clutter, jamming, or multi-target scenarios.\n\n2. **RF front-end / transmitter testing**  \n   Spectrum or signal analyzer measures output power, pulse parameters, modulation quality, phase noise, spurious emissions, harmonics, occupied bandwidth, etc.\n\n3. **Receiver / sensitivity testing**  \n   Signal generator injects controlled radar echoes or interference to test detection threshold, dynamic range, selectivity, false alarm behavior.\n\n4. **Antenna / array / beamforming testing**  \n   OTA chamber, positioner, VNA, signal generator/analyzer setup validates patterns, beam steering, gain, sidelobes, calibration.\n\n5. **System-level radar scenario validation**  \n   Radar target simulator or HIL setup validates tracking, range/Doppler accuracy, clutter rejection, ECCM, and mission scenarios.\n\nA **Signaling / Non-signaling Tester**—such as cellular/Wi‑Fi/Bluetooth/IoT communication testers—would fit only if the radar platform also includes a **communications subsystem**. For example:\n\n- UAV, aircraft, missile, ship, or ground radar platform with **LTE/5G/SATCOM/tactical radio/Wi‑Fi** connectivity.\n- Radar sensor module that reports data over a wireless link.\n- Maintenance, telemetry, command-and-control, or data-link validation.\n- Coexistence or interference testing between radar and onboard communication radios.\n\nSo the fit is usually **adjacent to the radar workflow**, not inside the radar measurement chain:\n\n> **Radar RF/performance path:** signal generator, radar echo simulator, spectrum/signal analyzer, VNA, oscilloscope, OTA/chamber tools.  \n> **Communication subsystem path:** signaling/non-signaling tester validates cellular or wireless connectivity, protocol behavior, RF parametrics, throughput, attach/call/session behavior, coexistence, and regression tests.\n\nIn short: for a radar Aerospace/Defense use case, the Signaling / Non-signaling Tester is relevant when testing the **communication links around the radar system**, not the radar sensing function itself.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_YJMKQcnrNCmcZu8TAjFsfp7A",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "failed",
+         "data": {
+          "knowledge_harness": "not_validated",
+          "answer": "The Knowledge query did not produce a validated answer. Unverified requested facets: technical_knowledge.",
+          "evidence": {
+           "raw_citations": 0,
+           "facet_status": "missing",
+           "missing_facets": [
+            "technical_knowledge"
+           ],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {}
+          },
+          "phase": "needs_input",
+          "failure_code": "knowledge_insufficient_evidence",
+          "instruction": "The knowledge base did not validate an answer. Tell the person what is above; anything you add is not from the knowledge base and must say so."
+         },
+         "failure": {
+          "code": "knowledge_not_validated",
+          "message": "The Knowledge Harness did not validate an answer",
+          "retryable": false
+         }
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,932 @@
+{
+ "question": {
+  "id": "Q1021",
+  "text": "What is OFDM, and which product-related measurement decisions depend on understanding it?",
+  "technical": "Wireless Fundamentals",
+  "topic": "OFDM",
+  "product_related": "true"
+ },
+ "session_id": "conversation-6a33543981c54103a3c7a1984a3e6d02",
+ "exchange": {
+  "sent": "What is OFDM, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 344.062,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-6a33543981c54103a3c7a1984a3e6d02",
+    "actor": "leo.chi",
+    "title": "What is OFDM, and which product-related measurement decisions depend on …",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T13:42:57.510713Z",
+    "updated_at": "2026-10-09T13:48:41.380206Z",
+    "messages": [
+     {
+      "message_id": "message-7554f1c7d1bd45b08b8fcbce0da698b1",
+      "role": "user",
+      "text": "What is OFDM, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-09T13:42:57.741546Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-51e79c7f4e094c5f97c4ff1605d2d586",
+      "role": "assistant",
+      "text": "The supported evidence only shows that **OFDM symbols** are resource-allocation units in NR OCNG: OCNG can have configurable OFDM symbol allocation per slot, with start OFDM symbol 0–13 and number of symbols 1–14, and an allocation header can carry a 14-bit OFDM symbol mask [14][25].\n| Product-related measurement decision | What depends on understanding OFDM / OFDM symbols | Rohde & Schwarz implication | Evidence |\n|---|---|---|---|\n| OCNG time-domain allocation | Deciding which OFDM symbols in a slot carry OCNG, including start symbol and symbol count | This is an implementation/configuration decision for OCNG mapping, but the source is R&S confidential implementation notes and not a public 3GPP requirement or product specification | [14][2] |\n| OCNG allocation header interpretation | Reading or setting the 14-bit OFDM symbol mask | The mask affects how OCNG is mapped; implementation must not over-treat the lossy notes as formal FPGA/PHY software design documentation | [25][2] |\n| OCNG modulation assumption | Avoiding the conclusion that QAM16/QAM64/QAM256 are allowed merely because a header field lists them | R&S notes state the specification only specifies pseudo-random QPSK for OCNG data-region behavior, so modulation choices are a specification-risk area | [2][14][25] |\n| R&S VSE analysis option selection | For NR/LTE/O-RAN/beamforming analysis, the passages support selecting VSE-related measurement options, but they do not directly state an OFDM-specific VSE setting | R&S VSE is PC signal analysis software used for 5G NR, LTE, O-RAN U-Plane/PCAP analysis and beamforming; listed options include VSE-K144 for 5G NR DL/UL, VSE-K146 for 5G NR MIMO & beamforming, VSE-K175 for O-RAN, VSE-K100 for LTE FDD, and VSE-K104 for LTE TDD | [4][16] |\n| R&S CMX500 role in NR measurement | The passages support CMX500 use for LTE/NR network emulation, RF parametric testing and fading, but do not state an OFDM-specific CMX500 setting | R&S CMX500 is a universal one-box network emulation and measurement test solution supporting LTE, NR FR1, NR FR2, NSA, SA, FDD, TDD, RF parametric testing and fading propagation conditions | [11] |\n| 5G NR base-station conformance product configuration | Product/instrument ordering decisions cannot be finalized from a table alone | Raw R&S evidence says the table does not include all test instruments and system components needed for 5G NR base-station conformance testing and directs users to contact the local sales team; another raw passage says to see the product brochure or ask a local R&S expert for available options | [37][38][39] |\n【推論】The only directly supported OFDM-dependent measurement/configuration decisions are OCNG symbol allocation and OFDM-symbol-mask interpretation, because those passages explicitly mention configurable OFDM symbol allocation and a 14-bit OFDM symbol mask [14][25].\n【推論】For Rohde & Schwarz product planning, OFDM/NR-related measurement setups should be treated as configuration-sensitive rather than orderable from the cited excerpts alone, because the raw R&S evidence says 5G NR conformance tables may omit required instruments/components and recommends contacting R&S sales or experts for ordering/options [37][38][39].\n\n來源：\n[2] Wiki：OCNG mapper（來源：`OCNG (NR).md`）\n[4] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[11] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[14] Wiki：OCNG mapper（來源：`OCNG (NR).md`）\n[16] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[25] Wiki：OCNG mapper（來源：`OCNG (NR).md`）\n[37] `raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md`\n[38] `raw/Market/OneNote/GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md`\n[39] `raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md`",
+      "created_at": "2026-10-09T13:48:41.380206Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-dd50d1bea6e544e88136bb887b8e1a05",
+       "request_id": "request-dd50d1bea6e544e88136bb887b8e1a05",
+       "span_id": "span-dd50d1bea6e544e88136bb887b8e1a05",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "The supported evidence only shows that **OFDM symbols** are resource-allocation units in NR OCNG: OCNG can have configurable OFDM symbol allocation per slot, with start OFDM symbol 0–13 and number of symbols 1–14, and an allocation header can carry a 14-bit OFDM symbol mask [14][25].\n| Product-related measurement decision | What depends on understanding OFDM / OFDM symbols | Rohde & Schwarz implication | Evidence |\n|---|---|---|---|\n| OCNG time-domain allocation | Deciding which OFDM symbols in a slot carry OCNG, including start symbol and symbol count | This is an implementation/configuration decision for OCNG mapping, but the source is R&S confidential implementation notes and not a public 3GPP requirement or product specification | [14][2] |\n| OCNG allocation header interpretation | Reading or setting the 14-bit OFDM symbol mask | The mask affects how OCNG is mapped; implementation must not over-treat the lossy notes as formal FPGA/PHY software design documentation | [25][2] |\n| OCNG modulation assumption | Avoiding the conclusion that QAM16/QAM64/QAM256 are allowed merely because a header field lists them | R&S notes state the specification only specifies pseudo-random QPSK for OCNG data-region behavior, so modulation choices are a specification-risk area | [2][14][25] |\n| R&S VSE analysis option selection | For NR/LTE/O-RAN/beamforming analysis, the passages support selecting VSE-related measurement options, but they do not directly state an OFDM-specific VSE setting | R&S VSE is PC signal analysis software used for 5G NR, LTE, O-RAN U-Plane/PCAP analysis and beamforming; listed options include VSE-K144 for 5G NR DL/UL, VSE-K146 for 5G NR MIMO & beamforming, VSE-K175 for O-RAN, VSE-K100 for LTE FDD, and VSE-K104 for LTE TDD | [4][16] |\n| R&S CMX500 role in NR measurement | The passages support CMX500 use for LTE/NR network emulation, RF parametric testing and fading, but do not state an OFDM-specific CMX500 setting | R&S CMX500 is a universal one-box network emulation and measurement test solution supporting LTE, NR FR1, NR FR2, NSA, SA, FDD, TDD, RF parametric testing and fading propagation conditions | [11] |\n| 5G NR base-station conformance product configuration | Product/instrument ordering decisions cannot be finalized from a table alone | Raw R&S evidence says the table does not include all test instruments and system components needed for 5G NR base-station conformance testing and directs users to contact the local sales team; another raw passage says to see the product brochure or ask a local R&S expert for available options | [37][38][39] |\n【推論】The only directly supported OFDM-dependent measurement/configuration decisions are OCNG symbol allocation and OFDM-symbol-mask interpretation, because those passages explicitly mention configurable OFDM symbol allocation and a 14-bit OFDM symbol mask [14][25].\n【推論】For Rohde & Schwarz product planning, OFDM/NR-related measurement setups should be treated as configuration-sensitive rather than orderable from the cited excerpts alone, because the raw R&S evidence says 5G NR conformance tables may omit required instruments/components and recommends contacting R&S sales or experts for ordering/options [37][38][39].\n\n來源：\n[2] Wiki：OCNG mapper（來源：`OCNG (NR).md`）\n[4] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[11] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[14] Wiki：OCNG mapper（來源：`OCNG (NR).md`）\n[16] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[25] Wiki：OCNG mapper（來源：`OCNG (NR).md`）\n[37] `raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md`\n[38] `raw/Market/OneNote/GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md`\n[39] `raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-dd50d1bea6e544e88136bb887b8e1a05",
+      "request_id": "request-dd50d1bea6e544e88136bb887b8e1a05",
+      "span_id": "span-dd50d1bea6e544e88136bb887b8e1a05",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-dd50d1bea6e544e88136bb887b8e1a05",
+       "request_id": "request-dd50d1bea6e544e88136bb887b8e1a05",
+       "span_id": "span-dd50d1bea6e544e88136bb887b8e1a05",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The supported evidence only shows that **OFDM symbols** are resource-allocation units in NR OCNG: OCNG can have configurable OFDM symbol allocation per slot, with start OFDM symbol 0–13 and number of symbols 1–14, and an allocation header can carry a 14-bit OFDM symbol mask [14][25].\n| Product-related measurement decision | What depends on understanding OFDM / OFDM symbols | Rohde & Schwarz implication | Evidence |\n|---|---|---|---|\n| OCNG time-domain allocation | Deciding which OFDM symbols in a slot carry OCNG, including start symbol and symbol count | This is an implementation/configuration decision for OCNG mapping, but the source is R&S confidential implementation notes and not a public 3GPP requirement or product specification | [14][2] |\n| OCNG allocation header interpretation | Reading or setting the 14-bit OFDM symbol mask | The mask affects how OCNG is mapped; implementation must not over-treat the lossy notes as formal FPGA/PHY software design documentation | [25][2] |\n| OCNG modulation assumption | Avoiding the conclusion that QAM16/QAM64/QAM256 are allowed merely because a header field lists them | R&S notes state the specification only specifies pseudo-random QPSK for OCNG data-region behavior, so modulation choices are a specification-risk area | [2][14][25] |\n| R&S VSE analysis option selection | For NR/LTE/O-RAN/beamforming analysis, the passages support selecting VSE-related measurement options, but they do not directly state an OFDM-specific VSE setting | R&S VSE is PC signal analysis software used for 5G NR, LTE, O-RAN U-Plane/PCAP analysis and beamforming; listed options include VSE-K144 for 5G NR DL/UL, VSE-K146 for 5G NR MIMO & beamforming, VSE-K175 for O-RAN, VSE-K100 for LTE FDD, and VSE-K104 for LTE TDD | [4][16] |\n| R&S CMX500 role in NR measurement | The passages support CMX500 use for LTE/NR network emulation, RF parametric testing and fading, but do not state an OFDM-specific CMX500 setting | R&S CMX500 is a universal one-box network emulation and measurement test solution supporting LTE, NR FR1, NR FR2, NSA, SA, FDD, TDD, RF parametric testing and fading propagation conditions | [11] |\n| 5G NR base-station conformance product configuration | Product/instrument ordering decisions cannot be finalized from a table alone | Raw R&S evidence says the table does not include all test instruments and system components needed for 5G NR base-station conformance testing and directs users to contact the local sales team; another raw passage says to see the product brochure or ask a local R&S expert for available options | [37][38][39] |\n【推論】The only directly supported OFDM-dependent measurement/configuration decisions are OCNG symbol allocation and OFDM-symbol-mask interpretation, because those passages explicitly mention configurable OFDM symbol allocation and a 14-bit OFDM symbol mask [14][25].\n【推論】For Rohde & Schwarz product planning, OFDM/NR-related measurement setups should be treated as configuration-sensitive rather than orderable from the cited excerpts alone, because the raw R&S evidence says 5G NR conformance tables may omit required instruments/components and recommends contacting R&S sales or experts for ordering/options [37][38][39].\n\n來源：\n[2] Wiki：OCNG mapper（來源：`OCNG (NR).md`）\n[4] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[11] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[14] Wiki：OCNG mapper（來源：`OCNG (NR).md`）\n[16] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[25] Wiki：OCNG mapper（來源：`OCNG (NR).md`）\n[37] `raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md`\n[38] `raw/Market/OneNote/GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md`\n[39] `raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_V9PkvID04XBZlBhMgvrS6hOd",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "The supported evidence only shows that **OFDM symbols** are resource-allocation units in NR OCNG: OCNG can have configurable OFDM symbol allocation per slot, with start OFDM symbol 0–13 and number of symbols 1–14, and an allocation header can carry a 14-bit OFDM symbol mask [14][25].\n| Product-related measurement decision | What depends on understanding OFDM / OFDM symbols | Rohde & Schwarz implication | Evidence |\n|---|---|---|---|\n| OCNG time-domain allocation | Deciding which OFDM symbols in a slot carry OCNG, including start symbol and symbol count | This is an implementation/configuration decision for OCNG mapping, but the source is R&S confidential implementation notes and not a public 3GPP requirement or product specification | [14][2] |\n| OCNG allocation header interpretation | Reading or setting the 14-bit OFDM symbol mask | The mask affects how OCNG is mapped; implementation must not over-treat the lossy notes as formal FPGA/PHY software design documentation | [25][2] |\n| OCNG modulation assumption | Avoiding the conclusion that QAM16/QAM64/QAM256 are allowed merely because a header field lists them | R&S notes state the specification only specifies pseudo-random QPSK for OCNG data-region behavior, so modulation choices are a specification-risk area | [2][14][25] |\n| R&S VSE analysis option selection | For NR/LTE/O-RAN/beamforming analysis, the passages support selecting VSE-related measurement options, but they do not directly state an OFDM-specific VSE setting | R&S VSE is PC signal analysis software used for 5G NR, LTE, O-RAN U-Plane/PCAP analysis and beamforming; listed options include VSE-K144 for 5G NR DL/UL, VSE-K146 for 5G NR MIMO & beamforming, VSE-K175 for O-RAN, VSE-K100 for LTE FDD, and VSE-K104 for LTE TDD | [4][16] |\n| R&S CMX500 role in NR measurement | The passages support CMX500 use for LTE/NR network emulation, RF parametric testing and fading, but do not state an OFDM-specific CMX500 setting | R&S CMX500 is a universal one-box network emulation and measurement test solution supporting LTE, NR FR1, NR FR2, NSA, SA, FDD, TDD, RF parametric testing and fading propagation conditions | [11] |\n| 5G NR base-station conformance product configuration | Product/instrument ordering decisions cannot be finalized from a table alone | Raw R&S evidence says the table does not include all test instruments and system components needed for 5G NR base-station conformance testing and directs users to contact the local sales team; another raw passage says to see the product brochure or ask a local R&S expert for available options | [37][38][39] |\n【推論】The only directly supported OFDM-dependent measurement/configuration decisions are OCNG symbol allocation and OFDM-symbol-mask interpretation, because those passages explicitly mention configurable OFDM symbol allocation and a 14-bit OFDM symbol mask [14][25].\n【推論】For Rohde & Schwarz product planning, OFDM/NR-related measurement setups should be treated as configuration-sensitive rather than orderable from the cited excerpts alone, because the raw R&S evidence says 5G NR conformance tables may omit required instruments/components and recommends contacting R&S sales or experts for ordering/options [37][38][39].\n\n來源：\n[2] Wiki：OCNG mapper（來源：`OCNG (NR).md`）\n[4] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[11] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[14] Wiki：OCNG mapper（來源：`OCNG (NR).md`）\n[16] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[25] Wiki：OCNG mapper（來源：`OCNG (NR).md`）\n[37] `raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md`\n[38] `raw/Market/OneNote/GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md`\n[39] `raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md`",
+          "evidence": {
+           "raw_citations": 9,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "product_option_spec": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-c9238e76d47d4d59852de7ff583c7dc1",
+            "request_id": "request-c9238e76d47d4d59852de7ff583c7dc1",
+            "span_id": "span-c9238e76d47d4d59852de7ff583c7dc1",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "What is OFDM, and which product-related measurement decisions depend on understanding it? Please include Rohde & Schwarz product-related measurement implications and cite Raw evidence.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "Time Domain Channel Properties\n[[Time Domain Channel Properties]]（TDCP）是 [[Release 18]] 中用於描述 channel time-domain behavior、[[UE]] relative mobility 與 associated Doppler 的新 measurement / CSI-related quantity，可協助 [[gNB]] 在 high-speed scenarios 中調整 transmission configuration。[[R18 CSI enhancements for high-speed Scenario]] [[TDCP Reporting]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Time Domain Channel Properties.md"
+              },
+              "score": 3.663464
+             },
+             {
+              "text": "OCNG mapper › 使用限制\n- 本頁整理的是 Rohde & Schwarz company confidential 技術筆記中的 implementation notes，不代表公開 3GPP 規格要求或產品規格。\n- Work Item 632178 與 Epic 686215 僅以內部 ID 出現，未提供狀態、系統或日期。\n- Header format 只依 lossy markdown 轉檔保存，正式 FPGA / PHY SW implementation 需回內部設計文件。\n- 來源中的 modulation type 欄位不代表 3GPP OCNG data region 已允許 QAM16 / QAM64 / QAM256；來源同時指出 specification only specifies pseudo random QPSK。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/OCNG mapper.md"
+              },
+              "score": 3.384453
+             },
+             {
+              "text": "R&S SMA100B\nR&S SMA100B 是 Rohde & Schwarz 的 RF and Microwave Signal Generator，依 Specifications Version 10.00（February 2026）透過 R&S®SMAB-B1xx frequency options 覆蓋 8 kHz to 3 GHz 到 8 kHz to 67 GHz，並可依 options 增加 high output power、ultra low phase noise、analog modulation、clock synthesizer、power analysis 與 remote control 功能。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMA100B.md"
+              },
+              "score": 6.046424
+             },
+             {
+              "text": "R&S VSE\n[[R&S VSE]]（Vector Signal Explorer）是 Rohde & Schwarz 的 PC signal analysis software；在 [[R&S portfolio for O-RU testing]] 中用於 5G NR、LTE、O-RAN U-Plane / PCAP analysis 與 beamforming measurements 的分析端。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S VSE.md"
+              },
+              "score": 2.514102
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 來源列出的優點\n- 可在 milliseconds 內量測 wideband signals 的 absolute group delay 與 relative group delay。\n- Signal averaging 與 smoothing 可改善 carrier-to-noise ratio，在 cables 與 fixtures 導致 high signal path losses 時取得 valid results。\n- 可自動補償 in-orbit measurements 的 Doppler effects。\n- Frequency converters 的 relative group delay 可達 1 ns measurement accuracy，且不需要 reference mixer 或 golden device。\n- Non-frequency-translating measurements 的 relative group delay 可達 300 ps measurement accuracy。\n- [[R&S SMW200A]] 可內部彈性產生 MCCW signals 與 modulated signals，並可設定 carrier spacing 與 number of carriers。\n- Deembedding function 可修正 measurement setup 中 cables 與 fixtures 的 frequency response。\n- [[R&S FSW-K17S]] option 可量測 low SNR 的 wideband signals，透過分析 overall signal 的 subspans 改善 SNR 與 measurement speeds。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 2.427734
+             },
+             {
+              "text": "R&S SMW200A › 主要 RF performance（Version 31.00，May 2026）\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]：\n\n- Frequency range：依 RF path frequency option，RF path A 最高 `100 kHz to 67 GHz`；RF path B 最高 `100 kHz to 44 GHz`。\n- Overrange：`67 GHz to 72 GHz`。\n- Resolution of setting：`0.001 Hz`。\n- Resolution of synthesis：`0.053 nHz nominal`，條件 `f = 1 GHz`。\n- Frequency setting time：依 frequency option 為 `< 1.2 ms` 至 `< 1.8 ms`；with `R&S®SMW-B711/-B721` 為 `< 4.0 ms`。條件包含 GUI update stopped、I/Q optimization mode fast、after IEC/IEEE bus delimiter、HUMS off。\n- Frequency setting time in list mode：依 frequency option為 `< 0.8 ms` 至 `< 1.4 ms`；with `R&S®SMW-B711/-B721`、run mode live 為 `< 4.0 ms`。\n- Level setting range：`100 kHz ≤ f < 1 MHz` 為 `–145 dBm to +8 dBm`；`1 MHz ≤ f < 3 MHz` 為 `–145 dBm to +13 dBm`；`3 MHz ≤ f ≤ 67 GHz` 為 `–145 dBm to +30 dBm`。\n- Standard performance SSB phase noise 條件：CW，carrier offset `20 kHz`，measurement bandwidth `1 Hz`，level `10 dBm` 或 maximum specified output power 兩者較低者；`f = 1 GHz` 為 `< –134 dBc`，typ. `–140 dBc`。\n- `R&S®SMW-B711/-B721` ultra low phase noise 在 `1 GHz`、`10 kHz offset` 下為 `–144 dBc`，typ. `–150 dBc`；在 `67 GHz`、`10 kHz offset` 下為 `–105 dBc`，typ. `–111 dBc`。\n- Pulse modulation 需 `R&S®SMW-K22`；一般 on/off ratio `> 80 dB`，部分高頻條件例外為 `> 65 dB`。\n- Pulse rise/fall time（10 % / 90 % of RF amplitude）：低頻 frequency options fast transition `< 10 ns`；多數 20 GHz 以上 options fast transition `< 15 ns`；smoothed transition 多數條件 `< 200 ns`。\n- Internal baseband I/Q、wideband baseband (`R&S®SMW-B13XT`)、I/Q wideband on：`f > 2.5 GHz` 時 `±1 GHz`；RF modulation bandwidth 可達 `2 GHz`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 6.253076
+             },
+             {
+              "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.606005
+             },
+             {
+              "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 原文未解的問題\n- 來源雖標示報告日期 2026-09-15，但部分數字標為公開財報、產業新聞、法人預估或 TrendForce 最新研究，未提供逐項引用、報告名稱、網址、頁碼或方法論。\n- 來源未說明 [[TrendForce]] 手機直連衛星市場規模 76 億美元與 49% 年成長率的完整報告名稱、發布日期、統計範圍與幣別口徑；雖可記為美元，但不可延伸推算區域市場或公司營收。\n- 來源稱台灣已於 2026 年全面開放 6 GHz 頻段 5925–6425 MHz，但未提供主管機關公告編號或法規文件。\n- 來源稱 [[華通]]星鏈太空板市占率約 9 成、[[華通]]掌握 SpaceX / Amazon Leo / OneWeb 等訂單，但未提供客戶公告、合約、出貨量、營收占比或市占統計口徑。\n- 來源稱 [[SpaceX]]旗下星鏈於 2026 年 6 月掛牌且市值突破 1.77 兆美元，但未提供交易所、股票代號、公告或資料來源；本次僅記錄來源說法，不建立為已驗證資本市場事實。\n- 來源稱 SpaceX 規劃部署百萬顆衛星藍圖，但未提供 FCC 文件、申請案號或官方計畫版本。\n- 來源稱台灣政府未來十年投入新台幣 400 億元發展 B5G 低軌通訊衛星計畫，未提供政府計畫名稱、預算來源或公告日期。\n- 來源未提供各廠商受惠程度的量化評分方法或分類標準。\n- 來源未說明 [[耀登]]之 Amphenol-affiliated / Auden 關係的法律或股權口徑。\n- 來源未說明 [[建漢]]在本報告中與既有 [[建漢]] T-Glass 圖卡列名是否為同一實體。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+              },
+              "score": 4.624269
+             },
+             {
+              "text": "TrendForce › 相關來源\n- [[AI Server PCB test image 25]] — Source 標示為 TrendForce, Nov., 2025 的 AI伺服器PCB原物料台日韓供應鏈圖。\n- [[AI Server PCB test image 51]] — Source 標示為 TrendForce, Nov., 2025 的 AI伺服器PCB原物料台日韓供應鏈圖，內容與 [[AI Server PCB test image 25]] 一致。\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]] — 2026-09-15 的市場分析，引用 TrendForce 最新研究中的手機直連衛星市場規模預估。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/TrendForce.md"
+              },
+              "score": 0.438017
+             },
+             {
+              "text": "Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR › 與既有知識的關係\n- 既有 [[R&S CMX500]] 頁已整理 [[R&S CMX500]] 是 Radio Communication Tester / one-box network emulation and measurement test solution；本來源補充其在 [[R&S TS-PCT]] protocol conformance test platform 中作為基礎的 PR 語境，但未提供新的 CMX500 formal specifications。\n- 既有 [[Qualcomm Technologies]] 頁已有 [[AI-enhanced CSI feedback]]、13 GHz [[FR3]] demonstration、[[FR1-FR3 carrier aggregation demonstration]] 等 PR 語境；本來源新增 [[3GPP Release 17]] SSSG conformance test case early verification 與 [[Qualcomm X105 5G Modem-RF]]。\n- 既有 [[Christian Mokry]] 頁已有多份 Rohde & Schwarz PR contact block；本來源延續相同姓名、職稱、電話與 press email。\n- 本來源屬 [[Productions]] / PR 類來源：可用於記錄 product / platform claim 與 conformance testing milestone，但不可等同 formal datasheet、certification approval、commercial availability 或 3GPP 官方變更結果。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR.md"
+              },
+              "score": 2.387254
+             },
+             {
+              "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 9.462097
+             },
+             {
+              "text": "Constellation Insight Tool\n[[Constellation Insight Tool]] 是 [[Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026]] 中描述的 [[R&S CMX500]] NTN testing 軟體工具，用於 satellite constellation visualization、mobility management、trajectory observation 與 handover scenario support。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Constellation Insight Tool.md"
+              },
+              "score": 2.142494
+             },
+             {
+              "text": "Time Domain Channel Properties › Spec change 線索\n[[TDCP Reporting]] 列出：\n\n- [[3GPP TS 38.215]]：TDCP definition。\n- [[3GPP TS 38.214]]：TDCP reporting changes；來源說 this spec best describes how this feature works。\n- [[3GPP TS 38.211]]：No changes relevant to Rel-18 TDCP CSI reporting。\n- [[3GPP TS 38.212]]：TDCP reporting parameter changes。\n- [[3GPP TS 38.306]]：UE Capabilities changes。\n- [[3GPP 38.822]]：TDCP-related capabilities。\n\n來源沒有列出 spec version、CR number 或 clause，因此這些只作為待回查索引。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Time Domain Channel Properties.md"
+              },
+              "score": 1.521451
+             },
+             {
+              "text": "OCNG mapper › 需求摘要\n[[OCNG (NR)]] 將 NR OCNG RE mapper 的需求整理如下：\n\n- Configurable bandwidth with [[Resource Block]] resolution，supports OCNG Pattern 3 and 5。\n- Start PRB and length of PRBs：0–272 and 1–273 ranges respectively。\n- Configurable [[OFDM symbol]] allocation per slot，supports OCNG Pattern 4。\n- Start OFDM symbol and number of symbols：0–13 and 1–14 ranges respectively。\n- Power setting for OCNG allocation, similar to [[PDSCH]] format。\n- Selectable awareness of other antenna's reference symbols，supports OCNG Pattern 2 and 5。\n- Awareness of other antenna reference symbols implemented with extra [[CSI-RS]] allocation with zero-power。\n- Data Region OCNG must be sourced from RDRAM。\n- OCNG REs must be allocated last, and with lowest priority。\n\n來源中曾提出 selectable modulation format 的問題，但也寫明 specification only specifies pseudo random [[QPSK]] modulated data；因此規格層主張仍是 QPSK。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/OCNG mapper.md"
+              },
+              "score": 1.058029
+             },
+             {
+              "text": "R&S SMA100B › 軟體 / keycode options\n| Licence code | 名稱 | Order No. | 原文說明 / requires |\n|---|---|---|---|\n| R&S®SMAB-K725 | Chirp signal generation | 1420.9861.02 | 需要 R&S®SMAB-K22、R&S®SMAB-K23、R&S®SMAB-K720；FW version > 4.70.xxx required |\n| R&S®SMAB-K28 | Power analysis | 1420.9755.02 | 建議使用 latest power sensor firmware version |\n| R&S®SMAB-K722 | Clock synthesizer frequency extension to 6 GHz | 1420.9810.02 | not available for instruments equipped with R&S®SMAB-B103 |\n| R&S®SMAB-K724 | High dynamic uninterrupted level sweep | 1420.9832.02 | serial number < 102000 需聯絡 Rohde & Schwarz service department |\n| R&S®SMAB-K980 | Health and utilization monitoring service HUMS | 1420.9284.02 | 支援 SNMP、REST JSON、SCPI、device web |\n| R&S®SMAB-K554 | R&S®SZM control via USB by the R&S®SMA100B microwave signal generator | 1420.9884.02 | Recommended extra |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 26,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMA100B.md"
+              },
+              "score": 4.54423
+             },
+             {
+              "text": "R&S VSE › 來源列出的 options / items\n依 [[R&S portfolio for O-RU testing]] Slide 46–48：\n\n| Item | 來源說法 |\n|---|---|\n| VSE | Vector Signal Explorer Software / VSE Basic Edition |\n| FSPC | License dongle, PC SW |\n| VSE-K144 | 5G-NR DL/UL Measurements |\n| VSE-K146 | 5G-NR MIMO&Beamforming DL Measurements；optional，例如 with RTP |\n| VSE-K175 | O-RAN Measurements |\n| VSE-K100 | LTE FDD DL/UL Measurements；optional |\n| VSE-K104 | LTE TDD DL/UL Measurements；optional |\n\nSlide 48 明列：\n\n- FSPC material `1310.0002.03`。\n- VSE material `1345.1011.06`。\n- VSE-K144 material `1309.9574.06`。\n- VSE-K175 material `1350.7020.06`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S VSE.md"
+              },
+              "score": 1.752967
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 為什麼量測 group delay\n依 [[Satellite_payload_testing_app-bro_en_5215-2120-92_v0200]]（September 2022，Version 02.00）：\n\n- [[Group delay]] measurements 用於表徵 satellite communications transmission path 的 phase distortions。\n- Bandpass filter 會在 band edges 增加更多 group delay。\n- 在 satellite communications systems 中，frequency converter 或 transponder channels 的 relative group delay 對判定 each channel band edges 的 distortion amount 很關鍵。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 2.388728
+             },
+             {
+              "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 2.354196
+             },
+             {
+              "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告\n這份來源是 2026-09-15 的台灣無線通訊代工製造市場分析，涵蓋 [[Wi-Fi 7 網通設備代工製造]]、[[低軌衛星零組件與地面終端供應鏈]]與[[手機直連衛星供應鏈]]三個主題。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+              },
+              "score": 0.553273
+             },
+             {
+              "text": "華通 › AI 伺服器 / HPC 圖解列名\n| 來源 | 日期 / 期間 | 圖上分類 | 圖上代號 | 備註 |\n|---|---|---|---|---|\n| [[AI Server PCB test image 5]] | 來源未標示日期；取得於 2026-09-04 | [[HDI板]] / 高密度互連板 | 2313 | 只代表圖上供應商列名；來源未提供供貨產品、客戶、出貨量、營收、占比或合約。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/華通.md"
+              },
+              "score": 3.371952
+             },
+             {
+              "text": "Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR › 原文未解的問題\n- 來源未標示 PR 發布日期；raw `created: 2026-09-11` 只代表原始檔建立 / 擷取時間。\n- 來源未標示 [[R&S TS-PCT]] 文件版次、software version、hardware configuration、option / license、order number 或 test campaign ID。\n- 來源未標示 [[R&S CMX500]] 的 exact hardware configuration、software release、protocol stack version 或是否使用 [[R&S CMX500 OBT]]。\n- 來源未標示 [[Qualcomm X105 5G Modem-RF]] mobile test platform 的 chipset / module / device configuration、firmware、commercial status 或 test setup。\n- 來源未提供 [[TS 38.523-1]] TC 7.1.1.12.5 的完整測試步驟、pass/fail criteria、RAN5 submission ID、change request number 或 CR 狀態。\n- 來源未說明 “initial verification”、“formally submitted for RAN5 verification” 與正式 conformance certification / GCF / PTCRB certification 之間的狀態差異。\n- Qualcomm branded products 與 Qualcomm Technologies, Inc. / subsidiaries / Qualcomm Incorporated 的法律實體關係仍需其他來源確認。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR.md"
+              },
+              "score": 2.205897
+             },
+             {
+              "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 9.778871
+             },
+             {
+              "text": "ScriptAssist › 限制與未決事項\n- [[AIW_on_prem_prerequisites_ScriptAssist]] 未說明 24GB RAM 是最低需求、建議值或驗證配置。\n- [[AIW_on_prem_prerequisites_ScriptAssist]] 未列出 Linux、MacOS 或 Docker Engine 的版本。\n- [[AIW_on_prem_prerequisites_ScriptAssist]] 未列出支援的 [[Cursor]]、[[Copilot]] 或 [[Claude Code]] 版本。\n- [[AIW_on_prem_prerequisites_ScriptAssist]] 未列出 customer LLMs 或 [[Embedding Model]] 的模型版本、API 相容性、embedding dimension、context length 或效能門檻。\n- [[Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026]] 提供功能描述，但未提供 [[ScriptAssist]] version、deployment mode、license code、order number、supported XLAPI version、supported CMX software release 或 availability date。\n- [[Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026]] 未說明 [[ScriptAssist]] 是否等同 AI Workplace on-prem product、CMX500 option、cloud service、demo tool 或 roadmap feature。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/ScriptAssist.md"
+              },
+              "score": 4.193328
+             },
+             {
+              "text": "Time Domain Channel Properties › 來源中的定義\n依 [[R18 CSI enhancements for high-speed Scenario]]：\n\n- TDCP 全名為 Time Domain Channel Properties。\n- 它是 a new CSI quantity。\n- 它 can provide additional information about time domain channel variability and User Equipment motion relative to the gNodeB。\n- 來源說 TDCP measured via [[CSI-RS]] is being investigated to help the network track the channel's behavior over time。\n- 來源在 development section 說 report quantity `tdcp` should be added，主要在 [[RRC]] 與 [[MAC]]。\n- [[PHY]] can treat the new report type TDCP as a new [[CSI report]] type。\n\n依 [[TDCP Reporting]]：\n\n- TDCP is a new measurement introduced in Rel-18。\n- TDCP provides CSI information on the relative mobility of the UE and the associated Doppler on the channel with the gNodeB。\n- TDCP can be used to adjust configuration parameters such as codebook type or reference signal，以 adapt to channel conditions and ensure robust transmission in high-speed scenarios。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Time Domain Channel Properties.md"
+              },
+              "score": 1.239991
+             },
+             {
+              "text": "OCNG mapper › Header / allocation format 線索\n來源列出 allocation header 的可辨識欄位：\n\n| Word | 欄位 | 來源描述 |\n|---:|---|---|\n| 0 | pointer / header type | next header element pointer；header type 14 = OCNG；invalid = 0xF |\n| 1 | priority / number of RBs | priority 1 low to 15 high，0 not allowed；Number of RBs 1..273 |\n| 2 | OFDM symbol mask | 14-bit OFDM symbol mask |\n| 3 | OCNG Power factor | 0x8000 = 1 |\n| 4/5 | data pointer / RAM / layers / modulation | OCNG Data pointer；RAM Select 0=PDRAM, 1=FDRAM, 3=RDRAM default；Number of layers / ports minus 1 range 0 to 3；Modulation Type 2=QPSK, 3=QAM16, 4=QAM64, 5=QAM256 |\n\n來源也說 RB List extension elements provide a list of PRB numbers in the order of mapping：\n\n- At least one RB set is required to provide overall OCNG mapping。\n- At least one RB is required。\n- Each extension element can hold up to 16 RB numbers。\n- More extension elements can be added if more RB numbers are needed。\n- Unused words in the last extension element should be set to 0xFFFF。\n- Number of RBs in the header must match number of RBs in the RB list。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/OCNG mapper.md"
+              },
+              "score": 1.005618
+             },
+             {
+              "text": "R&S SMA100B › Recommended extras（摘錄）\n| 類別 | 代碼 / 型號 | Order No. | 原文說明 |\n|---|---|---|---|\n| 19 inch rack adapter | R&S®ZZA-KNP21 | 1177.8803.00 | for 2 HU model |\n| 19 inch rack adapter | R&S®ZZA-KNP31 | 1177.8810.00 | for 3 HU model |\n| Transport case | R&S®ZZK-CASE | 1174.1443.02 | for 2 HU and 3 HU model |\n| USB serial adapter | R&S®TS-USB1 | 6124.2531.00 | for RS-232 remote control |\n| Test port adapter | 2.4 mm female | 1088.1627.02 | for instruments with R&S®SMAB-B112/-B120/-B131/-B140(N) frequency option |\n| Test port adapter | 2.92 mm female | 1036.4790.00 | for instruments with R&S®SMAB-B112/-B120/-B131/-B140(N) frequency option |\n| Test port adapter | 2.92 mm male | 1036.4802.00 | for instruments with R&S®SMAB-B112/-B120/-B131/-B140(N) frequency option |\n| Test port adapter | N female | 1036.4777.00 | for instruments with R&S®SMAB-B112/-B120/-B131/-B140(N) frequency option |\n| Test port adapter | N male | 1036.4783.00 | for instruments with R&S®SMAB-B112/-B120/-B131/-B140(N) frequency option |\n| Wear and tear adapter | 1.85 mm female/female | 3588.9654.00 | for instruments with R&S®SMAB-B150(N)/-B167(N) frequency option |\n| Documentation of calibration values | R&S®DCV-2 | 0240.2193.18 | Documentation of calibration values |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 27,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMA100B.md"
+              },
+              "score": 3.520036
+             },
+             {
+              "text": "R&S VSE › 來源中的定位\n依 [[R&S portfolio for O-RU testing]]（August 2023）：\n\n- Slide 8 的 VIAVI + R&S O-RU Tester solution 中列出 [[R&S VSE]]。\n- Slide 14 標題為 `R&S®VSE Signal analysis software`，描述為 PC analysis software。\n- Slide 14 key facts：\n  - Supports mobile and wireless communications standards。\n  - Fast measurements with parallel analysis。\n  - Supporting floating licenses。\n  - Control multiple instruments from one PC。\n- Slide 15 說 5G NR signal analysis 支援 presets for 5G NR Test models 與 support of all 5G NR measurements。\n- Slide 26 說 3GPP Receiver characteristic testing requires throughput calculation，且 BLER 與 Tput parameters implemented to VSE software。\n- Slide 35 說 signal analysis with option VSE-K175 有 pre-defined test signals according to WG4.CONF.0 test specification。\n- Slide 36 說 VSE software can extract channel decoder results and bitstream of 5G and LTE uplink and downlink signals；beamforming measurements 可用 VSE-K146 在 summary 顯示 phase and magnitude difference。\n- Slide 38 說 O-RAN PCAP Converter 可把 captured Ethernet stream 轉成 VSE file format，VSE analyzes the U-Plane data in UL and DL。\n- Slide 46 / 48 的 configurations 列出 VSE Basic Edition、FSPC license dongle、VSE-K144、VSE-K146、VSE-K175、VSE-K100、VSE-K104 等項目。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S VSE.md"
+              },
+              "score": 1.027733
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 使用限制\n- 本頁的 accuracy 數字與 method benefits 來自 2022 application brochure；實際性能需依 DUT、frequency range、bandwidth、SNR、option 與 calibration setup 確認。\n- 本頁不取代 [[R&S FSW]]、[[R&S SMW200A]]、[[R&S ZNA]] 的正式規格書。\n- 來源未提供完整 uncertainty budget、test limits、標準章節或 test case ID。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 1.621165
+             },
+             {
+              "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 2.082402
+             },
+             {
+              "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 概念\n- [[Wi-Fi 7 網通設備代工製造]] — 2026 年台灣網通 ODM / OEM 成長主題，核心規格包含 320 MHz、4096-QAM、MLO、6 GHz 與散熱設計。\n- [[低軌衛星零組件與地面終端供應鏈]] — 來源中的 LEO 供應鏈主題，包含高頻 PCB、RF 元件、相控陣列天線、UT、系統整合與測試驗證。\n- [[手機直連衛星供應鏈]] — 來源中的 Direct-to-Cell 主題，涵蓋衛星端天線、RF front-end、baseband、衛星內建基地台、手機品牌與電信商服務方案。\n- [[網路通訊設備產業鏈]] — 既有頁面記錄未標示日期的網路通訊設備四層供應鏈；本來源提供 2026-09-15 的 Wi-Fi 7 / FWA / CPE 市場補充。\n- [[整體通訊產業鏈]] — 既有頁面記錄未標示日期的整體通訊產業鏈；本來源提供 2026-09-15 的無線通訊代工與衛星通訊補充。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+              },
+              "score": 0.405261
+             },
+             {
+              "text": "Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR › 關鍵實體與概念\n- [[Rohde & Schwarz]]：PR 發布者與 [[R&S TS-PCT]] / [[R&S CMX500]] 供應商。\n- [[Qualcomm Technologies]]：與 [[Rohde & Schwarz]] 共同完成 SSSG conformance test case early verification 的合作方。\n- [[Qualcomm X105 5G Modem-RF]]：來源明示 mobile test platform 使用的 Qualcomm modem-RF platform。\n- [[R&S TS-PCT]]：Rohde & Schwarz protocol conformance test platform，來源稱其 based on [[R&S CMX500]]。\n- [[R&S CMX500]]：來源稱 [[R&S TS-PCT]] based on this 5G one-box signaling tester。\n- [[Search Space Set Group Switching]]：3GPP Rel. 17 的 5G NR UE power-saving mechanism。\n- [[3GPP Release 17]]：引入 SSSG 的 3GPP release。\n- [[3GPP RAN5]]：負責 conformance test specifications 的 3GPP group；來源稱 change request submitted to RAN5。\n- [[TS 38.523-1]]：本 PR 提到的 NR conformance test specification，測試案例為 TC 7.1.1.12.5。\n- [[PDCCH monitoring]]：SSSG 最佳化的 5G NR device monitoring behavior。\n- [[Christian Mokry]]：Press & media contact，職稱 PR Manager Test & measurement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR.md"
+              },
+              "score": 1.997372
+             },
+             {
+              "text": "R&S TS-PCT › 來源中的說法\n依 [[Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR]]：\n\n- [[R&S TS-PCT]] 是 protocol conformance test platform from [[Rohde & Schwarz]]。\n- 來源稱 [[R&S TS-PCT]] based on [[R&S CMX500]] 5G one-box signaling tester。\n- 它與 mobile test platform using [[Qualcomm X105 5G Modem-RF]] 共同用於完成 [[3GPP NR]] conformance test case [[TS 38.523-1]] TC 7.1.1.12.5 for [[Search Space Set Group Switching]] 的 early verification。\n- 來源提供更多資訊網址為 Rohde & Schwarz protocol conformance test solutions / R&S TS-PCT product page，但 raw 來源本身未包含該頁內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS-PCT.md"
+              },
+              "score": 3.559222
+             },
+             {
+              "text": "R&S CMX500 › Warranty and service\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n- Base unit warranty：1 year。\n- All other items warranty：1 year。\n- Calibration service plans：up to five years；on demand 為 pay per calibration。\n- Warranty and repair service plans：up to five years；on demand 為 standard price repair。\n- Extended periods：contact [[Rohde & Schwarz]] sales office。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 42,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 7.347164
+             },
+             {
+              "text": "Christian Mokry › 來源中的角色\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR]]：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Christian Mokry.md"
+              },
+              "score": 1.107993
+             },
+             {
+              "text": "Texas Instruments\n[[Texas Instruments]] 是半導體公司 / 品牌；在本 vault 中，既有市場來源把它列於交換機上游 CPU/PHY chip 分類，[[snla426]] 則提供其 PCIe Gen5 high-speed PCB layout application note 脈絡。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Texas Instruments.md"
+              },
+              "score": 0.181574
+             },
+             {
+              "text": "R&S ZNB3020 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3020 2-port | Vector network analyzer，2-port，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.22 |\n| R&S®ZNB3020 4-port | Vector network analyzer，4-port，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.24 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3020.md"
+              },
+              "score": 4.455087
+             },
+             {
+              "text": "Please note that the above table does not include all the test instruments and system components needed\nfor 5G NR base station conformance testing.\n►  For further ordering information please contact your local sales team:\nhttps://www.rohde-schwarz.com/service-sales-locator",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-b1f51b9642754bec",
+                "original_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+                "sha256": "b1f51b9642754bece660fb78a0146a645932657bee2e02c911d8ab5a0ebc8b64",
+                "raw_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+               "section": 114,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.111785
+             },
+             {
+              "text": "Please note that the above table does not include all the test instruments and system components needed\nfor 5G NR base station conformance testing.\nFor further ordering information please contact your local sales team:\n►  https://www.rohde-schwarz.com/service-sales-locator\nRohde & Schwarz | Application Note 5G New Radio Over-The-Air Base Station Transmitter Tests   56",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-3f9c4b1532d467ff",
+                "original_ref": "raw/Market/OneNote/GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md",
+                "sha256": "3f9c4b1532d467ff6132c3136a2bf8f0123f8ce0af28fc9d00a2bf74bcd1d90a",
+                "raw_ref": "raw/Market/OneNote/GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md",
+               "section": 107,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.061754
+             },
+             {
+              "text": "For more ordering information about available options, please see our product brochure (PD 5214.2833.12) or ask your local\nRohde & Schwarz expert to find the solution that best meets your needs.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-84f0ccff28cb329b",
+                "original_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+                "sha256": "84f0ccff28cb329ba83809be58133fb1b917290733c05f3f34a8f44c32526203",
+                "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+               "section": 1635,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 17.711382
+             },
+             {
+              "text": "![https://cdn.rohde-schwarz.com/pws/product/n_1/nrq6/NRQ6_48940_05_lightbox_landscape.jpg](Picture2.jpg)",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ae261ae2c6ea49d8",
+                "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+                "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+                "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "section": 53,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 15.977504
+             }
+            ],
+            "text": "The supported evidence only shows that **OFDM symbols** are resource-allocation units in NR OCNG: OCNG can have configurable OFDM symbol allocation per slot, with start OFDM symbol 0–13 and number of symbols 1–14, and an allocation header can carry a 14-bit OFDM symbol mask [14][25].\n| Product-related measurement decision | What depends on understanding OFDM / OFDM symbols | Rohde & Schwarz implication | Evidence |\n|---|---|---|---|\n| OCNG time-domain allocation | Deciding which OFDM symbols in a slot carry OCNG, including start symbol and symbol count | This is an implementation/configuration decision for OCNG mapping, but the source is R&S confidential implementation notes and not a public 3GPP requirement or product specification | [14][2] |\n| OCNG allocation header interpretation | Reading or setting the 14-bit OFDM symbol mask | The mask affects how OCNG is mapped; implementation must not over-treat the lossy notes as formal FPGA/PHY software design documentation | [25][2] |\n| OCNG modulation assumption | Avoiding the conclusion that QAM16/QAM64/QAM256 are allowed merely because a header field lists them | R&S notes state the specification only specifies pseudo-random QPSK for OCNG data-region behavior, so modulation choices are a specification-risk area | [2][14][25] |\n| R&S VSE analysis option selection | For NR/LTE/O-RAN/beamforming analysis, the passages support selecting VSE-related measurement options, but they do not directly state an OFDM-specific VSE setting | R&S VSE is PC signal analysis software used for 5G NR, LTE, O-RAN U-Plane/PCAP analysis and beamforming; listed options include VSE-K144 for 5G NR DL/UL, VSE-K146 for 5G NR MIMO & beamforming, VSE-K175 for O-RAN, VSE-K100 for LTE FDD, and VSE-K104 for LTE TDD | [4][16] |\n| R&S CMX500 role in NR measurement | The passages support CMX500 use for LTE/NR network emulation, RF parametric testing and fading, but do not state an OFDM-specific CMX500 setting | R&S CMX500 is a universal one-box network emulation and measurement test solution supporting LTE, NR FR1, NR FR2, NSA, SA, FDD, TDD, RF parametric testing and fading propagation conditions | [11] |\n| 5G NR base-station conformance product configuration | Product/instrument ordering decisions cannot be finalized from a table alone | Raw R&S evidence says the table does not include all test instruments and system components needed for 5G NR base-station conformance testing and directs users to contact the local sales team; another raw passage says to see the product brochure or ask a local R&S expert for available options | [37][38][39] |\n【推論】The only directly supported OFDM-dependent measurement/configuration decisions are OCNG symbol allocation and OFDM-symbol-mask interpretation, because those passages explicitly mention configurable OFDM symbol allocation and a 14-bit OFDM symbol mask [14][25].\n【推論】For Rohde & Schwarz product planning, OFDM/NR-related measurement setups should be treated as configuration-sensitive rather than orderable from the cited excerpts alone, because the raw R&S evidence says 5G NR conformance tables may omit required instruments/components and recommends contacting R&S sales or experts for ordering/options [37][38][39].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "OCNG mapper › 使用限制\n- 本頁整理的是 Rohde & Schwarz company confidential 技術筆記中的 implementation notes，不代表公開 3GPP 規格要求或產品規格。\n- Work Item 632178 與 Epic 686215 僅以內部 ID 出現，未提供狀態、系統或日期。\n- Header format 只依 lossy markdown 轉檔保存，正式 FPGA / PHY SW implementation 需回內部設計文件。\n- 來源中的 modulation type 欄位不代表 3GPP OCNG data region 已允許 QAM16 / QAM64 / QAM256；來源同時指出 specification only specifies pseudo random QPSK。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/OCNG mapper.md"
+             },
+             "score": 3.384453
+            },
+            {
+             "text": "R&S VSE\n[[R&S VSE]]（Vector Signal Explorer）是 Rohde & Schwarz 的 PC signal analysis software；在 [[R&S portfolio for O-RU testing]] 中用於 5G NR、LTE、O-RAN U-Plane / PCAP analysis 與 beamforming measurements 的分析端。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S VSE.md"
+             },
+             "score": 2.514102
+            },
+            {
+             "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 9.462097
+            },
+            {
+             "text": "OCNG mapper › 需求摘要\n[[OCNG (NR)]] 將 NR OCNG RE mapper 的需求整理如下：\n\n- Configurable bandwidth with [[Resource Block]] resolution，supports OCNG Pattern 3 and 5。\n- Start PRB and length of PRBs：0–272 and 1–273 ranges respectively。\n- Configurable [[OFDM symbol]] allocation per slot，supports OCNG Pattern 4。\n- Start OFDM symbol and number of symbols：0–13 and 1–14 ranges respectively。\n- Power setting for OCNG allocation, similar to [[PDSCH]] format。\n- Selectable awareness of other antenna's reference symbols，supports OCNG Pattern 2 and 5。\n- Awareness of other antenna reference symbols implemented with extra [[CSI-RS]] allocation with zero-power。\n- Data Region OCNG must be sourced from RDRAM。\n- OCNG REs must be allocated last, and with lowest priority。\n\n來源中曾提出 selectable modulation format 的問題，但也寫明 specification only specifies pseudo random [[QPSK]] modulated data；因此規格層主張仍是 QPSK。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/OCNG mapper.md"
+             },
+             "score": 1.058029
+            },
+            {
+             "text": "R&S VSE › 來源列出的 options / items\n依 [[R&S portfolio for O-RU testing]] Slide 46–48：\n\n| Item | 來源說法 |\n|---|---|\n| VSE | Vector Signal Explorer Software / VSE Basic Edition |\n| FSPC | License dongle, PC SW |\n| VSE-K144 | 5G-NR DL/UL Measurements |\n| VSE-K146 | 5G-NR MIMO&Beamforming DL Measurements；optional，例如 with RTP |\n| VSE-K175 | O-RAN Measurements |\n| VSE-K100 | LTE FDD DL/UL Measurements；optional |\n| VSE-K104 | LTE TDD DL/UL Measurements；optional |\n\nSlide 48 明列：\n\n- FSPC material `1310.0002.03`。\n- VSE material `1345.1011.06`。\n- VSE-K144 material `1309.9574.06`。\n- VSE-K175 material `1350.7020.06`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S VSE.md"
+             },
+             "score": 1.752967
+            },
+            {
+             "text": "OCNG mapper › Header / allocation format 線索\n來源列出 allocation header 的可辨識欄位：\n\n| Word | 欄位 | 來源描述 |\n|---:|---|---|\n| 0 | pointer / header type | next header element pointer；header type 14 = OCNG；invalid = 0xF |\n| 1 | priority / number of RBs | priority 1 low to 15 high，0 not allowed；Number of RBs 1..273 |\n| 2 | OFDM symbol mask | 14-bit OFDM symbol mask |\n| 3 | OCNG Power factor | 0x8000 = 1 |\n| 4/5 | data pointer / RAM / layers / modulation | OCNG Data pointer；RAM Select 0=PDRAM, 1=FDRAM, 3=RDRAM default；Number of layers / ports minus 1 range 0 to 3；Modulation Type 2=QPSK, 3=QAM16, 4=QAM64, 5=QAM256 |\n\n來源也說 RB List extension elements provide a list of PRB numbers in the order of mapping：\n\n- At least one RB set is required to provide overall OCNG mapping。\n- At least one RB is required。\n- Each extension element can hold up to 16 RB numbers。\n- More extension elements can be added if more RB numbers are needed。\n- Unused words in the last extension element should be set to 0xFFFF。\n- Number of RBs in the header must match number of RBs in the RB list。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/OCNG mapper.md"
+             },
+             "score": 1.005618
+            },
+            {
+             "text": "Please note that the above table does not include all the test instruments and system components needed\nfor 5G NR base station conformance testing.\n►  For further ordering information please contact your local sales team:\nhttps://www.rohde-schwarz.com/service-sales-locator",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-b1f51b9642754bec",
+               "original_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+               "sha256": "b1f51b9642754bece660fb78a0146a645932657bee2e02c911d8ab5a0ebc8b64",
+               "raw_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests.md",
+              "section": 114,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 19.111785
+            },
+            {
+             "text": "Please note that the above table does not include all the test instruments and system components needed\nfor 5G NR base station conformance testing.\nFor further ordering information please contact your local sales team:\n►  https://www.rohde-schwarz.com/service-sales-locator\nRohde & Schwarz | Application Note 5G New Radio Over-The-Air Base Station Transmitter Tests   56",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3f9c4b1532d467ff",
+               "original_ref": "raw/Market/OneNote/GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md",
+               "sha256": "3f9c4b1532d467ff6132c3136a2bf8f0123f8ce0af28fc9d00a2bf74bcd1d90a",
+               "raw_ref": "raw/Market/OneNote/GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md",
+              "section": 107,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 19.061754
+            },
+            {
+             "text": "For more ordering information about available options, please see our product brochure (PD 5214.2833.12) or ask your local\nRohde & Schwarz expert to find the solution that best meets your needs.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-84f0ccff28cb329b",
+               "original_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+               "sha256": "84f0ccff28cb329ba83809be58133fb1b917290733c05f3f34a8f44c32526203",
+               "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+              "section": 1635,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 17.711382
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "product_option_spec",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 5,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 13,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S SMW200A.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/Constellation Insight Tool.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 4,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/OCNG mapper.md",
+             "raw_refs": [
+              "raw/Knowledge/OCNG (NR).md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S VSE.md",
+             "raw_refs": [
+              "raw/Market/OneNote/R&S portfolio for O-RU testing.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

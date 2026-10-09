@@ -1,0 +1,53 @@
+{
+ "id": "Q0051",
+ "grader": "1.2",
+ "coverage": 0.0,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's signal integrity capability list is a high-speed PCB/PCBA flow: IL / Xtalk / eye diagram, TDR impedance, Stackup Planner, TL Calculator — not a wireless-application list.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "gives a wireless-application capability list instead of noting the SI list is PCB/PCBA IL/Xtalk/eye/TDR/etc."
+  },
+  {
+   "n": 2,
+   "point": "Signal Integrity is positioned in the Digital / high-speed digital test context, with RF as a separate target category, so the Vault does not frame SI as a wireless-communication capability area.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "frames capabilities as for Wireless Communication, not SI as digital/high-speed with RF separate"
+  },
+  {
+   "n": 3,
+   "point": "In the R&S PCB test solutions flow, Signal Integrity modeling/testing is defined as IL, DK/DF, roughness and impedance.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention IL, DK/DF, roughness, impedance"
+  },
+  {
+   "n": 4,
+   "point": "The only wireless-infrastructure SI reference is O-RU / Open RAN testing, where \"Timing / Sync / Signal Integrity\" is listed as one key test focus area.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention O-RU/Open RAN Timing/Sync/Signal Integrity focus"
+  },
+  {
+   "n": 5,
+   "point": "In the Jio mmWave (Wi-Fi over mmWave) project, signal integrity is tied to EVM/modulation-quality tuning after signal up-conversion.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention EVM/modulation-quality tuning after up-conversion"
+  },
+  {
+   "n": 6,
+   "point": "In an SDR/UAV wireless review, filtering stages plus configurable AGC are what mitigate interference and maintain signal integrity.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention filtering stages and configurable AGC"
+  }
+ ],
+ "contradicted": 2,
+ "invented": [
+  "key capabilities for Wireless Communication applications: wireless communication testing, EMI testing/receiving, and signal & spectrum analysis"
+ ]
+}

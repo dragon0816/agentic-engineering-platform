@@ -1,0 +1,917 @@
+{
+ "question": {
+  "id": "Q0351",
+  "text": "What are the most important S-parameters capabilities for applications in Aerospace / Defense?",
+  "market": "Aerospace / Defense",
+  "product": "Vector Network Analyzer",
+  "type": "basic",
+  "difficulty": "L1"
+ },
+ "session_id": "conversation-4214efdb70b7417796e0e27a96eadf1a",
+ "exchange": {
+  "sent": "What are the most important S-parameters capabilities for applications in Aerospace / Defense?",
+  "http_status": 200,
+  "seconds": 127.172,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-4214efdb70b7417796e0e27a96eadf1a",
+    "actor": "leo.chi",
+    "title": "What are the most important S-parameters capabilities for applications i…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T13:14:37.930923Z",
+    "updated_at": "2026-10-09T13:16:44.936338Z",
+    "messages": [
+     {
+      "message_id": "message-98374d82ef414e0ab1c34469269a1a18",
+      "role": "user",
+      "text": "What are the most important S-parameters capabilities for applications in Aerospace / Defense?",
+      "created_at": "2026-10-09T13:14:37.961056Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-f4bf596de0df45a28781b947a44feb17",
+      "role": "assistant",
+      "text": "### 推薦先賣\n**寬頻 VNA base capability**：R&S®ZNB3020 是 20 GHz Vector Network Analyzer，base frequency range 為 9 kHz to 20.0 GHz，並可透過 frequency upgrade option 到 26.5 GHz；2-port 與 4-port 版本皆列為 base unit / ordering information [19][5]。\n**2-port / 4-port network analysis**：ZNB3020 有 2-port 與 4-port 型號，兩者皆為 9 kHz to 20 GHz、3.5 mm connector 的 Vector Network Analyzer [5]。\n**real-time measurement uncertainty analysis**：R&S®ZNB3-K50 與 R&S®ZNB3-K50P 是適用於 VNA uncertainty model 的 real-time measurement uncertainty analysis options [37][38]。\n**PCB / interconnect S-parameter-adjacent measurements**：R&S PCB test solutions 來源列出 impedance、DK/DF extraction、insertion loss、roughness、crosstalk、transmission-line modeling、eye diagram、sampling testing、process monitoring，以及 cable / connector testing 等項目 [26]。\n**Aerospace / Defense 場景需求**：A&D test 相關簡報主題包括 deployed 5G private networks 在 smart jamming / EW 環境下的 resilience；mission drivers 包含 tactical edge connectivity、smart jamming、contested spectrum、private 5G、autonomous systems and drones、secure command-and-control networks [31][25]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S®ZNB3-K50 / ZNB3-K50P | Measurement uncertainty / traceability discussion | real-time measurement uncertainty analysis options；適用於 VNA uncertainty model | A&D 測試通常重視可追溯與不確定度；此處可作為 VNA 報告品質與量測信心的賣點 | [37][38] | Wiki 未收錄完整 uncertainty 規格、適用型號限制、校正條件、uncertainty budget |\n| PCB / high-speed digital test solutions | PCB material、stackup、interconnect、cable / connector testing | Impedance、TDR、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram、sampling testing、process monitoring、cable / connector testing | A&D 系統常包含高速 PCB、RF interconnect 與線纜連接器；知識庫已確認這些是 R&S PCB test solutions 的測試流程項目 | [26][12] | 知識庫未標示對應 VNA 型號、S-parameter 檔案格式、fixture / probe station、de-embedding method、頻率上限 |\n| R&S FSW + R&S SMW200A group delay setup | Satellite payload / RF path group delay and gain measurement | SMW200A 產生 multi-carrier continuous wave stimulus；FSW 以 reference calibration 與 DUT output phase difference 判定 group delay；來源列 R&S SMW-K61 與 R&S FSW-K17 | 對 satellite payload，group delay 是重要 RF measurement；雖非 VNA-only，但可作為 A&D / space RF test 的相鄰 capability | [36] | 該頁明示不取代 R&S FSW、SMW200A、ZNA 正式規格書；實際性能需依 DUT、frequency range、bandwidth、SNR、option 與 calibration setup 確認 [23] |\n| R&S CMX500 NR-NTN RF measurement options | Satellite / NTN device RF measurements | R&S CMX-KM606 是 CMX500 的 NR NTN measurements software option，用於 S-band and L-band NR-NTN RF measurements，需 R&S CMX-KM600 與 R&S CMX-KS627B | A&D / space-adjacent 通訊測試可把 VNA 元件量測與 NTN RF conformance / callbox 類測試分開銷售 | [20][6] | 這不是 S-parameter / VNA option；不可把它改寫成 network analyzer capability |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| PCB fabricator / system house for A&D electronics | PCB test solutions + VNA platform | Material measurement、stackup selection、signal integrity modeling/testing、sampling testing、process monitoring 是已列出的流程 | 知識庫未標示正式 A&D customer fit、認證需求、量測頻寬或自動化方案 [26][12] |\n### 最重要能力排序\n**Frequency coverage**：至少以 ZNB3020 已確認的 9 kHz to 20 GHz 為基礎，必要時評估 frequency upgrade option 到 26.5 GHz [19]。\n**Port count**：2-port 與 4-port VNA 版本都重要，因為知識庫確認 ZNB3020 同時提供 2-port 與 4-port base units [5]。\n**Measurement uncertainty**：real-time measurement uncertainty analysis 是 A&D 報告與驗證討論的重要能力，知識庫確認 R&S®ZNB3-K50 / K50P 對應 VNA uncertainty model [37][38]。\n**Insertion loss / impedance / crosstalk / material extraction**：PCB 與 interconnect 測試中已列出 IL、impedance、Xtalk、DK/DF、roughness、TL modeling、eye diagram、cable / connector testing [26]。\n**Calibration / reference-based measurement thinking**：satellite payload group delay 來源明確描述 reference calibration 與 DUT measurement 兩步法，雖然該例使用 FSW / SMW200A 而不是 VNA [36]。\n【推論】對 satellite / NTN 類 A&D 應用，VNA 應定位在 RF path / component characterization，而 group delay 與 NR-NTN RF measurements 需分別用 FSW/SMW200A 與 CMX500 options 補齊，不能全部宣稱為 VNA capability。[36][20][23]\n\n來源：\n[5] Wiki：R&S ZNB3020（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[6] Wiki：R&S CMX-KM606（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX_Configuration_Guide_NR-NTN.md`）\n[12] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[19] Wiki：R&S ZNB3020（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[20] Wiki：R&S CMX-KM606（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX_Configuration_Guide_NR-NTN.md`）\n[23] Wiki：衛星酬載群延遲量測（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[25] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[26] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[31] Wiki：Randy Schnell（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`）\n[36] Wiki：衛星酬載群延遲量測（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[37] `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`\n[38] `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`",
+      "created_at": "2026-10-09T13:16:44.936338Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-48aa48f9d1cc4b34a04d0058dfff55a2",
+       "request_id": "request-48aa48f9d1cc4b34a04d0058dfff55a2",
+       "span_id": "span-48aa48f9d1cc4b34a04d0058dfff55a2",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "### 推薦先賣\n**寬頻 VNA base capability**：R&S®ZNB3020 是 20 GHz Vector Network Analyzer，base frequency range 為 9 kHz to 20.0 GHz，並可透過 frequency upgrade option 到 26.5 GHz；2-port 與 4-port 版本皆列為 base unit / ordering information [19][5]。\n**2-port / 4-port network analysis**：ZNB3020 有 2-port 與 4-port 型號，兩者皆為 9 kHz to 20 GHz、3.5 mm connector 的 Vector Network Analyzer [5]。\n**real-time measurement uncertainty analysis**：R&S®ZNB3-K50 與 R&S®ZNB3-K50P 是適用於 VNA uncertainty model 的 real-time measurement uncertainty analysis options [37][38]。\n**PCB / interconnect S-parameter-adjacent measurements**：R&S PCB test solutions 來源列出 impedance、DK/DF extraction、insertion loss、roughness、crosstalk、transmission-line modeling、eye diagram、sampling testing、process monitoring，以及 cable / connector testing 等項目 [26]。\n**Aerospace / Defense 場景需求**：A&D test 相關簡報主題包括 deployed 5G private networks 在 smart jamming / EW 環境下的 resilience；mission drivers 包含 tactical edge connectivity、smart jamming、contested spectrum、private 5G、autonomous systems and drones、secure command-and-control networks [31][25]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S®ZNB3-K50 / ZNB3-K50P | Measurement uncertainty / traceability discussion | real-time measurement uncertainty analysis options；適用於 VNA uncertainty model | A&D 測試通常重視可追溯與不確定度；此處可作為 VNA 報告品質與量測信心的賣點 | [37][38] | Wiki 未收錄完整 uncertainty 規格、適用型號限制、校正條件、uncertainty budget |\n| PCB / high-speed digital test solutions | PCB material、stackup、interconnect、cable / connector testing | Impedance、TDR、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram、sampling testing、process monitoring、cable / connector testing | A&D 系統常包含高速 PCB、RF interconnect 與線纜連接器；知識庫已確認這些是 R&S PCB test solutions 的測試流程項目 | [26][12] | 知識庫未標示對應 VNA 型號、S-parameter 檔案格式、fixture / probe station、de-embedding method、頻率上限 |\n| R&S FSW + R&S SMW200A group delay setup | Satellite payload / RF path group delay and gain measurement | SMW200A 產生 multi-carrier continuous wave stimulus；FSW 以 reference calibration 與 DUT output phase difference 判定 group delay；來源列 R&S SMW-K61 與 R&S FSW-K17 | 對 satellite payload，group delay 是重要 RF measurement；雖非 VNA-only，但可作為 A&D / space RF test 的相鄰 capability | [36] | 該頁明示不取代 R&S FSW、SMW200A、ZNA 正式規格書；實際性能需依 DUT、frequency range、bandwidth、SNR、option 與 calibration setup 確認 [23] |\n| R&S CMX500 NR-NTN RF measurement options | Satellite / NTN device RF measurements | R&S CMX-KM606 是 CMX500 的 NR NTN measurements software option，用於 S-band and L-band NR-NTN RF measurements，需 R&S CMX-KM600 與 R&S CMX-KS627B | A&D / space-adjacent 通訊測試可把 VNA 元件量測與 NTN RF conformance / callbox 類測試分開銷售 | [20][6] | 這不是 S-parameter / VNA option；不可把它改寫成 network analyzer capability |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| PCB fabricator / system house for A&D electronics | PCB test solutions + VNA platform | Material measurement、stackup selection、signal integrity modeling/testing、sampling testing、process monitoring 是已列出的流程 | 知識庫未標示正式 A&D customer fit、認證需求、量測頻寬或自動化方案 [26][12] |\n### 最重要能力排序\n**Frequency coverage**：至少以 ZNB3020 已確認的 9 kHz to 20 GHz 為基礎，必要時評估 frequency upgrade option 到 26.5 GHz [19]。\n**Port count**：2-port 與 4-port VNA 版本都重要，因為知識庫確認 ZNB3020 同時提供 2-port 與 4-port base units [5]。\n**Measurement uncertainty**：real-time measurement uncertainty analysis 是 A&D 報告與驗證討論的重要能力，知識庫確認 R&S®ZNB3-K50 / K50P 對應 VNA uncertainty model [37][38]。\n**Insertion loss / impedance / crosstalk / material extraction**：PCB 與 interconnect 測試中已列出 IL、impedance、Xtalk、DK/DF、roughness、TL modeling、eye diagram、cable / connector testing [26]。\n**Calibration / reference-based measurement thinking**：satellite payload group delay 來源明確描述 reference calibration 與 DUT measurement 兩步法，雖然該例使用 FSW / SMW200A 而不是 VNA [36]。\n【推論】對 satellite / NTN 類 A&D 應用，VNA 應定位在 RF path / component characterization，而 group delay 與 NR-NTN RF measurements 需分別用 FSW/SMW200A 與 CMX500 options 補齊，不能全部宣稱為 VNA capability。[36][20][23]\n\n來源：\n[5] Wiki：R&S ZNB3020（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[6] Wiki：R&S CMX-KM606（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX_Configuration_Guide_NR-NTN.md`）\n[12] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[19] Wiki：R&S ZNB3020（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[20] Wiki：R&S CMX-KM606（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX_Configuration_Guide_NR-NTN.md`）\n[23] Wiki：衛星酬載群延遲量測（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[25] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[26] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[31] Wiki：Randy Schnell（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`）\n[36] Wiki：衛星酬載群延遲量測（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[37] `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`\n[38] `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-48aa48f9d1cc4b34a04d0058dfff55a2",
+      "request_id": "request-48aa48f9d1cc4b34a04d0058dfff55a2",
+      "span_id": "span-48aa48f9d1cc4b34a04d0058dfff55a2",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-48aa48f9d1cc4b34a04d0058dfff55a2",
+       "request_id": "request-48aa48f9d1cc4b34a04d0058dfff55a2",
+       "span_id": "span-48aa48f9d1cc4b34a04d0058dfff55a2",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "### 推薦先賣\n**寬頻 VNA base capability**：R&S®ZNB3020 是 20 GHz Vector Network Analyzer，base frequency range 為 9 kHz to 20.0 GHz，並可透過 frequency upgrade option 到 26.5 GHz；2-port 與 4-port 版本皆列為 base unit / ordering information [19][5]。\n**2-port / 4-port network analysis**：ZNB3020 有 2-port 與 4-port 型號，兩者皆為 9 kHz to 20 GHz、3.5 mm connector 的 Vector Network Analyzer [5]。\n**real-time measurement uncertainty analysis**：R&S®ZNB3-K50 與 R&S®ZNB3-K50P 是適用於 VNA uncertainty model 的 real-time measurement uncertainty analysis options [37][38]。\n**PCB / interconnect S-parameter-adjacent measurements**：R&S PCB test solutions 來源列出 impedance、DK/DF extraction、insertion loss、roughness、crosstalk、transmission-line modeling、eye diagram、sampling testing、process monitoring，以及 cable / connector testing 等項目 [26]。\n**Aerospace / Defense 場景需求**：A&D test 相關簡報主題包括 deployed 5G private networks 在 smart jamming / EW 環境下的 resilience；mission drivers 包含 tactical edge connectivity、smart jamming、contested spectrum、private 5G、autonomous systems and drones、secure command-and-control networks [31][25]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S®ZNB3-K50 / ZNB3-K50P | Measurement uncertainty / traceability discussion | real-time measurement uncertainty analysis options；適用於 VNA uncertainty model | A&D 測試通常重視可追溯與不確定度；此處可作為 VNA 報告品質與量測信心的賣點 | [37][38] | Wiki 未收錄完整 uncertainty 規格、適用型號限制、校正條件、uncertainty budget |\n| PCB / high-speed digital test solutions | PCB material、stackup、interconnect、cable / connector testing | Impedance、TDR、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram、sampling testing、process monitoring、cable / connector testing | A&D 系統常包含高速 PCB、RF interconnect 與線纜連接器；知識庫已確認這些是 R&S PCB test solutions 的測試流程項目 | [26][12] | 知識庫未標示對應 VNA 型號、S-parameter 檔案格式、fixture / probe station、de-embedding method、頻率上限 |\n| R&S FSW + R&S SMW200A group delay setup | Satellite payload / RF path group delay and gain measurement | SMW200A 產生 multi-carrier continuous wave stimulus；FSW 以 reference calibration 與 DUT output phase difference 判定 group delay；來源列 R&S SMW-K61 與 R&S FSW-K17 | 對 satellite payload，group delay 是重要 RF measurement；雖非 VNA-only，但可作為 A&D / space RF test 的相鄰 capability | [36] | 該頁明示不取代 R&S FSW、SMW200A、ZNA 正式規格書；實際性能需依 DUT、frequency range、bandwidth、SNR、option 與 calibration setup 確認 [23] |\n| R&S CMX500 NR-NTN RF measurement options | Satellite / NTN device RF measurements | R&S CMX-KM606 是 CMX500 的 NR NTN measurements software option，用於 S-band and L-band NR-NTN RF measurements，需 R&S CMX-KM600 與 R&S CMX-KS627B | A&D / space-adjacent 通訊測試可把 VNA 元件量測與 NTN RF conformance / callbox 類測試分開銷售 | [20][6] | 這不是 S-parameter / VNA option；不可把它改寫成 network analyzer capability |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| PCB fabricator / system house for A&D electronics | PCB test solutions + VNA platform | Material measurement、stackup selection、signal integrity modeling/testing、sampling testing、process monitoring 是已列出的流程 | 知識庫未標示正式 A&D customer fit、認證需求、量測頻寬或自動化方案 [26][12] |\n### 最重要能力排序\n**Frequency coverage**：至少以 ZNB3020 已確認的 9 kHz to 20 GHz 為基礎，必要時評估 frequency upgrade option 到 26.5 GHz [19]。\n**Port count**：2-port 與 4-port VNA 版本都重要，因為知識庫確認 ZNB3020 同時提供 2-port 與 4-port base units [5]。\n**Measurement uncertainty**：real-time measurement uncertainty analysis 是 A&D 報告與驗證討論的重要能力，知識庫確認 R&S®ZNB3-K50 / K50P 對應 VNA uncertainty model [37][38]。\n**Insertion loss / impedance / crosstalk / material extraction**：PCB 與 interconnect 測試中已列出 IL、impedance、Xtalk、DK/DF、roughness、TL modeling、eye diagram、cable / connector testing [26]。\n**Calibration / reference-based measurement thinking**：satellite payload group delay 來源明確描述 reference calibration 與 DUT measurement 兩步法，雖然該例使用 FSW / SMW200A 而不是 VNA [36]。\n【推論】對 satellite / NTN 類 A&D 應用，VNA 應定位在 RF path / component characterization，而 group delay 與 NR-NTN RF measurements 需分別用 FSW/SMW200A 與 CMX500 options 補齊，不能全部宣稱為 VNA capability。[36][20][23]\n\n來源：\n[5] Wiki：R&S ZNB3020（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[6] Wiki：R&S CMX-KM606（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX_Configuration_Guide_NR-NTN.md`）\n[12] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[19] Wiki：R&S ZNB3020（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[20] Wiki：R&S CMX-KM606（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX_Configuration_Guide_NR-NTN.md`）\n[23] Wiki：衛星酬載群延遲量測（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[25] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[26] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[31] Wiki：Randy Schnell（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`）\n[36] Wiki：衛星酬載群延遲量測（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[37] `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`\n[38] `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_CAxEtwAZle7dA8qjru77u9rs",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "### 推薦先賣\n**寬頻 VNA base capability**：R&S®ZNB3020 是 20 GHz Vector Network Analyzer，base frequency range 為 9 kHz to 20.0 GHz，並可透過 frequency upgrade option 到 26.5 GHz；2-port 與 4-port 版本皆列為 base unit / ordering information [19][5]。\n**2-port / 4-port network analysis**：ZNB3020 有 2-port 與 4-port 型號，兩者皆為 9 kHz to 20 GHz、3.5 mm connector 的 Vector Network Analyzer [5]。\n**real-time measurement uncertainty analysis**：R&S®ZNB3-K50 與 R&S®ZNB3-K50P 是適用於 VNA uncertainty model 的 real-time measurement uncertainty analysis options [37][38]。\n**PCB / interconnect S-parameter-adjacent measurements**：R&S PCB test solutions 來源列出 impedance、DK/DF extraction、insertion loss、roughness、crosstalk、transmission-line modeling、eye diagram、sampling testing、process monitoring，以及 cable / connector testing 等項目 [26]。\n**Aerospace / Defense 場景需求**：A&D test 相關簡報主題包括 deployed 5G private networks 在 smart jamming / EW 環境下的 resilience；mission drivers 包含 tactical edge connectivity、smart jamming、contested spectrum、private 5G、autonomous systems and drones、secure command-and-control networks [31][25]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S®ZNB3-K50 / ZNB3-K50P | Measurement uncertainty / traceability discussion | real-time measurement uncertainty analysis options；適用於 VNA uncertainty model | A&D 測試通常重視可追溯與不確定度；此處可作為 VNA 報告品質與量測信心的賣點 | [37][38] | Wiki 未收錄完整 uncertainty 規格、適用型號限制、校正條件、uncertainty budget |\n| PCB / high-speed digital test solutions | PCB material、stackup、interconnect、cable / connector testing | Impedance、TDR、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram、sampling testing、process monitoring、cable / connector testing | A&D 系統常包含高速 PCB、RF interconnect 與線纜連接器；知識庫已確認這些是 R&S PCB test solutions 的測試流程項目 | [26][12] | 知識庫未標示對應 VNA 型號、S-parameter 檔案格式、fixture / probe station、de-embedding method、頻率上限 |\n| R&S FSW + R&S SMW200A group delay setup | Satellite payload / RF path group delay and gain measurement | SMW200A 產生 multi-carrier continuous wave stimulus；FSW 以 reference calibration 與 DUT output phase difference 判定 group delay；來源列 R&S SMW-K61 與 R&S FSW-K17 | 對 satellite payload，group delay 是重要 RF measurement；雖非 VNA-only，但可作為 A&D / space RF test 的相鄰 capability | [36] | 該頁明示不取代 R&S FSW、SMW200A、ZNA 正式規格書；實際性能需依 DUT、frequency range、bandwidth、SNR、option 與 calibration setup 確認 [23] |\n| R&S CMX500 NR-NTN RF measurement options | Satellite / NTN device RF measurements | R&S CMX-KM606 是 CMX500 的 NR NTN measurements software option，用於 S-band and L-band NR-NTN RF measurements，需 R&S CMX-KM600 與 R&S CMX-KS627B | A&D / space-adjacent 通訊測試可把 VNA 元件量測與 NTN RF conformance / callbox 類測試分開銷售 | [20][6] | 這不是 S-parameter / VNA option；不可把它改寫成 network analyzer capability |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| PCB fabricator / system house for A&D electronics | PCB test solutions + VNA platform | Material measurement、stackup selection、signal integrity modeling/testing、sampling testing、process monitoring 是已列出的流程 | 知識庫未標示正式 A&D customer fit、認證需求、量測頻寬或自動化方案 [26][12] |\n### 最重要能力排序\n**Frequency coverage**：至少以 ZNB3020 已確認的 9 kHz to 20 GHz 為基礎，必要時評估 frequency upgrade option 到 26.5 GHz [19]。\n**Port count**：2-port 與 4-port VNA 版本都重要，因為知識庫確認 ZNB3020 同時提供 2-port 與 4-port base units [5]。\n**Measurement uncertainty**：real-time measurement uncertainty analysis 是 A&D 報告與驗證討論的重要能力，知識庫確認 R&S®ZNB3-K50 / K50P 對應 VNA uncertainty model [37][38]。\n**Insertion loss / impedance / crosstalk / material extraction**：PCB 與 interconnect 測試中已列出 IL、impedance、Xtalk、DK/DF、roughness、TL modeling、eye diagram、cable / connector testing [26]。\n**Calibration / reference-based measurement thinking**：satellite payload group delay 來源明確描述 reference calibration 與 DUT measurement 兩步法，雖然該例使用 FSW / SMW200A 而不是 VNA [36]。\n【推論】對 satellite / NTN 類 A&D 應用，VNA 應定位在 RF path / component characterization，而 group delay 與 NR-NTN RF measurements 需分別用 FSW/SMW200A 與 CMX500 options 補齊，不能全部宣稱為 VNA capability。[36][20][23]\n\n來源：\n[5] Wiki：R&S ZNB3020（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[6] Wiki：R&S CMX-KM606（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX_Configuration_Guide_NR-NTN.md`）\n[12] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[19] Wiki：R&S ZNB3020（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[20] Wiki：R&S CMX-KM606（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX_Configuration_Guide_NR-NTN.md`）\n[23] Wiki：衛星酬載群延遲量測（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[25] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[26] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[31] Wiki：Randy Schnell（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`）\n[36] Wiki：衛星酬載群延遲量測（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[37] `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`\n[38] `raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md`",
+          "evidence": {
+           "raw_citations": 12,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-0e7b1966316743feb7b067d8a5d389d7",
+            "request_id": "request-0e7b1966316743feb7b067d8a5d389d7",
+            "span_id": "span-0e7b1966316743feb7b067d8a5d389d7",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "What are the most important S-parameters capabilities for applications in Aerospace / Defense? Focus on capabilities relevant to test and measurement, especially VNA / network analyzer capabilities, and cite evidence.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "Space Supply Chain\n這份 OneNote 來源是 space / satellite supply chain 的外部資料與圖片 link hub，列出 [[Satellite Applications Catapult]] 的 Space Capabilities Catalogue、Yahoo 股市文章連結、[[PARPRO]] aerospace & defense solution 連結，以及多張未 OCR 圖片；本次 ingest 未擷取外部網頁正文，也未擷取圖片文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Space Supply Chain.md"
+              },
+              "score": 1.406936
+             },
+             {
+              "text": "Satellite Applications Catapult › 來源中的資訊\n- [[Space Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）列出連結文字 `Space Capabilities Catalogue - Satellite Applications Catapult`，URL 為 `https://sa.catapult.org.uk/space-capabilities-catalogue/`。\n- 本次 ingest 未擷取該外部網頁正文、更新日期、catalogue 版本、分類規則、公司名單、capabilities 條目或資料來源。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Satellite Applications Catapult.md"
+              },
+              "score": 0.73056
+             },
+             {
+              "text": "Randy Schnell\n[[Randy Schnell]] 是 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 封面列名的 Business Development Manager，Aerospace & Defense Test。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Randy Schnell.md"
+              },
+              "score": 1.393525
+             },
+             {
+              "text": "PARPRO › unresolved\n- 需要擷取 `https://www.parpro.com.tw/solutions/aerospace-defense/` 正文。\n- 需要確認 [[PARPRO]] 的正式公司名稱、所在地、產品線、產業分類與認證。\n- 需要 OCR 來源中與該 URL 相鄰的圖片，確認是否為 PARPRO aerospace & defense 內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/PARPRO.md"
+              },
+              "score": 0.328054
+             },
+             {
+              "text": "R&S ZNB3020 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3020 2-port | Vector network analyzer，2-port，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.22 |\n| R&S®ZNB3020 4-port | Vector network analyzer，4-port，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.24 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3020.md"
+              },
+              "score": 4.290212
+             },
+             {
+              "text": "R&S CMX-KM606 › 來源中的描述\n[[CMX_Configuration_Guide_NR-NTN]] 將 [[R&S CMX-KM606]] 列於 NR-NTN software 區段：\n\n- Type：SW。\n- Description：NR NTN measurements — S-band and L-band NR-NTN RF measurements。\n- Mandatory：Conditional。\n- Conditions：Mandatory for S/L-band NR-NTN callbox with RF measurements。\n- Dependency：Requires [[R&S CMX-KM600]]。\n- Error rule：Hard error if quoted without [[R&S CMX-KS627B]]。\n- Not used for [[NB-NTN]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KM606.md"
+              },
+              "score": 1.954294
+             },
+             {
+              "text": "經緯航太\n[[經緯航太]] 是 [[0. UAV產業分析報告架構]] 中列於 [[台灣無人機供應鏈]] 下游的公司，來源描述其與智慧農業與多用途無人機相關；[[4. UAV Eco-chain in Taiwan]] 另在 System Integrator 區段列出經緯航太名稱。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/經緯航太.md"
+              },
+              "score": 0.70924
+             },
+             {
+              "text": "uTCI beam failure recovery › 與 uTCI 的關係\n此 procedure 只對 configured to follow unified TCI state 的 channels / signals 有意義。相關範圍可連到：\n\n- [[Unified TCI Framework]]。\n- [[Unified TCI state]]。\n- [[PDCCH]] / [[PDSCH]]。\n- [[PUSCH]] / [[PUCCH]]。\n- [[SRS]]，若 configured to follow unified TCI state。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/uTCI beam failure recovery.md"
+              },
+              "score": 5.555208
+             },
+             {
+              "text": "DCP-Config-r16 › 來源列出的相關欄位\n[[Wake Up Signal]] 在描述 [[DCI format 2_6]] 時列出多個與 DCP / WUS 相關的 r16 欄位或參數：\n\n- `ps-RNTI-r16`：對應 [[PS-RNTI]]。\n- `ps-Offset-r16`：來源文字為 `ps-Offset-r16*0.125ms`，與 WUS search space relative to on-duration DRX cycle 的 timing 有關。\n- `duration`：來源說 search space spans `duration` slots。\n- `sizeDCI-2-6-r16`：DCI2_6 total length。\n- `outsideActiveTimeConfig-r16`：for each UE defines the starting position of its bits inside the whole DCI。\n- `ps-WakeUp-r16`：UE does not detect DCI 時的 default behavior，wake up 或 stay asleep。\n- `ps-TransmitPeriodicL1CSI-r16`：on-duration cycle does not start 時仍可 transmit periodic L1-RSRP reports 的設定線索。\n- `ps-TransmitOtherPeriodicCSI-r16`：on-duration cycle does not start 時仍可 transmit other periodic CSI reports 的設定線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DCP-Config-r16.md"
+              },
+              "score": 3.056914
+             },
+             {
+              "text": "R&S FSW › 相依關係與不可同時安裝（照抄來源）\n- R&S FSW-B517 不適用於 R&S FSW-B4001/-B6001/-B8001 option。\n- R&S FSW-B1017 適用於 R&S FSW-B1200/-B2001/-B800R option。\n- R&S FSW-B21 不適用於 [[R&S FSW8]]、[[R&S FSW13]]。\n- 2-port mixers 不支援 R&S FSW-B800R/-B1200/-B2001/-B4001/-B6001/-B8001 options。\n- R&S FSW-B1200 / B2001 / B800R 適用於所有型號，[[R&S FSW8]]、[[R&S FSW13]] 除外。\n- R&S FSW-B4001 / B6001 / B8001 僅適用於 [[R&S FSW43]]、[[R&S FSW50]]、[[R&S FSW67]]、[[R&S FSW85]]。\n- R&S FSW-B90G 不可 retrofittable，僅適用 [[R&S FSW85]]。\n- R&S FSW-K161R 不可搭配 R&S FSW-B512/-B512R/-B6001/-B8001。\n- R&S FSW-K512RE 不可搭配 R&S FSW-B160/-B320/-B512R/-B6001/-B8001。\n- R&S FSW-K800RE 不可搭配 R&S FSW-B160/-B320/-B512/-B512R/-B800R/-B4001/-B6001/-B8001。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 0.099506
+             },
+             {
+              "text": "5G private network resilience against smart jamming › Program / roadmap 脈絡\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 把 private 5G resilience 放入 defense / Future-G roadmap：\n\n| 期間 | 來源說法 |\n|---|---|\n| 2025–2028 | widespread deployment of 5G tactical networks；mmWave phased arrays available for field testing；hybrid commercial / military networks such as 5G.MIL-style architectures |\n| 2028–2032 | 5G/6G-capable software-defined radios replacing multi-radio tactical stacks；early [[ISAC]] deployment for drone detection and perimeter defense；[[URLLC]] services for autonomy |\n| 2032–2035+ | full 6G networks with integrated sensing；AI-native battlefield connectivity；high-precision location sensing and spectrum-aware autonomy |\n\n來源也列出 [[5G.MIL]]、[[Raytheon OXYGEN]]、[[L3Harris Tactical Network Demo]]、[[DoD EMS Superiority Strategy]] 與 [[FutureG ISAC]] / spectrum sharing programs，作為 FHSS 與 5G convergence 的 program examples。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+              },
+              "score": 1.683943
+             },
+             {
+              "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.606005
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › 使用限制\n- 本頁不是 [[RTCA DO-160]] 正式標準摘要；只保存 [[2025RS Drone Solution]] 的簡報文字。\n- 不得由本頁推論 DO-160G / DO-160 任何 section 的完整 category、limit、waveform、test setup 或 pass / fail criteria。\n- 來源把 DO-160 放在 military / aviation drone example 中，但未說明特定 drone、eVTOL 或 avionics equipment 的 qualification plan。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 3.075113
+             },
+             {
+              "text": "衛星地面設備 › Satellite Ground Station / Operation and Control Center 線索\n- [[Satellite Ground Station]]（raw converted 2026-09-17；來源正文未標示正式發布日期）列出 TASA | Satellite Operation and Control Center 外部連結。\n- 該連結指向 TASA 網站的 `space-facilities/satellite/satellite-operation-and-control-center` URL。\n- 本來源只提供 link hub 與未 OCR 圖片，尚未提供 [[Satellite Operation and Control Center]] 的正文內容。\n- 因此，這筆資料只可作為後續查證 [[TASA]] / [[國家太空中心]] 衛星地面站或操作控制中心的入口，不可視為設施規格或能力證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星地面設備.md"
+              },
+              "score": 5.317672
+             },
+             {
+              "text": "Satellite Operation and Control Center › 可追溯限制\n- [[Satellite Ground Station]] 尚未擷取 TASA 外部頁正文，因此不能確認 [[Satellite Operation and Control Center]] 的中文正式名稱、法律 / 組織歸屬、地址、設備、任務、操作衛星、天線規格或服務能力。\n- 不得把外部連結標題改寫為 TASA 已公開某項地面站技術規格。\n- 不得從檔名或圖片嵌入推論設施照片內容、天線數量、frequency band、tracking capability、mission control workflow 或客戶 / 任務關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Satellite Operation and Control Center.md"
+              },
+              "score": 3.261989
+             },
+             {
+              "text": "Space Supply Chain › References（來源原文列出但未擷取正文）\n- `https://sa.catapult.org.uk/space-capabilities-catalogue/` — [[Satellite Applications Catapult]] Space Capabilities Catalogue。\n- `![[Space Supply Chain image.png]]`\n- `202507:` + `![[Space Supply Chain image 1.png]]`\n- `2022:` + `![[Space Supply Chain image.jpg]]`\n- `2021:` + `![[Space Supply Chain image 2.png]]`\n- Yahoo 股市連結：連結文字包含「低軌衛星黑馬出列！它『拿下 AST 訂單』在手訂單突破 1.3 億美元 股價勁揚逾 8%（事欣科）」。\n- `https://www.parpro.com.tw/solutions/aerospace-defense/`\n- `![[Space Supply Chain image 1.jpg]]`\n- `![[Space Supply Chain image 2.jpg]]`\n- `![[Space Supply Chain image 3.png]]`\n- `![[Space Supply Chain image 4.png]]`\n- `https://teams.microsoft.com/v2/`\n- `![[Space Supply Chain image 5.png]]`\n- `![[Space Supply Chain image 6.png]]`\n- `![[Space Supply Chain image 7.png]]`\n- `![[Space Supply Chain image 8.png]]`\n- `![[Space Supply Chain image 9.png]]`\n- `![[Space Supply Chain image 10.png]]`",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Space Supply Chain.md"
+              },
+              "score": 1.295595
+             },
+             {
+              "text": "PARPRO › 使用限制\n- 不得由 URL 推論 [[PARPRO]] 已提供太空、衛星、航太、國防或 aerospace & defense 產品。\n- 不得推論其已具備 AS9100、ITAR、NADCAP、NASA、ESA、TASA 或任何其他認證 / 客戶資格。\n- 不得推論其與 [[事欣科]]、[[Satellite Applications Catapult]]、[[AST SpaceMobile]]、[[Rohde & Schwarz]] 或圖片中的任何公司存在供應、合作或投資關係。\n- 若後續擷取該頁正文，需保留頁面日期、版本、產品名稱與可追溯來源。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/PARPRO.md"
+              },
+              "score": 1.192646
+             },
+             {
+              "text": "Randy Schnell › 使用限制\n- 來源未提供 Randy Schnell 的 email、部門正式全名、辦公地點或任職期間。\n- 來源未明示其是否為作者、講者、文件 owner 或 presenter；本頁只記錄封面列名與職稱。\n- 不從本來源推論其對 [[R&S CMX500]]、[[5G.MIL]]、[[Raytheon OXYGEN]] 或其他 program 的正式負責關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Randy Schnell.md"
+              },
+              "score": 0.836337
+             },
+             {
+              "text": "R&S ZNB3020\n[[R&S ZNB3020]] 是 [[R&S ZNB3000]] 系列的 20 GHz Vector Network Analyzer 型號，依 Version 09.00（July 2026）base frequency range 為 9 kHz to 20.0 GHz，搭配 frequency upgrade option 可到 26.5 GHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3020.md"
+              },
+              "score": 4.062488
+             },
+             {
+              "text": "R&S CMX-KM606\n[[R&S CMX-KM606]] 是 [[R&S CMX500]] 的 NR NTN measurements software option；依 [[CMX_Configuration_Guide_NR-NTN]]，它用於 S-band and L-band [[NR-NTN]] RF measurements，且需要 [[R&S CMX-KM600]] 與 [[R&S CMX-KS627B]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KM606.md"
+              },
+              "score": 1.914479
+             },
+             {
+              "text": "經緯航太 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[經緯航太]] 列在台灣無人機產業供應鏈下游，分類為整機製造與應用服務，描述為智慧農業與多用途無人機。\n- [[4. UAV Eco-chain in Taiwan]]（來源未標示正式日期；raw 轉檔 2026-09-17）在 System Integrator 區段列出經緯航太，但未附 URL 或補充文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/經緯航太.md"
+              },
+              "score": 0.642929
+             },
+             {
+              "text": "Market 類資料 › 定義與範圍\n依 [[Market README]]，Market 類資料包含：\n\n- 供應鏈資料\n- 市場新聞\n- 競品動態\n- 客戶導入狀況\n\n依 vault schema，Market 的變動週期是中長期且會變，因此 Market 頁面若沒有日期或期間就是壞的；處理時需連到可追溯來源，例如 [[Market README]] 或其他 Market source page。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Market 類資料.md"
+              },
+              "score": 6.825498
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 使用限制\n- 本頁的 accuracy 數字與 method benefits 來自 2022 application brochure；實際性能需依 DUT、frequency range、bandwidth、SNR、option 與 calibration setup 確認。\n- 本頁不取代 [[R&S FSW]]、[[R&S SMW200A]]、[[R&S ZNA]] 的正式規格書。\n- 來源未提供完整 uncertainty budget、test limits、標準章節或 test case ID。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 2.05088
+             },
+             {
+              "text": "R&S SMW200A › 讀圖頁面\n> 以下段落引用的內容來自這幾頁的圖片。模型讀圖沒有信心分數，請以圖片為準。\n\n**p001**\n\n![[SMW200A_specs_en_3606-8037-22_v3100-p001.png]]\n\n**p001**\n\n![[SMW200A_config-guide_en_3606-8037-92_v0600-p001.png]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 29,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 2.3563
+             },
+             {
+              "text": "5G private network resilience against smart jamming › Mission context 與 industry drivers\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 列出的 mission / market drivers 包含：\n\n- tactical edge connectivity needs；\n- rise of smart jamming and improved [[EW]] tactics；\n- complex RF environment 與 contested spectrum；\n- growing adoption of private 5G networks；\n- autonomous systems and drones requiring low latency；\n- expansion of tactical private 5G networks on military bases；\n- demand for secure command-and-control networks；\n- strategic partnerships，例如來源提到 Nokia + L3Harris in 2024；\n- multi-year contracts，例如來源提到 Northrop Grumman 5G battlefield networking in 2024。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 另稱 United States Department of Defense has recently embarked on a strategy leveraging both public and private 5G networks，並說 5G could become the de-facto communications network between NATO members。此為 white paper statement；來源未附完整 DoD / NATO 文件引用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+              },
+              "score": 1.281171
+             },
+             {
+              "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 2.354196
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing\n[[DO-160 airborne equipment EMC testing]] 是 [[2025RS Drone Solution]] 中引用 [[RTCA DO-160]] 作為 airborne equipment environmental conditions and test procedures 的測試線索，用於 military / aviation drone EMC proposal context。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 2.173939
+             },
+             {
+              "text": "衛星地面設備 › 與既有頁面的關係\n- [[低軌衛星零組件與地面終端供應鏈]] 已整理 2026-09-15 市場報告中的地面設備與用戶終端公司，例如 [[啟碁]]、[[耀登]]、[[鐳洋科技]]、[[稜研科技]]與[[濰元科技]]。\n- [[Satellite User Terminal 外部資料清單]] 保存 [[User Terminal]] 來源中的 OneWeb / Kuiper / Starlink user terminal、test flow 與 supply-chain 待讀材料。\n- [[相控陣列天線]] 是地面終端與電子掃描天線相關的主題；[[User Terminal]] 補入 flat-panel antenna、ESA、phased array OTA testing、active phased array characterization 等待讀連結。\n- [[手機直連衛星供應鏈]] 涉及衛星通訊服務與手機終端，但 [[0.Satcom Industry]] 的「衛星地面設備」數字不可直接套用到手機直連衛星市場。\n- [[Satellite Operation and Control Center]] 是 [[Satellite Ground Station]] 新增的 TASA 外部頁線索，應待外部正文擷取後再判斷其與地面設備、ground station、mission control 或 satellite operations 的關係。\n- [[低軌衛星通信終端設備技術規範與相關檢測]]補入規範 / 檢測視角，連到 [[衛星地球電臺設備技術規範]]、[[低軌衛星終端設備檢測]]與[[電信技術中心]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星地面設備.md"
+              },
+              "score": 3.646841
+             },
+             {
+              "text": "TASA › Satellite Operation and Control Center 待讀線索\n- [[Satellite Ground Station]] 只提供外部連結標題與 URL，未擷取 TASA 頁面正文。\n- 本線索連到 [[Satellite Operation and Control Center]]，可作為後續補強 [[衛星地面設備]]、[[台灣太空產業]] 與 TASA space facilities 資料的入口。\n- 目前不能根據該 link hub 判斷 TASA 地面站的地點、設備、操作衛星、任務範圍、建置年份或技術規格。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/TASA.md"
+              },
+              "score": 4.303038
+             },
+             {
+              "text": "Space Supply Chain › 關鍵實體與概念\n- [[Satellite Applications Catapult]] — 外部連結 `Space Capabilities Catalogue` 的發布 / 網站主體線索；本來源未擷取 catalogue 內容。\n- [[PARPRO]] — 外部連結 `aerospace-defense` solution 的網站主體線索；本來源未擷取正文。\n- [[事欣科]] — Yahoo 股市連結標題括號中的公司名稱；本來源未擷取新聞正文，因此不可用來確認 AST 訂單、在手訂單金額或股價變動。\n- [[Space Supply Chain 外部資料清單]] — 保存本來源中的外部連結、年份標示與未 OCR 圖片索引。\n- [[台灣衛星產業鏈外部資料清單]]、[[台灣太空產業]]、[[低軌衛星零組件與地面終端供應鏈]] — 既有相關主題；本來源目前只提供待讀資料索引，尚不足以更新供應鏈表格或市場數字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Space Supply Chain.md"
+              },
+              "score": 0.949422
+             },
+             {
+              "text": "Randy Schnell › 來源中的列名\n依 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]]（檔名 / raw title 含 2025-12-19；raw converted 2026-09-17）：\n\n- 封面列名：Randy Schnell。\n- 職稱 / 角色列名：Business Development Manager。\n- 組織 / 業務領域列名：Aerospace & Defense Test。\n- 簡報主題為 deployed [[5G]] private networks 在 [[Smart Jamming]] / [[EW]] 環境下的 resilience，以及 legacy [[Frequency hopping for 5G resilience]] 能否在不修改 [[DUT]] 的前提下提升連線韌性。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Randy Schnell.md"
+              },
+              "score": 0.815498
+             },
+             {
+              "text": "R&S ZNB3020 › 文件依據\n- 來源：[[ZNB3000_specs_en_3647-5184-22_v0900]]。\n- 文件：R&S®ZNB3000 Vector Network Analyzer Specifications。\n- 文件編號：PD 3647.5184.22。\n- 文件版本：Version 09.00。\n- 發布時間：July 2026。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3020.md"
+              },
+              "score": 3.291003
+             },
+             {
+              "text": "R&S CMX-KM606 › 在 scenarios 中的角色\n[[CMX_Configuration_Guide_NR-NTN]] 的 scenario quick reference 在下列情境列出 [[R&S CMX-KM606]]：\n\n- NR-NTN S/L callbox（2 cells、Rel. 17、no fading）：與 [[R&S CMX-KS600B]]、[[R&S CMX-KS627B]]、[[R&S CMX-KA100]]、[[R&S CMX-KM600]] 同列。\n- NR-NTN S/L + fading（1 NTN cell）：同上再加 [[R&S CMX-KE611]]。\n- NR-NTN + user-defined fading（CDL/TDL）：同上再加 [[R&S CMX-KE620]]。\n- NR-NTN mobility：與 [[R&S CMX-KS600M]]、[[R&S CMX-KS627M]]、[[R&S CMX-KA100]]、[[R&S CMX-KM600]] 同列。\n- Ku-band NR-NTN n247 與 Ka-band NR-NTN n248：來源仍列 [[R&S CMX-KM600]] / [[R&S CMX-KM606]]，但另有 IF unit / RRH hardware requirement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KM606.md"
+              },
+              "score": 0.162608
+             },
+             {
+              "text": "經緯航太 › 可追溯限制\n- 來源未提供經緯航太的無人機型號、客戶、出貨、認證、營收或得標資料。\n- 來源未標示股票代號；本頁不推補。\n- [[4. UAV Eco-chain in Taiwan]] 僅列名稱，不能推論其具體 System Integrator 產品、服務或供應關係。\n- 本頁不把來源列名改寫為已確認供應、量產或採購關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/經緯航太.md"
+              },
+              "score": 0.557813
+             },
+             {
+              "text": "Market 類資料\n[[Market 類資料]] 是此 vault 中用來保存中長期會變動的供應鏈狀態、市場新聞、競品動態與客戶導入狀況的資料分類。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Market 類資料.md"
+              },
+              "score": 4.552409
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 測量原理\n- [[R&S SMW200A]] 產生 multi-carrier continuous wave signal 作為 stimulus。\n- Multi-carrier stimulus 的 tones 數量與 spacing / aperture 可依 DUT 需求調整。\n- [[R&S FSW]] 的 group delay measurement 分兩步：\n  - Reference calibration：generator 直接連接 analyzer，analyzer 判定 individual carriers 的 reference phase 與 amplitude。\n  - Group delay and gain measurement：連接 DUT，analyzer 由 reference signal 與 DUT output multicarrier signal 的 phase difference 判定 carrier frequency range 的 group delay。\n- 來源列出使用 [[R&S SMW-K61]] 與 [[R&S FSW-K17]] multicarrier group delay measurement application。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 1.997094
+             },
+             {
+              "text": "R&S®ZNB3020 9\nVector network analyzer (VNA) uncertainty model, applicable for R&S®ZNB3-K50 and R&S®ZNB3-K50P real-time\nmeasurement uncertainty analysis options",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-eca8f030d797ca58",
+                "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+                "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+                "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "section": 299,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 24.636926
+             },
+             {
+              "text": "R&S®ZNB3032/ZNB3044 9\nVector network analyzer (VNA) uncertainty model, applicable for R&S®ZNB3-K50 and R&S®ZNB3-K50P real-time\nmeasurement uncertainty analysis options",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-eca8f030d797ca58",
+                "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+                "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+                "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "section": 310,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 24.262303
+             },
+             {
+              "text": "https://www.parpro.com.tw/solutions/aerospace-defense/",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-6ae422456b68416f",
+                "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+                "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 23.758653
+             },
+             {
+              "text": "<!-- Slide number: 1 -->\n# Making Deployed 5G Private Networks more Resilient\nRandy Schnell\nBusiness Development Manager\nAerospace & Defense Test",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ee03d2faf62e9553",
+                "original_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "sha256": "ee03d2faf62e95530401e678c264a927c21cc58e47bb7aadc133b34233fc6940",
+                "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 23.33605
+             }
+            ],
+            "text": "### 推薦先賣\n**寬頻 VNA base capability**：R&S®ZNB3020 是 20 GHz Vector Network Analyzer，base frequency range 為 9 kHz to 20.0 GHz，並可透過 frequency upgrade option 到 26.5 GHz；2-port 與 4-port 版本皆列為 base unit / ordering information [19][5]。\n**2-port / 4-port network analysis**：ZNB3020 有 2-port 與 4-port 型號，兩者皆為 9 kHz to 20 GHz、3.5 mm connector 的 Vector Network Analyzer [5]。\n**real-time measurement uncertainty analysis**：R&S®ZNB3-K50 與 R&S®ZNB3-K50P 是適用於 VNA uncertainty model 的 real-time measurement uncertainty analysis options [37][38]。\n**PCB / interconnect S-parameter-adjacent measurements**：R&S PCB test solutions 來源列出 impedance、DK/DF extraction、insertion loss、roughness、crosstalk、transmission-line modeling、eye diagram、sampling testing、process monitoring，以及 cable / connector testing 等項目 [26]。\n**Aerospace / Defense 場景需求**：A&D test 相關簡報主題包括 deployed 5G private networks 在 smart jamming / EW 環境下的 resilience；mission drivers 包含 tactical edge connectivity、smart jamming、contested spectrum、private 5G、autonomous systems and drones、secure command-and-control networks [31][25]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S®ZNB3-K50 / ZNB3-K50P | Measurement uncertainty / traceability discussion | real-time measurement uncertainty analysis options；適用於 VNA uncertainty model | A&D 測試通常重視可追溯與不確定度；此處可作為 VNA 報告品質與量測信心的賣點 | [37][38] | Wiki 未收錄完整 uncertainty 規格、適用型號限制、校正條件、uncertainty budget |\n| PCB / high-speed digital test solutions | PCB material、stackup、interconnect、cable / connector testing | Impedance、TDR、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram、sampling testing、process monitoring、cable / connector testing | A&D 系統常包含高速 PCB、RF interconnect 與線纜連接器；知識庫已確認這些是 R&S PCB test solutions 的測試流程項目 | [26][12] | 知識庫未標示對應 VNA 型號、S-parameter 檔案格式、fixture / probe station、de-embedding method、頻率上限 |\n| R&S FSW + R&S SMW200A group delay setup | Satellite payload / RF path group delay and gain measurement | SMW200A 產生 multi-carrier continuous wave stimulus；FSW 以 reference calibration 與 DUT output phase difference 判定 group delay；來源列 R&S SMW-K61 與 R&S FSW-K17 | 對 satellite payload，group delay 是重要 RF measurement；雖非 VNA-only，但可作為 A&D / space RF test 的相鄰 capability | [36] | 該頁明示不取代 R&S FSW、SMW200A、ZNA 正式規格書；實際性能需依 DUT、frequency range、bandwidth、SNR、option 與 calibration setup 確認 [23] |\n| R&S CMX500 NR-NTN RF measurement options | Satellite / NTN device RF measurements | R&S CMX-KM606 是 CMX500 的 NR NTN measurements software option，用於 S-band and L-band NR-NTN RF measurements，需 R&S CMX-KM600 與 R&S CMX-KS627B | A&D / space-adjacent 通訊測試可把 VNA 元件量測與 NTN RF conformance / callbox 類測試分開銷售 | [20][6] | 這不是 S-parameter / VNA option；不可把它改寫成 network analyzer capability |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| PCB fabricator / system house for A&D electronics | PCB test solutions + VNA platform | Material measurement、stackup selection、signal integrity modeling/testing、sampling testing、process monitoring 是已列出的流程 | 知識庫未標示正式 A&D customer fit、認證需求、量測頻寬或自動化方案 [26][12] |\n### 最重要能力排序\n**Frequency coverage**：至少以 ZNB3020 已確認的 9 kHz to 20 GHz 為基礎，必要時評估 frequency upgrade option 到 26.5 GHz [19]。\n**Port count**：2-port 與 4-port VNA 版本都重要，因為知識庫確認 ZNB3020 同時提供 2-port 與 4-port base units [5]。\n**Measurement uncertainty**：real-time measurement uncertainty analysis 是 A&D 報告與驗證討論的重要能力，知識庫確認 R&S®ZNB3-K50 / K50P 對應 VNA uncertainty model [37][38]。\n**Insertion loss / impedance / crosstalk / material extraction**：PCB 與 interconnect 測試中已列出 IL、impedance、Xtalk、DK/DF、roughness、TL modeling、eye diagram、cable / connector testing [26]。\n**Calibration / reference-based measurement thinking**：satellite payload group delay 來源明確描述 reference calibration 與 DUT measurement 兩步法，雖然該例使用 FSW / SMW200A 而不是 VNA [36]。\n【推論】對 satellite / NTN 類 A&D 應用，VNA 應定位在 RF path / component characterization，而 group delay 與 NR-NTN RF measurements 需分別用 FSW/SMW200A 與 CMX500 options 補齊，不能全部宣稱為 VNA capability。[36][20][23]",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "R&S ZNB3020 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3020 2-port | Vector network analyzer，2-port，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.22 |\n| R&S®ZNB3020 4-port | Vector network analyzer，4-port，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.24 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNB3020.md"
+             },
+             "score": 4.290212
+            },
+            {
+             "text": "R&S CMX-KM606 › 來源中的描述\n[[CMX_Configuration_Guide_NR-NTN]] 將 [[R&S CMX-KM606]] 列於 NR-NTN software 區段：\n\n- Type：SW。\n- Description：NR NTN measurements — S-band and L-band NR-NTN RF measurements。\n- Mandatory：Conditional。\n- Conditions：Mandatory for S/L-band NR-NTN callbox with RF measurements。\n- Dependency：Requires [[R&S CMX-KM600]]。\n- Error rule：Hard error if quoted without [[R&S CMX-KS627B]]。\n- Not used for [[NB-NTN]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KM606.md"
+             },
+             "score": 1.954294
+            },
+            {
+             "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 3.606005
+            },
+            {
+             "text": "R&S ZNB3020\n[[R&S ZNB3020]] 是 [[R&S ZNB3000]] 系列的 20 GHz Vector Network Analyzer 型號，依 Version 09.00（July 2026）base frequency range 為 9 kHz to 20.0 GHz，搭配 frequency upgrade option 可到 26.5 GHz。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNB3020.md"
+             },
+             "score": 4.062488
+            },
+            {
+             "text": "R&S CMX-KM606\n[[R&S CMX-KM606]] 是 [[R&S CMX500]] 的 NR NTN measurements software option；依 [[CMX_Configuration_Guide_NR-NTN]]，它用於 S-band and L-band [[NR-NTN]] RF measurements，且需要 [[R&S CMX-KM600]] 與 [[R&S CMX-KS627B]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KM606.md"
+             },
+             "score": 1.914479
+            },
+            {
+             "text": "衛星酬載群延遲量測 › 使用限制\n- 本頁的 accuracy 數字與 method benefits 來自 2022 application brochure；實際性能需依 DUT、frequency range、bandwidth、SNR、option 與 calibration setup 確認。\n- 本頁不取代 [[R&S FSW]]、[[R&S SMW200A]]、[[R&S ZNA]] 的正式規格書。\n- 來源未提供完整 uncertainty budget、test limits、標準章節或 test case ID。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+             },
+             "score": 2.05088
+            },
+            {
+             "text": "5G private network resilience against smart jamming › Mission context 與 industry drivers\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 列出的 mission / market drivers 包含：\n\n- tactical edge connectivity needs；\n- rise of smart jamming and improved [[EW]] tactics；\n- complex RF environment 與 contested spectrum；\n- growing adoption of private 5G networks；\n- autonomous systems and drones requiring low latency；\n- expansion of tactical private 5G networks on military bases；\n- demand for secure command-and-control networks；\n- strategic partnerships，例如來源提到 Nokia + L3Harris in 2024；\n- multi-year contracts，例如來源提到 Northrop Grumman 5G battlefield networking in 2024。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 另稱 United States Department of Defense has recently embarked on a strategy leveraging both public and private 5G networks，並說 5G could become the de-facto communications network between NATO members。此為 white paper statement；來源未附完整 DoD / NATO 文件引用。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+             },
+             "score": 1.281171
+            },
+            {
+             "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 2.354196
+            },
+            {
+             "text": "Randy Schnell › 來源中的列名\n依 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]]（檔名 / raw title 含 2025-12-19；raw converted 2026-09-17）：\n\n- 封面列名：Randy Schnell。\n- 職稱 / 角色列名：Business Development Manager。\n- 組織 / 業務領域列名：Aerospace & Defense Test。\n- 簡報主題為 deployed [[5G]] private networks 在 [[Smart Jamming]] / [[EW]] 環境下的 resilience，以及 legacy [[Frequency hopping for 5G resilience]] 能否在不修改 [[DUT]] 的前提下提升連線韌性。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Randy Schnell.md"
+             },
+             "score": 0.815498
+            },
+            {
+             "text": "衛星酬載群延遲量測 › 測量原理\n- [[R&S SMW200A]] 產生 multi-carrier continuous wave signal 作為 stimulus。\n- Multi-carrier stimulus 的 tones 數量與 spacing / aperture 可依 DUT 需求調整。\n- [[R&S FSW]] 的 group delay measurement 分兩步：\n  - Reference calibration：generator 直接連接 analyzer，analyzer 判定 individual carriers 的 reference phase 與 amplitude。\n  - Group delay and gain measurement：連接 DUT，analyzer 由 reference signal 與 DUT output multicarrier signal 的 phase difference 判定 carrier frequency range 的 group delay。\n- 來源列出使用 [[R&S SMW-K61]] 與 [[R&S FSW-K17]] multicarrier group delay measurement application。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+             },
+             "score": 1.997094
+            },
+            {
+             "text": "R&S®ZNB3020 9\nVector network analyzer (VNA) uncertainty model, applicable for R&S®ZNB3-K50 and R&S®ZNB3-K50P real-time\nmeasurement uncertainty analysis options",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-eca8f030d797ca58",
+               "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+               "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "section": 299,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.636926
+            },
+            {
+             "text": "R&S®ZNB3032/ZNB3044 9\nVector network analyzer (VNA) uncertainty model, applicable for R&S®ZNB3-K50 and R&S®ZNB3-K50P real-time\nmeasurement uncertainty analysis options",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-eca8f030d797ca58",
+               "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+               "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+              "section": 310,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 24.262303
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/entities/R&S ZNB3020.md",
+             "raw_refs": [
+              "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX-KM606.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX_Configuration_Guide_NR-NTN.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/R&S PCB test solutions.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md",
+             "raw_refs": [
+              "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md",
+             "raw_refs": [
+              "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+              "raw/Market/OneNote/5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/Randy Schnell.md",
+             "raw_refs": [
+              "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

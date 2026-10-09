@@ -1,0 +1,71 @@
+{
+ "id": "Q0351",
+ "grader": "1.2",
+ "coverage": 0.062,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault assigns R&S ZNA to component-level satellite payload testing covering converters, mixers, amplifiers, filters, antennas, noise figure, group delay and phase measurements",
+   "verified": true,
+   "label": "partial",
+   "why": "vaguely mentions satellite/RF path component characterization, but not ZNA or the listed device types/measurements"
+  },
+  {
+   "n": 2,
+   "point": "Group delay measurement on frequency converters without LO access (two-tone technique) is a key VNA capability for satellite transponder/converter chains",
+   "verified": true,
+   "label": "contradicted",
+   "why": "treats group delay as FSW/SMW200A, not the ZNA two-tone VNA capability without LO access"
+  },
+  {
+   "n": 3,
+   "point": "ZNA supports true parallel and coherent data acquisition for antenna array / antenna test systems from 100 kHz",
+   "verified": true,
+   "label": "missing",
+   "why": "no true parallel/coherent antenna array acquisition from 100 kHz"
+  },
+  {
+   "n": 4,
+   "point": "High dynamic range is a stated ZNA key performance figure: >129 dB spec, 147 dB typical with options, up to 170 dB with full 2-port correction",
+   "verified": true,
+   "label": "missing",
+   "why": "no ZNA dynamic range figures"
+  },
+  {
+   "n": 5,
+   "point": "mmWave converter support via rear-panel LO out extends S-parameter coverage without an external signal generator",
+   "verified": true,
+   "label": "missing",
+   "why": "no rear-panel LO/mmWave converter support"
+  },
+  {
+   "n": 6,
+   "point": "Pulsed-signal S-parameter measurement exists as option R&S ZNA-K7 (requires ZNA-K17 plus pulse modulator)",
+   "verified": true,
+   "label": "missing",
+   "why": "no ZNA-K7 pulsed S-parameter option or requirements"
+  },
+  {
+   "n": 7,
+   "point": "In the satellite supply-chain solution mapping, ZNA / ZNB3000 are the instruments listed for antenna makers' G/T work",
+   "verified": true,
+   "label": "missing",
+   "why": "no satellite antenna makers' G/T mapping to ZNA/ZNB3000"
+  },
+  {
+   "n": 8,
+   "point": "For UAV antennas the Vault maps ZNB3000 to high isolation measurement and OTA passive testing",
+   "verified": true,
+   "label": "missing",
+   "why": "no UAV antenna ZNB3000 high-isolation or OTA passive testing"
+  }
+ ],
+ "contradicted": 1,
+ "invented": [
+  "Aerospace / Defense 場景需求",
+  "smart jamming / EW 環境下的 resilience",
+  "### 最重要能力排序",
+  "Frequency coverage：至少以 ZNB3020 已確認的 9 kHz to 20 GHz 為基礎",
+  "Measurement uncertainty 是 A&D 報告與驗證討論的重要能力"
+ ]
+}

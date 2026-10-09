@@ -1,0 +1,71 @@
+{
+ "id": "Q0401",
+ "grader": "1.2",
+ "coverage": 0.5,
+ "points": [
+  {
+   "n": 1,
+   "point": "The documented automotive use of the CMX500 signaling tester is functional tests, protocol conformity tests and type-approval of In-Vehicle Systems implementing hybrid eCall and NG eCall",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions NG/hybrid eCall compliance on CMX500, but not functional tests, protocol conformity tests, type-approval, or IVS explicitly"
+  },
+  {
+   "n": 2,
+   "point": "Core validation items for a vehicle eCall implementation are call triggering, MSD transmission, GNSS positioning and intelligible voice quality across VoNR, VoLTE and circuit-switched fallback",
+   "verified": true,
+   "label": "partial",
+   "why": "states call triggering, MSD, GNSS and voice quality, but not VoNR/VoLTE/CS fallback coverage"
+  },
+  {
+   "n": 3,
+   "point": "Signaling tests must also prove robustness during handovers and under degraded radio conditions, which the test environment provides by simulating real-world mobile network conditions and emulating various network scenarios",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions realistic/degraded conditions and fallback, but not handovers or various network scenarios clearly"
+  },
+  {
+   "n": 4,
+   "point": "PSAP emulation with voice and data transmission on both 4G and 5G is the capability used to validate NG eCall compliance with EN 17240:2024 (CMX500 mobile radio tester, CMX-KA098 option)",
+   "verified": true,
+   "label": "covered",
+   "why": "PSAP simulation, voice/data, 4G/5G NG eCall, EN 17240:2024 and CMX-KA098 are stated"
+  },
+  {
+   "n": 5,
+   "point": "The NGeCall capability lists name the required signaling procedures: eCall-only mode, timers T3444/T3445 and SRVCC handover to the CS domain / UTRAN / GERAN, alongside IMS eCall session establishment, MSD transfer/update and PSAP callback",
+   "verified": true,
+   "label": "partial",
+   "why": "only MSD/PSAP-related aspects appear; eCall-only mode, T3444/T3445, SRVCC, IMS session and callback are omitted"
+  },
+  {
+   "n": 6,
+   "point": "Audio-path capability is part of the configuration: CMX audio enabler (codecs), external media endpoint audio (CMX-ZG180) and CMX-KA401 for TS17240 in-band modem over IP tests",
+   "verified": true,
+   "label": "partial",
+   "why": "audio capability is mentioned generally, but CMX audio enabler, CMX-ZG180 and CMX-KA401 are not specified"
+  },
+  {
+   "n": 7,
+   "point": "GNSS receiver/performance testing for eCall modules is a separate capability provided by the R&S SMBV100B with the SMBV-K361 eCall test suite",
+   "verified": true,
+   "label": "partial",
+   "why": "GNSS validation is mentioned, but not the separate SMBV100B with SMBV-K361 capability"
+  },
+  {
+   "n": 8,
+   "point": "Vault records that not all eCall signaling test cases can be automated by the test software alone — HMI interaction, ignition OFF control, AT commands, prepared test USIM, crash simulation or in-band modem over IP support may be needed",
+   "verified": true,
+   "label": "missing",
+   "why": "does not state automation limits or required HMI, ignition, AT commands, USIM, crash simulation or in-band modem support"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "extend to LTE/5G/WLAN signaling, OTA, throughput",
+  "OTA signaling is important where the device or module must be validated through an antenna system",
+  "Automotive connectivity module RF/signaling regression",
+  "WLAN-heavy infotainment or connectivity designs",
+  "OTA validation of multi-radio modules"
+ ]
+}

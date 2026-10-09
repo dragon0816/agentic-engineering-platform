@@ -1572,5 +1572,10 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   key-point coverage). Trial: Q0011, Q1001, 8/8 quotes verified each. Grader
   1.2 reads the tool route's host-validated answer; the Gateway keeps its
   cited passages (a18421a, 875d3e3).
-- [ ] knowledge_v1 reference answers for the other 34 core questions: wait for
-  the owner after a fresh Q0011/Q1001 run on the restarted Agent Web.
+- [x] knowledge_v1 reference answers for all 36 core questions (667088f);
+  core-001 compared against them (3c7ff81).
+- [x] Bilingual retrieval for wiki-primary Knowledge, Skill 1.7.0 (f729827):
+  reference-file recall 0.12 -> 0.26; core-002 on the 22 answerable
+  questions PASS 13 -> 16, false insufficient 6 -> 0, FAIL 3 -> 6.
+- [ ] Knowledge answer overreach after bilingual retrieval: owner to choose
+  Skill guidance or multi-round retrieval (see runs/core-002/review.zh-TW.md).
