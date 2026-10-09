@@ -7,6 +7,7 @@ Bridge outcome and revalidates Raw citations; it grants no new capability.
 from collections.abc import Callable
 from typing import Any
 
+import telemetry.recorder as telemetry
 from agent.harness_run import HarnessCheckResult
 from agent.harness_runner import HarnessActionFailure
 from knowledge.evidence import (
@@ -30,8 +31,15 @@ class KnowledgeBridgeActions:
         relation_required: bool = False,
         required_subject: str | None = None,
         procedure: KnowledgeProcedure | None = None,
+        broadened: Callable[[int], dict[str, Any]] | None = None,
+        retry_budget: int = 0,
     ) -> None:
         self.invoke = invoke
+        # A retry asks again with wider retrieval (harness unification U5);
+        # the plan's budget, from the Knowledge Skill, bounds every attempt.
+        self.broadened = broadened
+        self.retry_budget = retry_budget
+        self.attempt = 0
         self.required_evidence = required_evidence
         self.required_facets = required_facets
         self.relation_required = relation_required
@@ -44,8 +52,21 @@ class KnowledgeBridgeActions:
         # by the authorized Bridge capability invoked in execute().
         return "knowledge_asset_selected"
 
+    def _ask(self) -> dict[str, Any]:
+        attempt, self.attempt = self.attempt, self.attempt + 1
+        if attempt and self.broadened is not None:
+            return self.broadened(attempt)
+        return self.invoke()
+
     def execute(self) -> str:
-        self.result = self.invoke()
+        self.result = self._ask()
+        code = self._code(self.result)
+        if (not self.result["ok"] and self.broadened is not None
+                and code in {"knowledge_insufficient_evidence", "knowledge_not_grounded"}
+                and self.attempt - 1 < self.retry_budget):
+            telemetry.emit("retry.scheduled", state="executing", attributes={
+                "retry_reason": code, "loop_index": self.attempt})
+            self.result = self._ask()
         if not self.result["ok"]:
             outcome = self.result.get("outcome") or {}
             capability = outcome.get("capability") or {}
@@ -223,3 +244,9 @@ class KnowledgeBridgeActions:
                 "supported" if self._claims_supported(checked) else "unverified"
             ),
         }
+
+    @staticmethod
+    def _code(result: dict[str, Any]) -> str:
+        outcome = result.get("outcome") or {}
+        failure = (outcome.get("capability") or {}).get("failure") or {}
+        return str(failure.get("code") or "")

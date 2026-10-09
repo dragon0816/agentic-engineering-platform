@@ -365,6 +365,9 @@ class Gateway:
         # Task folders whose files an answer may name; the Host checks they
         # exist (harness unification U4).
         self._workspace_roots = workspace_roots
+        # The Knowledge Harness the tool route runs (harness unification U5):
+        # (question, vault asset) -> the Harness result. Set by the host.
+        self.knowledge_harness: Callable[[str, AssetIdentity], dict[str, Any]] | None = None
 
     def _vault_tools(
         self,
@@ -699,6 +702,15 @@ class Gateway:
                     continue
                 item = await self._telemetered_tool(context, call, turn, host, bindings, bound)
                 evidence.append(item)
+                harnessed = (item.host.data if item.host is not None
+                             and isinstance(item.host.data, dict) else {})
+                if harnessed.get("knowledge_harness") == "validated":
+                    # The validated Knowledge answer is the turn's answer; the
+                    # model does not rewrite it (owner 2026-10-09, option a).
+                    return GatewayConversationResult(
+                        trace=context.trace, status="answered",
+                        text=str(harnessed.get("answer") or ""), model_turns=turn,
+                        tools=tuple(evidence))
                 observation = json.dumps(item.model_dump(mode="json"), ensure_ascii=False)
                 if len(observation) > MAX_TOOL_OBSERVATION_CHARS:
                     observation = json.dumps(
@@ -786,6 +798,31 @@ class Gateway:
             target=binding.target,
             reason="Model selected an installed conversation tool",
         )
+        if binding.kind == "capability" and bound is not None and \
+                self.knowledge_harness is not None and isinstance(bound.get("asset"), dict):
+            # The tool route runs the same Knowledge Harness as the direct
+            # route; its answer is validated by Host checks (owner 2026-10-09).
+            question = str(call.arguments.get("question") or "")
+            asset = AssetIdentity.model_validate(bound["asset"])
+            answer = await asyncio.to_thread(self.knowledge_harness, question, asset)
+            validated = bool(answer.get("ok"))
+            return ConversationToolExecution(
+                call_id=call.call_id, name=call.name,
+                host=HostToolOutcome(
+                    status="succeeded" if validated else "failed",
+                    data={"knowledge_harness": "validated" if validated else "not_validated",
+                          "answer": str(answer.get("answer") or "")[:12000],
+                          "evidence": answer.get("evidence"),
+                          "instruction": (
+                              "This answer passed the Host's evidence checks and is shown to "
+                              "the person as it is." if validated else
+                              "The knowledge base did not validate an answer. Tell the "
+                              "person what is above; anything you add is not from the "
+                              "knowledge base and must say so.")},
+                    failure=None if validated else Failure(
+                        code="knowledge_not_validated",
+                        message="The Knowledge Harness did not validate an answer")),
+            )
         if binding.kind == "capability":
             invocation_arguments = dict(call.arguments)
             if bound is not None:

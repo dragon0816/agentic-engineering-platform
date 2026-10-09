@@ -1761,4 +1761,8 @@ def build_runtime(
         raise
     runtime = HostRuntime(checked, place, agent, state, telegram, platform, chat_authoring)
     runtime.mcp = mcp
+    # The Knowledge tool route runs the shared Knowledge Harness (unification U5).
+    from host_runtime.knowledge_harness import KnowledgeHarness
+
+    gateway.knowledge_harness = KnowledgeHarness(runtime, checked.namespace).for_tool
     return runtime

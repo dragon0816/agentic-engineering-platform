@@ -70,10 +70,41 @@ def knowledge_source_lines(record: dict[str, Any]) -> list[str]:
     return lines
 
 
+def harness_skill(skills: Any) -> Any:
+    """The installed Knowledge Skill the Harness plans with: published or
+    validated, Knowledge harness guidance, and the exact query command."""
+    for manifest in skills.manifests():
+        guidance = manifest.harness_guidance
+        if (manifest.metadata.lifecycle in {"validated", "published"}
+                and guidance is not None and "knowledge" in guidance.domains
+                and any(command.kind == "capability"
+                        and command.target == KNOWLEDGE_QUERY_SPEC.identity
+                        for command in manifest.commands)):
+            return manifest.metadata.identity
+    return None
+
+
+def broaden(procedure: KnowledgeProcedure, attempt: int) -> KnowledgeProcedure:
+    """Wider retrieval for a retry: every facet query, more passages per
+    facet, more Wiki index hits. The Skill's rules and policy are unchanged."""
+    return procedure.model_copy(update={
+        "facets": tuple(facet.model_copy(update={
+            "collect_all_queries": True,
+            "max_passages": min(6, facet.max_passages + 2 * attempt)})
+            for facet in procedure.facets),
+        "wiki_index_hits": min(32, procedure.wiki_index_hits * 2 ** attempt),
+    })
+
+
 class KnowledgeHarness:
     def __init__(self, runtime: Any, namespace: str | None) -> None:
         self.runtime = runtime
         self.namespace = namespace
+
+    def for_tool(self, question: str, asset: Any) -> dict[str, Any]:
+        """The conversation tool route: the same Harness as the direct route."""
+        skill = harness_skill(self.runtime.agent.gateway.router.commands.skills)
+        return self.ask(KnowledgeAskRequest(asset=asset, question=question, skill=skill))
 
     def ask(self, request: KnowledgeAskRequest) -> dict[str, Any]:
         item = KnowledgeAskRequest.model_validate(request)
@@ -157,7 +188,9 @@ class KnowledgeHarness:
                     if required_facets else ()
                 ),
             ),
-            constraints=TaskExecutionConstraints(max_retries=0),
+            # The Knowledge Skill decides how many retries (U5), up to the cap.
+            constraints=TaskExecutionConstraints(
+                max_retries=min(3, skill.harness_guidance.max_retries)),
         )
         plan = plan_task(task, skill, "knowledge")
         actions = KnowledgeBridgeActions(
@@ -167,6 +200,10 @@ class KnowledgeHarness:
             relation_required=relation_required,
             required_subject=procedure.subject(item.question) if procedure else None,
             procedure=procedure,
+            broadened=None if procedure is None else (
+                lambda attempt: self._ask_knowledge_bridge(
+                    item, trace, procedure=broaden(procedure, attempt))),
+            retry_budget=plan.retry_budget,
         )
         run = run_harness(plan, actions)
         base = actions.result or {
