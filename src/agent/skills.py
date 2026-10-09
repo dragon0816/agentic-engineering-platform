@@ -41,13 +41,13 @@ class KeywordRule(Contract):
         return value
 
 
-HarnessDomain = Literal["workflow", "knowledge", "coding"]
+HarnessDomain = Literal["workflow", "knowledge", "coding", "conversation"]
 
 
 class SkillHarnessGuidance(Contract):
     """Procedural hints; never an execution grant or host validation override."""
 
-    domains: tuple[HarnessDomain, ...] = Field(min_length=1, max_length=3)
+    domains: tuple[HarnessDomain, ...] = Field(min_length=1, max_length=4)
     required_evidence: tuple[Symbol, ...] = Field(default=(), max_length=20)
     context_required: bool = False
     fallback: Literal["needs_input", "stop", "retry"] = "needs_input"

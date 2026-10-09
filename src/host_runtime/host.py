@@ -1010,6 +1010,7 @@ def build_gateway(
         accelerator_excluded_aliases=frozenset({coding_skill().alias}),
         workspace_note=workspace_note(
             () if config.coding is None else tuple(config.coding.workspace_roots)),
+        workspace_roots=() if config.coding is None else tuple(config.coding.workspace_roots),
     )
 
 

@@ -22,6 +22,7 @@ from agent.backend_contracts import (
     MAX_CONVERSATION_TOOL_CALLS,
     MAX_CONVERSATION_TURNS,
 )
+from agent.conversation_harness import checked_turn
 from agent.decisions import (
     DecisionProvider,
     DecisionResult,
@@ -320,6 +321,7 @@ class Gateway:
         accelerator_excluded_aliases: frozenset[str] = frozenset(),
         host_tools: Callable[[], Sequence[HostTool]] | None = None,
         workspace_note: str = "",
+        workspace_roots: tuple[str, ...] = (),
     ):
         # Host-owned conversation tools (G4 authoring); the host may set it after
         # construction, once the services behind the tools exist.
@@ -360,6 +362,9 @@ class Gateway:
         # Which folders task work may use (the host's coding roots), so the
         # model never proposes one the Bridge will refuse (owner 2026-10-08).
         self._workspace_note = workspace_note
+        # Task folders whose files an answer may name; the Host checks they
+        # exist (harness unification U4).
+        self._workspace_roots = workspace_roots
 
     def _vault_tools(
         self,
@@ -414,11 +419,19 @@ class Gateway:
         opened = telemetry.run("conversation_turn", trace_id=request.trace.trace_id) \
             if telemetry.current_run() is None else nullcontext()
         with opened:
-            result = await self._converse(
-                request, history, persona_guidance=persona_guidance,
-                allowed_tools=allowed_tools, max_turns=max_turns,
-                max_history_messages=max_history_messages,
-            )
+            async def turn(messages: tuple[ModelMessage, ...]) -> GatewayConversationResult:
+                return await self._converse(
+                    request, messages, persona_guidance=persona_guidance,
+                    allowed_tools=allowed_tools, max_turns=max_turns,
+                    max_history_messages=max_history_messages,
+                )
+
+            # The tool loop executes; the Host checks the answer against the
+            # turn's real tool results and files (harness unification U4).
+            result: GatewayConversationResult = await checked_turn(
+                turn, history, self._workspace_roots,
+                lambda role, text: ModelMessage(role=role, text=text),
+                request.trace.request_id)
             telemetry.set_run(
                 outcome=result.status, model_turns=result.model_turns,
                 status="failed" if result.status == "failed" else "succeeded",
