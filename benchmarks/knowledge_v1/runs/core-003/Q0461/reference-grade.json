@@ -1,0 +1,65 @@
+{
+ "id": "Q0461",
+ "grader": "1.2",
+ "coverage": 0.188,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's automotive radar anchor product is the R&S AREG800A Automotive Radar Echo Generator, used for dynamic artificial object generation (echo generation toward the radar under test).",
+   "verified": true,
+   "label": "covered",
+   "why": "Names AREG800A and dynamic echo/artificial object generation"
+  },
+  {
+   "n": 2,
+   "point": "An oscilloscope is connected to the AREG800A's auxiliary receive-signal IF output at the base unit for optional signal analysis (alternative to a spectrum analyzer).",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Says scope is only unverified auxiliary debug, not documented AUX IF output connection"
+  },
+  {
+   "n": 3,
+   "point": "This auxiliary IF output path requires the R&S AREG8-K740 option (Analog IF output interfaces).",
+   "verified": true,
+   "label": "missing",
+   "why": "No AREG8-K740 option mentioned"
+  },
+  {
+   "n": 4,
+   "point": "The documented purpose of the AUX IF output port is radar signal analysis and EIRP measurements.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Does not recognize documented AUX IF purpose; calls scope role unverified"
+  },
+  {
+   "n": 5,
+   "point": "Level/gain limits at the tap point: the AUX IF output measurement port is max. 0 dBm with 0 dB (nom.) gain from RX IF input to AUX IF output at the base unit.",
+   "verified": true,
+   "label": "missing",
+   "why": "No max 0 dBm or 0 dB nominal gain limits"
+  },
+  {
+   "n": 6,
+   "point": "The scope only has to cover the IF band, whose range depends on frontend/option (e.g. 0.7 GHz to 4.7 GHz with AREG8-K740 at the 77/79 GHz frontends).",
+   "verified": true,
+   "label": "missing",
+   "why": "No IF-band scope requirement or frequency ranges"
+  },
+  {
+   "n": 7,
+   "point": "Power and EIRP measurement at the frontend RX power connector is a separate path that uses a power sensor, not an oscilloscope.",
+   "verified": true,
+   "label": "missing",
+   "why": "No separate power-sensor path at frontend RX power connector"
+  },
+  {
+   "n": 8,
+   "point": "Other workflow-level interfaces documented for the AREG800A include a dedicated hardware-in-the-loop control interface (AREG8-K109).",
+   "verified": true,
+   "label": "partial",
+   "why": "Mentions hardware-in-the-loop generally, not AREG8-K109 control interface"
+  }
+ ],
+ "contradicted": 2,
+ "invented": []
+}

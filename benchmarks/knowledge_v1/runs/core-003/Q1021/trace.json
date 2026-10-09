@@ -1,0 +1,127 @@
+{
+ "question": {
+  "id": "Q1021",
+  "text": "What is OFDM, and which product-related measurement decisions depend on understanding it?",
+  "technical": "Wireless Fundamentals",
+  "topic": "OFDM",
+  "product_related": "true"
+ },
+ "session_id": "conversation-82586fcf6a454bceb981c192c18eb0f5",
+ "exchange": {
+  "sent": "What is OFDM, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 192.578,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-82586fcf6a454bceb981c192c18eb0f5",
+    "actor": "leo.chi",
+    "title": "What is OFDM, and which product-related measurement decisions depend on …",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T20:07:12.851630Z",
+    "updated_at": "2026-10-09T20:10:25.298149Z",
+    "messages": [
+     {
+      "message_id": "message-96cf50b16d684709a122ba7024220de0",
+      "role": "user",
+      "text": "What is OFDM, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-09T20:07:12.896879Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-2532f963e8b446429cfddec5c6863e37",
+      "role": "assistant",
+      "text": "The knowledge base gave no answer: it did not produce validated Raw evidence for the requested product/option/spec facets, so I can’t cite the RS vault for this answer.\n\nFrom general RF/wireless knowledge, not from the knowledge base:\n\n## What is OFDM?\n\n**OFDM — Orthogonal Frequency Division Multiplexing** — is a modulation method that splits a high-rate data stream across many closely spaced, mutually orthogonal subcarriers.\n\nInstead of sending all data on one wideband carrier, OFDM sends many lower-rate streams in parallel. Because the subcarriers are mathematically orthogonal, they can overlap in frequency without ideally interfering with one another.\n\nIt is widely used in systems such as:\n\n- **LTE**\n- **5G NR**\n- **Wi‑Fi / Wi‑Fi 6 / Wi‑Fi 7**\n- **DVB-T / digital broadcasting**\n- Some radar and wideband communication systems\n\nKey OFDM concepts include:\n\n- **Subcarrier spacing**\n- **FFT size**\n- **Cyclic prefix / guard interval**\n- **Resource blocks or resource units**\n- **Pilot/reference signals**\n- **PAPR — peak-to-average power ratio**\n- **EVM — error vector magnitude**\n- **Phase noise sensitivity**\n- **Frequency offset and timing synchronization**\n\n## Product-related measurement decisions that depend on understanding OFDM\n\nUnderstanding OFDM affects several measurement and product-selection decisions:\n\n### 1. Signal generator choice and options\n\nIf you need to generate LTE, 5G NR, Wi‑Fi, DVB-T, or custom OFDM signals, you must choose a generator that supports:\n\n- The required standard waveform\n- Correct bandwidth\n- Subcarrier spacing\n- Modulation formats, e.g. QPSK, 16QAM, 64QAM, 256QAM, 1024QAM\n- MIMO or multi-channel generation if needed\n- Low enough EVM and phase noise for the test target\n\nFor example, an OFDM-based 5G or Wi‑Fi test generally needs a vector signal generator, not a simple CW RF source.\n\n### 2. Signal analyzer bandwidth\n\nOFDM signals can occupy wide bandwidths. The analyzer must have enough **analysis bandwidth** to capture the full channel.\n\nExamples:\n\n- LTE: up to 20 MHz per carrier\n- 5G NR FR1: often 100 MHz-class channels\n- 5G NR FR2: hundreds of MHz\n- Wi‑Fi 6/7: 80, 160, or 320 MHz channels\n\nIf the analyzer bandwidth is too narrow, EVM, spectrum, ACLR, and demodulation results will be invalid or incomplete.\n\n### 3. EVM performance requirements\n\nOFDM systems are often judged by **EVM**. Higher-order modulation, such as 256QAM or 1024QAM, requires much better EVM performance.\n\nThis affects decisions such as:\n\n- Which signal analyzer model is accurate enough\n- Which generator has low enough residual EVM\n- Whether external reference clocks are needed\n- Whether phase noise performance is sufficient\n- Whether preamplifiers, attenuators, or calibration are required\n\n### 4. Phase noise and frequency accuracy\n\nOFDM is sensitive to oscillator impairments. Poor phase noise or frequency error can cause:\n\n- Common phase error\n- Inter-carrier interference\n- Degraded EVM\n- Failed demodulation\n\nSo understanding OFDM helps decide whether the product needs:\n\n- Better phase noise performance\n- High-stability frequency reference\n- External 10 MHz reference\n- Specialized phase noise measurement capability\n\n### 5. Power amplifier testing\n\nOFDM has high **PAPR**, meaning the signal has large peaks compared with its average power.\n\nThis affects PA and transmitter tests:\n\n- Output backoff requirements\n- Compression behavior\n- ACLR / adjacent channel leakage\n- EVM under load\n- Crest factor handling\n- Digital predistortion testing\n\nA product used for PA testing must support realistic OFDM waveform generation and accurate wideband analysis.\n\n### 6. Spectrum emission and ACLR measurements\n\nBecause OFDM signals occupy structured channel bandwidths, measurements such as:\n\n- Occupied bandwidth\n- Spectrum mask\n- ACLR / ACPR\n- Spurious emissions\n\ndepend on knowing the OFDM channel bandwidth, numerology, and allocation.\n\n### 7. Demodulation software or measurement application selection\n\nA general spectrum analyzer may show the spectrum, but OFDM quality measurements usually require standard-specific demodulation applications, such as for:\n\n- 5G NR\n- LTE\n- WLAN\n- DVB\n- Custom OFDM\n\nSo the decision is not only “which analyzer,” but also “which measurement personality or software option.”\n\n### 8. MIMO and multi-channel testing\n\nMany OFDM systems use MIMO. Product decisions may depend on:\n\n- Number of RF channels\n- Phase-coherent generation\n- Phase-coherent analysis\n- Multi-port synchronization\n- Channel emulation\n- OTA testing support\n\nThis matters for 5G, Wi‑Fi, and antenna/module testing.\n\n### 9. Time-domain capture and synchronization\n\nOFDM demodulation depends on correct timing, cyclic prefix detection, and symbol alignment. That affects whether the instrument needs:\n\n- Real-time capture memory\n- Triggering capability\n- Burst analysis\n- Time-gated measurements\n- Synchronization with DUT control or protocol events\n\n### 10. Vector network analyzer vs. signal analyzer decision\n\nIf the task is passive RF characterization — S-parameters, matching, filter response — a VNA may be appropriate.\n\nIf the task involves OFDM modulation quality — EVM, constellation, subcarrier analysis, ACLR, demodulation — a signal analyzer and vector signal generator are usually needed.\n\n## In short\n\nOFDM is the modulation foundation behind many modern wireless standards. Understanding it determines product and measurement choices around:\n\n- Generator waveform capability\n- Analyzer bandwidth\n- EVM accuracy\n- Phase noise performance\n- Standard-specific demodulation options\n- PA linearity and PAPR handling\n- ACLR and spectrum mask setup\n- MIMO/channel synchronization\n- OTA and wideband test architecture",
+      "created_at": "2026-10-09T20:10:25.298149Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-58405633150243219391fd6d7bc812da",
+       "request_id": "request-58405633150243219391fd6d7bc812da",
+       "span_id": "span-58405633150243219391fd6d7bc812da",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+    "ok": true,
+    "answer": "The knowledge base gave no answer: it did not produce validated Raw evidence for the requested product/option/spec facets, so I can’t cite the RS vault for this answer.\n\nFrom general RF/wireless knowledge, not from the knowledge base:\n\n## What is OFDM?\n\n**OFDM — Orthogonal Frequency Division Multiplexing** — is a modulation method that splits a high-rate data stream across many closely spaced, mutually orthogonal subcarriers.\n\nInstead of sending all data on one wideband carrier, OFDM sends many lower-rate streams in parallel. Because the subcarriers are mathematically orthogonal, they can overlap in frequency without ideally interfering with one another.\n\nIt is widely used in systems such as:\n\n- **LTE**\n- **5G NR**\n- **Wi‑Fi / Wi‑Fi 6 / Wi‑Fi 7**\n- **DVB-T / digital broadcasting**\n- Some radar and wideband communication systems\n\nKey OFDM concepts include:\n\n- **Subcarrier spacing**\n- **FFT size**\n- **Cyclic prefix / guard interval**\n- **Resource blocks or resource units**\n- **Pilot/reference signals**\n- **PAPR — peak-to-average power ratio**\n- **EVM — error vector magnitude**\n- **Phase noise sensitivity**\n- **Frequency offset and timing synchronization**\n\n## Product-related measurement decisions that depend on understanding OFDM\n\nUnderstanding OFDM affects several measurement and product-selection decisions:\n\n### 1. Signal generator choice and options\n\nIf you need to generate LTE, 5G NR, Wi‑Fi, DVB-T, or custom OFDM signals, you must choose a generator that supports:\n\n- The required standard waveform\n- Correct bandwidth\n- Subcarrier spacing\n- Modulation formats, e.g. QPSK, 16QAM, 64QAM, 256QAM, 1024QAM\n- MIMO or multi-channel generation if needed\n- Low enough EVM and phase noise for the test target\n\nFor example, an OFDM-based 5G or Wi‑Fi test generally needs a vector signal generator, not a simple CW RF source.\n\n### 2. Signal analyzer bandwidth\n\nOFDM signals can occupy wide bandwidths. The analyzer must have enough **analysis bandwidth** to capture the full channel.\n\nExamples:\n\n- LTE: up to 20 MHz per carrier\n- 5G NR FR1: often 100 MHz-class channels\n- 5G NR FR2: hundreds of MHz\n- Wi‑Fi 6/7: 80, 160, or 320 MHz channels\n\nIf the analyzer bandwidth is too narrow, EVM, spectrum, ACLR, and demodulation results will be invalid or incomplete.\n\n### 3. EVM performance requirements\n\nOFDM systems are often judged by **EVM**. Higher-order modulation, such as 256QAM or 1024QAM, requires much better EVM performance.\n\nThis affects decisions such as:\n\n- Which signal analyzer model is accurate enough\n- Which generator has low enough residual EVM\n- Whether external reference clocks are needed\n- Whether phase noise performance is sufficient\n- Whether preamplifiers, attenuators, or calibration are required\n\n### 4. Phase noise and frequency accuracy\n\nOFDM is sensitive to oscillator impairments. Poor phase noise or frequency error can cause:\n\n- Common phase error\n- Inter-carrier interference\n- Degraded EVM\n- Failed demodulation\n\nSo understanding OFDM helps decide whether the product needs:\n\n- Better phase noise performance\n- High-stability frequency reference\n- External 10 MHz reference\n- Specialized phase noise measurement capability\n\n### 5. Power amplifier testing\n\nOFDM has high **PAPR**, meaning the signal has large peaks compared with its average power.\n\nThis affects PA and transmitter tests:\n\n- Output backoff requirements\n- Compression behavior\n- ACLR / adjacent channel leakage\n- EVM under load\n- Crest factor handling\n- Digital predistortion testing\n\nA product used for PA testing must support realistic OFDM waveform generation and accurate wideband analysis.\n\n### 6. Spectrum emission and ACLR measurements\n\nBecause OFDM signals occupy structured channel bandwidths, measurements such as:\n\n- Occupied bandwidth\n- Spectrum mask\n- ACLR / ACPR\n- Spurious emissions\n\ndepend on knowing the OFDM channel bandwidth, numerology, and allocation.\n\n### 7. Demodulation software or measurement application selection\n\nA general spectrum analyzer may show the spectrum, but OFDM quality measurements usually require standard-specific demodulation applications, such as for:\n\n- 5G NR\n- LTE\n- WLAN\n- DVB\n- Custom OFDM\n\nSo the decision is not only “which analyzer,” but also “which measurement personality or software option.”\n\n### 8. MIMO and multi-channel testing\n\nMany OFDM systems use MIMO. Product decisions may depend on:\n\n- Number of RF channels\n- Phase-coherent generation\n- Phase-coherent analysis\n- Multi-port synchronization\n- Channel emulation\n- OTA testing support\n\nThis matters for 5G, Wi‑Fi, and antenna/module testing.\n\n### 9. Time-domain capture and synchronization\n\nOFDM demodulation depends on correct timing, cyclic prefix detection, and symbol alignment. That affects whether the instrument needs:\n\n- Real-time capture memory\n- Triggering capability\n- Burst analysis\n- Time-gated measurements\n- Synchronization with DUT control or protocol events\n\n### 10. Vector network analyzer vs. signal analyzer decision\n\nIf the task is passive RF characterization — S-parameters, matching, filter response — a VNA may be appropriate.\n\nIf the task involves OFDM modulation quality — EVM, constellation, subcarrier analysis, ACLR, demodulation — a signal analyzer and vector signal generator are usually needed.\n\n## In short\n\nOFDM is the modulation foundation behind many modern wireless standards. Understanding it determines product and measurement choices around:\n\n- Generator waveform capability\n- Analyzer bandwidth\n- EVM accuracy\n- Phase noise performance\n- Standard-specific demodulation options\n- PA linearity and PAPR handling\n- ACLR and spectrum mask setup\n- MIMO/channel synchronization\n- OTA and wideband test architecture",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-58405633150243219391fd6d7bc812da",
+      "request_id": "request-58405633150243219391fd6d7bc812da",
+      "span_id": "span-58405633150243219391fd6d7bc812da",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-58405633150243219391fd6d7bc812da",
+       "request_id": "request-58405633150243219391fd6d7bc812da",
+       "span_id": "span-58405633150243219391fd6d7bc812da",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no answer: it did not produce validated Raw evidence for the requested product/option/spec facets, so I can’t cite the RS vault for this answer.\n\nFrom general RF/wireless knowledge, not from the knowledge base:\n\n## What is OFDM?\n\n**OFDM — Orthogonal Frequency Division Multiplexing** — is a modulation method that splits a high-rate data stream across many closely spaced, mutually orthogonal subcarriers.\n\nInstead of sending all data on one wideband carrier, OFDM sends many lower-rate streams in parallel. Because the subcarriers are mathematically orthogonal, they can overlap in frequency without ideally interfering with one another.\n\nIt is widely used in systems such as:\n\n- **LTE**\n- **5G NR**\n- **Wi‑Fi / Wi‑Fi 6 / Wi‑Fi 7**\n- **DVB-T / digital broadcasting**\n- Some radar and wideband communication systems\n\nKey OFDM concepts include:\n\n- **Subcarrier spacing**\n- **FFT size**\n- **Cyclic prefix / guard interval**\n- **Resource blocks or resource units**\n- **Pilot/reference signals**\n- **PAPR — peak-to-average power ratio**\n- **EVM — error vector magnitude**\n- **Phase noise sensitivity**\n- **Frequency offset and timing synchronization**\n\n## Product-related measurement decisions that depend on understanding OFDM\n\nUnderstanding OFDM affects several measurement and product-selection decisions:\n\n### 1. Signal generator choice and options\n\nIf you need to generate LTE, 5G NR, Wi‑Fi, DVB-T, or custom OFDM signals, you must choose a generator that supports:\n\n- The required standard waveform\n- Correct bandwidth\n- Subcarrier spacing\n- Modulation formats, e.g. QPSK, 16QAM, 64QAM, 256QAM, 1024QAM\n- MIMO or multi-channel generation if needed\n- Low enough EVM and phase noise for the test target\n\nFor example, an OFDM-based 5G or Wi‑Fi test generally needs a vector signal generator, not a simple CW RF source.\n\n### 2. Signal analyzer bandwidth\n\nOFDM signals can occupy wide bandwidths. The analyzer must have enough **analysis bandwidth** to capture the full channel.\n\nExamples:\n\n- LTE: up to 20 MHz per carrier\n- 5G NR FR1: often 100 MHz-class channels\n- 5G NR FR2: hundreds of MHz\n- Wi‑Fi 6/7: 80, 160, or 320 MHz channels\n\nIf the analyzer bandwidth is too narrow, EVM, spectrum, ACLR, and demodulation results will be invalid or incomplete.\n\n### 3. EVM performance requirements\n\nOFDM systems are often judged by **EVM**. Higher-order modulation, such as 256QAM or 1024QAM, requires much better EVM performance.\n\nThis affects decisions such as:\n\n- Which signal analyzer model is accurate enough\n- Which generator has low enough residual EVM\n- Whether external reference clocks are needed\n- Whether phase noise performance is sufficient\n- Whether preamplifiers, attenuators, or calibration are required\n\n### 4. Phase noise and frequency accuracy\n\nOFDM is sensitive to oscillator impairments. Poor phase noise or frequency error can cause:\n\n- Common phase error\n- Inter-carrier interference\n- Degraded EVM\n- Failed demodulation\n\nSo understanding OFDM helps decide whether the product needs:\n\n- Better phase noise performance\n- High-stability frequency reference\n- External 10 MHz reference\n- Specialized phase noise measurement capability\n\n### 5. Power amplifier testing\n\nOFDM has high **PAPR**, meaning the signal has large peaks compared with its average power.\n\nThis affects PA and transmitter tests:\n\n- Output backoff requirements\n- Compression behavior\n- ACLR / adjacent channel leakage\n- EVM under load\n- Crest factor handling\n- Digital predistortion testing\n\nA product used for PA testing must support realistic OFDM waveform generation and accurate wideband analysis.\n\n### 6. Spectrum emission and ACLR measurements\n\nBecause OFDM signals occupy structured channel bandwidths, measurements such as:\n\n- Occupied bandwidth\n- Spectrum mask\n- ACLR / ACPR\n- Spurious emissions\n\ndepend on knowing the OFDM channel bandwidth, numerology, and allocation.\n\n### 7. Demodulation software or measurement application selection\n\nA general spectrum analyzer may show the spectrum, but OFDM quality measurements usually require standard-specific demodulation applications, such as for:\n\n- 5G NR\n- LTE\n- WLAN\n- DVB\n- Custom OFDM\n\nSo the decision is not only “which analyzer,” but also “which measurement personality or software option.”\n\n### 8. MIMO and multi-channel testing\n\nMany OFDM systems use MIMO. Product decisions may depend on:\n\n- Number of RF channels\n- Phase-coherent generation\n- Phase-coherent analysis\n- Multi-port synchronization\n- Channel emulation\n- OTA testing support\n\nThis matters for 5G, Wi‑Fi, and antenna/module testing.\n\n### 9. Time-domain capture and synchronization\n\nOFDM demodulation depends on correct timing, cyclic prefix detection, and symbol alignment. That affects whether the instrument needs:\n\n- Real-time capture memory\n- Triggering capability\n- Burst analysis\n- Time-gated measurements\n- Synchronization with DUT control or protocol events\n\n### 10. Vector network analyzer vs. signal analyzer decision\n\nIf the task is passive RF characterization — S-parameters, matching, filter response — a VNA may be appropriate.\n\nIf the task involves OFDM modulation quality — EVM, constellation, subcarrier analysis, ACLR, demodulation — a signal analyzer and vector signal generator are usually needed.\n\n## In short\n\nOFDM is the modulation foundation behind many modern wireless standards. Understanding it determines product and measurement choices around:\n\n- Generator waveform capability\n- Analyzer bandwidth\n- EVM accuracy\n- Phase noise performance\n- Standard-specific demodulation options\n- PA linearity and PAPR handling\n- ACLR and spectrum mask setup\n- MIMO/channel synchronization\n- OTA and wideband test architecture",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_FUqBWNOs9CgxSHoM5H7l1g1b",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "failed",
+         "data": {
+          "knowledge_harness": "not_validated",
+          "answer": "The Knowledge query did not produce a validated answer. Unverified requested facets: product_option_spec.",
+          "evidence": {
+           "raw_citations": 0,
+           "facet_status": "missing",
+           "missing_facets": [
+            "product_option_spec"
+           ],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {}
+          },
+          "phase": "needs_input",
+          "failure_code": "knowledge_insufficient_evidence",
+          "instruction": "The knowledge base did not validate an answer. Tell the person what is above; anything you add is not from the knowledge base and must say so."
+         },
+         "failure": {
+          "code": "knowledge_not_validated",
+          "message": "The Knowledge Harness did not validate an answer",
+          "retryable": false
+         }
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

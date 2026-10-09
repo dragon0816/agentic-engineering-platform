@@ -1,0 +1,1020 @@
+{
+ "question": {
+  "id": "Q0131",
+  "text": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+  "market": "Wireless Communication",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-4dba94c427a04bb296ba5e15699c0e86",
+ "exchange": {
+  "sent": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+  "http_status": 200,
+  "seconds": 149.468,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-4dba94c427a04bb296ba5e15699c0e86",
+    "actor": "leo.chi",
+    "title": "How do changes in Wi-Fi 7/8 technology affect the measurement capability…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T19:29:49.456283Z",
+    "updated_at": "2026-10-09T19:32:18.627446Z",
+    "messages": [
+     {
+      "message_id": "message-a8bae280ee38492bbdfc79c934692708",
+      "role": "user",
+      "text": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+      "created_at": "2026-10-09T19:29:49.489743Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-c94a625d2ce94ab59e654714bc95b9b3",
+      "role": "assistant",
+      "text": "【推論】Wi‑Fi 7/8 push Signal Generator and Signal Analyzer needs toward wider bandwidth, multi-channel/MIMO operation, and deeper per-link modulation analysis because Wi‑Fi 7 is described with 320 MHz bandwidth, up to 16 spatial streams, 4096QAM and MLO, while Wi‑Fi 8 retains up to 320 MHz, 4096QAM and MLO and adds dRU/UEQM test hurdles [6][13][15].\n### Measurement capability impact\n| Area | Required capability impact | Evidence |\n|---|---|---|\n| Bandwidth | Wi‑Fi 7 requires support for 320 MHz channel bandwidth [6]. | [6] |\n| Bandwidth | Wi‑Fi 8 is described as retaining channel bandwidths up to 320 MHz, but this PR summary is not a full normative IEEE 802.11bn specification [15]. | [15] |\n| Bandwidth | R&S also demonstrated CMP180 verification of a 480 MHz WLAN waveform as a potential Wi‑Fi 8 candidate, and CMP180 supports bandwidths up to 500 MHz [40]. | [40] |\n| Modulation | Wi‑Fi 7 includes 4096QAM, so generator/analyzer capability must cover high-order WLAN modulation [6]. | [6] |\n| Modulation | Wi‑Fi 8 is described as retaining 4096QAM from Wi‑Fi 7 [15]. | [15] |\n| UEQM | Wi‑Fi 8 UEQM allows each MIMO link to use a different modulation scheme in difficult reception scenarios [1]. | [1] |\n| UEQM | UEQM analysis must assess whether the device adapts modulation correctly according to specified MCS combinations [13]. | [13] |\n| MIMO | Wi‑Fi 7 is described with up to 16 spatial streams, making multi-stream analyzer/generator capability relevant [6]. | [6] |\n| MIMO / MLO | Wi‑Fi 7 MLO makes a test environment with multiple RF chains important [6]. | [6] |\n| MIMO / R&S | CMX500 Wi‑Fi 7 R&D tests include MLO, multiple RF chains and 2x2 MIMO [19]. | [19] |\n| MIMO / R&S | CMP180 integrates two analyzers, two generators and two sets of eight RF ports to support 2x2 MIMO in one box [19]. | [19] |\n| MIMO / R&S | Two CMP180 units can be combined and scaled to four analyzers and generators for 4x4 MIMO access points [19]. | [19] |\n| dRU | Wi‑Fi 8 dRU measurements are used to verify uplink transmit power boost and connection reliability improvement [13]. | [13] |\n| dRU | dRU is described as a Wi‑Fi 8 feature for overcoming PSD limits [1]. | [1] |\n| EVM | WoMT testing includes TX analysis of EIRP, TRP, ACLR and EVM under Wi‑Fi 7 modulation [2]. | [2] |\n| EVM | WoMT OTA/RF test confirms EVM, EIRP, TRP, ACLR, EIS, occupied bandwidth and Rx/OOB spurious emissions [27]. | [27] |\n| Phase noise | The RAW passages identify R&S FSPN and R&S FSWP as Phase Noise Analyzer and VCO Tester instruments [38][39]. | [38][39] |\n| Signaling | R&S and Broadcom will show CMX500 with newly added Wi‑Fi 8 testing capabilities validating a Broadcom prototype Wi‑Fi 8 device [37]. | [37] |\n| Signaling | CMX500 is described as supporting WLAN signaling and WLAN TX measurements for 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn and 2x2 MIMO [14]. | [14] |\n| Production non-signaling | WLAN production RF measurements are performed in non-signaling mode to save time, and CMP180 is optimized for this purpose [40]. | [40] |\n| Production non-signaling | CMP180 supports Wi‑Fi 6E, Wi‑Fi 7 and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz [40]. | [40] |\n| mmWave / IF | For WoMT, native Wi‑Fi/IF/IB band testing uses CMP180, while mmWave signal generation and analysis use CMP200/CMPHEAD50 [2]. | [2] |\n| mmWave / IF analyzer | CMP200 IF analyzer bandwidth is up to 1 GHz [28]. | [28] |\n| R&D fine tuning | WoMT R&D fine tuning uses FSW67 and signal sources [2]. | [2] |\n【推論】For Signal Generator and Signal Analyzer planning, the safest supported floor is 320 MHz and 4096QAM for Wi‑Fi 7/8 core PHY, while a 480 MHz path is only supported as a potential Wi‑Fi 8 waveform candidate demonstrated on CMP180, not as a ratified requirement [15][40].\n【推論】For multi-link and MIMO testing, the evidence supports at least 2x2 capability in CMX500/CMP180 contexts and scalable 4x4 with two CMP180 units, but it does not prove coverage of Wi‑Fi 7’s full 16 spatial streams [6][14][19].\n\n來源：\n[1] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[2] Wiki：Wi-Fi over mmWave Technology（來源：`FWA CPE.md`、`R&S for JIO Project.md`、`R&S solution for Jio project_202509_r3.md`）\n[6] Wiki：Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024（來源：`CMP180_specs_en_3609-7348-22_v0800.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[13] Wiki：Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[14] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[15] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[19] Wiki：Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024（來源：`CMP180_specs_en_3609-7348-22_v0800.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[27] Wiki：Wi-Fi over mmWave Technology（來源：`FWA CPE.md`、`R&S for JIO Project.md`、`R&S solution for Jio project_202509_r3.md`）\n[28] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[37] `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`\n[38] `raw/Productions/FSPN_specs_en_3683-7925-22_v0300.md`\n[39] `raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md`\n[40] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+      "created_at": "2026-10-09T19:32:18.627446Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-792490d2d34b47c495f2acdab1a7b927",
+       "request_id": "request-792490d2d34b47c495f2acdab1a7b927",
+       "span_id": "span-792490d2d34b47c495f2acdab1a7b927",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "【推論】Wi‑Fi 7/8 push Signal Generator and Signal Analyzer needs toward wider bandwidth, multi-channel/MIMO operation, and deeper per-link modulation analysis because Wi‑Fi 7 is described with 320 MHz bandwidth, up to 16 spatial streams, 4096QAM and MLO, while Wi‑Fi 8 retains up to 320 MHz, 4096QAM and MLO and adds dRU/UEQM test hurdles [6][13][15].\n### Measurement capability impact\n| Area | Required capability impact | Evidence |\n|---|---|---|\n| Bandwidth | Wi‑Fi 7 requires support for 320 MHz channel bandwidth [6]. | [6] |\n| Bandwidth | Wi‑Fi 8 is described as retaining channel bandwidths up to 320 MHz, but this PR summary is not a full normative IEEE 802.11bn specification [15]. | [15] |\n| Bandwidth | R&S also demonstrated CMP180 verification of a 480 MHz WLAN waveform as a potential Wi‑Fi 8 candidate, and CMP180 supports bandwidths up to 500 MHz [40]. | [40] |\n| Modulation | Wi‑Fi 7 includes 4096QAM, so generator/analyzer capability must cover high-order WLAN modulation [6]. | [6] |\n| Modulation | Wi‑Fi 8 is described as retaining 4096QAM from Wi‑Fi 7 [15]. | [15] |\n| UEQM | Wi‑Fi 8 UEQM allows each MIMO link to use a different modulation scheme in difficult reception scenarios [1]. | [1] |\n| UEQM | UEQM analysis must assess whether the device adapts modulation correctly according to specified MCS combinations [13]. | [13] |\n| MIMO | Wi‑Fi 7 is described with up to 16 spatial streams, making multi-stream analyzer/generator capability relevant [6]. | [6] |\n| MIMO / MLO | Wi‑Fi 7 MLO makes a test environment with multiple RF chains important [6]. | [6] |\n| MIMO / R&S | CMX500 Wi‑Fi 7 R&D tests include MLO, multiple RF chains and 2x2 MIMO [19]. | [19] |\n| MIMO / R&S | CMP180 integrates two analyzers, two generators and two sets of eight RF ports to support 2x2 MIMO in one box [19]. | [19] |\n| MIMO / R&S | Two CMP180 units can be combined and scaled to four analyzers and generators for 4x4 MIMO access points [19]. | [19] |\n| dRU | Wi‑Fi 8 dRU measurements are used to verify uplink transmit power boost and connection reliability improvement [13]. | [13] |\n| dRU | dRU is described as a Wi‑Fi 8 feature for overcoming PSD limits [1]. | [1] |\n| EVM | WoMT testing includes TX analysis of EIRP, TRP, ACLR and EVM under Wi‑Fi 7 modulation [2]. | [2] |\n| EVM | WoMT OTA/RF test confirms EVM, EIRP, TRP, ACLR, EIS, occupied bandwidth and Rx/OOB spurious emissions [27]. | [27] |\n| Phase noise | The RAW passages identify R&S FSPN and R&S FSWP as Phase Noise Analyzer and VCO Tester instruments [38][39]. | [38][39] |\n| Signaling | R&S and Broadcom will show CMX500 with newly added Wi‑Fi 8 testing capabilities validating a Broadcom prototype Wi‑Fi 8 device [37]. | [37] |\n| Signaling | CMX500 is described as supporting WLAN signaling and WLAN TX measurements for 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn and 2x2 MIMO [14]. | [14] |\n| Production non-signaling | WLAN production RF measurements are performed in non-signaling mode to save time, and CMP180 is optimized for this purpose [40]. | [40] |\n| Production non-signaling | CMP180 supports Wi‑Fi 6E, Wi‑Fi 7 and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz [40]. | [40] |\n| mmWave / IF | For WoMT, native Wi‑Fi/IF/IB band testing uses CMP180, while mmWave signal generation and analysis use CMP200/CMPHEAD50 [2]. | [2] |\n| mmWave / IF analyzer | CMP200 IF analyzer bandwidth is up to 1 GHz [28]. | [28] |\n| R&D fine tuning | WoMT R&D fine tuning uses FSW67 and signal sources [2]. | [2] |\n【推論】For Signal Generator and Signal Analyzer planning, the safest supported floor is 320 MHz and 4096QAM for Wi‑Fi 7/8 core PHY, while a 480 MHz path is only supported as a potential Wi‑Fi 8 waveform candidate demonstrated on CMP180, not as a ratified requirement [15][40].\n【推論】For multi-link and MIMO testing, the evidence supports at least 2x2 capability in CMX500/CMP180 contexts and scalable 4x4 with two CMP180 units, but it does not prove coverage of Wi‑Fi 7’s full 16 spatial streams [6][14][19].\n\n來源：\n[1] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[2] Wiki：Wi-Fi over mmWave Technology（來源：`FWA CPE.md`、`R&S for JIO Project.md`、`R&S solution for Jio project_202509_r3.md`）\n[6] Wiki：Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024（來源：`CMP180_specs_en_3609-7348-22_v0800.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[13] Wiki：Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[14] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[15] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[19] Wiki：Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024（來源：`CMP180_specs_en_3609-7348-22_v0800.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[27] Wiki：Wi-Fi over mmWave Technology（來源：`FWA CPE.md`、`R&S for JIO Project.md`、`R&S solution for Jio project_202509_r3.md`）\n[28] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[37] `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`\n[38] `raw/Productions/FSPN_specs_en_3683-7925-22_v0300.md`\n[39] `raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md`\n[40] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-792490d2d34b47c495f2acdab1a7b927",
+      "request_id": "request-792490d2d34b47c495f2acdab1a7b927",
+      "span_id": "span-792490d2d34b47c495f2acdab1a7b927",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-792490d2d34b47c495f2acdab1a7b927",
+       "request_id": "request-792490d2d34b47c495f2acdab1a7b927",
+       "span_id": "span-792490d2d34b47c495f2acdab1a7b927",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "【推論】Wi‑Fi 7/8 push Signal Generator and Signal Analyzer needs toward wider bandwidth, multi-channel/MIMO operation, and deeper per-link modulation analysis because Wi‑Fi 7 is described with 320 MHz bandwidth, up to 16 spatial streams, 4096QAM and MLO, while Wi‑Fi 8 retains up to 320 MHz, 4096QAM and MLO and adds dRU/UEQM test hurdles [6][13][15].\n### Measurement capability impact\n| Area | Required capability impact | Evidence |\n|---|---|---|\n| Bandwidth | Wi‑Fi 7 requires support for 320 MHz channel bandwidth [6]. | [6] |\n| Bandwidth | Wi‑Fi 8 is described as retaining channel bandwidths up to 320 MHz, but this PR summary is not a full normative IEEE 802.11bn specification [15]. | [15] |\n| Bandwidth | R&S also demonstrated CMP180 verification of a 480 MHz WLAN waveform as a potential Wi‑Fi 8 candidate, and CMP180 supports bandwidths up to 500 MHz [40]. | [40] |\n| Modulation | Wi‑Fi 7 includes 4096QAM, so generator/analyzer capability must cover high-order WLAN modulation [6]. | [6] |\n| Modulation | Wi‑Fi 8 is described as retaining 4096QAM from Wi‑Fi 7 [15]. | [15] |\n| UEQM | Wi‑Fi 8 UEQM allows each MIMO link to use a different modulation scheme in difficult reception scenarios [1]. | [1] |\n| UEQM | UEQM analysis must assess whether the device adapts modulation correctly according to specified MCS combinations [13]. | [13] |\n| MIMO | Wi‑Fi 7 is described with up to 16 spatial streams, making multi-stream analyzer/generator capability relevant [6]. | [6] |\n| MIMO / MLO | Wi‑Fi 7 MLO makes a test environment with multiple RF chains important [6]. | [6] |\n| MIMO / R&S | CMX500 Wi‑Fi 7 R&D tests include MLO, multiple RF chains and 2x2 MIMO [19]. | [19] |\n| MIMO / R&S | CMP180 integrates two analyzers, two generators and two sets of eight RF ports to support 2x2 MIMO in one box [19]. | [19] |\n| MIMO / R&S | Two CMP180 units can be combined and scaled to four analyzers and generators for 4x4 MIMO access points [19]. | [19] |\n| dRU | Wi‑Fi 8 dRU measurements are used to verify uplink transmit power boost and connection reliability improvement [13]. | [13] |\n| dRU | dRU is described as a Wi‑Fi 8 feature for overcoming PSD limits [1]. | [1] |\n| EVM | WoMT testing includes TX analysis of EIRP, TRP, ACLR and EVM under Wi‑Fi 7 modulation [2]. | [2] |\n| EVM | WoMT OTA/RF test confirms EVM, EIRP, TRP, ACLR, EIS, occupied bandwidth and Rx/OOB spurious emissions [27]. | [27] |\n| Phase noise | The RAW passages identify R&S FSPN and R&S FSWP as Phase Noise Analyzer and VCO Tester instruments [38][39]. | [38][39] |\n| Signaling | R&S and Broadcom will show CMX500 with newly added Wi‑Fi 8 testing capabilities validating a Broadcom prototype Wi‑Fi 8 device [37]. | [37] |\n| Signaling | CMX500 is described as supporting WLAN signaling and WLAN TX measurements for 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn and 2x2 MIMO [14]. | [14] |\n| Production non-signaling | WLAN production RF measurements are performed in non-signaling mode to save time, and CMP180 is optimized for this purpose [40]. | [40] |\n| Production non-signaling | CMP180 supports Wi‑Fi 6E, Wi‑Fi 7 and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz [40]. | [40] |\n| mmWave / IF | For WoMT, native Wi‑Fi/IF/IB band testing uses CMP180, while mmWave signal generation and analysis use CMP200/CMPHEAD50 [2]. | [2] |\n| mmWave / IF analyzer | CMP200 IF analyzer bandwidth is up to 1 GHz [28]. | [28] |\n| R&D fine tuning | WoMT R&D fine tuning uses FSW67 and signal sources [2]. | [2] |\n【推論】For Signal Generator and Signal Analyzer planning, the safest supported floor is 320 MHz and 4096QAM for Wi‑Fi 7/8 core PHY, while a 480 MHz path is only supported as a potential Wi‑Fi 8 waveform candidate demonstrated on CMP180, not as a ratified requirement [15][40].\n【推論】For multi-link and MIMO testing, the evidence supports at least 2x2 capability in CMX500/CMP180 contexts and scalable 4x4 with two CMP180 units, but it does not prove coverage of Wi‑Fi 7’s full 16 spatial streams [6][14][19].\n\n來源：\n[1] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[2] Wiki：Wi-Fi over mmWave Technology（來源：`FWA CPE.md`、`R&S for JIO Project.md`、`R&S solution for Jio project_202509_r3.md`）\n[6] Wiki：Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024（來源：`CMP180_specs_en_3609-7348-22_v0800.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[13] Wiki：Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[14] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[15] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[19] Wiki：Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024（來源：`CMP180_specs_en_3609-7348-22_v0800.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[27] Wiki：Wi-Fi over mmWave Technology（來源：`FWA CPE.md`、`R&S for JIO Project.md`、`R&S solution for Jio project_202509_r3.md`）\n[28] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[37] `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`\n[38] `raw/Productions/FSPN_specs_en_3683-7925-22_v0300.md`\n[39] `raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md`\n[40] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_LWbwZsg5Gk7dcg2d2uEbzox3",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "【推論】Wi‑Fi 7/8 push Signal Generator and Signal Analyzer needs toward wider bandwidth, multi-channel/MIMO operation, and deeper per-link modulation analysis because Wi‑Fi 7 is described with 320 MHz bandwidth, up to 16 spatial streams, 4096QAM and MLO, while Wi‑Fi 8 retains up to 320 MHz, 4096QAM and MLO and adds dRU/UEQM test hurdles [6][13][15].\n### Measurement capability impact\n| Area | Required capability impact | Evidence |\n|---|---|---|\n| Bandwidth | Wi‑Fi 7 requires support for 320 MHz channel bandwidth [6]. | [6] |\n| Bandwidth | Wi‑Fi 8 is described as retaining channel bandwidths up to 320 MHz, but this PR summary is not a full normative IEEE 802.11bn specification [15]. | [15] |\n| Bandwidth | R&S also demonstrated CMP180 verification of a 480 MHz WLAN waveform as a potential Wi‑Fi 8 candidate, and CMP180 supports bandwidths up to 500 MHz [40]. | [40] |\n| Modulation | Wi‑Fi 7 includes 4096QAM, so generator/analyzer capability must cover high-order WLAN modulation [6]. | [6] |\n| Modulation | Wi‑Fi 8 is described as retaining 4096QAM from Wi‑Fi 7 [15]. | [15] |\n| UEQM | Wi‑Fi 8 UEQM allows each MIMO link to use a different modulation scheme in difficult reception scenarios [1]. | [1] |\n| UEQM | UEQM analysis must assess whether the device adapts modulation correctly according to specified MCS combinations [13]. | [13] |\n| MIMO | Wi‑Fi 7 is described with up to 16 spatial streams, making multi-stream analyzer/generator capability relevant [6]. | [6] |\n| MIMO / MLO | Wi‑Fi 7 MLO makes a test environment with multiple RF chains important [6]. | [6] |\n| MIMO / R&S | CMX500 Wi‑Fi 7 R&D tests include MLO, multiple RF chains and 2x2 MIMO [19]. | [19] |\n| MIMO / R&S | CMP180 integrates two analyzers, two generators and two sets of eight RF ports to support 2x2 MIMO in one box [19]. | [19] |\n| MIMO / R&S | Two CMP180 units can be combined and scaled to four analyzers and generators for 4x4 MIMO access points [19]. | [19] |\n| dRU | Wi‑Fi 8 dRU measurements are used to verify uplink transmit power boost and connection reliability improvement [13]. | [13] |\n| dRU | dRU is described as a Wi‑Fi 8 feature for overcoming PSD limits [1]. | [1] |\n| EVM | WoMT testing includes TX analysis of EIRP, TRP, ACLR and EVM under Wi‑Fi 7 modulation [2]. | [2] |\n| EVM | WoMT OTA/RF test confirms EVM, EIRP, TRP, ACLR, EIS, occupied bandwidth and Rx/OOB spurious emissions [27]. | [27] |\n| Phase noise | The RAW passages identify R&S FSPN and R&S FSWP as Phase Noise Analyzer and VCO Tester instruments [38][39]. | [38][39] |\n| Signaling | R&S and Broadcom will show CMX500 with newly added Wi‑Fi 8 testing capabilities validating a Broadcom prototype Wi‑Fi 8 device [37]. | [37] |\n| Signaling | CMX500 is described as supporting WLAN signaling and WLAN TX measurements for 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn and 2x2 MIMO [14]. | [14] |\n| Production non-signaling | WLAN production RF measurements are performed in non-signaling mode to save time, and CMP180 is optimized for this purpose [40]. | [40] |\n| Production non-signaling | CMP180 supports Wi‑Fi 6E, Wi‑Fi 7 and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz [40]. | [40] |\n| mmWave / IF | For WoMT, native Wi‑Fi/IF/IB band testing uses CMP180, while mmWave signal generation and analysis use CMP200/CMPHEAD50 [2]. | [2] |\n| mmWave / IF analyzer | CMP200 IF analyzer bandwidth is up to 1 GHz [28]. | [28] |\n| R&D fine tuning | WoMT R&D fine tuning uses FSW67 and signal sources [2]. | [2] |\n【推論】For Signal Generator and Signal Analyzer planning, the safest supported floor is 320 MHz and 4096QAM for Wi‑Fi 7/8 core PHY, while a 480 MHz path is only supported as a potential Wi‑Fi 8 waveform candidate demonstrated on CMP180, not as a ratified requirement [15][40].\n【推論】For multi-link and MIMO testing, the evidence supports at least 2x2 capability in CMX500/CMP180 contexts and scalable 4x4 with two CMP180 units, but it does not prove coverage of Wi‑Fi 7’s full 16 spatial streams [6][14][19].\n\n來源：\n[1] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[2] Wiki：Wi-Fi over mmWave Technology（來源：`FWA CPE.md`、`R&S for JIO Project.md`、`R&S solution for Jio project_202509_r3.md`）\n[6] Wiki：Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024（來源：`CMP180_specs_en_3609-7348-22_v0800.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[13] Wiki：Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[14] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[15] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[19] Wiki：Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024（來源：`CMP180_specs_en_3609-7348-22_v0800.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[27] Wiki：Wi-Fi over mmWave Technology（來源：`FWA CPE.md`、`R&S for JIO Project.md`、`R&S solution for Jio project_202509_r3.md`）\n[28] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[37] `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`\n[38] `raw/Productions/FSPN_specs_en_3683-7925-22_v0300.md`\n[39] `raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md`\n[40] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+          "evidence": {
+           "raw_citations": 13,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-747ce5542497435f8d5d216698a765d0",
+            "request_id": "request-747ce5542497435f8d5d216698a765d0",
+            "span_id": "span-747ce5542497435f8d5d216698a765d0",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "How do changes in Wi-Fi 7 and Wi-Fi 8 technology affect the measurement capability required from Signal Generator and Signal Analyzer? Please explain requirements such as bandwidth, modulation, MIMO, puncturing/MRU, EVM, phase noise, triggering/synchronization, and any Rohde & Schwarz instrument implications, with Raw evidence citations.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "Wi-Fi 8 › 新增 / 強調的 PHY 與 MAC layer technologies\n[[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]] 舉例列出：\n\n- [[distributed resource units]]（dRU）：用於 overcome power spectral density（PSD）limits；dRU measurements 可驗證 uplink transmit power boost 與 connection reliability improvement。\n- [[unequal modulation]]（UEQM）：在 difficult reception scenarios 中允許 each [[MIMO]] link 使用 different modulation scheme；UEQM analysis 可評估 device 是否依 specified MCS combinations 正確 adapt modulation。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+              },
+              "score": 5.434674
+             },
+             {
+              "text": "Wi-Fi over mmWave Technology › 測試需求\n依 [[R&S for JIO Project]] 與 [[R&S solution for Jio project_202509_r3]]，WoMT 測試至少包含：\n\n- OTA precision measurement：使用 [[R&S ATS1800C]] CATR chamber。\n- TX analysis：[[EIRP]]、[[TRP]]、[[ACLR]]、EVM under Wi-Fi 7 modulation。\n- RX analysis：[[EIS]] sensitivity verification。\n- Spurious：Rx / OOB spurious emissions monitoring。\n- Occupied bandwidth。\n- Native Wi-Fi / IF / IB band：[[R&S CMP180]]。\n- mmWave signal generation and analysis：[[R&S CMP200]] / [[R&S CMPHEAD50]]。\n- R&D fine tuning：[[R&S FSW67]] 與 signal sources。\n- Production / manufacturing setup：[[R&S CMQ200]] 與 automation SW WMT 只作為來源列名，尚無詳細流程。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi over mmWave Technology.md"
+              },
+              "score": 1.807336
+             },
+             {
+              "text": "R&S ATS1800C › 來源中的定位\n依 [[GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests]]（06.2020）：\n\n- [[R&S ATS1800C]] 是 CATR based 5G NR mmWave test chamber。\n- 在 OTA base station receiver tests 中，ATS1800C 適用 FR2。\n- Source abbreviations 中簡稱 `ATS1800C`。\n- 來源的 OTA antenna test solution applicability table 中，FR2 ATS1800C 適用於 7.2 OTA sensitivity、7.3 OTA reference sensitivity level、7.4 OTA dynamic range、7.5.1 OTA adjacent channel selectivity、7.5.2 OTA in-band blocking、7.8 OTA receiver intermodulation 與 7.9 OTA in-channel selectivity。\n- 7.6 OTA out-of-band blocking 與 7.7 OTA receiver spurious emissions 在 FR2 ATS1800C 欄位標示為 `TBC`。\n- Ordering information：Compact antenna test range OTA test system，Order No. `1534.1800.02`。\n\n依 [[MWC2025---WIC-INFRA]]（MWC 2025 Barcelona；raw converted 2026-09-17）：\n\n- [[R&S ATS1800C]] 被列為 `Solutions for OTA testing` 中的 RF Performance at Small Test Chamber Footprints solution。\n- 來源將其定位為 FR2 compact test system with a high-quality quiet zone。\n- Slide 8 同頁列出 Ø 30 cm Quiet zone、high shielding effective chamber with IFF（indirect far-field）solution。\n- Slide 26 的 densification / small cells / RF design and compliance portfolio 也列出 [[R&S ATS1800C]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ATS1800C.md"
+              },
+              "score": 2.354564
+             },
+             {
+              "text": "Wi-Fi 8 › 使用限制\n- 本頁目前由 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]、[[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 與 [[WiFi8]] 支撐。\n- [[WiFi8]] 是 OneNote link hub，不是文章正文、datasheet、configuration guide、IEEE standard text 或 certification document。\n- PR / demonstration statement 不等同於 IEEE standard text、datasheet、configuration guide 或 certification document。\n- 來源未標示 [[IEEE 802.11bn]] draft version、standard version、final ratification date 或 IEEE document number。\n- 來源未列出完整 [[Wi-Fi 8]] PHY / MAC feature set、band plan、regulatory conditions、test requirements 或 interoperability criteria。\n- 480 MHz waveform 僅能記為 MWC 2024 PR 中的 potential candidate，不可寫成 Wi-Fi 8 正式規格。\n- 320 MHz channel bandwidth 僅能記為較晚 R&S / Broadcom PR 對 retained core PHY parameter 的說法，不可替代 IEEE 802.11bn 正式文件。\n- 不可從 [[WiFi8]] 的連結標題推論 [[Broadcom]]、[[MediaTek]]、[[ASUS]] 或 [[Filogic 8000]] 的產品規格、上市時間、供應關係或認證狀態。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+              },
+              "score": 2.41126
+             },
+             {
+              "text": "Broadcom › Wi-Fi 8 prototype device 語境\n- [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]（來源未標示發布日期；raw created 2026-09-11）稱 [[Rohde & Schwarz]] in collaboration with [[Broadcom]] 將在 [[MWC Barcelona 2026]] 展示 [[R&S CMX500]] multi-technology multi-channel signaling tester 與 newly added [[Wi-Fi 8]] / [[IEEE 802.11bn]] testing capabilities。\n- 同一來源稱 setup will validate a prototype [[Wi-Fi 8]] device from Broadcom，showcasing physical layer features unique to [[Wi-Fi 8]]。\n- 來源也以 validating a prototype next-generation WLAN device from Broadcom 描述該展示。\n- 本來源沒有提供 Broadcom prototype device 的型號、chipset SKU、reference design name、commercial availability、driver / firmware version 或客戶資訊。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Broadcom.md"
+              },
+              "score": 3.641923
+             },
+             {
+              "text": "Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024 › 關鍵實體與概念\n- [[Rohde & Schwarz]]：新聞稿發布者與測試解決方案供應商。\n- [[Rohde & Schwarz GmbH & Co KG]]：frontmatter author 與 R&S registered trademark 所屬公司名。\n- [[R&S CMX500]]：R&D single-box signaling tester；本來源新增 Wi‑Fi 7 test functionality、WLAN offloading、N3IWF 與 POLQA voice quality measurement 的 PR 語境。\n- [[R&S CMP180]]：production / R&D non-signaling tester；本來源宣稱支援 Wi-Fi 6E、Wi-Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz，並展示 480 MHz WLAN waveform loopback。\n- [[Wi-Fi 7 R&D and production testing]]：本來源的主題概念，區分 CMX500 R&D signaling 與 CMP180 production non-signaling 測試。\n- [[WLAN offloading with Voice over WLAN]]：本來源描述的 CMX500 single-box interworking / voice continuity 測試情境。\n- [[Wi-Fi 7]] / [[IEEE 802.11be]]：來源列出 320 MHz channel bandwidth、up to 16 spatial streams、4096 QAM、低延遲與 high throughput。\n- [[Wi-Fi 8]] / [[IEEE 802.11bn]]：來源稱 yet-to-be-defined，且 wider channel bandwidths are in discussion；CMP180 480 MHz waveform 被稱為 potential waveform candidate。\n- [[MLO]]：Wi-Fi 7 key feature，使 multiple RF chains 的 test environment 變重要。\n- [[N3IWF]]：Non-3GPP Interworking Function gateway；來源稱 newly integrated in R&S CMX500。\n- [[POLQA]]：來源稱 R&S CMX500 integrated POLQA voice quality measurement function 可用於 Voice over WLAN applications。\n- [[MWC 2024]]：展示場合。\n- [[Christian Mokry]]：Press & media contact。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+              },
+              "score": 1.190618
+             },
+             {
+              "text": "Rohde & Schwarz GmbH & Co KG › 與 Rohde & Schwarz 的關係\n本頁只記錄來源文字中的 legal / trademark name。來源正文同時以 [[Rohde & Schwarz]] 作為公司 / 品牌名稱，描述其 Test & Measurement、Technology Systems、Networks & Cybersecurity Divisions，以及 2024/2025 fiscal year 財務與員工資訊；[[1C111_1e_3GPPPreConfGuide]] 則提供 electronics group 的 business fields 與公司概述。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Rohde & Schwarz GmbH & Co KG.md"
+              },
+              "score": 1.49403
+             },
+             {
+              "text": "S-SSS › 基本性質\n依 [[S-SSB]]：\n\n- [[S-SSS]] 是 [[Sidelink SSB]] / [[S-SS-PSBCH block]] 的四個組成之一。\n- Like standard [[SSS]]，[[S-SSS]] consists of 127 [[BPSK]] modulation symbols。\n- Sequence is based on two Fibonacci [[LFSR]]s of length 7：\n  - `x0` with taps [7,3]。\n  - `x1` with taps [7,6]。\n- Final sequence `d` is obtained by interleaving the two LFSR outputs depending on the [[Sidelink identity]]，in same way as standard [[SSS]]；但來源中的完整公式 / identity 符號因轉檔遺失。\n- Overall 672 different S-SSS sequences are defined because sequence generation depends on the first and second ID。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/S-SSS.md"
+              },
+              "score": 2.550143
+             },
+             {
+              "text": "Wi-Fi 8 RF signaling tests › 使用限制\n- 本頁目前只由 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]] 支撐。\n- 來源是 PR / demonstration statement，不是 datasheet、configuration guide、IEEE standard text 或 certification document。\n- 不可從本來源推論 [[R&S CMX500]] 的 Wi‑Fi 8 option code、license、software version、hardware configuration、RF chain count、test case list 或 measurement uncertainty。\n- 不可從本來源推論 [[Broadcom]] prototype device 的正式產品名稱、量產狀態、客戶、driver version、chipset SKU 或商用 availability。\n- 來源未標示 [[IEEE 802.11bn]] draft version、final ratification date 或正式標準版本。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md"
+              },
+              "score": 1.638939
+             },
+             {
+              "text": "R&S CMX500 › mmWave extension 與 remote radio heads\n[[CMX500_specs_en_5216-4127-22_v1100]] 指出 3GPP FR2 frequency range 測試可由 [[R&S CMX500]] 搭配 [[R&S CMXHEAD30]]、[[R&S CMXHEAD50]] 或 [[R&S CMXHEAD50-Evo]] 執行。Remote radio head 是獨立 compact unit，在 IF 與 5G NR FR2 frequency ranges 間執行 upconversion / downconversion。CMX500 與 remote radio head 的 split concept 可在 5G NR FR2 frequency range 使用短 RF cable lengths，以最佳化 radiated chamber test environments 的 link budget。\n\n適用 radiated chamber test environments：[[R&S CMQ500]] shielding cube 與 [[R&S ATS800R]] CATR rack based antenna test system。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 21,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.202112
+             },
+             {
+              "text": "0. UAV產業分析報告架構 › 重點摘要\n- 本來源是一份 OneNote / Microsoft 365 chat 複製出的「台灣無人機產業分析報告（2025年版）」架構與內容摘要，主題是 [[台灣無人機產業]]、[[台灣無人機供應鏈]]、政策、技術與市場機會。\n- 來源稱台灣無人機產業在 2025 年上半年外銷金額達 1,189 萬美元，年增超過 7 倍；但該數字來自來源內引用的 [[數位時代 BusinessNext]] 連結，raw 未擷取連結正文。\n- 來源稱政府投入 500 億元推動軍用無人機採購，並成立 [[台灣卓越無人機海外商機聯盟]]，但未提供政府公告、預算科目或聯盟正式文件。\n- 來源稱全球無人機市場預估由 2024 年 730 億美元成長至 2030 年 1,636 億美元，CAGR 約 14.3%；該數字來自來源內引用的 PDF 連結，raw 未擷取 PDF 正文。\n- 來源稱台灣國防部預計於 2026–2027 年間採購 5 萬架無人機；raw 未擷取該主張的正式採購公告或標案文件。\n- 來源把無人機供應鏈分成上游晶片 / 感測器 / 通訊模組、中游模組製造與系統整合、下游整機製造與應用服務三層，列出 [[聯發科]]、[[新唐科技]]、[[圓剛]]、[[聰泰]]、[[亞光]]、[[中光電]]、[[漢翔]]、[[雷虎科技]]、[[經緯航太]]與[[長榮航太]]等公司。\n- 技術趨勢方面，來源列出 [[AI]]、自主飛行、[[5G]]、[[低軌衛星]]通訊、AI 飛控、影像辨識與邊緣運算，但沒有逐項列出標準版本、產品型號或公司導入證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0. UAV產業分析報告架構.md"
+              },
+              "score": 0.343104
+             },
+             {
+              "text": "台灣卓越無人機海外商機聯盟\n[[台灣卓越無人機海外商機聯盟]] 是 [[0. UAV產業分析報告架構]] 中提到的台灣無人機海外商機推動聯盟，來源括號寫作 TEDIBOA。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/台灣卓越無人機海外商機聯盟.md"
+              },
+              "score": 1.584889
+             },
+             {
+              "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 重點摘要\n- 來源未標示發布日期；raw frontmatter `created: 2026-09-11`，本文 ingest 日期為 2026-09-15。\n- [[Rohde & Schwarz]] 宣稱在最終 IEEE standard ratification 之前，已將 first [[Wi-Fi 8 RF signaling tests]] 實作到 [[R&S CMX500]] one-box signaling tester。\n- 展示情境：[[MWC Barcelona 2026]]，[[Rohde & Schwarz]] booth 5A80，Fira Gran Via Barcelona，hall 5。\n- 測試對象：[[Broadcom]] prototype next-generation WLAN device / prototype [[Wi-Fi 8]] device。\n- [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的焦點被描述為從 sheer speed 轉向 ultra-high reliability（[[UHR]]）performance。\n- 來源稱 [[Wi-Fi 8]] 延續 [[Wi-Fi 7]] 的 core PHY parameters：supported frequencies up to 7.125 GHz、channel bandwidths up to 320 MHz、4096QAM modulation、[[MLO]]。\n- 來源列出 [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的新 testing hurdles，包括 [[distributed resource units]]（dRU）與 [[unequal modulation]]（UEQM）。\n- dRU measurements 被描述為可驗證 device boosting uplink transmit power 與 improving connection reliability 的 effectiveness。\n- UEQM analysis 被描述為可評估 test device 是否能依 specified modulation coding scheme（MCS）combinations 正確 adapt modulation。\n- [[R&S CMX500]] 被定位為 modular、powerful one-box signaling tester，支援 [[LTE]]、[[NR]] SA/NSA、[[NR-NTN]]、[[NB-NTN]]、Direct-to-Cell（[[D2C]] / [[DTC]]）與 WLAN including [[Wi‑Fi 7]] and [[Wi‑Fi 8]]。\n- Press & media contact：[[Christian Mokry]]，PR Manager Test & measurement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+              },
+              "score": 5.623939
+             },
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 14.558383
+             },
+             {
+              "text": "Wi-Fi 8 › 延續自 Wi-Fi 7 的 core PHY parameters\n依 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]，[[Wi-Fi 8]] 保留下列 [[Wi-Fi 7]] core physical layer parameters：\n\n| 項目 | 來源說法 |\n|---|---|\n| supported frequencies | up to 7.125 GHz |\n| channel bandwidth | up to 320 MHz |\n| modulation | 4096QAM |\n| multi-link | [[MLO]] |\n\n以上是 PR 中對 Wi-Fi 8 的簡述，不等同於完整 IEEE 802.11bn normative specification。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+              },
+              "score": 3.403382
+             },
+             {
+              "text": "Wi-Fi over mmWave Technology › 與 3GPP / IEEE 的邊界\n[[R&S for JIO Project]] 把 WoMT 的核心挑戰描述為 bridging the gap between IEEE and 3GPP：\n\n- IEEE / Wi-Fi side：[[Wi-Fi 7]]、802.11be、native Wi-Fi signal、IF / IB band testing。\n- 3GPP side：n257 / n258、27 GHz mmWave band、FR2 / mmWave-related test items。\n- Regulatory / certification side：來源提到 [[SGS]]、Indian Government、government regulatory requirements，但未提供正式文件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi over mmWave Technology.md"
+              },
+              "score": 1.669521
+             },
+             {
+              "text": "R&S CMP180 › Measurement options\n| Designation | Type | Order no. |\n|---|---|---|\n| Non-cellular measurements pack 1 | R&S CMP-PKM30 | 1212.3689.02 |\n| Cellular measurements pack 1 | R&S CMP-PKM40 | 1212.3695.02 |\n| Advanced path loss measurements（serial number ≥ 102160） | R&S CMP-KM115 | 1212.2201.02 |\n| Advanced path loss measurements（serial number < 102160） | R&S CMP-U115 | 1212.4291.02 |\n| Spectrum analyzer | R&S CMP-KM140 | 1212.4410.02 |\n| Signal analysis base software | R&S CMP-KM150 | 1212.3972.02 |\n| Signal analysis, digital | R&S CMP-KM152 | 1212.3989.02 |\n| NB-IoT measurements | R&S CMP-KM250 | 1212.2218.02 |\n| LP-IoT measurements, Zigbee | R&S CMP-KM280 | 1212.2224.02 |\n| Ultra-wideband production measurements | R&S CMP-KM305 | 1212.4304.02 |\n| UWB IEEE 802.15.4ab production measurements | R&S CMP-KM306 | 1212.4691.02 |\n| Bluetooth measurements, Classic / Low Energy up to Rel. 5.3 | R&S CMP-KM310 | 1212.2230.02 |\n| Bluetooth HDT measurements Rel. 7.0 | R&S CMP-KM317 | 1212.4591.02 |\n| WLAN IEEE 802.11a/b/g/n/ac SISO measurements | R&S CMP-KM350 | 1212.2247.02 |\n| WLAN IEEE 802.11ax SISO measurements | R&S CMP-KM351 | 1212.2253.02 |\n| WLAN IEEE 802.11be SISO measurements | R&S CMP-KM352 | 1212.2260.02 |\n| WLAN true MIMO 2x2 and 4x4 measurements | R&S CMP-KM360 | 1212.2276.02 |\n| WLAN true MIMO 5x5 and 6x6 measurements | R&S CMP-KM361 | 1212.4685.02 |\n| WLAN packet error rate acknowledgement measurements | R&S CMP-KM365 | 1212.4562.02 |\n| GSM measurements | R&S CMP-KM420 | 1212.2282.02 |\n| WCDMA measurements | R&S CMP-KM440 | 1212.2299.02 |\n| CDMA2000 1xRTT measurements | R&S CMP-KM480 | 1212.2730.02 |\n| LTE measurements | R&S CMP-KM500 | 1212.2301.02 |\n| LTE C-V2X measurements, PC5 | R&S CMP-KM570 | 1212.2318.02 |\n| NR FR1 measurements, single carrier | R&S CMP-KM600 | 1212.2101.02 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 3.458008
+             },
+             {
+              "text": "MediaTek › Genio 系列圖上表格\n[[Edge AI Chips image 14]]（來源未標示日期；取得於 2026-09-04）中既有頁面曾整理的 Genio 系列表格如下：\n\n| 型號 | CPU | AI TOPS | 備註 |\n|---|---|---:|---|\n| [[Genio 1200]] | 4x CA73 (2.2GHz) + 4x CA55 (2.0GHz) | 4.8 TOPS | 最強邊緣 AI |\n| [[Genio 720]] | 2x CA78 (2.6GHz) + 6x CA55 (2GHz) | 10 TOPS | 高階邊緣 AI |\n| [[Genio 700]] | 2x CA78 (2GHz) + 6x CA55 (2GHz) | 4.0 TOPS | 監控家電與零售 |\n| [[Genio 520]] | 2x CA78 (2.2GHz) + 6x CA55 (2.0GHz) | 10 TOPS | 產業生成式 AI |\n| [[Genio 510]] | 2x CA78 (2GHz) + 4x CA55 (2.0GHz) | 4.8 TOPS | 高效能數位看板 |\n| [[Genio 350]] | 4x CA53 (2GHz) | 0.35 TOPS | 入門智慧物聯 |\n\n[[Edge AI Chips image 17]]（來源未標示日期；取得於 2026-09-04）提供的 Genio 系列表格如下：\n\n| 型號 | 主要核心 | AI 算力 | 主要應用 |\n|---|---|---:|---|\n| [[Genio 1200]] | 4x CA78 (2.2GHz) + 4x CA55 (2.0GHz) | 4.8 TOPs | 頂級邊緣 AI |\n| [[Genio 720]] | 2x CA78 (2.6GHz) + 6x CA55 (2.0GHz) | 10 TOPs（混合算力） | 生成式 AI |\n| [[Genio 700]] | 2x CA78 (2.2GHz) + 6x CA55 (2.0GHz) | 4.0 TOPs | 智慧家庭與零售 |\n| [[Genio 520]] | 2x CA78 (2.2GHz) + 6x CA55 (2.0GHz) | 10 TOPs（混合算力） | 主流生成式 AI |\n| [[Genio 510]] | 2x CA78 (2.0GHz) + 4x CA55 (2.0GHz) | 4.8 TOPs | 高效能數位看板 |\n| [[Genio 350]] | 4x CA53 (2.0GHz) | 0.35 TOPs | 入門級物聯網 |\n\n⚠️ [[Edge AI Chips image 17]]（來源未標示日期；取得於 2026-09-04）說 [[Genio 1200]] 主要核心為 `4x CA78 (2.2GHz) + 4x CA55 (2.0GHz)`，但既有頁面 [[MediaTek]] 說 [[Genio 1200]] 為 `4x CA73 (2.2GHz) + 4x CA55 (2.0GHz)`。判斷：兩者皆保留為圖上讀圖差異，需回看原圖或官方資料裁決。\n\n⚠️ [[Edge AI Chips image 17]]（來源未標示日期；取得於 2026-09-04）說 [[Genio 700]] 主要核心為 `2x CA78 (2.2GHz) + 6x CA55 (2.0GHz)`，但既有頁面 [[MediaTek]] 說 [[Genio 700]] 為 `2x CA78 (2GHz) + 6x CA55 (2GHz)`。判斷：兩者皆保留為圖上讀圖差異，需回看原圖或官方資料裁決。\n\n⚠️ [[Edge AI Chips image 17]]（來源未標示日期；取得於 2026-09-04）說 [[Genio 520]] 主要應用為主流生成式 AI，但既有頁面 [[MediaTek]] 說 [[Genio 520]] 主要應用為產業生成式 AI。判斷：兩者可能來自不同圖卡版本或 OCR 讀圖差異，需回看原圖或官方資料裁決。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/MediaTek.md"
+              },
+              "score": 2.712191
+             },
+             {
+              "text": "Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024 › 重點摘要\n- [[Rohde & Schwarz]] 將在 [[MWC 2024]] 展示最新 [[Wi-Fi 7]] R&D 與 production 測試方案，用於應對 [[Wi-Fi 7]] / [[IEEE 802.11be]]、[[LTE]] 與 [[5G]] parallel operation 的測試挑戰。\n- [[R&S CMX500]] 被描述為 multi-technology multi-channel signaling tester，新增 integrated [[Wi-Fi 7]] test functionality，可讓 R&D engineers 以 single instrument setup 測試 cellular 與 non-cellular standards。\n- [[R&S CMX500]] 的 Wi‑Fi 7 R&D 測試情境包含 signaling mode、real-world RF TX/RX characteristics、[[MLO]]、multiple RF chains、2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。\n- [[R&S CMX500]] 也被用於展示 cellular [[5G]] 與 [[WLAN]] 的 traffic offloading / interworking；來源稱其 newly integrated [[N3IWF]] gateway 可測試 [[WLAN offloading with Voice over WLAN]]，並搭配 integrated [[POLQA]] voice quality measurement。\n- [[R&S CMP180]] 被描述為 production phase 的 non-signaling RF measurement tester，支援 cellular 與 non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將在 MWC 展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform；來源稱這是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate。\n- [[R&S CMP180]] 來源說法：two analyzers、two generators、two sets of eight RF ports integrated，可在 single box 支援 2x2 [[MIMO]] testing；兩台 CMP180 可 combined / scaled，支援 four analyzers and generators，用於 4x4 MIMO access points。\n- 展示地點：Fira Gran Via, Barcelona，hall 5，booth 5A80。\n- Press & media contact：[[Christian Mokry]]，PR Manager Test & measurement。\n- 公司段落稱 [[Rohde & Schwarz]] 在 2024/2025 fiscal year（July to June）net revenue 為 EUR 3.16 billion，且 2025-06-30 有 more than 15,000 employees worldwide。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+              },
+              "score": 1.189617
+             },
+             {
+              "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 9.462097
+             },
+             {
+              "text": "S-SSS › 使用限制\n- 來源未保留 first ID / second ID 的正式符號與範圍。\n- 來源未提供 full S-SSS interleaving formula。\n- 來源未標示 [[3GPP TS 38.211]] 的 version；只提供 Section 8.4.2 / 8.4.3 的引用線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/S-SSS.md"
+              },
+              "score": 0.796351
+             },
+             {
+              "text": "ASUS › 可追溯範圍\n- 本頁只支持 [[Edge AI Chips image 14]]、[[Edge AI Chips image 20]] 與 [[Edge AI Chips image 46]] 圖上將 ASUS / 華碩與 [[Tinker Board AI 開發板]] 放入台灣 AI SoC/MPU + NPU 型或 edge AI 開發板產品盤點。\n- 這些來源都未提供各 Tinker Edge 型號的完整 datasheet、文件版本、上市狀態、量產、出貨、客戶導入或測試條件。\n- 這些來源沒有說明 [[Google EdgeTPU]]、Renesas、iMX、RK3566、RK3568、RK3399PRO 與 ASUS 之間的供應或合作關係；本頁只記錄同區塊圖上文字。\n- [[Edge AI Chips image 46]] 與 [[Edge AI Chips image 20]] 內容高度重疊，不可視為兩份獨立市場驗證。\n- [[Edge AI Chips image 46]] 是產品介紹 / 型錄式資訊圖，不是統計圖表；不可由版面位置推論排名、出貨量、市占或成長趨勢。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/ASUS.md"
+              },
+              "score": 2.230067
+             },
+             {
+              "text": "Wi-Fi 8 RF signaling tests › Wi-Fi 8 測試重點\n來源描述 [[IEEE 802.11bn]] / [[Wi-Fi 8]] 的重點從 sheer speed 轉向 [[UHR]] performance。相關測試重點包括：\n\n| 測試 / feature | 來源說法 |\n|---|---|\n| [[distributed resource units]] / dRU measurements | 用於驗證 device boosting uplink transmit power 與 improving connection reliability 的 effectiveness；來源提到 dRU 可 overcome PSD limits。 |\n| [[unequal modulation]] / UEQM analysis | 在 difficult reception scenarios 中允許 each MIMO link 使用不同 modulation scheme；測試可評估 device 是否以 specified MCS combinations 正確 adapt modulation。 |\n| comprehensive signaling mode tests | 來源稱可 cover a broad range of Wi‑Fi 8 features 並執行 in-depth analysis of performance characteristics。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md"
+              },
+              "score": 0.941587
+             },
+             {
+              "text": "0. UAV產業分析報告架構 › 日期與期間\n| 主張 | 日期 / 期間 | 來源中的標示 |\n|---|---:|---|\n| 報告版本 | 2025 年版 | 標題寫明「2025年版」。 |\n| 台灣無人機外銷金額 | 2025 年上半年 | 外銷金額 1,189 萬美元、年增超過 7 倍。 |\n| 全球市場預估起點 | 2024 年 | 全球市場 730 億美元。 |\n| 全球市場預估終點 | 2030 年 | 全球市場 1,636 億美元，CAGR 約 14.3%。 |\n| 台灣國防部無人機採購 | 2026–2027 年 | 預計採購 5 萬架無人機。 |\n| CTCI 參考資料 | 2023-02 | 來源 references 中列出 2023-02 台灣無人機技術與產業發展之挑戰。 |\n| raw 轉檔 | 2026-09-17 | frontmatter `converted: 2026-09-17`，不可當作內容發布日期。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0. UAV產業分析報告架構.md"
+              },
+              "score": 0.316647
+             },
+             {
+              "text": "聯發科 › 相關來源\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 6]] — 未標示發布日期、取得於 2026-09-04 的 Google / 谷歌 TPU 晶片藍圖表格。\n- [[0. UAV產業分析報告架構]] — 2025 年版台灣無人機產業分析架構，列出聯發科為上游 AI晶片與通訊模組公司。\n- [[4. UAV Eco-chain in Taiwan]] — OneNote UAV eco-chain link hub，列出聯發科為 Key component/technology，並描述其晶片可作為無人機核心處理器。\n- [[TW government support projects(無人機關鍵晶片及模組自主開發研發補助計畫)]] — OneNote 補助計畫清單，稱先進無人機 AI 影像模組計畫將採用聯發科 Genio 720。\n- [[Taiwan Small Cell BTS 業務簡報]] — 2025 業務簡報，列出聯發科 / MediaTek 為 5G NR SoC 供應鏈上游晶片層。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/聯發科.md"
+              },
+              "score": 1.611428
+             },
+             {
+              "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 關鍵實體與概念\n- [[Rohde & Schwarz]] — 新聞稿發布者與 [[R&S CMX500]] 供應商。\n- [[R&S CMX500]] — multi-technology multi-channel one-box signaling tester；本來源新增 [[Wi-Fi 8]] / [[IEEE 802.11bn]] RF signaling mode 測試語境。\n- [[Broadcom]] — 提供 prototype next-generation WLAN / [[Wi-Fi 8]] device 供展示驗證。\n- [[Wi-Fi 8]] — 對應 [[IEEE 802.11bn]] amendment，來源稱其聚焦 [[UHR]]。\n- [[Wi-Fi 8 RF signaling tests]] — 本來源的核心測試能力宣稱。\n- [[IEEE 802.11bn]] — Wi-Fi 8 amendment；來源未標示標準版次或 ratification 狀態細節，只說 ahead of final ratification。\n- [[UHR]] — Ultra-high reliability；來源稱為 Wi-Fi 8 的性能焦點。\n- [[distributed resource units]] — Wi-Fi 8 PHY feature；來源寫作 dRU。\n- [[unequal modulation]] — Wi-Fi 8 technology；來源寫作 UEQM。\n- [[MLO]] — Wi-Fi 7 / Wi-Fi 8 延續的 Multi-Link-Operation。\n- [[MWC Barcelona 2026]] — 展示場域。\n- [[Christian Mokry]] — Press & media contact。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+              },
+              "score": 4.196012
+             },
+             {
+              "text": "Wi-Fi over mmWave Technology › 架構與用途\n來源中的 WoMT 架構可整理為：\n\n1. 產生或處理 native [[Wi-Fi 7]] / IEEE 802.11be signal。\n2. 透過 [[AiP]] / antenna-in-package module 執行 integrated antenna 與 up-conversion。\n3. 將信號搬移到 27 GHz mmWave band，來源以 n257 / n258 表示。\n4. 用於 Integrated Radio CPEs 與 WoMT-AP。\n5. 在 RD / manufacturing setup 中分成 WIFI IB band 與 WIFI mmWave path。\n6. 透過 OTA / RF test 確認 EVM、[[EIRP]]、[[TRP]]、[[ACLR]]、[[EIS]]、occupied bandwidth 與 Rx / OOB spurious emissions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi over mmWave Technology.md"
+              },
+              "score": 1.445945
+             },
+             {
+              "text": "R&S CMP200 › IF analyzer\n| 項目 | 規格 |\n|---|---|\n| Ports | 3 × IF In，port 1/2/3 |\n| Connector | SMA |\n| Frequency range | 4 GHz to 20 GHz，含 modulation bandwidth |\n| Frequency resolution | < 0.1 Hz |\n| Absolute maximum level range | 0 V DC，+25 dBm |\n| Expected nominal power setting range | PEP，ADC full scale，4 GHz to 20 GHz：–5 dBm to +15 dBm |\n| Level uncertainty | +15 °C 至 +35 °C，4 GHz to 20 GHz，P > –45 dBm RMS：< 1.5 dB |\n| Bandwidth | up to 1 GHz |\n| Harmonic response | second harmonic > 45 dB nom.；third harmonic > 70 dB nom. |\n\nFirmware version（base）≥ 4.0.7 且 TRX_BB hardware code（[[R&S CMP-B500A]] IF unit 的一部分）< 11 時，4 GHz to 7.38 GHz 與 8.0 GHz to 20 GHz 的 level uncertainty 為 < 2.5 dB。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 3.926829
+             },
+             {
+              "text": "Filogic 8000 › 來源中的說法\n[[WiFi8]]（raw converted 2026-09-17）列出以下外部連結：\n\n- `Wi-Fi 8 takes shape as MediaTek previews Filogic 8000 at CES 2026`\n- URL: `https://www.rcrwireless.com/20260105/network-infrastructure/wi-fi/mediatek`\n\n此來源只保存連結標題與 URL，未擷取 RCR Wireless 文章正文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Filogic 8000.md"
+              },
+              "score": 0.461107
+             },
+             {
+              "text": "Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024 › 與既有知識的關係\n- 既有 [[R&S CMX500]] 頁已依 [[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]] 記錄 CMX500 的 WLAN signaling / measurement options；本來源補充的是 2024 MWC PR / solution demonstration 語境，不提供正式 option code、software version 或硬體 BOM。\n- 既有 [[R&S CMP180]] 頁已依 [[CMP180 Specifications Version 08.00]] 記錄 8 GHz frequency extension 與 500 MHz bandwidth options；本來源補充 MWC 2024 對 Wi‑Fi 7 production testing 與 480 MHz WLAN waveform loopback demonstration 的 positioning。\n- 既有 [[Wi-Fi 7 OTA MIMO stress testing]] 主要來自 Bluetest / EMITE OTA chamber PR；本來源不描述 OTA chamber，而是 R&S own CMX500 / CMP180 single-box R&D / production workflow。\n- 既有 [[Wi-Fi 8]] 頁依較晚的 R&S / Broadcom PR 記錄 Wi-Fi 8 保留 up to 320 MHz channel bandwidth；本來源較早期說 wider channel bandwidths are in discussion，且 480 MHz waveform 是 potential candidate，因此需在 [[Wi-Fi 8]] 並列而不調和。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+              },
+              "score": 0.901497
+             },
+             {
+              "text": "R&S CMP180\n[[R&S CMP180]] 是 [[Rohde & Schwarz]] 的 **Radio Communication Tester**，用於 production / wireless communication device 測試，依文件可配置多埠 RF generator/analyzer、通訊標準 measurement options、waveform options 與 [[R&S VSE]] 分析能力。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 7.993411
+             },
+             {
+              "text": "Wi-Fi 8 RF signaling tests\n[[Wi-Fi 8 RF signaling tests]] 是 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]] 中描述的 [[R&S CMX500]] signaling mode 測試能力，用於驗證 prototype [[Wi-Fi 8]] / [[IEEE 802.11bn]] WLAN device 的 physical layer features。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md"
+              },
+              "score": 0.906355
+             },
+             {
+              "text": "R&S CMP180 › 文件依據與版本\n本頁目前依兩份 Productions 來源整理：\n\n- [[CMP180 Features and Functions Version 09]]：文件識別碼 **1179.5118.02**，**Version 09**，對應 software **V11.9 or higher**，版權標示 © 2026；此文件是 test applications overview，並明示量測範圍與 tolerance limits 需參考 specifications document **PD 3609.7348.22**。\n- [[CMP180 Specifications Version 08.00]]：文件識別碼 **PD 3609.7348.22**，**Version 08.00**，日期 **March 2026**；此文件提供 specifications、general data、ordering information、warranty 與 service。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 9.115328
+             },
+             {
+              "text": "0. UAV產業分析報告架構 › 原文未解的問題\n- 來源是 Microsoft 365 chat / OneNote 複製內容，未標示作者、生成模型、製作日期或人工校訂者。\n- references 中的三個外部連結未被 raw 擷取正文；本頁不能把連結內容當成已讀證據。\n- 2025 年上半年外銷金額 1,189 萬美元、年增超過 7 倍的統計口徑、資料來源、商品分類與是否包含零組件未標示。\n- 政府投入 500 億元、2026–2027 年採購 5 萬架無人機的預算科目、採購單位、標案編號與是否已核定未標示。\n- 全球市場 2024–2030 預估的研究機構、報告日期、無人機分類範圍與 CAGR 計算口徑未標示。\n- 供應鏈公司列名未標示是否為實際供應、已得標、量產、研發、概念股或市場觀察名單。\n- 來源未提供 [[聯發科]]、[[新唐科技]]、[[圓剛]]、[[聰泰]]、[[亞光]]、[[中光電]]、[[漢翔]]、[[雷虎科技]]、[[經緯航太]]、[[長榮航太]]在無人機供應鏈中的產品型號或客戶。\n- 來源提到 AI、自主飛行、5G、低軌衛星通訊，但未提供標準版本、頻段、測試項目、產品型號或實作案例。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0. UAV產業分析報告架構.md"
+              },
+              "score": 0.303203
+             },
+             {
+              "text": "新唐科技 › 可追溯範圍\n- [[Edge AI Chips image 10]] 與 [[Edge AI Chips image 36]] 可支持來源未標示日期的「新唐 / Nuvoton – Cortex-M55」圖上產品、料號與部分規格文字。\n- [[Edge AI Chips image 11]] 可支持來源未標示日期的 [[NuML Toolkit]]、[[NuEdgeWise]]、[[M55M1 EVB]] 與工具流程文字。\n- [[Edge AI Chips image 1]] 可支持 2024/05/15 [[nuvoton]] 被放在 [[Wearable AI]] / [[MCU]] / [[TinyML]] 區塊。\n- [[0. UAV產業分析報告架構]] 可支持 2025 年版台灣無人機分析架構中，新唐被列為上游 MCU 公司。\n- 本頁不把上述圖像或 OneNote 來源升格為市場份額、客戶導入、量產、採購或供應鏈事實。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/新唐科技.md"
+              },
+              "score": 1.838418
+             },
+             {
+              "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 與既有知識的關係\n- 既有 [[R&S CMX500]] 頁已依 [[CMX500_Features_CSW9-20-0_en_32]] 記錄 WLAN signaling 802.11bn options 與 WLAN TX measurement option family；本新聞稿提供 PR / demonstration 層級的 [[Wi-Fi 8]] RF signaling tests 與 Broadcom prototype device 展示語境。\n- 既有 [[Wi-Fi 7 OTA MIMO stress testing]]、[[Wi-Fi 7 and 5G RedCap OTA measurements]] 與 [[4G 5G NR WLAN OTA MIMO stress testing]] 聚焦 Wi‑Fi 7 / IEEE 802.11be、OTA chamber integration 與 Bluetest / EMITE；本來源轉向 [[Wi-Fi 8]] / [[IEEE 802.11bn]] RF signaling tests，不是 OTA chamber 測試。\n- 既有 [[Broadcom]] 頁主要收錄 Broadcom 在 switch、PCIe switch 與 TPU roadmap 圖表中的列名；本來源新增 Broadcom 作為 prototype Wi-Fi 8 device 提供方 / 展示合作方的 PR 語境。\n- 本來源屬於 [[Productions]] 資料，但不是 datasheet / configuration guide；不可用來取代 [[CMX500_specs_en_5216-4127-22_v1100]] 或 [[CMX500_Features_CSW9-20-0_en_32]] 的正式規格與 option ordering data。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+              },
+              "score": 4.105803
+             },
+             {
+              "text": "Rohde & Schwarz, in collaboration with Broadcom, will display its [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC Barcelona 2026 with newly added Wi-Fi 8 (IEEE 802.11bn) testing capabilities. The setup at the Rohde & Schwarz booth (5A80) will validate a prototype Wi-Fi 8 device from Broadcom, showcasing physical layer features unique to Wi-Fi 8.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-f833664f4958cbb4",
+                "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+                "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+                "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 28.841797
+             },
+             {
+              "text": "Rohde & Schwarz R&S®FSPN Phase Noise Analyzer and VCO Tester",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-6edc5773641e5092",
+                "original_ref": "raw/Productions/FSPN_specs_en_3683-7925-22_v0300.md",
+                "sha256": "6edc5773641e5092ce7ad929650ed2d2c92906f900f135116bd496547eeffb24",
+                "raw_ref": "raw/Productions/FSPN_specs_en_3683-7925-22_v0300.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/FSPN_specs_en_3683-7925-22_v0300.md",
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 28.767911
+             },
+             {
+              "text": "Rohde & Schwarz R&S®FSWP Phase Noise Analyzer and VCO Tester",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-d9f5b6d241c1e5d8",
+                "original_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+                "sha256": "d9f5b6d241c1e5d834b6f0c0df762971f0c39a6fc045fc2d7db2589ee858e26f",
+                "raw_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 28.767911
+             },
+             {
+              "text": "In the production phase of WLAN devices, all RF measurements are performed in non-signaling mode to save time. Rohde & Schwarz has optimized the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester for this purpose. The instrument supports many cellular and non-cellular technologies including Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz in frequency with bandwidths up to 500 MHz. Leveraging the wide bandwidth, the R&S CMP180 will demonstrate at MWC its ability to verify a WLAN waveform with 480 MHz bandwidth in loopback mode, a potential waveform candidate for the yet-to-be-defined Wi-Fi 8 (IEEE 802.11bn) standard. This feature shows that the cost-effective instrument is future-proof for users not only in production, but also in R&D.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-d0a8f03c4120b8e2",
+                "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+                "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+                "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 27.000238
+             }
+            ],
+            "text": "【推論】Wi‑Fi 7/8 push Signal Generator and Signal Analyzer needs toward wider bandwidth, multi-channel/MIMO operation, and deeper per-link modulation analysis because Wi‑Fi 7 is described with 320 MHz bandwidth, up to 16 spatial streams, 4096QAM and MLO, while Wi‑Fi 8 retains up to 320 MHz, 4096QAM and MLO and adds dRU/UEQM test hurdles [6][13][15].\n### Measurement capability impact\n| Area | Required capability impact | Evidence |\n|---|---|---|\n| Bandwidth | Wi‑Fi 7 requires support for 320 MHz channel bandwidth [6]. | [6] |\n| Bandwidth | Wi‑Fi 8 is described as retaining channel bandwidths up to 320 MHz, but this PR summary is not a full normative IEEE 802.11bn specification [15]. | [15] |\n| Bandwidth | R&S also demonstrated CMP180 verification of a 480 MHz WLAN waveform as a potential Wi‑Fi 8 candidate, and CMP180 supports bandwidths up to 500 MHz [40]. | [40] |\n| Modulation | Wi‑Fi 7 includes 4096QAM, so generator/analyzer capability must cover high-order WLAN modulation [6]. | [6] |\n| Modulation | Wi‑Fi 8 is described as retaining 4096QAM from Wi‑Fi 7 [15]. | [15] |\n| UEQM | Wi‑Fi 8 UEQM allows each MIMO link to use a different modulation scheme in difficult reception scenarios [1]. | [1] |\n| UEQM | UEQM analysis must assess whether the device adapts modulation correctly according to specified MCS combinations [13]. | [13] |\n| MIMO | Wi‑Fi 7 is described with up to 16 spatial streams, making multi-stream analyzer/generator capability relevant [6]. | [6] |\n| MIMO / MLO | Wi‑Fi 7 MLO makes a test environment with multiple RF chains important [6]. | [6] |\n| MIMO / R&S | CMX500 Wi‑Fi 7 R&D tests include MLO, multiple RF chains and 2x2 MIMO [19]. | [19] |\n| MIMO / R&S | CMP180 integrates two analyzers, two generators and two sets of eight RF ports to support 2x2 MIMO in one box [19]. | [19] |\n| MIMO / R&S | Two CMP180 units can be combined and scaled to four analyzers and generators for 4x4 MIMO access points [19]. | [19] |\n| dRU | Wi‑Fi 8 dRU measurements are used to verify uplink transmit power boost and connection reliability improvement [13]. | [13] |\n| dRU | dRU is described as a Wi‑Fi 8 feature for overcoming PSD limits [1]. | [1] |\n| EVM | WoMT testing includes TX analysis of EIRP, TRP, ACLR and EVM under Wi‑Fi 7 modulation [2]. | [2] |\n| EVM | WoMT OTA/RF test confirms EVM, EIRP, TRP, ACLR, EIS, occupied bandwidth and Rx/OOB spurious emissions [27]. | [27] |\n| Phase noise | The RAW passages identify R&S FSPN and R&S FSWP as Phase Noise Analyzer and VCO Tester instruments [38][39]. | [38][39] |\n| Signaling | R&S and Broadcom will show CMX500 with newly added Wi‑Fi 8 testing capabilities validating a Broadcom prototype Wi‑Fi 8 device [37]. | [37] |\n| Signaling | CMX500 is described as supporting WLAN signaling and WLAN TX measurements for 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn and 2x2 MIMO [14]. | [14] |\n| Production non-signaling | WLAN production RF measurements are performed in non-signaling mode to save time, and CMP180 is optimized for this purpose [40]. | [40] |\n| Production non-signaling | CMP180 supports Wi‑Fi 6E, Wi‑Fi 7 and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz [40]. | [40] |\n| mmWave / IF | For WoMT, native Wi‑Fi/IF/IB band testing uses CMP180, while mmWave signal generation and analysis use CMP200/CMPHEAD50 [2]. | [2] |\n| mmWave / IF analyzer | CMP200 IF analyzer bandwidth is up to 1 GHz [28]. | [28] |\n| R&D fine tuning | WoMT R&D fine tuning uses FSW67 and signal sources [2]. | [2] |\n【推論】For Signal Generator and Signal Analyzer planning, the safest supported floor is 320 MHz and 4096QAM for Wi‑Fi 7/8 core PHY, while a 480 MHz path is only supported as a potential Wi‑Fi 8 waveform candidate demonstrated on CMP180, not as a ratified requirement [15][40].\n【推論】For multi-link and MIMO testing, the evidence supports at least 2x2 capability in CMX500/CMP180 contexts and scalable 4x4 with two CMP180 units, but it does not prove coverage of Wi‑Fi 7’s full 16 spatial streams [6][14][19].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "Wi-Fi 8 › 新增 / 強調的 PHY 與 MAC layer technologies\n[[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]] 舉例列出：\n\n- [[distributed resource units]]（dRU）：用於 overcome power spectral density（PSD）limits；dRU measurements 可驗證 uplink transmit power boost 與 connection reliability improvement。\n- [[unequal modulation]]（UEQM）：在 difficult reception scenarios 中允許 each [[MIMO]] link 使用 different modulation scheme；UEQM analysis 可評估 device 是否依 specified MCS combinations 正確 adapt modulation。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+             },
+             "score": 5.434674
+            },
+            {
+             "text": "Wi-Fi over mmWave Technology › 測試需求\n依 [[R&S for JIO Project]] 與 [[R&S solution for Jio project_202509_r3]]，WoMT 測試至少包含：\n\n- OTA precision measurement：使用 [[R&S ATS1800C]] CATR chamber。\n- TX analysis：[[EIRP]]、[[TRP]]、[[ACLR]]、EVM under Wi-Fi 7 modulation。\n- RX analysis：[[EIS]] sensitivity verification。\n- Spurious：Rx / OOB spurious emissions monitoring。\n- Occupied bandwidth。\n- Native Wi-Fi / IF / IB band：[[R&S CMP180]]。\n- mmWave signal generation and analysis：[[R&S CMP200]] / [[R&S CMPHEAD50]]。\n- R&D fine tuning：[[R&S FSW67]] 與 signal sources。\n- Production / manufacturing setup：[[R&S CMQ200]] 與 automation SW WMT 只作為來源列名，尚無詳細流程。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi over mmWave Technology.md"
+             },
+             "score": 1.807336
+            },
+            {
+             "text": "Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024 › 關鍵實體與概念\n- [[Rohde & Schwarz]]：新聞稿發布者與測試解決方案供應商。\n- [[Rohde & Schwarz GmbH & Co KG]]：frontmatter author 與 R&S registered trademark 所屬公司名。\n- [[R&S CMX500]]：R&D single-box signaling tester；本來源新增 Wi‑Fi 7 test functionality、WLAN offloading、N3IWF 與 POLQA voice quality measurement 的 PR 語境。\n- [[R&S CMP180]]：production / R&D non-signaling tester；本來源宣稱支援 Wi-Fi 6E、Wi-Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz，並展示 480 MHz WLAN waveform loopback。\n- [[Wi-Fi 7 R&D and production testing]]：本來源的主題概念，區分 CMX500 R&D signaling 與 CMP180 production non-signaling 測試。\n- [[WLAN offloading with Voice over WLAN]]：本來源描述的 CMX500 single-box interworking / voice continuity 測試情境。\n- [[Wi-Fi 7]] / [[IEEE 802.11be]]：來源列出 320 MHz channel bandwidth、up to 16 spatial streams、4096 QAM、低延遲與 high throughput。\n- [[Wi-Fi 8]] / [[IEEE 802.11bn]]：來源稱 yet-to-be-defined，且 wider channel bandwidths are in discussion；CMP180 480 MHz waveform 被稱為 potential waveform candidate。\n- [[MLO]]：Wi-Fi 7 key feature，使 multiple RF chains 的 test environment 變重要。\n- [[N3IWF]]：Non-3GPP Interworking Function gateway；來源稱 newly integrated in R&S CMX500。\n- [[POLQA]]：來源稱 R&S CMX500 integrated POLQA voice quality measurement function 可用於 Voice over WLAN applications。\n- [[MWC 2024]]：展示場合。\n- [[Christian Mokry]]：Press & media contact。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             },
+             "score": 1.190618
+            },
+            {
+             "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 重點摘要\n- 來源未標示發布日期；raw frontmatter `created: 2026-09-11`，本文 ingest 日期為 2026-09-15。\n- [[Rohde & Schwarz]] 宣稱在最終 IEEE standard ratification 之前，已將 first [[Wi-Fi 8 RF signaling tests]] 實作到 [[R&S CMX500]] one-box signaling tester。\n- 展示情境：[[MWC Barcelona 2026]]，[[Rohde & Schwarz]] booth 5A80，Fira Gran Via Barcelona，hall 5。\n- 測試對象：[[Broadcom]] prototype next-generation WLAN device / prototype [[Wi-Fi 8]] device。\n- [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的焦點被描述為從 sheer speed 轉向 ultra-high reliability（[[UHR]]）performance。\n- 來源稱 [[Wi-Fi 8]] 延續 [[Wi-Fi 7]] 的 core PHY parameters：supported frequencies up to 7.125 GHz、channel bandwidths up to 320 MHz、4096QAM modulation、[[MLO]]。\n- 來源列出 [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的新 testing hurdles，包括 [[distributed resource units]]（dRU）與 [[unequal modulation]]（UEQM）。\n- dRU measurements 被描述為可驗證 device boosting uplink transmit power 與 improving connection reliability 的 effectiveness。\n- UEQM analysis 被描述為可評估 test device 是否能依 specified modulation coding scheme（MCS）combinations 正確 adapt modulation。\n- [[R&S CMX500]] 被定位為 modular、powerful one-box signaling tester，支援 [[LTE]]、[[NR]] SA/NSA、[[NR-NTN]]、[[NB-NTN]]、Direct-to-Cell（[[D2C]] / [[DTC]]）與 WLAN including [[Wi‑Fi 7]] and [[Wi‑Fi 8]]。\n- Press & media contact：[[Christian Mokry]]，PR Manager Test & measurement。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+             },
+             "score": 5.623939
+            },
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 14.558383
+            },
+            {
+             "text": "Wi-Fi 8 › 延續自 Wi-Fi 7 的 core PHY parameters\n依 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]，[[Wi-Fi 8]] 保留下列 [[Wi-Fi 7]] core physical layer parameters：\n\n| 項目 | 來源說法 |\n|---|---|\n| supported frequencies | up to 7.125 GHz |\n| channel bandwidth | up to 320 MHz |\n| modulation | 4096QAM |\n| multi-link | [[MLO]] |\n\n以上是 PR 中對 Wi-Fi 8 的簡述，不等同於完整 IEEE 802.11bn normative specification。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+             },
+             "score": 3.403382
+            },
+            {
+             "text": "Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024 › 重點摘要\n- [[Rohde & Schwarz]] 將在 [[MWC 2024]] 展示最新 [[Wi-Fi 7]] R&D 與 production 測試方案，用於應對 [[Wi-Fi 7]] / [[IEEE 802.11be]]、[[LTE]] 與 [[5G]] parallel operation 的測試挑戰。\n- [[R&S CMX500]] 被描述為 multi-technology multi-channel signaling tester，新增 integrated [[Wi-Fi 7]] test functionality，可讓 R&D engineers 以 single instrument setup 測試 cellular 與 non-cellular standards。\n- [[R&S CMX500]] 的 Wi‑Fi 7 R&D 測試情境包含 signaling mode、real-world RF TX/RX characteristics、[[MLO]]、multiple RF chains、2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。\n- [[R&S CMX500]] 也被用於展示 cellular [[5G]] 與 [[WLAN]] 的 traffic offloading / interworking；來源稱其 newly integrated [[N3IWF]] gateway 可測試 [[WLAN offloading with Voice over WLAN]]，並搭配 integrated [[POLQA]] voice quality measurement。\n- [[R&S CMP180]] 被描述為 production phase 的 non-signaling RF measurement tester，支援 cellular 與 non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將在 MWC 展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform；來源稱這是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate。\n- [[R&S CMP180]] 來源說法：two analyzers、two generators、two sets of eight RF ports integrated，可在 single box 支援 2x2 [[MIMO]] testing；兩台 CMP180 可 combined / scaled，支援 four analyzers and generators，用於 4x4 MIMO access points。\n- 展示地點：Fira Gran Via, Barcelona，hall 5，booth 5A80。\n- Press & media contact：[[Christian Mokry]]，PR Manager Test & measurement。\n- 公司段落稱 [[Rohde & Schwarz]] 在 2024/2025 fiscal year（July to June）net revenue 為 EUR 3.16 billion，且 2025-06-30 有 more than 15,000 employees worldwide。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             },
+             "score": 1.189617
+            },
+            {
+             "text": "Wi-Fi over mmWave Technology › 架構與用途\n來源中的 WoMT 架構可整理為：\n\n1. 產生或處理 native [[Wi-Fi 7]] / IEEE 802.11be signal。\n2. 透過 [[AiP]] / antenna-in-package module 執行 integrated antenna 與 up-conversion。\n3. 將信號搬移到 27 GHz mmWave band，來源以 n257 / n258 表示。\n4. 用於 Integrated Radio CPEs 與 WoMT-AP。\n5. 在 RD / manufacturing setup 中分成 WIFI IB band 與 WIFI mmWave path。\n6. 透過 OTA / RF test 確認 EVM、[[EIRP]]、[[TRP]]、[[ACLR]]、[[EIS]]、occupied bandwidth 與 Rx / OOB spurious emissions。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi over mmWave Technology.md"
+             },
+             "score": 1.445945
+            },
+            {
+             "text": "R&S CMP200 › IF analyzer\n| 項目 | 規格 |\n|---|---|\n| Ports | 3 × IF In，port 1/2/3 |\n| Connector | SMA |\n| Frequency range | 4 GHz to 20 GHz，含 modulation bandwidth |\n| Frequency resolution | < 0.1 Hz |\n| Absolute maximum level range | 0 V DC，+25 dBm |\n| Expected nominal power setting range | PEP，ADC full scale，4 GHz to 20 GHz：–5 dBm to +15 dBm |\n| Level uncertainty | +15 °C 至 +35 °C，4 GHz to 20 GHz，P > –45 dBm RMS：< 1.5 dB |\n| Bandwidth | up to 1 GHz |\n| Harmonic response | second harmonic > 45 dB nom.；third harmonic > 70 dB nom. |\n\nFirmware version（base）≥ 4.0.7 且 TRX_BB hardware code（[[R&S CMP-B500A]] IF unit 的一部分）< 11 時，4 GHz to 7.38 GHz 與 8.0 GHz to 20 GHz 的 level uncertainty 為 < 2.5 dB。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP200.md"
+             },
+             "score": 3.926829
+            },
+            {
+             "text": "Rohde & Schwarz, in collaboration with Broadcom, will display its [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC Barcelona 2026 with newly added Wi-Fi 8 (IEEE 802.11bn) testing capabilities. The setup at the Rohde & Schwarz booth (5A80) will validate a prototype Wi-Fi 8 device from Broadcom, showcasing physical layer features unique to Wi-Fi 8.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-f833664f4958cbb4",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.841797
+            },
+            {
+             "text": "Rohde & Schwarz R&S®FSPN Phase Noise Analyzer and VCO Tester",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-6edc5773641e5092",
+               "original_ref": "raw/Productions/FSPN_specs_en_3683-7925-22_v0300.md",
+               "sha256": "6edc5773641e5092ce7ad929650ed2d2c92906f900f135116bd496547eeffb24",
+               "raw_ref": "raw/Productions/FSPN_specs_en_3683-7925-22_v0300.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/FSPN_specs_en_3683-7925-22_v0300.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.767911
+            },
+            {
+             "text": "Rohde & Schwarz R&S®FSWP Phase Noise Analyzer and VCO Tester",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d9f5b6d241c1e5d8",
+               "original_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+               "sha256": "d9f5b6d241c1e5d834b6f0c0df762971f0c39a6fc045fc2d7db2589ee858e26f",
+               "raw_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/FSWP_specs_en_3683-7719-22_v0901.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 28.767911
+            },
+            {
+             "text": "In the production phase of WLAN devices, all RF measurements are performed in non-signaling mode to save time. Rohde & Schwarz has optimized the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester for this purpose. The instrument supports many cellular and non-cellular technologies including Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz in frequency with bandwidths up to 500 MHz. Leveraging the wide bandwidth, the R&S CMP180 will demonstrate at MWC its ability to verify a WLAN waveform with 480 MHz bandwidth in loopback mode, a potential waveform candidate for the yet-to-be-defined Wi-Fi 8 (IEEE 802.11bn) standard. This feature shows that the cost-effective instrument is future-proof for users not only in production, but also in R&D.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 12,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.000238
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "technical_knowledge",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 5,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 5,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi over mmWave Technology.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 8,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 5,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/Broadcom.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 4,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/Rohde & Schwarz GmbH & Co KG.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/Wi-Fi 8.md",
+             "raw_refs": [
+              "raw/Market/OneNote/FWA CPE SmallCell/WiFi8.md",
+              "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Wi-Fi over mmWave Technology.md",
+             "raw_refs": [
+              "raw/Market/OneNote/FWA CPE SmallCell/FWA CPE.md",
+              "raw/Market/OneNote/R&S for JIO Project.md",
+              "raw/Market/OneNote/R&S solution for Jio project_202509_r3.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+             "raw_refs": [
+              "raw/Productions/CMP180_specs_en_3609-7348-22_v0800.md",
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+              "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+              "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMP200.md",
+             "raw_refs": [
+              "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

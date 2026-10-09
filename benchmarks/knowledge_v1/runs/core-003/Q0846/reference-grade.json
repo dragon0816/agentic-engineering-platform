@@ -1,0 +1,67 @@
+{
+ "id": "Q0846",
+ "grader": "1.2",
+ "coverage": 0.125,
+ "points": [
+  {
+   "n": 1,
+   "point": "Chip vendor 是 5G device testing value chain 中明示的角色，validation 目標直接包含 Chipset L1–L4 測試計畫與驗證，signaling 層對應 CMX500 / CMW500 / CMsquares",
+   "verified": true,
+   "label": "missing",
+   "why": "未提 chip vendor value chain、Chipset L1-L4 validation、CMsquares mapping"
+  },
+  {
+   "n": 2,
+   "point": "測試類型同時涵蓋 Signaling / Signaling Protocol 與 Non-signaling RF，且 value chain 由 chip vendor 一路串到 network operator",
+   "verified": true,
+   "label": "partial",
+   "why": "有提 signaling 與 non-signaling RF，但未交代 value chain 由 chip vendor 到 operator"
+  },
+  {
+   "n": 3,
+   "point": "R&S 已與 Tier 1 chipset vendors 合作驗證其平台與 WI-555 / RFT 555 的 NR-NTN test cases，是半導體客戶的既有切入點",
+   "verified": true,
+   "label": "contradicted",
+   "why": "把 NTN 證據說成很弱/僅資訊連結，未承認 Tier 1 chipset vendors 與 WI-555/RFT 555 驗證"
+  },
+  {
+   "n": 4,
+   "point": "PCT roadmap 指出近期需求來自 test houses / chipset vendors，尤其是 RedCap 與 Rel.17 整體",
+   "verified": true,
+   "label": "missing",
+   "why": "未提 PCT roadmap、test houses/chipset vendors、RedCap 或 Rel.17 需求"
+  },
+  {
+   "n": 5,
+   "point": "與晶片商共同展示 / 驗證已有案例：CMX500 OBT one-box signaling tester 搭 MediaTek NTN-NR device 做 Rel.17 NTN 連線",
+   "verified": true,
+   "label": "missing",
+   "why": "未提 MediaTek NTN-NR Rel.17 連線展示"
+  },
+  {
+   "n": 6,
+   "point": "FR3 / 6G 早期研究機會：CMX500 OBT 在 13 GHz 建立 signaling environment 並驗證 Qualcomm 5G mobile test platform 的 throughput",
+   "verified": true,
+   "label": "missing",
+   "why": "未提 Qualcomm、13 GHz FR3、throughput 或 6G 早研"
+  },
+  {
+   "n": 7,
+   "point": "Non-signaling / ATE 延伸機會：由 CMX validation 擴展到 CMP180 / CMP200 / CMW100 量產線，CMP200 + RRH 定位為 FR2 nonsignaling high-volume RF parametric testing",
+   "verified": true,
+   "label": "partial",
+   "why": "有提 CMP180/CMP200 production/non-signaling，但缺 CMX validation scale、CMW100、RRH/FR2 high-volume parametric testing"
+  },
+  {
+   "n": 8,
+   "point": "競爭風險：R&S battle card 自述 Keysight 在美國與 key semiconductor accounts 很強，宣稱 25/25 semiconductor companies，且未附可追溯外部證據",
+   "verified": true,
+   "label": "missing",
+   "why": "未提 Keysight 競爭風險與 25/25 semiconductor companies 宣稱"
+  }
+ ],
+ "contradicted": 1,
+ "invented": [
+  "Wiki 確認 NR FR2 measurements options：CMP-KM601、CMP-KM603、CMP-KM605、CMP-KW601"
+ ]
+}

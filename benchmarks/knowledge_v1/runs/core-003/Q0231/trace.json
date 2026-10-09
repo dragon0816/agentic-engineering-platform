@@ -1,0 +1,910 @@
+{
+ "question": {
+  "id": "Q0231",
+  "text": "How do changes in radar technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "market": "Aerospace / Defense",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-da0cac80491f4bcea4a7d58ab93fea97",
+ "exchange": {
+  "sent": "How do changes in radar technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "http_status": 200,
+  "seconds": 125.719,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-da0cac80491f4bcea4a7d58ab93fea97",
+    "actor": "leo.chi",
+    "title": "How do changes in radar technology affect the measurement capability req…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T19:34:44.420749Z",
+    "updated_at": "2026-10-09T19:36:49.946380Z",
+    "messages": [
+     {
+      "message_id": "message-340cb3f890a440109ddbd1f746d94a77",
+      "role": "user",
+      "text": "How do changes in radar technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+      "created_at": "2026-10-09T19:34:44.449074Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-95bffc7511f04926b0c728a5a23cf202",
+      "role": "assistant",
+      "text": "Radar-related test capability in the passages is framed around automotive radar echo generation, FMCW radar, radar cross-section, Doppler frequency shift, hardware-in-the-loop, Open Simulation Interface, air gap, and monostatic or bistatic frontend support [2].\nThe R&S AREG800A radar production configurations show that radar test capability is specified by digital channel count, object count per channel, instantaneous bandwidth, near-object range, IF interfaces, remote control interfaces, and monostatic/bistatic frontend support [33].\nThe AREG-P1 radar mini configuration has one digital channel, one object per channel, 5 GHz instantaneous bandwidth, near-object range possibility, analog IF output interfaces, remote control interfaces, and requires one AREG-MFP or AREG-BFP frontend per channel [33].\nThe AREG-P2 radar golden configuration has two digital channels [33].\nThe AREG-P3 radar pro configuration has three digital channels, one object per channel, and uses AREG-MFP or AREG-BFP frontend options supporting monostatic or bistatic operation [33].\nSignaling/non-signaling tester capability in the passages is framed separately around wireless communications testing, because the CMX500 is a universal one-box network emulation and measurement test solution for LTE, NR FR1, NR FR2, NSA, SA, FDD, TDD, FR1/FR2 RF parametric testing, and fading propagation conditions [11].\nThe CMX500 also provides NR FR1/FR2 signaling and TX measurements, LTE signaling and measurements, WLAN signaling and WLAN TX measurements, fading, AWGN, BLER, CSI reports, throughput measurement, and PER measurement [1].\nCMX500 Callbox use cases include RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance, and non-signaling R&D verification [3].\nExample CMX500 Callbox use cases include R&D verification of new bands, sensitivity testing, RedCap, desense testing, 3GPP pre-conformance testing, SRS RF measurements, UL MIMO and UL CA RF measurements, UL TX switching, multi-SIM testing, high end-to-end throughput testing, and non-signaling verification [13].\nFor Wi-Fi 7 R&D, the CMX500 is positioned as a single-box signaling tester used to measure RF TX/RX characteristics in signaling mode and real-world conditions, and MLO makes a multiple-RF-chain test environment important [26].\nFor WLAN production, RF measurements are performed in non-signaling mode to save time, and the CMP180 supports Wi-Fi 6E, Wi-Fi 7, 5G NR FR1 up to 8 GHz, bandwidths up to 500 MHz, 480 MHz WLAN waveform loopback validation, 2x2 MIMO in one box, and scalable 4x4 MIMO using two instruments [34].\n【推論】If radar development requires more simulated radar channels, objects, bandwidth, near-object behavior, or monostatic/bistatic setups, the relevant radar test equipment capability would need to scale in those dimensions, because AREG800A configurations are specified by channel count, object count per channel, 5 GHz instantaneous bandwidth, near-object range, IF interfaces, and monostatic/bistatic frontend support.[33]\n【推論】These radar echo-generation requirements should not be treated as verified requirements for CMX500 or CMP180, because the cited CMX500 and CMP180 passages describe cellular/WLAN signaling or non-signaling RF testing rather than automotive radar echo generation.[1][11][34]\n【推論】For products that combine radar with cellular or WLAN functions, signaling/non-signaling testers would cover the communications-side measurements such as RF TX/RX, sensitivity, desense, MIMO, throughput, pre-conformance, and non-signaling verification, while automotive radar echo generation remains a separate radar-specific test role.[3][13][33][34]\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[2] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[3] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[11] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[13] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[26] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[33] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[34] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）",
+      "created_at": "2026-10-09T19:36:49.946380Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-3b58008cee954d31a7d5a0810b601e21",
+       "request_id": "request-3b58008cee954d31a7d5a0810b601e21",
+       "span_id": "span-3b58008cee954d31a7d5a0810b601e21",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "Radar-related test capability in the passages is framed around automotive radar echo generation, FMCW radar, radar cross-section, Doppler frequency shift, hardware-in-the-loop, Open Simulation Interface, air gap, and monostatic or bistatic frontend support [2].\nThe R&S AREG800A radar production configurations show that radar test capability is specified by digital channel count, object count per channel, instantaneous bandwidth, near-object range, IF interfaces, remote control interfaces, and monostatic/bistatic frontend support [33].\nThe AREG-P1 radar mini configuration has one digital channel, one object per channel, 5 GHz instantaneous bandwidth, near-object range possibility, analog IF output interfaces, remote control interfaces, and requires one AREG-MFP or AREG-BFP frontend per channel [33].\nThe AREG-P2 radar golden configuration has two digital channels [33].\nThe AREG-P3 radar pro configuration has three digital channels, one object per channel, and uses AREG-MFP or AREG-BFP frontend options supporting monostatic or bistatic operation [33].\nSignaling/non-signaling tester capability in the passages is framed separately around wireless communications testing, because the CMX500 is a universal one-box network emulation and measurement test solution for LTE, NR FR1, NR FR2, NSA, SA, FDD, TDD, FR1/FR2 RF parametric testing, and fading propagation conditions [11].\nThe CMX500 also provides NR FR1/FR2 signaling and TX measurements, LTE signaling and measurements, WLAN signaling and WLAN TX measurements, fading, AWGN, BLER, CSI reports, throughput measurement, and PER measurement [1].\nCMX500 Callbox use cases include RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance, and non-signaling R&D verification [3].\nExample CMX500 Callbox use cases include R&D verification of new bands, sensitivity testing, RedCap, desense testing, 3GPP pre-conformance testing, SRS RF measurements, UL MIMO and UL CA RF measurements, UL TX switching, multi-SIM testing, high end-to-end throughput testing, and non-signaling verification [13].\nFor Wi-Fi 7 R&D, the CMX500 is positioned as a single-box signaling tester used to measure RF TX/RX characteristics in signaling mode and real-world conditions, and MLO makes a multiple-RF-chain test environment important [26].\nFor WLAN production, RF measurements are performed in non-signaling mode to save time, and the CMP180 supports Wi-Fi 6E, Wi-Fi 7, 5G NR FR1 up to 8 GHz, bandwidths up to 500 MHz, 480 MHz WLAN waveform loopback validation, 2x2 MIMO in one box, and scalable 4x4 MIMO using two instruments [34].\n【推論】If radar development requires more simulated radar channels, objects, bandwidth, near-object behavior, or monostatic/bistatic setups, the relevant radar test equipment capability would need to scale in those dimensions, because AREG800A configurations are specified by channel count, object count per channel, 5 GHz instantaneous bandwidth, near-object range, IF interfaces, and monostatic/bistatic frontend support.[33]\n【推論】These radar echo-generation requirements should not be treated as verified requirements for CMX500 or CMP180, because the cited CMX500 and CMP180 passages describe cellular/WLAN signaling or non-signaling RF testing rather than automotive radar echo generation.[1][11][34]\n【推論】For products that combine radar with cellular or WLAN functions, signaling/non-signaling testers would cover the communications-side measurements such as RF TX/RX, sensitivity, desense, MIMO, throughput, pre-conformance, and non-signaling verification, while automotive radar echo generation remains a separate radar-specific test role.[3][13][33][34]\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[2] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[3] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[11] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[13] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[26] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[33] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[34] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-3b58008cee954d31a7d5a0810b601e21",
+      "request_id": "request-3b58008cee954d31a7d5a0810b601e21",
+      "span_id": "span-3b58008cee954d31a7d5a0810b601e21",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-3b58008cee954d31a7d5a0810b601e21",
+       "request_id": "request-3b58008cee954d31a7d5a0810b601e21",
+       "span_id": "span-3b58008cee954d31a7d5a0810b601e21",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Radar-related test capability in the passages is framed around automotive radar echo generation, FMCW radar, radar cross-section, Doppler frequency shift, hardware-in-the-loop, Open Simulation Interface, air gap, and monostatic or bistatic frontend support [2].\nThe R&S AREG800A radar production configurations show that radar test capability is specified by digital channel count, object count per channel, instantaneous bandwidth, near-object range, IF interfaces, remote control interfaces, and monostatic/bistatic frontend support [33].\nThe AREG-P1 radar mini configuration has one digital channel, one object per channel, 5 GHz instantaneous bandwidth, near-object range possibility, analog IF output interfaces, remote control interfaces, and requires one AREG-MFP or AREG-BFP frontend per channel [33].\nThe AREG-P2 radar golden configuration has two digital channels [33].\nThe AREG-P3 radar pro configuration has three digital channels, one object per channel, and uses AREG-MFP or AREG-BFP frontend options supporting monostatic or bistatic operation [33].\nSignaling/non-signaling tester capability in the passages is framed separately around wireless communications testing, because the CMX500 is a universal one-box network emulation and measurement test solution for LTE, NR FR1, NR FR2, NSA, SA, FDD, TDD, FR1/FR2 RF parametric testing, and fading propagation conditions [11].\nThe CMX500 also provides NR FR1/FR2 signaling and TX measurements, LTE signaling and measurements, WLAN signaling and WLAN TX measurements, fading, AWGN, BLER, CSI reports, throughput measurement, and PER measurement [1].\nCMX500 Callbox use cases include RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance, and non-signaling R&D verification [3].\nExample CMX500 Callbox use cases include R&D verification of new bands, sensitivity testing, RedCap, desense testing, 3GPP pre-conformance testing, SRS RF measurements, UL MIMO and UL CA RF measurements, UL TX switching, multi-SIM testing, high end-to-end throughput testing, and non-signaling verification [13].\nFor Wi-Fi 7 R&D, the CMX500 is positioned as a single-box signaling tester used to measure RF TX/RX characteristics in signaling mode and real-world conditions, and MLO makes a multiple-RF-chain test environment important [26].\nFor WLAN production, RF measurements are performed in non-signaling mode to save time, and the CMP180 supports Wi-Fi 6E, Wi-Fi 7, 5G NR FR1 up to 8 GHz, bandwidths up to 500 MHz, 480 MHz WLAN waveform loopback validation, 2x2 MIMO in one box, and scalable 4x4 MIMO using two instruments [34].\n【推論】If radar development requires more simulated radar channels, objects, bandwidth, near-object behavior, or monostatic/bistatic setups, the relevant radar test equipment capability would need to scale in those dimensions, because AREG800A configurations are specified by channel count, object count per channel, 5 GHz instantaneous bandwidth, near-object range, IF interfaces, and monostatic/bistatic frontend support.[33]\n【推論】These radar echo-generation requirements should not be treated as verified requirements for CMX500 or CMP180, because the cited CMX500 and CMP180 passages describe cellular/WLAN signaling or non-signaling RF testing rather than automotive radar echo generation.[1][11][34]\n【推論】For products that combine radar with cellular or WLAN functions, signaling/non-signaling testers would cover the communications-side measurements such as RF TX/RX, sensitivity, desense, MIMO, throughput, pre-conformance, and non-signaling verification, while automotive radar echo generation remains a separate radar-specific test role.[3][13][33][34]\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[2] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[3] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[11] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[13] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[26] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[33] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[34] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_EalcSxjLgAXE45wPSNVwbHpz",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "Radar-related test capability in the passages is framed around automotive radar echo generation, FMCW radar, radar cross-section, Doppler frequency shift, hardware-in-the-loop, Open Simulation Interface, air gap, and monostatic or bistatic frontend support [2].\nThe R&S AREG800A radar production configurations show that radar test capability is specified by digital channel count, object count per channel, instantaneous bandwidth, near-object range, IF interfaces, remote control interfaces, and monostatic/bistatic frontend support [33].\nThe AREG-P1 radar mini configuration has one digital channel, one object per channel, 5 GHz instantaneous bandwidth, near-object range possibility, analog IF output interfaces, remote control interfaces, and requires one AREG-MFP or AREG-BFP frontend per channel [33].\nThe AREG-P2 radar golden configuration has two digital channels [33].\nThe AREG-P3 radar pro configuration has three digital channels, one object per channel, and uses AREG-MFP or AREG-BFP frontend options supporting monostatic or bistatic operation [33].\nSignaling/non-signaling tester capability in the passages is framed separately around wireless communications testing, because the CMX500 is a universal one-box network emulation and measurement test solution for LTE, NR FR1, NR FR2, NSA, SA, FDD, TDD, FR1/FR2 RF parametric testing, and fading propagation conditions [11].\nThe CMX500 also provides NR FR1/FR2 signaling and TX measurements, LTE signaling and measurements, WLAN signaling and WLAN TX measurements, fading, AWGN, BLER, CSI reports, throughput measurement, and PER measurement [1].\nCMX500 Callbox use cases include RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance, and non-signaling R&D verification [3].\nExample CMX500 Callbox use cases include R&D verification of new bands, sensitivity testing, RedCap, desense testing, 3GPP pre-conformance testing, SRS RF measurements, UL MIMO and UL CA RF measurements, UL TX switching, multi-SIM testing, high end-to-end throughput testing, and non-signaling verification [13].\nFor Wi-Fi 7 R&D, the CMX500 is positioned as a single-box signaling tester used to measure RF TX/RX characteristics in signaling mode and real-world conditions, and MLO makes a multiple-RF-chain test environment important [26].\nFor WLAN production, RF measurements are performed in non-signaling mode to save time, and the CMP180 supports Wi-Fi 6E, Wi-Fi 7, 5G NR FR1 up to 8 GHz, bandwidths up to 500 MHz, 480 MHz WLAN waveform loopback validation, 2x2 MIMO in one box, and scalable 4x4 MIMO using two instruments [34].\n【推論】If radar development requires more simulated radar channels, objects, bandwidth, near-object behavior, or monostatic/bistatic setups, the relevant radar test equipment capability would need to scale in those dimensions, because AREG800A configurations are specified by channel count, object count per channel, 5 GHz instantaneous bandwidth, near-object range, IF interfaces, and monostatic/bistatic frontend support.[33]\n【推論】These radar echo-generation requirements should not be treated as verified requirements for CMX500 or CMP180, because the cited CMX500 and CMP180 passages describe cellular/WLAN signaling or non-signaling RF testing rather than automotive radar echo generation.[1][11][34]\n【推論】For products that combine radar with cellular or WLAN functions, signaling/non-signaling testers would cover the communications-side measurements such as RF TX/RX, sensitivity, desense, MIMO, throughput, pre-conformance, and non-signaling verification, while automotive radar echo generation remains a separate radar-specific test role.[3][13][33][34]\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[2] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[3] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[11] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[13] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[26] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[33] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[34] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）",
+          "evidence": {
+           "raw_citations": 8,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-2f3478256ce0409d8ce6f4eaa55b52b1",
+            "request_id": "request-2f3478256ce0409d8ce6f4eaa55b52b1",
+            "span_id": "span-2f3478256ce0409d8ce6f4eaa55b52b1",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "How do changes in radar technology affect the measurement capability required from Signaling / Non-signaling Tester? Include implications for radar technology trends and test equipment such as signaling/non-signaling testers.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 15.030628
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG-MFP]]、[[R&S AREG-BFP]] — production frontend options，支援 monostatic 或 bistatic。\n- [[Automotive radar echo generation]]、[[FMCW radar]]、[[Radar cross-section]]、[[Doppler frequency shift]]、[[Hardware-in-the-loop]]、[[Open Simulation Interface]]、[[SCPI]]、[[Air gap]] — 本來源涉及的技術概念。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.010399
+             },
+             {
+              "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 2.570631
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 2.46928
+             },
+             {
+              "text": "R&S AREG800A › Production base units\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n| 代碼 | 名稱 | Order No. | 原文的一句說明 |\n|---|---|---|---|\n| [[R&S AREG-DBP1]] | [[R&S AREG-P1]] radar mini | `1437.9676P02` | Production base unit option / radar mini configuration |\n| [[R&S AREG-DBP2]] | [[R&S AREG-P2]] radar golden | `1437.9682P02` | Production base unit option / radar golden configuration |\n| [[R&S AREG-DBP3]] | [[R&S AREG-P3]] radar pro | `1437.9699P02` | Production base unit option / radar pro configuration |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 41,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 3.3807
+             },
+             {
+              "text": "0. UAV產業分析報告架構 › 重點摘要\n- 本來源是一份 OneNote / Microsoft 365 chat 複製出的「台灣無人機產業分析報告（2025年版）」架構與內容摘要，主題是 [[台灣無人機產業]]、[[台灣無人機供應鏈]]、政策、技術與市場機會。\n- 來源稱台灣無人機產業在 2025 年上半年外銷金額達 1,189 萬美元，年增超過 7 倍；但該數字來自來源內引用的 [[數位時代 BusinessNext]] 連結，raw 未擷取連結正文。\n- 來源稱政府投入 500 億元推動軍用無人機採購，並成立 [[台灣卓越無人機海外商機聯盟]]，但未提供政府公告、預算科目或聯盟正式文件。\n- 來源稱全球無人機市場預估由 2024 年 730 億美元成長至 2030 年 1,636 億美元，CAGR 約 14.3%；該數字來自來源內引用的 PDF 連結，raw 未擷取 PDF 正文。\n- 來源稱台灣國防部預計於 2026–2027 年間採購 5 萬架無人機；raw 未擷取該主張的正式採購公告或標案文件。\n- 來源把無人機供應鏈分成上游晶片 / 感測器 / 通訊模組、中游模組製造與系統整合、下游整機製造與應用服務三層，列出 [[聯發科]]、[[新唐科技]]、[[圓剛]]、[[聰泰]]、[[亞光]]、[[中光電]]、[[漢翔]]、[[雷虎科技]]、[[經緯航太]]與[[長榮航太]]等公司。\n- 技術趨勢方面，來源列出 [[AI]]、自主飛行、[[5G]]、[[低軌衛星]]通訊、AI 飛控、影像辨識與邊緣運算，但沒有逐項列出標準版本、產品型號或公司導入證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0. UAV產業分析報告架構.md"
+              },
+              "score": 7.569122
+             },
+             {
+              "text": "聯發科 › UAV / Genio 脈絡\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[聯發科]]（2454）列於 [[台灣無人機供應鏈]] 上游的晶片、感測器、通訊模組分類，描述為 AI晶片與通訊模組。\n- [[4. UAV Eco-chain in Taiwan]]（來源未標示正式日期；raw 轉檔 2026-09-17）將 [[聯發科]]（2454）列於 Key component/technology 區段，稱其晶片可作為無人機核心處理器，負責運算與通訊。\n- [[TW government support projects(無人機關鍵晶片及模組自主開發研發補助計畫)]]（來源未標示正式發布日期；raw 轉檔 2026-09-17）稱 [[海華科技]] 主導、[[臺灣希望]] 合作的先進無人機 AI 影像模組計畫將採用 [[聯發科]] [[Genio 720]] 晶片。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/聯發科.md"
+              },
+              "score": 1.695046
+             },
+             {
+              "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.606005
+             },
+             {
+              "text": "Temporary UE capability restriction\n[[Temporary UE capability restriction]] 是 Release 18 [[Dual SIM Dual Active]] / [[Multi-USIM operation]] 中，UE 因雙 SIM active connection 共用硬體能力而向 network 回報暫時能力限制的機制。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Temporary UE capability restriction.md"
+              },
+              "score": 7.823058
+             },
+             {
+              "text": "R&S SMW200A › RF path combination 與 chassis\n- RF path combination table：`●` 代表 possible；`–` 代表 not possible；灰底格代表該 RF path combination 需要 `R&S®SMW-B94L` deeper chassis；白底格使用 standard chassis。\n- `R&S®SMW-B94L`：Deeper chassis，Order No. `1438.8150.02`。\n- `R&S®SMW-B94L` required and only possible for RF path combinations：`2 × 12.75 GHz`、`2 × 31.8 GHz`、`2 × 44 GHz`。\n- 44 GHz 組合限制：`R&S®SMW-B1044` 只能與 `R&S®SMW-B2044` 組合；`R&S®SMW-B1044N` 只能與 `R&S®SMW-B2044N` 組合；`R&S®SMW-B1044O` 只能與 `R&S®SMW-B2044O` 組合。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 2.782244
+             },
+             {
+              "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 8.867548
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 讀圖補充\n以下內容來自讀圖補充，可信度低於正文，不用於推翻正文。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 0.896535
+             },
+             {
+              "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 2.555599
+             },
+             {
+              "text": "0. UAV產業分析報告架構 › 日期與期間\n| 主張 | 日期 / 期間 | 來源中的標示 |\n|---|---:|---|\n| 報告版本 | 2025 年版 | 標題寫明「2025年版」。 |\n| 台灣無人機外銷金額 | 2025 年上半年 | 外銷金額 1,189 萬美元、年增超過 7 倍。 |\n| 全球市場預估起點 | 2024 年 | 全球市場 730 億美元。 |\n| 全球市場預估終點 | 2030 年 | 全球市場 1,636 億美元，CAGR 約 14.3%。 |\n| 台灣國防部無人機採購 | 2026–2027 年 | 預計採購 5 萬架無人機。 |\n| CTCI 參考資料 | 2023-02 | 來源 references 中列出 2023-02 台灣無人機技術與產業發展之挑戰。 |\n| raw 轉檔 | 2026-09-17 | frontmatter `converted: 2026-09-17`，不可當作內容發布日期。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0. UAV產業分析報告架構.md"
+              },
+              "score": 1.413206
+             },
+             {
+              "text": "新唐科技\n[[新唐科技]] 是 [[Edge AI Chips image 10]]、[[Edge AI Chips image 11]] 與 [[Edge AI Chips image 36]] 中以 **nuvoton / 新唐科技 / 新唐(Nuvoton)** 出現的公司 / 品牌名稱，相關內容包含 [[Cortex-M55]] 產品圖與 [[NuML Toolkit]] / [[NuEdgeWise]] AI 開發工具流程。[[0. UAV產業分析報告架構]] 另將新唐列於 [[台灣無人機供應鏈]] 上游，描述為微控制器 MCU。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/新唐科技.md"
+              },
+              "score": 0.12537
+             },
+             {
+              "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.359119
+             },
+             {
+              "text": "Temporary UE capability restriction › 為什麼需要 capability restriction\n依 [[Dual Sim Dual Active]]：\n\n- dual-Tx / dual-Rx MUSIM device 可能為了有效與經濟地使用 hardware，在兩個 USIMs 之間 share hardware。\n- dual active connections 可能造成 temporary hardware conflict。\n- band conflict 也可能發生。\n- UE 因此可能需要向 network report temporary capability restriction。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Temporary UE capability restriction.md"
+              },
+              "score": 1.586859
+             },
+             {
+              "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 5.757787
+             },
+             {
+              "text": "CMX500 Callbox › Testing phases\n[[CMX500_Callbox]] 將測試階段放在下列脈絡中：\n\n- [[Go-NoGo Testing]]。\n- [[Non-Sig Testing]]。\n- [[Conformance Testing]]。\n- [[R&D Testing]]。\n\n來源未明確說這四者是完整 lifecycle，也未定義各階段 pass/fail 標準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 0.965981
+             },
+             {
+              "text": "R&S SGU100A › Spectral purity\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Harmonics | `f > 12 GHz, level ≤ 8 dBm` | `< –30 dBc` |\n| Nonharmonics | `level > –10 dBm, offset > 10 kHz from carrier`, `12 GHz < f ≤ 20 GHz` | `< –56 dBc (meas.)` |\n| Nonharmonics | `level > –10 dBm, offset > 10 kHz from carrier`, `f > 20 GHz` | `< –50 dBc (meas.)` |\n| Subharmonics | `f > 12 GHz` | `< –55 dBc, < –65 dBc (typ.)` |\n\nWideband noise 條件：`carrier offset = 30 MHz, level = 10 dBm, measurement bandwidth 1 Hz`，註明 in combination with [[R&S SGS100A]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SGU100A.md"
+              },
+              "score": 3.377521
+             },
+             {
+              "text": "0. UAV產業分析報告架構 › 與既有知識的關係\n- 本來源與既有 [[聯發科]]、[[新唐科技]]、[[Edge AI 晶片版圖]] 皆涉及 AI / edge / 通訊晶片，但本來源只提供無人機供應鏈列名，不提供產品型號、規格、出貨或客戶證據。\n- 本來源提到 [[低軌衛星]]通訊作為無人機關鍵技術，與既有 [[低軌衛星零組件與地面終端供應鏈]]、[[相控陣列天線]]、[[衛星地面設備]] 可橫向連結；但本來源沒有提供 UAV 與 LEO 供應鏈的具體公司或測試規格。\n- 本來源屬於 [[Market]] 類資料，含 2025、2026–2027、2024–2030 等時間性市場主張；後續使用時必須保留日期與來源限制。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0. UAV產業分析報告架構.md"
+              },
+              "score": 1.382465
+             },
+             {
+              "text": "雷虎科技\n[[雷虎科技]] 是 [[0. UAV產業分析報告架構]] 中列於 [[台灣無人機供應鏈]] 下游的公司，來源描述其與軍用與大型無人機相關；[[4. UAV Eco-chain in Taiwan]] 另把雷虎科技股份有限公司列在 System Integrator 區段。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/雷虎科技.md"
+              },
+              "score": 0.482648
+             },
+             {
+              "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 2.354196
+             },
+             {
+              "text": "Temporary UE capability restriction › Wait timer 與 reconfiguration\n來源描述：\n\n- 若 UE reactively requests a change of capabilities，UE expected to receive a new [[RRCReconfiguration]] immediately。\n- network 可能仍短時間使用 requested resource for transmission。\n- 因此引入 wait timer 等待 subsequent RRC reconfiguration。\n- 若 UE 在 certain time 內未收到符合 UE current capabilities 的 reconfiguration，UE is allowed to switch its capabilities locally。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Temporary UE capability restriction.md"
+              },
+              "score": 0.891372
+             },
+             {
+              "text": "VIAVI O-RU Tester › 與 R&S portfolio 的關係\n依兩份來源：\n\n- [[VIAVI O-RU Tester]] / [[VIAVI TM500 O-RU Tester]] 主要承擔 O-DU emulation、O-RAN FH、M / C / U / S plane、test scripts、O-RU test manager / TMA 與 automation context。\n- R&S 提供 RF signal generation、signal analysis、VSE、power supply、oscilloscope、RF switch / OSP、PVT360A single-box VSA/VSG 或 standalone VSA/VSG equipment。\n- 2025 來源將 setup 分為：\n  - [[R&S PVT360A O-RU testing]]：release / regression / quality check / production / FR1 subset。\n  - VSA/VSG setup：complete WG4 and 3GPP conformance testing / R&D / FR1 / FR2 / LTE / NB-IoT。\n  - [[O-RU NES testing]]：RTO6 + VSE/VSA + power supply + VIAVI TM500 O-RU Tester。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/VIAVI O-RU Tester.md"
+              },
+              "score": 1.028668
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › R&D：R&S CMX500 single-box signaling testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- [[R&S CMX500]] 是 multi-technology multi-channel signaling tester。\n- 來源稱其已新增 integrated [[Wi-Fi 7]] test functionality。\n- 目的在 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation。\n- Wi-Fi 7 R&D 測試需在 signaling mode 與 real-world conditions 下量測 RF TX / RX characteristics。\n- [[MLO]] 是 [[Wi-Fi 7]] key feature，因此提供 multiple RF chains 的 test environment 很重要。\n- 來源列出的 Wi‑Fi 7-specific tests 包含 2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 2.761739
+             },
+             {
+              "text": "R&S SGT100A › Spectral purity\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Harmonics | `level ≤ 8 dBm`, CW, I/Q wideband off | `< –30 dBc` |\n| Nonharmonics | `level > –10 dBm`, `offset > 10 kHz from carrier`, `f ≤ 1500 MHz` | `< –76 dBc` |\n| Nonharmonics | `level > –10 dBm`, `offset > 10 kHz from carrier`, `1500 MHz < f ≤ 3000 MHz` | `< –70 dBc` |\n| Nonharmonics | `level > –10 dBm`, `offset > 10 kHz from carrier`, `3000 MHz < f ≤ 6000 MHz` | `< –64 dBc` |\n| Subharmonics | `level > –10 dBm`, `f ≤ 3000 MHz` | `< –76 dBc` |\n| Subharmonics | `level > –10 dBm`, `3000 MHz < f ≤ 6000 MHz` | `< –68 dBc` |\n| Wideband noise | `1 MHz ≤ f ≤ 6 GHz`, `10 MHz carrier offset`, `level > 5 dBm`, setting characteristic `auto`, `1 Hz measurement bandwidth`, CW | `< –145 dBc` |\n| Wideband noise | same condition, I/Q | `< –135 dBc` |\n\nSSB phase noise 條件：`20 kHz carrier offset`, `1 Hz measurement bandwidth`。\n\n| Frequency | SSB phase noise |\n|---|---|\n| `f = 1 GHz` | `< –126 dBc`; `–133 dBc (meas.)` |\n| `f = 2 GHz` | `< –120 dBc`; `–127 dBc (meas.)` |\n| `f = 6 GHz` | `< –110 dBc`; `–117 dBc (meas.)` |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SGT100A.md"
+              },
+              "score": 4.793389
+             },
+             {
+              "text": "0. AI Data Center › 重點摘要\n- [[0. AI Data Center]] 是一份題為「台灣AI資料中心產業分析報告」的 OneNote raw 來源；來源正文未標示作者、發布者、正式發布日期、報告版本或資料來源清單。\n- 來源路徑含 `AI DATA CENTER (2026-8-20)`，raw frontmatter 的 `converted` 為 2026-09-16；但來源正文沒有明確說明 2026-8-20 是報告日期、筆記資料夾日期或其他日期。\n- 來源主張 [[台灣 AI 資料中心產業]] 正快速成長，受惠於全球 [[AI算力]] 需求、[[生成式AI]]、[[主權AI]]、[[邊緣運算]] 與 [[Neo Cloud]] 市場崛起。\n- 來源將 [[AI資料中心]] 定義為支撐 [[大型語言模型]]、[[生成式AI]] 與 [[雲端運算]] 的基礎設施，核心包含高效能 [[AI伺服器]]、[[GPU]] / [[TPU]]、[[液冷系統]] 與高速網路。\n- 來源列出市場數字：2025 年全球伺服器出貨量預估達 1,432 萬台，[[AI伺服器]] 占比預估 2029 年達 38.4%；來源未附引用、計算口徑或資料機構。\n- 來源稱 [[微軟 Azure]]、[[Vantage]]、[[是方電訊]] 等業者已在台啟用資料中心，帶動本地基礎建設與供應鏈需求；來源未提供啟用日期、機房位置、容量或原始公告。\n- 來源將供應鏈分成上游晶片與零組件、中游伺服器代工與品牌、下游雲端與 AI 服務，列名包含 [[台積電]]、[[信驊]]、[[雙鴻]]、[[台達電]]、[[金像電]]、[[緯穎]]、[[鴻海]]、[[廣達]]、[[英業達]]、[[台智雲]]、[[AWS]]、[[Google Cloud]] 等。\n- 來源稱 [[緯穎]] 為 AWS、Meta 代工；稱 [[鴻海]] 與輝達合作；來源未提供合約、客戶公告、出貨或專案證據。\n- 技術面，來源列出 [[液冷散熱]]、[[DLC]]、[[兩相液冷]]、高效率電源與儲能系統、模組化設計、GPU 叢集與 [[BMC]] 遠端管理。\n- 政策與挑戰面，來源列出能源供應、用電規範、綠電、碳排、個資法、資安法規、人才流失、技術斷層與國際競爭。\n- 來源末尾嵌入兩張圖片：`0. AI Data Center image.png` 與 `0. AI Data Center image 1.png`；既有 wiki 已有 [[0. AI Data Center image]] 與 [[0. AI Data Center image 1]] 等圖像來源摘要，本文頁不重新解讀圖片內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0. AI Data Center.md"
+              },
+              "score": 1.2594
+             },
+             {
+              "text": "信驊 › 來源中的列名\n- [[Power IC - Power Management IC image 4]]（圖上標示 2026 年；取得於 2026-09-04）在「台股 AI 電力供應鏈地圖」的「PMIC 設計與 BMC 監控」分類中列出 [[信驊]]。\n- 同一分類還列出 [[矽力-KY]]、[[致新]]、[[力智]]、[[茂達]]、[[BMC]]、[[新唐]]。\n- 來源未提供 [[信驊]] 的產品型號、客戶、BMC 型號、營收、市占率、供應合約、認證或出貨資料。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/信驊.md"
+              },
+              "score": 0.906344
+             },
+             {
+              "text": "NTN test and measurement aspects › SAN / base station in the sky testing\n來源以 [[TS 38.108]]、[[TS 38.181]] 描述 satellite / [[Satellite Access Node]]（SAN）testing：\n\n- TS 38.108 定義 SAN radio transmission and reception。\n- TS 38.181 定義 SAN conformance testing tolerances 與 test cases。\n- SAN type 包含 type 1-H、type 1-O、type 2-O。\n- FR1 hybrid setup 可 conducted 或 radiated；FR2 only OTA / radiated。\n- TS 38.181 chapters 包含 conducted transmitter、conducted receiver、conducted performance、radiated transmitter、radiated receiver、radiated performance。\n- 測試重點包含 output power、power dynamics、frequency error、modulation quality、ACLR、OBUE、receiver sensitivity、blocking、PUSCH / PUCCH / PRACH performance。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 3.87531
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 來源列出的優點\n- 可在 milliseconds 內量測 wideband signals 的 absolute group delay 與 relative group delay。\n- Signal averaging 與 smoothing 可改善 carrier-to-noise ratio，在 cables 與 fixtures 導致 high signal path losses 時取得 valid results。\n- 可自動補償 in-orbit measurements 的 Doppler effects。\n- Frequency converters 的 relative group delay 可達 1 ns measurement accuracy，且不需要 reference mixer 或 golden device。\n- Non-frequency-translating measurements 的 relative group delay 可達 300 ps measurement accuracy。\n- [[R&S SMW200A]] 可內部彈性產生 MCCW signals 與 modulated signals，並可設定 carrier spacing 與 number of carriers。\n- Deembedding function 可修正 measurement setup 中 cables 與 fixtures 的 frequency response。\n- [[R&S FSW-K17S]] option 可量測 low SNR 的 wideband signals，透過分析 overall signal 的 subspans 改善 SNR 與 measurement speeds。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 2.502523
+             },
+             {
+              "text": "VIAVI O-RU Tester › March 2025 short version 中的新增角色\n依 [[R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT]]（March 2025）：\n\n- Slide 7 將 `VIAVI+R&S O-RU Tester with PVT360A` 定位為 compact, cost optimized, fully automated solution，addressing O-RU regression testing、design validation、pre-production / NPI 與 mass production test stages。\n- Slide 7 說該 setup supports full 5G NR FR1 spectrum、up to 8 GHz frequency、500 MHz bandwidth，並支援 conformance test suites aligned with O-RAN WG4 CONF FR1 and subset of 38.141 Ch. 6 / Ch. 7 test cases。\n- Slide 9 將 `VIAVI+R&S O-RU Tester with VSA/VSG` 定位為 conformance and certification testing，使用 standalone VSA：[[R&S FSV3000]] / [[R&S FSVA3000]] / [[R&S FSW]]，以及 VSG：[[R&S SMW200A]] / [[R&S SMM100A]] / [[R&S SMBV100B]]。\n- Slide 9 說 VSA/VSG setup supports conformance test suites aligned with WG4 CONF FR1 / FR2 and [[3GPP TS 38.141-1]] / [[3GPP TS 38.141-2]] chapter 6 and 7，all test cases supported。\n- Slide 11 的 NES setup 稱 [[VIAVI TM500 O-RU Tester]] offers energy efficiency focused O-DU emulation test scripts for O-RU testing。\n- Slide 12 說 VIAVI TM500 O-RU Tester provides O-DU emulation along with a pre-configured library for TDD / FDD traffic loads as defined by [[ETSI ES 202 706-1]]。\n- Slide 19 將 VIAVI / R&S 與 Keysight 比較，列出 VSA-VSG based test setup 與 MMIMO with BFM based test setup 的 price point、test coverage、test case counts 與 reusability；此為 R&S internal market / battle-card statement。\n- Slide 21 說 [[VIAVI VAR Agreement]] / R&S GPPA allows Viavi to sell R&S products worldwide，target markets are O-RAN、NTN and 6G。\n- Slide 26 說 [[ORCID]] 與 [[ACCoRD]] lab 中有 VIAVI and R&S integrated O-RU tester as part of the lab；此仍需官方 lab equipment list 或 award document 補證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/VIAVI O-RU Tester.md"
+              },
+              "score": 0.93621
+             },
+             {
+              "text": "R&S AREG800A › Automotive radar production configurations\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- [[R&S AREG-P1]] radar mini configuration / [[R&S AREG-DBP1]] base unit option：one digital channel，one object per channel，5 GHz instantaneous bandwidth，near object range possibility，analog IF output interfaces，remote control interfaces，[[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option one frontend per channel required。\n- [[R&S AREG-P2]] radar golden configuration / [[R&S AREG-DBP2]] base unit option：two digital channels。\n- [[R&S AREG-P3]] radar pro configuration / [[R&S AREG-DBP3]] base unit option：搭配 [[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option；frontend 支援 monostatic 或 bistatic；three digital channels；one object per channel。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 31,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 2.997608
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › Production：R&S CMP180 non-signaling RF testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。\n- [[R&S CMP180]] 被定位為 optimized for this purpose 的 radio communication tester。\n- 來源稱 [[R&S CMP180]] 支援 many cellular and non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform。\n- 來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。\n- 來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。\n- 來源稱 two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 2.737886
+             },
+             {
+              "text": "R&S SMW200A › 主要 RF performance（Version 31.00，May 2026）\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]：\n\n- Frequency range：依 RF path frequency option，RF path A 最高 `100 kHz to 67 GHz`；RF path B 最高 `100 kHz to 44 GHz`。\n- Overrange：`67 GHz to 72 GHz`。\n- Resolution of setting：`0.001 Hz`。\n- Resolution of synthesis：`0.053 nHz nominal`，條件 `f = 1 GHz`。\n- Frequency setting time：依 frequency option 為 `< 1.2 ms` 至 `< 1.8 ms`；with `R&S®SMW-B711/-B721` 為 `< 4.0 ms`。條件包含 GUI update stopped、I/Q optimization mode fast、after IEC/IEEE bus delimiter、HUMS off。\n- Frequency setting time in list mode：依 frequency option為 `< 0.8 ms` 至 `< 1.4 ms`；with `R&S®SMW-B711/-B721`、run mode live 為 `< 4.0 ms`。\n- Level setting range：`100 kHz ≤ f < 1 MHz` 為 `–145 dBm to +8 dBm`；`1 MHz ≤ f < 3 MHz` 為 `–145 dBm to +13 dBm`；`3 MHz ≤ f ≤ 67 GHz` 為 `–145 dBm to +30 dBm`。\n- Standard performance SSB phase noise 條件：CW，carrier offset `20 kHz`，measurement bandwidth `1 Hz`，level `10 dBm` 或 maximum specified output power 兩者較低者；`f = 1 GHz` 為 `< –134 dBc`，typ. `–140 dBc`。\n- `R&S®SMW-B711/-B721` ultra low phase noise 在 `1 GHz`、`10 kHz offset` 下為 `–144 dBc`，typ. `–150 dBc`；在 `67 GHz`、`10 kHz offset` 下為 `–105 dBc`，typ. `–111 dBc`。\n- Pulse modulation 需 `R&S®SMW-K22`；一般 on/off ratio `> 80 dB`，部分高頻條件例外為 `> 65 dB`。\n- Pulse rise/fall time（10 % / 90 % of RF amplitude）：低頻 frequency options fast transition `< 10 ns`；多數 20 GHz 以上 options fast transition `< 15 ns`；smoothed transition 多數條件 `< 200 ns`。\n- Internal baseband I/Q、wideband baseband (`R&S®SMW-B13XT`)、I/Q wideband on：`f > 2.5 GHz` 時 `±1 GHz`；RF modulation bandwidth 可達 `2 GHz`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 1.93831
+             },
+             {
+              "text": "0. AI Data Center › 與既有知識的關係\n- 本來源是文字型市場分析報告，與既有 [[0. AI Data Center image]]、[[0. AI Data Center image 1]] 等圖像來源不同；它提供較完整的敘事式產業分析，但缺少引用來源、作者與資料口徑。\n- 既有 [[AI 資料中心基礎設施]] 主要整理概念圖中的 Connectivity、Power、Resilience、Power Management、Rack & Accessories、Management System、Precision Cooling 與 Service；本來源補入台灣產業、政策、能源與供應鏈敘事。\n- 既有 [[AI 資料中心生態系]] 與 [[臺灣 AI 伺服器供應鏈]] 已整理多張供應鏈圖；本來源的公司列名與其相鄰，但因缺少引用與期間，不應直接視為比既有圖卡更完整或更新的供應鏈名單。\n- 既有 [[AI 伺服器 ODM]] 已記錄 [[緯穎]]、[[廣達]]、[[緯創]]、[[英業達]]、[[鴻海]]、[[神達]]、[[技嘉]] 等代工廠圖卡；本來源新增「緯穎（AWS、Meta代工）」與「鴻海（輝達合作）」文字說法，但未提供合約或出貨證據。\n- 既有 [[AI 伺服器液冷散熱]] 主要整理 [[HVDC image 2]]、[[HVDC image 5]] 的散熱結構與 VR200 散熱產值估算；本來源只提供高階敘事「雙鴻、奇鋐等台廠領先全球，導入 DLC 與兩相液冷技術」，不能補足具體產品、客戶或成本證據。\n- 既有 [[台達電]] 頁已有 HVDC Power Rack 與電源系統相關來源；本來源新增其在台灣 AI 資料中心產業報告中被列為電源與高效率電源 / 儲能系統相關公司。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0. AI Data Center.md"
+              },
+              "score": 1.089446
+             },
+             {
+              "text": "Christoph Pointner, Senior Vice President of Mobile Radio Testers at Rohde & Schwarz, said: “Integrating our CMX500 OBT with Bluetest’s RTS technology allows mobile device manufacturers to leverage its advanced multi-technology and multi-channel signaling testing capabilities. It unlocks the potential of our tester within Bluetest’s industry-leading reverberation test systems.”",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-20f22e12a8b3ec5d",
+                "original_ref": "raw/Productions/PR/Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md",
+                "sha256": "20f22e12a8b3ec5de36f6d2d3d5606fa4592a038851c6bf3dbe193ba76121f2e",
+                "raw_ref": "raw/Productions/PR/Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/PR/Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md",
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 20.461725
+             },
+             {
+              "text": "[https://www.rohde-schwarz.com/cmx-ntn](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-communications-testers-systems/wireless-communication-testers-systems/cmx-for-non-terrestrial-networks_258274.html \"https://www.rohde-schwarz.com/cmx-ntn\")",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-2f52d1674ba65597",
+                "original_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+                "sha256": "2f52d1674ba6559771a562aa583b8f226233e65ee10d2d9aca7f0659f4a3254e",
+                "raw_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026.md",
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.900822
+             },
+             {
+              "text": "Introduction\nThe CMX500 radio communication tester is a universal one-box network emulation and measurement test solution supporting latest\n3GPP 5G NR technology.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-5bee12c555a55c2e",
+                "original_ref": "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+                "sha256": "5bee12c555a55c2e156bb110f89b4d24248ba6717c09abfc191c5a8683c1b23d",
+                "raw_ref": "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+               "section": 23,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 18.759841
+             },
+             {
+              "text": "[AI Chips Technology Trends & Landscape (GPU + TPU + FPGA + Startups) | by Jonathan Hui | Medium](https://jonathan-hui.medium.com/ai-chips-technology-trends-landscape-gpu-tpu-fpga-startups-4798bfad78a2)",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-9038c56e555eb0fa",
+                "original_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/IO Serdes in AI ASIC-TPU-Chiplet.md",
+                "sha256": "9038c56e555eb0fa29e871b299b57b869bd4a185dfc341dca54a2145d049e5e7",
+                "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/IO Serdes in AI ASIC-TPU-Chiplet.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Serdes IC IP (2026-8-7)/IO Serdes in AI ASIC-TPU-Chiplet.md",
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 18.377419
+             }
+            ],
+            "text": "Radar-related test capability in the passages is framed around automotive radar echo generation, FMCW radar, radar cross-section, Doppler frequency shift, hardware-in-the-loop, Open Simulation Interface, air gap, and monostatic or bistatic frontend support [2].\nThe R&S AREG800A radar production configurations show that radar test capability is specified by digital channel count, object count per channel, instantaneous bandwidth, near-object range, IF interfaces, remote control interfaces, and monostatic/bistatic frontend support [33].\nThe AREG-P1 radar mini configuration has one digital channel, one object per channel, 5 GHz instantaneous bandwidth, near-object range possibility, analog IF output interfaces, remote control interfaces, and requires one AREG-MFP or AREG-BFP frontend per channel [33].\nThe AREG-P2 radar golden configuration has two digital channels [33].\nThe AREG-P3 radar pro configuration has three digital channels, one object per channel, and uses AREG-MFP or AREG-BFP frontend options supporting monostatic or bistatic operation [33].\nSignaling/non-signaling tester capability in the passages is framed separately around wireless communications testing, because the CMX500 is a universal one-box network emulation and measurement test solution for LTE, NR FR1, NR FR2, NSA, SA, FDD, TDD, FR1/FR2 RF parametric testing, and fading propagation conditions [11].\nThe CMX500 also provides NR FR1/FR2 signaling and TX measurements, LTE signaling and measurements, WLAN signaling and WLAN TX measurements, fading, AWGN, BLER, CSI reports, throughput measurement, and PER measurement [1].\nCMX500 Callbox use cases include RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance, and non-signaling R&D verification [3].\nExample CMX500 Callbox use cases include R&D verification of new bands, sensitivity testing, RedCap, desense testing, 3GPP pre-conformance testing, SRS RF measurements, UL MIMO and UL CA RF measurements, UL TX switching, multi-SIM testing, high end-to-end throughput testing, and non-signaling verification [13].\nFor Wi-Fi 7 R&D, the CMX500 is positioned as a single-box signaling tester used to measure RF TX/RX characteristics in signaling mode and real-world conditions, and MLO makes a multiple-RF-chain test environment important [26].\nFor WLAN production, RF measurements are performed in non-signaling mode to save time, and the CMP180 supports Wi-Fi 6E, Wi-Fi 7, 5G NR FR1 up to 8 GHz, bandwidths up to 500 MHz, 480 MHz WLAN waveform loopback validation, 2x2 MIMO in one box, and scalable 4x4 MIMO using two instruments [34].\n【推論】If radar development requires more simulated radar channels, objects, bandwidth, near-object behavior, or monostatic/bistatic setups, the relevant radar test equipment capability would need to scale in those dimensions, because AREG800A configurations are specified by channel count, object count per channel, 5 GHz instantaneous bandwidth, near-object range, IF interfaces, and monostatic/bistatic frontend support.[33]\n【推論】These radar echo-generation requirements should not be treated as verified requirements for CMX500 or CMP180, because the cited CMX500 and CMP180 passages describe cellular/WLAN signaling or non-signaling RF testing rather than automotive radar echo generation.[1][11][34]\n【推論】For products that combine radar with cellular or WLAN functions, signaling/non-signaling testers would cover the communications-side measurements such as RF TX/RX, sensitivity, desense, MIMO, throughput, pre-conformance, and non-signaling verification, while automotive radar echo generation remains a separate radar-specific test role.[3][13][33][34]",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 15.030628
+            },
+            {
+             "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG-MFP]]、[[R&S AREG-BFP]] — production frontend options，支援 monostatic 或 bistatic。\n- [[Automotive radar echo generation]]、[[FMCW radar]]、[[Radar cross-section]]、[[Doppler frequency shift]]、[[Hardware-in-the-loop]]、[[Open Simulation Interface]]、[[SCPI]]、[[Air gap]] — 本來源涉及的技術概念。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+             },
+             "score": 1.010399
+            },
+            {
+             "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 2.570631
+            },
+            {
+             "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 8.867548
+            },
+            {
+             "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 2.555599
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing › R&D：R&S CMX500 single-box signaling testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- [[R&S CMX500]] 是 multi-technology multi-channel signaling tester。\n- 來源稱其已新增 integrated [[Wi-Fi 7]] test functionality。\n- 目的在 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation。\n- Wi-Fi 7 R&D 測試需在 signaling mode 與 real-world conditions 下量測 RF TX / RX characteristics。\n- [[MLO]] 是 [[Wi-Fi 7]] key feature，因此提供 multiple RF chains 的 test environment 很重要。\n- 來源列出的 Wi‑Fi 7-specific tests 包含 2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 2.761739
+            },
+            {
+             "text": "R&S AREG800A › Automotive radar production configurations\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- [[R&S AREG-P1]] radar mini configuration / [[R&S AREG-DBP1]] base unit option：one digital channel，one object per channel，5 GHz instantaneous bandwidth，near object range possibility，analog IF output interfaces，remote control interfaces，[[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option one frontend per channel required。\n- [[R&S AREG-P2]] radar golden configuration / [[R&S AREG-DBP2]] base unit option：two digital channels。\n- [[R&S AREG-P3]] radar pro configuration / [[R&S AREG-DBP3]] base unit option：搭配 [[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option；frontend 支援 monostatic 或 bistatic；three digital channels；one object per channel。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 31,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 2.997608
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing › Production：R&S CMP180 non-signaling RF testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。\n- [[R&S CMP180]] 被定位為 optimized for this purpose 的 radio communication tester。\n- 來源稱 [[R&S CMP180]] 支援 many cellular and non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform。\n- 來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。\n- 來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。\n- 來源稱 two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 2.737886
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "technical_knowledge",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 5,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 5,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+             "raw_refs": [
+              "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/CMX500 Callbox.md",
+             "raw_refs": [
+              "raw/Market/OneNote/CMX500_Callbox.md",
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+             "raw_refs": [
+              "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S AREG800A.md",
+             "raw_refs": [
+              "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

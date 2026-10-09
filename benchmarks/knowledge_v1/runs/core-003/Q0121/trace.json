@@ -1,0 +1,956 @@
+{
+ "question": {
+  "id": "Q0121",
+  "text": "Map the chain from a Wireless Communication market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "market": "Wireless Communication",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-18b7f72c92aa4eaaa876441bb8d4aadb",
+ "exchange": {
+  "sent": "Map the chain from a Wireless Communication market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "http_status": 200,
+  "seconds": 106.0,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-18b7f72c92aa4eaaa876441bb8d4aadb",
+    "actor": "leo.chi",
+    "title": "Map the chain from a Wireless Communication market requirement to a meas…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T19:29:43.918225Z",
+    "updated_at": "2026-10-09T19:31:29.790978Z",
+    "messages": [
+     {
+      "message_id": "message-fb330f09351d4ef294a884c96b065227",
+      "role": "user",
+      "text": "Map the chain from a Wireless Communication market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+      "created_at": "2026-10-09T19:29:43.929787Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-5190dc4118a3479497ccee050a7455bb",
+      "role": "assistant",
+      "text": "| 鏈條 | Wireless Communication 市場 / 測試需求 | 可量測參數 | Signal Generator 所需能力 | Signal Analyzer 所需能力 |\n|---|---|---|---|---|\n| 【推論】無線設備認證 / 3GPP cellular | 無線通訊認證實驗室用於驗證無線設備符合法規、安全與性能標準，主要測試項目包含頻譜、輸出功率、Protocol 相容性、互操作性、PTCRB / GCF 認證；來源另標示主題為 wireless devices with 3GPP cellular technology。[11][40] | 頻譜、輸出功率、協定 / 互操作性相關測試項目。[11] | 需要能產生對應 cellular / 5G NR 測試訊號；R&S SMW200A 在 component testing 中支援 LTE、Cellular IoT、5G NR R17/18、OFDM、custom digital modulation，frequency up to 67 GHz、overrange 72 GHz，RF modulation bandwidth up to 2 GHz、搭配 R&S SMW-K555 可到 4 GHz。[27] | 需要能做對應訊號與頻譜分析；R&S FSW 在 component testing 中支援 LTE、Cellular IoT、5G NR R17/18、OFDM signal analysis、Vector signal analysis，frequency up to 85 GHz、overrange 90 GHz，analysis bandwidth up to 8 GHz。[27] |\n| 【推論】Wi‑Fi 7 / 6 GHz 網通設備 | 2026 年台灣無線通訊代工製造市場包含 Wi‑Fi 7 網通設備代工製造，來源列出 IEEE 802.11be、320 MHz channel bandwidth、4096‑QAM、MLO、STR、eMLSR、6 GHz band，並指出台灣全面開放 5925–6425 MHz。[19] | 6 GHz 頻段 5925–6425 MHz、320 MHz channel bandwidth、4096‑QAM。[19] | 需要覆蓋 6 GHz 頻段並具備至少 320 MHz 等級的調變頻寬；R&S SMW200A frequency up to 67 GHz、RF modulation bandwidth up to 2 GHz，搭配 R&S SMW-K555 可到 4 GHz。[27] | 需要覆蓋 6 GHz 頻段並具備至少 320 MHz 等級的分析頻寬；R&S FSW frequency up to 85 GHz、overrange 90 GHz，analysis bandwidth up to 8 GHz。[27] |\n| 【推論】5G NTN‑NR / 衛星通訊 | 5G NTN‑NR gaining interest from chipset / device manufacturers、automotive、satellite / space industry；來源明示 R&S SMW200A channel emulation capabilities 用於 NTN testing，包含 long path delays、enhanced Doppler capabilities 與 customized dynamic fading。[35] | NTN channel emulation 參數包含 satellite trajectory modelling、frequency-dependent atmospheric effects、longer path delays、enhanced Doppler capabilities、up to 1073 ms delay、up to ±1 MHz Doppler。[4] | R&S SMW200A 需 firmware version ≥ 5.30，並透過 B14 或 B15 搭配 R&S SMW-K820 customized dynamic fading 支援上述 NTN channel emulation 能力。[4] | NTN component testing 使用 DUT、R&S SMW200A 與 R&S FSW；R&S FSW 支援 frequency up to 85 GHz、overrange 90 GHz、analysis bandwidth up to 8 GHz，以及 LTE、Cellular IoT、5G NR R17/18、OFDM signal analysis、Vector signal analysis。[27] |\n\n來源：\n[4] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[11] Wiki：無線通訊認證實驗室資料清單（來源：`1661484068021173813.md`、`Test House.md`、`無線通訊認證實驗室.md`）\n[19] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）\n[27] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[35] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）\n[40] `raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md`\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+      "created_at": "2026-10-09T19:31:29.790978Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-9f411c535ee044d0bbabbb6fe4c52327",
+       "request_id": "request-9f411c535ee044d0bbabbb6fe4c52327",
+       "span_id": "span-9f411c535ee044d0bbabbb6fe4c52327",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": true,
+    "answer": "| 鏈條 | Wireless Communication 市場 / 測試需求 | 可量測參數 | Signal Generator 所需能力 | Signal Analyzer 所需能力 |\n|---|---|---|---|---|\n| 【推論】無線設備認證 / 3GPP cellular | 無線通訊認證實驗室用於驗證無線設備符合法規、安全與性能標準，主要測試項目包含頻譜、輸出功率、Protocol 相容性、互操作性、PTCRB / GCF 認證；來源另標示主題為 wireless devices with 3GPP cellular technology。[11][40] | 頻譜、輸出功率、協定 / 互操作性相關測試項目。[11] | 需要能產生對應 cellular / 5G NR 測試訊號；R&S SMW200A 在 component testing 中支援 LTE、Cellular IoT、5G NR R17/18、OFDM、custom digital modulation，frequency up to 67 GHz、overrange 72 GHz，RF modulation bandwidth up to 2 GHz、搭配 R&S SMW-K555 可到 4 GHz。[27] | 需要能做對應訊號與頻譜分析；R&S FSW 在 component testing 中支援 LTE、Cellular IoT、5G NR R17/18、OFDM signal analysis、Vector signal analysis，frequency up to 85 GHz、overrange 90 GHz，analysis bandwidth up to 8 GHz。[27] |\n| 【推論】Wi‑Fi 7 / 6 GHz 網通設備 | 2026 年台灣無線通訊代工製造市場包含 Wi‑Fi 7 網通設備代工製造，來源列出 IEEE 802.11be、320 MHz channel bandwidth、4096‑QAM、MLO、STR、eMLSR、6 GHz band，並指出台灣全面開放 5925–6425 MHz。[19] | 6 GHz 頻段 5925–6425 MHz、320 MHz channel bandwidth、4096‑QAM。[19] | 需要覆蓋 6 GHz 頻段並具備至少 320 MHz 等級的調變頻寬；R&S SMW200A frequency up to 67 GHz、RF modulation bandwidth up to 2 GHz，搭配 R&S SMW-K555 可到 4 GHz。[27] | 需要覆蓋 6 GHz 頻段並具備至少 320 MHz 等級的分析頻寬；R&S FSW frequency up to 85 GHz、overrange 90 GHz，analysis bandwidth up to 8 GHz。[27] |\n| 【推論】5G NTN‑NR / 衛星通訊 | 5G NTN‑NR gaining interest from chipset / device manufacturers、automotive、satellite / space industry；來源明示 R&S SMW200A channel emulation capabilities 用於 NTN testing，包含 long path delays、enhanced Doppler capabilities 與 customized dynamic fading。[35] | NTN channel emulation 參數包含 satellite trajectory modelling、frequency-dependent atmospheric effects、longer path delays、enhanced Doppler capabilities、up to 1073 ms delay、up to ±1 MHz Doppler。[4] | R&S SMW200A 需 firmware version ≥ 5.30，並透過 B14 或 B15 搭配 R&S SMW-K820 customized dynamic fading 支援上述 NTN channel emulation 能力。[4] | NTN component testing 使用 DUT、R&S SMW200A 與 R&S FSW；R&S FSW 支援 frequency up to 85 GHz、overrange 90 GHz、analysis bandwidth up to 8 GHz，以及 LTE、Cellular IoT、5G NR R17/18、OFDM signal analysis、Vector signal analysis。[27] |\n\n來源：\n[4] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[11] Wiki：無線通訊認證實驗室資料清單（來源：`1661484068021173813.md`、`Test House.md`、`無線通訊認證實驗室.md`）\n[19] Wiki：2026台灣無線通訊代工製造產業_技術規格與市場分析報告（來源：`2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md`、`HSD PCB image 18.md`）\n[27] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[35] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）\n[40] `raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md`\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-9f411c535ee044d0bbabbb6fe4c52327",
+      "request_id": "request-9f411c535ee044d0bbabbb6fe4c52327",
+      "span_id": "span-9f411c535ee044d0bbabbb6fe4c52327",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-9f411c535ee044d0bbabbb6fe4c52327",
+       "request_id": "request-9f411c535ee044d0bbabbb6fe4c52327",
+       "span_id": "span-9f411c535ee044d0bbabbb6fe4c52327",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.2"
+       },
+       "trace": {
+        "trace_id": "trace-9f411c535ee044d0bbabbb6fe4c52327",
+        "request_id": "request-9f411c535ee044d0bbabbb6fe4c52327",
+        "span_id": "span-9f411c535ee044d0bbabbb6fe4c52327",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "Map the chain from a Wireless Communication market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "R&S CMP200 › R&S CM-Z310A UWB head\n[[R&S CM-Z310A]] UWB head 是 [[R&S CMP200]] 的 ultra wideband extension：\n\n| 項目 | 規格 |\n|---|---|\n| Order No. | 1215.0000.02 |\n| Connection cable | [[R&S CM-Z33A]]，3 m，1215.0500.02 |\n| Step attenuator | RF 1、RF 2、RF 3、RF 4，user controlled |\n| Attenuation range | 0 dB to 20 dB |\n| Attenuation step size | 1 dB |\n| Generator frequency range | 6 GHz to 13 GHz |\n| Generator output level range | RMS，step attenuator 20 dB：–110 dBm to –46 dBm；step attenuator 0 dB overrange：up to –10 dBm |\n| Analyzer frequency range | 4 GHz to 13 GHz |\n| Analyzer absolute maximum | 30 V DC，+15 dBm |\n| Analyzer displayed average noise level | +15 °C to +35 °C，4 GHz to 13 GHz：< –154.5 dBm/Hz meas. |\n| Calibration interval | 24 months |\n| Dimensions | 245 mm × 185 mm × 38 mm |\n| Weight | 約 2.0 kg |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 20,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP200.md"
+          },
+          "score": 4.108461
+         },
+         {
+          "text": "R&S SMW200A\n[[R&S SMW200A]] 是 Rohde & Schwarz 的 vector signal generator；依 `R&S®SMW200A Vector Signal Generator Specifications` `Version 31.00`（`May 2026`），RF path A 可覆蓋 `100 kHz to 67 GHz`，RF path B 可覆蓋至 `44 GHz`，並可由 single-path vector signal generator 擴充到 multichannel MIMO receiver tester（來源：[[SMW200A_specs_en_3606-8037-22_v3100]]）。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 5.33223
+         },
+         {
+          "text": "LTM TTCN-3 Test cases- ss stack Requirements Analysis › RACH-less LTM requirements\n用於 TC 7.1.1.3.28、7.1.1.3.28A.x、7.1.1.3.30、7.1.1.5.11 與 7.1.3.5.14 的 [[RACH-less LTM]] additional requirements：\n\n- Target DRB pre-configuration：`f_NR_SS_CommonRadioBearerConfig` before switch。\n- Target [[C-RNTI]] assignment with FollowOnFlag：`f_NR_SS_C_RNTI_Config(FollowOnFlag=true)`。\n- Target UL grant OnSR：`f_NR_ULGrantConfiguration_Common(cs_UL_GrantConfig_OnSR)`。\n- [[RRCReconfigurationComplete]] on target SRB1：`SRB.receive(car_NR_SRB1_RrcPdu_IND)`。\n- Source cell cleanup：`f_NR_SS_SRBs_DRBs_Release` + `f_NR_SS_SRBs_DRBs_Config(omit)`。\n- UL grant stop on source：`f_NR_ULGrantConfiguration_Stop`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/LTM TTCN-3 Test cases- ss stack Requirements Analysis.md"
+          },
+          "score": 0.074917
+         },
+         {
+          "text": "NTN signal generator solutions › End-to-end system testing\n來源將 E2E system testing 描述為對 UE、NTN payload、service link channel emulator 與 feeder link channel emulator 的 RF satellite link emulation。[[R&S SMW200A]] 需要 firmware version ≥ 5.30，並透過 B14 或 B15 搭配 [[R&S SMW-K820]] customized dynamic fading 支援：\n\n- satellite trajectory modelling。\n- frequency-dependent atmospheric effects。\n- longer path delays。\n- enhanced Doppler capabilities。\n- up to 1073 ms delay。\n- up to ±1 MHz Doppler（pure Doppler）。\n\n[[R&S Space Nexus]] 在來源中被描述為 PC Software，available on request，可依 satellite trajectory 產生 [[R&S SMW200A]] fading files。\n\n詳見 [[SMW200A NTN end-to-end channel emulation]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 1.702677
+         },
+         {
+          "text": "FR2 OTA spatial test metrics\n[[FR2 OTA spatial test metrics]] 是 [[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]]（2020-11-02）用來說明 [[5G FR2 RF conformance testing]] 的 OTA / spatial metric 集合，涵蓋 [[EIRP]] CDF、[[EIRP]] @ beam peak、[[TRP]] @ beam peak、[[EIS]] CDF 與 RX beam peak。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md"
+          },
+          "score": 0.227723
+         },
+         {
+          "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 實體\n- [[華通]] — 來源稱其掌握 SpaceX、Amazon Leo、OneWeb 等四大低軌衛星業者訂單，並稱星鏈太空板市占率約 9 成。\n- [[台燿]] — 來源稱其供應低軌衛星與基地台用高頻材料，為衛星板上游關鍵材料供應商。\n- [[穩懋]] — 來源稱其為全球最大 GaAs 晶圓代工廠，產品涵蓋衛星間高頻連結與手機直連技術所需 RF 元件，並稱早期參與 SpaceX 計畫。\n- [[建漢]] — 來源稱其為 Compal Broadband Networks，主力產品為 Cable / DSL 寬頻路由器 ODM。\n- [[TrendForce]] — 來源引用其最新研究，指出 2026 年全球手機直連衛星市場規模預估為 76 億美元、年成長率約 49%。\n- [[智易]]、[[智邦]]、[[中磊]]、[[啟碁]]、[[友訊]]、[[合勤控]]、[[正文]] — 來源列為 2026 年台灣網通 ODM / OEM 廠商版圖中的主要公司。\n- [[昇達科]]、[[同欣電]]、[[耀登]]、[[鐳洋科技]]、[[稜研科技]]、[[濰元科技]] — 來源列為低軌衛星零組件、地面終端或相控陣列天線相關公司。\n- [[Starlink]]、[[Amazon Leo]]、[[Eutelsat OneWeb]]、[[AST SpaceMobile]]、[[SpaceX]] — 來源列為低軌衛星或手機直連衛星市場相關營運商 / 專案。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+          },
+          "score": 3.314526
+         },
+         {
+          "text": "華通 › 來源中的說法\n- [[AI Server PCB test image 5]]（來源未標示日期；取得於 2026-09-04）在「HDI 板（高密度互連板）」分類中列出[[華通]]（2313）。\n- [[AI Server PCB test image 5]]（來源未標示日期；取得於 2026-09-04）對 [[HDI板]] 的說法為「線路更細、更密集」、「用於縮小、儲存裝置等」、「節省空間、提升效能」。\n- [[臺灣 PCB 產業鏈]] 引用 [[4 AI Data Center Eco-Chain image]]（來源未標示日期）時，將[[華通]]列為板廠，並記錄圖上「全球營業額第六大、全球最大HDI廠」的市場地位宣稱；該宣稱未提供資料年份、排名口徑或統計來源。\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）將[[華通]] / Compeq 列為衛星本體零組件廠商，技術定位為衛星用高頻高密度連接板 / [[HDI]]。\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）稱[[華通]]掌握 [[SpaceX]]、[[Amazon Leo]]、[[OneWeb]]等四大低軌衛星業者訂單，並稱泰國新廠專門生產衛星板與伺服器板，以因應非中非台供應鏈需求。\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）稱[[華通]]為全球低軌衛星 PCB 龍頭，星鏈太空板市占率約 9 成；來源未提供市占率統計口徑或原始資料。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/華通.md"
+          },
+          "score": 6.116848
+         },
+         {
+          "text": "02160280\n這份來源是《科儀新知》216期、頁尾標示 `107.9` 的〈福爾摩沙衛星五號專題：電力次系統 / Electrical Power Subsystem〉文章，作者為[[葉嘉靖]]；內容說明[[FORMOSAT-5]] 的[[衛星電力次系統]]硬體、[[PCDU]]、控制演算法與電能平衡分析。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/02160280.md"
+          },
+          "score": 6.054872
+         },
+         {
+          "text": "葉嘉靖 › 相關主題\n- [[02160280]] 內容聚焦 [[FORMOSAT-5]] 的[[衛星電力次系統]]、[[PCDU]]、電池、太陽能板、控制軟體演算法與電能平衡分析。\n- 本頁只記錄作者與任職資訊，不推論其後續職務、其他著作或專案角色。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/葉嘉靖.md"
+          },
+          "score": 7.167883
+         },
+         {
+          "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 7.380633
+         },
+         {
+          "text": "無線通訊認證實驗室資料清單 › 已擷取的無線通訊認證實驗室簡報內容\n依 [[無線通訊認證實驗室]]：\n\n- [[無線通訊認證實驗室]]用於測試與驗證無線設備符合法規、安全與性能標準，涵蓋 [[RF 測試]]、[[EMC]]、安規及一致性認證。\n- 來源稱其可經 [[NCC]]、[[TAF]]、[[FCC]] 等機構認可，並支援 [[Global Market Access]] 與上市加速。\n- 主要測試項目包含：頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試、[[PTCRB]] / [[GCF]] 認證。\n- 認證必要性包含防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端、6G 等需求。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+          },
+          "score": 2.454629
+         },
+         {
+          "text": "NCC › 衛星 / 通訊監理語境中的 NCC\n- [[低軌衛星通信終端設備技術規範與相關檢測]]（來源標示 111年08月）列出 NCC 電信事業申請衛星固定通信用無線電頻率核配有關事項草案、NCC 衛星地球電臺設置使用管理辦法部分條文修正草案，以及 NCC 衛星地球電臺設備技術規範草案總說明。\n- 上述語境應連到 [[國家通訊傳播委員會]]，不應與交換機光器件圖上的 NCC 混用。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/NCC.md"
+          },
+          "score": 7.4508
+         },
+         {
+          "text": "R&S CMP200 › IF generator\n| 項目 | 規格 |\n|---|---|\n| Ports | 3 × IF Out，port 1/2/3 |\n| Connector | SMA |\n| Frequency range | 6 GHz to 20 GHz，含 modulation bandwidth |\n| Frequency resolution | < 0.1 Hz |\n| Frequency uncertainty | same as timebase + frequency resolution |\n| Frequency settling time | < 300 µs |\n| Maximum reverse power | 0 V DC，+25 dBm |\n| Output level range | 6 GHz ≤ f ≤ 20 GHz，PEP，best SNR/IMD performance：–20 dBm to +2 dBm；overrange up to +10 dBm |\n| Output level resolution | 0.1 dB |\n| Output level uncertainty | +15 °C 至 +35 °C、no overranging、6 GHz to 20 GHz：< 1.5 dB |\n| Output level repeatability | 1 h warm-up 後 typical < 0.1 dB |\n| Harmonics attenuation | second harmonics > 35 dB nom.；third harmonics > 45 dB nom. |\n\nIF generator EVM 條件為 5G NR PDSCH、100 MHz channel bandwidth、full allocation、SCS 60 kHz / 120 kHz、64QAM、+15 °C 至 +35 °C、signal PAR = 11.8 dB；來源標示 EVM 為 measured values。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP200.md"
+          },
+          "score": 3.553294
+         },
+         {
+          "text": "R&S FSW\nR&S FSW 是 Rohde & Schwarz 的 high-end Signal and Spectrum Analyzer 系列，依 Version 17.01（September 2025）涵蓋 8 GHz 至 85 GHz 型號，[[R&S FSW85]] 搭配 R&S FSW-B90G 可延伸至 90 GHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSW.md"
+          },
+          "score": 4.139259
+         },
+         {
+          "text": "LTM TTCN-3 Test cases- ss stack Requirements Analysis › RACH-based LTM requirements\n用於 TC 7.1.1.1.28、7.1.1.1.29、7.1.1.1.30、7.1.1.3.29、7.1.2.3.12、7.1.3.5.13、7.1.3.5.15 與 7.1.3.5.14A.x 的 [[RACH-based LTM]] additional requirements：\n\n- [[PDCCH order]] / DCI 1_0：`cads_NR_DciTriggerPDCCHOrder_REQ`。\n- Cross-cell PDCCH order / CellIndicator bit：`cds_NR_PDCCH_Order_CellInd`。\n- PRACH preamble indication：`cds_NR_SystemIndCtrl_RachPreamble` + `SYSIND.receive(car_NR_PRACH_Preamble_IND)`。\n- RACH no-response mode for [[T304]] testing：`cs_NR_RachProcedureConfig_NoResponse`。\n- Target cell [[CFRA]]：`cs_NR_RachProcedureConfig_CFRA`。\n- RACH re-initialization：`f_NR_InitialiseRachProcedure`。\n- Target timing advance / physical layer uplink configuration：`cads_NR_CellConfigPhysicalLayerUplink`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/LTM TTCN-3 Test cases- ss stack Requirements Analysis.md"
+          },
+          "score": 0.073002
+         },
+         {
+          "text": "NTN signal generator solutions\n[[NTN signal generator solutions]] 是 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]]（封面標示 12-2025；末頁標示 Last updated: 08/25）中用來整理 [[R&S SMW200A]]、[[R&S FSW]] 與相關 software options 在 [[3GPP]] [[NTN]] 測試中的 solution-level 應用框架。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 0.23628
+         },
+         {
+          "text": "R&S Space Nexus\n[[R&S Space Nexus]] 是 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]] slide 27 中列出的 [[Rohde & Schwarz]] PC software，來源說它 available on request，可依 satellite trajectory 產生 [[R&S SMW200A]] fading files。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S Space Nexus.md"
+          },
+          "score": 1.766887
+         },
+         {
+          "text": "FR2 OTA spatial test metrics › EIRP CDF metric\n來源文字：\n\n- EIRP CDF metric：3D EIRP scan with the same link & measurement antenna, CDF for power。\n- 來源把 spherical coverage 連到 EIRP CDF metric。\n\n判斷：本來源將 [[EIRP]] CDF 作為 TX scan / spherical coverage 類 metric；這補充 [[EIRP]] 既有頁的方向性 radiated power 定義，但不取代 GFM324 的 formal test context。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md"
+          },
+          "score": 0.167288
+         },
+         {
+          "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 重點摘要\n- 報告日期：2026-09-15；來源轉檔日期：2026-09-15。\n- 報告主張 2026 年台灣無線通訊代工製造產業呈現雙引擎成長：既有的 [[Wi-Fi 7 網通設備代工製造]]，以及新興的 [[低軌衛星零組件與地面終端供應鏈]]。\n- 在 [[Wi-Fi 7]] 部分，來源列出 [[IEEE 802.11be]]、320 MHz channel bandwidth、4096-QAM、[[MLO]]、STR、eMLSR、6 GHz band、thermal throttling 等技術規格，並指出台灣已於 2026 年全面開放 6 GHz 頻段 5925–6425 MHz。\n- 在台灣網通 ODM / OEM 廠商版圖部分，來源列出 [[智易]]、[[智邦]]、[[中磊]]、[[啟碁]]、[[建漢]]、[[友訊]]、[[合勤控]]、[[正文]]等廠商，並分別描述 2026 年動態與受惠程度。\n- 在 [[低軌衛星]] 供應鏈部分，來源將產業鏈分成衛星本體製造與關鍵材料、地面設備與用戶終端、系統整合與測試驗證、衛星營運商服務四大環節。\n- 衛星本體零組件表列 [[華通]]、[[昇達科]]、[[同欣電]]、[[穩懋]]、[[台燿]]，並將 [[華通]]定位為衛星用高頻高密度連接板 / HDI 廠商，將 [[台燿]]定位為高頻高速 [[CCL]] 材料供應商。\n- 地面設備與用戶終端表列 [[啟碁]]、[[耀登]]、[[鐳洋科技]]、[[稜研科技]]、[[濰元科技]]，主題集中於[[相控陣列天線]]、Ku/Ka-band、RF front-end 與系統整合能力。\n- 手機直連衛星部分，來源將 [[Direct-to-Cell]] 描述為一般 4G/5G 手機無需額外硬體、修改韌體或安裝特殊軟體即可直接連結低軌衛星的技術，並連到 [[3GPP Release 17]]與[[3GPP Release 18]]。\n- 市場數字包括：[[TrendForce]] 最新研究指出 2026 年全球手機直連衛星市場規模預估為 76 億美元、年成長率約 49%；來源未提供該 TrendForce 報告名稱、發布日期或頁碼。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+          },
+          "score": 2.527033
+         },
+         {
+          "text": "台燿 › 可追溯範圍\n- 本頁只記錄來源圖上的台燿列名，不推論供應合約、出貨量、市占率、客戶、材料規格、國別或 R&S 往來關係。\n- 本頁不自動把台燿與 [[台耀]] 合併；需要人工確認命名與同義頁處理。\n- [[AI Server PCB test image 23]] 的「2023 Q1 接獲AI通用基板(UBB) 訂單」只支持圖上說法；來源未提供訂單客戶、合約、數量、金額、出貨期間或公告。\n- [[AI Server PCB test image 23]] 的「800G交換器材料認證中」只支持圖上說法；來源未標示認證對象、測試項目、材料型號、完成時間或結果。\n- [[AI Server PCB test image 23]] 的客戶欄只記錄圖上文字；不得改寫成已驗證直接客戶或現行供應關係。\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]] 的低軌衛星與基地台高頻材料說法只支持該 2026-09-15 報告中的市場定位，不能推論具體產品料號、衛星平台或基地台客戶。\n- [[Switch server- optical switch]] 的 800G 交換器材料供應商句子只支持 OneNote 文字列名；來源未標示材料種類、產品型號、客戶、出貨、認證、合約或原始資料來源，不能升格為已驗證供應關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/台燿.md"
+          },
+          "score": 6.464925
+         },
+         {
+          "text": "02160280 › 重點摘要\n- 太陽電力調節模組含 36 組 shunt stage，控制共 38 串太陽電池串；每組分流器由 MOSFET 開關與隔離繼電器組成。\n- 表 3 記錄電池充電過電壓保護：Level 1 在 33.8 V、latency 2 sec. 時 shunt on 1/2 strings，disable level 33.3 V；Level 2 在 34.0 V、latency 0 sec. 時 shunt on all strings，disable level 33.3 V。\n- 表 4 記錄 MOSFET switch LCL 類型 A、B、C、D-1、D-2、E-1、E-2 的 Max Load、Trip-off Load 與 Latching Current Limit；來源稱限電流保護先限制電流，若異常持續超過 10 ms，視為短路並啟動過電流保護關閉 MOSFET。\n- PCDU 內部 DCDC converter 有 INT +5V、INT ±15V、INT +12V 三種規格；外部 DCDC converter 有 EXT +5.2V 與 EXT ±15V 兩種規格；內外部 DCDC 均有備援設計。\n- PCDU 資料與介面使用備援 RS-422 / UART 介面；另有兩個 RS-422 指令與 5 個 RS-422 high priority command（HPC）獨立介面，用於失去通聯緊急狀況下繞過 CDMU 飛行軟體控制關鍵元件。\n- 控制軟體演算法位於 [[CDMU]]，主要以 4 Hz 調節 36 組分流器，分為 sensor data processing、charge control processing、ampere-hour integration、charge protection processing、charge control execution、battery temperature sensor data processing 等六階段。\n- 充電控制分為高電流充電 / Direct Energy Transfer（DET）與限制電流充電 / taper charge；充電電壓設定為 33.3 V，若電池電流不高於 12 A，將剩餘太陽電力直接對電池充電。\n- 電能平衡分析結合電力預算、軌道特性、衛星飛行姿態、操作模式、太陽能板與衛星電池性能；來源稱這是驗證電力次系統是否達到需求的最主要分析。\n- 來源列出軌道條件：720 km / 98.27°、最差 LTDN 09:45、夏季 / 軌道太陽角 26.5°、軌道週期 99.19 分鐘、太陽夜間時間 33.41 分鐘。\n- 表 7 記錄任務壽命終期第五年電力預算：Normal 268.61 W、Rest 264.59 W、ASH 221.81 W；其中 Payload 為 96.32 W / 91.77 W / 55 W。\n- 來源稱太陽能板最大輸出約 630 W；配合任務姿態與日照 / 陰影時間比，扣除 PCDU 調節耗損後每軌道輸出平均功率約 348.73 W，日照平均功率 529 W。\n- 衛星電池放電深度約 21% 至 24%；依供應商評估，五年壽命下正常使用電池容量僅減少 16%。\n- 來源稱以細部設計審查階段為例，可得到約 25% 電力餘裕度，對比表 1 的 EOL +3% power margin requirement，可證明電力次系統設計符合福衛五號系統設計。\n- 結論稱[[FORMOSAT-5]]於 2017-08-25 升空後已超過六個月飛行任務，電力次系統行為表現與預期相同、未出現異常，顯示該次系統成熟且可作為[[國家太空中心]]標準平台。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/02160280.md"
+          },
+          "score": 5.075949
+         },
+         {
+          "text": "FORMOSAT-5\n[[FORMOSAT-5]] / 福爾摩沙衛星五號 / 福衛五號是[[國家太空中心]]自研的台灣衛星；[[02160280]] 以其[[衛星電力次系統]]為專題，描述太陽能板、電池、[[PCDU]]、控制演算法與電能平衡分析。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/FORMOSAT-5.md"
+          },
+          "score": 7.299406
+         },
+         {
+          "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 3.606005
+         },
+         {
+          "text": "無線通訊認證實驗室資料清單\n[[無線通訊認證實驗室資料清單]]原本由 [[Test House]] 提供待讀材料索引；[[低軌衛星通信終端設備技術規範與相關檢測]]新增了[[電信技術中心]]在 111年08月簡報中的毫米波頻段測試量能描述；[[無線通訊認證實驗室]]則補入 `無線通訊認證實驗室.pptx` 的簡報正文摘要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+          },
+          "score": 0.707606
+         },
+         {
+          "text": "R&S CMP200 › R&S CMPHEAD30\n[[R&S CMPHEAD30]] remote radio head 用於 28 GHz / 39 GHz FR2 frequency ranges：\n\n| 項目 | 規格 |\n|---|---|\n| Order No. | 1201.0002K23 |\n| Hardware unit | [[R&S CMPH-B23A]]，1430.8000.02 |\n| Connector type | RF 1、RF 2，front panel，wear adapter，2.4 mm（Q），female |\n| Duplex mode | half duplex（TDD） |\n| Frequency range | 28 GHz band：24.25 GHz to 31.80 GHz；39 GHz band：37.00 GHz to 43.50 GHz |\n| Generator output level range | 28 GHz PEP –84 dBm to +20 dBm；37–40 GHz PEP –78 dBm to +19 dBm；40–43.5 GHz PEP –78 dBm to +17 dBm |\n| Analyzer frequency extension | 28 GHz band：23.45 GHz to 24.25 GHz；39 GHz band：43.50 GHz to 44.30 GHz |\n| Analyzer frequency error | < ±0.01 ppm，符合 [[3GPP TS 38.521-2]] V17.0.0 |\n| Isolation of RF ports | RF 1 to RF 2 > 27 dB，35 dB typ. |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 18,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP200.md"
+          },
+          "score": 3.09082
+         },
+         {
+          "text": "LTM TTCN-3 Test cases- ss stack Requirements Analysis › 重點摘要\n本來源是 Rohde & Schwarz confidential 文件《LTM TTCN-3 Test Cases - SS Stack Requirements Analysis (IWD_26wk24)》，標示 Generated: 2026-06-26，Source: IWD_26wk24 TTCN-3 codebase，整理 [[L1-L2 Triggered Mobility]]（LTM）TTCN-3 test cases 對 [[SS Stack LTM Requirements]] 的能力需求。來源列出 Total LTM Test Cases: 17，涵蓋 [[RACH-based LTM]]、[[RACH-less LTM]]、[[NR-DC]] LTM、[[Carrier Aggregation]] LTM，以及 [[RLC]] / [[PDCP]] persistence、NoResetID、DRX、CFRA、T304、LBT failure 等測試子集合。\n\n來源不是 3GPP 標準全文，而是從 TTCN-3 codebase 反推出的 test implementation requirements；因此其中的 API / template 名稱（例如 `cas_NR_MacCommandTrigger_REQ`、`cs_LTM_CellSwitch_CE`、`f_NR_SS_ConfigLTM_TCI`）應視為 SS stack / test harness 需求，不可直接推論為 [[3GPP TS 38.321]]、[[3GPP TS 38.331]] 或 [[3GPP TS 38.508-1]] 的正式條文內容。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/LTM TTCN-3 Test cases- ss stack Requirements Analysis.md"
+          },
+          "score": 0.066935
+         },
+         {
+          "text": "NTN signal generator solutions › Component testing\n依 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]] slide 16，component testing 使用 DUT、[[R&S SMW200A]] 與 [[R&S FSW]]：\n\n- [[R&S SMW200A]]：frequency up to 67 GHz，overrange 72 GHz；RF modulation bandwidth up to 2 GHz，up to 4 GHz with [[R&S SMW-K555]]。\n- [[R&S SMW200A]] signal generation SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal generation（K114）、custom digital modulation。\n- [[R&S FSW]]：frequency up to 85 GHz，overrange 90 GHz；analysis bandwidth up to 8 GHz。\n- [[R&S FSW]] signal analysis SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal analysis（K96）、Vector signal analysis（K70）。\n\n以上是 2025 簡報摘要值；正式產品規格仍需回查 [[R&S SMW200A]]、[[R&S FSW]] 與其對應 specifications。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 0.212237
+         },
+         {
+          "text": "FR2 OTA spatial test metrics › 使用限制\n- 本頁主要依 [[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]] Slide 10 整理，該來源是 2020-11-02 customer presentation 的 lossy derivative，不是 3GPP 標準全文。\n- Slide 10 中部分 test case numbering / labels 可能受 OCR 影響，例如 TX Spurious Emissions 與 6.5.3.1 的排列需回查原始投影片。\n- 本頁只保存 metric taxonomy 與來源語句，不提供測試限值、grid definition、uncertainty、measurement bandwidth、beam management procedure 或 pass/fail criteria。\n- [[EIRP]]、[[TRP]] 與 [[EIS]] 的正式定義與測試程序需回查對應 3GPP、R&S application note 或 chamber / test system 文件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md"
+          },
+          "score": 0.143719
+         },
+         {
+          "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 與既有知識的關係\n- [[網路通訊設備產業鏈]]與[[整體通訊產業鏈]]多來自未標示日期的圖像來源；本來源有明確報告日期 2026-09-15，可作為 2026 年市場敘事補充，但仍需遵守來源自身限制。\n- [[華通]]既有頁面已記錄其在 [[HDI板]] / [[臺灣 PCB 產業鏈]]中的列名；本來源新增 LEO satellite PCB、SpaceX / Amazon Leo / OneWeb、泰國新廠與星鏈太空板市占率約 9 成等市場說法。\n- [[台燿]]既有頁面已記錄其在 [[AI PCB 概念股]]與 [[AI 伺服器 PCB 原物料台日韓供應鏈]]中的 CCL 列名；本來源新增低軌衛星與基地台高頻材料供應說法。\n- [[穩懋]]既有頁面只記錄其在第三代半導體 / GaAs 通訊射頻供應鏈概念股圖中的列名；本來源新增全球最大 GaAs 晶圓代工廠、衛星間高頻連結與手機直連衛星 RF 元件等市場說法。\n- [[TrendForce]]既有頁面記錄其作為 AI server PCB 供應鏈圖的來源標示；本來源新增 TrendForce 研究被引用於手機直連衛星市場規模，但未提供完整報告書目資訊。\n- [[建漢]]既有頁面主要記錄 [[HSD PCB image 18]] 中 T-Glass 圖卡列名；本來源將建漢寫為 Compal Broadband Networks、Cable/DSL broadband router ODM。兩者可能是同名、OCR / 讀圖誤植或不同公司，需保留矛盾。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+          },
+          "score": 2.0422
+         },
+         {
+          "text": "穩懋 › 來源中的說法\n- [[Power IC - Power Management IC image 3]]（來源未標示日期；取得於 2026-09-04）將 [[穩懋]]（3105）列於「第三代半導體與特殊製程」大分類。\n- 同一來源將 [[穩懋]] 放在「GaAs/Ga 通訊射頻供應鏈」子分類。\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）將[[穩懋]] / WIN Semiconductors 列為衛星本體零組件廠商，技術定位為 [[GaAs]] 晶圓代工。\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）稱[[穩懋]]為全球最大 GaAs 晶圓代工廠，產品涵蓋衛星間高頻連結與手機直連技術所需 RF 元件，並稱其早期即參與 [[SpaceX]]計畫。\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）在手機直連衛星章節中稱台灣廠商目前主要透過[[穩懋]]的 GaAs RF 元件代工以及手機品牌供應鏈間接受惠。\n- [[0.Satcom Industry]]（來源正文未標示正式發布日期；內容含 2025 年與 2024 年資料點；raw converted 2026-09-17）在台灣太空產業供應鏈中，將「穩懋半導體」列於「太空系統與衛星應用」。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/穩懋.md"
+          },
+          "score": 5.146485
+         },
+         {
+          "text": "02160280 › 重點摘要\n- 來源稱[[FORMOSAT-5]] / 福衛五號是台灣首次由[[國家太空中心]]自行完成設計、分析、組裝、驗證測試的 spacecraft。\n- 來源稱[[FORMOSAT-5]] 任務包含 2 m panchromatic / 4 m multispectral [[Remote Sensing Instrument]]（RSI）光學遙測酬載，以及 [[Advance Ionosphere Probe]]；任務壽命目標為五年。\n- [[衛星電力次系統]]供應 spacecraft bus 與 payload instruments 所需電力，管理電力安全，調節太陽能板與衛星電池電力，使衛星可在五年任務壽命中正常運作。\n- 電力次系統硬體包含：(1) 太陽能板、(2) [[PCDU]] / Power Control and Distribution Unit、(3) 衛星電池、(4) 衛星線束；控制軟體演算法建立於 [[CDMU]] 中。\n- 來源的表 1 記錄主要設計參數：EOL nominal operation 每日至少 +3% power margin、primary power bus 為 unregulated 28 V（表中寫 `28V +5.6/4.0V`）、secondary power bus 含 +4.8 V ~ +5.6 V 與 ±15 V 範圍、battery low voltage protection 22 V、battery high voltage protection 超過 34 V 時 shunt off all charge regulators、EPS 不需 ground uplink command 即可運作、各 equipment 與 payload instrument 需 over-current protection。\n- 來源稱福衛五號[[衛星電力次系統]]由[[國家太空中心]]主導；[[PCDU]]由中科院與[[國家太空中心]]設計、製作與驗證測試；衛星線束由[[國家太空中心]]設計並委託國外製作；演算法與控制軟體由[[國家太空中心]]設計、編碼與系統驗證。\n- 太陽能板由兩片相同 solar panel wings 組成；每面太陽能板為 20s 19p 組態，每串 20 顆 triple-junction GaAs 太陽電池，來源稱在軌最大約 630 W 電力。\n- 表 2 記錄每面太陽能板於 5 年壽命終期、夏至軌道的最大輸出參數：Voc 41.82 V、Isc 9.45 A、Vmp 35.67 V、Imp 8.85 A。\n- 衛星電池組採用鋰離子電芯，總容量 24 Ah；每顆電芯額定容量 1.5 Ah，8 顆串聯、16 串並聯，亦即 8s16p 組態；來源列出 Sony 18650HC 電芯，額定容量至少 1.5 Ah / 5.4 Wh、能量密度 129 Wh/kg、最大充電電壓 4.2 V、最低放電電壓 2.5 V。\n- 來源稱衛星電池組外觀尺寸約 345 mm × 192 mm × 95 mm，質量約 6.6 kg；長期不用時以 C/10 放電至 20.0 V、殘餘電量低於 5%，乾燥保存於 10 °C 至 20 °C（+4 °C 最佳）。\n- 電池安全保護包含 [[PTC]] 多重開關；若短路造成過度放電，PTC 電阻上升以限制放電電流在 1C 穩定狀態，反應時間 1–2 秒；短路解除後可恢復。\n- 飛行操作中充電原則為定電壓 33.6 V 控制，額定電流不超過 C/2，搭配 taper charge；軟體演算法使用電壓感測器讀值做充電調節。\n- 來源稱 [[UVLO]] / Under-voltage Lockout 在電池降至 22 V 時關閉電力控制單元，使衛星休眠；當主電源恢復至 26 V 以上時，電力控制單元自動開啟，[[CDMU]] 與飛行軟體自動開啟以恢復操作。\n- [[PCDU]]包含太陽電力調節、電力分配控制、直流電壓轉換、資料與介面、備援控制等主要模組；並整合熱控控制器、推進控制器與太陽能板展開控制器，以減少衛星線束並統一電力分配控制。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/02160280.md"
+          },
+          "score": 4.330466
+         },
+         {
+          "text": "R&S PCB test solutions › 圖上工具 / 合作方文字\n| 圖上文字 | 可能角色 | 來源 | 限制 |\n|---|---|---|---|\n| [[SPEAG]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未說明是合作夥伴、工具、方法或範例 |\n| [[SWISSTO12]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[QWED]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[KEYCOM]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[RSTW]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開完整單位名稱 |\n| TDR | 測 impedance | [[0 Digital Test - What are SIPI and Serdes]] | 未提供 TDR option 或探頭型號 |\n| Delta-L | 損耗量測相關 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供方法定義、標準或軟體名稱 |\n| ISD/ADK | 圖上方法 / 工具文字 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開縮寫，未說明與 Delta-L 的關係 |\n| w/ cable / connector testing | cable / connector testing | [[0 Digital Test - What are SIPI and Serdes]] | 未提供連接器類型、線纜規格或測試項目 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 3.265783
+         },
+         {
+          "text": "無線通訊認證實驗室資料清單 › 目前已知內容\n- [[Test House]] 只包含一個本機檔案連結：`無線通訊認證實驗室.pptx`。\n- [[Test House]] 來源 converted 日期為 2026-09-17，但正文未標示正式發布日期或文件版次。\n- 先前 [[Test House]] 沒有可抽取的簡報正文、圖表、標準清單、實驗室名稱、認證範圍或設備配置。\n- [[無線通訊認證實驗室]]已補入該 PPT 的 markitdown 轉檔文字；raw frontmatter 顯示 converted 日期為 2026-09-17，但簡報本身仍未標示正式發布日期與版次。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+          },
+          "score": 0.62735
+         },
+         {
+          "text": "uTCI beam failure recovery\n[[uTCI beam failure recovery]] 是 [[Unified TCI Framework]] 中 Release 17 unified TCI 對 legacy beam failure recovery procedure 的延伸，讓 BFR response 後的 QCL parameters 與 UL spatial filters 套用到 configured to follow unified TCI state 的 channels / signals。[[Unified TCI Framework(uTCI)]]",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/uTCI beam failure recovery.md"
+          },
+          "score": 1.264463
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 5G NTN-NR 市場與技術背景\n來源 slide 3 說 [[5G NTN-NR]] gaining interest from chipset / device manufacturers、automotive、satellite / space industry。初始焦點是 S/L bands 的 transparent payload，後續 extension 指向 regenerative architecture 以及 Ka、K、Ku、Q/V 等其他 bands。來源同頁明示 [[R&S SMW200A]] 的 channel emulation capabilities 用於 NTN testing，包含 long path delays、enhanced Doppler capabilities 與 customized dynamic fading。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 3.160728
+         },
+         {
+          "text": "Starlink User Terminal › Field performance metrics\n來源列出：\n\n- Throughput：Rev4 100–307 Mbps down、10–40 Mbps up；iPerf3 validation。\n- Latency / Jitter：88 ms avg、9 ms jitter Rev4；flent rrul bufferbloat test。\n- Power：55–100 W normal、200 W snowmelt；wattmeter baseline。\n- Obstructions：App API monitoring、FOV alignment、beam steering accuracy。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Starlink User Terminal.md"
+          },
+          "score": 1.443206
+         },
+         {
+          "text": "![](Picture4.jpg)\nWireless communication tester\nEMI test receiver\nSignal & spectrum analyzer\nWireless communication tester",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-4a179a13677acd8f",
+            "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+            "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "section": 175,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 29.267142
+         },
+         {
+          "text": "Signal Generator\nSignal Analyzer",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-c478cd76758e3230",
+            "original_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+            "sha256": "c478cd76758e32304c76f6cddcc468bbab6c09f305ddd986166116e13cef3c38",
+            "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+           "section": 37,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 22.699916
+         },
+         {
+          "text": "Network analyzer\nVector signal generator\nBroadband Amplifier",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-4a179a13677acd8f",
+            "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+            "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "section": 177,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 19.87828
+         },
+         {
+          "text": "# Let’s talk\nEMC& Regulatory test\nfor wireless devices with 3GPP cellular technology\nAll about test standards and R&S solutions\nXIE, Feng ˹Rich˼\nMarket Segment Manager\nWireless Communication\nfeng.xie@rohde-schwarz.com",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-4a179a13677acd8f",
+            "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+            "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 17.329539
+         }
+        ],
+        "text": "| 鏈條 | Wireless Communication 市場 / 測試需求 | 可量測參數 | Signal Generator 所需能力 | Signal Analyzer 所需能力 |\n|---|---|---|---|---|\n| 【推論】無線設備認證 / 3GPP cellular | 無線通訊認證實驗室用於驗證無線設備符合法規、安全與性能標準，主要測試項目包含頻譜、輸出功率、Protocol 相容性、互操作性、PTCRB / GCF 認證；來源另標示主題為 wireless devices with 3GPP cellular technology。[11][40] | 頻譜、輸出功率、協定 / 互操作性相關測試項目。[11] | 需要能產生對應 cellular / 5G NR 測試訊號；R&S SMW200A 在 component testing 中支援 LTE、Cellular IoT、5G NR R17/18、OFDM、custom digital modulation，frequency up to 67 GHz、overrange 72 GHz，RF modulation bandwidth up to 2 GHz、搭配 R&S SMW-K555 可到 4 GHz。[27] | 需要能做對應訊號與頻譜分析；R&S FSW 在 component testing 中支援 LTE、Cellular IoT、5G NR R17/18、OFDM signal analysis、Vector signal analysis，frequency up to 85 GHz、overrange 90 GHz，analysis bandwidth up to 8 GHz。[27] |\n| 【推論】Wi‑Fi 7 / 6 GHz 網通設備 | 2026 年台灣無線通訊代工製造市場包含 Wi‑Fi 7 網通設備代工製造，來源列出 IEEE 802.11be、320 MHz channel bandwidth、4096‑QAM、MLO、STR、eMLSR、6 GHz band，並指出台灣全面開放 5925–6425 MHz。[19] | 6 GHz 頻段 5925–6425 MHz、320 MHz channel bandwidth、4096‑QAM。[19] | 需要覆蓋 6 GHz 頻段並具備至少 320 MHz 等級的調變頻寬；R&S SMW200A frequency up to 67 GHz、RF modulation bandwidth up to 2 GHz，搭配 R&S SMW-K555 可到 4 GHz。[27] | 需要覆蓋 6 GHz 頻段並具備至少 320 MHz 等級的分析頻寬；R&S FSW frequency up to 85 GHz、overrange 90 GHz，analysis bandwidth up to 8 GHz。[27] |\n| 【推論】5G NTN‑NR / 衛星通訊 | 5G NTN‑NR gaining interest from chipset / device manufacturers、automotive、satellite / space industry；來源明示 R&S SMW200A channel emulation capabilities 用於 NTN testing，包含 long path delays、enhanced Doppler capabilities 與 customized dynamic fading。[35] | NTN channel emulation 參數包含 satellite trajectory modelling、frequency-dependent atmospheric effects、longer path delays、enhanced Doppler capabilities、up to 1073 ms delay、up to ±1 MHz Doppler。[4] | R&S SMW200A 需 firmware version ≥ 5.30，並透過 B14 或 B15 搭配 R&S SMW-K820 customized dynamic fading 支援上述 NTN channel emulation 能力。[4] | NTN component testing 使用 DUT、R&S SMW200A 與 R&S FSW；R&S FSW 支援 frequency up to 85 GHz、overrange 90 GHz、analysis bandwidth up to 8 GHz，以及 LTE、Cellular IoT、5G NR R17/18、OFDM signal analysis、Vector signal analysis。[27] |",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "NTN signal generator solutions › End-to-end system testing\n來源將 E2E system testing 描述為對 UE、NTN payload、service link channel emulator 與 feeder link channel emulator 的 RF satellite link emulation。[[R&S SMW200A]] 需要 firmware version ≥ 5.30，並透過 B14 或 B15 搭配 [[R&S SMW-K820]] customized dynamic fading 支援：\n\n- satellite trajectory modelling。\n- frequency-dependent atmospheric effects。\n- longer path delays。\n- enhanced Doppler capabilities。\n- up to 1073 ms delay。\n- up to ±1 MHz Doppler（pure Doppler）。\n\n[[R&S Space Nexus]] 在來源中被描述為 PC Software，available on request，可依 satellite trajectory 產生 [[R&S SMW200A]] fading files。\n\n詳見 [[SMW200A NTN end-to-end channel emulation]]。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+         },
+         "score": 1.702677
+        },
+        {
+         "text": "無線通訊認證實驗室資料清單 › 已擷取的無線通訊認證實驗室簡報內容\n依 [[無線通訊認證實驗室]]：\n\n- [[無線通訊認證實驗室]]用於測試與驗證無線設備符合法規、安全與性能標準，涵蓋 [[RF 測試]]、[[EMC]]、安規及一致性認證。\n- 來源稱其可經 [[NCC]]、[[TAF]]、[[FCC]] 等機構認可，並支援 [[Global Market Access]] 與上市加速。\n- 主要測試項目包含：頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試、[[PTCRB]] / [[GCF]] 認證。\n- 認證必要性包含防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端、6G 等需求。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+         },
+         "score": 2.454629
+        },
+        {
+         "text": "2026台灣無線通訊代工製造產業_技術規格與市場分析報告 › 重點摘要\n- 報告日期：2026-09-15；來源轉檔日期：2026-09-15。\n- 報告主張 2026 年台灣無線通訊代工製造產業呈現雙引擎成長：既有的 [[Wi-Fi 7 網通設備代工製造]]，以及新興的 [[低軌衛星零組件與地面終端供應鏈]]。\n- 在 [[Wi-Fi 7]] 部分，來源列出 [[IEEE 802.11be]]、320 MHz channel bandwidth、4096-QAM、[[MLO]]、STR、eMLSR、6 GHz band、thermal throttling 等技術規格，並指出台灣已於 2026 年全面開放 6 GHz 頻段 5925–6425 MHz。\n- 在台灣網通 ODM / OEM 廠商版圖部分，來源列出 [[智易]]、[[智邦]]、[[中磊]]、[[啟碁]]、[[建漢]]、[[友訊]]、[[合勤控]]、[[正文]]等廠商，並分別描述 2026 年動態與受惠程度。\n- 在 [[低軌衛星]] 供應鏈部分，來源將產業鏈分成衛星本體製造與關鍵材料、地面設備與用戶終端、系統整合與測試驗證、衛星營運商服務四大環節。\n- 衛星本體零組件表列 [[華通]]、[[昇達科]]、[[同欣電]]、[[穩懋]]、[[台燿]]，並將 [[華通]]定位為衛星用高頻高密度連接板 / HDI 廠商，將 [[台燿]]定位為高頻高速 [[CCL]] 材料供應商。\n- 地面設備與用戶終端表列 [[啟碁]]、[[耀登]]、[[鐳洋科技]]、[[稜研科技]]、[[濰元科技]]，主題集中於[[相控陣列天線]]、Ku/Ka-band、RF front-end 與系統整合能力。\n- 手機直連衛星部分，來源將 [[Direct-to-Cell]] 描述為一般 4G/5G 手機無需額外硬體、修改韌體或安裝特殊軟體即可直接連結低軌衛星的技術，並連到 [[3GPP Release 17]]與[[3GPP Release 18]]。\n- 市場數字包括：[[TrendForce]] 最新研究指出 2026 年全球手機直連衛星市場規模預估為 76 億美元、年成長率約 49%；來源未提供該 TrendForce 報告名稱、發布日期或頁碼。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+         },
+         "score": 2.527033
+        },
+        {
+         "text": "NTN signal generator solutions › Component testing\n依 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]] slide 16，component testing 使用 DUT、[[R&S SMW200A]] 與 [[R&S FSW]]：\n\n- [[R&S SMW200A]]：frequency up to 67 GHz，overrange 72 GHz；RF modulation bandwidth up to 2 GHz，up to 4 GHz with [[R&S SMW-K555]]。\n- [[R&S SMW200A]] signal generation SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal generation（K114）、custom digital modulation。\n- [[R&S FSW]]：frequency up to 85 GHz，overrange 90 GHz；analysis bandwidth up to 8 GHz。\n- [[R&S FSW]] signal analysis SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal analysis（K96）、Vector signal analysis（K70）。\n\n以上是 2025 簡報摘要值；正式產品規格仍需回查 [[R&S SMW200A]]、[[R&S FSW]] 與其對應 specifications。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+         },
+         "score": 0.212237
+        },
+        {
+         "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 5G NTN-NR 市場與技術背景\n來源 slide 3 說 [[5G NTN-NR]] gaining interest from chipset / device manufacturers、automotive、satellite / space industry。初始焦點是 S/L bands 的 transparent payload，後續 extension 指向 regenerative architecture 以及 Ka、K、Ku、Q/V 等其他 bands。來源同頁明示 [[R&S SMW200A]] 的 channel emulation capabilities 用於 NTN testing，包含 long path delays、enhanced Doppler capabilities 與 customized dynamic fading。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+         },
+         "score": 3.160728
+        },
+        {
+         "text": "# Let’s talk\nEMC& Regulatory test\nfor wireless devices with 3GPP cellular technology\nAll about test standards and R&S solutions\nXIE, Feng ˹Rich˼\nMarket Segment Manager\nWireless Communication\nfeng.xie@rohde-schwarz.com",
+         "citation": {
+          "kind": "raw",
+          "source": {
+           "source_id": "src-4a179a13677acd8f",
+           "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+           "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "page": null,
+           "slide": null,
+           "parent_source_id": null
+          },
+          "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": null
+         },
+         "score": 17.329539
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [
+         {
+          "name": "market_segment",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 3,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/華通.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 3,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 6,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/台燿.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/concepts/NTN signal generator solutions.md",
+         "raw_refs": [
+          "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md",
+         "raw_refs": [
+          "raw/Market/OneNote/1661484068021173813.md",
+          "raw/Market/OneNote/TestHouse/Test House.md",
+          "raw/Market/OneNote/無線通訊認證實驗室.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md",
+         "raw_refs": [
+          "raw/Market/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md",
+          "raw/Market/HSD PCB image 18.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+         "raw_refs": [
+          "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+          "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+          "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+          "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-f5da86e9a7694274afd32cfa9fa7a55f",
+      "task_sha256": "6da2b730fe7fb9cab6d760b0f4b367d131bfa948ae249fe6de8f26ae93e00a1d",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.8.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "validated",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validated",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "passed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": null
+    },
+    "evidence": {
+     "raw_citations": 6,
+     "facet_status": "covered",
+     "missing_facets": [],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {
+      "market_segment": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

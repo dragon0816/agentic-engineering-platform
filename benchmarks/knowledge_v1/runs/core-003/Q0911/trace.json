@@ -1,0 +1,786 @@
+{
+ "question": {
+  "id": "Q0911",
+  "text": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+  "market": "Semiconductor",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-de65ae76552e4b43a27e8b2da29a25d4",
+ "exchange": {
+  "sent": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 89.219,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-de65ae76552e4b43a27e8b2da29a25d4",
+    "actor": "leo.chi",
+    "title": "For a Semiconductor use case involving RFIC validation, where would Sign…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T20:03:23.665715Z",
+    "updated_at": "2026-10-09T20:04:52.615160Z",
+    "messages": [
+     {
+      "message_id": "message-61ec3c185765411f9d350362226da06c",
+      "role": "user",
+      "text": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+      "created_at": "2026-10-09T20:03:23.674784Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-c2dd4d32375840c28f8846f9be14cbc2",
+      "role": "assistant",
+      "text": "Signal Generator / Signal Analyzer would fit in the **component-test / RF validation step**, i.e., where the RFIC or RF component is treated as the DUT and exercised before broader system, end-to-end, or UE-level testing layers.[14][34]\n- **Placement in workflow:** In the cited R&S NTN test framework, testing is organized into layers including **component testing, SAN testing, end-to-end system testing, and UE testing**; the Signal Generator / Signal Analyzer pair is explicitly described under **component testing** with a DUT.[34][14]  \n- **Signal Generator role:** The **R&S SMW200A** provides the RF stimulus / waveform generation for the DUT, with cited capabilities such as frequency up to 67 GHz, RF modulation bandwidth up to 2 GHz or up to 4 GHz with R&S SMW-K555, and signal generation software for LTE, Cellular IoT, 5G NR R17/18, OFDM, and custom digital modulation.[14]  \n- **Signal Analyzer role:** The **R&S FSW** measures and analyzes the DUT output, with cited capabilities such as frequency up to 85 GHz, overrange to 90 GHz, analysis bandwidth up to 8 GHz, and analysis software for LTE, Cellular IoT, 5G NR R17/18, OFDM signal analysis, and vector signal analysis.[14][15]  \n- 【推論】For an RFIC validation workflow, this means the generator/analyzer pair is best placed after implementation/prototype availability and during the **test → validation** portion of the workflow, because the broader workflow is defined as implementation → test → debug → validation, while the generator/analyzer setup is documented as DUT-based component testing.[2][14]\n\n來源：\n[2] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[14] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[15] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[34] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）",
+      "created_at": "2026-10-09T20:04:52.615160Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-46ed91ffe2e243938d42f576af75ef0f",
+       "request_id": "request-46ed91ffe2e243938d42f576af75ef0f",
+       "span_id": "span-46ed91ffe2e243938d42f576af75ef0f",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "Signal Generator / Signal Analyzer would fit in the **component-test / RF validation step**, i.e., where the RFIC or RF component is treated as the DUT and exercised before broader system, end-to-end, or UE-level testing layers.[14][34]\n- **Placement in workflow:** In the cited R&S NTN test framework, testing is organized into layers including **component testing, SAN testing, end-to-end system testing, and UE testing**; the Signal Generator / Signal Analyzer pair is explicitly described under **component testing** with a DUT.[34][14]  \n- **Signal Generator role:** The **R&S SMW200A** provides the RF stimulus / waveform generation for the DUT, with cited capabilities such as frequency up to 67 GHz, RF modulation bandwidth up to 2 GHz or up to 4 GHz with R&S SMW-K555, and signal generation software for LTE, Cellular IoT, 5G NR R17/18, OFDM, and custom digital modulation.[14]  \n- **Signal Analyzer role:** The **R&S FSW** measures and analyzes the DUT output, with cited capabilities such as frequency up to 85 GHz, overrange to 90 GHz, analysis bandwidth up to 8 GHz, and analysis software for LTE, Cellular IoT, 5G NR R17/18, OFDM signal analysis, and vector signal analysis.[14][15]  \n- 【推論】For an RFIC validation workflow, this means the generator/analyzer pair is best placed after implementation/prototype availability and during the **test → validation** portion of the workflow, because the broader workflow is defined as implementation → test → debug → validation, while the generator/analyzer setup is documented as DUT-based component testing.[2][14]\n\n來源：\n[2] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[14] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[15] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[34] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-46ed91ffe2e243938d42f576af75ef0f",
+      "request_id": "request-46ed91ffe2e243938d42f576af75ef0f",
+      "span_id": "span-46ed91ffe2e243938d42f576af75ef0f",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-46ed91ffe2e243938d42f576af75ef0f",
+       "request_id": "request-46ed91ffe2e243938d42f576af75ef0f",
+       "span_id": "span-46ed91ffe2e243938d42f576af75ef0f",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Signal Generator / Signal Analyzer would fit in the **component-test / RF validation step**, i.e., where the RFIC or RF component is treated as the DUT and exercised before broader system, end-to-end, or UE-level testing layers.[14][34]\n- **Placement in workflow:** In the cited R&S NTN test framework, testing is organized into layers including **component testing, SAN testing, end-to-end system testing, and UE testing**; the Signal Generator / Signal Analyzer pair is explicitly described under **component testing** with a DUT.[34][14]  \n- **Signal Generator role:** The **R&S SMW200A** provides the RF stimulus / waveform generation for the DUT, with cited capabilities such as frequency up to 67 GHz, RF modulation bandwidth up to 2 GHz or up to 4 GHz with R&S SMW-K555, and signal generation software for LTE, Cellular IoT, 5G NR R17/18, OFDM, and custom digital modulation.[14]  \n- **Signal Analyzer role:** The **R&S FSW** measures and analyzes the DUT output, with cited capabilities such as frequency up to 85 GHz, overrange to 90 GHz, analysis bandwidth up to 8 GHz, and analysis software for LTE, Cellular IoT, 5G NR R17/18, OFDM signal analysis, and vector signal analysis.[14][15]  \n- 【推論】For an RFIC validation workflow, this means the generator/analyzer pair is best placed after implementation/prototype availability and during the **test → validation** portion of the workflow, because the broader workflow is defined as implementation → test → debug → validation, while the generator/analyzer setup is documented as DUT-based component testing.[2][14]\n\n來源：\n[2] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[14] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[15] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[34] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_Zpxbu1FKN3MTC7qBMRx9iK1X",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "Signal Generator / Signal Analyzer would fit in the **component-test / RF validation step**, i.e., where the RFIC or RF component is treated as the DUT and exercised before broader system, end-to-end, or UE-level testing layers.[14][34]\n- **Placement in workflow:** In the cited R&S NTN test framework, testing is organized into layers including **component testing, SAN testing, end-to-end system testing, and UE testing**; the Signal Generator / Signal Analyzer pair is explicitly described under **component testing** with a DUT.[34][14]  \n- **Signal Generator role:** The **R&S SMW200A** provides the RF stimulus / waveform generation for the DUT, with cited capabilities such as frequency up to 67 GHz, RF modulation bandwidth up to 2 GHz or up to 4 GHz with R&S SMW-K555, and signal generation software for LTE, Cellular IoT, 5G NR R17/18, OFDM, and custom digital modulation.[14]  \n- **Signal Analyzer role:** The **R&S FSW** measures and analyzes the DUT output, with cited capabilities such as frequency up to 85 GHz, overrange to 90 GHz, analysis bandwidth up to 8 GHz, and analysis software for LTE, Cellular IoT, 5G NR R17/18, OFDM signal analysis, and vector signal analysis.[14][15]  \n- 【推論】For an RFIC validation workflow, this means the generator/analyzer pair is best placed after implementation/prototype availability and during the **test → validation** portion of the workflow, because the broader workflow is defined as implementation → test → debug → validation, while the generator/analyzer setup is documented as DUT-based component testing.[2][14]\n\n來源：\n[2] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[14] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[15] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[34] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）",
+          "evidence": {
+           "raw_citations": 4,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-15bf0935255c46898903fa919bc911ba",
+            "request_id": "request-15bf0935255c46898903fa919bc911ba",
+            "span_id": "span-15bf0935255c46898903fa919bc911ba",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow? Explain placement in workflow and role.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "CMX500 use-case based 5G testing › Shuffler\n來源描述 [[Shuffler]]：\n\n- RF / T-put test on all supported UE band combos in one go。\n- All Shuffler tests part of [[R&S CMX-KF612M]] test package。\n- Loop blocks provide flexibility to loop through bands、bandwidth、channels。\n- one test script with one test report can test RF TX / RX measurement、RX sensitivity measurement、throughput、VoLTE / VoNR。\n- Band combinations input via UE capabilities or user-defined Excel sheet。\n- Shuffler implemented in [[R&S CMsequencer]]。\n\n此處仍需正式 [[R&S CMX-KF612M]] 文件補證。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 1.714356
+             },
+             {
+              "text": "Virtual tester\n[[Virtual tester]] 在 [[AIW_Products_Customer_Questionnaire]] 中被定義為跨 implementation → test → debug → validation 的 agentic workflow，而不是 single tool。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 1.682243
+             },
+             {
+              "text": "NTN signal generator solutions\n[[NTN signal generator solutions]] 是 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]]（封面標示 12-2025；末頁標示 Last updated: 08/25）中用來整理 [[R&S SMW200A]]、[[R&S FSW]] 與相關 software options 在 [[3GPP]] [[NTN]] 測試中的 solution-level 應用框架。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+              },
+              "score": 0.23628
+             },
+             {
+              "text": "R&S SMW200A\n[[R&S SMW200A]] 是 Rohde & Schwarz 的 vector signal generator；依 `R&S®SMW200A Vector Signal Generator Specifications` `Version 31.00`（`May 2026`），RF path A 可覆蓋 `100 kHz to 67 GHz`，RF path B 可覆蓋至 `44 GHz`，並可由 single-path vector signal generator 擴充到 multichannel MIMO receiver tester（來源：[[SMW200A_specs_en_3606-8037-22_v3100]]）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 5.33223
+             },
+             {
+              "text": "CMX500 Sequencer Test Packages › Summary package counts\n| Package | Test purpose | Summary status / count | 來源備註 |\n|---|---|---:|---|\n| [[R&S CMX-KC550B]] | LTE 3GPP RF | verified 14 | 詳細表列 16 個 verified，與 Summary 不一致 |\n| [[R&S CMX-KC660B]] | NSA FR1 3GPP RF | verified 68 | Summary 標示 planned |\n| [[R&S CMX-KC661B]] | SA FR1 3GPP RF | verified 100 | 基本、CA、UL MIMO、Tx Diversity、Rx tests |\n| [[R&S CMX-KC664B]] | Rel.17 RedCap 3GPP RF | verified 32 | 詳細 package 行出現 NR NSA FR2 3GPP RF，需查原始 Excel |\n| [[R&S CMX-KC665B]] | Rel.17 NR-NTN 3GPP RF | verified 12 | NR-NTN tests Initial Release Version 9.11 |\n| 3GPP RF total | 3GPP RF packages | verified 212；planned 13 | 合計欄位 |\n| [[R&S CMX-KC652B]] | FCC RF Acceptance Tests | verified 8 | SA Tx Tests |\n| [[R&S CMX-KC653B]] | RED RF Acceptance Tests | verified 33 | NSA / SA Tx / Rx tests |\n| IEEE WiFi | IEEE WiFi | planned 13 | 片段未提供完整 package details |\n| [[R&S CMX-KC350B]] | WLAN IEEE RF Acceptance Tests | verified 95 | 802.11b/a/g/n/ac/ax/be SISO Tx / Rx tests |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Sequencer Test Packages.md"
+              },
+              "score": 0.988539
+             },
+             {
+              "text": "R&S CMX-KC661B › 來源中的訂購資訊\n依 [[1C111_1e_3GPPPreConfGuide]]（06.2025）：\n\n| 項目 | 原文名稱 | Order no. |\n|---|---|---|\n| [[R&S CMX-KC661B]] | NR SA FR1 3GPP RF Test Scenarios | 1222.4513.02 |\n\n依 [[1C111_0e_3GPPPreConfGuide]]（06.2025）：\n\n| 項目 | 原文名稱 | Order no. |\n|---|---|---|\n| [[R&S CMX-KC661B]] | NR SA FR1 3GPP RF Test Scenarios | 1222.4513.02 |\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，同一 option 被列為 **NR SA FR1 3GPP RF test scenarios**，order no. 為 **1222.4513.xx**；[[1C111_0e_3GPPPreConfGuide]] 與 [[1C111_1e_3GPPPreConfGuide]] 均確認完整尾碼 **1222.4513.02**。\n\n[[CMX500_Callbox]] 沒有提供 order number，但在 3GPP Pre-Conformance Testing slide 中明示 [[R&S CMX-KC661B]] SA FR1 3GPP RF Test Scenarios，並與 [[R&S CMX-KM600]] NR FR1 measurements single-carrier 同列。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KC661B.md"
+              },
+              "score": 0.917733
+             },
+             {
+              "text": "Kuiper UT 測試流程 › 測試策略框架\n[[Kuiper UT Test & Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）Slide 5 將測試策略分為三層：\n\n1. 製造階段：工廠驗收測試 FAT、射頻模式驗證、熱電性能。\n2. 系統整合：實驗室端對端測試、協議棧驗證、模擬器模擬。\n3. 現場驗證：Protoflight 試驗、真實衛星測試、1000+ 終端試驗。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+              },
+              "score": 2.714518
+             },
+             {
+              "text": "亞光 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[亞光]]（3019）列在台灣無人機產業供應鏈中游，分類為模組製造與系統整合，描述為高解析度鏡頭與感測器。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/亞光.md"
+              },
+              "score": 2.044232
+             },
+             {
+              "text": "聯發科 › UAV / Genio 脈絡\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[聯發科]]（2454）列於 [[台灣無人機供應鏈]] 上游的晶片、感測器、通訊模組分類，描述為 AI晶片與通訊模組。\n- [[4. UAV Eco-chain in Taiwan]]（來源未標示正式日期；raw 轉檔 2026-09-17）將 [[聯發科]]（2454）列於 Key component/technology 區段，稱其晶片可作為無人機核心處理器，負責運算與通訊。\n- [[TW government support projects(無人機關鍵晶片及模組自主開發研發補助計畫)]]（來源未標示正式發布日期；raw 轉檔 2026-09-17）稱 [[海華科技]] 主導、[[臺灣希望]] 合作的先進無人機 AI 影像模組計畫將採用 [[聯發科]] [[Genio 720]] 晶片。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/聯發科.md"
+              },
+              "score": 3.835457
+             },
+             {
+              "text": "第三代半導體概念股 › [[Power IC - Power Management IC image 3]] 圖上分類\n| 圖上大分類 | 圖上子分類 | 公司 / 代號 | 日期 / 期間 |\n|---|---|---|---|\n| 第三代半導體與特殊製程 | 上游基板與磊晶 | [[環球晶]]（6488） | 來源未標示日期；取得於 2026-09-04 |\n| 第三代半導體與特殊製程 | 上游基板與磊晶 | [[嘉晶]]（3016） | 來源未標示日期；取得於 2026-09-04 |\n| 第三代半導體與特殊製程 | 上游基板與磊晶 | [[合晶]]（6182） | 來源未標示日期；取得於 2026-09-04 |\n| 第三代半導體與特殊製程 | 上游基板與磊晶 | [[全新]]（2455） | 來源未標示日期；取得於 2026-09-04 |\n| 第三代半導體與特殊製程 | 第三代半導體晶圓代工 | [[漢磊]]（3707） | 來源未標示日期；取得於 2026-09-04 |\n| 第三代半導體與特殊製程 | GaAs/Ga 通訊射頻供應鏈 | [[穩懋]]（3105） | 來源未標示日期；取得於 2026-09-04 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/第三代半導體概念股.md"
+              },
+              "score": 2.805862
+             },
+             {
+              "text": "環球晶\n[[環球晶]] 是 [[Power IC - Power Management IC image 3]]（來源未標示日期；取得於 2026-09-04）列於「第三代半導體與特殊製程」中「上游基板與磊晶」分類的公司名稱，圖上代號為 6488。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/環球晶.md"
+              },
+              "score": 2.592468
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › CMX500 platform overview\n來源對 [[R&S CMX500]] 的 platform overview 說法包含：\n\n- Future proof 5G signaling test platform。\n- Running on Linux：faster and more robust。\n- Single web-based GUI for RF、protocol、application testing。\n- Modular and scalable HW architecture。\n- LTE & FR1：up to 8 GHz。\n- FR2：24–50 GHz。\n- Ready for up to 20 Gbps and more E2E IP performance。\n- Extensive IP and Application Test feature set onboard。\n\n此處屬 presentation claim；不能取代 formal frequency range、hardware configuration、software option 或 guaranteed performance 規格。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 1.228523
+             },
+             {
+              "text": "Virtual tester › 來源定義\n[[AIW_Products_Customer_Questionnaire]] 的 short definitions 寫道：\n\n> Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a single tool.\n\n因此本庫把 [[Virtual tester]] 記為工作流 / solution concept，而非單一軟體工具或儀器。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 1.315356
+             },
+             {
+              "text": "NTN signal generator solutions › Component testing\n依 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]] slide 16，component testing 使用 DUT、[[R&S SMW200A]] 與 [[R&S FSW]]：\n\n- [[R&S SMW200A]]：frequency up to 67 GHz，overrange 72 GHz；RF modulation bandwidth up to 2 GHz，up to 4 GHz with [[R&S SMW-K555]]。\n- [[R&S SMW200A]] signal generation SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal generation（K114）、custom digital modulation。\n- [[R&S FSW]]：frequency up to 85 GHz，overrange 90 GHz；analysis bandwidth up to 8 GHz。\n- [[R&S FSW]] signal analysis SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal analysis（K96）、Vector signal analysis（K70）。\n\n以上是 2025 簡報摘要值；正式產品規格仍需回查 [[R&S SMW200A]]、[[R&S FSW]] 與其對應 specifications。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+              },
+              "score": 0.212237
+             },
+             {
+              "text": "R&S FSW\nR&S FSW 是 Rohde & Schwarz 的 high-end Signal and Spectrum Analyzer 系列，依 Version 17.01（September 2025）涵蓋 8 GHz 至 85 GHz 型號，[[R&S FSW85]] 搭配 R&S FSW-B90G 可延伸至 90 GHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 4.139259
+             },
+             {
+              "text": "CMX500 Sequencer Test Packages › NR-NTN package note\n[[R&S CMX-KC665B]] 在 [[Sequencer-CMX-Test_Packages_Database]] 中列為 NR-NTN 3GPP RF package，測項均為 verified，Initial Release Version 9.11，Call Drop handling OK，required licenses 為 [[R&S CMX-KS600]]、[[R&S CMX-KS627]]、[[R&S CMX-KM600]]。\n\n⚠️ 來源 [[Sequencer-CMX-Test_Packages_Database]]（2026-06-30）說 [[R&S CMX-KC665B]] 的 required licenses 為 [[R&S CMX-KS600]]、[[R&S CMX-KS627]]、[[R&S CMX-KM600]]，但既有頁面 [[CMX500 NR-NTN configuration]] 說 [[R&S CMX-KC665B]] 若 RF measurements needed 另需 [[R&S CMX-KM600]] / [[R&S CMX-KM606]]。判斷：暫視為 sequencer test package database 的 package-level license 欄與 NR-NTN configuration guide 的 application configuration scope 差異；不得用本來源覆蓋完整 NR-NTN configuration rules。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Sequencer Test Packages.md"
+              },
+              "score": 0.684223
+             },
+             {
+              "text": "R&S CMX-KC665B\n[[R&S CMX-KC665B]] 是 [[R&S CMX500]] 的 NR-NTN 3GPP RF test package / RF test case package；目前由 [[Sequencer-CMX-Test_Packages_Database]] 與 [[CMX500_Software_Maintenance_PU-Option_Mapping]] 支撐。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KC665B.md"
+              },
+              "score": 2.323826
+             },
+             {
+              "text": "Kuiper UT 測試流程 › 系統整合與現場試驗\nSlide 11 的系統整合測試：\n\n- 基帶 / [[Amazon Prometheus SoC]]：協議棧驗證、資料處理 1Tbps 等級。\n- 加密與安全：[[AWS]] 整合，私有網路延伸。\n- 端對端模擬：使用網路仿真器，模擬衛星延遲與衰落。\n- 合規檢驗：FCC / ITU 規範，PFD、雜散限制。\n\nSlide 12 的現場試驗目標：\n\n- Protoflight（2023）：100% 成功率，雙向視訊通話驗證。\n- 1000+ 單位測試（2024）：FCC 授權，多地點涵蓋驗證。\n- 實衛星速率（2025）：達成 1+ Gbps 下行、450 Mbps 上行。\n- 商用化準備（2026 Q1）：5 國上線服務驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+              },
+              "score": 2.640955
+             },
+             {
+              "text": "亞光\n[[亞光]] 是 [[0. UAV產業分析報告架構]] 中列於 [[台灣無人機供應鏈]] 中游的公司，來源描述其與高解析度鏡頭與感測器相關。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/亞光.md"
+              },
+              "score": 2.021314
+             },
+             {
+              "text": "新唐科技 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[新唐科技]] / 新唐（4919）列於 [[台灣無人機供應鏈]] 上游的晶片、感測器、通訊模組分類，描述為微控制器 MCU。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/新唐科技.md"
+              },
+              "score": 5.791177
+             },
+             {
+              "text": "第三代半導體概念股 › 限制與不可推論事項\n- [[Power IC - Power Management IC image 3]] 與 [[Power IC - Power Management IC image]] 未標示日期；[[Power IC - Power Management IC image 4]] 只在漲價潮段落標示 2026 年，仍缺少完整發布日期。\n- 圖上分類是概念股 / 供應鏈資訊圖，不等於供應鏈驗證、交易關係、完整市場名單或投資建議。\n- [[Power IC - Power Management IC image]] 的「上游基板與晶晶」照 raw OCR 保留；[[Power IC - Power Management IC image 3]] 的「上游基板與磊晶」也保留，兩者需待原圖或更清晰來源裁決。\n- 圖中文字「GaAs/Ga 通訊射頻供應鏈」照原文記錄；此頁不推論「Ga」是 GaN、GaAs 或其他技術縮寫。\n- [[Power IC - Power Management IC image 4]] 的「晶圓」「磊晶」「代工」是圖上括號註記，不等於產能、市占率或 AI 伺服器供應量。\n- 圖上沒有任何數字口徑可支持市占率、排名、產能或成長率。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/第三代半導體概念股.md"
+              },
+              "score": 2.444876
+             },
+             {
+              "text": "嘉晶\n[[嘉晶]] 是 [[Power IC - Power Management IC image 1]]（來源未標示日期；取得於 2026-09-04）列於「功率半導體概念股」表中的公司名稱，圖上代號為 3016。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/嘉晶.md"
+              },
+              "score": 5.85914
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › OBT\n來源列 OBT：\n\n- Support for FR2 2x2 MIMO and up to 8 CC。\n- Up to 16 CC LTE / FR1。\n- CB RF test up to 50 GHz。\n- 8CC FR2 2x2 + 4CC FR1 4x4。\n- 8CC FR2 2x2 + 8CC LTE 4x4。\n- 8CC FR1 4x4 + 8CC LTE 4x4。\n- >10 Gbps Data Throughput。\n- 3GPP pre-conformance tests。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 1.134028
+             },
+             {
+              "text": "Virtual tester › 與 point tools 的區分\n問卷第 3b 題要求客戶說明他們是在尋找 point tools，或 broader [[Virtual tester]]：\n\n- point tools examples：better scripting、log analysis。\n- broader [[Virtual tester]]：spans implementation → test → debug → validation。\n\n這個區分表示 [[Virtual tester]] 的範圍比單一 scripting assistant 或 log analyzer 更寬，但來源未提供具體產品功能矩陣。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 0.262895
+             },
+             {
+              "text": "NTN signal generator solutions › SAN testing\n來源將 SAN testing 連到 [[3GPP TS 38.108]]、[[3GPP TS 38.181]]、[[3GPP TS 36.108]] 與 [[3GPP TS 36.181]]。在 signal generator 角度，[[R&S SMW200A]] 提供：\n\n- Fixed Reference Channels（FRCs）。\n- Test Models（TMs）。\n- Fading Module。\n- AWGN Module。\n- static UE propagation models。\n- TDL and moving propagation。\n- SISO / MIMO。\n- NB-IoT options：K119 / K115 / K143 / K146。\n- NR options：K144 / K148 / K171。\n- B14 / B15 + K71 moving propagation。\n\n詳見 [[5G NR SAN conformance testing]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+              },
+              "score": 0.203853
+             },
+             {
+              "text": "CMX500 Sequencer Test Packages\n[[CMX500 Sequencer Test Packages]] 是 [[R&S CMX500]] sequencer 中以 KC option / package code 組織的 RF、acceptance 與 WLAN test package 集合；目前主要由 [[Sequencer-CMX-Test_Packages_Database]] 支撐，並由 [[CMX500_Callbox]] 補充 callbox 簡報中的 manual-to-automated pre-conformance 與 TC count 圖表。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Sequencer Test Packages.md"
+              },
+              "score": 0.673602
+             },
+             {
+              "text": "Rohde & Schwarz GmbH & Co KG › 與 Rohde & Schwarz 的關係\n本頁只記錄來源文字中的 legal / trademark name。來源正文同時以 [[Rohde & Schwarz]] 作為公司 / 品牌名稱，描述其 Test & Measurement、Technology Systems、Networks & Cybersecurity Divisions，以及 2024/2025 fiscal year 財務與員工資訊；[[1C111_1e_3GPPPreConfGuide]] 則提供 electronics group 的 business fields 與公司概述。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Rohde & Schwarz GmbH & Co KG.md"
+              },
+              "score": 1.158451
+             },
+             {
+              "text": "Kuiper UT 測試流程\n[[Kuiper UT 測試流程]]是 [[Kuiper UT Test & Supply Chain]] 中針對 [[Project Kuiper 用戶終端]]的製造測試、OTA 電波暗室測試、RF 驗證、波束追蹤、環境可靠性、系統整合與現場試驗流程。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Kuiper UT 測試流程.md"
+              },
+              "score": 2.260133
+             },
+             {
+              "text": "亞光 › 可追溯限制\n- 來源未提供亞光的無人機鏡頭 / 感測器型號、客戶、出貨、認證、營收或得標資料。\n- 本頁不把來源列名改寫為已確認供應、量產或採購關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/亞光.md"
+              },
+              "score": 1.221864
+             },
+             {
+              "text": "圓剛 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[圓剛]]（2417）列在台灣無人機產業供應鏈上游，分類為晶片、感測器、通訊模組，描述為影像與視訊模組。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/圓剛.md"
+              },
+              "score": 3.281438
+             },
+             {
+              "text": "第三代半導體概念股 › [[Power IC - Power Management IC image]] 圖上分類\n[[Power IC - Power Management IC image]] 未標示圖片發布日期，raw 轉換於 2026-09-04，內容與 [[Power IC - Power Management IC image 3]] 高度重疊；但本次 raw OCR 將上游分類照錄為「上游基板與晶晶」。\n\n| 圖上大分類 | 圖上子分類 | 公司 / 代號 | 日期 / 期間 |\n|---|---|---|---|\n| 第三代半導體與特殊製程 | 上游基板與晶晶 | [[環球晶]]（6488） | 來源未標示日期；raw 轉換於 2026-09-04 |\n| 第三代半導體與特殊製程 | 上游基板與晶晶 | [[嘉晶]]（3016） | 來源未標示日期；raw 轉換於 2026-09-04 |\n| 第三代半導體與特殊製程 | 上游基板與晶晶 | [[合晶]]（6182） | 來源未標示日期；raw 轉換於 2026-09-04 |\n| 第三代半導體與特殊製程 | 上游基板與晶晶 | [[全新]]（2455） | 來源未標示日期；raw 轉換於 2026-09-04 |\n| 第三代半導體與特殊製程 | 第三代半導體晶圓代工 | [[漢磊]]（3707） | 來源未標示日期；raw 轉換於 2026-09-04 |\n| 第三代半導體與特殊製程 | GaAs/Ga 通訊射頻供應鏈 | [[穩懋]]（3105） | 來源未標示日期；raw 轉換於 2026-09-04 |\n\n⚠️ [[Power IC - Power Management IC image]]（來源未標示日期；raw 轉換於 2026-09-04）說第三代半導體與特殊製程的上游分類為「上游基板與晶晶」，但既有頁面 [[第三代半導體概念股]] 說 [[Power IC - Power Management IC image 3]] 的對應分類為「上游基板與磊晶」。判斷為同一或高度相似圖卡的 OCR / 讀圖差異；未裁決前兩種字串並列，不自行改成其中一者。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/第三代半導體概念股.md"
+              },
+              "score": 2.287844
+             },
+             {
+              "text": "合晶\n[[合晶]] 是 [[Power IC - Power Management IC image 3]]（來源未標示日期；取得於 2026-09-04）列於「第三代半導體與特殊製程」中「上游基板與磊晶」分類的公司名稱，圖上代號為 6182。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/合晶.md"
+              },
+              "score": 2.597001
+             },
+             {
+              "text": "Analog Devices › 來源中的出現\n[[Beamforming OneNote]]（來源正式日期未標示；raw converted 2026-09-17）列出以下 Analog Devices 連結標題：\n\n- An Interview with Analog Devices Discussing RF Electronics for Phased Array Applications。\n- Overcoming Common Planar Phased Array Circuit Design Challenges。\n- Internet from Space: RFIC in High Capacity, Low Latency LEO Satellite Terminals。\n\n[[User Terminal]]（來源正文標示 links current as of January 7, 2026, 1:33 PM CST；raw converted 2026-09-17）在 RF Components & Semiconductors 表格列出：\n\n- Component：Receiver IC。\n- Supplier：[[Analog Devices]]。\n- Link：`analog.com/adar1000`，連到 [[ADAR1000]] 產品頁。\n- 另一個 link：Analog Devices IMS landing page。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Analog Devices.md"
+              },
+              "score": 0.728159
+             },
+             {
+              "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 重點摘要\n此來源是由 `3GPP NTN Signal Generator Solutions Overview-EN-UR.pptx` 轉出的 lossy markdown；封面標示 `1GP` 與 `12-2025`，末頁標示 `Last updated: 08/25`，其中 slide 27 另標示 `2025-09-29 Nokia Workshop at R&S - SigGen Product Update`。本頁以來源原文呈現的 2025 年簡報語境處理，不自行推論正式發布日。\n\n簡報主題是 [[Rohde & Schwarz]] 針對 [[3GPP]] [[NTN]] 的 signal generator / channel emulation 測試方案，涵蓋：\n\n- [[5G NTN-NR]] 的 Release 17 / 18 / 19 演進與頻段。\n- [[Satellite Access Node]]（[[SAN]]）conformance testing。\n- [[NTN signal generator solutions]] 的 component testing、SAN testing、end-to-end system testing 與 UE testing 分層。\n- [[R&S SMW200A]] 作為 channel emulator / signal generator 的 NTN 測試能力。\n- [[R&S FSW]] 與 [[R&S FSVA3000]] 在 component testing / SAN transmitter measurement 中的角色。\n- [[R&S Space Nexus]] 依 satellite trajectory 產生 [[R&S SMW200A]] fading files 的待請求 PC software 線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+              },
+              "score": 0.115016
+             },
+             {
+              "text": "Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains › 重點摘要\n這份 [[Rohde & Schwarz GmbH & Co KG]] PR 宣稱 [[Rohde & Schwarz]] 已在 [[GCF]] conformance test cases for [[NR-NTN]] 中成功 validated 目前最高數量的 test cases，涵蓋 [[3GPP Release 17]] 定義的 [[RF]]、[[RRM]] 與 [[PCT]] 三個 domain，並於 [[CAG #86]] in Düsseldorf 呈現。\n\n來源說明：在 [[PTCRB]] 完成 first 5G-based [[NR-NTN]] successful validation 之後，[[Rohde & Schwarz]] 繼續推動 [[GCF]] validation。Validated test cases 位於 [[GCF]] [[WI-555]]，並依 [[3GPP]] test specifications for [[RF]]、[[RRM]] and [[PCT]] 定義。\n\n所有 measurements 於 [[NR FR1]] 執行，使用 [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] 與 [[R&S CMX500]]，DUT 為 [[Samsung NR-NTN chipset]]，來源文字稱其為 latest NR-NTN chipset from [[Samsung]]。\n\nPR 也重申 [[R&S CMX500]] 是 [[Rohde & Schwarz]] conformance test solutions 的核心 5G one-box signaling tester，並支援 integrated [[Fading]]、[[channel emulation]]、satellite constellation visualization tool 與 single-box test setup；[[R&S CONTEST]] 則用於 seamless execution of [[3GPP]] test cases。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md"
+              },
+              "score": 0.404464
+             },
+             {
+              "text": "R&S TS8980 Conformance Test Platform › 來源中的角色（NR-NTN PR）\n依 [[Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP]]：\n\n- Test cases are conducted on the [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] and [[R&S CMX500]]。\n- 目的為 preparing the system’s upcoming validation by [[GCF]] and [[PTCRB]] for [[NR-NTN]] in [[NR FR1]]。\n- 測試領域包含 [[RF]]、[[RRM]] 與 [[PCT]]，但來源未指定 [[R&S TS8980 Conformance Test Platform]] 對應其中哪一個或哪些 domain。\n\n依 [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]]：\n\n- All measurements were conducted on [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] and [[R&S CMX500]] in [[NR FR1]]。\n- 測試用於 verifying latest [[Samsung NR-NTN chipset]] from [[Samsung]] as DUT。\n- 來源把這些 measurements 連到 [[GCF]] validated [[3GPP Release 17]] [[NR-NTN]] conformance test cases across [[RF]]、[[RRM]] and [[PCT]] domains。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md"
+              },
+              "score": 0.436725
+             },
+             {
+              "text": "•  Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-c733beba88ba4b3a",
+                "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+                "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+                "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 24.580028
+             },
+             {
+              "text": "Signal Generator\nSignal Analyzer",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-c478cd76758e3230",
+                "original_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+                "sha256": "c478cd76758e32304c76f6cddcc468bbab6c09f305ddd986166116e13cef3c38",
+                "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+               "section": 37,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 22.699916
+             },
+             {
+              "text": "Network analyzer\nVector signal generator\nBroadband Amplifier",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-4a179a13677acd8f",
+                "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+                "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+               "section": 177,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.87828
+             },
+             {
+              "text": "1) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the second path of the SMW.\n2) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the AWGN B block in RF path B of the SMW. In this application note we will explain the second\noption in the respective test case chapter.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-0acf440ab126eca3",
+                "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+                "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+                "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "section": 20,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.611999
+             }
+            ],
+            "text": "Signal Generator / Signal Analyzer would fit in the **component-test / RF validation step**, i.e., where the RFIC or RF component is treated as the DUT and exercised before broader system, end-to-end, or UE-level testing layers.[14][34]\n- **Placement in workflow:** In the cited R&S NTN test framework, testing is organized into layers including **component testing, SAN testing, end-to-end system testing, and UE testing**; the Signal Generator / Signal Analyzer pair is explicitly described under **component testing** with a DUT.[34][14]  \n- **Signal Generator role:** The **R&S SMW200A** provides the RF stimulus / waveform generation for the DUT, with cited capabilities such as frequency up to 67 GHz, RF modulation bandwidth up to 2 GHz or up to 4 GHz with R&S SMW-K555, and signal generation software for LTE, Cellular IoT, 5G NR R17/18, OFDM, and custom digital modulation.[14]  \n- **Signal Analyzer role:** The **R&S FSW** measures and analyzes the DUT output, with cited capabilities such as frequency up to 85 GHz, overrange to 90 GHz, analysis bandwidth up to 8 GHz, and analysis software for LTE, Cellular IoT, 5G NR R17/18, OFDM signal analysis, and vector signal analysis.[14][15]  \n- 【推論】For an RFIC validation workflow, this means the generator/analyzer pair is best placed after implementation/prototype availability and during the **test → validation** portion of the workflow, because the broader workflow is defined as implementation → test → debug → validation, while the generator/analyzer setup is documented as DUT-based component testing.[2][14]",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "Virtual tester\n[[Virtual tester]] 在 [[AIW_Products_Customer_Questionnaire]] 中被定義為跨 implementation → test → debug → validation 的 agentic workflow，而不是 single tool。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Virtual tester.md"
+             },
+             "score": 1.682243
+            },
+            {
+             "text": "NTN signal generator solutions › Component testing\n依 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]] slide 16，component testing 使用 DUT、[[R&S SMW200A]] 與 [[R&S FSW]]：\n\n- [[R&S SMW200A]]：frequency up to 67 GHz，overrange 72 GHz；RF modulation bandwidth up to 2 GHz，up to 4 GHz with [[R&S SMW-K555]]。\n- [[R&S SMW200A]] signal generation SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal generation（K114）、custom digital modulation。\n- [[R&S FSW]]：frequency up to 85 GHz，overrange 90 GHz；analysis bandwidth up to 8 GHz。\n- [[R&S FSW]] signal analysis SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal analysis（K96）、Vector signal analysis（K70）。\n\n以上是 2025 簡報摘要值；正式產品規格仍需回查 [[R&S SMW200A]]、[[R&S FSW]] 與其對應 specifications。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+             },
+             "score": 0.212237
+            },
+            {
+             "text": "R&S FSW\nR&S FSW 是 Rohde & Schwarz 的 high-end Signal and Spectrum Analyzer 系列，依 Version 17.01（September 2025）涵蓋 8 GHz 至 85 GHz 型號，[[R&S FSW85]] 搭配 R&S FSW-B90G 可延伸至 90 GHz。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSW.md"
+             },
+             "score": 4.139259
+            },
+            {
+             "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 重點摘要\n此來源是由 `3GPP NTN Signal Generator Solutions Overview-EN-UR.pptx` 轉出的 lossy markdown；封面標示 `1GP` 與 `12-2025`，末頁標示 `Last updated: 08/25`，其中 slide 27 另標示 `2025-09-29 Nokia Workshop at R&S - SigGen Product Update`。本頁以來源原文呈現的 2025 年簡報語境處理，不自行推論正式發布日。\n\n簡報主題是 [[Rohde & Schwarz]] 針對 [[3GPP]] [[NTN]] 的 signal generator / channel emulation 測試方案，涵蓋：\n\n- [[5G NTN-NR]] 的 Release 17 / 18 / 19 演進與頻段。\n- [[Satellite Access Node]]（[[SAN]]）conformance testing。\n- [[NTN signal generator solutions]] 的 component testing、SAN testing、end-to-end system testing 與 UE testing 分層。\n- [[R&S SMW200A]] 作為 channel emulator / signal generator 的 NTN 測試能力。\n- [[R&S FSW]] 與 [[R&S FSVA3000]] 在 component testing / SAN transmitter measurement 中的角色。\n- [[R&S Space Nexus]] 依 satellite trajectory 產生 [[R&S SMW200A]] fading files 的待請求 PC software 線索。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+             },
+             "score": 0.115016
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/Virtual tester.md",
+             "raw_refs": [
+              "raw/Productions/AIW_Products_Customer_Questionnaire.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/NTN signal generator solutions.md",
+             "raw_refs": [
+              "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S FSW.md",
+             "raw_refs": [
+              "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+             "raw_refs": [
+              "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+              "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+              "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+              "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

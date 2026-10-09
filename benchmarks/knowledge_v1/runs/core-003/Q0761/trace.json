@@ -1,0 +1,830 @@
+{
+ "question": {
+  "id": "Q0761",
+  "text": "For a AI use case involving AI data centers, where would Vector Network Analyzer fit in the test workflow?",
+  "market": "AI",
+  "product": "Vector Network Analyzer",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-45c23fc78fab48f08eb9f22ea884f9ee",
+ "exchange": {
+  "sent": "For a AI use case involving AI data centers, where would Vector Network Analyzer fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 116.141,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-45c23fc78fab48f08eb9f22ea884f9ee",
+    "actor": "leo.chi",
+    "title": "For a AI use case involving AI data centers, where would Vector Network …",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T19:57:28.440558Z",
+    "updated_at": "2026-10-09T19:59:24.399152Z",
+    "messages": [
+     {
+      "message_id": "message-4f777e497aac46f78bcce9a1fad2f094",
+      "role": "user",
+      "text": "For a AI use case involving AI data centers, where would Vector Network Analyzer fit in the test workflow?",
+      "created_at": "2026-10-09T19:57:28.450332Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-77efca7415b24c8894230fbb7b7d45db",
+      "role": "assistant",
+      "text": "Short answer: The passages support placing a Vector Network Analyzer in the AI data-center high-speed interconnect workflow at the PCB/PCBA, connector/channel, de-embedding, and PDN validation stages, but they only explicitly say “network analyzers,” not a specific VNA model. [19]\n| Test workflow stage | Where the VNA would fit | Measurements / analysis supported by the passages | Evidence |\n|---|---|---|---|\n| AI data-center interconnect component context | High-speed backplane / server interconnect component validation | Sentry HD is described as a next-generation high-speed backplane connector platform purpose-built for AI data center architectures. [1] Server/storage interconnect solutions are described for high-speed, high-density applications with signal integrity and reliable data transmission for next-gen enterprise server and data center architectures. [40] | [1], [40] |\n| Material measurement | Early PCB material characterization before channel design | Impedance using TDR and DK/DF extraction are listed in the material measurement stage. [6] | [6] |\n| Material / stackup selection | Stackup and transmission-channel design validation | IL, DK/DF, roughness, impedance, crosstalk, transmission-line modeling, and eye diagram are listed for material/stackup selection. [6] | [6] |\n| Signal integrity modeling / testing | High-speed PCB/PCBA channel and interconnect validation | IL, DK/DF, roughness, and impedance are listed for signal integrity modeling/testing. [6] Slide 20 also lists IL, crosstalk, eye diagram, TDR impedance, stackup planner, and TL calculator in the signal-integrity flow of high-speed PCB/PCBA. [19] | [6], [19] |\n| Interconnect / component probing and de-embedding | Bare board, socket/transmission-line, and board-to-board connector DUT characterization | Bare board for SoCs, socket/transmission line evaluation, and board-to-board connector DUTs are placed at the intersection of signal integrity, insertion loss, return loss, impedance, and de-embedding. [11] | [11] |\n| Power distribution network validation | PDN impedance / network-analysis portion of high-speed digital validation | The validation-challenges slide maps the Power Distribution Network test block to scopes and network analyzers. [19] | [19] |\n| Sampling testing | Production or qualification sampling of high-speed PCB characteristics | Sampling testing lists IL, DK/DF, and impedance. [6] | [6] |\n| Process monitoring | Ongoing PCB/process control for high-speed digital manufacturing | Process monitoring lists IL, DK/DF, impedance, and related process context. [6] | [6] |\n【推論】For an AI data-center high-speed interconnect use case, the VNA would most defensibly sit after material/stackup definition and during SI channel/component validation, sampling, and process monitoring, because those workflow stages list IL, impedance, DK/DF, roughness, crosstalk, eye diagram, and de-embedding-related interconnect measurements. [6][11][19]\n【推論】For connector/backplane components such as Sentry HD, the VNA role would be component/channel signal-integrity validation rather than proving AI workload performance, because the passages identify Sentry HD as an AI data-center high-speed backplane connector platform but do not provide its test conditions, rates, impedance, insertion loss, crosstalk, or compliance data. [1][17][26]\n\n來源：\n[1] Wiki：Sentry HD High-Speed Backplane Connector（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[6] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[11] Wiki：高速互連 probing 與 de-embedding 測試案例（來源：`TRI_AMD_RSKR Sharing1.md`）\n[17] Wiki：Sentry HD High-Speed Backplane Connector（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[19] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[26] Wiki：Sentry HD High-Speed Backplane Connector（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[40] `raw/Market/HSD Cable test image 4.md`",
+      "created_at": "2026-10-09T19:59:24.399152Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-9c2a076ad2994ca987b9119d67464db1",
+       "request_id": "request-9c2a076ad2994ca987b9119d67464db1",
+       "span_id": "span-9c2a076ad2994ca987b9119d67464db1",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "Short answer: The passages support placing a Vector Network Analyzer in the AI data-center high-speed interconnect workflow at the PCB/PCBA, connector/channel, de-embedding, and PDN validation stages, but they only explicitly say “network analyzers,” not a specific VNA model. [19]\n| Test workflow stage | Where the VNA would fit | Measurements / analysis supported by the passages | Evidence |\n|---|---|---|---|\n| AI data-center interconnect component context | High-speed backplane / server interconnect component validation | Sentry HD is described as a next-generation high-speed backplane connector platform purpose-built for AI data center architectures. [1] Server/storage interconnect solutions are described for high-speed, high-density applications with signal integrity and reliable data transmission for next-gen enterprise server and data center architectures. [40] | [1], [40] |\n| Material measurement | Early PCB material characterization before channel design | Impedance using TDR and DK/DF extraction are listed in the material measurement stage. [6] | [6] |\n| Material / stackup selection | Stackup and transmission-channel design validation | IL, DK/DF, roughness, impedance, crosstalk, transmission-line modeling, and eye diagram are listed for material/stackup selection. [6] | [6] |\n| Signal integrity modeling / testing | High-speed PCB/PCBA channel and interconnect validation | IL, DK/DF, roughness, and impedance are listed for signal integrity modeling/testing. [6] Slide 20 also lists IL, crosstalk, eye diagram, TDR impedance, stackup planner, and TL calculator in the signal-integrity flow of high-speed PCB/PCBA. [19] | [6], [19] |\n| Interconnect / component probing and de-embedding | Bare board, socket/transmission-line, and board-to-board connector DUT characterization | Bare board for SoCs, socket/transmission line evaluation, and board-to-board connector DUTs are placed at the intersection of signal integrity, insertion loss, return loss, impedance, and de-embedding. [11] | [11] |\n| Power distribution network validation | PDN impedance / network-analysis portion of high-speed digital validation | The validation-challenges slide maps the Power Distribution Network test block to scopes and network analyzers. [19] | [19] |\n| Sampling testing | Production or qualification sampling of high-speed PCB characteristics | Sampling testing lists IL, DK/DF, and impedance. [6] | [6] |\n| Process monitoring | Ongoing PCB/process control for high-speed digital manufacturing | Process monitoring lists IL, DK/DF, impedance, and related process context. [6] | [6] |\n【推論】For an AI data-center high-speed interconnect use case, the VNA would most defensibly sit after material/stackup definition and during SI channel/component validation, sampling, and process monitoring, because those workflow stages list IL, impedance, DK/DF, roughness, crosstalk, eye diagram, and de-embedding-related interconnect measurements. [6][11][19]\n【推論】For connector/backplane components such as Sentry HD, the VNA role would be component/channel signal-integrity validation rather than proving AI workload performance, because the passages identify Sentry HD as an AI data-center high-speed backplane connector platform but do not provide its test conditions, rates, impedance, insertion loss, crosstalk, or compliance data. [1][17][26]\n\n來源：\n[1] Wiki：Sentry HD High-Speed Backplane Connector（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[6] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[11] Wiki：高速互連 probing 與 de-embedding 測試案例（來源：`TRI_AMD_RSKR Sharing1.md`）\n[17] Wiki：Sentry HD High-Speed Backplane Connector（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[19] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[26] Wiki：Sentry HD High-Speed Backplane Connector（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[40] `raw/Market/HSD Cable test image 4.md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-9c2a076ad2994ca987b9119d67464db1",
+      "request_id": "request-9c2a076ad2994ca987b9119d67464db1",
+      "span_id": "span-9c2a076ad2994ca987b9119d67464db1",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-9c2a076ad2994ca987b9119d67464db1",
+       "request_id": "request-9c2a076ad2994ca987b9119d67464db1",
+       "span_id": "span-9c2a076ad2994ca987b9119d67464db1",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Short answer: The passages support placing a Vector Network Analyzer in the AI data-center high-speed interconnect workflow at the PCB/PCBA, connector/channel, de-embedding, and PDN validation stages, but they only explicitly say “network analyzers,” not a specific VNA model. [19]\n| Test workflow stage | Where the VNA would fit | Measurements / analysis supported by the passages | Evidence |\n|---|---|---|---|\n| AI data-center interconnect component context | High-speed backplane / server interconnect component validation | Sentry HD is described as a next-generation high-speed backplane connector platform purpose-built for AI data center architectures. [1] Server/storage interconnect solutions are described for high-speed, high-density applications with signal integrity and reliable data transmission for next-gen enterprise server and data center architectures. [40] | [1], [40] |\n| Material measurement | Early PCB material characterization before channel design | Impedance using TDR and DK/DF extraction are listed in the material measurement stage. [6] | [6] |\n| Material / stackup selection | Stackup and transmission-channel design validation | IL, DK/DF, roughness, impedance, crosstalk, transmission-line modeling, and eye diagram are listed for material/stackup selection. [6] | [6] |\n| Signal integrity modeling / testing | High-speed PCB/PCBA channel and interconnect validation | IL, DK/DF, roughness, and impedance are listed for signal integrity modeling/testing. [6] Slide 20 also lists IL, crosstalk, eye diagram, TDR impedance, stackup planner, and TL calculator in the signal-integrity flow of high-speed PCB/PCBA. [19] | [6], [19] |\n| Interconnect / component probing and de-embedding | Bare board, socket/transmission-line, and board-to-board connector DUT characterization | Bare board for SoCs, socket/transmission line evaluation, and board-to-board connector DUTs are placed at the intersection of signal integrity, insertion loss, return loss, impedance, and de-embedding. [11] | [11] |\n| Power distribution network validation | PDN impedance / network-analysis portion of high-speed digital validation | The validation-challenges slide maps the Power Distribution Network test block to scopes and network analyzers. [19] | [19] |\n| Sampling testing | Production or qualification sampling of high-speed PCB characteristics | Sampling testing lists IL, DK/DF, and impedance. [6] | [6] |\n| Process monitoring | Ongoing PCB/process control for high-speed digital manufacturing | Process monitoring lists IL, DK/DF, impedance, and related process context. [6] | [6] |\n【推論】For an AI data-center high-speed interconnect use case, the VNA would most defensibly sit after material/stackup definition and during SI channel/component validation, sampling, and process monitoring, because those workflow stages list IL, impedance, DK/DF, roughness, crosstalk, eye diagram, and de-embedding-related interconnect measurements. [6][11][19]\n【推論】For connector/backplane components such as Sentry HD, the VNA role would be component/channel signal-integrity validation rather than proving AI workload performance, because the passages identify Sentry HD as an AI data-center high-speed backplane connector platform but do not provide its test conditions, rates, impedance, insertion loss, crosstalk, or compliance data. [1][17][26]\n\n來源：\n[1] Wiki：Sentry HD High-Speed Backplane Connector（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[6] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[11] Wiki：高速互連 probing 與 de-embedding 測試案例（來源：`TRI_AMD_RSKR Sharing1.md`）\n[17] Wiki：Sentry HD High-Speed Backplane Connector（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[19] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[26] Wiki：Sentry HD High-Speed Backplane Connector（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[40] `raw/Market/HSD Cable test image 4.md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_1zbROeQ7AjKvLiWMpOHoc6Rr",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "Short answer: The passages support placing a Vector Network Analyzer in the AI data-center high-speed interconnect workflow at the PCB/PCBA, connector/channel, de-embedding, and PDN validation stages, but they only explicitly say “network analyzers,” not a specific VNA model. [19]\n| Test workflow stage | Where the VNA would fit | Measurements / analysis supported by the passages | Evidence |\n|---|---|---|---|\n| AI data-center interconnect component context | High-speed backplane / server interconnect component validation | Sentry HD is described as a next-generation high-speed backplane connector platform purpose-built for AI data center architectures. [1] Server/storage interconnect solutions are described for high-speed, high-density applications with signal integrity and reliable data transmission for next-gen enterprise server and data center architectures. [40] | [1], [40] |\n| Material measurement | Early PCB material characterization before channel design | Impedance using TDR and DK/DF extraction are listed in the material measurement stage. [6] | [6] |\n| Material / stackup selection | Stackup and transmission-channel design validation | IL, DK/DF, roughness, impedance, crosstalk, transmission-line modeling, and eye diagram are listed for material/stackup selection. [6] | [6] |\n| Signal integrity modeling / testing | High-speed PCB/PCBA channel and interconnect validation | IL, DK/DF, roughness, and impedance are listed for signal integrity modeling/testing. [6] Slide 20 also lists IL, crosstalk, eye diagram, TDR impedance, stackup planner, and TL calculator in the signal-integrity flow of high-speed PCB/PCBA. [19] | [6], [19] |\n| Interconnect / component probing and de-embedding | Bare board, socket/transmission-line, and board-to-board connector DUT characterization | Bare board for SoCs, socket/transmission line evaluation, and board-to-board connector DUTs are placed at the intersection of signal integrity, insertion loss, return loss, impedance, and de-embedding. [11] | [11] |\n| Power distribution network validation | PDN impedance / network-analysis portion of high-speed digital validation | The validation-challenges slide maps the Power Distribution Network test block to scopes and network analyzers. [19] | [19] |\n| Sampling testing | Production or qualification sampling of high-speed PCB characteristics | Sampling testing lists IL, DK/DF, and impedance. [6] | [6] |\n| Process monitoring | Ongoing PCB/process control for high-speed digital manufacturing | Process monitoring lists IL, DK/DF, impedance, and related process context. [6] | [6] |\n【推論】For an AI data-center high-speed interconnect use case, the VNA would most defensibly sit after material/stackup definition and during SI channel/component validation, sampling, and process monitoring, because those workflow stages list IL, impedance, DK/DF, roughness, crosstalk, eye diagram, and de-embedding-related interconnect measurements. [6][11][19]\n【推論】For connector/backplane components such as Sentry HD, the VNA role would be component/channel signal-integrity validation rather than proving AI workload performance, because the passages identify Sentry HD as an AI data-center high-speed backplane connector platform but do not provide its test conditions, rates, impedance, insertion loss, crosstalk, or compliance data. [1][17][26]\n\n來源：\n[1] Wiki：Sentry HD High-Speed Backplane Connector（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[6] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[11] Wiki：高速互連 probing 與 de-embedding 測試案例（來源：`TRI_AMD_RSKR Sharing1.md`）\n[17] Wiki：Sentry HD High-Speed Backplane Connector（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[19] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[26] Wiki：Sentry HD High-Speed Backplane Connector（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[40] `raw/Market/HSD Cable test image 4.md`",
+          "evidence": {
+           "raw_citations": 7,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-21feb94331cf456f9da7bd7d7d9be3e0",
+            "request_id": "request-21feb94331cf456f9da7bd7d7d9be3e0",
+            "span_id": "span-21feb94331cf456f9da7bd7d7d9be3e0",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "For an AI use case involving AI data centers, where would a Vector Network Analyzer fit in the test workflow? Focus on test workflow stages and measurements for AI data center high-speed interconnects, signal integrity, and components.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "Sentry HD High-Speed Backplane Connector › 來源中的說法\n- [[full-spectrum-data-center-connectivity-brochure]]（來源未標示日期；raw converted 2026-09-17）在 featured product 區塊列出 Sentry HD High-Speed Backplane Connector。\n- 來源稱 Sentry HD is Amphenol's next-generation high-speed backplane connector platform。\n- 來源稱它 purpose-built to power the future of AI data center architectures。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Sentry HD High-Speed Backplane Connector.md"
+              },
+              "score": 1.051363
+             },
+             {
+              "text": "R&S CMX500 › R&S CMX-B200A accelerator unit\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX-B200A]] 提供 accelerated digital signal processing capabilities，並包含 two high-speed digital I/Q interfaces：\n\n| 項目 | 規格 |\n|---|---|\n| Ports | DIG. IQ HS 1、DIG. IQ HS 2 |\n| Direction | full duplex |\n| Connector | QSFP+ |\n| Level | CML |\n| Data rate | 40 Gbps |\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，每個 accelerator unit 可 fading 的最大 cells 數包含：1 NR cell 8x8 MIMO；1 NR cell 16x4 MIMO, 50 MHz bandwidth；2 NR cells 4x4 MIMO；4 NR cells 2x2 MIMO；2 LTE cells 8x4 MIMO；4 LTE cells 2x2 或 4x4 MIMO。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 9.99289
+             },
+             {
+              "text": "Release 18 CSI enhancements for high-speed scenario\n[[Release 18 CSI enhancements for high-speed scenario]] 是來源中描述的 5G NR R18 CSI 改良集合，目標是在 high-mobility / high-speed 場景利用 [[CSI prediction]]、[[Time Domain Channel Properties]]、[[AP CSI-RS set]]、[[CSI prediction window]] 與 Type II Doppler / codebook refinement 改善 CSI feedback accuracy 與 [[PDSCH]] scheduling。[[R18 CSI enhancements for high-speed Scenario]] [[Type II CSI enhancements for high-speed Ues]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Release 18 CSI enhancements for high-speed scenario.md"
+              },
+              "score": 0.179739
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽\n[[SerDes 與 SI PI 測試概覽]] 是依 [[0 Digital Test - What are SIPI and Serdes]] 建立的 high-speed digital 測試主題頁，用來連接 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]]、[[PCB]] / [[PCBA]] 與相關驗證儀器類型。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 1.165947
+             },
+             {
+              "text": "R&S TS-RRM\n[[R&S TS-RRM]] 是 [[Rohde & Schwarz]] 的 test system component；在 NR-NTN PR 中，它與 [[NR-NTN]] [[3GPP]] conformance testing、[[RRM]] test cases、[[GCF]] [[WI-555]] 與 [[PTCRB]] validation 語境相關。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS-RRM.md"
+              },
+              "score": 2.760773
+             },
+             {
+              "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 8.475177
+             },
+             {
+              "text": "R&S FSWP50 › unresolved\n- 來源未列出價格。\n- R&S®FSWP-B64 option model .27 / .51 與 R&S®FSWP50 model .50 / .51 的組合條件複雜；報價前需回查 [[FSWP_specs_en_3683-7719-22_v0901]] 與 configure 工具。\n- Recommended extras 中部分附件沒有 R&S 型號代碼，僅有 order number；已標示「來源未標示」。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 20,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWP50.md"
+              },
+              "score": 2.380708
+             },
+             {
+              "text": "資料中心 PSU 供應商分布 › 不可推論事項\n- [[Power delivery unit image 12]] 與 [[Power delivery unit image 5]] 都是非完整名單，不能用於排除未列名公司。\n- [[Power delivery unit image 12]] 與 [[Power delivery unit image 5]] 沒有提供市場份額、營收、出貨量、客戶導入、產品型號或供應鏈關係。\n- [[Power delivery unit image 12]] 與 [[Power delivery unit image 5]] 沒有定義 **major European player** 的判準，因此不能量化歐洲供應缺口。\n- 來源中的地緣政治風險句是問題式說法，不能改寫為已發生的供應風險。\n- 來源只限定在 **Power Supply Unit (PSU) for data centers**，不能擴大到所有 [[Power Management]]、[[PDU]]、[[BBU]]、[[Power shelf]] 或 [[Data Center Power Module Solution]] 供應商。\n- [[Power delivery unit image 5]] 與 [[Power delivery unit image 12]] 高度重疊，不可視為兩份獨立市場驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/資料中心 PSU 供應商分布.md"
+              },
+              "score": 3.931286
+             },
+             {
+              "text": "DCP-Config-r16 › 來源列出的相關欄位\n[[Wake Up Signal]] 在描述 [[DCI format 2_6]] 時列出多個與 DCP / WUS 相關的 r16 欄位或參數：\n\n- `ps-RNTI-r16`：對應 [[PS-RNTI]]。\n- `ps-Offset-r16`：來源文字為 `ps-Offset-r16*0.125ms`，與 WUS search space relative to on-duration DRX cycle 的 timing 有關。\n- `duration`：來源說 search space spans `duration` slots。\n- `sizeDCI-2-6-r16`：DCI2_6 total length。\n- `outsideActiveTimeConfig-r16`：for each UE defines the starting position of its bits inside the whole DCI。\n- `ps-WakeUp-r16`：UE does not detect DCI 時的 default behavior，wake up 或 stay asleep。\n- `ps-TransmitPeriodicL1CSI-r16`：on-duration cycle does not start 時仍可 transmit periodic L1-RSRP reports 的設定線索。\n- `ps-TransmitOtherPeriodicCSI-r16`：on-duration cycle does not start 時仍可 transmit other periodic CSI reports 的設定線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DCP-Config-r16.md"
+              },
+              "score": 3.056914
+             },
+             {
+              "text": "R&S FSW › 文件版次\n- 來源：[[FSW_specs_en_5215-6749-22_v1701]]。\n- 文件：PD 5215.6749.22。\n- 文件版次：Version 17.01。\n- 文件日期：September 2025。\n- 文件註記：Data without tolerance limits is not binding；規格可能變更。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 3.450848
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 可學到的 sales / solution pattern\n- 來源明示的 win factor 不是單一儀器規格，而是 total solution：probe、mount-kit、de-embedding tool 與 local partner。這與 [[R&S PCB test solutions]] 中 material measurement / sampling testing / process monitoring 的流程視角互補。\n- Bare board for SoCs、socket / transmission line evaluation 與 board-to-board connector DUT 都落在 [[Signal Integrity]]、[[Insertion Loss]]、[[Return Loss]]、[[Impedance]] 與 de-embedding 的交界。\n- Samsung 5G SoC including VCO case 顯示 [[R&S FSWP50]]、[[R&S SMW200A]] 與 automated VCO tuning software 可以被包裝成 RF / analog enablement 測試方案，但來源未提供正式 software product name 或 version。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 3.182817
+             },
+             {
+              "text": "R&S FSWP50 › Spectrum analyzer、bandwidth 與 frequency extension options\n| Option code | 名稱 | Order No. | 原文說明 / 限制 |\n|---|---|---|---|\n| R&S®FSWP-B1 | Spectrum analyzer, 10 Hz to 50 GHz | 1322.9997.50 | for R&S®FSWP50 |\n| R&S®FSWP-B8 | Resolution bandwidth up to 80 MHz | 1325.5028.02 | not retrofittable，for R&S®FSWP50 with R&S®FSWP-B80 option；export license required |\n| R&S®FSWP-B21 | LO/IF connections for external mixers | 1325.3848.02 | retrofittable，for R&S®FSWP26/50，contact service center，includes two cables for IF and LO ports, length 1 m |\n| R&S®FSWP-B24 | RF preamplifier, 100 kHz to 50 GHz | 1325.3725.50 | for R&S®FSWP50 |\n| R&S®FSWP-B56G | Frequency extension up to 56 GHz | 1357.7878.02 | retrofittable，for R&S®FSWP50 with model .51 或 R&S®FSWP-B61 option model .51 |\n| R&S®FSWP-B80 | 80 MHz analysis bandwidth | 1325.4338.02 | retrofittable，for R&S®FSWP8/26/50 |\n| R&S®FSWP-B320 | 320 MHz analysis bandwidth | 1338.3235.04 | retrofittable，for R&S®FSWP8/26/50 |\n\n- R&S®FSWP-B1 spectrum analyzer mode：DC coupled 10 Hz to 50 GHz；AC coupled 10 MHz to 50 GHz；with R&S®FSWP-B56G 時 DC coupled 1 MHz to 56 GHz，AC coupled 10 MHz to 56 GHz。\n- Signal analysis bandwidth：standard 10 MHz nominal；with R&S®FSWP-B80 option 80 MHz nominal；with R&S®FSWP-B320 option 320 MHz nominal。\n- R&S®FSWP-B24 RF preamplifier frequency range：100 kHz to 50 GHz；RF preamplifier gain setting range 15 dB / 30 dB nominal；RF preamplifier 對 phase noise analyzer specifications 無影響。\n- R&S®FSWP-B320：signal analysis bandwidth 標稱 320 MHz；f ≥ 8 GHz 時 YIG preselector off。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWP50.md"
+              },
+              "score": 3.083992
+             },
+             {
+              "text": "R&S FSWP › 共通功能\n- Frequency resolution：0.01 Hz。\n- 主要量測：[[Phase noise measurement]]、[[AM noise measurement]]、[[Baseband noise measurement]]、[[VCO characterization]]、[[Transient analysis]]、[[Allan deviation]] / [[Allan variance]]。\n- Phase noise measurement results：SSB phase noise、spurious signals、integrated RMS phase deviation、residual FM、time jitter。\n- Number of traces：phase noise 6；spectrum analyzer mode level display 6。\n- Cross-correlations 改善量：10 cross-correlations 改善 5 dB；100 改善 10 dB；1000 改善 15 dB；10 000 改善 20 dB。\n- Signal levels below +10 dBm 時，phase noise sensitivity 受 thermal noise floor −177 dBm (1 Hz) 限制。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWP.md"
+              },
+              "score": 8.203849
+             },
+             {
+              "text": "Wi-Fi 7 and 5G RedCap OTA measurements › 使用限制\n- 來源未標示發布日期。\n- 來源未標示 [[R&S CMX500]] 搭配 [[EMITE]] OTA chambers 的硬體 BOM、software option code、CSW version、RF chain count 或 license requirement。\n- 來源未標示 [[EMITE]] chamber 型號、頻率範圍、DUT 尺寸、load condition、校準程序、measurement uncertainty 或 conformance applicability。\n- 來源使用 full compliance with [[IEEE 802.11be]] and [[5G RedCap]] 的語句，但未展開 compliance 的標準版本、測試項目、pass/fail criteria 或認證機構。\n- 來源未列出 [[Wi-Fi 7]]、[[5G RedCap]]、[[LTE]]、[[NR FR1]]、[[NR FR2]] 的完整 test case list。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+              },
+              "score": 2.556472
+             },
+             {
+              "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx | WLAN SISO signaling |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx | 802.11ax station testing |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx | 802.11be station testing |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx | 802.11bn station testing |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx | 802.11ax AP testing |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx | 802.11be AP testing |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx | 802.11bn AP testing |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx | 2x2 MIMO support |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx | Enterprise security support |\n| R&S CMX-KS500B / M / X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx | 僅 LTE standalone 需要；NR NSA LTE anchor cells 包含於 NR signaling options |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx | D2C fixed / variable delay |\n| R&S CMX-KS600B / M / X | NR signaling enabler, Rel. 15 | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx | 包含 5G NR SA option 2、NSA option 3、DL 2x2/4x4 MIMO、one CC、UL 256QAM |\n| R&S CMX-KS610B / M / X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx | UL 2x2 MIMO、CA up to 9 CC |\n| R&S CMX-KS611B / M / X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx | SUL / Rel. 16 features |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 9.748054
+             },
+             {
+              "text": "R&S FPL1003 › Software、upgrade 與 recommended extras\n| Code / 名稱 | Order No. | 原文說明 |\n|---|---:|---|\n| R&S®FSPC License dongle | 1310.0002.03 | 適用全系列 |\n| R&S®VSE Vector signal explorer base software | 1320.7500.06 | 適用全系列 |\n| R&S®VSE-K70 Vector signal analysis | 1320.7522.06 | 適用全系列 |\n| R&S®VSE-K106 EUTRA/LTE NB-IoT | 1320.7900.06 | 適用全系列 |\n| R&S®FPL1-U10 | 1353.5393.21 | Upgrade to Windows IoT Enterprise LTSC 2021；retrofittable；需 contact Rohde & Schwarz service center |\n| R&S®FPL1-Z1 | 1323.1960.02 | Protective hard cover |\n| R&S®FPL1-Z2 | 1323.1977.02 | Soft carrying bag for transport and outdoor operation |\n| R&S®FPL1-Z3 | 1323.1683.02 | H-style shoulder harness；requires R&S®FPL1-Z2 option |\n| R&S®FPL1-Z4 | 1323.1677.02 | Spare lithium-ion battery pack |\n| R&S®FSV-B34 | 1321.3950.02 | Lithium-ion battery charger for charging spare batteries |\n| R&S®FPL1-Z6 | 1323.1954.02 | 19 inch rackmount kit，RAL 5014，legacy color pigeon blue |\n| R&S®FPL1-Z6B | 1323.1954.03 | 19 inch rackmount kit，RAL 5000，current corporate design color violet blue |\n| R&S®FPL1-Z7 | 1353.6648.02 | D-Sub cable for TTL synchronization；requires R&S®FPL1-B5 option |\n| Headphone | 0708.9010.00 | 來源未標示適用限制 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FPL1003.md"
+              },
+              "score": 4.901553
+             },
+             {
+              "text": "Sentry HD High-Speed Backplane Connector › 未決事項\n- 來源未提供 Sentry HD 的完整型號、order number、可訂購狀態、測試條件或正式規格表。\n- 來源未提供 AI data center architecture 的具體系統、客戶、平台或設計導入案例。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Sentry HD High-Speed Backplane Connector.md"
+              },
+              "score": 0.799121
+             },
+             {
+              "text": "Release 18 CSI enhancements for high-speed scenario › CSI prediction 與 throughput\n來源 [[R18 CSI enhancements for high-speed Scenario]] 說本 feature 透過 exploiting time / Doppler information from previous CSI reports 來 predict future CSI。[[gNB]] 可在傳送 [[PDSCH]] 時使用 predicted CSI；來源主張這會因更準確掌握 channel conditions 而 improve throughput。\n\n[[Type II CSI enhancements for high-speed Ues]] 補充，UE prediction 的目的，是讓 UE predict what the channel will look like at a time closer to the PDSCH transmission。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Release 18 CSI enhancements for high-speed scenario.md"
+              },
+              "score": 0.154558
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 0.900189
+             },
+             {
+              "text": "R&S TS-RRM › 來源中的角色\n依 [[Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP]]：\n\n- [[GCF]] [[WI-555]] 與 [[PTCRB]] [[RFT 555]] 將包含 [[RF]]、[[RRM]] 與 [[PCT]] test cases。\n- Test cases are conducted on [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] 與 [[R&S CMX500]]。\n- 來源脈絡為準備 [[NR-NTN]] in [[NR FR1]] 的 GCF / PTCRB upcoming validation。\n\n依 [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]]：\n\n- All measurements were conducted on [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] and [[R&S CMX500]] in [[NR FR1]]。\n- Validation covers [[RF]]、[[RRM]] and [[PCT]] domains as defined in [[3GPP Release 17]]。\n- DUT 為 latest [[Samsung NR-NTN chipset]] from [[Samsung]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS-RRM.md"
+              },
+              "score": 1.060795
+             },
+             {
+              "text": "R&S PCB test solutions › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 既有內容來自 Keysight 圖像，流程是原材料表徵、材料選擇、電路板抽樣測試、大批量監控；本頁保存 R&S 簡報中的類似但不完全相同的流程詞。\n- [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 均已有既有頁面；本來源增加 2026.3.4 R&S 簡報的追溯來源，但沒有新增可量化規格。\n- [[SerDes 與 SI PI 測試概覽]] 連接 Slide 11 和 Slide 20 的 validation challenges / SI flow；本頁聚焦 Slide 21 的 PCB test solutions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 5.227312
+             },
+             {
+              "text": "R&S SMW200A › 產品定位與架構\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]（Version 31.00，May 2026）與 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（Version 06.00，May 2024）：\n\n- [[R&S SMW200A]] 可從 single-path vector signal generator 擴充到 multichannel [[MIMO]] receiver tester。\n- 支援最多 `8` 個 signal sources 與最多 `64` 個 fading channels。\n- 可連接 [[R&S SGT100A]] signal generator modules，提供最多 `8` 條 RF paths。\n- 最多可在 `2` 個 internal baseband modules 上配置 `8` 個 baseband generators，具 real-time coder 與 ARB。\n- 單機可配置最多兩個 internal RF paths：RF path A 為 mandatory，RF path B 為 optional second RF path。\n- Baseband section 分成 standard baseband section 與 wideband baseband section；standard baseband 最高 `160 MHz` RF modulation bandwidth，wideband baseband 最高 `2 GHz` RF modulation bandwidth。\n- 可選 integrated fading section，channel emulation bandwidth 最高 `800 MHz`；最多可安裝 `4` 個 fading modules，提供最多 `64` 個 logical faders。\n- 單一儀器可實作 MIMO fading scenarios：`2x2`、`3x3`、`4x4`、`8x4`、`4x8`、`2x4x4`。\n- Path-specific、baseband-specific 與 fading/MIMO software options 採 floating license concept；若同一 feature 需同時在兩個 paths 或兩個 baseband generators 使用，通常需安裝兩份對應 option。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 6.212613
+             },
+             {
+              "text": "資料中心 PSU 供應商分布 › 與既有頁面的關係\n- [[PSU]] 既有頁整理 [[Power delivery unit image 1]] 中 server rack 內 PSU 階段與效率標示；本頁補充 [[Yole Group]]（2025）對 data center PSU supplier 地理分布的市場來源。\n- [[Server Hall 電力供應鏈]] 與 [[Data Center Power Module Solution]] 是供電架構 / 模組路徑頁；本頁是供應商地理分布頁，不提供電源轉換拓撲或效率數字。\n- [[AI 資料中心基礎設施]] 記錄 AI / data center infrastructure 的 Power 面向；本頁可作為其中 [[Power]] / [[PSU]] 供應鏈的一個 2025 年市場來源。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/資料中心 PSU 供應商分布.md"
+              },
+              "score": 3.219238
+             },
+             {
+              "text": "PRS (NR)\n這份來源是 Rohde & Schwarz company confidential 的 NR DL Positioning Reference Signal 技術筆記 lossy markdown 轉檔，整理 [[NR DL PRS]] 的 3GPP 參考章節、ASN.1 參數、RE grid mapping、periodicity / repetition、open questions 與 customer test case requirements。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/PRS (NR).md"
+              },
+              "score": 4.234089
+             },
+             {
+              "text": "R&S SMW200A › 主要 RF performance（Version 31.00，May 2026）\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]：\n\n- Frequency range：依 RF path frequency option，RF path A 最高 `100 kHz to 67 GHz`；RF path B 最高 `100 kHz to 44 GHz`。\n- Overrange：`67 GHz to 72 GHz`。\n- Resolution of setting：`0.001 Hz`。\n- Resolution of synthesis：`0.053 nHz nominal`，條件 `f = 1 GHz`。\n- Frequency setting time：依 frequency option 為 `< 1.2 ms` 至 `< 1.8 ms`；with `R&S®SMW-B711/-B721` 為 `< 4.0 ms`。條件包含 GUI update stopped、I/Q optimization mode fast、after IEC/IEEE bus delimiter、HUMS off。\n- Frequency setting time in list mode：依 frequency option為 `< 0.8 ms` 至 `< 1.4 ms`；with `R&S®SMW-B711/-B721`、run mode live 為 `< 4.0 ms`。\n- Level setting range：`100 kHz ≤ f < 1 MHz` 為 `–145 dBm to +8 dBm`；`1 MHz ≤ f < 3 MHz` 為 `–145 dBm to +13 dBm`；`3 MHz ≤ f ≤ 67 GHz` 為 `–145 dBm to +30 dBm`。\n- Standard performance SSB phase noise 條件：CW，carrier offset `20 kHz`，measurement bandwidth `1 Hz`，level `10 dBm` 或 maximum specified output power 兩者較低者；`f = 1 GHz` 為 `< –134 dBc`，typ. `–140 dBc`。\n- `R&S®SMW-B711/-B721` ultra low phase noise 在 `1 GHz`、`10 kHz offset` 下為 `–144 dBc`，typ. `–150 dBc`；在 `67 GHz`、`10 kHz offset` 下為 `–105 dBc`，typ. `–111 dBc`。\n- Pulse modulation 需 `R&S®SMW-K22`；一般 on/off ratio `> 80 dB`，部分高頻條件例外為 `> 65 dB`。\n- Pulse rise/fall time（10 % / 90 % of RF amplitude）：低頻 frequency options fast transition `< 10 ns`；多數 20 GHz 以上 options fast transition `< 15 ns`；smoothed transition 多數條件 `< 200 ns`。\n- Internal baseband I/Q、wideband baseband (`R&S®SMW-B13XT`)、I/Q wideband on：`f > 2.5 GHz` 時 `±1 GHz`；RF modulation bandwidth 可達 `2 GHz`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 7.434879
+             },
+             {
+              "text": "Sentry HD High-Speed Backplane Connector › 可追溯限制\n- 來源未標示正式內容日期、datasheet 版次、料號、支援速率、pin count、impedance、insertion loss、crosstalk 或 compliance 資訊。\n- `next-generation`、`purpose-built` 與 `AI data center architectures` 是 brochure marketing claim；不可推論市占率、客戶導入或量產狀態。\n- 來源未說明 [[Sentry HD High-Speed Backplane Connector]] 與既有 [[Paladin HD]]、[[Paladin HD2 224Gb-s Backplane Interconnect System]]、[[EXAMAX2]] 或 [[XCede HD2]] 的產品階層關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Sentry HD High-Speed Backplane Connector.md"
+              },
+              "score": 1.362327
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 與既有知識的關係\n- [[R&S PCB test solutions]] — 保存 R&S high-speed digital 簡報中的 PCB test flow；本頁補入 case-sharing 中的 customer / partner / competitor context。\n- [[SerDes 與 SI PI 測試概覽]] — 本頁提供 PCB / interconnect probing 的實務案例語境。\n- [[Keysight ENA]] — 在 LSmtron case 中作為 competitor。\n- [[R&S ZNB3044]]、[[R&S ZNA43]]、[[R&S FSWP50]]、[[R&S SMW200A]] — 本來源提供 Market 應用案例，不改寫 Productions 規格。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 1.757136
+             },
+             {
+              "text": "R&S SMW200A\n[[R&S SMW200A]] 是 Rohde & Schwarz 的 vector signal generator；依 `R&S®SMW200A Vector Signal Generator Specifications` `Version 31.00`（`May 2026`），RF path A 可覆蓋 `100 kHz to 67 GHz`，RF path B 可覆蓋至 `44 GHz`，並可由 single-path vector signal generator 擴充到 multichannel MIMO receiver tester（來源：[[SMW200A_specs_en_3606-8037-22_v3100]]）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 6.419938
+             },
+             {
+              "text": "R&S FSWP\nR&S FSWP 是 Rohde & Schwarz 的 Phase Noise Analyzer and VCO Tester 系列，依 Version 09.01（January 2026）涵蓋 [[R&S FSWP8]]、[[R&S FSWP26]]、[[R&S FSWP50]]，其中 [[R&S FSWP50]] 搭配 R&S®FSWP-B56G 可延伸至 56 GHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWP.md"
+              },
+              "score": 4.504678
+             },
+             {
+              "text": "Wi-Fi 7 and 5G RedCap OTA measurements\n[[Wi-Fi 7 and 5G RedCap OTA measurements]] 是 [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 中描述的 OTA 測試解決方案情境：將 [[R&S CMX500]] 的 latest test capabilities 整合到 [[EMITE]] over-the-air chambers，以評估 [[Wi-Fi 7]] / [[IEEE 802.11be]] 與 [[5G RedCap]] devices 的 performance。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+              },
+              "score": 2.20097
+             },
+             {
+              "text": "EMITE › 與 Rohde & Schwarz 的合作\n[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 說明 [[EMITE]] 與 [[Rohde & Schwarz]] 延續合作，將 [[R&S CMX500]] multi-technology、multi-channel one-box signaling tester 的 latest test capabilities fully integrated 到 [[EMITE]] OTA measurement solutions。\n\n來源中的合作重點：\n\n- [[EMITE]] state-of-the-art over-the-air chambers 可與 [[R&S CMX500]] 最新 testing features combined。\n- 整合能力涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]、[[IEEE 802.11be]] / [[Wi-Fi 7]] 與 [[5G RedCap]]。\n- 對 EMITE customers 的目標是提供 comprehensive environment，用於 assessing performance of [[Wi-Fi 7]] and [[5G RedCap]] devices。\n- 下一步合作方向是整合 [[NB-IoT NTN]] 與 [[NR NTN]] test capabilities；來源稱兩者 already covered by [[R&S CMW500]] and [[R&S CMX500]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/EMITE.md"
+              },
+              "score": 3.234524
+             },
+             {
+              "text": "R&S FPL1003\nR&S®FPL1003 是 Rohde & Schwarz 的 FPL Spectrum Analyzer 型號，依 [[FPL_specs_en_5214-6974-22_v1700]]（PD 5214.6974.22，Version 17.00，December 2025）標示，frequency range 為 AC coupled 5 kHz to 3 GHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FPL1003.md"
+              },
+              "score": 4.281471
+             },
+             {
+              "text": "Release 18 CSI enhancements for high-speed scenario › Release 18 主要 enhancement\n來源 [[R18 CSI enhancements for high-speed Scenario]] 列出三個主要 CSI enhancements：\n\n1. [[Cooperative Coherent Joint Transmission]]（CJT）。\n2. [[CSI prediction]]。\n3. [[Time Domain Channel Properties]]（TDCP）：新的 CSI quantity，可提供 time-domain channel variability 與 [[UE]] motion relative to the [[gNB]] 的 additional information。\n\n來源另提到 Type II PMI at higher speeds 搭配 Doppler / time-domain compression，並提到 `typeII-Doppler-r18` report / codebook type。[[R18 CSI enhancements for high-speed Scenario]]\n\n[[Type II CSI enhancements for high-speed Ues]] 進一步補充 Type II CSI high-speed UE 的機制：\n\n- UE 使用 previous [[CSI-RS]] information，利用 time correlation / Doppler 進行 prediction。\n- 採用 UE prediction 而非 gNB prediction，來源理由是 UE has full channel information in real time，而 gNB only has quantized information。\n- Prediction models classically use [[Wiener filter]] or [[Kalman filter]] 這類 filters。\n- 對 future predicted time points，可取得 corresponding precoding matrices；several Eigenvector-based precoding matrix sets 由 channel prediction 得到，並透過 [[beam-delay representation]] 做 space and frequency compression。\n- RAN1 simulations 多數針對 30 km/h 與 60 km/h speeds。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Release 18 CSI enhancements for high-speed scenario.md"
+              },
+              "score": 0.151743
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 與既有知識的關係\n- [[SerDes]] 已記錄 die-to-die、SoC IP 與封裝示意圖中的 SerDes 語彙；本頁補充 R&S 簡報中 SerDes 與 SI / PI / validation challenges 的測試場景。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]] 與 [[TDR 阻抗測量]] 可承接 Slide 20–21 中對 high speed PCB / PCBA signal integrity flow 與 PCB test solutions 的列名。\n- [[Power Integrity 外部資料清單]] 保存既有 OneNote link hub 中的 PDN impedance 待讀資料；本頁只加入 Slide 11 明示的 [[Power Distribution Network]] 測試區塊。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 0.886066
+             },
+             {
+              "text": "R&S TS-RRM › unresolved\n- [[R&S TS-RRM]] 的正式文件版次與產品 / 系統配置未標示。\n- [[R&S TS-RRM]] 與 [[R&S CMX500]]、[[R&S TS8980 Conformance Test Platform]] 的系統分工未標示。\n- [[WI-555]] / [[RFT 555]] 中具體 RRM test case IDs 未標示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS-RRM.md"
+              },
+              "score": 0.207753
+             },
+             {
+              "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.606005
+             },
+             {
+              "text": "DATA CENTER\nSERVER SOLUTIONS\nFueling Servers with High-Speed Interconnect\nSolutions for Scalable Performance\nAmphenol’s portfolio of connectors, cables, and high-speed\ncomponents is built for peak server performance. Designed for high-\nbandwidth efficiency, our solutions ensure seamless data flow in data\ncenters. These reliable components optimize server operations for\ncomplex data processing and high-performance computing.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-108d7b58b896a099",
+                "original_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+                "sha256": "108d7b58b896a0995ecc89afb9d513a04577bf496cb665f05a481edc7b27d429",
+                "raw_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/data-center-server-solutions-guide.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 31.282273
+             },
+             {
+              "text": "Network analyzer\nVector signal generator\nBroadband Amplifier",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-4a179a13677acd8f",
+                "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+                "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+               "section": 177,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 27.621615
+             },
+             {
+              "text": "1   Assured data integrity when using a certified high speed USB cable.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-bb00f7ed66cf3a5d",
+                "original_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+                "sha256": "bb00f7ed66cf3a5d5e0de6726bb22640f7873382a3abbbb5b905cb98d9c0c856",
+                "raw_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+               "section": 73,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 27.437956
+             },
+             {
+              "text": "## 主文說明\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-04ab0b80488a718c",
+                "original_ref": "raw/Market/HSD Cable test image 4.md",
+                "sha256": "04ab0b80488a718c486e973bf870be90a5b2fb7185b7a4fd2f04d9511370649c",
+                "raw_ref": "raw/Market/HSD Cable test image 4.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/HSD Cable test image 4.md",
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 27.019075
+             }
+            ],
+            "text": "Short answer: The passages support placing a Vector Network Analyzer in the AI data-center high-speed interconnect workflow at the PCB/PCBA, connector/channel, de-embedding, and PDN validation stages, but they only explicitly say “network analyzers,” not a specific VNA model. [19]\n| Test workflow stage | Where the VNA would fit | Measurements / analysis supported by the passages | Evidence |\n|---|---|---|---|\n| AI data-center interconnect component context | High-speed backplane / server interconnect component validation | Sentry HD is described as a next-generation high-speed backplane connector platform purpose-built for AI data center architectures. [1] Server/storage interconnect solutions are described for high-speed, high-density applications with signal integrity and reliable data transmission for next-gen enterprise server and data center architectures. [40] | [1], [40] |\n| Material measurement | Early PCB material characterization before channel design | Impedance using TDR and DK/DF extraction are listed in the material measurement stage. [6] | [6] |\n| Material / stackup selection | Stackup and transmission-channel design validation | IL, DK/DF, roughness, impedance, crosstalk, transmission-line modeling, and eye diagram are listed for material/stackup selection. [6] | [6] |\n| Signal integrity modeling / testing | High-speed PCB/PCBA channel and interconnect validation | IL, DK/DF, roughness, and impedance are listed for signal integrity modeling/testing. [6] Slide 20 also lists IL, crosstalk, eye diagram, TDR impedance, stackup planner, and TL calculator in the signal-integrity flow of high-speed PCB/PCBA. [19] | [6], [19] |\n| Interconnect / component probing and de-embedding | Bare board, socket/transmission-line, and board-to-board connector DUT characterization | Bare board for SoCs, socket/transmission line evaluation, and board-to-board connector DUTs are placed at the intersection of signal integrity, insertion loss, return loss, impedance, and de-embedding. [11] | [11] |\n| Power distribution network validation | PDN impedance / network-analysis portion of high-speed digital validation | The validation-challenges slide maps the Power Distribution Network test block to scopes and network analyzers. [19] | [19] |\n| Sampling testing | Production or qualification sampling of high-speed PCB characteristics | Sampling testing lists IL, DK/DF, and impedance. [6] | [6] |\n| Process monitoring | Ongoing PCB/process control for high-speed digital manufacturing | Process monitoring lists IL, DK/DF, impedance, and related process context. [6] | [6] |\n【推論】For an AI data-center high-speed interconnect use case, the VNA would most defensibly sit after material/stackup definition and during SI channel/component validation, sampling, and process monitoring, because those workflow stages list IL, impedance, DK/DF, roughness, crosstalk, eye diagram, and de-embedding-related interconnect measurements. [6][11][19]\n【推論】For connector/backplane components such as Sentry HD, the VNA role would be component/channel signal-integrity validation rather than proving AI workload performance, because the passages identify Sentry HD as an AI data-center high-speed backplane connector platform but do not provide its test conditions, rates, impedance, insertion loss, crosstalk, or compliance data. [1][17][26]",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "Sentry HD High-Speed Backplane Connector › 來源中的說法\n- [[full-spectrum-data-center-connectivity-brochure]]（來源未標示日期；raw converted 2026-09-17）在 featured product 區塊列出 Sentry HD High-Speed Backplane Connector。\n- 來源稱 Sentry HD is Amphenol's next-generation high-speed backplane connector platform。\n- 來源稱它 purpose-built to power the future of AI data center architectures。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Sentry HD High-Speed Backplane Connector.md"
+             },
+             "score": 1.051363
+            },
+            {
+             "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 8.475177
+            },
+            {
+             "text": "高速互連 probing 與 de-embedding 測試案例 › 可學到的 sales / solution pattern\n- 來源明示的 win factor 不是單一儀器規格，而是 total solution：probe、mount-kit、de-embedding tool 與 local partner。這與 [[R&S PCB test solutions]] 中 material measurement / sampling testing / process monitoring 的流程視角互補。\n- Bare board for SoCs、socket / transmission line evaluation 與 board-to-board connector DUT 都落在 [[Signal Integrity]]、[[Insertion Loss]]、[[Return Loss]]、[[Impedance]] 與 de-embedding 的交界。\n- Samsung 5G SoC including VCO case 顯示 [[R&S FSWP50]]、[[R&S SMW200A]] 與 automated VCO tuning software 可以被包裝成 RF / analog enablement 測試方案，但來源未提供正式 software product name 或 version。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+             },
+             "score": 3.182817
+            },
+            {
+             "text": "Sentry HD High-Speed Backplane Connector › 未決事項\n- 來源未提供 Sentry HD 的完整型號、order number、可訂購狀態、測試條件或正式規格表。\n- 來源未提供 AI data center architecture 的具體系統、客戶、平台或設計導入案例。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Sentry HD High-Speed Backplane Connector.md"
+             },
+             "score": 0.799121
+            },
+            {
+             "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+             },
+             "score": 0.900189
+            },
+            {
+             "text": "Sentry HD High-Speed Backplane Connector › 可追溯限制\n- 來源未標示正式內容日期、datasheet 版次、料號、支援速率、pin count、impedance、insertion loss、crosstalk 或 compliance 資訊。\n- `next-generation`、`purpose-built` 與 `AI data center architectures` 是 brochure marketing claim；不可推論市占率、客戶導入或量產狀態。\n- 來源未說明 [[Sentry HD High-Speed Backplane Connector]] 與既有 [[Paladin HD]]、[[Paladin HD2 224Gb-s Backplane Interconnect System]]、[[EXAMAX2]] 或 [[XCede HD2]] 的產品階層關係。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Sentry HD High-Speed Backplane Connector.md"
+             },
+             "score": 1.362327
+            },
+            {
+             "text": "## 主文說明\n**Optimized for high-speed, high-density applications, our server and storage interconnect\nsolutions ensure superior signal integrity, reliable data transmission, and scalable performance\nto support next-gen enterprise server and data center architectures.**",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-04ab0b80488a718c",
+               "original_ref": "raw/Market/HSD Cable test image 4.md",
+               "sha256": "04ab0b80488a718c486e973bf870be90a5b2fb7185b7a4fd2f04d9511370649c",
+               "raw_ref": "raw/Market/HSD Cable test image 4.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/HSD Cable test image 4.md",
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 27.019075
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/entities/Sentry HD High-Speed Backplane Connector.md",
+             "raw_refs": [
+              "raw/Market/OneNote/full-spectrum-data-center-connectivity-brochure.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/R&S PCB test solutions.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md",
+             "raw_refs": [
+              "raw/Market/OneNote/TRI_AMD_RSKR Sharing1.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

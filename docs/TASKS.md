@@ -1577,5 +1577,7 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Bilingual retrieval for wiki-primary Knowledge, Skill 1.7.0 (f729827):
   reference-file recall 0.12 -> 0.26; core-002 on the 22 answerable
   questions PASS 13 -> 16, false insufficient 6 -> 0, FAIL 3 -> 6.
-- [ ] Knowledge answer overreach after bilingual retrieval: owner to choose
-  Skill guidance or multi-round retrieval (see runs/core-002/review.zh-TW.md).
+- [x] Knowledge answer overreach: Skill 1.8.0 guidance (2026-10-10). core-003
+  on the 22 answerable questions: PASS 18, FAIL 2 (was 6), coverage 0.28.
+- [ ] Knowledge coverage: model-driven multi-round retrieval (architecture
+  change, owner to confirm; see runs/core-003/review.zh-TW.md).

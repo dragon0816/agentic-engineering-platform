@@ -1,0 +1,75 @@
+{
+ "id": "Q0911",
+ "grader": "1.2",
+ "coverage": 0.125,
+ "points": [
+  {
+   "n": 1,
+   "point": "Vault 的實際 RFIC/半導體案例：Samsung Foundry RF/Analog Enablement Group，DUT 為 5G SoC including VCO，使用 FSWP50（analyzer）+ SMW200A 44GHz / SGS100A（signal generator）",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions SMW200A/analyzer generally, but not Samsung Foundry, 5G SoC/VCO, FSWP50, SGS100A"
+  },
+  {
+   "n": 2,
+   "point": "該案例的量測在 probe station 上進行，並搭配自動化 VCO tuning 軟體，顯示儀器位於晶片級 characterization / validation 這一步",
+   "verified": true,
+   "label": "partial",
+   "why": "places it at component/RF validation, but omits probe station and automated VCO tuning"
+  },
+  {
+   "n": 3,
+   "point": "測試區塊對儀器類別的 mapping：RefClk 與 PLL jitter performance 由 phase noise analyzers 與 signal generators 負責",
+   "verified": true,
+   "label": "missing",
+   "why": "no RefClk/PLL jitter mapping to phase-noise analyzer and signal generator"
+  },
+  {
+   "n": 4,
+   "point": "ADC / DAC frontend performance 由 spectrum analyzers 與 signal generators 負責，是 signal generator / analyzer 在高速數位 / 混訊晶片驗證中的另一個落點",
+   "verified": true,
+   "label": "missing",
+   "why": "no ADC/DAC frontend mapping to spectrum analyzer and signal generator"
+  },
+  {
+   "n": 5,
+   "point": "RFIC 的 bare board / socket / transmission line 評估這一段，來源明示的 fit 是 VNAs，而非 signal generator / analyzer",
+   "verified": true,
+   "label": "missing",
+   "why": "does not say bare board/socket/transmission line evaluation fits VNAs, not SG/SA"
+  },
+  {
+   "n": 6,
+   "point": "2026.7 DDT success stories 把 SoC testing 對應到 FSWP、SMA100B（RF and Microwave Signal Generator）與 ZNA67",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention DDT SoC testing mapped to FSWP, SMA100B, ZNA67"
+  },
+  {
+   "n": 7,
+   "point": "Vault 明示不推論這些儀器在各應用中的角色分工（stimulus / analysis / phase noise / VNA / automation），因此「流程位置」只能到 mapping 層級",
+   "verified": true,
+   "label": "contradicted",
+   "why": "assigns explicit stimulus/analysis roles and workflow placement despite Vault not supporting role分工"
+  },
+  {
+   "n": 8,
+   "point": "Samsung 案例被歸納為可包裝成 RF / analog enablement 測試方案，但軟體正式名稱與版本未標示",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention RF/analog enablement packaging or unnamed/unversioned software"
+  }
+ ],
+ "contradicted": 1,
+ "invented": [
+  "SMW200A provides the RF stimulus / waveform generation",
+  "FSW measures and analyzes the DUT output",
+  "frequency up to 67 GHz",
+  "RF modulation bandwidth up to 2 GHz or up to 4 GHz with R&S SMW-K555",
+  "frequency up to 85 GHz, overrange to 90 GHz",
+  "analysis bandwidth up to 8 GHz",
+  "component testing, SAN testing, end-to-end system testing, and UE testing",
+  "before broader system, end-to-end, or UE-level testing layers",
+  "implementation → test → debug → validation"
+ ]
+}

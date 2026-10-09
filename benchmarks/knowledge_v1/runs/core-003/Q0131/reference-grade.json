@@ -1,0 +1,65 @@
+{
+ "id": "Q0131",
+ "grader": "1.2",
+ "coverage": 0.625,
+ "points": [
+  {
+   "n": 1,
+   "point": "Wi-Fi 7 / IEEE 802.11be raises PHY demands to 320 MHz channel bandwidth, up to 16 spatial streams and 4096 QAM, and MLO makes a multiple-RF-chain test environment essential",
+   "verified": true,
+   "label": "covered",
+   "why": "States 320 MHz, 16 streams, 4096QAM, MLO and multiple RF chains"
+  },
+  {
+   "n": 2,
+   "point": "Wi-Fi 8 retains Wi-Fi 7 core PHY parameters — frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz, 4096QAM, MLO — so frequency/bandwidth coverage requirements carry over",
+   "verified": true,
+   "label": "partial",
+   "why": "Covers Wi‑Fi 8 retaining 320 MHz/4096QAM/MLO, but omits frequencies up to 7.125 GHz"
+  },
+  {
+   "n": 3,
+   "point": "Wi-Fi 8 introduces new measurement types: dRU measurements (verifying uplink transmit power boost / reliability against PSD limits) and UEQM analysis (per-MIMO-link modulation adaptation vs specified MCS combinations)",
+   "verified": true,
+   "label": "covered",
+   "why": "States dRU for uplink power/reliability vs PSD and UEQM per-link MCS adaptation"
+  },
+  {
+   "n": 4,
+   "point": "Multi-channel hardware is required: CMP180 integrates two analyzers, two generators and two sets of eight RF ports for 2x2 MIMO in one box, and two units scale to four analyzers/generators for 4x4 MIMO APs",
+   "verified": true,
+   "label": "covered",
+   "why": "Gives CMP180 two analyzers/generators/RF ports, 2x2, two units for 4x4"
+  },
+  {
+   "n": 5,
+   "point": "Production-side instrument capability is stated as non-cellular coverage up to 8 GHz with bandwidths up to 500 MHz, and a 480 MHz WLAN waveform verified in loopback as a potential (not yet standardized) Wi-Fi 8 candidate",
+   "verified": true,
+   "label": "covered",
+   "why": "Mentions up to 8 GHz, 500 MHz bandwidth, and 480 MHz potential Wi‑Fi 8 candidate"
+  },
+  {
+   "n": 6,
+   "point": "Signaling-tester measurement bandwidth is enumerated per standard and currently reaches 320 MHz for WLAN",
+   "verified": true,
+   "label": "partial",
+   "why": "Mentions CMX500 WLAN standards and 320 MHz need, but not the per-standard bandwidth list reaching 320 MHz"
+  },
+  {
+   "n": 7,
+   "point": "On the signal analyzer, each new WLAN generation needs its own measurement application option plus sufficient analysis bandwidth options (e.g. FSWX KM412 for 802.11be, KM414 for 802.11bn, both on top of KM410; B320 for 320 MHz analysis bandwidth)",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not mention FSWX WLAN generation options or analysis bandwidth options"
+  },
+  {
+   "n": 8,
+   "point": "On the signal generator, wide internal RF modulation bandwidth and 802.11be waveform/EVM options are the stated enablers for future WLAN requirements",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not mention generator wide internal RF modulation bandwidth or 802.11be waveform/EVM options"
+  }
+ ],
+ "contradicted": 0,
+ "invented": []
+}

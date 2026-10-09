@@ -1,0 +1,903 @@
+{
+ "question": {
+  "id": "Q0631",
+  "text": "How do changes in AI data centers technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "market": "AI",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-be1066bf6fd84b8cad2613faefec35f8",
+ "exchange": {
+  "sent": "How do changes in AI data centers technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "http_status": 200,
+  "seconds": 141.922,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-be1066bf6fd84b8cad2613faefec35f8",
+    "actor": "leo.chi",
+    "title": "How do changes in AI data centers technology affect the measurement capa…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T19:50:13.923604Z",
+    "updated_at": "2026-10-09T19:52:21.473981Z",
+    "messages": [
+     {
+      "message_id": "message-75a5c62cb30542e59fb937f9e34dc404",
+      "role": "user",
+      "text": "How do changes in AI data centers technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+      "created_at": "2026-10-09T19:50:13.956481Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-5891b157798e41a1b3edd0f847df4371",
+      "role": "assistant",
+      "text": "AI data center 技術變化主要被描述為：AI 伺服器機架從 `48 V` 生態系轉向 `800 V` 或 `±400Vdc`，並在伺服器主板本地轉換至 GPU / 處理器低壓供電[1]；Infineon 白皮書稱單機架功率達 MW 等級時系統架構必須從 `48 V` 轉向高壓直流供電，並提到 `800 V DC` 集中發電與高壓直流配電、主板本地功率轉換、預充電、放電與 eFuse / hot-swap 控制需求[29]。\nAI 伺服器 PCB / 互連變化主要被描述為高層數、大面積與高速傳輸，材料導入低介電、低損耗與高散熱設計，主板層數達 30～40 層，並需應對厚銅與雷射鑽孔等製程挑戰[27]；直接附接銅纜來源則列出 112G / 224G high-speed I/O、PCIe Gen 5/6，以及 200G / 400G / 800G / 1.6T 等語彙[33]。\nSignaling / Non-signaling Tester 方面，R&S CMX500 被定位為一台 callbox 快速建立 DUT 連線，用於 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證[4]。\nCMX500 的已知量測 / 測試能力包括 NR FR1 / FR2 signaling 與 TX measurements、LTE signaling 與 measurements、NB-IoT / NB-NTN signaling、WLAN signaling 與 WLAN TX measurements、fading、AWGN、BLER、CSI report、throughput measurement、PER measurement、application test、IP traffic analysis、IMS / audio / POLQA，以及 GUI、Python XLAPI、SCPI remote control[5]。\nCMX500 callbox use cases 另列出 new bands R&D verification、sensitivity testing、RedCap、desense testing、3GPP pre-conformance、SRS RF measurements、UL MIMO / UL CA RF measurements、UL TX switching、multi-SIM testing、high e2e throughput testing 與 non-signaling verification[19]。\n\n來源：\n[1] Wiki：AI 資料中心高壓直流供電（來源：`BBU image 2.md`、`HVDC image 3.md`、`HVDC image.md`…）\n[4] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[5] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[19] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[27] Wiki：AI 伺服器 PCB 供應鏈升級（來源：`AI Server PCB test image 4.md`、`HSD PCB image 1.md`、`HSD PCB image 11.md`）\n[29] Wiki：AI 資料中心高壓直流供電（來源：`BBU image 2.md`、`HVDC image 3.md`、`HVDC image.md`…）\n[33] Wiki：Direct Attached Copper Cables（來源：`HSD Cable test image 2.md`）",
+      "created_at": "2026-10-09T19:52:21.473981Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-fbf71bf47c7043929db64f0e768a5c6f",
+       "request_id": "request-fbf71bf47c7043929db64f0e768a5c6f",
+       "span_id": "span-fbf71bf47c7043929db64f0e768a5c6f",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "AI data center 技術變化主要被描述為：AI 伺服器機架從 `48 V` 生態系轉向 `800 V` 或 `±400Vdc`，並在伺服器主板本地轉換至 GPU / 處理器低壓供電[1]；Infineon 白皮書稱單機架功率達 MW 等級時系統架構必須從 `48 V` 轉向高壓直流供電，並提到 `800 V DC` 集中發電與高壓直流配電、主板本地功率轉換、預充電、放電與 eFuse / hot-swap 控制需求[29]。\nAI 伺服器 PCB / 互連變化主要被描述為高層數、大面積與高速傳輸，材料導入低介電、低損耗與高散熱設計，主板層數達 30～40 層，並需應對厚銅與雷射鑽孔等製程挑戰[27]；直接附接銅纜來源則列出 112G / 224G high-speed I/O、PCIe Gen 5/6，以及 200G / 400G / 800G / 1.6T 等語彙[33]。\nSignaling / Non-signaling Tester 方面，R&S CMX500 被定位為一台 callbox 快速建立 DUT 連線，用於 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證[4]。\nCMX500 的已知量測 / 測試能力包括 NR FR1 / FR2 signaling 與 TX measurements、LTE signaling 與 measurements、NB-IoT / NB-NTN signaling、WLAN signaling 與 WLAN TX measurements、fading、AWGN、BLER、CSI report、throughput measurement、PER measurement、application test、IP traffic analysis、IMS / audio / POLQA，以及 GUI、Python XLAPI、SCPI remote control[5]。\nCMX500 callbox use cases 另列出 new bands R&D verification、sensitivity testing、RedCap、desense testing、3GPP pre-conformance、SRS RF measurements、UL MIMO / UL CA RF measurements、UL TX switching、multi-SIM testing、high e2e throughput testing 與 non-signaling verification[19]。\n\n來源：\n[1] Wiki：AI 資料中心高壓直流供電（來源：`BBU image 2.md`、`HVDC image 3.md`、`HVDC image.md`…）\n[4] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[5] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[19] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[27] Wiki：AI 伺服器 PCB 供應鏈升級（來源：`AI Server PCB test image 4.md`、`HSD PCB image 1.md`、`HSD PCB image 11.md`）\n[29] Wiki：AI 資料中心高壓直流供電（來源：`BBU image 2.md`、`HVDC image 3.md`、`HVDC image.md`…）\n[33] Wiki：Direct Attached Copper Cables（來源：`HSD Cable test image 2.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-fbf71bf47c7043929db64f0e768a5c6f",
+      "request_id": "request-fbf71bf47c7043929db64f0e768a5c6f",
+      "span_id": "span-fbf71bf47c7043929db64f0e768a5c6f",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-fbf71bf47c7043929db64f0e768a5c6f",
+       "request_id": "request-fbf71bf47c7043929db64f0e768a5c6f",
+       "span_id": "span-fbf71bf47c7043929db64f0e768a5c6f",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "AI data center 技術變化主要被描述為：AI 伺服器機架從 `48 V` 生態系轉向 `800 V` 或 `±400Vdc`，並在伺服器主板本地轉換至 GPU / 處理器低壓供電[1]；Infineon 白皮書稱單機架功率達 MW 等級時系統架構必須從 `48 V` 轉向高壓直流供電，並提到 `800 V DC` 集中發電與高壓直流配電、主板本地功率轉換、預充電、放電與 eFuse / hot-swap 控制需求[29]。\nAI 伺服器 PCB / 互連變化主要被描述為高層數、大面積與高速傳輸，材料導入低介電、低損耗與高散熱設計，主板層數達 30～40 層，並需應對厚銅與雷射鑽孔等製程挑戰[27]；直接附接銅纜來源則列出 112G / 224G high-speed I/O、PCIe Gen 5/6，以及 200G / 400G / 800G / 1.6T 等語彙[33]。\nSignaling / Non-signaling Tester 方面，R&S CMX500 被定位為一台 callbox 快速建立 DUT 連線，用於 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證[4]。\nCMX500 的已知量測 / 測試能力包括 NR FR1 / FR2 signaling 與 TX measurements、LTE signaling 與 measurements、NB-IoT / NB-NTN signaling、WLAN signaling 與 WLAN TX measurements、fading、AWGN、BLER、CSI report、throughput measurement、PER measurement、application test、IP traffic analysis、IMS / audio / POLQA，以及 GUI、Python XLAPI、SCPI remote control[5]。\nCMX500 callbox use cases 另列出 new bands R&D verification、sensitivity testing、RedCap、desense testing、3GPP pre-conformance、SRS RF measurements、UL MIMO / UL CA RF measurements、UL TX switching、multi-SIM testing、high e2e throughput testing 與 non-signaling verification[19]。\n\n來源：\n[1] Wiki：AI 資料中心高壓直流供電（來源：`BBU image 2.md`、`HVDC image 3.md`、`HVDC image.md`…）\n[4] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[5] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[19] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[27] Wiki：AI 伺服器 PCB 供應鏈升級（來源：`AI Server PCB test image 4.md`、`HSD PCB image 1.md`、`HSD PCB image 11.md`）\n[29] Wiki：AI 資料中心高壓直流供電（來源：`BBU image 2.md`、`HVDC image 3.md`、`HVDC image.md`…）\n[33] Wiki：Direct Attached Copper Cables（來源：`HSD Cable test image 2.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_P1IHpU2Lr35UvrrlAehRyeUs",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "AI data center 技術變化主要被描述為：AI 伺服器機架從 `48 V` 生態系轉向 `800 V` 或 `±400Vdc`，並在伺服器主板本地轉換至 GPU / 處理器低壓供電[1]；Infineon 白皮書稱單機架功率達 MW 等級時系統架構必須從 `48 V` 轉向高壓直流供電，並提到 `800 V DC` 集中發電與高壓直流配電、主板本地功率轉換、預充電、放電與 eFuse / hot-swap 控制需求[29]。\nAI 伺服器 PCB / 互連變化主要被描述為高層數、大面積與高速傳輸，材料導入低介電、低損耗與高散熱設計，主板層數達 30～40 層，並需應對厚銅與雷射鑽孔等製程挑戰[27]；直接附接銅纜來源則列出 112G / 224G high-speed I/O、PCIe Gen 5/6，以及 200G / 400G / 800G / 1.6T 等語彙[33]。\nSignaling / Non-signaling Tester 方面，R&S CMX500 被定位為一台 callbox 快速建立 DUT 連線，用於 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證[4]。\nCMX500 的已知量測 / 測試能力包括 NR FR1 / FR2 signaling 與 TX measurements、LTE signaling 與 measurements、NB-IoT / NB-NTN signaling、WLAN signaling 與 WLAN TX measurements、fading、AWGN、BLER、CSI report、throughput measurement、PER measurement、application test、IP traffic analysis、IMS / audio / POLQA，以及 GUI、Python XLAPI、SCPI remote control[5]。\nCMX500 callbox use cases 另列出 new bands R&D verification、sensitivity testing、RedCap、desense testing、3GPP pre-conformance、SRS RF measurements、UL MIMO / UL CA RF measurements、UL TX switching、multi-SIM testing、high e2e throughput testing 與 non-signaling verification[19]。\n\n來源：\n[1] Wiki：AI 資料中心高壓直流供電（來源：`BBU image 2.md`、`HVDC image 3.md`、`HVDC image.md`…）\n[4] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[5] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[19] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[27] Wiki：AI 伺服器 PCB 供應鏈升級（來源：`AI Server PCB test image 4.md`、`HSD PCB image 1.md`、`HSD PCB image 11.md`）\n[29] Wiki：AI 資料中心高壓直流供電（來源：`BBU image 2.md`、`HVDC image 3.md`、`HVDC image.md`…）\n[33] Wiki：Direct Attached Copper Cables（來源：`HSD Cable test image 2.md`）",
+          "evidence": {
+           "raw_citations": 7,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-6b063bc82c0d461593828e857212883b",
+            "request_id": "request-6b063bc82c0d461593828e857212883b",
+            "span_id": "span-6b063bc82c0d461593828e857212883b",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "How do changes in AI data centers technology affect the measurement capability required from Signaling / Non-signaling Tester? Focus on signaling/non-signaling testers and AI data center technology changes.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "AI 資料中心高壓直流供電\n[[AI 資料中心高壓直流供電]] 是 [[Infineon]] 白皮書 [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）用來描述 AI 伺服器機架從 `48 V` 生態系轉向 `800 V` 或 [[±400Vdc]]，並在伺服器主板本地轉換至 GPU / 處理器低壓供電的架構方向。[[SST(Solid State Transformer ) image 1]]（來源未標示日期；取得於 2026-09-04）也在概念圖中把 [[Data Center]] 應用標示為 **800 VDC**，並以圖說稱 [[SST]] technology 受到 **AI data centers** 帶動。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心高壓直流供電.md"
+              },
+              "score": 1.953694
+             },
+             {
+              "text": "Infineon\n[[Infineon]] 是多份市場來源中的 power electronics / semiconductor 公司名稱；在 2024-09 [[Power Systems Design]] BBU 文章讀圖來源中，Infineon 被連到 data center [[BBU]] converter topology、low-power [[DP-CF-SUSD]] board、[[OptiMOS]] MOSFET 與 [[EiceDRIVER 2EDB]] gate driver；在 10/2025 白皮書中則提出 AI 資料中心從電網到核心的供電架構。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Infineon.md"
+              },
+              "score": 4.14927
+             },
+             {
+              "text": "AI Data Center Eco-Chain 匯總\n[[AI Data Center Eco-Chain 匯總]] 是用來保存 [[4 AI Data Center Eco-Chain]] 這份 OneNote 彙整頁中，非單張圖像 OCR 的 AI data center / server / PCB supply chain 表格、分類語彙與外部連結清單的概念頁。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI Data Center Eco-Chain 匯總.md"
+              },
+              "score": 0.323342
+             },
+             {
+              "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 2.570631
+             },
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 8.836397
+             },
+             {
+              "text": "Direct Attached Copper Cables › 未決事項\n- 來源未標示 [[Direct Attached Copper Cables]] 的完整型號、料號、產品系列階層、發布日期或資料表版次。\n- 來源未說明 112G / 224G 與 200G / 400G / 800G / 1.6T 的對應 lane 數、編碼、距離或測試條件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Direct Attached Copper Cables.md"
+              },
+              "score": 1.654209
+             },
+             {
+              "text": "AI 資料中心基礎設施 › 未決事項\n- [[0. AI Data Center image 1]] 來源未標示日期；不得將圖中敘事寫成特定時間點的市場現況。\n- [[0. AI Data Center image 2]] 來源未標示日期；不得將圖中列出的 solution components 寫成特定時間點的市場現況、導入狀態或供應鏈狀態。\n- [[0. AI Data Center image 3]] 來源未標示日期；不得將圖中敘事寫成特定時間點的市場現況。\n- [[0. AI Data Center image]] 來源未標示日期；不得將圖中列出的 solution components 寫成特定時間點的市場現況、導入狀態或供應鏈狀態。\n- [[4 AI Data Center Eco-Chain image 1]] 頁尾日期為 12/10/2025，但日期格式未標示；不得推論為 2025-12-10 或 2025-10-12。\n- [[0. AI Data Center image 1]] 來源未標示發布者或公司；不得推論此圖代表某特定廠商觀點。\n- [[0. AI Data Center image 2]] 來源未標示公司名稱、發布者、品牌或可辨識 logo；不得推論 InfraSuite Manager、EnviroStation、EnviroProbe、RowCool 等名稱的供應商歸屬。\n- [[0. AI Data Center image 3]] 來源未標示公司名稱、發布者、品牌或可辨識 logo；不得推論此圖代表某特定廠商觀點。\n- [[0. AI Data Center image]] 來源未標示公司名稱、發布者、品牌或可辨識 logo；不得推論 InfraSuite Manager、EnviroStation、EnviroProbe、RowCool 等名稱的供應商歸屬。\n- [[4 AI Data Center Eco-Chain image 1]] 未標示圖中公司是否為 R&S 往來對象、外部市場參與者、範例名單或內部關注名單。\n- [[0. AI Data Center image 1]] 來源未標示產品或型號；不得推論圖中設備為特定產品線。\n- [[0. AI Data Center image 2]] 來源未標示產品型號或文件版次；不得推論圖中設備為特定型號。\n- [[0. AI Data Center image 3]] 來源未標示具體產品名稱或型號；不得推論圖中設備為特定產品線或型號。\n- [[0. AI Data Center image]] 來源未標示產品型號或文件版次；不得推論圖中設備為特定型號。\n- [[4 AI Data Center Eco-Chain image 1]] 未標示任何產品型號或文件版次；不得把圖中品牌名稱推論成特定產品型號。\n- [[0. AI Data Center image 2]] 中編號 2 or 3 在圖中以同一指示區域呈現，來源未能清楚區分 [[Power Distribution Unit]] 與 [[Rack-Mount Remote Power Panel]] 在圖上的個別位置。\n- [[0. AI Data Center image]] 中編號 2 or 3 在圖中以同一指示區域呈現，來源未能清楚區分 [[Power Distribution Unit]] 與 [[Rack-Mount Remote Power Panel]] 在圖上的個別位置。\n- [[0. AI Data Center image 3]] 中建築外側線路與鎖頭圖示是否代表 cybersecurity、network security、physical security 或其他安全概念，來源未明示。\n- [[0. AI Data Center image 3]] 中上方小型建築群代表資料中心園區、外部設施群、城市、客戶端基礎設施或其他場景，來源未明示。\n- [[0. AI Data Center image 3]] 中右上設備機箱代表運算、網路、硬體設備或特定測試 / 供電設備，來源未明示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+              },
+              "score": 3.919511
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 測量原理\n- [[R&S ZNA]] 使用 two-tone stimulus signal。\n- 儀器量測 DUT input 與 output 的兩個 signals 之 phase difference。\n- Group delay 由 phase difference 與 frequency offset 計算。\n- 兩個 signals 間的 frequency offset Δf 是 aperture。\n- [[R&S ZNA]] 具備用於量測不同 frequency signals 之 phase 的 frontend。\n- Calibration 只需要 unknown through mixer。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 0.253798
+             },
+             {
+              "text": "R&S ZNA › R&S®ZNA-B15 RFFE GPIO interface 規格摘錄\n- Models .02 and .03 提供 two independent MIPI RFFE busses。\n- Connector type：25-pin D-Sub，female。\n- RFFE port 1 / 2 的 VIO、DATA、CLK 電壓範圍為 0 V to +2 V，1 mV step，maximum current 20 mA。\n- CLK configurable clock rate：31.25 kHz to 26 MHz。\n- GPIO 1 to GPIO 8：voltage range –5 V to +10 V；typ. –6 V to +12 V；voltage step size 5 mV；maximum current 20 mA。\n- GPIO 9 and 10：voltage range –5 V to +10 V；typ. –6 V to +12 V；voltage step size 5 mV；maximum current 100 mA。\n- Model .03 提供 voltage and current measurement with switchable source resistance；32 internal ADC channels 可同時量測每個 RFFE 與 GPIO pin 的 voltage and current。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 6.482603
+             },
+             {
+              "text": "800GbE Switch\n[[800GbE Switch]] 是 [[AI Server PCB test image 76]] 與 [[Switch server- optical switch image 1]] 頁尾 / 圖下文字中出現的高速乙太網路交換器語彙；在本 vault 中，此頁目前只保存這些來源的 2023 年照片語境，不補入來源未提供的 Ethernet 規格細節。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/800GbE Switch.md"
+              },
+              "score": 13.810218
+             },
+             {
+              "text": "Keysight N1500A › 相關來源\n- [[AI Server PCB test image 24]] — 未標示日期的 Keysight 高頻高速 PCB 測試解決方案流程圖。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Keysight N1500A.md"
+              },
+              "score": 5.796279
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping\n[[AISeverEcosystem R&S solution mapping]] 是用來保存 [[AISeverEcosystem]] 中 AI server ecosystem 分類與 [[R&S Solution]] 欄位對應關係的概念頁；它只表示該 Excel 表中的銷售 / 測試方案線索，不代表正式產品配置、客戶關係或已驗證商機。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 4.372183
+             },
+             {
+              "text": "台光電 › 高階 CCL 表內狀態\n[[AI Server PCB test image 21]]（來源未標示日期；取得於 2026-09-04）對 [[台光電]] 的表內狀態如下。來源未提供 **○** 的圖例定義，因此本表不將其解讀為量產、供貨、客戶導入或已出貨。\n\n| 板型 | 規格 | 表內狀態 | 日期 / 期間 | 來源 |\n|---|---|---|---|---|\n| 一般 PCB板 | M6 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |\n| 一般 PCB板 | M7 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |\n| 一般 PCB板 | M8 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |\n| HDI板 | M6 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |\n| HDI板 | M7 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |\n| HDI板 | M8 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/台光電.md"
+              },
+              "score": 0.572455
+             },
+             {
+              "text": "AI 伺服器 PCB 供應鏈升級 › 升級面向整理\n| 面向 | 來源文字 | 可追溯數字 / 時間 | 限制 |\n|---|---|---|---|\n| AI伺服器趨勢 | 推升 PCB 邁向高層數、大面積與高速傳輸，供應鏈全面翻新 | [[AI Server PCB test image 4]] 來源未標示日期 | 未提供出貨量、平台樣本、PCB 面積或層數分布 |\n| ASIC平台進展 | AWS Trainium 2 Max、Google TPU V6、Meta MTIA 2量產，2026年新平台將陸續推出 | 2026年；量產時間未標示 | 未定義量產、未列出出貨量、客戶或供應鏈 |\n| 材料升級方向 | HVLP銅箔進入第4、5代，CCL以M8為主，導入低介電、低損耗與高散熱設計 | 第4、5代；來源未標示日期 | 未定義 HVLP 世代、M8、低介電、低損耗或高散熱設計的測試條件 |\n| 製程挑戰 | 主板層數達30～40層，縱深比需達12～14倍，需應對厚銅、雷射鑽孔等高階製程 | 30～40層；12～14倍；來源未標示日期 | 未說明板種、平台、線寬線距、孔徑、板厚或良率 |\n| TPCA Show焦點 | 聚焦玻纖布、HVLP銅箔、CCL發展與高縱深比設備 | 來源未標示日期 | 未標示 TPCA Show 年份、場次、展會期間或參展廠商 |\n| GB200 / GB300 / VR200 板件升級比較 | [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 將 ComputeTray 從 GB200 / GB300 的 5層22L列到 VR200 的 6層26L，NVSwitch Tray 從 24L HLC 列到 32L (N+N HLC)，並列出 VR200 Midplane 44L(N+N HLC) | GB200：25Q1試產、25Q2量產；GB300：25H2樣機/2026放量；VR200：26H2樣機/2027放量；來源發布日期未標示 | 未定義試產、量產、樣機、放量；未提供板厚、孔徑、線寬線距、良率、出貨量或平台驗證證據 |\n| VR200 材料升級與供應商列名 | [[HSD PCB image 11]] 列出 VR200 計算板斗山(M8+LDK+HVLP4)+M4、交換板M8(LDK2+HVLP4) 生益科技/台光電/南亞(交期最快)、HVLP4銅箔三井/古河/盧森堡/金居/福田 | VR200：26H2樣機/2027放量；來源發布日期未標示 | 與 [[HSD PCB image 1]] 既有抄錄「南亞(交期最長)」矛盾；未說明南亞完整公司名稱、交期數字、材料型號、認證狀態或供應關係 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+              },
+              "score": 11.659528
+             },
+             {
+              "text": "Data center full-spectrum connectivity\n[[Data center full-spectrum connectivity]] 是 [[full-spectrum-data-center-connectivity-brochure]] 呈現的 portfolio 視角：把 AI / data center 的 high-speed electrical interconnect、optical interconnect、fiber deployment、rack power distribution、busbar、liquid cooling 與 leak detection 放在同一張 data center connectivity brochure 中。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 4.973467
+             },
+             {
+              "text": "AI 資料中心基礎設施 › 可追溯範圍\n本頁根據五張圖像來源建立：[[0. AI Data Center image 1]]、[[0. AI Data Center image 2]]、[[0. AI Data Center image 3]]、[[0. AI Data Center image]] 與 [[4 AI Data Center Eco-Chain image 1]]。\n\n- [[0. AI Data Center image 1]] 可追溯的主張限於：AI / data center 場景與 **Enabling AI**、[[Connectivity]]、[[Power]]、[[Resilience]] 的視覺關聯。\n- [[0. AI Data Center image 2]] 可追溯的主張限於：資料中心 / 機房 solution diagram 中列出的子系統分類與 1–11 編號設備 / 系統名稱。\n- [[0. AI Data Center image 3]] 可追溯的主張限於：**Enabling AI** 與資料中心 / 機房 / 基礎設施場景的視覺關聯，以及 [[Connectivity]]、[[Power]]、[[Resilience]] 三個明示重點方塊。\n- [[0. AI Data Center image]] 可追溯的主張限於：資料中心 / 機房 solution diagram 中列出的子系統分類、1–11 編號設備 / 系統名稱，以及「2 or 3」共同標示造成的位置未決問題。\n- [[4 AI Data Center Eco-Chain image 1]] 可追溯的主張限於：12/10/2025（日期格式未標示）頁面上的 ecosystem map 分類、公司 / 品牌 / logo 列名、頁尾 Rohde & Schwarz / COMPANY RESTRICT / RS / 頁碼 25 等可見資訊。\n- 由於前四份來源都未標示日期，所有與時序、市場現況、供應商名單、產品導入、客戶採用、出貨量或市場占比相關的判斷都需要其他來源補強。\n- 即使 [[4 AI Data Center Eco-Chain image 1]] 有頁尾日期 12/10/2025，它仍未提供市場數值、排名、關係線或採用狀態，因此不能單獨支持市場份額、導入狀態、供應鏈上下游關係或 R&S 往來關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+              },
+              "score": 3.971463
+             },
+             {
+              "text": "AI 資料中心高壓直流供電 › 限制與不可推論事項\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）是 Infineon 白皮書；本頁只記錄 Infineon 在 10/2025 的技術與市場判斷，不代表跨供應商共識。\n- `200 kW` 至 `250 kW`、`4100 A` 至 `5200 A`、`1 MW`、`2300 W/in³`、`97.4%`、`96.6%`、`98.5%` 等數字皆需追溯到 [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）。\n- 來源未提供 Infineon `800 V → 12 V` 示範板、`800 V → 50 V → 6 V` 方案或 `1 kW` 8:1 電源模組的完整料號、量產時間、客戶導入、出貨狀態或採購資訊。\n- 來源未說明 `800 V` 與 [[±400Vdc]] 哪一種架構會成為標準，也未提供標準組織版本或安全法規細節。\n- [[SST(Solid State Transformer ) image 1]] 未標示日期，因此 **800 VDC** 不能寫成特定時間點的 AI data center 市場現況或標準規格。\n- [[SST(Solid State Transformer ) image 1]] 未標示發布者、公司或報告名稱；不得把 **SST technology fueled by AI data centers** 改寫成特定供應商已受惠、已出貨或已導入。\n- [[SST(Solid State Transformer ) image 1]] 沒有提供 [[SST]] 產品型號、效率、功率、認證、客戶、量產或出貨資訊。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心高壓直流供電.md"
+              },
+              "score": 1.545488
+             },
+             {
+              "text": "AI Data Center Eco-Chain 匯總 › 未決事項\n- [[4 AI Data Center Eco-Chain]] 未標示正式發布日期、資料期間、作者、版本、頁碼或完整報告名稱。\n- [[4 AI Data Center Eco-Chain]] 中「伺服器零組件」表的直接來源未明確標示。\n- [[4 AI Data Center Eco-Chain]] 中 Business Weekly URL 未標示文章標題、發布日期、作者或擷取日期。\n- [[4 AI Data Center Eco-Chain]] 未說明 RSCN taxonomy 是哪個版本、誰整理、用途或適用範圍。\n- [[4 AI Data Center Eco-Chain]] 未說明 `RSCN version`、`RSNA version` 兩行下方各圖的差異與審核狀態。\n- [[4 AI Data Center Eco-Chain]] 未說明 `AISeverEcosystem.xlsx` 的版本、資料來源或是否為本頁表格來源。\n- 來源中的 AMD / StockFeel / my-finance / EET China / Connector Supplier / TechSpot / Wccftech / ServeTheHome 網址尚未 ingest。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI Data Center Eco-Chain 匯總.md"
+              },
+              "score": 0.310702
+             },
+             {
+              "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 2.555599
+             },
+             {
+              "text": "Direct Attached Copper Cables › 可追溯限制\n- [[HSD Cable test image 2]] 未標示內容日期；不得把 112G、224G、200G / 400G / 800G / 1.6T 或 PCIe Gen 5/6 寫成特定日期的量產、出貨或採用狀態。\n- 來源未提供 cable length、gauge、BER、eye diagram、active / passive 分界、功耗、合規證書、order number 或客戶導入證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Direct Attached Copper Cables.md"
+              },
+              "score": 1.552931
+             },
+             {
+              "text": "AI 資料中心基礎設施\nAI 資料中心基礎設施是此 vault 用來記錄支撐 AI 部署或運作的資料中心能力組合；在 [[0. AI Data Center image 1]] 與 [[0. AI Data Center image 3]] 中，來源未標示日期的圖像明示其核心面向包含 **Connectivity**、**Power**、**Resilience**，而 [[0. AI Data Center image 2]] 與 [[0. AI Data Center image]] 則以未標示日期的 3D 機房示意圖列出 Power Management、Rack & Accessories、Management System、Precision Cooling 與 Service 等資料中心 solution components。[[4 AI Data Center Eco-Chain image 1]] 則在頁尾標示 12/10/2025（日期格式未標示）的 ecosystem map 中，補充 cloud service、datacenter、AI server、compute 與 peripheral 的市場參與者 / 品牌分類視角。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+              },
+              "score": 0.645139
+             },
+             {
+              "text": "衛星酬載群延遲量測\n[[衛星酬載群延遲量測]]是用來判定 satellite communications transmission path phase distortions、frequency converter / transponder channel band edge distortion 與 transmission path quality 的測試方法集合。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 0.240373
+             },
+             {
+              "text": "800GbE Switch › 與既有知識的關係\n- [[網路通訊設備產業鏈]] 記錄網路通訊設備供應鏈分層；[[AI Server PCB test image 76]] 與 [[Switch server- optical switch image 1]] 不是供應鏈圖，不能用來補市場名單或交易關係。\n- [[設備內部硬體照片]] 記錄硬體拆機或內部照片的可見特徵；這兩份來源可作為具頁尾語境的網路交換器內部照片來源。\n- [[高頻高速 PCB 測試解決方案]] 記錄 PCB 測試流程；這兩份來源未提供測試項目、儀器或量測數據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/800GbE Switch.md"
+              },
+              "score": 7.242049
+             },
+             {
+              "text": "Keysight ENA › 相關來源\n- [[AI Server PCB test image 24]] — 未標示日期的 Keysight 高頻高速 PCB 測試解決方案流程圖。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Keysight ENA.md"
+              },
+              "score": 8.165291
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › 與既有知識的關係\n- [[R&S PCB test solutions]] 提供 2026.3.4 R&S high-speed digital 簡報中的 PCB fabricator / system house 測試流程；本頁則來自市場 Excel，將 R&S 儀器與 AI server supply-chain 類別做銷售 mapping。\n- [[高頻高速 PCB 測試解決方案]] 與 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 已有 Keysight / PCB test 圖像來源；本頁新增 R&S 方案對應，但未提供可替代正式規格的量測條件。\n- [[AI 伺服器 PCB 供應鏈升級]] 記錄材料與板層升級；本頁只補充對應測試入口，例如 IL、TDR、high speed trace、PDN Target Z。\n- [[資料中心電力電子生態系]]、[[NVIDIA 800V HVDC 架構]] 與 [[AI 資料中心高壓直流供電]] 記錄 data center power electronics；本頁補充 [[MXO]]、[[R&S FSWP]]、[[ZISO]] 與 BMS test 的 sales mapping 線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 3.944209
+             },
+             {
+              "text": "台燿 › 可追溯範圍\n- 本頁只記錄來源圖上的台燿列名，不推論供應合約、出貨量、市占率、客戶、材料規格、國別或 R&S 往來關係。\n- 本頁不自動把台燿與 [[台耀]] 合併；需要人工確認命名與同義頁處理。\n- [[AI Server PCB test image 23]] 的「2023 Q1 接獲AI通用基板(UBB) 訂單」只支持圖上說法；來源未提供訂單客戶、合約、數量、金額、出貨期間或公告。\n- [[AI Server PCB test image 23]] 的「800G交換器材料認證中」只支持圖上說法；來源未標示認證對象、測試項目、材料型號、完成時間或結果。\n- [[AI Server PCB test image 23]] 的客戶欄只記錄圖上文字；不得改寫成已驗證直接客戶或現行供應關係。\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]] 的低軌衛星與基地台高頻材料說法只支持該 2026-09-15 報告中的市場定位，不能推論具體產品料號、衛星平台或基地台客戶。\n- [[Switch server- optical switch]] 的 800G 交換器材料供應商句子只支持 OneNote 文字列名；來源未標示材料種類、產品型號、客戶、出貨、認證、合約或原始資料來源，不能升格為已驗證供應關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/台燿.md"
+              },
+              "score": 3.392776
+             },
+             {
+              "text": "AI 伺服器 PCB 供應鏈升級 › 來源中的說法\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）標題為「PCB供應鏈升級重點」。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 AI伺服器趨勢推升 [[PCB]] 邁向高層數、大面積與高速傳輸，供應鏈全面翻新。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 [[AWS Trainium 2 Max]]、[[Google TPU V6]]、[[Meta MTIA 2]] 量產，並稱 2026年新平台將陸續推出。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 [[HVLP銅箔]] 進入第4、5代，[[CCL]] 以 [[M8]] 為主，導入低介電、低損耗與高散熱設計。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱主板層數達 30～40 層，縱深比需達 12～14 倍，並需應對厚銅、雷射鑽孔等高階製程。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 TPCA Show 焦點聚焦玻纖布、HVLP銅箔、CCL 發展與高縱深比設備，反映材料與製程全面升級。\n- [[HSD PCB image 1]]（來源發布日期未標示；取得於 2026-09-04）以「GB200/GB300/VR200規格：南亞和臻鼎為亮點」為標題，比較 [[GB200]] NVL72(72GPU)、[[GB300]] NVL72(72GPU) 與 [[VR200]] NVL144(72GPU) 的時間、製程、功耗、載板、CCL 材料、上游材料、ComputeTray、NVSwitch Tray、CPX 與 Midplane。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）與 [[HSD PCB image 1]] 高度重疊，同樣以「GB200/GB300/VR200規格：南亞和臻鼎為亮點」為標題，右上角標示「資料來源：產業調研、福邦投顧整理」。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[GB200]] / [[GB300]] ComputeTray 為 **5層22L**，[[VR200]] ComputeTray 為 **6層26L**；[[GB200]] / [[GB300]] NVSwitch Tray 為 **24L HLC**，[[VR200]] NVSwitch Tray 為 **32L (N+N HLC)**，[[VR200]] Midplane 為 **44L(N+N HLC)**。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[GB300]] 使用 **HVLP3銅箔**，[[VR200]] 使用 **HVLP4銅箔**，並將 [[VR200]] 交換板 CCL 材料列為 **M8(LDK2+HVLP4) 生益科技/台光電/南亞(交期最快)**。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[VR200]] ComputeTray PCB 供應商 / 占比為 **欣興35~40% > 臻鼎25~30% = 勝宏25~30%**。\n\n⚠️ [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）說 [[VR200]] 交換板 CCL 材料供應為「生益科技/台光電/南亞(交期最快)」，但既有頁面 [[AI 伺服器 PCB 供應鏈升級]] 說 [[HSD PCB image 1]] 的對應欄位為「生益科技/台光電/南亞(交期最長)」。判斷：最快 / 最長方向相反，影響對 [[南亞]] 供應鏈定位的解讀；在回看原圖前不得擇一。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+              },
+              "score": 7.489254
+             },
+             {
+              "text": "Data center full-spectrum connectivity › 與既有概念的關係\n- [[Data center server 高速互連產品組合]] 偏向 data center server interconnect portfolio 的分類表；[[Data center full-spectrum connectivity]] 更強調 full-spectrum：electrical interconnect + optical + fiber + power + cooling。\n- [[Compute tray component solutions]] 偏向 compute tray connectors、cables、power connector、busbar 與 backplane interconnect；本頁納入 optical transceiver、CPO、fiber deployment 與 liquid cooling。\n- [[高速伺服器儲存互連]] 可連接本頁中的 [[Mini Cool Edge IO]]、[[Cool Express Link]]、[[Direct Attached Copper Cables]]、[[PCIe CEM 7 Connectors]] 與 storage / EDSFF 類產品。\n- [[CPO]]、[[Optical I-O]]、[[Near-Packaged Optics]] 可連接本頁的 [[Amphenol Co-packaged Optics]] 與 [[LEAP On-Board Transceiver]]，但本來源不是技術標準或市場採用證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 2.817565
+             },
+             {
+              "text": "AI 資料中心高壓直流供電 › 來源中的說法\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）稱，隨著 GPU 功耗上升與每機架 GPU 叢集規模擴大，單機架功率需求將很快突破 `1 MW` 或更高。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）稱，當單機架功率達 MW 等級，系統架構必須從既有 `48 V` 生態系轉向高壓直流供電。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）預計，從 `48 V` 匯流排架構轉向 `800 V` 或 [[±400Vdc]] 架構，會在單機架功率達 `200 kW` 至 `250 kW` 時出現。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）指出，在 `48 V` 匯流排架構下，單機架功率 `200 kW` 至 `250 kW` 對應母排電流約 `4100 A` 至 `5200 A`。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）提出高壓直流架構示例：採用 `800 V DC` 的集中發電與高壓直流配電，並在伺服器主板進行本地功率轉換。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）稱，未來伺服器主板將直接運行於 `800 V` 或 [[±400Vdc]] 電壓。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）指出，高壓直流伺服器主板需要在插入高壓直流匯流排前執行預充電，並在伺服器主板從 IT 機架移除時確保開關及時放電，以避免危險電壓。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）指出，每個伺服器主板需部署 [[eFuse]] 功能，以便故障時快速切斷電源。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）展示基於 [[XDP]] 熱插拔控制器 `XDP70x` 與 [[CoolSiC]] [[JFET]] 的 [[eFuse]] 與 hot-swap 控制方案；實驗條件為輸入電容 `300 µF`，可將伺服器主板從 `0 V` 預充電至 `800 V`。\n- [[SST(Solid State Transformer ) image 1]]（來源未標示日期；取得於 2026-09-04）圖中 [[Data Center]] 應用旁標示 **800 VDC**，其 AC-DC 方塊標示為 **AC-DC (SST)**。\n- [[SST(Solid State Transformer ) image 1]]（來源未標示日期；取得於 2026-09-04）圖上方標示 **34.5 kVAc or 13.8 kVAc 3-Ph Grid**，表示該概念圖把 [[SST]] 放在中高壓三相電網與 DC 應用介面之間。\n- [[SST(Solid State Transformer ) image 1]]（來源未標示日期；取得於 2026-09-04）圖說稱：**SST technology fueled by AI data centers set to modernize grid-infrastructure across battery energy storage systems (BESS), EV megawatt charging systems (MCS), and renewable energy**；這只能作為未標示日期圖上的敘事，不能視為已導入或市場共識。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心高壓直流供電.md"
+              },
+              "score": 1.163481
+             },
+             {
+              "text": "AI Data Center Eco-Chain 匯總 › 來源中的說法\n- [[4 AI Data Center Eco-Chain]]（來源正文未標示正式日期；路徑含 2026-8-20；converted 2026-09-16）保存了 PCB supply chain、伺服器零組件、伺服器 ODM / 品牌廠、RSCN taxonomy、多張 image links 與外部網址。\n- [[4 AI Data Center Eco-Chain]] 以 [[產業價值鏈資訊平台]]「印刷電路板產業鏈簡介」作為 PCB supply chain 區段的連結來源，但沒有摘錄該網頁正文。\n- [[4 AI Data Center Eco-Chain]] 兩次標示 Business Weekly URL `https://www2.businessweekly.com.tw/business/blog/3016444`，並在其後列出 [[伺服器代工廠（ODM）]] 與 [[伺服器品牌廠]] 表。\n- [[4 AI Data Center Eco-Chain]] 保存 RSCN 分類：AI Chips、Components、AI Servers、Applications。\n- [[4 AI Data Center Eco-Chain]] 的外部網址與圖片連結很多；本頁只整理 raw 中明確可見的文字，不讀取外部網頁或圖片內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI Data Center Eco-Chain 匯總.md"
+              },
+              "score": 0.301275
+             },
+             {
+              "text": "CMX500 Callbox › Testing phases\n[[CMX500_Callbox]] 將測試階段放在下列脈絡中：\n\n- [[Go-NoGo Testing]]。\n- [[Non-Sig Testing]]。\n- [[Conformance Testing]]。\n- [[R&D Testing]]。\n\n來源未明確說這四者是完整 lifecycle，也未定義各階段 pass/fail 標準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 0.965981
+             },
+             {
+              "text": "R&S CMP180 › Measurement options\n依 [[CMP180 Features and Functions Version 09]] 與 [[CMP180 Specifications Version 08.00]]，CMP180 支援多種 measurement options。Version 08.00 ordering information 的完整 order number 節錄如下：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 2.720096
+             },
+             {
+              "text": "Direct Attached Copper Cables › 來源中的說法\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）左側主圖編號 4 標示 DIrect Attached Copper Cables，右側標題為 Direct Attached Copper Cables。\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）描述其為 112G and 224G high-speed I/O PCIe Gen 5/6 passive and active cables designed and manufactured for data centers、networking、HPC、telecom、server and storage solutions。\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）列出 [[OSFP Cables]]、[[OSFP-XD Copper Cables]]、[[QSFP DD Cables]]、[[CDFP Cables]]。\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）小標為 200G / 400G / 800G / 1.6T。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Direct Attached Copper Cables.md"
+              },
+              "score": 1.166449
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 方法選擇\n依 [[Satellite_payload_testing_app-bro_en_5215-2120-92_v0200]]：\n\n- [[R&S FSW]] + [[R&S SMW200A]] 建議用於 complete payload testing。\n- [[R&S ZNA]] 建議用於 component level testing。\n- Spectrum analyzer + signal generator 的 measuring principle 是產生 multi-carrier signal，量測 carriers 之間的 phase shift / difference，再計算 group delay。\n- VNA 的 measuring principle 是產生 two-tone signal，並在 reference 與 measurement receivers 中量測 carriers 之間的 phase。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 0.2326
+             },
+             {
+              "text": "800GbE Switch › 可追溯限制\n- [[AI Server PCB test image 76]] 與 [[Switch server- optical switch image 1]] 只以頁尾 / 圖下文字列出 `800GbE Switch`；未提供 port count、每埠速率定義、光模組型式、交換容量、serdes 速率、功耗、散熱設計或產品型號。\n- 本頁不從 `800GbE` 推論 [[Ethernet]] 標準版本、IEEE 文件、介面類型、lane 數、調變格式或測試需求；來源未提供這些資訊。\n- 本頁不把照片寫成 [[800GbE Switch]] 在 2023 年已量產、已出貨、被客戶導入或市場普及的證據。\n- 本頁不把檔名中的 `AI Server PCB` 或 `Switch server` 當作 [[800GbE Switch]] 屬於 [[AI伺服器]] 的證據；來源頁尾與內容描述偏向 [[網路交換器]] / 通訊設備。\n- [[Switch server- optical switch image 1]] 與 [[AI Server PCB test image 76]] 高度重疊，不可視為彼此獨立的市場驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/800GbE Switch.md"
+              },
+              "score": 3.790481
+             },
+             {
+              "text": "Keysight PNA › 相關來源\n- [[AI Server PCB test image 24]] — 未標示日期的 Keysight 高頻高速 PCB 測試解決方案流程圖。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Keysight PNA.md"
+              },
+              "score": 8.165291
+             },
+             {
+              "text": "\\[1\\] [https://kitalent.com](https://kitalent.com/zh-tw/ai-technology-and-digital-infrastructure-recruitment/digital-infrastructure-and-data-centers-recruitment/data-center-construction-recruitment/)",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-db9753a8cd8a072d",
+                "original_ref": "raw/Market/OneNote/Construction (2026-8-20)/QPS for DC.md",
+                "sha256": "db9753a8cd8a072dc6651618d8fe3f10705ce95bef29fe9a9b21b594d6aa8416",
+                "raw_ref": "raw/Market/OneNote/Construction (2026-8-20)/QPS for DC.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Construction (2026-8-20)/QPS for DC.md",
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 26.074982
+             },
+             {
+              "text": "[I/O Design Challenges Grow In AI Data Centers And HPC Clusters](https://semiengineering.com/i-o-design-challenges-grow-in-ai-data-centers-and-hpc-clusters/)",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-68e5c65bc97be956",
+                "original_ref": "raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md",
+                "sha256": "68e5c65bc97be956bd677453a27445cf9c9d5fa65c731dcd6ce88aa865ae093a",
+                "raw_ref": "raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md",
+               "section": 68,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.863188
+             },
+             {
+              "text": "![[0. AI Data Center image.png]]",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-30b82598e1f78a2b",
+                "original_ref": "raw/Market/OneNote/AI DATA CENTER (2026-8-20)/0. AI Data Center.md",
+                "sha256": "30b82598e1f78a2bba8a437b82d4fda74032ce90b05f0a02ea45398dd88b11eb",
+                "raw_ref": "raw/Market/OneNote/AI DATA CENTER (2026-8-20)/0. AI Data Center.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/AI DATA CENTER (2026-8-20)/0. AI Data Center.md",
+               "section": 27,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.139947
+             },
+             {
+              "text": "![[0. AI Data Center image 1.png]]",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-30b82598e1f78a2b",
+                "original_ref": "raw/Market/OneNote/AI DATA CENTER (2026-8-20)/0. AI Data Center.md",
+                "sha256": "30b82598e1f78a2bba8a437b82d4fda74032ce90b05f0a02ea45398dd88b11eb",
+                "raw_ref": "raw/Market/OneNote/AI DATA CENTER (2026-8-20)/0. AI Data Center.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/AI DATA CENTER (2026-8-20)/0. AI Data Center.md",
+               "section": 28,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 18.666539
+             }
+            ],
+            "text": "AI data center 技術變化主要被描述為：AI 伺服器機架從 `48 V` 生態系轉向 `800 V` 或 `±400Vdc`，並在伺服器主板本地轉換至 GPU / 處理器低壓供電[1]；Infineon 白皮書稱單機架功率達 MW 等級時系統架構必須從 `48 V` 轉向高壓直流供電，並提到 `800 V DC` 集中發電與高壓直流配電、主板本地功率轉換、預充電、放電與 eFuse / hot-swap 控制需求[29]。\nAI 伺服器 PCB / 互連變化主要被描述為高層數、大面積與高速傳輸，材料導入低介電、低損耗與高散熱設計，主板層數達 30～40 層，並需應對厚銅與雷射鑽孔等製程挑戰[27]；直接附接銅纜來源則列出 112G / 224G high-speed I/O、PCIe Gen 5/6，以及 200G / 400G / 800G / 1.6T 等語彙[33]。\nSignaling / Non-signaling Tester 方面，R&S CMX500 被定位為一台 callbox 快速建立 DUT 連線，用於 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證[4]。\nCMX500 的已知量測 / 測試能力包括 NR FR1 / FR2 signaling 與 TX measurements、LTE signaling 與 measurements、NB-IoT / NB-NTN signaling、WLAN signaling 與 WLAN TX measurements、fading、AWGN、BLER、CSI report、throughput measurement、PER measurement、application test、IP traffic analysis、IMS / audio / POLQA，以及 GUI、Python XLAPI、SCPI remote control[5]。\nCMX500 callbox use cases 另列出 new bands R&D verification、sensitivity testing、RedCap、desense testing、3GPP pre-conformance、SRS RF measurements、UL MIMO / UL CA RF measurements、UL TX switching、multi-SIM testing、high e2e throughput testing 與 non-signaling verification[19]。",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "AI 資料中心高壓直流供電\n[[AI 資料中心高壓直流供電]] 是 [[Infineon]] 白皮書 [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）用來描述 AI 伺服器機架從 `48 V` 生態系轉向 `800 V` 或 [[±400Vdc]]，並在伺服器主板本地轉換至 GPU / 處理器低壓供電的架構方向。[[SST(Solid State Transformer ) image 1]]（來源未標示日期；取得於 2026-09-04）也在概念圖中把 [[Data Center]] 應用標示為 **800 VDC**，並以圖說稱 [[SST]] technology 受到 **AI data centers** 帶動。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AI 資料中心高壓直流供電.md"
+             },
+             "score": 1.953694
+            },
+            {
+             "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 2.570631
+            },
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 8.836397
+            },
+            {
+             "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 2.555599
+            },
+            {
+             "text": "AI 伺服器 PCB 供應鏈升級 › 來源中的說法\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）標題為「PCB供應鏈升級重點」。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 AI伺服器趨勢推升 [[PCB]] 邁向高層數、大面積與高速傳輸，供應鏈全面翻新。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 [[AWS Trainium 2 Max]]、[[Google TPU V6]]、[[Meta MTIA 2]] 量產，並稱 2026年新平台將陸續推出。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 [[HVLP銅箔]] 進入第4、5代，[[CCL]] 以 [[M8]] 為主，導入低介電、低損耗與高散熱設計。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱主板層數達 30～40 層，縱深比需達 12～14 倍，並需應對厚銅、雷射鑽孔等高階製程。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 TPCA Show 焦點聚焦玻纖布、HVLP銅箔、CCL 發展與高縱深比設備，反映材料與製程全面升級。\n- [[HSD PCB image 1]]（來源發布日期未標示；取得於 2026-09-04）以「GB200/GB300/VR200規格：南亞和臻鼎為亮點」為標題，比較 [[GB200]] NVL72(72GPU)、[[GB300]] NVL72(72GPU) 與 [[VR200]] NVL144(72GPU) 的時間、製程、功耗、載板、CCL 材料、上游材料、ComputeTray、NVSwitch Tray、CPX 與 Midplane。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）與 [[HSD PCB image 1]] 高度重疊，同樣以「GB200/GB300/VR200規格：南亞和臻鼎為亮點」為標題，右上角標示「資料來源：產業調研、福邦投顧整理」。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[GB200]] / [[GB300]] ComputeTray 為 **5層22L**，[[VR200]] ComputeTray 為 **6層26L**；[[GB200]] / [[GB300]] NVSwitch Tray 為 **24L HLC**，[[VR200]] NVSwitch Tray 為 **32L (N+N HLC)**，[[VR200]] Midplane 為 **44L(N+N HLC)**。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[GB300]] 使用 **HVLP3銅箔**，[[VR200]] 使用 **HVLP4銅箔**，並將 [[VR200]] 交換板 CCL 材料列為 **M8(LDK2+HVLP4) 生益科技/台光電/南亞(交期最快)**。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[VR200]] ComputeTray PCB 供應商 / 占比為 **欣興35~40% > 臻鼎25~30% = 勝宏25~30%**。\n\n⚠️ [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）說 [[VR200]] 交換板 CCL 材料供應為「生益科技/台光電/南亞(交期最快)」，但既有頁面 [[AI 伺服器 PCB 供應鏈升級]] 說 [[HSD PCB image 1]] 的對應欄位為「生益科技/台光電/南亞(交期最長)」。判斷：最快 / 最長方向相反，影響對 [[南亞]] 供應鏈定位的解讀；在回看原圖前不得擇一。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+             },
+             "score": 7.489254
+            },
+            {
+             "text": "AI 資料中心高壓直流供電 › 來源中的說法\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）稱，隨著 GPU 功耗上升與每機架 GPU 叢集規模擴大，單機架功率需求將很快突破 `1 MW` 或更高。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）稱，當單機架功率達 MW 等級，系統架構必須從既有 `48 V` 生態系轉向高壓直流供電。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）預計，從 `48 V` 匯流排架構轉向 `800 V` 或 [[±400Vdc]] 架構，會在單機架功率達 `200 kW` 至 `250 kW` 時出現。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）指出，在 `48 V` 匯流排架構下，單機架功率 `200 kW` 至 `250 kW` 對應母排電流約 `4100 A` 至 `5200 A`。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）提出高壓直流架構示例：採用 `800 V DC` 的集中發電與高壓直流配電，並在伺服器主板進行本地功率轉換。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）稱，未來伺服器主板將直接運行於 `800 V` 或 [[±400Vdc]] 電壓。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）指出，高壓直流伺服器主板需要在插入高壓直流匯流排前執行預充電，並在伺服器主板從 IT 機架移除時確保開關及時放電，以避免危險電壓。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）指出，每個伺服器主板需部署 [[eFuse]] 功能，以便故障時快速切斷電源。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）展示基於 [[XDP]] 熱插拔控制器 `XDP70x` 與 [[CoolSiC]] [[JFET]] 的 [[eFuse]] 與 hot-swap 控制方案；實驗條件為輸入電容 `300 µF`，可將伺服器主板從 `0 V` 預充電至 `800 V`。\n- [[SST(Solid State Transformer ) image 1]]（來源未標示日期；取得於 2026-09-04）圖中 [[Data Center]] 應用旁標示 **800 VDC**，其 AC-DC 方塊標示為 **AC-DC (SST)**。\n- [[SST(Solid State Transformer ) image 1]]（來源未標示日期；取得於 2026-09-04）圖上方標示 **34.5 kVAc or 13.8 kVAc 3-Ph Grid**，表示該概念圖把 [[SST]] 放在中高壓三相電網與 DC 應用介面之間。\n- [[SST(Solid State Transformer ) image 1]]（來源未標示日期；取得於 2026-09-04）圖說稱：**SST technology fueled by AI data centers set to modernize grid-infrastructure across battery energy storage systems (BESS), EV megawatt charging systems (MCS), and renewable energy**；這只能作為未標示日期圖上的敘事，不能視為已導入或市場共識。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AI 資料中心高壓直流供電.md"
+             },
+             "score": 1.163481
+            },
+            {
+             "text": "Direct Attached Copper Cables › 來源中的說法\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）左側主圖編號 4 標示 DIrect Attached Copper Cables，右側標題為 Direct Attached Copper Cables。\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）描述其為 112G and 224G high-speed I/O PCIe Gen 5/6 passive and active cables designed and manufactured for data centers、networking、HPC、telecom、server and storage solutions。\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）列出 [[OSFP Cables]]、[[OSFP-XD Copper Cables]]、[[QSFP DD Cables]]、[[CDFP Cables]]。\n- [[HSD Cable test image 2]]（來源未標示日期；取得於 2026-09-04）小標為 200G / 400G / 800G / 1.6T。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Direct Attached Copper Cables.md"
+             },
+             "score": 1.166449
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "technical_knowledge",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 11,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S ZNA.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 5,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 15,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMP180.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 9,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/AI 資料中心高壓直流供電.md",
+             "raw_refs": [
+              "raw/Market/BBU image 2.md",
+              "raw/Market/HVDC image 3.md",
+              "raw/Market/HVDC image.md",
+              "raw/Market/SST(Solid State Transformer ) image 1.md",
+              "raw/Market/infineon-powering-the-future-of-ai-whitepaper-cn 1.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/CMX500 Callbox.md",
+             "raw_refs": [
+              "raw/Market/OneNote/CMX500_Callbox.md",
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md",
+             "raw_refs": [
+              "raw/Market/AI Server PCB test image 4.md",
+              "raw/Market/HSD PCB image 1.md",
+              "raw/Market/HSD PCB image 11.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/Direct Attached Copper Cables.md",
+             "raw_refs": [
+              "raw/Market/HSD Cable test image 2.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

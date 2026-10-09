@@ -26,10 +26,14 @@ Knowledge retrieval was changed after the first comparison.
 - Post-unification benchmarks: coding_v1 fix-run-016 20/20, lab fix-012 13
   pass (X02/X03 fail), knowledge sample-004 (grader 1.3).
 
-Next actions, owner decides which:
-1. Knowledge Skill guidance to stop stretching related passages into
-   conclusions (Skill-only change), then re-run core questions.
-2. Model-driven multi-round retrieval (architecture change; ask first).
+- 2026-10-10: Knowledge Skill 1.8.0 installed (1.7.0 in `disabled/`), only
+  `answer_guidance` changed. `runs/core-003`: on the 22 answerable questions
+  PASS 18, FAIL 2, coverage 0.28; see `runs/core-003/review.zh-TW.md`.
+
+Next action: the owner said to do multi-round retrieval if the guidance did
+not help. The guidance fixed overreach but not coverage, so the owner was asked
+whether to start model-driven multi-round retrieval (a Harness architecture
+change).
 
 ## Repository and runtime state
 

@@ -1,0 +1,65 @@
+{
+ "id": "Q1091",
+ "grader": "1.2",
+ "coverage": 0.188,
+ "points": [
+  {
+   "n": 1,
+   "point": "Vault 沒有提供 Signal Integrity 的定義，只保存來源明示的測試區塊與儀器類型對應；因此「signal-integrity-to-oscilloscope」這個具名概念在 Vault 中無定義依據。",
+   "verified": true,
+   "label": "partial",
+   "why": "states no validated definition for the named term, but omits the supported test-block/instrument mapping basis"
+  },
+  {
+   "n": 2,
+   "point": "Slide 11 將 Interface Test 對應到 scopes、BERTs、AWGs、switch matrices，這是 Vault 中 SI 與示波器之間最直接的對應。",
+   "verified": true,
+   "label": "missing",
+   "why": "does not state Interface Test maps to scopes, BERTs, AWGs, switch matrices"
+  },
+  {
+   "n": 3,
+   "point": "Power Distribution Network 測試區塊同時對應 scopes 與 network analyzers，意即 PDN / 電源完整性量測需在示波器與網路分析儀之間做選擇。",
+   "verified": true,
+   "label": "missing",
+   "why": "does not state PDN maps to both scopes and network analyzers"
+  },
+  {
+   "n": 4,
+   "point": "Signal integrity flow of high speed PCB/PCBA 的項目為 IL / Xtalk / Eye diagram、TDR Impedance、Stackup Planner、TL Calculator。",
+   "verified": true,
+   "label": "missing",
+   "why": "does not list IL/Xtalk/Eye diagram, TDR Impedance, Stackup Planner, TL Calculator as the flow items"
+  },
+  {
+   "n": 5,
+   "point": "Signal Integrity modeling/testing 流程階段對應 IL、DK/DF、roughness、impedance，而非示波器量測項目。",
+   "verified": true,
+   "label": "missing",
+   "why": "does not state modeling/testing corresponds to IL, DK/DF, roughness, impedance rather than scope measurements"
+  },
+  {
+   "n": 6,
+   "point": "AI server 對照表把示波器系列 MXO 列在 power rail、multiphase DC、PI 與 motor driver analysis，顯示示波器在 PI 相關量測的產品對應。",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention MXO mapping to power rail, multiphase DC, PI, motor driver analysis"
+  },
+  {
+   "n": 7,
+   "point": "Vault 明確限制：不可把這些儀器類型列名推論為 R&S 具備所有方案或轉換成正式 product configuration。",
+   "verified": true,
+   "label": "partial",
+   "why": "says evidence is insufficient for product/option/spec decisions, but not the explicit no-formal-product-configuration limitation"
+  },
+  {
+   "n": 8,
+   "point": "Slide 11 的儀器對應未提供型號、頻寬、資料率或測試標準，無法支撐具體產品選型決策。",
+   "verified": true,
+   "label": "partial",
+   "why": "says no product/option/spec decisions were identified, but omits missing model, bandwidth, data-rate, and standards details"
+  }
+ ],
+ "contradicted": 0,
+ "invented": []
+}
