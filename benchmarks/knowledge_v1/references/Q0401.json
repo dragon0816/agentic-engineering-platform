@@ -1,0 +1,70 @@
+{
+  "id": "Q0401",
+  "question": "What are the most important signaling test capabilities for applications in Automotive?",
+  "tags": {
+    "market": "Automotive",
+    "product": "Signaling / Non-signaling Tester",
+    "type": "basic",
+    "difficulty": "L1"
+  },
+  "answer": "In this Vault, the automotive signaling-test material is centred on vehicle emergency call (eCall) testing on the R&S CMX500 radio communication tester, so the capabilities it documents as most important are: (1) emulating a Public Safety Answering Point (PSAP) and verifying NG eCall end-to-end including voice and data transmission against EN 17240:2024 (verified with Qualcomm's Snapdragon Auto 5G Modem-RF using CMX500 + CMX-KA098); (2) validating that an In-Vehicle System can trigger calls, transmit the minimum set of data (MSD), maintain GNSS positioning and deliver intelligible voice quality across VoNR, VoLTE and circuit-switched fallback, i.e. hybrid eCall per EN 18052:2025 (CMX-KA099); (3) robustness under handovers and degraded radio conditions, with simulation of real-world mobile network conditions and emulation of various network scenarios, used for functional tests, protocol conformity tests and type-approval of IVS; (4) IMS/NAS-level signaling procedures from the NGeCall capability lists — IMS eCall session establishment with the sos:ecall URNs, MSD transfer/update, PSAP request and callback, eCall-only mode, T3444/T3445 and SRVCC handover to the CS domain; (5) audio-path capabilities — CMX audio codec enabler, external media endpoint audio (CMX-ZG180) and CMX-KA401 for TS17240 in-band modem over IP tests, plus an ITU-P1140 audio option with HEAD acoustics labCORE; and (6) a companion GNSS capability (R&S SMBV100B with the SMBV-K361 eCall test suite) for eCall GNSS receiver/performance tests. The Vault also records limits: many test cases are not fully automatable because they need HMI interaction, ignition OFF control, AT commands, prepared test USIMs, crash simulation or in-band modem over IP support, and some cases are marked partly available or not available.",
+  "sufficient": true,
+  "missing": "The Vault has no dedicated 'automotive signaling test capabilities' overview document; the evidence is confined to eCall / NG eCall / hybrid eCall (CMX500 + CMX-KA09x) plus eCall GNSS. There is no automotive-specific signaling-test content for C-V2X / V2X (only non-signaling ARB waveform libraries such as CMX-KW570 / KW670 are listed for the CMX500 callbox), nor for TCU/telematics throughput, carrier aggregation, antenna/OTA or infotainment signaling. Test case IDs, pass/fail criteria, software versions and certification report details are explicitly not provided by the sources.",
+  "key_points": [
+    {
+      "point": "The documented automotive use of the CMX500 signaling tester is functional tests, protocol conformity tests and type-approval of In-Vehicle Systems implementing hybrid eCall and NG eCall",
+      "source": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+      "quote": "We use the solution for functional tests and protocol conformity tests as well as for the type-approval of In-Vehicle Systems (IVS)",
+      "verified": true
+    },
+    {
+      "point": "Core validation items for a vehicle eCall implementation are call triggering, MSD transmission, GNSS positioning and intelligible voice quality across VoNR, VoLTE and circuit-switched fallback",
+      "source": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+      "quote": "trigger calls, transmit the minimum set of data (MSD), maintain GNSS positioning, and deliver intelligible voice quality",
+      "verified": true
+    },
+    {
+      "point": "Signaling tests must also prove robustness during handovers and under degraded radio conditions, which the test environment provides by simulating real-world mobile network conditions and emulating various network scenarios",
+      "source": "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md",
+      "quote": "Tests must demonstrate that a system remains robust during handovers and under degraded radio conditions",
+      "verified": true
+    },
+    {
+      "point": "PSAP emulation with voice and data transmission on both 4G and 5G is the capability used to validate NG eCall compliance with EN 17240:2024 (CMX500 mobile radio tester, CMX-KA098 option)",
+      "source": "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+      "quote": "a comprehensive testing solution for NG eCall including voice and data transmission. This rigorous test, which was simulating a Public Safety Answering Point (PSAP)",
+      "verified": true
+    },
+    {
+      "point": "The NGeCall capability lists name the required signaling procedures: eCall-only mode, timers T3444/T3445 and SRVCC handover to the CS domain / UTRAN / GERAN, alongside IMS eCall session establishment, MSD transfer/update and PSAP callback",
+      "source": "wiki/concepts/NGeCall over LTE.md",
+      "quote": "eCall only mode、T3444 / T3445、SRVCC handover to CS domain / UTRAN / GERAN。",
+      "verified": true
+    },
+    {
+      "point": "Audio-path capability is part of the configuration: CMX audio enabler (codecs), external media endpoint audio (CMX-ZG180) and CMX-KA401 for TS17240 in-band modem over IP tests",
+      "source": "wiki/concepts/CMX500 NGeCall configuration.md",
+      "quote": "CMX Audio Test Test Feature Set 2 | mandatory；Audio player/recorder with ZG180A；mandatory for TS17240 In-Band Modem over IP Tests",
+      "verified": true
+    },
+    {
+      "point": "GNSS receiver/performance testing for eCall modules is a separate capability provided by the R&S SMBV100B with the SMBV-K361 eCall test suite",
+      "source": "wiki/concepts/eCall GNSS Testing configuration.md",
+      "quote": "eCall Test Suite GNSS Performance tests for eCall modules | mandatory；for GNSS receiver tests",
+      "verified": true
+    },
+    {
+      "point": "Vault records that not all eCall signaling test cases can be automated by the test software alone — HMI interaction, ignition OFF control, AT commands, prepared test USIM, crash simulation or in-band modem over IP support may be needed",
+      "source": "wiki/concepts/NGeCall over LTE.md",
+      "quote": "需要 HMI interaction、engine / ignition OFF 控制、AT command、IVS debugging tool、Prepared TestUSIM、handset、crash simulation、in-band modem over IP support",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T09:26:15+00:00",
+  "seconds": 148.2,
+  "num_turns": 20,
+  "cost_usd_estimate": 1.210821,
+  "error": null
+}

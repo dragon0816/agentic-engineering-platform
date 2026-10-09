@@ -1,0 +1,70 @@
+{
+  "id": "Q0489",
+  "question": "What evidence is required to compare our Oscilloscope solution with a competitor for Automotive without making unsupported claims?",
+  "tags": {
+    "market": "Automotive",
+    "product": "Oscilloscope",
+    "type": "competitive",
+    "difficulty": "L4"
+  },
+  "answer": "The Vault contains no oscilloscope product pages (no R&S RTO/RTP/MXO entity notes), no oscilloscope battle card, and no automotive oscilloscope competitive comparison — oscilloscopes appear only as unresolved [[Oscilloscope]] mentions in solution-mapping tables that explicitly note no model or test item is given. What the Vault does document is a transferable evidence standard, set by the three CMX500 battle-card syntheses: a sales battle card is \"sales positioning\", not binding technical specifications, so every R&S number must be traced to the official specifications / features document with its document number and version. Claims about the competitor coming from a single R&S internal battle card are not usable in customer documents until the competitor's own official datasheet/brochure and independent third-party evidence are obtained. Superlatives — \"only platform\", \"first\", \"leadership\", \"fewer boxes\", \"lower TCO\" — are sales language that must either be dropped or backed by a formal datasheet, features document, conformance report or configuration tool; TCO claims specifically need a calculation or empirical data, which the sources do not provide. PR and demonstration material counts only as demonstration-level evidence and must carry test conditions (bandwidth, throughput, MCS index, software version, measurement uncertainty) before it is used as a spec. For the Automotive dimension the Vault's only comparable precedent is NG eCall: a compliance claim needs the named standard and version (EN 17240:2024), test case IDs, test conditions, setup and software versions and pass/fail details, and must not upgrade \"verification\" into formal third-party \"certification\". Applying that standard to an Oscilloscope-vs-competitor Automotive comparison is not possible from this Vault, because none of the required product-level or competitor-level documents exist here.",
+  "sufficient": false,
+  "missing": "The Vault has no R&S oscilloscope product pages (no RTO/RTP/MXO entity notes, datasheet or specifications document), no oscilloscope sales battle card, no named oscilloscope competitor pages, and no automotive oscilloscope test-requirement or standards content (e.g. automotive Ethernet/CAN/SerDes/power-rail test specs). It therefore lacks the R&S-side official specification numbers, the competitor-side official datasheets, any third-party or conformance reports, automotive standard/test-case references, and any TCO calculation that its own evidence rules would demand for such a comparison. Only the generic competitive-claim methodology (from the CMX500 vs Keysight/Anritsu/amarisoft syntheses) and the NG eCall automotive verification precedent are available.",
+  "key_points": [
+    {
+      "point": "A sales battle card is sales positioning, not binding technical specifications — R&S figures must be traced to the official specs/features documents instead",
+      "source": "wiki/syntheses/R&S CMX500 vs Keysight.md",
+      "quote": "其性質是 sales positioning，不是 binding technical specifications。",
+      "verified": true
+    },
+    {
+      "point": "Superlative/positioning statements cannot be used as verifiable specifications; they must be checked back against a formal datasheet, features document, conformance report or configuration tool",
+      "source": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md",
+      "quote": "不能當作可驗證規格，需回查正式 datasheet、features document、conformance report 或配置工具。",
+      "verified": true
+    },
+    {
+      "point": "Competitor claims resting on a single R&S internal battle card require the competitor's own official data plus third-party evidence before use in customer-facing documents",
+      "source": "wiki/syntheses/R&S CMX500 vs Keysight.md",
+      "quote": "若用於客戶文件，應另查 Keysight 官方資料與第三方證據。",
+      "verified": true
+    },
+    {
+      "point": "Phrases such as \"only platform\", \"industry-leading\", \"widest\" and \"lower TCO\" are sales language and must not be treated as verifiable technical specifications",
+      "source": "wiki/syntheses/R&S CMX500 vs Anritsu.md",
+      "quote": "Source 中的 only platform、industry-leading、widest frequency range、lower TCO 等語句是 sales language，不應當作可驗證技術規格。",
+      "verified": true
+    },
+    {
+      "point": "Cost/TCO advantage claims need a calculation or empirical data, which the battle-card sources do not supply",
+      "source": "wiki/syntheses/R&S CMX500 vs Keysight.md",
+      "quote": "TCO 未有算式或實證資料",
+      "verified": true
+    },
+    {
+      "point": "Press-release or demo evidence counts only as demonstration-level evidence unless test conditions, software version and measurement uncertainty are given",
+      "source": "wiki/concepts/FR3 測試與 RFU18 battle card 主張.md",
+      "quote": "未提供 carrier bandwidth、throughput、MCS index、software version、RFU18 detailed specs 或 measurement uncertainty；只能作為 PR / demonstration-level evidence。",
+      "verified": true
+    },
+    {
+      "point": "For an automotive compliance claim the Vault requires the standard version, test case IDs, test conditions, software versions and pass/fail details, and keeps \"verification\" distinct from formal certification",
+      "source": "wiki/concepts/NG eCall EN 17240 2024 verification.md",
+      "quote": "來源未列 test case IDs、test conditions、network parameters、IMS setup、GNSS setup、software versions 或 pass/fail details。",
+      "verified": true
+    },
+    {
+      "point": "The Vault's oscilloscope references are generic solution-mapping entries with no model or test item recorded, so no oscilloscope spec baseline exists for a comparison",
+      "source": "wiki/concepts/台灣衛星產業鏈 R&S solution mapping.md",
+      "quote": "未標示示波器型號或測項。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T09:31:39+00:00",
+  "seconds": 172.0,
+  "num_turns": 24,
+  "cost_usd_estimate": 1.2669434999999998,
+  "error": null
+}

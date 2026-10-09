@@ -1,0 +1,69 @@
+{
+  "id": "Q1091",
+  "question": "What is signal-integrity-to-oscilloscope, and which product-related measurement decisions depend on understanding it?",
+  "tags": {
+    "technical": "Cross-Knowledge Reasoning",
+    "topic": "signal-integrity-to-oscilloscope",
+    "product_related": "true"
+  },
+  "answer": "Vault 中並不存在名為「signal-integrity-to-oscilloscope」的節點、關係或檔案；也沒有獨立的 [[Signal Integrity]] 或 [[Oscilloscope]] 筆記（兩者只以 wikilink 形式被引用，沒有對應檔案）。Vault 對此議題唯一能支撐的，是來源層級的「SI/PI 測試區塊 → 儀器類型」對應：`wiki/concepts/SerDes 與 SI PI 測試概覽.md` 依 0 Digital Test - What are SIPI and Serdes 的 Slide 11，把 Interface Test 對應到 Scopes、BERTs、AWGs、Switch Matrices，並把 Power Distribution Network 對應到 Scopes 與 Network Analyzers；Slide 20 的 Signal integrity flow of high speed PCB/PCBA 則列出 IL / Xtalk / Eye diagram、TDR Impedance 等項目。產品端的決策線索包含：高速介面 / eye diagram / jitter 類量測落在 scope 類儀器，PDN 與電源完整性量測同時牽涉 scope 與 network analyzer（AI server 對照表把 [[MXO]] 列在 power rail、multiphase DC、PI 與 motor driver analysis），而材料 / stackup / IL / DK-DF / impedance 類 SI modelling 則對應 VNA、probe、de-embedding 工具而非 scope。該筆記同時明確聲明它不提供 Signal Integrity 的標準定義，也不把儀器類型轉換成正式 product configuration，且未提供型號、頻寬、資料率或測試標準。因此無法從 Vault 回答「signal-integrity-to-oscilloscope 是什麼」這個具名概念。",
+  "sufficient": false,
+  "missing": "Vault 中完全沒有名為「signal-integrity-to-oscilloscope」的節點、關係 ID 或檔案，也沒有獨立的 [[Signal Integrity]] 與 [[Oscilloscope]] 筆記（僅為未建檔的 wikilink）。缺少：該術語的定義來源；示波器頻寬 / 取樣率 / jitter noise floor 等規格與 SI 量測需求的量化對應；具體 R&S 示波器型號（如 MXO、RTP、RTO 的正式型號與 option）與 SI 測試項目（eye diagram、jitter、TDR、PDN impedance）的正式配置對照；以及任何 pass/fail 準則、測試標準版本與 fixture / de-embedding 條件。",
+  "key_points": [
+    {
+      "point": "Vault 沒有提供 Signal Integrity 的定義，只保存來源明示的測試區塊與儀器類型對應；因此「signal-integrity-to-oscilloscope」這個具名概念在 Vault 中無定義依據。",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "本頁不提供 [[Signal Integrity]]、[[Power Integrity]] 或 [[SerDes]] 的標準定義；只保存來源明示的測試區塊與儀器類型。",
+      "verified": true
+    },
+    {
+      "point": "Slide 11 將 Interface Test 對應到 scopes、BERTs、AWGs、switch matrices，這是 Vault 中 SI 與示波器之間最直接的對應。",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]]",
+      "verified": true
+    },
+    {
+      "point": "Power Distribution Network 測試區塊同時對應 scopes 與 network analyzers，意即 PDN / 電源完整性量測需在示波器與網路分析儀之間做選擇。",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]]",
+      "verified": true
+    },
+    {
+      "point": "Signal integrity flow of high speed PCB/PCBA 的項目為 IL / Xtalk / Eye diagram、TDR Impedance、Stackup Planner、TL Calculator。",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]",
+      "verified": true
+    },
+    {
+      "point": "Signal Integrity modeling/testing 流程階段對應 IL、DK/DF、roughness、impedance，而非示波器量測項目。",
+      "source": "wiki/concepts/R&S PCB test solutions.md",
+      "quote": "| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]]",
+      "verified": true
+    },
+    {
+      "point": "AI server 對照表把示波器系列 MXO 列在 power rail、multiphase DC、PI 與 motor driver analysis，顯示示波器在 PI 相關量測的產品對應。",
+      "source": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+      "quote": "- [[MXO]] 被列於 power rail、multiphase DC、PI，以及 motor driver analysis。",
+      "verified": true
+    },
+    {
+      "point": "Vault 明確限制：不可把這些儀器類型列名推論為 R&S 具備所有方案或轉換成正式 product configuration。",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "本頁不推論 R&S 具備所有列名儀器或方案，也不把儀器類型轉換成正式 product configuration。",
+      "verified": true
+    },
+    {
+      "point": "Slide 11 的儀器對應未提供型號、頻寬、資料率或測試標準，無法支撐具體產品選型決策。",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "未提供型號、頻寬、資料率或測試標準",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T10:30:24+00:00",
+  "seconds": 122.8,
+  "num_turns": 18,
+  "cost_usd_estimate": 0.898828,
+  "error": null
+}

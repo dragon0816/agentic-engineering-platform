@@ -1,0 +1,70 @@
+{
+  "id": "Q0131",
+  "question": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+  "tags": {
+    "market": "Wireless Communication",
+    "product": "Signal Generator / Signal Analyzer",
+    "type": "cross_domain",
+    "difficulty": "L4"
+  },
+  "answer": "In the Vault, Wi-Fi 7/8 changes the demands on generators and analyzers along four axes. (1) Bandwidth: Wi-Fi 7 / IEEE 802.11be brings 320 MHz channel bandwidth (with up to 16 spatial streams and 4096 QAM), so test instruments need matching wide analysis/modulation bandwidth — the CMX500 WLAN measurement bandwidth list tops out at 320 MHz, the FSWX needs discrete analysis-bandwidth options (320 MHz / 600 MHz and up), and the CMP180 is positioned with bandwidths up to 500 MHz, demonstrating a 480 MHz WLAN waveform in loopback as a possible (not standardized) Wi-Fi 8 candidate. (2) Frequency coverage: Wi-Fi 8 retains Wi-Fi 7 core PHY parameters including supported frequencies up to 7.125 GHz and the 6 GHz band with out-of-band discovery, which is why the CMP180 is described as covering non-cellular technologies up to 8 GHz. (3) Channel count: because MLO is a Wi-Fi 7 key feature, a test environment providing multiple RF chains becomes important — the CMP180 integrates two analyzers, two generators and two sets of eight RF ports for 2x2 MIMO in one box, and two instruments can be combined for four analyzers and generators to test 4x4 MIMO access points. (4) New measurement types: Wi-Fi 8 / IEEE 802.11bn adds distributed resource units (dRU) measurements, used to verify uplink transmit power boost and reliability improvement against PSD limits, and unequal modulation (UEQM) analysis, which checks whether the device adapts modulation per MIMO link according to the specified MCS combinations. Practically this appears in the Vault as per-standard option stacking: WLAN generator ARB licenses (CMX-KW353 for 802.11bn requires KW352+KW351+KW350), WLAN TX measurement options (CMX-KM353 for 802.11bn requires KM352/KM351), FSWX analyzer options KM412 (802.11be) and KM414 (802.11bn) on top of KM410, and generator-side support such as SMM100A's 2 GHz internal RF modulation bandwidth positioned for \"future WLAN requirements\" with IEEE 802.11be EVM (SMM-K147).",
+  "sufficient": true,
+  "missing": "The Vault contains no document that explicitly derives numeric instrument requirements from Wi-Fi 7/8 (e.g. required residual EVM / dynamic range for 4096QAM, phase-coherence or synchronization specs for MLO multi-channel setups, or required analyzer bandwidth margin above 320/480 MHz). It also lacks an 802.11bn/Wi-Fi 8 generation option for SMW200A/SMM100A (only 802.11be is listed), any IEEE 802.11bn draft version or ratification date, and complete dRU/UEQM test parameters (MCS combinations, PSD limit values, channel models).",
+  "key_points": [
+    {
+      "point": "Wi-Fi 7 / IEEE 802.11be raises PHY demands to 320 MHz channel bandwidth, up to 16 spatial streams and 4096 QAM, and MLO makes a multiple-RF-chain test environment essential",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "[[MLO]] 是 [[Wi-Fi 7]] key feature，因此提供 multiple RF chains 的 test environment 很重要。",
+      "verified": true
+    },
+    {
+      "point": "Wi-Fi 8 retains Wi-Fi 7 core PHY parameters — frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz, 4096QAM, MLO — so frequency/bandwidth coverage requirements carry over",
+      "source": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+      "quote": "core PHY parameters：supported frequencies up to 7.125 GHz、channel bandwidths up to 320 MHz、4096QAM modulation、[[MLO]]。",
+      "verified": true
+    },
+    {
+      "point": "Wi-Fi 8 introduces new measurement types: dRU measurements (verifying uplink transmit power boost / reliability against PSD limits) and UEQM analysis (per-MIMO-link modulation adaptation vs specified MCS combinations)",
+      "source": "wiki/concepts/Wi-Fi 8.md",
+      "quote": "[[unequal modulation]]（UEQM）：在 difficult reception scenarios 中允許 each [[MIMO]] link 使用 different modulation scheme",
+      "verified": true
+    },
+    {
+      "point": "Multi-channel hardware is required: CMP180 integrates two analyzers, two generators and two sets of eight RF ports for 2x2 MIMO in one box, and two units scale to four analyzers/generators for 4x4 MIMO APs",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。",
+      "verified": true
+    },
+    {
+      "point": "Production-side instrument capability is stated as non-cellular coverage up to 8 GHz with bandwidths up to 500 MHz, and a 480 MHz WLAN waveform verified in loopback as a potential (not yet standardized) Wi-Fi 8 candidate",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。",
+      "verified": true
+    },
+    {
+      "point": "Signaling-tester measurement bandwidth is enumerated per standard and currently reaches 320 MHz for WLAN",
+      "source": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md",
+      "quote": "WLAN measurement bandwidth 依 standard 支援 5 MHz、10 MHz、20 MHz、40 MHz、80 MHz、160 MHz、320 MHz。",
+      "verified": true
+    },
+    {
+      "point": "On the signal analyzer, each new WLAN generation needs its own measurement application option plus sufficient analysis bandwidth options (e.g. FSWX KM412 for 802.11be, KM414 for 802.11bn, both on top of KM410; B320 for 320 MHz analysis bandwidth)",
+      "source": "wiki/entities/R&S FSWX.md",
+      "quote": "| R&S FSW3-KM414 | WLAN IEEE 802.11bn measurement | 1349.2287.02 | 需要 R&S FSW3-KM410 |",
+      "verified": true
+    },
+    {
+      "point": "On the signal generator, wide internal RF modulation bandwidth and 802.11be waveform/EVM options are the stated enablers for future WLAN requirements",
+      "source": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md",
+      "quote": "IEEE 802.11be EVM with `R&S®SMM-K147`",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T09:00:58+00:00",
+  "seconds": 137.7,
+  "num_turns": 20,
+  "cost_usd_estimate": 1.2415425,
+  "error": null
+}

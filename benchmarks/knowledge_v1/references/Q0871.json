@@ -1,0 +1,70 @@
+{
+  "id": "Q0871",
+  "question": "Map the chain from a Semiconductor market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+  "tags": {
+    "market": "Semiconductor",
+    "product": "Oscilloscope",
+    "type": "solution_mapping",
+    "difficulty": "L3"
+  },
+  "answer": "The Vault supports the chain only qualitatively, in two traceable variants. (1) High-speed digital / SerDes: the R&S high-speed-digital source (0 Digital Test – What are SIPI and Serdes, cover date 2026.3.4) frames the semiconductor-side requirement as the validation challenges of high-speed electrical interfaces (Tx/Rx, channel, Tx/Rx packages, PCBs, connectors); the measurable parameters named are eye diagram, IL (insertion loss), Xtalk (crosstalk) and TDR impedance in the \"Signal integrity flow of high speed PCB/PCBA\", plus the Power Distribution Network block; and the required instrument capability is scopes — the concept page maps \"Interface Test\" and \"Power Distribution Network\" to [[Oscilloscope]] (with BERTs/AWGs/switch matrices and network analyzers respectively). (2) Power-semiconductor / PMIC: the market driver recorded is the 800V high-voltage architecture upgrade and the AI-server claim that \"Blackwell platform power consumption doubles, driving high-density power demand\"; the measurable parameters are power rail, multiphase DC and power integrity (with PDN Target Z assigned to R&S ZNL); and the mapped instrument is MXO for power rail / multiphase DC / PI. Both chains stop at instrument *type*: the Vault explicitly records that no model, bandwidth, data rate or test standard is given for the scopes, no PDN impedance target value or method, and no option/firmware/fixture/calibration conditions for MXO. There is also no [[Oscilloscope]] (or MXO/RTO) entity page in the Vault, so no oscilloscope specification can be cited — only the functional role. Note that for the explicitly semiconductor rows of the AI-server mapping (IC/IP, test interface, high-speed transmission IC) the Vault maps VNA and FSWP, not an oscilloscope.",
+  "sufficient": true,
+  "missing": "The Vault supports only a qualitative chain. It lacks: (a) any numeric target or pass/fail threshold for the measurable parameters (no eye-diagram mask, IL/Xtalk limits, PDN impedance target value or measurement method, no jitter mask); (b) any oscilloscope specification — there is no [[Oscilloscope]], MXO, RTO or RTP entity page, hence no bandwidth, sample rate, channel count, probe or option data from which a 'required capability' could be derived (the source pages state model/bandwidth/data-rate/standard are not provided); (c) an explicit statement that MXO/RTO are oscilloscopes (only R&S RTO6 is labelled 'Oscilloscope', and that is in an O-RU energy-saving context, not semiconductor); (d) a direct link from the explicitly semiconductor rows (IC/IP design, test interface/probe, high-speed transmission IC) to an oscilloscope — those rows map to ZNA/ZNA67EXT/FSWP instead.",
+  "key_points": [
+    {
+      "point": "The semiconductor-side market/engineering requirement is recorded as the validation challenge of high-speed electrical interfaces (Slide 11 of the R&S high-speed digital source, cover date 2026.3.4).",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰",
+      "verified": true
+    },
+    {
+      "point": "The measurable parameters in that chain are eye diagram, IL, Xtalk and TDR impedance, listed in the signal-integrity flow for high-speed PCB/PCBA.",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]",
+      "verified": true
+    },
+    {
+      "point": "The required instrument capability for Interface Test is scopes (oscilloscopes), alongside BERTs, AWGs and switch matrices; the Power Distribution Network block maps to scopes and network analyzers.",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "Interface Test 對應 scopes、BERTs、AWGs、switch matrices",
+      "verified": true
+    },
+    {
+      "point": "The Vault's own mapping table explicitly resolves the PDN \"Scopes\" entry to the Oscilloscope instrument class.",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]]",
+      "verified": true
+    },
+    {
+      "point": "The chain stops at instrument type: no model, bandwidth, data rate or test standard is provided for the scopes in the Interface Test row.",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "未提供型號、頻寬、資料率或測試標準",
+      "verified": true
+    },
+    {
+      "point": "A second chain runs from the power-semiconductor market driver (800V high-voltage architecture upgrade) on the semiconductor side.",
+      "source": "wiki/concepts/AI 伺服器 PMIC 與功率半導體轉型.md",
+      "quote": "[[Power IC - Power Management IC image 4]] 把功率半導體的驅動因素寫為 800V 高壓架構規格提升。",
+      "verified": true
+    },
+    {
+      "point": "In the AI-server ecosystem source the power requirement (Blackwell power doubling, high-density power demand) is mapped to the measurable parameters power rail / multiphase DC / PI and to the MXO instrument.",
+      "source": "wiki/sources/AISeverEcosystem.md",
+      "quote": "角色亮點稱 `Blackwell平台功耗翻倍，推升高密度電源需求`；[[R&S Solution]] 欄列 [[MXO]]：power rail / multiphase DC / PI",
+      "verified": true
+    },
+    {
+      "point": "The instrument-side link is a sales mapping without test conditions: no option, firmware, fixture or calibration conditions are given for MXO (nor for ZNL/FSWP/ZNA).",
+      "source": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+      "quote": "[[MXO]]、[[R&S FSWP]]、[[R&S ZNA]]、[[R&S ZNB]]、[[R&S ZNA67EXT]] 在此表中的對應未提供 option / firmware / fixture / calibration 條件",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T10:12:53+00:00",
+  "seconds": 267.5,
+  "num_turns": 40,
+  "cost_usd_estimate": 2.0896405,
+  "error": null
+}

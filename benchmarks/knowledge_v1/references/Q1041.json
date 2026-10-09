@@ -1,0 +1,69 @@
+{
+  "id": "Q1041",
+  "question": "What is eye diagram, and which product-related measurement decisions depend on understanding it?",
+  "tags": {
+    "technical": "High-Speed / Signal Integrity",
+    "topic": "eye diagram",
+    "product_related": "true"
+  },
+  "answer": "Vault 並沒有一頁定義 eye diagram 本身：`[[Eye diagram]]` 只以 wikilink 與流程項目的形式出現，沒有說明眼圖的構成、eye height/width、mask 或與 BER 的關係。可追溯的內容有三類。第一，它是 high-speed PCB/PCBA signal integrity 流程中的量測項目：[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 20「Signal integrity flow of high speed PCB/PCBA」把 IL / Xtalk / Eye diagram 與 TDR Impedance、Stackup Planner、TL Calculator 並列；Slide 21 的 R&S PCB test solutions 則把 Eye diagram 放在 **Material/Stackup selection** 階段，與 IL、DK/DF、roughness、impedance、Xtalk、TL modeling 同列，因此材料與疊層選擇決策會用到它。第二，它對應具體產品選配決策：[[R&S ZNA]] / [[R&S ZNA67EXT]] 的 R&S®ZNA-K20「Extended time domain analysis (including eye diagram)」需要先有 R&S®ZNA-K2（Time domain analysis, TDR），Order No. 1332.4746.02——要在 VNA 上看眼圖就必須同時買 K2 + K20。第三，它是 PCB layout 與 channel 設計的後果指標：[[snla426]]（June 2023）說 differential pair 兩線經過不同 fiberglass / epoxy 比例產生的 intra-pair skew 會顯著劣化 receiver 看到的 differential eye diagram，並造成 duty cycle distortion、AC common-mode voltage noise 與 EMI，這支撐了 fiber weave 旋轉 10°–35° 或 zig-zag routing 等 mitigation 決策。此外，多個連接器／線纜實體頁（如 [[Direct Attached Copper Cables]]、[[Celerity 224 Gb-s BGA Mezzanine Connectors]]、[[Amphenol CoolExpress Link]]）明確把「來源未提供 eye diagram」列為可追溯限制，即缺少眼圖資料時不得把 brochure 的 224G / PAM4 claim 當成實測或量產證據。Vault 未提供任何眼圖量測條件、pass/fail mask 或實際眼圖數據，所以證據不足以回答「什麼是眼圖」的定義層面問題。",
+  "sufficient": false,
+  "missing": "Vault 沒有任何一頁定義 eye diagram 本身（沒有眼圖的構成原理、eye height / eye width / eye opening、eye mask、jitter 與 BER 的關係、PAM4 三眼結構等說明），也沒有 Eye diagram 的獨立 concept 筆記——只有 wikilink 與流程清單式列名。同時缺少：眼圖量測的條件（data rate、pattern、equalization、取樣數）、pass/fail mask 或允收標準與其標準版本（來源明示「Slide 20 未標示 IL、Xtalk、Eye diagram... 的工具、供應商或規格」）、ZNA-K20 眼圖功能的實際規格與操作流程、以及任何實際眼圖量測數據或報告。若要完整回答定義層面的問題，需補入 eye diagram 的教學／應用筆記或 R&S ZNA-K20、示波器 / BERT 的眼圖量測手冊來源。",
+  "key_points": [
+    {
+      "point": "Vault 把 Eye diagram 列為 high-speed PCB/PCBA signal integrity flow 的量測項目之一（Slide 20），與 IL、Xtalk、TDR Impedance、Stackup Planner、TL Calculator 並列",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+      "verified": true
+    },
+    {
+      "point": "在 R&S PCB test solutions 流程中，Eye diagram 屬於 Material/Stackup selection 階段的量測 / 分析項目，因此材料與疊層選擇決策依賴它",
+      "source": "wiki/concepts/R&S PCB test solutions.md",
+      "quote": "**Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。",
+      "verified": true
+    },
+    {
+      "point": "產品選配決策：R&S®ZNA-K20 提供含 eye diagram 的 extended time domain analysis，且必須搭配 R&S®ZNA-K2（TDR）",
+      "source": "wiki/entities/R&S ZNA.md",
+      "quote": "| R&S®ZNA-K20 | Extended time domain analysis including eye diagram | requires R&S®ZNA-K2；Order No. 1332.4746.02 |",
+      "verified": true
+    },
+    {
+      "point": "同一選配關係在 ZNA67EXT 規格頁也成立，Requires 欄明示 R&S®ZNA-K2，Order No. 1332.4746.02",
+      "source": "wiki/entities/R&S ZNA67EXT.md",
+      "quote": "| R&S®ZNA-K20 | Extended time domain analysis (including eye diagram) | R&S®ZNA-K2 | 1332.4746.02 |",
+      "verified": true
+    },
+    {
+      "point": "PCB layout 決策依據：fiber weave 造成的 intra-pair skew 會顯著劣化 receiver 端看到的 differential eye diagram，並造成 duty cycle distortion、AC common-mode noise 與 EMI",
+      "source": "raw/Market/OneNote/snla426.md",
+      "quote": "significantly degrade the differential eye diagram as presented to the receiver, causing significant duty cycle",
+      "verified": true
+    },
+    {
+      "point": "同一結論已落地為 wiki 說法，並連到 intra-pair skew 與 PCIe Gen5 layout mitigation 脈絡",
+      "source": "wiki/sources/snla426.md",
+      "quote": "skew 會劣化 receiver 看到的 differential eye diagram，並造成 duty cycle distortion、AC common-mode voltage noise 與 EMI issues。",
+      "verified": true
+    },
+    {
+      "point": "缺少 eye diagram 資料被當作產品聲明的可追溯限制：沒有眼圖等實測資料時，不得把 brochure claim 寫成量產或實測證據",
+      "source": "wiki/entities/Direct Attached Copper Cables.md",
+      "quote": "來源未提供 cable length、gauge、BER、eye diagram、active / passive 分界、功耗、合規證書、order number 或客戶導入證據。",
+      "verified": true
+    },
+    {
+      "point": "連接器頁同樣以缺少 PAM4 eye diagram / BER / compliance 為由，拒絕把 224 Gb/s PAM4 寫成認證或出貨狀態",
+      "source": "wiki/entities/Celerity 224 Gb-s BGA Mezzanine Connectors.md",
+      "quote": "來源未標示正式內容日期、料號、BGA footprint、stack height 清單、測試條件、PAM4 eye diagram、BER、compliance 或 datasheet 版次。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T10:24:02+00:00",
+  "seconds": 92.3,
+  "num_turns": 9,
+  "cost_usd_estimate": 0.6392965,
+  "error": null
+}

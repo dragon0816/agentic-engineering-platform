@@ -1,0 +1,70 @@
+{
+  "id": "Q0121",
+  "question": "Map the chain from a Wireless Communication market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "tags": {
+    "market": "Wireless Communication",
+    "product": "Signal Generator / Signal Analyzer",
+    "type": "solution_mapping",
+    "difficulty": "L3"
+  },
+  "answer": "Vault 中可完整串起的鏈路是「市場需求 → 可量測參數 → SG/SA 必備能力」。市場端（Wireless Communication / 5G FWA）由 operator 的 Rel.16 需求驅動：mmWave 4CC/8CC→10CC、7.9 Gbps→10 Gbps、FR1+FR2 ENDC→DC/CA、MIMO enhancements（[[5G FWA CPE deployment and testing requirements]]）；基地台端對應的市場需求是 3GPP TS 38.141-1/-2 conformance，FR2 test model bandwidth 達 100/200/400 MHz。這些需求被轉成可量測參數：RF parametric 指標 Output power、EVM、OBW、receiver sensitivity level BLER、band permutations and CAs，以及 38.141-1 chapter 6 的 Modulation quality（6.5.3）、Occupied bandwidth（6.6.2）、ACLR（6.6.3）、OBUE/SEM、Transmitter intermodulation（6.7）與 chapter 7 的 Dynamic range、ACS、blocking、intermodulation。參數再落到儀器能力：量測側需 signal and spectrum analyzer（FSW / FSV3000 / FSVA3000）base unit 加 5G NR Downlink Measurements option（FSW-/FSV3-K144），在 5G NR mode 用 EVM/Frequency Err/Power 量 6.2/6.5.2/6.5.3，用 Channel Power ACLR 量 6.6.3，OBW 與 spurious 則用 spectrum analyzer mode；訊號產生側需 vector signal generator（SMW200A / SMBV100B）加 K144 產生 wanted signal 與 interferer，receiver 測試另需 2× baseband generator（B10/B9）、baseband main module（B13T/B13XT）、兩條 RF path 與 AWGN option K62。頻寬需求則直接決定硬體選項：分析儀要配 analysis bandwidth option（例如 FSV3-B400 400 MHz、FSV3-B1001 1 GHz、FSW-B2001 2 GHz），訊號產生器要用 wideband baseband（SMW-B13XT 搭 B9 + K525/K527）才有 up to 2 GHz RF modulation bandwidth。需注意 Vault 僅提供此對應關係與 option 清單，未提供各參數的完整 limits 或 pass/fail criteria。",
+  "sufficient": true,
+  "missing": "Vault 沒有單一筆記直接畫出「市場需求→參數→儀器能力」的完整鏈路；需由 FWA/BS conformance 概念頁與 GFM313/GFM314 應用筆記、產品 entity 頁拼接。另缺：各參數（EVM、ACLR、sensitivity）的數值 limits 與 pass/fail criteria、CA/寬頻情境下所需 analysis bandwidth 的明確計算規則，以及 GFM315/GFM324/GFM325 OTA 應用筆記正文尚未 ingest。",
+  "key_points": [
+    {
+      "point": "市場需求端：5G FWA operator 的 Rel.16 需求包含 mmWave 載波聚合由 4CC/8CC 擴到 10CC，以及吞吐由 7.9 Gbps 提升到 10 Gbps、FR1+FR2 ENDC 轉為 DC/CA",
+      "source": "wiki/concepts/5G FWA CPE deployment and testing requirements.md",
+      "quote": "- mmWave 4CC / 8CC → 10CC。\n- 7.9 Gbps → 10 Gbps。\n- FR1 + FR2 ENDC → FR1 + FR2 DC / CA。",
+      "verified": true
+    },
+    {
+      "point": "市場需求被轉成 RF parametric 可量測參數：Output power、EVM、OBW、receiver sensitivity level BLER、band permutations and CAs（多為 operator 要求）",
+      "source": "wiki/concepts/5G FWA CPE deployment and testing requirements.md",
+      "quote": "Output power、EVM、OBW、receiver sensitivity level BLER、band permutations and CAs",
+      "verified": true
+    },
+    {
+      "point": "這些測試需求對應到的儀器類別明確包含 VSA（signal analyzer）與 VSG（signal generator），具體型號為 R&S FSW 與 R&S SMW200A",
+      "source": "wiki/concepts/5G FWA CPE deployment and testing requirements.md",
+      "quote": "instruments 包含 Power Supply、Power Meters、Scopes、VSA、VSG、[[R&S RTO]]、[[R&S FSW]]、[[R&S SMW200A]]",
+      "verified": true
+    },
+    {
+      "point": "基地台側的可量測參數清單來自 3GPP TS 38.141-1 chapter 6，含 Modulation quality、Occupied bandwidth、ACLR 等 transmitted signal quality 與 unwanted emissions 項目",
+      "source": "wiki/concepts/5G NR Base Station Conformance Testing.md",
+      "quote": "- 6.6.3 Unwanted emissions - Adjacent Channel Leakage Power Ratio（ACLR）。",
+      "verified": true
+    },
+    {
+      "point": "參數 → signal analyzer 能力：ACLR（6.6.3）需要 FSW base unit 加 FSW-K144 5G NR option，並在 5G NR mode 以 Channel Power ACLR / EVM 量測功能執行；OBW 則用 spectrum analyzer mode 基本功能",
+      "source": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+      "quote": "| 6.6.3 ACLR | FSW Base Unit；FSW K144 | 來源未列 |",
+      "verified": true
+    },
+    {
+      "point": "參數 → signal generator 能力：receiver 類參數（Dynamic range、ACS、blocking、intermodulation）需要 SMW200A 配 2× baseband generator、baseband main module B13T/B13XT、兩條 RF path、AWGN option K62 與 2× K144",
+      "source": "wiki/sources/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+      "quote": "- 1× additive white Gaussian noise option：`R&S®SMW-K62`。",
+      "verified": true
+    },
+    {
+      "point": "頻寬需求（FR2 test model 100/200/400 MHz 與寬頻 CA）決定硬體能力門檻：signal generator 需 wideband baseband（SMW-B13XT）提供 up to 2 GHz RF modulation bandwidth",
+      "source": "wiki/entities/R&S SMW200A.md",
+      "quote": "Wideband baseband section；RF modulation bandwidth up to `2 GHz`",
+      "verified": true
+    },
+    {
+      "point": "對應地 signal analyzer 需加購 analysis bandwidth 硬體選項（例如 FSW-B2001 提供 2 GHz analysis bandwidth）才能涵蓋寬頻訊號分析",
+      "source": "wiki/entities/R&S FSW.md",
+      "quote": "| R&S FSW-B2001 | 2 GHz analysis bandwidth | 1331.6916.14 |",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T08:58:41+00:00",
+  "seconds": 187.5,
+  "num_turns": 24,
+  "cost_usd_estimate": 1.495873,
+  "error": null
+}

@@ -1,0 +1,69 @@
+{
+  "id": "Q1061",
+  "question": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+  "tags": {
+    "technical": "Instrument & Measurement Principles",
+    "topic": "non-signaling tester",
+    "product_related": "true"
+  },
+  "answer": "In the Vault, \"non-signaling\" describes an RF test mode in which the tester makes parametric RF measurements on the DUT without running a full protocol/signaling connection — RX/PER/BER work is done instead via loopback or direct-test-mode style paths (e.g. R&S CMP-KM365 for WLAN nonsignaling PER, CMP-KM310 for Bluetooth nonsignaling DTM RX, and loop-based receiver quality testing with the downlink generator). A \"non-signaling tester\" is therefore a radio communication tester optimized for that mode: the Vault positions R&S CMP180 as the production-phase non-signaling RF measurement tester, and CMP200 together with the CMPHEAD30/CMPHEAD50 remote radio heads as the 5G NR FR2 (mmWave) nonsignaling one-box test solution for R&D and high-volume manufacturing RF parametric testing. The stated reason for non-signaling mode in production is test time: in the WLAN device production phase all RF measurements are run non-signaling to save time. Product-related measurement decisions that depend on this distinction include: (1) choosing a signaling platform (CMX500 / CMW500) versus a non-signaling production/ATE platform (CMP180 / CMP200 / CMW100 K06) for a given test stage in the 5G device testing value chain, where \"Non-signaling RF\" is listed as its own test type; (2) qualification questions in competitive positioning — whether non-signaling ATE, multi-port production test, or factory-line non-signaling capability is required; (3) FR2 setup architecture on CMP200 (radiated mmWave vs mixed radiated/conducted IF, RRH used to shorten mmWave cabling for link budget); and (4) option/licence selection — non-signaling RX/PER options on CMP180, and on CMX500 the GPRF generator / IQ recorder / standalone TX measurement non-signaling use cases where the generator slide claims \"No License required\" but technology-specific ARB waveform replay needs the KWxxx licences. The Vault has no dedicated concept page defining the term itself; the usage above is what the product and solution pages support.",
+  "sufficient": true,
+  "missing": "The Vault has no dedicated concept/glossary page for \"non-signaling tester\" or \"Non-signaling RF\" (those wikilinks are unresolved stubs), so there is no single authoritative definition of the term, no explicit statement of how non-signaling differs from signaling at the protocol-stack level, and no quantified test-time or throughput comparison between signaling and non-signaling production test. The R&S CMP180 and R&S CMW100 K06 entity pages are also not shown to contain their own non-signaling positioning statements.",
+  "key_points": [
+    {
+      "point": "Non-signaling mode means RF measurements are executed without a signaling connection, and is used in production to save test time",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。",
+      "verified": true
+    },
+    {
+      "point": "R&S CMP180 is positioned as the production-phase non-signaling RF measurement tester, covering cellular and non-cellular technologies",
+      "source": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+      "quote": "[[R&S CMP180]] 被描述為 production phase 的 non-signaling RF measurement tester，支援 cellular 與 non-cellular technologies",
+      "verified": true
+    },
+    {
+      "point": "CMP200 plus CMPHEAD30/CMPHEAD50 RRH form the 5G NR FR2 (mmWave) nonsignaling one-box test solution for RF parametric testing in R&D and manufacturing",
+      "source": "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md",
+      "quote": "The 5G NR FR2 (mmWave) nonsignaling, one-box test solution consists of the CMP200 radio communication tester and the",
+      "verified": true
+    },
+    {
+      "point": "Non-signaling RF is listed as a distinct test type in the 5G device testing value chain, with production/manufacturing mapped to CMP180 / CMP200 / CMW100 while signaling is mapped to CMX500 / CMW500",
+      "source": "wiki/concepts/5G device testing value chain.md",
+      "quote": "| Production / manufacturing | [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100]]、[[R&S CMX500]] / [[R&S CMW500]] |",
+      "verified": true
+    },
+    {
+      "point": "Whether the customer needs non-signaling ATE / multi-port production test or factory-line non-signaling capability is an explicit qualification question driving platform choice",
+      "source": "wiki/syntheses/R&S CMX500 vs amarisoft.md",
+      "quote": "5. 是否需要 non-signaling ATE 或 multi-port production test？",
+      "verified": true
+    },
+    {
+      "point": "Non-signaling RX/PER measurement capability on CMP180 is option-gated (e.g. CMP-KM365 for WLAN nonsignaling PER), so option selection depends on understanding the mode",
+      "source": "raw/Productions/CMP180_Features_V11-9_en_09.md",
+      "quote": "R&S CMP-KM365 for WLAN nonsignaling PER measurements",
+      "verified": true
+    },
+    {
+      "point": "CMX500 itself has non-signaling use cases (GPRF generator with ARB/CW/dual tone/.wv replay) alongside its signaling role",
+      "source": "wiki/concepts/CMX500 GPRF Generator.md",
+      "quote": "是 [[CMX500_Callbox]] 中的 [[R&S CMX500]] non-signaling use case：在 CMX500 上產生 ARB、CW、dual tone 或 replay `.wv` waveform",
+      "verified": true
+    },
+    {
+      "point": "The non-signaling GPRF generator licensing claim must be separated from technology-specific ARB licensing, which requires KWxxx licences",
+      "source": "wiki/concepts/CMX500 GPRF Generator.md",
+      "quote": "technology-specific ARB replay / WinIQSim2 waveform 明確需要 KWxxx licenses。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T10:26:02+00:00",
+  "seconds": 120.1,
+  "num_turns": 18,
+  "cost_usd_estimate": 1.2866275,
+  "error": null
+}

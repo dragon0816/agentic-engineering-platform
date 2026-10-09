@@ -1,0 +1,70 @@
+{
+  "id": "Q0989",
+  "question": "What evidence is required to compare our Vector Network Analyzer solution with a competitor for Semiconductor without making unsupported claims?",
+  "tags": {
+    "market": "Semiconductor",
+    "product": "Vector Network Analyzer",
+    "type": "competitive",
+    "difficulty": "L4"
+  },
+  "answer": "Vault 中沒有 VNA 專屬的競品 battle card，因此任何「R&S VNA 對手」的 Semiconductor 比較都必須逐項建立在可追溯證據上。R&S 側要引用正式規格書並標明型號與文件版次（例如 [[ZNA_specs_en_5215-4652-22_v2400]]，PD 5215.4652.22，Version 24.00，April 2026），且規格數字必須連測試條件一起抄（如 dynamic range 的 10 Hz measurement bandwidth、未套用 user correction），並區分 specification / typical / nominal / measured 等級，因為來源明示 R&S 不保證 typical、nominal、measured 值。競品側目前只有未標日期的 Keysight 高頻高速 PCB 測試流程圖，Vault 明確記錄該來源未列 PNA 的具體型號、頻率範圍、option code 與校準件，也未提供任何性能指標，所以不足以做 dynamic range、頻寬或速度對比；需另取 Keysight 官方 datasheet 或第三方資料。Semiconductor 應用面，Vault 唯一的對應是 AISeverEcosystem Excel 的 solution mapping（IC / 矽智財 / 製程的 [[智原]]、測試介面的 [[旺矽]]、高速傳輸 IC 的 [[譜瑞-KY]] 對應 R&S ZNA / ZNA67EXT），但該欄被標示不是 formal datasheet / application note / configuration guide，未提供 option、firmware、fixture、calibration 條件，也未說明量測對象是 wafer、package 還是 probe station。公司列名不等於已購買、評估或導入，不能當成客戶實證。依既有 battle card 審查慣例，only platform、leadership、lower TCO 這類語句屬 sales language，不可當成可驗證技術規格，且 TCO 主張在來源中沒有算式或實證資料。",
+  "sufficient": true,
+  "missing": "Vault 沒有 VNA 專屬的競品 battle card（只有 CMX500 對 Keysight / Anritsu / amarisoft 的 wireless tester battle card），也沒有任何競品 VNA（Keysight PNA/ENA、Anritsu VectorStar/ShockLine）的正式 datasheet、文件版次、頻率範圍、dynamic range、trace noise 或 option 清單，因此無法做逐項規格對比。半導體領域缺少 VNA 的 application note、on-wafer / probe station 測試條件、fixture 與 de-embedding 方法、量測不確定度比較，以及任何半導體客戶的驗證報告、導入案例或 TCO 算式；旺矽、智原、譜瑞-KY 等列名也缺少量測對象（wafer vs package）與頻率範圍說明。",
+  "key_points": [
+    {
+      "point": "R&S VNA 的每條規格必須標示型號與文件版次，且數字要連測試條件一起抄，不可自行補齊原文沒有的 option code 或料號",
+      "source": "wiki/concepts/Productions 類資料.md",
+      "quote": "每條規格需標示型號與文件版次；來源沒標版次，就明說沒標。\n- 規格數字要連條件一起抄，例如頻寬、溫度、測試模式。",
+      "verified": true
+    },
+    {
+      "point": "比較時必須區分 specification / typical / nominal / measured 等級，因為來源明示 R&S 不保證 non-traceable specifications、typical、nominal、measured 值",
+      "source": "wiki/entities/R&S ZNA.md",
+      "quote": "Rohde & Schwarz 不保證 non-traceable specifications with limits、typical data、nominal values、measured values",
+      "verified": true
+    },
+    {
+      "point": "性能數字（如 dynamic range）必須附上量測條件，例如 measurement bandwidth 與是否套用 user correction",
+      "source": "wiki/entities/R&S ZNA.md",
+      "quote": "Specification 適用於 10 Hz measurement bandwidth，未套用 user correction；使用 1 Hz measurement bandwidth 可增加 dynamic range",
+      "verified": true
+    },
+    {
+      "point": "Vault 對競品 VNA（Keysight PNA）的唯一來源未列型號、頻率範圍、option code 或校準件，且未提供任何性能指標，不足以支撐規格對比",
+      "source": "wiki/entities/Keysight PNA.md",
+      "quote": "來源未列出 PNA 的具體型號、頻率範圍、option code、校準件型號或 TDR option 名稱。",
+      "verified": true
+    },
+    {
+      "point": "R&S 內部 battle card 對競品的描述屬單一來源，用於客戶文件前需以競品官方資料或第三方資料驗證",
+      "source": "wiki/entities/Keysight.md",
+      "quote": "是 R&S battle card，對 Keysight 的競品描述需要 Keysight 官方資料或第三方資料驗證。",
+      "verified": true
+    },
+    {
+      "point": "only platform、leadership、lower TCO 等 sales language 不可當作可驗證技術規格，且 TCO 主張沒有算式或實證資料",
+      "source": "wiki/syntheses/R&S CMX500 vs Keysight.md",
+      "quote": "only platform、first validated、leadership、lower TCO、fewer boxes 等語句是 sales language，不應當作可驗證技術規格。",
+      "verified": true
+    },
+    {
+      "point": "半導體相關的 ZNA / ZNA67EXT 對應只來自 Excel solution mapping，該欄不是正式 datasheet / application note / configuration guide，不得據此報價或建立測試配置，也未提供 option / fixture / calibration 條件",
+      "source": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+      "quote": "欄不是 formal datasheet、application note、configuration guide 或 ordering guide；不得據此報價或建立正式測試配置。",
+      "verified": true
+    },
+    {
+      "point": "半導體客戶與 R&S solution 同列不代表已購買、評估、合作或導入，不能作為客戶實證",
+      "source": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+      "quote": "公司列名與 solution 同列不代表該公司已購買、正在評估、已合作、已導入、已被拜訪或為 R&S 客戶。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T10:20:40+00:00",
+  "seconds": 160.3,
+  "num_turns": 25,
+  "cost_usd_estimate": 1.318435,
+  "error": null
+}

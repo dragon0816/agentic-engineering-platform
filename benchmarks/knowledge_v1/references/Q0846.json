@@ -1,0 +1,70 @@
+{
+  "id": "Q0846",
+  "question": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Semiconductor, and what evidence supports each opportunity?",
+  "tags": {
+    "market": "Semiconductor",
+    "product": "Signaling / Non-signaling Tester",
+    "type": "strategic",
+    "difficulty": "L5"
+  },
+  "answer": "Vault 沒有以「Signaling / Non-signaling Tester × Semiconductor」為標題的機會清單，但可由現有證據歸納出三類最強機會。(1) 晶片商（chip vendor）本身就是 5G device testing value chain 中的明示角色，validation 階段目標直接列出 Chipset L1–L4 test plan and verification 與 modem stack debug，對應工具 mapping 為 CMX500 / CMW500 / CMsquares 等 signaling 平台，這是 signaling tester 在半導體客戶的核心用途。(2) NTN 與 RedCap 的早期驗證與 conformance 是最具體的切入點：R&S 新聞稿說它正與 Tier 1 chipset vendors 共同驗證 WI-555 / RFT 555 test cases，PCT roadmap 也說近期需求來自 test houses / chipset vendors（5G NR Rel.17、IMS NG-eCall，尤其 RedCap），並排出 Rel.17 NB-NTN 49 test cases（Q4/2026）、Rel.18 eRedCap 13 test cases（Q3/2026）、Rel.18 NR-NTN 15 test cases（Q1/2027）等時程。(3) 與晶片平台共同做新頻段 / 新技術的 pre-standard 驗證已有先例：MWC 2024 以 CMX500 OBT one-box signaling tester 搭 MediaTek NTN-NR device 做 Rel.17 連線展示；與 Qualcomm 則用 CMX500 OBT 在 13 GHz FR3 驗證其 5G mobile test platform（MTP）throughput，指向 FR3 / 6G 研發機會。Non-signaling 側的機會在於「validation 到量產」的延伸：battle card 說 R&S 可由 CMX validation scale 到 CMP180 / CMP200 / CMW100 production lines，而 CMP200 + CMPHEAD30/50 被定位為 FR2 nonsignaling one-box，目標應用是 R&D 與 manufacturing 的 high-volume RF parametric testing。需注意競爭風險：R&S 自己的 battle card 也說 Keysight 在美國與 key semiconductor accounts 很強（宣稱 25/25 semiconductor companies），且該說法未附外部證據。以上均為 solution overview / PR / sales battle card 層級，不是正式規格或已成交的商機資料。",
+  "sufficient": true,
+  "missing": "Vault 沒有「Signaling / Non-signaling Tester」產品類別 × Semiconductor 產業的正式分段頁或機會清單：缺少具名半導體客戶/帳戶計畫、pipeline 或營收規模、win/loss 記錄、各機會的優先序與時程，也沒有台灣或區域晶片商的帳戶策略文件。現有證據多為 solution overview（未標日期）、PR 與 2026-02-26 sales battle card，缺 option code、價格與正式驗證報告，無法量化機會大小。",
+  "key_points": [
+    {
+      "point": "Chip vendor 是 5G device testing value chain 中明示的角色，validation 目標直接包含 Chipset L1–L4 測試計畫與驗證，signaling 層對應 CMX500 / CMW500 / CMsquares",
+      "source": "wiki/concepts/5G device testing value chain.md",
+      "quote": "Chipset L1–L4 test plan and verification",
+      "verified": true
+    },
+    {
+      "point": "測試類型同時涵蓋 Signaling / Signaling Protocol 與 Non-signaling RF，且 value chain 由 chip vendor 一路串到 network operator",
+      "source": "wiki/concepts/5G device testing value chain.md",
+      "quote": "從 chip vendor、device manufacturer、test house 到 network operator",
+      "verified": true
+    },
+    {
+      "point": "R&S 已與 Tier 1 chipset vendors 合作驗證其平台與 WI-555 / RFT 555 的 NR-NTN test cases，是半導體客戶的既有切入點",
+      "source": "wiki/concepts/NR-NTN conformance testing.md",
+      "quote": "正與 Tier 1 chipset vendors 合作，successfully verifying their respective platforms",
+      "verified": true
+    },
+    {
+      "point": "PCT roadmap 指出近期需求來自 test houses / chipset vendors，尤其是 RedCap 與 Rel.17 整體",
+      "source": "wiki/concepts/PCT Rel17 Rel18 roadmap Q2 2026.md",
+      "quote": "Recent demand from test houses / chipset vendors：LTE Rel.16 RACS、Rel.12 ACB；5G NR Rel.17 overall、IMS NG-eCall and especially RedCap。",
+      "verified": true
+    },
+    {
+      "point": "與晶片商共同展示 / 驗證已有案例：CMX500 OBT one-box signaling tester 搭 MediaTek NTN-NR device 做 Rel.17 NTN 連線",
+      "source": "wiki/sources/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+      "quote": "展示 setup 使用 [[R&S CMX500 OBT]] one-box signaling tester 與 [[MediaTek]] 的 NTN-NR device as DUT。",
+      "verified": true
+    },
+    {
+      "point": "FR3 / 6G 早期研究機會：CMX500 OBT 在 13 GHz 建立 signaling environment 並驗證 Qualcomm 5G mobile test platform 的 throughput",
+      "source": "wiki/sources/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+      "quote": "來源稱其為 future-proof multi-technology, multi-channel one-box signaling tester；在 demo 中用於傳送 13 GHz FR3 cell signal",
+      "verified": true
+    },
+    {
+      "point": "Non-signaling / ATE 延伸機會：由 CMX validation 擴展到 CMP180 / CMP200 / CMW100 量產線，CMP200 + RRH 定位為 FR2 nonsignaling high-volume RF parametric testing",
+      "source": "wiki/sources/CMP200_specs_en_5216-4391-22_v0800.md",
+      "quote": "nonsignaling one-box test solution，目標應用為 R&D 與 manufacturing 的 high-volume RF parametric testing",
+      "verified": true
+    },
+    {
+      "point": "競爭風險：R&S battle card 自述 Keysight 在美國與 key semiconductor accounts 很強，宣稱 25/25 semiconductor companies，且未附可追溯外部證據",
+      "source": "wiki/entities/Keysight.md",
+      "quote": "來源說 Keysight 在美國與 key semiconductor accounts 很強，並宣稱有 broad ecosystem partnerships：24/25 top tech companies、14/15 operators、25/25 semiconductor companies。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T10:08:26+00:00",
+  "seconds": 170.7,
+  "num_turns": 25,
+  "cost_usd_estimate": 1.3917059999999999,
+  "error": null
+}

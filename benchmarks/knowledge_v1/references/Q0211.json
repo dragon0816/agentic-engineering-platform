@@ -1,0 +1,70 @@
+{
+  "id": "Q0211",
+  "question": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "tags": {
+    "market": "Aerospace / Defense",
+    "product": "Signaling / Non-signaling Tester",
+    "type": "application",
+    "difficulty": "L2"
+  },
+  "answer": "The Vault contains no test workflow that places a Signaling / Non-signaling Tester inside a radar test chain. Radar in this Vault appears in two unrelated places: as an instrument category, the R&S AREG800A \"Automotive Radar Echo Generator\" for dynamic artificial object generation (automotive, not aerospace/defense radar), and as a Counter-UAV detection sensor category (\"Radar Systems\" to track drones over long ranges), which the Vault records only as a source listing without band, RCS, method, or products. Where the Vault does position signaling and non-signaling testers is the 5G device testing value chain: Signaling / protocol / application maps to R&S CMX500 / CMW500 / CMsquares, while Production / manufacturing maps to R&S CMP180 / CMP200 / CMW100 (the CMP180 is described as a \"production / R&D non-signaling tester\"). In aerospace/defense-adjacent material the signaling tester sits on the communications-link side, not the radar sensor side: the CMX500 is used as the 5G network emulator in the deployed private-5G / smart-jamming (A&D) test setup, and in the UAV signaling test solution it covers LTE / 5G / Wi-Fi link signaling plus multi-technology de-sense validation. The Vault explicitly forbids crossing these domains, stating that a CMX500 signaling option must not be inferred as an EMC/EME test system, nor an EMC system inferred as a cellular / WLAN protocol tester. Military drone/aviation testing in the Vault is covered by EMC / EME standards (MIL-STD-461, MIL-STD-464, RTCA DO-160) and EMI/EMS systems, not by signaling testers. So the only defensible placement is: a signaling/non-signaling tester belongs to the radio-communication-link and production-RF stages of a radar-platform program (and to de-sense / coexistence validation between the radar and the comms links), while radar echo/target simulation and EME testing are handled by different instruments.",
+  "sufficient": false,
+  "missing": "No Vault page describes an aerospace/defense radar test workflow (radar TX/RX characterization, pulse/chirp analysis, target/echo simulation, EW threat emulation) with ordered test stages, and none places a Signaling / Non-signaling Tester in such a workflow. Missing: any A&D radar test plan or stage sequence; any statement linking CMX500/CMP180-class testers to radar measurement; radar bands/RCS/waveform or MIL-STD radar test methods; and whether the AREG800A (documented only as automotive) is offered for aerospace/defense radar at all.",
+  "key_points": [
+    {
+      "point": "The Vault's radar-specific instrument is the AREG800A automotive radar echo generator, not a signaling tester.",
+      "source": "wiki/entities/R&S AREG800A.md",
+      "quote": "是 [[Rohde & Schwarz]] 的 Automotive Radar Echo Generator，用於 dynamic artificial object generation",
+      "verified": true
+    },
+    {
+      "point": "Radar in the Vault's defense/counter-UAV context is only a detection sensor category with no test method or product detail.",
+      "source": "wiki/concepts/Counter-UAV 技術.md",
+      "quote": "| [[Radar Systems]] | track drones over long ranges and in poor visibility。",
+      "verified": true
+    },
+    {
+      "point": "In the device testing value chain, signaling testers (CMX500/CMW500) occupy the signaling / protocol / application layer.",
+      "source": "wiki/concepts/5G device testing value chain.md",
+      "quote": "| Signaling / protocol / application | [[R&S CMX500]]、[[R&S CMW500]]、[[R&S CMsquares]] |",
+      "verified": true
+    },
+    {
+      "point": "Non-signaling testers (CMP180/CMP200/CMW100) are mapped to the production / manufacturing stage.",
+      "source": "wiki/concepts/5G device testing value chain.md",
+      "quote": "| Production / manufacturing | [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100]]、[[R&S CMX500]] / [[R&S CMW500]] |",
+      "verified": true
+    },
+    {
+      "point": "The CMP180 is explicitly characterized as a production / R&D non-signaling tester.",
+      "source": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+      "quote": "[[R&S CMP180]]：production / R&D non-signaling tester",
+      "verified": true
+    },
+    {
+      "point": "In the defense (A&D) private-5G resilience work the signaling tester is used as the 5G network emulator for the communications link, not for radar.",
+      "source": "wiki/concepts/5G private network resilience against smart jamming.md",
+      "quote": "- [[R&S CMX500]] 作為 5G network emulator。",
+      "verified": true
+    },
+    {
+      "point": "On air vehicles the signaling tester's role is link signaling plus multi-technology de-sense validation across co-located radios.",
+      "source": "wiki/concepts/UAV signaling test solution.md",
+      "quote": "因 [[R&S CMX500]] 支援多種通訊技術，可進行 De-sense validation",
+      "verified": true
+    },
+    {
+      "point": "The Vault forbids inferring a signaling tester into the EMC/EME (system-level defense) test domain or the reverse.",
+      "source": "wiki/concepts/UAV UAS Drones T&M Solutions.md",
+      "quote": "不可把 CMX500 signaling option 自動推論為 EMC / EME test system，也不可把 EMC 系統推論為 cellular / WLAN protocol tester",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T09:06:27+00:00",
+  "seconds": 143.1,
+  "num_turns": 22,
+  "cost_usd_estimate": 1.469991,
+  "error": null
+}

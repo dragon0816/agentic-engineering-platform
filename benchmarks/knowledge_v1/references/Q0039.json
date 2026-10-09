@@ -1,0 +1,70 @@
+{
+  "id": "Q0039",
+  "question": "What evidence is required to compare our Signaling / Non-signaling Tester solution with a competitor for Wireless Communication without making unsupported claims?",
+  "tags": {
+    "market": "Wireless Communication",
+    "product": "Signaling / Non-signaling Tester",
+    "type": "competitive",
+    "difficulty": "L4"
+  },
+  "answer": "For a signaling / non-signaling tester comparison (R&S CMX500 / CMW500 on the signaling side, CMP180 / CMP200 / CMW100 K06 on the non-signaling production side) the Vault requires evidence at three layers. First, R&S capability claims must be traced to the formal documents — CMX500_specs_en_5216-4127-22_v1100, CMX500_Features_CSW9-20-0_en_32, CMW_dat-sw_en_5213-9211-22_v1700 — and each production / non-signaling platform must be cited from its own official source page; the competitive synthesis pages explicitly cannot replace them. Second, the 2026-02-26 sales battle cards (Keysight / Anritsu / amarisoft) are sales positioning, not binding technical specifications, so their numbers (FR1 500 MHz or 18 GHz, RFU18 2000 MHz aggregated bandwidth, >16 GHz instantaneous bandwidth, >10 Gbps) may only be quoted as a dated sales claim and must never be back-filled into CMX500 specifications. Third, every competitor statement currently rests on a single R&S internal battle card, so customer-facing use requires the competitor's own official data plus third-party evidence; conversely a competitor's official brochure (e.g. mx844030pc-j1200 for the Anritsu MX844030PC Virtual Signalling Tester) may describe that competitor's product but cannot validate an R&S advantage claim. Superlatives — \"only platform\", \"first validated\", \"industry-leading\", \"widest frequency range\", \"lower TCO\", \"fewer boxes\" — are sales language and are not usable as verifiable specifications; TCO in particular has no formula or supporting data in the sources. Validated-conformance and NTN claims additionally need a validation report, test case list and PTCRB RFT version/date, and demo-level PR sources need bandwidth, throughput, MCS, MIMO configuration and measurement uncertainty before being treated as capability evidence.",
+  "sufficient": true,
+  "missing": "The Vault has no page using the exact category label \"Signaling / Non-signaling Tester\" or a \"Wireless Communication\" solution taxonomy, and no single consolidated evidence-policy page; the rules above are assembled from the three competitive synthesis pages, the battle card source notes and the FR3/RFU18 concept page. Also missing in the Vault: Keysight / Anritsu / amarisoft official datasheets and order data, the RFU18 formal specification, and any TCO calculation or third-party benchmark.",
+  "key_points": [
+    {
+      "point": "The competitive comparison pages are sales positioning, not binding technical specifications.",
+      "source": "wiki/syntheses/R&S CMX500 vs Keysight.md",
+      "quote": "其性質是 sales positioning，不是 binding technical specifications。",
+      "verified": true
+    },
+    {
+      "point": "The comparison page cannot replace the formal specifications / features documents of the R&S testers being compared.",
+      "source": "wiki/syntheses/R&S CMX500 vs Keysight.md",
+      "quote": "本頁不可取代 [[R&S CMX500]]、[[R&S CMW500]] 或 Keysight UXM 各型號的正式 specifications / features documents。",
+      "verified": true
+    },
+    {
+      "point": "Competitor claims come from a single R&S internal battle card, so customer-facing use requires the competitor's official data plus third-party evidence.",
+      "source": "wiki/syntheses/R&S CMX500 vs Keysight.md",
+      "quote": "對 [[Keysight]] 的主張目前只有 R&S internal battle card 單一來源；若用於客戶文件，應另查 Keysight 官方資料與第三方證據。",
+      "verified": true
+    },
+    {
+      "point": "Superlatives such as \"only platform\", \"first validated\", \"leadership\", \"lower TCO\", \"fewer boxes\" are sales language and must not be used as verifiable technical specifications.",
+      "source": "wiki/syntheses/R&S CMX500 vs Keysight.md",
+      "quote": "only platform、first validated、leadership、lower TCO、fewer boxes 等語句是 sales language，不應當作可驗證技術規格。",
+      "verified": true
+    },
+    {
+      "point": "Battle card numbers conflicting with the formal CMX500 specs may only be cited as a dated (2026-02-26) sales claim, not as binding specifications.",
+      "source": "wiki/concepts/FR3 測試與 RFU18 battle card 主張.md",
+      "quote": "判斷：battle card 數字不可當作 CMX500 binding specifications；引用時只能標示為 2026-02-26 sales claim，需等待正式 RFU18 / FR2 high-bandwidth 規格文件。",
+      "verified": true
+    },
+    {
+      "point": "The non-signaling / production path platforms (CMP180, CMP200, CMW100 K06) must each be cited from their own official source pages.",
+      "source": "wiki/syntheses/R&S CMX500 vs amarisoft.md",
+      "quote": "各 production platform 規格需分別引用其正式 source pages",
+      "verified": true
+    },
+    {
+      "point": "Validated NTN / conformance leadership claims lack a validation report, test case list and PTCRB RFT version, which are the evidence still required.",
+      "source": "wiki/syntheses/R&S CMX500 vs Keysight.md",
+      "quote": "未提供 validation report、PTCRB RFT 555 版本或 test case list",
+      "verified": true
+    },
+    {
+      "point": "A competitor's own official brochure can be used to describe that competitor's product but not to validate R&S advantage claims.",
+      "source": "wiki/syntheses/R&S CMX500 vs Anritsu.md",
+      "quote": "是 Anritsu product brochure，可用於描述 [[Anritsu MX844030PC]]、[[Anritsu MD8190A]] 與 [[Virtual Signalling Tester]]，但不可用來驗證 R&S 對 CMX500 的優勢主張。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T08:52:08+00:00",
+  "seconds": 134.8,
+  "num_turns": 20,
+  "cost_usd_estimate": 0.9600590000000001,
+  "error": null
+}

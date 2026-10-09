@@ -1,0 +1,58 @@
+{
+  "id": "Q0051",
+  "question": "What are the most important signal integrity capabilities for applications in Wireless Communication?",
+  "tags": {
+    "market": "Wireless Communication",
+    "product": "Oscilloscope",
+    "type": "basic",
+    "difficulty": "L1"
+  },
+  "answer": "The Vault does not contain an application-to-capability mapping that ranks signal integrity (SI) capabilities for a \"Wireless Communication\" application area, so no prioritized list can be given from it. The SI capability catalog that does exist is framed as high-speed digital / PCB work, not wireless: the R&S SI/PI deck's \"Signal integrity flow of high speed PCB/PCBA\" lists insertion loss (IL), crosstalk (Xtalk), eye diagram, TDR impedance, Stackup Planner and TL Calculator, while the R&S PCB test solutions flow defines \"Signal Integrity modeling/testing\" as IL, DK/DF, roughness and impedance. That same deck places SerDes, Signal Integrity, Power Integrity and PCB/PCBA testing in the Digital / high-speed-digital context, with RF listed as a separate division target — i.e. the Vault treats SI as a digital-interconnect discipline rather than a wireless one. Only three wireless-adjacent SI statements exist. In Open RAN radio unit (O-RU) testing, \"Timing / Sync / Signal Integrity\" appears as one of the key test focus areas alongside RF design/verification, beamforming/Massive MIMO and fronthaul conformance. In the Jio Wi-Fi-over-mmWave project deck, the optimization focus for 3GPP mmWave test items is \"Precise tuning of EVM (Modulation Quality) and signal integrity after signal up-conversion\", and in an SDR/UAV review, analog and digital filtering plus configurable AGC are credited with mitigating interference and maintaining signal integrity. None of these sources quantifies, ranks or specifies test conditions, so any claim about the \"most important\" wireless SI capabilities would go beyond the evidence.",
+  "sufficient": false,
+  "missing": "The Vault has no page defining Signal Integrity itself (the [[Signal Integrity]] wikilink has no target note), no application-area taxonomy in which \"Wireless Communication\" is mapped to signal integrity capabilities, and no ranking or importance weighting of SI capabilities for any application. It also lacks wireless-specific SI test details: no standards, limits, bandwidths, jitter/eye masks, de-embedding procedures, instrument models or pass/fail criteria for SI in cellular, mmWave, O-RU or Wi-Fi contexts (the O-RU and Jio decks name SI only as a bullet, with no values or test conditions).",
+  "key_points": [
+    {
+      "point": "The Vault's signal integrity capability list is a high-speed PCB/PCBA flow: IL / Xtalk / eye diagram, TDR impedance, Stackup Planner, TL Calculator — not a wireless-application list.",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]",
+      "verified": true
+    },
+    {
+      "point": "Signal Integrity is positioned in the Digital / high-speed digital test context, with RF as a separate target category, so the Vault does not frame SI as a wireless-communication capability area.",
+      "source": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+      "quote": "並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中",
+      "verified": true
+    },
+    {
+      "point": "In the R&S PCB test solutions flow, Signal Integrity modeling/testing is defined as IL, DK/DF, roughness and impedance.",
+      "source": "wiki/concepts/R&S PCB test solutions.md",
+      "quote": "- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。",
+      "verified": true
+    },
+    {
+      "point": "The only wireless-infrastructure SI reference is O-RU / Open RAN testing, where \"Timing / Sync / Signal Integrity\" is listed as one key test focus area.",
+      "source": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+      "quote": "Timing / Sync / Signal Integrity",
+      "verified": true
+    },
+    {
+      "point": "In the Jio mmWave (Wi-Fi over mmWave) project, signal integrity is tied to EVM/modulation-quality tuning after signal up-conversion.",
+      "source": "raw/Market/OneNote/R&S for JIO Project.md",
+      "quote": "Optimization Focus: Precise tuning of EVM (Modulation Quality) and signal integrity after signal up-conversion.",
+      "verified": true
+    },
+    {
+      "point": "In an SDR/UAV wireless review, filtering stages plus configurable AGC are what mitigate interference and maintain signal integrity.",
+      "source": "raw/Market/OneNote/Software-Defined_Radio_Deployments_in_UAV-Driven_Applications_A_Comprehensive_Review.md",
+      "quote": "gate interference and maintain signal integrity. Experimental",
+      "verified": true
+    }
+  ],
+  "verified_points": 6,
+  "author": "claude-code",
+  "written_at": "2026-10-09T08:55:33+00:00",
+  "seconds": 205.0,
+  "num_turns": 30,
+  "cost_usd_estimate": 1.4670869999999998,
+  "error": null
+}

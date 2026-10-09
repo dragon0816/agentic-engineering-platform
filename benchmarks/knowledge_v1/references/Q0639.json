@@ -1,0 +1,70 @@
+{
+  "id": "Q0639",
+  "question": "What evidence is required to compare our Signaling / Non-signaling Tester solution with a competitor for AI without making unsupported claims?",
+  "tags": {
+    "market": "AI",
+    "product": "Signaling / Non-signaling Tester",
+    "type": "competitive",
+    "difficulty": "L4"
+  },
+  "answer": "Vault 的競品比較紀律集中在三份 battle card synthesis（[[R&S CMX500 vs Keysight]]、[[R&S CMX500 vs Anritsu]]、[[R&S CMX500 vs amarisoft]]）與 [[FR3 測試與 RFU18 battle card 主張]]：battle card 只能作為 sales positioning，不是 binding technical specifications，所以任何數字（頻率、bandwidth、throughput、TCO）在對外比較前必須回查正式規格文件並標註文件編號與版次，例如 CMX500_specs_en_5216-4127-22_v1100、CMX500_Features_CSW9-20-0_en_32、CMW_dat-sw_en_5213-9211-22_v1700。對競品（Keysight、Anritsu、amarisoft）的說法目前多只有 R&S internal battle card 單一來源，若要用於客戶文件必須另外取得競品官方資料與第三方證據；反之，像 Anritsu 的 mx844030pc-j1200 官方 brochure 可用來描述競品，但不可用來驗證 R&S 的優勢主張。涉及 non-signaling / production 路徑（R&S CMP180、CMP200、CMW100 K06）時，各平台規格必須分別引用其正式 source page，不能用 battle card 的 production path 敘述代替。針對 AI 這一面，Vault 只有 PR / battle card 層級證據：battle card 列出 AI Script Assistant 卻未提供文件版次，而 CMX500 AI Scripting Assistant 的新聞稿未提供 benchmark、correctness metric、coverage matrix 或驗證條件，也未列正式型號、software release、XLAPI 版本與資料治理說明，Keysight Atlas 亦僅由 R&S battle card 描述為 AI-powered device test。因此 AI 能力比較需要的證據是：雙方 AI 工具的正式產品文件與版次、支援的儀器 / software release、可量測的成功指標（如 time to first test、mean time to debug、regression coverage）與其量化驗證方法，以及 deployment / data residency / IP handling 條件。缺這些證據時，只能把說法標示為特定日期的 sales claim 或 PR / demonstration-level evidence，並避免使用 only platform、first validated、leadership、lower TCO 這類 sales language。",
+  "sufficient": true,
+  "missing": "Vault 沒有以「Signaling / Non-signaling Tester」為標題的產品類別頁，也沒有專門針對 AI 市場／AI 客群的競品比較頁；AI 面的證據只到 PR（CMX500 AI Scripting Assistant）與 battle card（AI Script Assistant、Keysight Atlas）層級，缺雙方 AI 工具的正式 datasheet、版本、支援矩陣、量化 benchmark 與 data residency / IP handling 文件，因此無法建立 AI 能力的規格級比較表。",
+  "key_points": [
+    {
+      "point": "Battle card 的競品比較本質是 sales positioning，不是可引用的技術規格",
+      "source": "wiki/syntheses/R&S CMX500 vs Keysight.md",
+      "quote": "其性質是 sales positioning，不是 binding technical specifications。",
+      "verified": true
+    },
+    {
+      "point": "對競品的主張只有 R&S 內部 battle card 單一來源，對外使用前須補競品官方資料與第三方證據",
+      "source": "wiki/syntheses/R&S CMX500 vs Keysight.md",
+      "quote": "對 [[Keysight]] 的主張目前只有 R&S internal battle card 單一來源；若用於客戶文件，應另查 Keysight 官方資料與第三方證據。",
+      "verified": true
+    },
+    {
+      "point": "battle card 數字不可當作 binding specifications，引用時只能標示為特定日期的 sales claim，並等待正式規格文件",
+      "source": "wiki/concepts/FR3 測試與 RFU18 battle card 主張.md",
+      "quote": "判斷：battle card 數字不可當作 CMX500 binding specifications；引用時只能標示為 2026-02-26 sales claim",
+      "verified": true
+    },
+    {
+      "point": "AI 相關的 R&S 自動化工具（AI Script Assistant / CONTEST）在 battle card 中未提供文件版次，Keysight toolchain 需官方資料",
+      "source": "wiki/syntheses/R&S CMX500 vs Keysight.md",
+      "quote": "AI Script Assistant / CONTEST 在本來源中未提供文件版次；Keysight toolchain 需官方資料",
+      "verified": true
+    },
+    {
+      "point": "CMX500 AI Scripting Assistant 的能力只有 PR 說法，缺 benchmark、correctness metric、coverage matrix 與驗證條件",
+      "source": "wiki/entities/CMX500 AI Scripting Assistant.md",
+      "quote": "來源未提供 benchmark、correctness metric、coverage matrix、支援 script package 清單或驗證條件。",
+      "verified": true
+    },
+    {
+      "point": "non-signaling / production 平台的能力主張，必須分別引用各平台的正式 source page",
+      "source": "wiki/syntheses/R&S CMX500 vs amarisoft.md",
+      "quote": "各 production platform 規格需分別引用其正式 source pages",
+      "verified": true
+    },
+    {
+      "point": "競品官方 brochure 可用於描述競品，但不可用來驗證 R&S 自家的優勢主張",
+      "source": "wiki/syntheses/R&S CMX500 vs Anritsu.md",
+      "quote": "是 Anritsu product brochure，可用於描述 [[Anritsu MX844030PC]]、[[Anritsu MD8190A]] 與 [[Virtual Signalling Tester]]，但不可用來驗證 R&S 對 CMX500 的優勢主張",
+      "verified": true
+    },
+    {
+      "point": "AI-assisted 測試工作流的價值需用可量測指標衡量，而 PR 語言未提供量化 benchmark 或驗證方法",
+      "source": "wiki/concepts/AI-assisted agentic test workflows.md",
+      "quote": "但來源未提供量化 benchmark 或驗證方法。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T09:47:15+00:00",
+  "seconds": 159.7,
+  "num_turns": 24,
+  "cost_usd_estimate": 1.223125,
+  "error": null
+}

@@ -1,0 +1,70 @@
+{
+  "id": "Q0631",
+  "question": "How do changes in AI data centers technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "tags": {
+    "market": "AI",
+    "product": "Signaling / Non-signaling Tester",
+    "type": "cross_domain",
+    "difficulty": "L4"
+  },
+  "answer": "The Vault does not contain evidence that links AI data center technology changes to the measurement capability required from Signaling / Non-signaling Testers; the two topics live in separate, unconnected parts of the Vault. On the AI data center side, the documented technology change is the shift from the 48 V rack ecosystem to 800 V / ±400 Vdc HVDC with on-board conversion, driven by MW-class rack power (plus related PCB/CCL, CPO/silicon-photonics and 800GbE switch material). Where the Vault does map AI server / data center supply-chain categories to R&S test solutions (AISeverEcosystem R&S solution mapping), the instruments named are VNAs (R&S ZNA/ZNB/ZNL/ZNA67EXT) for IL/TDR/high-speed trace and PDN target Z, oscilloscopes (MXO) for power rail / multiphase DC / PI, and phase-noise analyzers (R&S FSWP) for LDO NSD and clock jitter — no signaling or non-signaling radio communication tester appears in that mapping, and that page itself warns it is only an Excel sales-mapping clue, not a formal configuration. Conversely, the Vault's signaling / non-signaling tester notes (R&S CMX500 for R&D signaling, R&S CMP180/CMP200/CMW100-K06 for production non-signaling RF) tie their measurement-capability changes to wireless standards and device features — Wi-Fi 7/Wi-Fi 8 (IEEE 802.11bn), 2x2 MIMO, 480 MHz bandwidth, 5G NR FR1 up to 8 GHz, FR3, NTN, RedCap — not to data center infrastructure. The only notes mentioning both domains (Broadcom, Keysight) do so incidentally, and the Keysight page explicitly refuses to infer any AI-server/data-center relationship. So a causal answer cannot be supported from this Vault.",
+  "sufficient": false,
+  "missing": "The Vault has no note, source or synthesis that connects AI data center technology changes (800 V HVDC, CPO/silicon photonics, 800GbE switching, PCIe/CXL, high-speed PCB) to measurement requirements for signaling / non-signaling testers (CMX500, CMP180/CMP200, CMW500/CMW100). Missing specifically: any statement that AI data center trends change required frequency range, bandwidth, channel count, protocol stack, throughput or measurement types of a signaling/non-signaling tester; any R&S application note, battle card or solution mapping that places a radio communication tester in a data center / AI server test flow; and any definition page for a 'Signaling / Non-signaling Tester' product category stating its capability drivers.",
+  "key_points": [
+    {
+      "point": "The AI data center technology change documented in the Vault is the move from the 48 V ecosystem to 800 V / ±400 Vdc HVDC as rack power reaches MW class",
+      "source": "wiki/concepts/AI 資料中心高壓直流供電.md",
+      "quote": "當單機架功率達 MW 等級，系統架構必須從既有 `48 V` 生態系轉向高壓直流供電。",
+      "verified": true
+    },
+    {
+      "point": "The Vault's AI server ecosystem → R&S solution mapping assigns VNA, oscilloscope and phase-noise instruments (ZNL/MXO/FSWP/ZNA/ZNB) to these needs, not signaling or non-signaling radio communication testers",
+      "source": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+      "quote": "[[R&S ZNL]]: PDN Target Z；[[MXO]]: Power rail、multiphase DC、PI",
+      "verified": true
+    },
+    {
+      "point": "Even data center power-electronics topics (800V HVDC) are mapped in the Vault to MXO / FSWP / ZISO / BMS test, with no signaling tester involvement",
+      "source": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+      "quote": "記錄 data center power electronics；本頁補充 [[MXO]]、[[R&S FSWP]]、[[ZISO]] 與 BMS test 的 sales mapping 線索",
+      "verified": true
+    },
+    {
+      "point": "That mapping page is only a sales/test clue from an Excel conversion and is not a formal configuration or validated requirement",
+      "source": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+      "quote": "它只表示該 Excel 表中的銷售 / 測試方案線索，不代表正式產品配置、客戶關係或已驗證商機。",
+      "verified": true
+    },
+    {
+      "point": "In the Vault, signaling vs non-signaling tester roles are defined for wireless device testing: CMX500 for R&D signaling, CMP180 for production non-signaling RF",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "以 [[R&S CMX500]] 覆蓋 R&D signaling / interworking 測試，以 [[R&S CMP180]] 覆蓋 production non-signaling RF 測試",
+      "verified": true
+    },
+    {
+      "point": "Non-signaling mode is tied to WLAN/cellular device production RF measurement speed, i.e. a device-test driver rather than a data center driver",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。",
+      "verified": true
+    },
+    {
+      "point": "The documented driver of new signaling-tester measurement capability is new wireless standards such as Wi-Fi 8 / IEEE 802.11bn",
+      "source": "wiki/entities/Broadcom.md",
+      "quote": "[[R&S CMX500]] multi-technology multi-channel signaling tester 與 newly added [[Wi-Fi 8]] / [[IEEE 802.11bn]] testing capabilities",
+      "verified": true
+    },
+    {
+      "point": "Signaling test content in the Vault is scoped to LTE / 5G / Wi-Fi UE RF, application-layer and protocol measurements within 400 MHz–8 GHz, with no data center scope",
+      "source": "wiki/sources/Signaling test solution.md",
+      "quote": "來源列出 signaling test 可包含基本 RF 量測、application layer tests 與 protocol test",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T09:44:35+00:00",
+  "seconds": 210.9,
+  "num_turns": 31,
+  "cost_usd_estimate": 1.5113059999999998,
+  "error": null
+}

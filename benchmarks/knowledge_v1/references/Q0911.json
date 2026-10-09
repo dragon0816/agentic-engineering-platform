@@ -1,0 +1,70 @@
+{
+  "id": "Q0911",
+  "question": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+  "tags": {
+    "market": "Semiconductor",
+    "product": "Signal Generator / Signal Analyzer",
+    "type": "application",
+    "difficulty": "L2"
+  },
+  "answer": "Vault 沒有一份正式的「Semiconductor / RFIC validation 測試流程」文件，但有兩層可引用的對應關係。第一層是 slide 級的測試區塊對儀器類別 mapping：[[SerDes 與 SI PI 測試概覽]] 依 2026.3.4 R&S 簡報 Slide 11 把 RefClk and PLL jitter performance 對應到 phase noise analyzers 與 signal generators，把 ADC / DAC frontend performance 對應到 spectrum analyzers 與 signal generators，而 Interface Test 對應 scopes / BERTs / AWGs / switch matrices、Power Distribution Network 對應 scopes 與 network analyzers。第二層是實際案例：TRI_AMD_RSKR Sharing1 的 Samsung Electronics Foundry RF/Analog Enablement Group success story 中，DUT 是 5G SoC including VCO，產品組合為 R&S FSWP50（Phase Noise Analyzer and VCO Tester）、R&S SMW200A 44GHz 與 SGS100A，搭配 FormFactor Semi-auto Probe Station 與 RSK AE 自製的 automated VCO Tuning S/W，競品為 Keysight E5052B、VXG。亦即在 Vault 證據中，signal generator / analyzer 落在「晶片本身的 RF/analog 特性量測與 characterization」這一步（phase noise / VCO tuning、ADC/DAC 前端、RefClk/PLL jitter），通常在 probe station 上對 die/package 進行。相對地，同一來源 Slide 10 的 sales strategy 把 industry「Bare board for SoCs (RFIC)」的 fit 寫為 VNAs，評估對象是 socket and transmission line，顯示 interconnect / socket / PCB fixture 這一段在 Vault 中是 VNA（ZNB40、ZNA43、ZNA67、ZNB3044）而非 signal generator / analyzer 的位置。2026.7 的 DDT Success stories 也只把 DAC/ADC testing => FSWP, SMA100B 與 SOC testing => FSWP, SMA100B, ZNA67 列為 mapping。必須注意 Vault 明示不推論這些儀器在各應用中的角色分工（stimulus、analysis、phase noise、VNA、automation），也沒有測試條件、option 或 pass/fail 門檻。",
+  "sufficient": true,
+  "missing": "Vault 沒有一份正式的 RFIC validation 端到端測試流程文件（例如 wafer-level → package-level → system-level 的階段定義），也沒有 signal generator / analyzer 在各階段的明確角色分工、測試項目清單（如 EVM、ACLR、NF、gain compression）、頻率範圍、fixture / calibration / de-embedding 條件、儀器 option 與 pass/fail 門檻；Samsung case 的 SGS100A 型號未對應到既有產品頁（可能需確認是否為 R&S SGT100A），automated VCO Tuning S/W 的名稱、版本與交付形式亦未標示；DDT success stories 的 Slide 2–7 圖片未 OCR，無法確認實際測試配置。",
+  "key_points": [
+    {
+      "point": "Vault 的實際 RFIC/半導體案例：Samsung Foundry RF/Analog Enablement Group，DUT 為 5G SoC including VCO，使用 FSWP50（analyzer）+ SMW200A 44GHz / SGS100A（signal generator）",
+      "source": "wiki/sources/TRI_AMD_RSKR Sharing1.md",
+      "quote": "Customer 為 [[Samsung Electronics]] Foundry RF/Analog Enablement Group；Products 為 [[R&S FSWP50]]、[[R&S SMW200A]] 44GHz、SGS100A",
+      "verified": true
+    },
+    {
+      "point": "該案例的量測在 probe station 上進行，並搭配自動化 VCO tuning 軟體，顯示儀器位於晶片級 characterization / validation 這一步",
+      "source": "wiki/sources/TRI_AMD_RSKR Sharing1.md",
+      "quote": "RSK AE developed and provided automated VCO Tuning S/W；圖上另有 Semi-auto Probe Station from FormFactor。",
+      "verified": true
+    },
+    {
+      "point": "測試區塊對儀器類別的 mapping：RefClk 與 PLL jitter performance 由 phase noise analyzers 與 signal generators 負責",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators",
+      "verified": true
+    },
+    {
+      "point": "ADC / DAC frontend performance 由 spectrum analyzers 與 signal generators 負責，是 signal generator / analyzer 在高速數位 / 混訊晶片驗證中的另一個落點",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators",
+      "verified": true
+    },
+    {
+      "point": "RFIC 的 bare board / socket / transmission line 評估這一段，來源明示的 fit 是 VNAs，而非 signal generator / analyzer",
+      "source": "wiki/sources/TRI_AMD_RSKR Sharing1.md",
+      "quote": "industry 為 Bare board for SoCs (RFIC)；fit 為 VNAs；companies 為 suppliers of Samsung Electronics；comments 為 evaluation of socket and transmission line",
+      "verified": true
+    },
+    {
+      "point": "2026.7 DDT success stories 把 SoC testing 對應到 FSWP、SMA100B（RF and Microwave Signal Generator）與 ZNA67",
+      "source": "wiki/sources/DDT SuccessStories_202607.md",
+      "quote": "Slide 4–5 題為 **SOC testing => FSWP, SMA100B, ZNA67**",
+      "verified": true
+    },
+    {
+      "point": "Vault 明示不推論這些儀器在各應用中的角色分工（stimulus / analysis / phase noise / VNA / automation），因此「流程位置」只能到 mapping 層級",
+      "source": "wiki/concepts/Digital design test success stories.md",
+      "quote": "本頁不推論 [[R&S FSWP]]、[[R&S SMA100B]]、[[R&S ZNA67]] 在各應用中的角色分工；例如 stimulus、analysis、phase noise、VNA 或 automation 角色都需後續來源補證。",
+      "verified": true
+    },
+    {
+      "point": "Samsung 案例被歸納為可包裝成 RF / analog enablement 測試方案，但軟體正式名稱與版本未標示",
+      "source": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md",
+      "quote": "Samsung 5G SoC including VCO case 顯示 [[R&S FSWP50]]、[[R&S SMW200A]] 與 automated VCO tuning software 可以被包裝成 RF / analog enablement 測試方案",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T10:18:00+00:00",
+  "seconds": 172.2,
+  "num_turns": 24,
+  "cost_usd_estimate": 1.1935154999999997,
+  "error": null
+}

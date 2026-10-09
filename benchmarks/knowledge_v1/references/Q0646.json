@@ -1,0 +1,70 @@
+{
+  "id": "Q0646",
+  "question": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in AI, and what evidence supports each opportunity?",
+  "tags": {
+    "market": "AI",
+    "product": "Signaling / Non-signaling Tester",
+    "type": "strategic",
+    "difficulty": "L5"
+  },
+  "answer": "Vault 的證據集中在「signaling tester」一側（[[R&S CMX500]] 5G one-box signaling tester），非 signaling（CMP/CMW100 production ATE）在 AI 題材上幾乎沒有對應證據。最強的機會有三類。(1) Generative AI user experience testing：R&S 與 China Mobile Research Institute 在 MWC Shanghai 2026 以 CMX500 為核心，建立 LLM（server/cloud）+ smart terminal 的 testbed，用 Time to First Token（TTFT）與 Tokens Per Second（TPS）量化 generative AI 應用的 end-user experience，並支援 on-device generative AI 應用設計最佳化。其賣點正是 CMX500 可控地配置 network parameters、channel fading models、latency、jitter、RF impairments 等變數，這是純 non-signaling RF tester 做不到的。(2) AI/ML air-interface 驗證與 6G 前期研究：KT / Qualcomm / R&S 的 PoC 把 CMX500 配置成 AI-enabled base station emulator，驗證 two-sided AI model 的 AI-enhanced CSI feedback，宣稱相較 conventional non-AI technology 有約 50% downlink throughput increase，並被定位為 multi-vendor AI interoperability 往 6G 標準化的驗證平台。(3) 把 AI 用在測試工作流本身：CMX500 AI Scripting Assistant 以 generative AI 與 NLP 生成／擴充／解釋 XLAPI scripts，而 R&S AI Workplace 的客戶問卷正是在蒐集 virtual testing 與 AI-assisted, agentic test workflows 的需求、限制與成功指標，顯示需求面與產品面同時存在。重要限制：以上全部是 PR／demonstration／questionnaire 層級證據，沒有 software version、license、order number、measurement methodology 或量化 benchmark，不能當成正式規格或已驗證商機引用。",
+  "sufficient": true,
+  "missing": "Vault 僅支撐 signaling tester（CMX500）側的 AI 機會；non-signaling / production tester（R&S CMP180、CMP200、CMW100 K06）在 AI 題材上沒有任何對應證據——AI server 生態系的 R&S solution mapping 只列 ZNA/ZNB/ZNL/FSWP/MXO/ZISO 等 SI、PI、jitter、optical 量測，未納入 signaling 或 non-signaling tester；Edge AI 晶片相關概念頁也沒有 R&S tester mapping。此外缺少：各 AI 機會的市場規模、客戶名單、pipeline 或優先順序；CMX500 AI 用例所需的 software release、license、order number、option 與硬體配置（含 FR3 / RFU18 是否必要）；TTFT/TPS 與 50% throughput gain 的 measurement methodology 與可重現數據；以及 AI Scripting Assistant 的部署型態、資料治理與與 ScriptAssist / R&S AI Workplace 的關係。",
+  "key_points": [
+    {
+      "point": "最強機會之一是以 CMX500 為核心的 Generative AI user experience testing，用 TTFT／TPS 量化 generative AI 應用的使用者體驗（R&S 與 China Mobile Research Institute, MWC Shanghai 2026）。",
+      "source": "wiki/concepts/Generative AI user experience testing.md",
+      "quote": "以 [[Time to First Token]]、[[Tokens Per Second]] 等指標量化 generative AI application 的 end-user experience",
+      "verified": true
+    },
+    {
+      "point": "該機會的差異化來自 signaling tester 能可控地配置網路與無線條件（network parameters、fading、latency、jitter、RF impairments），非 signaling RF tester 無此能力。",
+      "source": "wiki/concepts/Generative AI user experience testing.md",
+      "quote": "[[R&S CMX500]] 配置 network parameters、channel fading models、latency、jitter、RF impairments and other variables。",
+      "verified": true
+    },
+    {
+      "point": "此 testbed 的宣稱價值包含支援 on-device generative AI 應用設計最佳化與 future network optimization 的 reference points。",
+      "source": "wiki/concepts/Generative AI user experience testing.md",
+      "quote": "- 支援 on-device generative AI application design optimization。",
+      "verified": true
+    },
+    {
+      "point": "第二個機會是 AI/ML air-interface 驗證：CMX500 被配置成 AI-enabled base station emulator，用於 two-sided AI model 的 AI-enhanced CSI feedback 驗證（KT / Qualcomm / R&S）。",
+      "source": "wiki/concepts/6G AI proof-of-concept demonstration.md",
+      "quote": "Network / test side：[[R&S CMX500]]，configured as an AI-enabled base station emulator。",
+      "verified": true
+    },
+    {
+      "point": "該 PoC 的量化宣稱是相較非 AI 技術約 50% downlink throughput 提升，是支撐 5G-Advanced / 6G AI 驗證商機的主要證據。",
+      "source": "wiki/concepts/6G AI proof-of-concept demonstration.md",
+      "quote": "約 50% downlink throughput increase compared to conventional non-AI technology",
+      "verified": true
+    },
+    {
+      "point": "第三個機會是把 AI 用在 signaling tester 的測試工作流本身：CMX500 AI Scripting Assistant 以 generative AI 與 NLP 協助生成、擴充與解釋 XLAPI scripts。",
+      "source": "wiki/entities/CMX500 AI Scripting Assistant.md",
+      "quote": "5G one-box signaling tester AI-powered scripting tool，使用 generative AI 與 natural language processing",
+      "verified": true
+    },
+    {
+      "point": "需求面證據：R&S AI Workplace 客戶問卷（Latest Update 2026-08-19）正在蒐集 virtual testing 與 AI-assisted, agentic test workflows 的需求、限制、工具整合與成功指標。",
+      "source": "wiki/sources/AIW_Products_Customer_Questionnaire.md",
+      "quote": "用於蒐集客戶在 virtual testing 與 AI-assisted, agentic test workflows 方面的需求、限制、工具整合與成功指標",
+      "verified": true
+    },
+    {
+      "point": "所有 AI 相關證據都是 PR／demonstration 層級，不是正式 test specification、standardized benchmark 或 product datasheet，不可當成已驗證規格或商機。",
+      "source": "wiki/concepts/Generative AI user experience testing.md",
+      "quote": "本頁是 PR / demonstration-level evidence，不是正式 test specification、standardized benchmark 或 product datasheet。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T09:50:57+00:00",
+  "seconds": 222.2,
+  "num_turns": 27,
+  "cost_usd_estimate": 1.4303204999999999,
+  "error": null
+}

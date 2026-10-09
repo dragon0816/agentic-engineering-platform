@@ -1,0 +1,70 @@
+{
+  "id": "Q0546",
+  "question": "Based on current vault evidence, what are the strongest opportunities for Signal Generator / Signal Analyzer in Automotive, and what evidence supports each opportunity?",
+  "tags": {
+    "market": "Automotive",
+    "product": "Signal Generator / Signal Analyzer",
+    "type": "strategic",
+    "difficulty": "L5"
+  },
+  "answer": "The Vault contains no automotive opportunity assessment, market sizing, or pipeline record for the Signal Generator / Signal Analyzer line, so only indirect, evidence-backed hypotheses can be stated. The strongest is automotive satellite/NTN connectivity testing: the 3GPP NTN signal generator overview explicitly names automotive as one of the industries showing interest in 5G NTN-NR, and on the same slide credits R&S SMW200A channel emulation (long path delays, enhanced Doppler, customized dynamic fading) for NTN testing — and the Vault's NTN concept page already defines a ready SMW200A + FSW component-testing pair (SMW200A to 67/72 GHz with up to 2–4 GHz modulation bandwidth; FSW to 85/90 GHz with up to 8 GHz analysis bandwidth). Second, automotive radar echo generation is an attachable signal-generator capability: the SMW200A configuration guide lists R&S SMW-K78 'Radar echo generation' as an orderable Fading/MIMO option. Third, the Vault's deepest automotive T&M asset is the AREG800A Automotive Radar Echo Generator with 76–81 GHz frontends, QAT100 antenna array and AREG-P1/P2/P3 production configurations — a documented path into automotive radar production test — but the Vault explicitly states this product is NOT an RF signal generator or spectrum analyzer, so it is an adjacent/attach play rather than a SigGen/SA opportunity. Fourth, R&S already has automotive market access through NG eCall (CMX500 + CMX-KA098, EN 17240:2024, Qualcomm Snapdragon Auto verification, obligation starting 2026-01-01) and a Vice President Market Segment Automotive, which is a channel into automotive accounts even though the instrument of record is a radio communication tester. A longer-term pipeline item is 6G NTN, where the Vault lists automotive V2X safety applications among the use cases. No Vault evidence quantifies any of these opportunities.",
+  "sufficient": false,
+  "missing": "The Vault has no automotive market sizing, TAM/SAM, customer account, win/loss, pipeline or quotation evidence for the Signal Generator / Signal Analyzer line; no automotive application notes or solution-mapping pages (unlike the UAV / satellite / AI-server 'R&S solution mapping' concepts) for automotive radar, V2X/C-V2X, automotive Ethernet, EMC or in-vehicle connectivity; the SigGen/SA datasheet pages (SMW200A, SMM100A, SMCV100B, SMBV100B, SMB100B, SMA100B, FSV3000/FSVA3000/FPL/FSPN) contain no automotive application framing at all; and no pricing, competitive positioning (e.g. vs Keysight/Anritsu) or opportunity-ranking data exists for automotive.",
+  "key_points": [
+    {
+      "point": "Automotive is explicitly named as an industry showing interest in 5G NTN-NR, on the same slide that credits SMW200A channel emulation (long path delays, Doppler, customized dynamic fading) for NTN testing — the clearest SigGen link to automotive demand.",
+      "source": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+      "quote": "gaining interest from chipset / device manufacturers、automotive、satellite / space industry",
+      "verified": true
+    },
+    {
+      "point": "The Vault already defines a reusable signal generator + signal analyzer component-test pairing (SMW200A + FSW) for NTN, which is the configuration an automotive NTN module/chipset opportunity would use.",
+      "source": "wiki/concepts/NTN signal generator solutions.md",
+      "quote": "component testing 使用 DUT、[[R&S SMW200A]] 與 [[R&S FSW]]",
+      "verified": true
+    },
+    {
+      "point": "The analyzer side of that pair is specified to 85 GHz (overrange 90 GHz) with up to 8 GHz analysis bandwidth, i.e. sufficient reach for mmWave/automotive-radar-band analysis work.",
+      "source": "wiki/concepts/NTN signal generator solutions.md",
+      "quote": "[[R&S FSW]]：frequency up to 85 GHz，overrange 90 GHz；analysis bandwidth up to 8 GHz。",
+      "verified": true
+    },
+    {
+      "point": "Radar echo generation is an orderable SMW200A software option (SMW-K78), making radar echo generation an attach opportunity for the signal generator line itself.",
+      "source": "wiki/sources/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+      "quote": "| Fading/MIMO | `R&S®SMW-K78` | Radar echo generation | `1414.1833.02` |",
+      "verified": true
+    },
+    {
+      "point": "The AREG800A offers automotive radar production configurations (AREG-P1/P2/P3 with digital channels, 5 GHz instantaneous bandwidth, MFP/BFP frontends), indicating an automotive radar production-test opportunity.",
+      "source": "wiki/entities/R&S AREG800A.md",
+      "quote": "[[R&S AREG-P1]] radar mini configuration / [[R&S AREG-DBP1]] base unit option：one digital channel，one object per channel，5 GHz instantaneous bandwidth",
+      "verified": true
+    },
+    {
+      "point": "Critical scoping caveat: the Vault explicitly classifies the AREG800A automotive radar echo generator as outside the RF signal generator / spectrum analyzer category, so it must not be counted as a SigGen/SA opportunity.",
+      "source": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+      "quote": "但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+      "verified": true
+    },
+    {
+      "point": "R&S's documented automotive demand driver is NG eCall regulation (obligatory from 2026-01-01), but the instrument of record there is the CMX500 mobile radio tester, not a signal generator or analyzer.",
+      "source": "wiki/concepts/NG eCall EN 17240 2024 verification.md",
+      "quote": "來源稱 [[European Commission]] most recent regulation 定義 NG eCall will be obligatory starting **2026-01-01**。",
+      "verified": true
+    },
+    {
+      "point": "6G NTN is a forward-looking automotive pipeline item: the Vault lists automotive V2X safety applications among 6G NTN use cases, a future driver for channel-emulation-capable generators and analyzers.",
+      "source": "wiki/concepts/6G NTN 展望.md",
+      "quote": "- automotive V2X safety applications。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T09:35:04+00:00",
+  "seconds": 205.6,
+  "num_turns": 32,
+  "cost_usd_estimate": 1.9219215000000003,
+  "error": null
+}

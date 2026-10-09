@@ -1,0 +1,69 @@
+{
+  "id": "Q1071",
+  "question": "What is measurement method, and which product-related measurement decisions depend on understanding it?",
+  "tags": {
+    "technical": "Technical Document / Paper Understanding",
+    "topic": "measurement method",
+    "product_related": "true"
+  },
+  "answer": "The Vault has no standalone concept note defining \"measurement method\" in the abstract; it uses the term in two concrete senses. First, as the defined procedure/metric by which a value is obtained: for 5G NR OTA base-station transmitter tests, GFM324 classifies each TS 38.141-2 test case as EIRP (directional), TRP, or co-location, and lists TRP measurement grids (2-cut, 3-cut, equal angle, equal area, Fibonacci) plus eight TRP measurement procedures that are either accurate (full sphere with reference steps, two cuts + pattern multiplication) or a controlled overestimate (sparse sampling, two/three cuts), with other variants such as beam-based directions, peak method, equal sector with peak average and pre-scan; other examples are \"the OTA emission measurement method shall be TRP\" with True RMS detection, the EEIRP spatial OTA metric computed as the average of EIRP measurements over an upper hemisphere, and the NPR notch method in satellite payload testing. Second, the Vault repeatedly uses \"measurement method / measurement methodology\" as a missing-evidence flag: performance claims (e.g. the ~50% downlink throughput increase, Kuiper UT throughput/success-rate figures, TTFT/TPS in generative-AI UX testing) are recorded as unverifiable because no measurement method, test conditions or baseline definition is given. Product-related decisions that depend on understanding the method: which procedure to run, since the Vault states the choice depends on available test setup, measurement equipment and measurement time; which OTA antenna test solution to buy or use (TS8991 with WPTC for FR1/FR2, ATS1800C CATR for FR2, PWC200 for FR1), because not all OTA base-station conformance tests can be performed with all available solutions; which analyzer/generator and software options are needed (FSW/FSV/FSV3/FPS with -K144, SMW200A or SMBV100B for the intermodulation test case, possibly frequency up-converters for FR2); and the calibration path (SMW-K544 / FSW-K544 attenuation and antenna-gain tables to account for cable, antenna and OTA losses). Method knowledge also gates chamber/quiet-zone qualification (ATS1800C quiet zone is evaluated with a TRP- and EIRP-based procedure at 7 points) and option-level claims such as the latency measurement method behind CMX-KA401, which the Vault explicitly defers to official documentation. The Vault also warns that TRP procedure, grid density, uncertainty budget and applicability must be re-checked against TS 38.141-2 / TR 37.941 rather than inferred from the wiki pages.",
+  "sufficient": true,
+  "missing": "No dedicated concept note defines \"measurement method\" generically; the Vault gives only domain examples (TRP/EIRP/EEIRP procedures, NPR, calibration). Full step-by-step procedures, measurement grids figures, uncertainty budgets, limits and pass/fail criteria are not ingested and are explicitly deferred to 3GPP TS 38.141-2 / TR 37.941 and the original R&S PDFs; similarly ETSI ES 202 706-1 measurement methods and the latency/audio measurement methods behind CMX options are absent.",
+  "key_points": [
+    {
+      "point": "A measurement method in the Vault is a defined procedure for obtaining a metric; GFM324 lists multiple TRP measurement procedures that are either accurate or a controlled overestimate.",
+      "source": "raw/Market/OneNote/GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md",
+      "quote": "Different procedures can be used to evaluate the TRP estimate. These procedures can provide either an",
+      "verified": true
+    },
+    {
+      "point": "The choice of measurement procedure depends on the available test setup, measurement equipment and measurement time.",
+      "source": "wiki/concepts/TRP.md",
+      "quote": "來源指出 procedure 選擇取決於 available test setup、measurement equipment 與 measurement time。",
+      "verified": true
+    },
+    {
+      "point": "Which OTA antenna test solution (test system / chamber) can be used is method- and test-case-dependent — not every solution covers every conformance test.",
+      "source": "raw/Market/OneNote/GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md",
+      "quote": "not all OTA base station conformance tests can be performed with all available",
+      "verified": true
+    },
+    {
+      "point": "The metric prescribed by the method is explicit in test procedures, e.g. OTA emission measurement must use TRP with True RMS detection.",
+      "source": "raw/Market/OneNote/GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md",
+      "quote": "The OTA emission measurement method shall be TRP and the detection mode of the measurement",
+      "verified": true
+    },
+    {
+      "point": "Instrument and option selection plus pre-test calibration (K544, attenuation/antenna-gain tables for cable, antenna and OTA losses) are part of the measurement-method decision.",
+      "source": "wiki/concepts/5G NR OTA Base Station Transmitter Tests.md",
+      "quote": "校準目標是納入 cable losses、antenna losses、OTA losses 等 system loss。",
+      "verified": true
+    },
+    {
+      "point": "EEIRP is an example of a spatially defined measurement method/metric: the average of EIRP measurements over an upper hemisphere with elevation-specific limits.",
+      "source": "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md",
+      "quote": "is defined as a spatial OTA metric that is calculated as the average of the EIRP measurements in an upper hemisphere",
+      "verified": true
+    },
+    {
+      "point": "The Vault treats a missing measurement method as a reason a product/performance claim cannot be validated or compared.",
+      "source": "wiki/sources/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+      "quote": "未提供測試條件、頻段、bandwidth、MIMO configuration、channel model、UE category、baseline definition、statistical confidence 或完整 measurement method",
+      "verified": true
+    },
+    {
+      "point": "Option-level product questions are explicitly deferred to official documents when the measurement method is unknown (e.g. CMX-KA401 latency measurement method).",
+      "source": "wiki/entities/R&S CMX-KA401.md",
+      "quote": "實際 supported OTT apps、WAV format、latency measurement method 與 script interface 需另查正式文件",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T10:28:21+00:00",
+  "seconds": 138.9,
+  "num_turns": 21,
+  "cost_usd_estimate": 1.101218,
+  "error": null
+}

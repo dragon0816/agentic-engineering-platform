@@ -1,0 +1,70 @@
+{
+  "id": "Q0296",
+  "question": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+  "tags": {
+    "market": "Aerospace / Defense",
+    "product": "Oscilloscope",
+    "type": "strategic",
+    "difficulty": "L5"
+  },
+  "answer": "The Vault's strongest Oscilloscope opportunity in Aerospace/Defense is satellite payload and on-board digital-interface testing: the R&S Satellite payload testing application brochure positions R&S RTP and R&S RTO6 for trigger, decode and debug of satellite buses — SpaceWire, 8b/10b-based SpaceFibre, MIL-STD-1553, ARINC 429, CAN, I²C/SPI and UART — and highlights multi-domain debug where each RTP channel measures a different domain (RF link, DC power supply, datacom buses) and correlates results. This is corroborated by the OBC side of the chain: the spacecraft OBC datasheet lists exactly those buses (2x CAN 2.0, 4x SpaceWire 40 Mbps, 2x MIL-STD-1553B, RS422, LVDS), so A&D OBC/DHS designers are a natural scope target. In Taiwan, the SatelliteEcoChain mapping already names 精英電腦 (satellite control board / OBC) with 'Oscilloscope' as the mapped R&S solution — the one explicit oscilloscope account lead in the satellite chain. On the UAV side, the UAVEcoChain mapping gives three oscilloscope leads: 邑錡 for camera/image-processing GMSL and LVDS interfaces (R&S RTO, R&S MXO), 其昜先進 for motor/gimbal, and 德鑫新技 for battery/power (both R&S MXO) — i.e. high-speed serial video links plus UAV power electronics. All of these are sales/solution-mapping leads only: the Vault explicitly forbids inferring that any of these companies has purchased, used, deployed, evaluated or certified R&S instruments, and no order numbers, configurations or pricing are recorded.",
+  "sufficient": true,
+  "missing": "No quantified A&D oscilloscope pipeline, market size, win/loss or revenue data; no entity pages for R&S RTP / RTO6 / MXO with specifications, bandwidths, option order numbers (e.g. RTP-K65 appears only in the raw brochure, not in a wiki entity page) or pricing; no competitive comparison for oscilloscopes in A&D; no evidence of any actual customer adoption, quote or test configuration for these leads; and the drone EMC brochure lists 'Oscilloscopes' only inside an un-extracted table image, so the UAV EMC attach case is not cleanly supported in the wiki layer.",
+  "key_points": [
+    {
+      "point": "R&S RTP and RTO6 oscilloscopes are positioned for satellite digital interface trigger, decode and debug — the clearest A&D oscilloscope use case in the Vault.",
+      "source": "wiki/sources/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+      "quote": "- [[R&S RTP]]、[[R&S RTO6]]：oscilloscopes，用於 satellite digital interface trigger、decode 與 debug。",
+      "verified": true
+    },
+    {
+      "point": "The covered bus standards are the space/avionics set: SpaceWire, 8b/10b SpaceFibre, MIL-STD-1553, ARINC 429, CAN, I²C/SPI, UART.",
+      "source": "wiki/sources/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+      "quote": "Digital interface testing 涵蓋 [[SpaceWire]]、8b/10b-based [[SpaceFibre]]、MIL-STD-1553、ARINC 429、CAN、I²C/SPI、UART 等 bus trigger/decode/debug 測試。",
+      "verified": true
+    },
+    {
+      "point": "Multi-domain correlation (RF link + DC power + datacom bus on one 4-channel scope) is the differentiating value proposition for satellite debug.",
+      "source": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+      "quote": "Each R&S®RTP channel measures a different domain (RF link, DC power supply, datacom buses) and correlates the measurement results.",
+      "verified": true
+    },
+    {
+      "point": "A concrete named satellite-chain lead exists: 精英電腦 under satellite control board / OBC is mapped to 'Oscilloscope'.",
+      "source": "wiki/sources/SatelliteEcoChain.md",
+      "quote": "- [[精英電腦]] — 關鍵元件欄為 OBC；R&S Solution 欄為 Oscilloscope。",
+      "verified": true
+    },
+    {
+      "point": "Spacecraft OBC hardware actually carries CAN, SpaceWire, MIL-STD-1553B, RS422 and LVDS interfaces, which is the technical basis for the scope need.",
+      "source": "wiki/sources/satellite-systems-obc-datasheet.md",
+      "quote": "2x CAN 2.0 1 Mbps、4x SpW 40 Mbps、2x MIL-STD-1553B dual bus with Bus Controller capability",
+      "verified": true
+    },
+    {
+      "point": "UAV camera / image-processing high-speed serial links (GMSL, LVDS) at 邑錡 are mapped to R&S RTO and R&S MXO.",
+      "source": "wiki/sources/UAVEcoChain.md",
+      "quote": "[[邑錡]]對應 [[R&S RTO]]、[[R&S MXO]]",
+      "verified": true
+    },
+    {
+      "point": "UAV battery/power and motor/gimbal segments give further MXO leads (德鑫新技, 其昜先進).",
+      "source": "wiki/concepts/台灣無人機供應鏈.md",
+      "quote": "[[電池電源]]：列出 [[德鑫新技]]、[[台船動力]]、[[其昜先進]]、[[有量科技]]；[[德鑫新技]] R&S Solution 欄列 [[R&S MXO]]。",
+      "verified": true
+    },
+    {
+      "point": "These mappings are leads only — the Vault prohibits inferring purchase, use, deployment, evaluation or certification by the named companies.",
+      "source": "wiki/concepts/台灣 UAV 產業鏈 R&S solution mapping.md",
+      "quote": "- 不能推論上述公司已採購、使用、導入、評估或認證 R&S 儀器。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T09:17:26+00:00",
+  "seconds": 198.7,
+  "num_turns": 36,
+  "cost_usd_estimate": 1.634166,
+  "error": null
+}

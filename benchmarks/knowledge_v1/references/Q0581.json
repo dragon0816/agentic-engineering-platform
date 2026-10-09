@@ -1,0 +1,64 @@
+{
+  "id": "Q0581",
+  "question": "How do changes in automotive radar technology affect the measurement capability required from Vector Network Analyzer?",
+  "tags": {
+    "market": "Automotive",
+    "product": "Vector Network Analyzer",
+    "type": "cross_domain",
+    "difficulty": "L4"
+  },
+  "answer": "The Vault does not contain any source that discusses how automotive radar technology trends drive Vector Network Analyzer measurement requirements, so this causal link cannot be answered from it. What the Vault does hold are two unconnected bodies of evidence. On the radar side, automotive radar appears only through the R&S AREG800A Automotive Radar Echo Generator (Version 09.00, September 2025), whose frontends cover 24 GHz to 24.25 GHz, 76 GHz to 81 GHz and 24 GHz to 44 GHz (R&S FE44S), and which distinguishes FMCW from non-FMCW radar in its echo-generation concept — but it is a radar echo generator, not a VNA. On the VNA side, the Vault's spec-derived pages (R&S ZNA, ZNA67EXT, ZNB3000, ZNL) record frequency coverage and performance — ZNA up to 67 GHz, ZNA67EXT 10 MHz to 110 GHz with dynamic-range figures that include the 75 GHz to 80 GHz segment, ZNB3044 up to 54.0 GHz with upgrade options — yet none of these VNA files mentions radar or automotive applications at all (a grep for \"radar\" in the ZNA and ZNB3000 spec sources returns no matches). So one may only observe that mmWave-capable VNAs in the Vault happen to span the frequencies where the Vault's automotive radar frontends operate; the Vault states no requirement, driver, or design implication connecting the two. Any statement that evolving automotive radar (higher bands, wider bandwidth, imaging/MIMO arrays, radomes) raises VNA demands for frequency extension, dynamic range, or multiport capability would be outside-knowledge inference, not Vault evidence.",
+  "sufficient": false,
+  "missing": "The Vault lacks any application note, white paper, or concept page linking automotive radar evolution (higher carrier frequencies, wider chirp bandwidth, 4D imaging / MIMO arrays, radome and antenna-in-package design, cascaded radar MMICs) to VNA measurement requirements. Specifically absent: any statement that automotive radar drives VNA needs for 77/79 GHz or above-110 GHz frequency extension, wide measurement/IF bandwidth, multiport or multiport-array S-parameter measurement, time-domain/radome material characterization, on-wafer or antenna-in-package measurement, de-embedding for radar PCB/package interfaces, or group-delay/phase-stability specs for radar components. The ZNA, ZNA67EXT, ZNB3000 and ZNL spec sources contain no occurrence of 'radar' or 'automotive', and the AREG800A material never mentions a VNA.",
+  "key_points": [
+    {
+      "point": "The Vault's automotive radar content is confined to the AREG800A radar echo generator, which is not a VNA",
+      "source": "wiki/entities/R&S AREG800A.md",
+      "quote": "是 [[Rohde & Schwarz]] 的 Automotive Radar Echo Generator，用於 dynamic artificial object generation",
+      "verified": true
+    },
+    {
+      "point": "The automotive radar frequency bands documented in the Vault are 24–24.25 GHz, 76–81 GHz and 24–44 GHz (FE44S), given for radar echo generator frontends",
+      "source": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+      "quote": "RF frequency bands：[[R&S AREG8-24S]] / [[R&S AREG8-24D]] 為 `24 GHz to 24.25 GHz`",
+      "verified": true
+    },
+    {
+      "point": "The Vault distinguishes FMCW from non-FMCW radar only in the echo-generation/distance context, not as a VNA measurement requirement",
+      "source": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+      "quote": "`digital`：針對 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 `air gap value`",
+      "verified": true
+    },
+    {
+      "point": "The ZNA VNA family page describes coverage from 10 MHz up to 67 GHz with no reference to radar or automotive use cases",
+      "source": "wiki/entities/R&S ZNA.md",
+      "quote": "涵蓋 [[R&S ZNA26]]、[[R&S ZNA43]]、[[R&S ZNA50]]、[[R&S ZNA67]]，頻率範圍從 10 MHz 延伸到最高 67 GHz。",
+      "verified": true
+    },
+    {
+      "point": "mmWave VNA coverage in the Vault extends to 110 GHz via the ZNA67EXT converter-head system, stated purely as instrument specification",
+      "source": "wiki/entities/R&S ZNA67EXT.md",
+      "quote": "| Frequency range | measurement range | 10 MHz to 110 GHz |",
+      "verified": true
+    },
+    {
+      "point": "ZNA67EXT dynamic-range data is segmented by band, including the 75 GHz to 80 GHz segment that overlaps the 76–81 GHz radar band, but the Vault never attributes this to radar needs",
+      "source": "wiki/entities/R&S ZNA67EXT.md",
+      "quote": "| 75 GHz to 80 GHz | > 100 dB (spec.) |",
+      "verified": true
+    },
+    {
+      "point": "ZNB3000 VNA models are documented with frequency upgrade options up to 54.0 GHz, again with no radar or automotive application context",
+      "source": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md",
+      "quote": "[[R&S ZNB3044]] 為 9 kHz to 43.5 GHz，搭配 [[R&S ZNB3-B542]] 或 [[R&S ZNB3-B544]] 可到 54.0 GHz。",
+      "verified": true
+    }
+  ],
+  "verified_points": 7,
+  "author": "claude-code",
+  "written_at": "2026-10-09T09:41:04+00:00",
+  "seconds": 127.1,
+  "num_turns": 18,
+  "cost_usd_estimate": 0.9808075000000002,
+  "error": null
+}

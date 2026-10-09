@@ -1,0 +1,70 @@
+{
+  "id": "Q0801",
+  "question": "What are the most important signaling test capabilities for applications in Semiconductor?",
+  "tags": {
+    "market": "Semiconductor",
+    "product": "Signaling / Non-signaling Tester",
+    "type": "basic",
+    "difficulty": "L1"
+  },
+  "answer": "The Vault has no note that treats \"Semiconductor\" as its own application/industry segment for signaling test, so the answer must be assembled from its chip-vendor / chipset-vendor evidence. In the 5G device testing value chain, the Vault places the chip vendor alongside device manufacturer, test house and operator, spanning Lab, R&D, Production and Operations, with test types covering RF, Signaling, Application, OTA, Pre-conformance, Conformance approval, Carrier acceptance, Non-signaling RF and Signaling Protocol. For semiconductor (chipset) work the capabilities the Vault names explicitly are: chipset L1–L4 test plan and verification, investigating and debugging the modem stack, validating and optimizing end-to-end IMS / SIP / TCP-IP performance, and debugging the app stack — mapped to R&S CMX500 / CMW500 / CMsquares for the signaling / protocol / application layer. The Vault also shows chipset vendors as the users of protocol-conformance (PCT) signaling capability: R&S verifies platforms of Tier 1 chipset vendors against the WI-555 / RFT 555 NR-NTN test cases, and the Q2 2026 roadmap records demand from test houses / chipset vendors for LTE Rel.16 RACS, Rel.12 ACB, 5G NR Rel.17 and especially RedCap. Early, pre-standard signaling capability also matters: R&S implemented the first Wi-Fi 8 RF tests in signaling mode on the CMX500 one-box signaling tester using a Broadcom prototype WLAN device before IEEE ratification. Separately, an Anritsu-sourced note describes virtualized protocol-stack (RRC-NAS/PDCP/RLC/MAC) pre-silicon signaling test as a shift-left capability for chipset development, with protocol tests run on a virtual terminal before physical chipset manufacture. Generic signaling test scope in the Vault is basic RF measurements (Power, Frequency, Spectrum, EVM, PER/BLER, MIMO), application-layer tests and protocol test. The Vault does not rank these capabilities or state which are \"most important\" for semiconductor customers.",
+  "sufficient": false,
+  "missing": "The Vault has no note that defines \"Semiconductor\" as an application/industry segment for signaling test. Its semiconductor content covers packaging technologies, IC substrates, power ICs/PMIC, SerDes IP and Taiwanese OSAT/test-house company names, none of which is linked to signaling test. There is no prioritized or ranked list of signaling test capabilities for semiconductor customers, no semiconductor-specific test-requirement matrix, option/license list, test-case list or KPI set, and no R&S-sourced statement on pre-silicon/post-silicon signaling test (the only pre-silicon evidence is an Anritsu competitor product note).",
+  "key_points": [
+    {
+      "point": "The Vault's 5G device testing value chain lists the chip vendor as one of four ecosystem roles and ties the roles to RF, signaling, application, OTA, pre-conformance, conformance and carrier-acceptance testing.",
+      "source": "wiki/concepts/5G device testing value chain.md",
+      "quote": "從 chip vendor、device manufacturer、test house 到 network operator，依 Lab、R&D、Production、Operations 與 Use cases 串接 RF、signaling、application、OTA、pre-conformance、conformance、carrier acceptance 與 service / repair 測試",
+      "verified": true
+    },
+    {
+      "point": "The validation/conformance goals that apply to chipset (semiconductor) work include chipset L1–L4 test plan and verification.",
+      "source": "wiki/concepts/5G device testing value chain.md",
+      "quote": "- Chipset L1–L4 test plan and verification。",
+      "verified": true
+    },
+    {
+      "point": "Other named chipset-level signaling goals are modem-stack debug and end-to-end IMS/SIP/TCP-IP validation plus app-stack debug.",
+      "source": "wiki/concepts/5G device testing value chain.md",
+      "quote": "- Investigate and debug modem stack。\n- Validate and optimize end to end performance of IMS / SIP / TCP/IP。\n- Investigate and debug app stack。",
+      "verified": true
+    },
+    {
+      "point": "The signaling / protocol / application test layer is mapped to R&S CMX500, CMW500 and CMsquares.",
+      "source": "wiki/concepts/5G device testing value chain.md",
+      "quote": "| Signaling / protocol / application | [[R&S CMX500]]、[[R&S CMW500]]、[[R&S CMsquares]] |",
+      "verified": true
+    },
+    {
+      "point": "Protocol-conformance signaling capability is used directly with Tier 1 chipset vendors to verify their platforms against WI-555 / RFT 555 NR-NTN test cases.",
+      "source": "wiki/concepts/RFT 555.md",
+      "quote": "- [[Rohde & Schwarz]] 正與 Tier 1 chipset vendors verifying their respective platforms and the test cases outlined in [[WI-555]] and [[RFT 555]]。",
+      "verified": true
+    },
+    {
+      "point": "Chipset vendors are recorded as a source of recent PCT (protocol conformance) demand, notably Rel-17 and RedCap.",
+      "source": "wiki/concepts/PCT Rel17 Rel18 roadmap Q2 2026.md",
+      "quote": "- Recent demand from test houses / chipset vendors：LTE Rel.16 RACS、Rel.12 ACB；5G NR Rel.17 overall、IMS NG-eCall and especially RedCap。",
+      "verified": true
+    },
+    {
+      "point": "Pre-standard signaling-mode capability on the CMX500 one-box signaling tester was demonstrated with a Broadcom prototype WLAN device before IEEE Wi-Fi 8 ratification.",
+      "source": "wiki/concepts/Wi-Fi 8 RF signaling tests.md",
+      "quote": "[[Rohde & Schwarz]] 在 final IEEE standard ratification 前，已將 first [[Wi-Fi 8]] RF tests in signaling mode 實作到 [[R&S CMX500]] one-box signaling tester。",
+      "verified": true
+    },
+    {
+      "point": "A virtualized protocol-stack signaling tester is described as a shift-left capability for chipset development, running protocol tests on a virtual terminal before physical chipset manufacture.",
+      "source": "wiki/concepts/Virtual Signalling Tester.md",
+      "quote": "- 對 chipset development 的 [[Shift-Left]] 有效。\n- 在實體 chipset 製造前，用 virtual terminal 執行 protocol test。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T10:05:35+00:00",
+  "seconds": 190.4,
+  "num_turns": 29,
+  "cost_usd_estimate": 1.6081130000000001,
+  "error": null
+}

@@ -1,0 +1,70 @@
+{
+  "id": "Q0461",
+  "question": "For a Automotive use case involving automotive radar, where would Oscilloscope fit in the test workflow?",
+  "tags": {
+    "market": "Automotive",
+    "product": "Oscilloscope",
+    "type": "application",
+    "difficulty": "L2"
+  },
+  "answer": "In the Vault the automotive-radar anchor is the R&S AREG800A Automotive Radar Echo Generator, which stimulates a radar under test by generating dynamic artificial objects (echoes) — so the oscilloscope is not the stimulus instrument but an optional downstream analysis instrument. It fits at the AREG800A's auxiliary IF output, enabled by the R&S AREG8-K740 option: the datasheet states the auxiliary receive signal IF output at the AREG800A base unit is 'for optional signal analysis: connect to a spectrum analyzer or oscilloscope'. Its documented purpose there is radar signal analysis and EIRP measurements, i.e. you tap the radar-under-test's received/downconverted signal at IF rather than probing 77 GHz RF directly. Practical constraints from the specs: the AUX IF output measurement port is max. 0 dBm, gain is 0 dB (nom.) from RX IF input to AUX IF output at the base unit (12 dB nom. at the frontend variants), and the AUX IF output frequency range depends on frontend/option (e.g. 1.1–2.1 GHz, 0.7–4.7 GHz or 0.7–5.7 GHz for 77/79 GHz frontends, 700–950 MHz for 24 GHz frontends) — so the scope only needs to cover the IF band, not the mmWave RF. Note the parallel but distinct path: power and EIRP measurements at the RX power connector on the mmWave frontend module are made with a power sensor, not a scope. Beyond this interface the Vault does not describe a stage-by-stage automotive radar test workflow (R&D vs. HiL vs. production), although it does record the AREG8-K109 hardware-in-the-loop control interface and production frontend/base-unit options as other workflow elements.",
+  "sufficient": true,
+  "missing": "The Vault has no oscilloscope product pages (no R&S RTO/RTP/MXO entity or source notes), so it gives no scope model, bandwidth, sampling-rate or probing recommendations, and no automotive-radar-specific scope application note. It also contains no documented end-to-end automotive radar test workflow (R&D / HiL / validation / production stages) in which to place the oscilloscope; the placement above is inferred only from the AREG800A datasheet's AUX IF output interface description.",
+  "key_points": [
+    {
+      "point": "The Vault's automotive radar anchor product is the R&S AREG800A Automotive Radar Echo Generator, used for dynamic artificial object generation (echo generation toward the radar under test).",
+      "source": "wiki/entities/R&S AREG800A.md",
+      "quote": "的 Automotive Radar Echo Generator，用於 dynamic artificial object generation",
+      "verified": true
+    },
+    {
+      "point": "An oscilloscope is connected to the AREG800A's auxiliary receive-signal IF output at the base unit for optional signal analysis (alternative to a spectrum analyzer).",
+      "source": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+      "quote": "connect to a spectrum analyzer or oscilloscope",
+      "verified": true
+    },
+    {
+      "point": "This auxiliary IF output path requires the R&S AREG8-K740 option (Analog IF output interfaces).",
+      "source": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+      "quote": "Auxiliary IF output interface (R&S®AREG8-K740 option)",
+      "verified": true
+    },
+    {
+      "point": "The documented purpose of the AUX IF output port is radar signal analysis and EIRP measurements.",
+      "source": "wiki/entities/R&S AREG800A.md",
+      "quote": "AUX IF output port for radar signal analysis and EIRP measurements；IF output ports available on base unit",
+      "verified": true
+    },
+    {
+      "point": "Level/gain limits at the tap point: the AUX IF output measurement port is max. 0 dBm with 0 dB (nom.) gain from RX IF input to AUX IF output at the base unit.",
+      "source": "wiki/entities/R&S AREG800A.md",
+      "quote": "AUX IF output measurement port output gain：from RX IF input to AUX IF output at AREG800A base unit，`0 dB (nom.)`；max. `0 dBm`。",
+      "verified": true
+    },
+    {
+      "point": "The scope only has to cover the IF band, whose range depends on frontend/option (e.g. 0.7 GHz to 4.7 GHz with AREG8-K740 at the 77/79 GHz frontends).",
+      "source": "wiki/entities/R&S AREG800A.md",
+      "quote": "AUX IF output measurement port max. `0 dBm`；AUX IF output gain `12 dB (nom.)`；AUX IF output frequency range `0.7 GHz to 4.7 GHz`。",
+      "verified": true
+    },
+    {
+      "point": "Power and EIRP measurement at the frontend RX power connector is a separate path that uses a power sensor, not an oscilloscope.",
+      "source": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+      "quote": "RX power connector at AREG800A mmWave frontend module for optional power and EIRP measurements:",
+      "verified": true
+    },
+    {
+      "point": "Other workflow-level interfaces documented for the AREG800A include a dedicated hardware-in-the-loop control interface (AREG8-K109).",
+      "source": "wiki/entities/R&S AREG800A.md",
+      "quote": "Dedicated HiL interface：[[R&S AREG8-K109]]，HiL co-processor。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T09:28:47+00:00",
+  "seconds": 151.4,
+  "num_turns": 24,
+  "cost_usd_estimate": 1.054812,
+  "error": null
+}

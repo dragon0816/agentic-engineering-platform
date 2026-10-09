@@ -1,0 +1,70 @@
+{
+  "id": "Q0351",
+  "question": "What are the most important S-parameters capabilities for applications in Aerospace / Defense?",
+  "tags": {
+    "market": "Aerospace / Defense",
+    "product": "Vector Network Analyzer",
+    "type": "basic",
+    "difficulty": "L1"
+  },
+  "answer": "The Vault has no page that labels an \"Aerospace / Defense\" market segment and maps S-parameter capabilities to it, so the only supportable evidence comes from its satellite/space-payload and UAV pages, where vector network analyzers (R&S ZNA, R&S ZNB3000) are the S-parameter instruments. For satellite payloads the Vault states that the R&S ZNA is recommended for component-level testing of converters, mixers, amplifiers, filters and antennas, including noise figure, group delay and phase measurements, while complete payload testing is assigned to R&S FSW + SMW200A. A capability called out as critical for transponders is group delay on frequency converters without LO access, which the ZNA performs with a two-tone technique (option R&S ZNA-K9) when the DUT's internal LO drifts or is noisy. For antennas and phased arrays the ZNA is credited with true parallel and coherent data acquisition for antenna array tests and antenna test systems from 100 kHz, plus mmWave converter support via a rear-panel LO out (up to 4 converters on the 4-port model) for high-frequency coverage to 67 GHz. High dynamic range is a stated key performance item: > 129 dB specification without options, 147 dB typical with options, and up to 170 dB maximum attainable with full 2-port correction. Pulsed-signal measurement capability exists as option R&S ZNA-K7 (with pulse modulators, 40 ns minimum pulse width), which is the Vault's nearest item to radar-type devices, though the Vault never ties it to defense. In the Taiwan supply-chain mappings, ZNA / ZNB3000 are assigned to satellite antenna makers for G/T work and ZNB3000 to UAV antenna high-isolation and OTA passive testing.",
+  "sufficient": false,
+  "missing": "The Vault contains no page that defines an \"Aerospace / Defense\" application segment or ranks S-parameter capabilities for it. There is no radar, electronic warfare, avionics or MIL-spec S-parameter content (the only aerospace/defense-labelled pages, e.g. DO-160 airborne equipment EMC testing and 軍用無人機 EMC 與 EME testing, are EMC/EME, not S-parameters), no R&S ZNA/ZNB brochure text listing target industries, and no statement of which capabilities are 'most important'. The answer above is assembled from satellite payload/component testing and UAV antenna pages and is therefore inference about segment relevance, not a sourced A&D capability ranking.",
+  "key_points": [
+    {
+      "point": "The Vault assigns R&S ZNA to component-level satellite payload testing covering converters, mixers, amplifiers, filters, antennas, noise figure, group delay and phase measurements",
+      "source": "wiki/concepts/衛星酬載與元件測試.md",
+      "quote": "建議用於 component level testing，特別是 converters、mixers、amplifiers、filters、antennas、noise figure、group delay 與 phase measurements。",
+      "verified": true
+    },
+    {
+      "point": "Group delay measurement on frequency converters without LO access (two-tone technique) is a key VNA capability for satellite transponder/converter chains",
+      "source": "wiki/concepts/衛星酬載群延遲量測.md",
+      "quote": "vector network analyzer 可用於量測 frequency converters without LO access 的 group delay",
+      "verified": true
+    },
+    {
+      "point": "ZNA supports true parallel and coherent data acquisition for antenna array / antenna test systems from 100 kHz",
+      "source": "wiki/entities/R&S ZNA.md",
+      "quote": "支援 true parallel and coherent data acquisition，例如 antenna array tests 與 antenna test systems，從 100 kHz 開始。",
+      "verified": true
+    },
+    {
+      "point": "High dynamic range is a stated ZNA key performance figure: >129 dB spec, 147 dB typical with options, up to 170 dB with full 2-port correction",
+      "source": "wiki/entities/R&S ZNA.md",
+      "quote": "Dynamic range：> 129 dB specification without options；147 dB typical with options；maximum attainable range up to 170 dB allowing full 2-port correction。",
+      "verified": true
+    },
+    {
+      "point": "mmWave converter support via rear-panel LO out extends S-parameter coverage without an external signal generator",
+      "source": "wiki/entities/R&S ZNA.md",
+      "quote": "Optional rear panel LO out 可支援 mmWave converters；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters，無需 external signal generator。",
+      "verified": true
+    },
+    {
+      "point": "Pulsed-signal S-parameter measurement exists as option R&S ZNA-K7 (requires ZNA-K17 plus pulse modulator)",
+      "source": "wiki/entities/R&S ZNA.md",
+      "quote": "R&S®ZNA-K7 | Measurements on pulsed signals | requires R&S®ZNA-K17 together with pulse modulator",
+      "verified": true
+    },
+    {
+      "point": "In the satellite supply-chain solution mapping, ZNA / ZNB3000 are the instruments listed for antenna makers' G/T work",
+      "source": "wiki/concepts/台灣衛星產業鏈 R&S solution mapping.md",
+      "quote": "天線 | [[芳興科技]] | G/T | [[R&S ZNA]] / [[R&S ZNB3000]]",
+      "verified": true
+    },
+    {
+      "point": "For UAV antennas the Vault maps ZNB3000 to high isolation measurement and OTA passive testing",
+      "source": "wiki/concepts/台灣 UAV 產業鏈 R&S solution mapping.md",
+      "quote": "high isolation measurement；OTA passive testing | [[R&S ZNB3000]]；[[R&S TS8991]]",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T09:23:47+00:00",
+  "seconds": 174.5,
+  "num_turns": 25,
+  "cost_usd_estimate": 1.4742925,
+  "error": null
+}

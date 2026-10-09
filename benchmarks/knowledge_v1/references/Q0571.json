@@ -1,0 +1,70 @@
+{
+  "id": "Q0571",
+  "question": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Vector Network Analyzer.",
+  "tags": {
+    "market": "Automotive",
+    "product": "Vector Network Analyzer",
+    "type": "solution_mapping",
+    "difficulty": "L3"
+  },
+  "answer": "The Vault does not contain a note that states an end-to-end chain from an Automotive market requirement to a measurable parameter to a required Vector Network Analyzer (VNA) capability. The automotive market requirements it records map to non-VNA R&S solutions: NG eCall (mandatory in the EU, obligatory from 2026-01-01) is verified with the R&S CMX500 mobile radio tester, and automotive radar echo generation (76–81 GHz) is covered by the R&S AREG800A — not by a VNA. Conversely, every VNA page in the Vault (R&S ZNA, ZNB3000, ZNL and their specification sources) contains no automotive or radar application context at all; the VNA use cases recorded are PCB/interconnect, socket and connector signal integrity, satellite payload group delay and Starlink/Kuiper UT work. The closest automotive-adjacent chain the Vault supports is indirect and assembled from separate notes: automotive high-speed links (ADAS/V2X, Automotive SerDes Alliance in-vehicle data links) and automotive-grade Low DK glass fabric for high-frequency/high-speed PCB drive dielectric and loss parameters (Dk/Df, insertion loss, return loss, impedance), which in the Vault's PCB/interconnect cases are measured with multi-port VNAs (e.g. the 4-port R&S ZNB3044 at 9 kHz to 43.5 GHz, ZNB40/ZNA43 plus probe, mount-kit and de-embedding tooling). That linkage is a reconstruction across notes, not a stated automotive requirement chain, so it should not be presented as Vault-sourced automotive evidence.",
+  "sufficient": false,
+  "missing": "No Vault note states an automotive market requirement together with its measurable test parameter and the resulting VNA capability. Missing: (a) an automotive application context in any VNA page — the ZNA, ZNB3000, ZNA67EXT and ZNL specification sources and entity pages contain zero occurrences of 'automotive'/'radar'/'車用'; (b) automotive-specific parameter limits (e.g. radar module or in-vehicle link insertion loss / return loss / impedance / group delay specifications, 76–81 GHz S-parameter requirements, automotive connector or Ethernet channel limits); (c) any mapping of such limits to required VNA attributes (frequency coverage to 81 GHz, dynamic range, port count, de-embedding or fixture compensation options).",
+  "key_points": [
+    {
+      "point": "The Vault's automotive requirement notes map to the R&S CMX500 (NG eCall / EN 17240:2024 verification), not to a VNA.",
+      "source": "wiki/concepts/NG eCall EN 17240 2024 verification.md",
+      "quote": "測試設備：[[R&S CMX500]] mobile radio tester。",
+      "verified": true
+    },
+    {
+      "point": "The other automotive-specific R&S instrument recorded is the AREG800A automotive radar echo generator, covering 76–81 GHz radar echo generation rather than S-parameter measurement.",
+      "source": "wiki/entities/R&S AREG800A.md",
+      "quote": "RF frequency range：`76 GHz to 77 GHz`、`77 GHz to 81 GHz`。",
+      "verified": true
+    },
+    {
+      "point": "Automotive high-speed requirements in the Vault are expressed as ADAS and V2X needing high-speed signal transmission, and as Automotive SerDes Alliance standards for in-vehicle high-speed data links — with no measurement parameter attached.",
+      "source": "wiki/concepts/High speed SerDes eco-chain.md",
+      "quote": "汽車上的 [[ADAS]] 與 [[V2X]] 通訊亦需高速訊號傳輸",
+      "verified": true
+    },
+    {
+      "point": "In-vehicle high-speed links appear only as a standards category, without stated test parameters or instrument requirements.",
+      "source": "wiki/concepts/台灣 SerDes IC-IP 公司名單.md",
+      "quote": "[[Automotive SerDes Alliance]] standards — 用於 in-vehicle high-speed data links。",
+      "verified": true
+    },
+    {
+      "point": "The only automotive-to-parameter hint is material-level: Low DK glass fabric is listed for high-frequency/high-speed PCB, server, automotive and communication use, making Dk/Df the associated measurable parameter.",
+      "source": "wiki/concepts/Dk-Df.md",
+      "quote": "將 [[Low DK 玻纖布]]列為次高階玻纖布，用途 / 特性欄為「高頻高速PCB板材、伺服器、車用、通訊」",
+      "verified": true
+    },
+    {
+      "point": "The Vault states these dielectric/loss parameters are extracted with VNA-based solutions (Delta-L loss, TDR impedance, Dk/Df extraction), though the cited instruments are competitor ENA/PNA.",
+      "source": "wiki/concepts/Dk-Df.md",
+      "quote": "在解決方案區塊寫明「基于 ENA/PNA 的 Delta-L 损耗、TDR 阻抗测量和 Dk/Df 提取」",
+      "verified": true
+    },
+    {
+      "point": "R&S VNA cases in the Vault tie measurable parameters (impedance, insertion loss, return loss) to a required capability set of multi-port VNA plus probe, mount-kit and de-embedding tool — but for PCB/SoC/connector DUTs, not automotive ones.",
+      "source": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md",
+      "quote": "PCB test with probing；impedance、insertion loss、return loss | ZNB40、probe、mount-kit、de-embedding tool",
+      "verified": true
+    },
+    {
+      "point": "A concrete VNA capability the Vault documents is the 4-port R&S ZNB3044 covering 9 kHz to 43.5 GHz with 1.85 mm ports.",
+      "source": "wiki/entities/R&S ZNB3044.md",
+      "quote": "Vector network analyzer，4-port，9 kHz to 43.5 GHz，1.85 mm connector",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T09:38:57+00:00",
+  "seconds": 232.5,
+  "num_turns": 31,
+  "cost_usd_estimate": 1.4419825,
+  "error": null
+}

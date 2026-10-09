@@ -1,0 +1,70 @@
+{
+  "id": "Q0231",
+  "question": "How do changes in radar technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "tags": {
+    "market": "Aerospace / Defense",
+    "product": "Signaling / Non-signaling Tester",
+    "type": "cross_domain",
+    "difficulty": "L4"
+  },
+  "answer": "The Vault does not contain any source that analyses how radar technology evolution changes the measurement capability required from a signaling / non-signaling tester — the two subjects sit in separate, unconnected parts of the Vault. On the tester side, the Vault defines the signaling / non-signaling split purely for cellular and WLAN device testing: R&S CMX500 is positioned as the multi-technology, multi-channel one-box signaling tester for R&D signaling / interworking, while R&S CMP180 / CMP200 / CMW100 / PVT360A cover production non-signaling RF measurements, where all RF measurements run in non-signaling mode to save test time. On the radar side, radar measurement needs are met by a different product class: the R&S AREG800A automotive radar echo generator (dynamic artificial object generation, object distance up to 3000 m, 5 GHz instantaneous bandwidth per digital channel) and radar/DFS signal generation on vector signal generators such as SMW200A, SMBV100B and SGT100A with Pulse Sequencer DFS. The only documented point where radar actually touches a non-signaling tester is DFS: option R&S CMP-KD359 \"Dynamic frequency selection (DFS) for WLAN\" is listed among the CMP180's waveform-playing options, i.e. the radar-avoidance requirement on WLAN devices appears as a radar-pattern waveform playback capability rather than as a radar measurement. The only forward-looking radar-to-communications convergence recorded is 6G ISAC / MFSS, where a joint waveform combining communications + radar sensing is foreseen and the listed challenges are high bandwidth, the radar equation, power density, spectrum coexistence and waveform design — but the Vault draws no tester requirement from this. Notably, none of the CMX500, CMW500, CMP180, CMP200 or PVT360A product documents in the Vault mention radar at all, so any causal statement linking radar technology change to signaling/non-signaling tester specifications would be unsupported.",
+  "sufficient": false,
+  "missing": "No source in the Vault links radar technology trends (e.g. FMCW/imaging/4D radar bandwidth growth, higher carrier frequencies, counter-UAV radar) to measurement requirements for signaling or non-signaling testers. Missing: (1) any R&S document or market note stating that radar evolution drives signaling/non-signaling tester specifications; (2) radar-related measurement options, frequency/bandwidth roadmaps or test cases in the CMX500, CMW500, CMP180, CMP200 or PVT360A documents (none of them mention radar at all); (3) details of the CMP-KD359 DFS option (supported radar patterns, regulatory regime such as FCC/ETSI, measurement procedure); (4) any ISAC test-solution document specifying sensing/radar measurement capability for a communications tester (the NTN white paper only cites an external R&S ISAC web page).",
+  "key_points": [
+    {
+      "point": "The Vault's signaling / non-signaling tester category is defined for cellular and WLAN device testing: CMX500 for R&D signaling, CMP180 for production non-signaling RF, where non-signaling mode is used to save test time.",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。",
+      "verified": true
+    },
+    {
+      "point": "The Vault's tooling map assigns signaling/protocol testing to CMX500/CMW500 and production non-signaling to CMP180/CMP200/CMW100 — no radar role is assigned to these testers.",
+      "source": "wiki/concepts/5G device testing value chain.md",
+      "quote": "| Production / manufacturing | [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100]]、[[R&S CMX500]] / [[R&S CMW500]] |",
+      "verified": true
+    },
+    {
+      "point": "Radar measurement/stimulus needs in the Vault are served by a separate product class — the AREG800A automotive radar echo generator, not by a signaling or non-signaling tester.",
+      "source": "wiki/entities/R&S AREG800A.md",
+      "quote": "Automotive Radar Echo Generator，用於 dynamic artificial object generation",
+      "verified": true
+    },
+    {
+      "point": "Radar-specific capability metrics in the Vault are radar-domain parameters (digital channels, objects per channel, instantaneous bandwidth, object range), unrelated to signaling-tester measurement lists.",
+      "source": "wiki/entities/R&S AREG800A.md",
+      "quote": "one digital channel，one object per channel，5 GHz instantaneous bandwidth，near object range possibility",
+      "verified": true
+    },
+    {
+      "point": "Radar signal scenario generation for module, receiver and DFS tests is attributed to the SMW200A vector signal generator, i.e. a generator rather than a signaling/non-signaling tester.",
+      "source": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+      "quote": "Generation of radar signal scenarios for module, receiver and DFS tests",
+      "verified": true
+    },
+    {
+      "point": "The single documented radar-related capability on a non-signaling tester is the CMP180 DFS waveform-playing option R&S CMP-KD359 for WLAN.",
+      "source": "wiki/sources/CMP180_Features_V11-9_en_09.md",
+      "quote": "R&S CMP-KD359 | Dynamic frequency selection（DFS）for WLAN",
+      "verified": true
+    },
+    {
+      "point": "The only radar/communications convergence trend recorded is 6G MFSS/ISAC with a possible joint communications + radar sensing waveform.",
+      "source": "wiki/concepts/6G NTN 展望.md",
+      "quote": "Phase 2：可能整合 joint waveform，例如 communications + radar sensing，或 communications method 提供 timing information。",
+      "verified": true
+    },
+    {
+      "point": "For ISAC the Vault lists only technical challenges (high bandwidth, radar equation, power density, spectrum coexistence, waveform design) and derives no tester measurement requirement from them.",
+      "source": "wiki/concepts/6G NTN 展望.md",
+      "quote": "challenge 包含 high bandwidth、radar equation、power density、spectrum coexistence 與 waveform design。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T09:14:07+00:00",
+  "seconds": 253.6,
+  "num_turns": 28,
+  "cost_usd_estimate": 1.6326664999999998,
+  "error": null
+}

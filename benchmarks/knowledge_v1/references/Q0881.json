@@ -1,0 +1,64 @@
+{
+  "id": "Q0881",
+  "question": "How do changes in RFIC validation technology affect the measurement capability required from Oscilloscope?",
+  "tags": {
+    "market": "Semiconductor",
+    "product": "Oscilloscope",
+    "type": "cross_domain",
+    "difficulty": "L4"
+  },
+  "answer": "The Vault does not support an answer to this question. There is no concept or entity page for RFIC validation technology (or its evolution) anywhere in the Vault — RFIC appears only as an unresolved wiki link and as incidental slide text — and there is no Oscilloscope entity page either; oscilloscopes appear only as an instrument category inside other pages. The closest material is: (1) the 5G device testing value chain page, which lists \"Oscilloscopes\" together with R&S SMW200A and R&S FSW under the RF / parametric / characterization test layer, without any capability figures; (2) the SerDes 與 SI PI 測試概覽 page, which maps \"Scopes\" to Interface Test and to the Power Distribution Network block but explicitly records that no model, bandwidth, data rate or test standard is given; and (3) the TRI_AMD_RSKR Sharing1 source, where the only RFIC-labelled validation context — \"Bare board for SoCs (RFIC)\" — is mapped to VNAs, not to oscilloscopes, and where the validation-optimization case (noise/uncertainty above 40 GHz, stability unlocked up to 67 GHz) is a VNA/probing case that the Vault forbids converting into instrument specifications. So the Vault contains no stated causal link from RFIC validation trends to required oscilloscope bandwidth, sample rate, jitter, noise floor or probe capability; any such answer would be inference beyond the sources.",
+  "sufficient": false,
+  "missing": "The Vault lacks any page describing RFIC validation technology or its evolution (e.g. mmWave/phased-array RFIC validation trends, IF access, higher data rates, integration), and lacks any Oscilloscope entity/product page with capability parameters (bandwidth, sample rate, ADC resolution, jitter/noise floor, probe options). No source states a requirement or causal relationship between RFIC validation changes and oscilloscope measurement capability. Needed: an extracted RFIC-validation source (e.g. the Analog Devices 'Internet from Space: RFIC...' article body or an R&S RFIC-test application note) plus R&S oscilloscope (RTO/RTP/MXO) specification pages, and a page that explicitly links the two.",
+  "key_points": [
+    {
+      "point": "The Vault has no dedicated RFIC or RFIC-validation page; RFIC source material is explicitly flagged as not yet extracted/unresolved.",
+      "source": "wiki/entities/Analog Devices.md",
+      "quote": "需要確認是否建立個別來源頁：RF Electronics for Phased Array Applications、Planar Phased Array Circuit Design Challenges、Internet from Space RFIC。",
+      "verified": true
+    },
+    {
+      "point": "Oscilloscopes appear in the Vault only as an instrument category in a test-layer mapping (RF / parametric / characterization), with no capability specifications.",
+      "source": "wiki/concepts/5G device testing value chain.md",
+      "quote": "| RF / parametric / characterization | [[R&S SMW200A]]、[[R&S FSW]]、Oscilloscopes |",
+      "verified": true
+    },
+    {
+      "point": "Where scopes are mapped to validation blocks (Interface Test, PDN), the Vault records that no model, bandwidth, data rate or test standard is provided — so no oscilloscope measurement capability requirement can be derived.",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |",
+      "verified": true
+    },
+    {
+      "point": "The same page forbids turning the listed instrument types into product configurations or capability claims.",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "本頁不推論 R&S 具備所有列名儀器或方案，也不把儀器類型轉換成正式 product configuration。",
+      "verified": true
+    },
+    {
+      "point": "The only RFIC-labelled validation/sales context in the Vault maps the RFIC (bare board for SoCs) industry to VNAs, not to oscilloscopes.",
+      "source": "wiki/sources/TRI_AMD_RSKR Sharing1.md",
+      "quote": "industry 為 Bare board for SoCs (RFIC)；fit 為 VNAs",
+      "verified": true
+    },
+    {
+      "point": "The validation-optimization evidence about higher frequencies (noise/uncertainty above 40 GHz, stability up to 67 GHz) comes from a VNA/probing case, and the Vault explicitly refuses to convert it into instrument specification claims.",
+      "source": "wiki/sources/TRI_AMD_RSKR Sharing1.md",
+      "quote": "optimized setup 則 complete signal stability unlocked up to 67 GHz",
+      "verified": true
+    },
+    {
+      "point": "RFIC-related external articles in the Vault are recorded as link titles only, with the note that they do not support R&S test-capability claims.",
+      "source": "wiki/sources/Beamforming OneNote.md",
+      "quote": "本來源偏 antenna / RFIC / phased array 背景，不支撐 R&S CMX500 測試能力主張",
+      "verified": true
+    }
+  ],
+  "verified_points": 7,
+  "author": "claude-code",
+  "written_at": "2026-10-09T10:15:08+00:00",
+  "seconds": 134.4,
+  "num_turns": 21,
+  "cost_usd_estimate": 0.9861149999999999,
+  "error": null
+}

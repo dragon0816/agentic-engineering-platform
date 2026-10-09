@@ -1,0 +1,70 @@
+{
+  "id": "Q0671",
+  "question": "Map the chain from a AI market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+  "tags": {
+    "market": "AI",
+    "product": "Oscilloscope",
+    "type": "solution_mapping",
+    "difficulty": "L3"
+  },
+  "answer": "The Vault supports the chain only at category level, through two parallel legs. (1) Signal-integrity leg: the AI market requirement appears in [[High speed SerDes eco-chain]], where the downstream tier states that servers and data centers supporting AI and HPC deployment require high-speed internal interconnect and interfaces; [[SerDes 與 SI PI 測試概覽]] turns this into measurable parameters from Slide 20's \"Signal integrity flow of high speed PCB/PCBA\" — IL / Xtalk / Eye diagram and TDR impedance; and Slide 11 maps the \"Interface Test\" block to instrument classes including Scopes (i.e., [[Oscilloscope]]), BERTs, AWGs and switch matrices, so the oscilloscope capability required is high-speed interface/eye-diagram test. (2) Power-integrity leg: the same page maps \"Power Distribution Network\" to Scopes and network analyzers, and [[AISeverEcosystem]] records the AI power requirement (Blackwell platform power consumption doubling, driving high-density power demand; GPU TDP rising 700 W to 1200 W) against measurable parameters PDN Target Z and power rail / multiphase DC / PI, with [[MXO]] listed as the instrument for power rail, multiphase DC and PI analysis. Crucially, the Vault explicitly flags that the source gives no model, bandwidth, data rate or test standard for these scopes, and no PDN impedance target value or method. So the chain is traceable as requirement → parameter → instrument class, but not as a quantified oscilloscope specification.",
+  "sufficient": true,
+  "missing": "The Vault gives no quantified oscilloscope requirement (no bandwidth in GHz, sample rate, jitter floor, data rate or compliance standard), no PDN impedance target value or measurement method, and no page that explicitly defines MXO as an oscilloscope family or ties a specific AI interface data rate (e.g. 112G/224G PAM4, PCIe Gen6) to a required scope bandwidth. There is no dedicated [[Oscilloscope]] entity page; the link is a stub referenced only from concept pages.",
+  "key_points": [
+    {
+      "point": "The AI market requirement is stated as servers/data centers for AI and HPC deployment needing high-speed internal interconnect and interfaces (downstream tier of the high-speed SerDes eco-chain).",
+      "source": "wiki/concepts/High speed SerDes eco-chain.md",
+      "quote": "服務器與資料中心：協助 AI、高效能計算環境部署，需求高速內部連與介面連接。",
+      "verified": true
+    },
+    {
+      "point": "The measurable signal-integrity parameters for high-speed PCB/PCBA are IL, Xtalk, Eye diagram and TDR impedance (Slide 20 signal integrity flow).",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]",
+      "verified": true
+    },
+    {
+      "point": "The Interface Test block maps to the oscilloscope (Scopes) together with BERTs, AWGs and switch matrices — this is the required oscilloscope capability for high-speed interface validation.",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]",
+      "verified": true
+    },
+    {
+      "point": "The Power Distribution Network block maps to oscilloscopes plus network analyzers, giving a second oscilloscope capability leg (PDN / power integrity).",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]]",
+      "verified": true
+    },
+    {
+      "point": "On the power side, the AI requirement (Blackwell platform power doubling, high-density power demand) is mapped to MXO for power rail / multiphase DC / PI measurement.",
+      "source": "wiki/sources/AISeverEcosystem.md",
+      "quote": "`Blackwell平台功耗翻倍，推升高密度電源需求`；[[R&S Solution]] 欄列 [[MXO]]：power rail / multiphase DC / PI",
+      "verified": true
+    },
+    {
+      "point": "For AI server motherboard/PCBA, the measurable parameters PDN Target Z and power rail / multiphase DC / PI are mapped to R&S ZNL and MXO respectively.",
+      "source": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+      "quote": "[[R&S ZNL]]: PDN Target Z；[[MXO]]: Power rail、multiphase DC、PI",
+      "verified": true
+    },
+    {
+      "point": "The Vault explicitly records that the source provides no oscilloscope model, bandwidth, data rate or test standard, so the chain cannot be quantified into a scope specification.",
+      "source": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+      "quote": "未提供型號、頻寬、資料率或測試標準",
+      "verified": true
+    },
+    {
+      "point": "The instrument mappings carry no option, firmware, fixture or calibration conditions, limiting them to sales-level clues rather than a formal test configuration.",
+      "source": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+      "quote": "在此表中的對應未提供 option / firmware / fixture / calibration 條件。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T09:55:50+00:00",
+  "seconds": 292.7,
+  "num_turns": 26,
+  "cost_usd_estimate": 1.4551885,
+  "error": null
+}
