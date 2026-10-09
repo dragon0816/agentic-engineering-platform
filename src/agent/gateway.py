@@ -813,6 +813,8 @@ class Gateway:
             # passages) is kept for whoever checks the citations; an
             # unvalidated one goes back to the model and stays small.
             kept = {"record": answer.get("record")} if validated else {}
+            # The answer's outcome is the Bridge call's: its code sits on the capability.
+            failure_code = ((ran.get("capability") or {}).get("failure") or {}).get("code")
             return ConversationToolExecution(
                 call_id=call.call_id, name=call.name,
                 host=HostToolOutcome(
@@ -821,7 +823,7 @@ class Gateway:
                           "answer": str(answer.get("answer") or "")[:12000],
                           "evidence": answer.get("evidence"),
                           "phase": state.get("phase"),
-                          "failure_code": (ran.get("failure") or {}).get("code"),
+                          "failure_code": failure_code,
                           **kept,
                           "instruction": (
                               "This answer passed the Host's evidence checks and is shown to "

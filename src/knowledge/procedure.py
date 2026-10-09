@@ -72,6 +72,11 @@ class KnowledgeProcedure(Contract):
     # "wiki_primary": curated Wiki pages are the cited answer source and each
     # cited page carries its Raw provenance; Raw fills gaps the Wiki lacks.
     citation_policy: Literal["raw_only", "wiki_primary"] = "raw_only"
+    # Opt-in, wiki_primary only (owner 2026-10-09): the Gateway model adds
+    # bilingual keyword queries, queries drop English function words, facet
+    # queries carry the question's own words when no subject or focus names
+    # them, and more Wiki sections are kept. Measured as one set.
+    bilingual_retrieval: bool = False
 
     @model_validator(mode="after")
     def valid_patterns(self) -> Self:

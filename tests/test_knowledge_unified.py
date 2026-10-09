@@ -67,7 +67,8 @@ def test_an_unvalidated_answer_goes_back_to_the_model_marked_as_such() -> None:
     model, handler = CallsVault("knowledge__rs-knowledge", {"question": "CMP180?"}), Recording()
     built = gateway(model, handler)
     built.knowledge_harness = lambda question, asset: {
-        "ok": False, "answer": "No sufficient evidence.", "evidence": None}
+        "ok": False, "answer": "No sufficient evidence.", "evidence": None,
+        "outcome": {"capability": {"failure": {"code": "knowledge_insufficient_evidence"}}}}
     import asyncio
 
     from test_gateway import request
@@ -79,6 +80,7 @@ def test_an_unvalidated_answer_goes_back_to_the_model_marked_as_such() -> None:
     observation = model.calls[1].messages[-1].text
     assert "not_validated" in observation and "not from the knowledge base" in observation
     assert '"record"' not in observation  # the model's observation stays small
+    assert '"failure_code": "knowledge_insufficient_evidence"' in observation
 
 
 def test_without_a_harness_the_tool_route_keeps_the_bridge_call() -> None:

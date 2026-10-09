@@ -34,6 +34,7 @@ from knowledge.query import (
     RetrievalSnapshot,
     cited_numbers,
 )
+from knowledge.query_rewrite import content_words, rewrite_queries
 from knowledge.vault import Vault
 from models.contracts import ModelClient
 
@@ -284,11 +285,21 @@ class KnowledgeQueryHandler:
         subject = procedure.subject(request.question)
         focus = procedure.focus(request.question)
         prefix = " ".join(part for part in (subject, focus.query if focus else None) if part)
+        bilingual = procedure.bilingual_retrieval
+        if bilingual and not prefix:
+            # A facet query without the question's words finds the same pages
+            # for every question.
+            prefix = content_words(request.question)
         queries = [request.question, *(focus.expansions if focus else ())]
+        if bilingual:
+            queries[1:1] = rewrite_queries(
+                self.model, self.alias, request.question, context.trace)
         for facet in procedure.requested_facets(request.question):
             for search in (*facet.search_queries, *facet.discovery_queries)[:2]:
                 queries.append(f"{prefix} {search}".strip())
-        passages = snapshot.wiki_primary_passages(tuple(dict.fromkeys(queries))[:12])
+        passages = snapshot.wiki_primary_passages(
+            tuple(dict.fromkeys(queries))[:12], k=36 if bilingual else 24,
+            content_only=bilingual)
         if not passages:
             raise CapabilityRefused("knowledge_insufficient_evidence")
         assessment = assess_wiki_primary(passages, request.question, procedure)

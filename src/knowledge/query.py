@@ -27,6 +27,7 @@ from common.execution import Failure, TraceIdentifiers
 from knowledge.contracts import KnowledgeSource
 from knowledge.lint import WIKILINK, body_of, head_fields, read_pages
 from knowledge.modelcalls import failure_from_exception
+from knowledge.query_rewrite import content_words
 from knowledge.raw import RawIndex, load_document, one_line_ending
 from knowledge.vault import Vault, VaultError, normalize
 from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequirements
@@ -915,6 +916,7 @@ class RetrievalSnapshot:
     def wiki_primary_passages(
         self, queries: tuple[str, ...], *, k: int = 24, per_page: int = 3,
         index_k: int = 8, raw_k: int = 4, max_chars: int = 40000, linked_from: int = 6,
+        content_only: bool = False,
     ) -> tuple[Passage, ...]:
         """Rank curated Wiki sections first, then add a few Raw fallbacks.
 
@@ -922,8 +924,11 @@ class RetrievalSnapshot:
         followed by a full-text ranking of all Wiki sections. Queries are
         interleaved so one facet cannot fill the budget, and no page supplies
         more than `per_page` sections. Raw passages cover claims the Wiki
-        does not; they keep their own citations.
+        does not; they keep their own citations. With `content_only`, English
+        function words are left out of every query's ranking.
         """
+        if content_only:
+            queries = tuple(content_words(query) for query in queries)
         self._prepare_wiki_navigation()
         docs = self._wiki_section_docs()
         by_page: dict[str, list[_Doc]] = {}
