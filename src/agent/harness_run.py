@@ -118,7 +118,9 @@ def validate_run(
     failed = next(item for item in checks if item.status == "failed")
     if run.plan.fallback == "retry" and run.retry_count < run.plan.retry_budget:
         first: HarnessPhase = (
-            "collecting" if run.plan.stages[0] == "collect_context" else "executing"
+            "collecting"
+            if run.plan.stages[0] == "collect_context" and run.plan.retry_from == "first"
+            else "executing"
         )
         return _advance(
             run, first,
@@ -131,7 +133,7 @@ def validate_run(
     event: HarnessEventKind = "needs_input" if terminal == "needs_input" else "failed"
     return _advance(
         run, terminal, ("validation_failed", failed.evidence_ref),
-        (event, failed.evidence_ref), checks=checks, failure_code="host_check_failed",
+        (event, failed.evidence_ref), checks=checks, failure_code=run.plan.exhausted_code,
     )
 
 

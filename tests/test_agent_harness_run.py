@@ -87,3 +87,40 @@ def test_coding_retry_is_bounded_and_failure_never_turns_into_success() -> None:
     assert exhausted.phase == "failed" and exhausted.retry_count == 1
     with pytest.raises(ValueError, match="not expected"):
         observe_execution(exhausted, "candidate-3")
+
+
+def test_a_repair_retry_keeps_its_context_and_an_adapter_names_the_exhaustion() -> None:
+    """Harness unification U1 (owner 2026-10-09): a coding repair executes
+    again without replanning; when repairs run out the adapter's code ends it."""
+    from agent.harness_plan import build_plan
+    from agent.skills import SkillHarnessGuidance
+    from common.assets import AssetIdentity
+
+    plan = build_plan(
+        task_id="coding-1", task_sha256="0" * 64, domain="coding",
+        skill=AssetIdentity(namespace="engineering", name="coding", version="1.7.0"),
+        guidance=SkillHarnessGuidance(domains=("coding",), fallback="retry", max_retries=2),
+        host_checks=("tests_new", "tests_suite"), max_retries=1, retry_from="execute",
+        exhausted_code="repair_budget_exceeded")
+    assert plan.retry_budget == 1 and plan.stages[0] == "collect_context"
+    failed = (HarnessCheckResult(check_id="tests_new", status="failed", evidence_ref="t1"),
+              HarnessCheckResult(check_id="tests_suite", status="passed", evidence_ref="t2"))
+    run = observe_execution(observe_context(start_harness(plan), "plan"), "change-1")
+    run = validate_run(run, failed)
+    assert run.phase == "executing" and run.retry_count == 1  # no second plan
+    run = validate_run(observe_execution(run, "change-2"), failed)
+    assert run.phase == "failed" and run.failure_code == "repair_budget_exceeded"
+
+
+def test_a_host_budget_caps_what_a_skill_asks_for() -> None:
+    from agent.harness_plan import build_plan
+    from agent.skills import SkillHarnessGuidance
+    from common.assets import AssetIdentity
+
+    plan = build_plan(
+        task_id="w", task_sha256="0" * 64, domain="workflow",
+        skill=AssetIdentity(namespace="engineering", name="x", version="1.0.0"),
+        guidance=SkillHarnessGuidance(domains=("workflow",), fallback="retry", max_retries=3),
+        host_checks=("steps_succeeded",), max_retries=0)
+    assert plan.retry_budget == 0 and plan.fallback == "needs_input"
+    assert plan.stages == ("execute", "validate")
