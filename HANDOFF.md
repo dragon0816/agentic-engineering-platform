@@ -1,6 +1,34 @@
 # Handoff
 
-Updated: 2026-10-08 (Asia/Taipei), by Claude Code
+Updated: 2026-10-09 (Asia/Taipei), by Claude Code
+
+## Where the current work stopped (2026-10-09)
+
+knowledge_v1 is now measured against Claude Code reference answers.
+
+- References: `benchmarks/knowledge_v1/references/` (36 core questions,
+  283 key points, all quotes verified). Made by `reference.py`; do not
+  regenerate them without the owner (about $49 of Claude Code usage).
+- Grading: `reference_grade.py --run-id <id>` (company gpt-5.5 labels each
+  key point). `run.py` grader 1.3.
+- Latest run: `runs/core-001`, review in `runs/core-001/review.zh-TW.md`.
+  30/36 acceptable, but 7 answerable questions came back as insufficient, and
+  all 6 foundation questions stop at a `product_option_spec` facet with no
+  retrieval retry (`retrieval_attempts` empty).
+- Post-unification benchmarks: coding_v1 fix-run-016 20/20 (was 19/20); lab
+  fix-012 13 pass, X02/X03 fail (was 12/3); knowledge sample-004 lost 14
+  questions to company LLM 503s, and its tool-route traces predate the cited-passage record.
+- The JEV/Laya tunnel host 172.25.228.141 is unreachable from this PC's new
+  network (owner, 2026-10-09). The `decision_accelerator` shadow calls fail
+  until that changes.
+
+Next actions, in order:
+1. Owner decision: may the Knowledge Harness facet assessment change, so
+   definition questions are not held to `product_option_spec`, and why does the
+   retry not run? Investigate first, change only with approval.
+2. For the 7 retrieval misses, compare the reference's cited files with the
+   passages AEP retrieved.
+3. Re-run only `run.py --run-id core-002 --set <core ids>` + `reference_grade.py`.
 
 ## Repository and runtime state
 
