@@ -43,7 +43,9 @@ from questions import SOURCE_SHA256, load, sample  # noqa: E402
 # reply with no citations is INSUFFICIENT_KNOWLEDGE.
 # 1.2 (2026-10-09): the tool route's Host-validated answer is read from the
 # host record and cited like the direct route.
-GRADER_VERSION = "1.2"
+# 1.3 (2026-10-09): a tool-route answer the Harness refused to validate is a
+# FAIL with VALIDATION_GAP, not a SYSTEM_ERROR.
+GRADER_VERSION = "1.3"
 TIMEOUT_S = 600.0
 HOST_JSON = Path(os.path.expandvars(r"%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json"))
 STATUSES = ("PASS", "INSUFFICIENT_KNOWLEDGE", "FAIL", "NEEDS_HUMAN_REVIEW", "SYSTEM_ERROR")
@@ -72,6 +74,11 @@ def grade(question: dict[str, Any], exchange: dict[str, Any], vault: Path,
         return {**base, "status": "FAIL", "gap": "EXECUTION_GAP",
                 "why": "answered without using Knowledge"}
     gap = use["failure"] in INSUFFICIENT or use["phase"] == "needs_input"
+    if use.get("harnessed") and not gap and use["status"] != "succeeded":
+        # The Harness ran and its checks refused the answer: a validation
+        # miss, not a system error.
+        return {**base, "status": "FAIL", "gap": "VALIDATION_GAP",
+                "why": f"the Knowledge Harness did not validate an answer ({use['failure']})"}
     if not gap and use["status"] != "succeeded":
         return {**base, "status": "SYSTEM_ERROR", "gap": "EXECUTION_GAP",
                 "why": f"Knowledge did not complete ({use['failure'] or use['status']})"}

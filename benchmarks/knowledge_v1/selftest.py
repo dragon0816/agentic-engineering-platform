@@ -36,7 +36,7 @@ class Reviewer:
 
 
 def direct(text: str, passages: list[dict[str, Any]], status: str = "succeeded",
-           failure: str | None = None) -> dict[str, Any]:
+           failure: str | None = None, phase: str = "needs_input") -> dict[str, Any]:
     capability = {"status": status, "data": {"answer": {"passages": passages, "text": text}},
                   "failure": {"code": failure} if failure else None}
     return {"http_status": 200, "timed_out": False, "seconds": 1.0, "reply": {"answer": {
@@ -120,10 +120,10 @@ def compare_cases() -> int:
 
 
 def hosted(text: str, passages: list[dict[str, Any]] | None, validated: bool = True,
-           failure: str | None = None) -> dict[str, Any]:
+           failure: str | None = None, phase: str = "needs_input") -> dict[str, Any]:
     """The tool route since 2026-10-09: the host ran the Knowledge Harness."""
     data: dict[str, Any] = {"knowledge_harness": "validated" if validated else "not_validated",
-                            "answer": text, "phase": "validated" if validated else "needs_input",
+                            "answer": text, "phase": "validated" if validated else phase,
                             "failure_code": failure}
     if passages is not None:
         data["record"] = {"answer": {"passages": passages}}
@@ -148,6 +148,8 @@ def main() -> int:
             ("NEEDS_HUMAN_REVIEW", hosted("It measures EVM [1].", None), Reviewer(True)),
             ("INSUFFICIENT_KNOWLEDGE", hosted("Not in the Vault.", None, False,
                                               "knowledge_insufficient_evidence"), Reviewer(True)),
+            ("FAIL", hosted("Not validated.", None, False, "knowledge_not_validated", "failed"),
+             Reviewer(True)),
             ("FAIL", plain("It measures EVM."), Reviewer(True)),
             ("FAIL", direct("It measures EVM [1].", [FORGED]), Reviewer(True)),
             ("FAIL", direct("It measures EVM.", [PASSAGE]), Reviewer(True)),
