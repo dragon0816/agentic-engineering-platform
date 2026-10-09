@@ -20,7 +20,20 @@ REPO = Path(__file__).resolve().parents[3]
 
 
 def agent_web() -> tuple[str, str]:
-    """The newest Agent Web started from this repository: (base URL, token)."""
+    """The running Agent Web: (base URL, token). Since 2026-10-08 the server
+    records its address in the workspace (`aep-host open`); older starts left
+    it only in `.scratch` logs."""
+    import os
+
+    record = (Path(os.environ.get("LOCALAPPDATA", "")) / "AgenticEngineeringPlatform"
+              / "preview-0.1.0" / "workspace" / "agent-web.json")
+    try:
+        address = json.loads(record.read_text(encoding="utf-8"))["address"]
+        found = re.search(r"(http://127\.0\.0\.1:\d+)/\?token=(\S+)", address)
+        if found:
+            return found.group(1), found.group(2)
+    except (OSError, ValueError, KeyError):
+        pass
     logs = sorted((REPO / ".scratch").glob("agent-web-*.out.log"), key=lambda p: p.stat().st_mtime)
     for log in reversed(logs):
         found = re.search(r"(http://127\.0\.0\.1:\d+)/\?token=(\S+)", log.read_text(encoding="utf-8"))
