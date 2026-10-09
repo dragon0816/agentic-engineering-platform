@@ -256,3 +256,18 @@ def test_unclassified_or_incomplete_context_never_reaches_cli(tmp_path: Path) ->
     )
     assert denied.code == "native_requires_public"
     assert runner.calls == []
+
+
+def test_a_chinese_cli_answer_is_read_as_utf8_not_the_console_code_page(tmp_path: Path) -> None:
+    """2026-10-08: a cp950 reader thread failed on a CLI's UTF-8 answer and the
+    turn crashed with stdout None."""
+    import sys
+
+    from host_runtime.conversation_backends import _answer, _run_process
+
+    done = _run_process(
+        [sys.executable, "-c", "import sys; sys.stdout.buffer.write('答案\u00a0完成'.encode())"],
+        cwd=tmp_path, input="", capture_output=True, text=True, timeout=30, check=False,
+        env=dict(__import__("os").environ))
+    assert done.stdout == "答案 完成"
+    assert _answer(None) == ""

@@ -156,12 +156,16 @@ def _run_process(
     check: bool,
     env: Mapping[str, str],
 ) -> ProcessResult:
+    # UTF-8, never the console code page: a Chinese answer from a CLI crashed
+    # the cp950 reader thread and left stdout None (2026-10-08 log).
     return subprocess.run(
         argv,
         cwd=cwd,
         input=input,
         capture_output=capture_output,
         text=text,
+        encoding="utf-8" if text else None,
+        errors="replace" if text else None,
         timeout=timeout,
         check=check,
         env=env,
@@ -221,8 +225,9 @@ def _text_values(value: object) -> list[str]:
     return found
 
 
-def _answer(output: str) -> str:
+def _answer(output: str | None) -> str:
     values: list[str] = []
+    output = output or ""
     try:
         values.extend(_text_values(json.loads(output)))
     except json.JSONDecodeError:
