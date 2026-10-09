@@ -1,0 +1,128 @@
+{
+ "question": {
+  "id": "Q0401",
+  "text": "What are the most important signaling test capabilities for applications in Automotive?",
+  "market": "Automotive",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "basic",
+  "difficulty": "L1"
+ },
+ "session_id": "conversation-2ee5833561bb48119ee84ac68e5f5b94",
+ "exchange": {
+  "sent": "What are the most important signaling test capabilities for applications in Automotive?",
+  "http_status": 200,
+  "seconds": 307.547,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-2ee5833561bb48119ee84ac68e5f5b94",
+    "actor": "leo.chi",
+    "title": "What are the most important signaling test capabilities for applications…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T21:16:23.521864Z",
+    "updated_at": "2026-10-09T21:21:30.973504Z",
+    "messages": [
+     {
+      "message_id": "message-9425abddabd84e53a10a14fc7654d80d",
+      "role": "user",
+      "text": "What are the most important signaling test capabilities for applications in Automotive?",
+      "created_at": "2026-10-09T21:16:23.635071Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-5a721a5cd783455ea8f9d46cc6d0cbf9",
+      "role": "assistant",
+      "text": "The knowledge base gave no validated answer for this question, so the points below are **general industry guidance, not from the R&S knowledge base**.\n\nFor Automotive applications, the most important **signaling test capabilities** are usually:\n\n1. **End-to-end cellular connectivity validation**\n   - Ability to emulate LTE/5G networks and verify that the device under test attaches, registers, authenticates, and maintains service correctly.\n   - Important for telematics control units, connected infotainment, emergency call modules, and software-defined vehicles.\n\n2. **Multi-RAT support**\n   - Testing across **LTE, 5G NR, WCDMA/GSM fallback where relevant**, and sometimes Wi‑Fi/Bluetooth coexistence.\n   - Automotive modules often need to work globally across many operators and legacy network conditions.\n\n3. **eCall / emergency call signaling**\n   - Validation of emergency call setup, MSD transmission, voice connection, fallback behavior, and regional variants such as EU eCall or NG eCall.\n   - This is safety-critical and often regulatory-driven.\n\n4. **V2X signaling and protocol testing**\n   - Support for **C‑V2X PC5 sidelink**, and increasingly 5G NR-V2X where applicable.\n   - Key capabilities include message exchange, resource allocation, latency, congestion behavior, and robustness under mobility.\n\n5. **Mobility and handover testing**\n   - Simulation of changing cells, roaming, reselection, handover, and loss/recovery of service.\n   - Automotive devices experience fast-changing RF and network environments, so stable behavior during mobility is essential.\n\n6. **Network impairment and edge-case simulation**\n   - Ability to emulate weak coverage, fading, interference, dropped calls, failed attach, abnormal detach, rejected registration, SIM/network errors, and emergency-only service.\n   - This helps verify vehicle behavior in real-world poor-network scenarios.\n\n7. **Throughput, latency, and QoS validation**\n   - Important for connected services, OTA updates, navigation, infotainment, diagnostics, cloud connectivity, and ADAS data offload.\n   - For 5G, testing QoS flows, slicing-related behavior, and latency-sensitive services may matter.\n\n8. **IMS / VoLTE / VoNR capability**\n   - Automotive telematics often depends on voice services for emergency or assistance calls.\n   - Signaling test should cover IMS registration, VoLTE/VoNR call setup, fallback, and failure modes.\n\n9. **GNSS and cellular interaction**\n   - Many automotive use cases combine cellular signaling with GNSS positioning.\n   - Useful test systems can coordinate location simulation with network behavior, especially for eCall, telematics, and V2X scenarios.\n\n10. **Regression automation and operator certification support**\n   - Automotive programs need repeatable test campaigns across firmware releases.\n   - Important features include automated test sequencing, logging, protocol trace analysis, and support for carrier/GCF/PTCRB-style test cases.\n\nIn short: for Automotive, the most critical signaling-test capabilities are **cellular network emulation, LTE/5G mobility, eCall, C‑V2X/NR‑V2X, IMS voice, degraded-network scenarios, global operator coverage, and strong automation with protocol analysis**.",
+      "created_at": "2026-10-09T21:21:30.973504Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-7226ff0de79742518e69c5ffd203c065",
+       "request_id": "request-7226ff0de79742518e69c5ffd203c065",
+       "span_id": "span-7226ff0de79742518e69c5ffd203c065",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+    "ok": true,
+    "answer": "The knowledge base gave no validated answer for this question, so the points below are **general industry guidance, not from the R&S knowledge base**.\n\nFor Automotive applications, the most important **signaling test capabilities** are usually:\n\n1. **End-to-end cellular connectivity validation**\n   - Ability to emulate LTE/5G networks and verify that the device under test attaches, registers, authenticates, and maintains service correctly.\n   - Important for telematics control units, connected infotainment, emergency call modules, and software-defined vehicles.\n\n2. **Multi-RAT support**\n   - Testing across **LTE, 5G NR, WCDMA/GSM fallback where relevant**, and sometimes Wi‑Fi/Bluetooth coexistence.\n   - Automotive modules often need to work globally across many operators and legacy network conditions.\n\n3. **eCall / emergency call signaling**\n   - Validation of emergency call setup, MSD transmission, voice connection, fallback behavior, and regional variants such as EU eCall or NG eCall.\n   - This is safety-critical and often regulatory-driven.\n\n4. **V2X signaling and protocol testing**\n   - Support for **C‑V2X PC5 sidelink**, and increasingly 5G NR-V2X where applicable.\n   - Key capabilities include message exchange, resource allocation, latency, congestion behavior, and robustness under mobility.\n\n5. **Mobility and handover testing**\n   - Simulation of changing cells, roaming, reselection, handover, and loss/recovery of service.\n   - Automotive devices experience fast-changing RF and network environments, so stable behavior during mobility is essential.\n\n6. **Network impairment and edge-case simulation**\n   - Ability to emulate weak coverage, fading, interference, dropped calls, failed attach, abnormal detach, rejected registration, SIM/network errors, and emergency-only service.\n   - This helps verify vehicle behavior in real-world poor-network scenarios.\n\n7. **Throughput, latency, and QoS validation**\n   - Important for connected services, OTA updates, navigation, infotainment, diagnostics, cloud connectivity, and ADAS data offload.\n   - For 5G, testing QoS flows, slicing-related behavior, and latency-sensitive services may matter.\n\n8. **IMS / VoLTE / VoNR capability**\n   - Automotive telematics often depends on voice services for emergency or assistance calls.\n   - Signaling test should cover IMS registration, VoLTE/VoNR call setup, fallback, and failure modes.\n\n9. **GNSS and cellular interaction**\n   - Many automotive use cases combine cellular signaling with GNSS positioning.\n   - Useful test systems can coordinate location simulation with network behavior, especially for eCall, telematics, and V2X scenarios.\n\n10. **Regression automation and operator certification support**\n   - Automotive programs need repeatable test campaigns across firmware releases.\n   - Important features include automated test sequencing, logging, protocol trace analysis, and support for carrier/GCF/PTCRB-style test cases.\n\nIn short: for Automotive, the most critical signaling-test capabilities are **cellular network emulation, LTE/5G mobility, eCall, C‑V2X/NR‑V2X, IMS voice, degraded-network scenarios, global operator coverage, and strong automation with protocol analysis**.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-7226ff0de79742518e69c5ffd203c065",
+      "request_id": "request-7226ff0de79742518e69c5ffd203c065",
+      "span_id": "span-7226ff0de79742518e69c5ffd203c065",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-7226ff0de79742518e69c5ffd203c065",
+       "request_id": "request-7226ff0de79742518e69c5ffd203c065",
+       "span_id": "span-7226ff0de79742518e69c5ffd203c065",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no validated answer for this question, so the points below are **general industry guidance, not from the R&S knowledge base**.\n\nFor Automotive applications, the most important **signaling test capabilities** are usually:\n\n1. **End-to-end cellular connectivity validation**\n   - Ability to emulate LTE/5G networks and verify that the device under test attaches, registers, authenticates, and maintains service correctly.\n   - Important for telematics control units, connected infotainment, emergency call modules, and software-defined vehicles.\n\n2. **Multi-RAT support**\n   - Testing across **LTE, 5G NR, WCDMA/GSM fallback where relevant**, and sometimes Wi‑Fi/Bluetooth coexistence.\n   - Automotive modules often need to work globally across many operators and legacy network conditions.\n\n3. **eCall / emergency call signaling**\n   - Validation of emergency call setup, MSD transmission, voice connection, fallback behavior, and regional variants such as EU eCall or NG eCall.\n   - This is safety-critical and often regulatory-driven.\n\n4. **V2X signaling and protocol testing**\n   - Support for **C‑V2X PC5 sidelink**, and increasingly 5G NR-V2X where applicable.\n   - Key capabilities include message exchange, resource allocation, latency, congestion behavior, and robustness under mobility.\n\n5. **Mobility and handover testing**\n   - Simulation of changing cells, roaming, reselection, handover, and loss/recovery of service.\n   - Automotive devices experience fast-changing RF and network environments, so stable behavior during mobility is essential.\n\n6. **Network impairment and edge-case simulation**\n   - Ability to emulate weak coverage, fading, interference, dropped calls, failed attach, abnormal detach, rejected registration, SIM/network errors, and emergency-only service.\n   - This helps verify vehicle behavior in real-world poor-network scenarios.\n\n7. **Throughput, latency, and QoS validation**\n   - Important for connected services, OTA updates, navigation, infotainment, diagnostics, cloud connectivity, and ADAS data offload.\n   - For 5G, testing QoS flows, slicing-related behavior, and latency-sensitive services may matter.\n\n8. **IMS / VoLTE / VoNR capability**\n   - Automotive telematics often depends on voice services for emergency or assistance calls.\n   - Signaling test should cover IMS registration, VoLTE/VoNR call setup, fallback, and failure modes.\n\n9. **GNSS and cellular interaction**\n   - Many automotive use cases combine cellular signaling with GNSS positioning.\n   - Useful test systems can coordinate location simulation with network behavior, especially for eCall, telematics, and V2X scenarios.\n\n10. **Regression automation and operator certification support**\n   - Automotive programs need repeatable test campaigns across firmware releases.\n   - Important features include automated test sequencing, logging, protocol trace analysis, and support for carrier/GCF/PTCRB-style test cases.\n\nIn short: for Automotive, the most critical signaling-test capabilities are **cellular network emulation, LTE/5G mobility, eCall, C‑V2X/NR‑V2X, IMS voice, degraded-network scenarios, global operator coverage, and strong automation with protocol analysis**.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_xxBCyHgWURkNVplUFWXQYoXi",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "failed",
+         "data": {
+          "knowledge_harness": "not_validated",
+          "answer": "The Knowledge query did not produce a validated answer. Unverified requested facets: technical_knowledge.",
+          "evidence": {
+           "raw_citations": 0,
+           "facet_status": "missing",
+           "missing_facets": [
+            "technical_knowledge"
+           ],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {}
+          },
+          "phase": "needs_input",
+          "failure_code": "knowledge_insufficient_evidence",
+          "instruction": "The knowledge base did not validate an answer. Tell the person what is above; anything you add is not from the knowledge base and must say so."
+         },
+         "failure": {
+          "code": "knowledge_not_validated",
+          "message": "The Knowledge Harness did not validate an answer",
+          "retryable": false
+         }
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

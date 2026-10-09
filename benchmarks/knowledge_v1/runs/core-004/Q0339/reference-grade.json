@@ -1,0 +1,68 @@
+{
+ "id": "Q0339",
+ "grader": "1.2",
+ "coverage": 0.438,
+ "points": [
+  {
+   "n": 1,
+   "point": "每條規格主張必須標明型號與來源文件版次，來源未標版次就要明說沒標",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions official R&S spec/config sources and source filenames/versions, but not the rule that every spec claim must carry model and document version or state when version is unmarked"
+  },
+  {
+   "n": 2,
+   "point": "規格數字必須連同測試條件一起引用，不換算單位；option 相依性照抄原文，不自行推論相容性",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions exact setup, options, compatibility, and checking datasheets, but omits quoting test conditions, no unit conversion, and no inferred option compatibility"
+  },
+  {
+   "n": 3,
+   "point": "只有 specifications with limits / without limits 代表保證效能；typ./nom./meas./n. trc. 不由 R&S 保證，不能用來做比較主張",
+   "verified": true,
+   "label": "missing",
+   "why": "does not distinguish specifications with/without limits from typ./nom./meas./n. trc. or say typical values cannot support comparisons"
+  },
+  {
+   "n": 4,
+   "point": "訊號分析儀規格文件同樣註明無 tolerance limits 的資料不具約束力且可能變更",
+   "verified": true,
+   "label": "missing",
+   "why": "does not state analyzer data without tolerance limits is non-binding and subject to change"
+  },
+  {
+   "n": 5,
+   "point": "對競品的主張若只有 R&S internal battle card 單一來源，用於客戶文件前必須另查對手官方資料與第三方證據",
+   "verified": true,
+   "label": "covered",
+   "why": "says competitor evidence must be official/independent and not rely only on internal battle-card positioning"
+  },
+  {
+   "n": 6,
+   "point": "only platform、first validated、leadership、lower TCO 等銷售語言不可當作可驗證技術規格",
+   "verified": true,
+   "label": "partial",
+   "why": "says sales positioning is not binding technical specification, but does not cover the listed claims such as only platform, first validated, leadership, lower TCO"
+  },
+  {
+   "n": 7,
+   "point": "現有 battle card 未提供競品的正式 datasheet、文件版次、order number、option code、release status 或測試條件",
+   "verified": true,
+   "label": "partial",
+   "why": "notes lack of official/third-party competitor citations and need to check datasheets, options, order numbers, etc., but does not fully list missing document version, option code, release status, and test conditions in existing battle cards"
+  },
+  {
+   "n": 8,
+   "point": "Aerospace / Defense（衛星、UAV）的 R&S solution mapping 只是 sales mapping，不可當作測試配置建議書，仍需 sales kits、application notes、datasheet 或正式 proposal",
+   "verified": true,
+   "label": "partial",
+   "why": "asks for direct A&D/application evidence, but does not clearly state satellite/UAV solution mapping is only sales mapping and not a test configuration proposal requiring sales kits, app notes, datasheets, or formal proposal"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "R&S FSW with R&S SMW200A is stated to measure absolute and relative group delay of satellite transponders",
+  "TVAC page says cable/adaptor/switch drift and recalibration affect measurement accuracy"
+ ]
+}

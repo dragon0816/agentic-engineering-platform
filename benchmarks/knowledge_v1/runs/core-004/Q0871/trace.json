@@ -1,0 +1,195 @@
+{
+ "question": {
+  "id": "Q0871",
+  "text": "Map the chain from a Semiconductor market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+  "market": "Semiconductor",
+  "product": "Oscilloscope",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-ecaec13ddeb740e4ad5c4fb95fdc95f6",
+ "exchange": {
+  "sent": "Map the chain from a Semiconductor market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+  "http_status": 200,
+  "seconds": 254.39,
+  "timed_out": false,
+  "reply": {
+   "ok": false,
+   "conversation": {
+    "session_id": "conversation-ecaec13ddeb740e4ad5c4fb95fdc95f6",
+    "actor": "leo.chi",
+    "title": "Map the chain from a Semiconductor market requirement to a measurable pa…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T21:44:59.592408Z",
+    "updated_at": "2026-10-09T21:49:13.713766Z",
+    "messages": [
+     {
+      "message_id": "message-194c6ec1728e4f3c917ebba99bd05190",
+      "role": "user",
+      "text": "Map the chain from a Semiconductor market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+      "created_at": "2026-10-09T21:44:59.601814Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-05cd0b16c48d40088c4ae6d06b223a2d",
+      "role": "assistant",
+      "text": "The Knowledge query did not produce a validated answer. Unverified requested facets: market_segment.",
+      "created_at": "2026-10-09T21:49:13.713766Z",
+      "status": "needs_input",
+      "trace": {
+       "trace_id": "trace-64af3c1792d24b72b252f5d2efe477df",
+       "request_id": "request-64af3c1792d24b72b252f5d2efe477df",
+       "span_id": "span-64af3c1792d24b72b252f5d2efe477df",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": false,
+    "answer": "The Knowledge query did not produce a validated answer. Unverified requested facets: market_segment.",
+    "status": "needs_input",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-64af3c1792d24b72b252f5d2efe477df",
+      "request_id": "request-64af3c1792d24b72b252f5d2efe477df",
+      "span_id": "span-64af3c1792d24b72b252f5d2efe477df",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-64af3c1792d24b72b252f5d2efe477df",
+       "request_id": "request-64af3c1792d24b72b252f5d2efe477df",
+       "span_id": "span-64af3c1792d24b72b252f5d2efe477df",
+       "parent_span_id": null
+      },
+      "status": "failed",
+      "data": null,
+      "failure": {
+       "code": "knowledge_insufficient_evidence",
+       "message": "Capability invocation did not complete",
+       "retryable": false
+      },
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-6a9a4b702c5d47ca9bad50cec37d9c8b",
+      "task_sha256": "681ffdeda8ba61c1d3ec18a268ea644de849c90523100c74dfeeb562aa0dac5f",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.9.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "needs_input",
+     "retry_count": 1,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validation_failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "sequence": 4,
+       "kind": "retrying",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 5,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 6,
+       "kind": "needs_input",
+       "evidence_ref": null
+      }
+     ],
+     "checks": [],
+     "failure_code": "knowledge_insufficient_evidence"
+    },
+    "evidence": {
+     "raw_citations": 0,
+     "facet_status": "missing",
+     "missing_facets": [
+      "market_segment"
+     ],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {}
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

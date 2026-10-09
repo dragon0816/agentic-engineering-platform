@@ -1,0 +1,65 @@
+{
+ "id": "Q0581",
+ "grader": "1.2",
+ "coverage": 0.0,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's automotive radar content is confined to the AREG800A radar echo generator, which is not a VNA",
+   "verified": true,
+   "label": "contradicted",
+   "why": "uses AREG800A echo-generator data as VNA measurement requirements"
+  },
+  {
+   "n": 2,
+   "point": "The automotive radar frequency bands documented in the Vault are 24–24.25 GHz, 76–81 GHz and 24–44 GHz (FE44S), given for radar echo generator frontends",
+   "verified": true,
+   "label": "missing",
+   "why": "does not state 24–24.25, 76–81, or 24–44 GHz frontend bands"
+  },
+  {
+   "n": 3,
+   "point": "The Vault distinguishes FMCW from non-FMCW radar only in the echo-generation/distance context, not as a VNA measurement requirement",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention FMCW/non-FMCW distinction or its limited context"
+  },
+  {
+   "n": 4,
+   "point": "The ZNA VNA family page describes coverage from 10 MHz up to 67 GHz with no reference to radar or automotive use cases",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention ZNA coverage or absence of radar use case"
+  },
+  {
+   "n": 5,
+   "point": "mmWave VNA coverage in the Vault extends to 110 GHz via the ZNA67EXT converter-head system, stated purely as instrument specification",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention ZNA67EXT 110 GHz specification"
+  },
+  {
+   "n": 6,
+   "point": "ZNA67EXT dynamic-range data is segmented by band, including the 75 GHz to 80 GHz segment that overlaps the 76–81 GHz radar band, but the Vault never attributes this to radar needs",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention ZNA67EXT dynamic-range bands or lack of radar attribution"
+  },
+  {
+   "n": 7,
+   "point": "ZNB3000 VNA models are documented with frequency upgrade options up to 54.0 GHz, again with no radar or automotive application context",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention ZNB3000 54 GHz upgrades or lack of radar context"
+  }
+ ],
+ "contradicted": 1,
+ "invented": [
+  "automotive radar echo generation moves toward wider instantaneous bandwidth... the VNA measurement task shifts toward wider IF-span coverage",
+  "the VNA measurement task shifts toward... time-domain analysis",
+  "the VNA measurement task shifts toward... fine frequency stepping, narrow measurement bandwidth",
+  "enough dynamic/level accuracy to verify ghost suppression, SFDR, RCS range, and IF transfer behavior",
+  "For ghost-object suppression, the VNA is used in time domain with 125 kHz frequency step size...",
+  "For IF transfer / level measurements, the VNA conditions are 2.5 MHz frequency step size, 1 kHz measurement bandwidth..."
+ ]
+}

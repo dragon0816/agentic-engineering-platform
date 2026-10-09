@@ -1,0 +1,790 @@
+{
+ "question": {
+  "id": "Q0546",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Signal Generator / Signal Analyzer in Automotive, and what evidence supports each opportunity?",
+  "market": "Automotive",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-106888047e2646d4add5d9e44829eeaf",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Signal Generator / Signal Analyzer in Automotive, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 164.859,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-106888047e2646d4add5d9e44829eeaf",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T21:24:30.852989Z",
+    "updated_at": "2026-10-09T21:27:15.648983Z",
+    "messages": [
+     {
+      "message_id": "message-9d74459dd1b74d0f8e33b581977fdfe9",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Signal Generator / Signal Analyzer in Automotive, and what evidence supports each opportunity?",
+      "created_at": "2026-10-09T21:24:31.071148Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-ee2c8044495a4ab68fb4fe34fc43a0fa",
+      "role": "assistant",
+      "text": "No RAW passage directly supports an automotive-specific opportunity; the only supported SG/SA opportunity is **ADC / DAC Frontend Performance**, which RAW evidence marks for both **Spectrum Analyzers** and **Signal Generators** [37], and the RAW-listed R&S signal/spectrum analyzer families are **R&S FSW**, **R&S FSWX**, and **R&S FSV3000** [38][39][40].\n### 推薦先賣\n| Opportunity | Supported instrument role | R&S products supported by RAW | Evidence strength |\n|---|---|---|---|\n| ADC / DAC Frontend Performance | Spectrum Analyzers and Signal Generators are both marked applicable [37] | R&S FSW Signal and Spectrum Analyzer [38]; R&S FSWX Signal and Spectrum Analyzer [39]; R&S FSV3000 Signal and Spectrum Analyzer [40] | Strongest currently supported RAW opportunity because it is the only RAW opportunity that explicitly includes both instrument categories [37] |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S FSW Signal and Spectrum Analyzer | ADC / DAC Frontend Performance | 知識庫未標示 | RAW names FSW as a Rohde & Schwarz signal and spectrum analyzer, and ADC / DAC Frontend Performance is marked for spectrum analyzers [37][38] | [37][38] | RAW does not state automotive application, required frequency range, bandwidth, options, or configuration |\n| R&S FSWX Signal and Spectrum Analyzer | ADC / DAC Frontend Performance | 知識庫未標示 | RAW names FSWX as a Rohde & Schwarz signal and spectrum analyzer, and ADC / DAC Frontend Performance is marked for spectrum analyzers [37][39] | [37][39] | RAW does not state automotive application, required frequency range, bandwidth, options, or configuration |\n| R&S FSV3000 Signal and Spectrum Analyzer | ADC / DAC Frontend Performance | 知識庫未標示 | RAW names FSV3000 as a Rohde & Schwarz signal and spectrum analyzer, and ADC / DAC Frontend Performance is marked for spectrum analyzers [37][40] | [37][40] | RAW does not state automotive application, required frequency range, bandwidth, options, or configuration |\n| R&S Signal Generators | ADC / DAC Frontend Performance | 知識庫未標示 | RAW marks Signal Generators applicable to ADC / DAC Frontend Performance [37] | [37] | RAW does not name any R&S signal generator model or automotive-specific use case |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| ADC / DAC Frontend Performance | Signal generator + R&S FSW / FSWX / FSV3000 signal and spectrum analyzer | Use the RAW-supported pairing of signal generators and spectrum analyzers for ADC / DAC frontend performance work [37][38][39][40] | Automotive linkage, DUT type, required options, frequency range, bandwidth, and measurement procedure are not stated in RAW |\n### 限制\nRAW evidence does not rank opportunities, does not explicitly mention automotive for ADC / DAC Frontend Performance, and does not provide any R&S signal generator model names or options [37][38][39][40].\n\n來源：\n[37] `raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md`\n[38] `raw/Productions/FSW_specs_en_5215-6749-22_v1701.md`\n[39] `raw/Productions/FSWX_specs_en_3684-1314-22_v1200.md`\n[40] `raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md`",
+      "created_at": "2026-10-09T21:27:15.648983Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-1fe21488adc9414cb7b02569268a9b07",
+       "request_id": "request-1fe21488adc9414cb7b02569268a9b07",
+       "span_id": "span-1fe21488adc9414cb7b02569268a9b07",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "No RAW passage directly supports an automotive-specific opportunity; the only supported SG/SA opportunity is **ADC / DAC Frontend Performance**, which RAW evidence marks for both **Spectrum Analyzers** and **Signal Generators** [37], and the RAW-listed R&S signal/spectrum analyzer families are **R&S FSW**, **R&S FSWX**, and **R&S FSV3000** [38][39][40].\n### 推薦先賣\n| Opportunity | Supported instrument role | R&S products supported by RAW | Evidence strength |\n|---|---|---|---|\n| ADC / DAC Frontend Performance | Spectrum Analyzers and Signal Generators are both marked applicable [37] | R&S FSW Signal and Spectrum Analyzer [38]; R&S FSWX Signal and Spectrum Analyzer [39]; R&S FSV3000 Signal and Spectrum Analyzer [40] | Strongest currently supported RAW opportunity because it is the only RAW opportunity that explicitly includes both instrument categories [37] |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S FSW Signal and Spectrum Analyzer | ADC / DAC Frontend Performance | 知識庫未標示 | RAW names FSW as a Rohde & Schwarz signal and spectrum analyzer, and ADC / DAC Frontend Performance is marked for spectrum analyzers [37][38] | [37][38] | RAW does not state automotive application, required frequency range, bandwidth, options, or configuration |\n| R&S FSWX Signal and Spectrum Analyzer | ADC / DAC Frontend Performance | 知識庫未標示 | RAW names FSWX as a Rohde & Schwarz signal and spectrum analyzer, and ADC / DAC Frontend Performance is marked for spectrum analyzers [37][39] | [37][39] | RAW does not state automotive application, required frequency range, bandwidth, options, or configuration |\n| R&S FSV3000 Signal and Spectrum Analyzer | ADC / DAC Frontend Performance | 知識庫未標示 | RAW names FSV3000 as a Rohde & Schwarz signal and spectrum analyzer, and ADC / DAC Frontend Performance is marked for spectrum analyzers [37][40] | [37][40] | RAW does not state automotive application, required frequency range, bandwidth, options, or configuration |\n| R&S Signal Generators | ADC / DAC Frontend Performance | 知識庫未標示 | RAW marks Signal Generators applicable to ADC / DAC Frontend Performance [37] | [37] | RAW does not name any R&S signal generator model or automotive-specific use case |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| ADC / DAC Frontend Performance | Signal generator + R&S FSW / FSWX / FSV3000 signal and spectrum analyzer | Use the RAW-supported pairing of signal generators and spectrum analyzers for ADC / DAC frontend performance work [37][38][39][40] | Automotive linkage, DUT type, required options, frequency range, bandwidth, and measurement procedure are not stated in RAW |\n### 限制\nRAW evidence does not rank opportunities, does not explicitly mention automotive for ADC / DAC Frontend Performance, and does not provide any R&S signal generator model names or options [37][38][39][40].\n\n來源：\n[37] `raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md`\n[38] `raw/Productions/FSW_specs_en_5215-6749-22_v1701.md`\n[39] `raw/Productions/FSWX_specs_en_3684-1314-22_v1200.md`\n[40] `raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-1fe21488adc9414cb7b02569268a9b07",
+      "request_id": "request-1fe21488adc9414cb7b02569268a9b07",
+      "span_id": "span-1fe21488adc9414cb7b02569268a9b07",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-1fe21488adc9414cb7b02569268a9b07",
+       "request_id": "request-1fe21488adc9414cb7b02569268a9b07",
+       "span_id": "span-1fe21488adc9414cb7b02569268a9b07",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "No RAW passage directly supports an automotive-specific opportunity; the only supported SG/SA opportunity is **ADC / DAC Frontend Performance**, which RAW evidence marks for both **Spectrum Analyzers** and **Signal Generators** [37], and the RAW-listed R&S signal/spectrum analyzer families are **R&S FSW**, **R&S FSWX**, and **R&S FSV3000** [38][39][40].\n### 推薦先賣\n| Opportunity | Supported instrument role | R&S products supported by RAW | Evidence strength |\n|---|---|---|---|\n| ADC / DAC Frontend Performance | Spectrum Analyzers and Signal Generators are both marked applicable [37] | R&S FSW Signal and Spectrum Analyzer [38]; R&S FSWX Signal and Spectrum Analyzer [39]; R&S FSV3000 Signal and Spectrum Analyzer [40] | Strongest currently supported RAW opportunity because it is the only RAW opportunity that explicitly includes both instrument categories [37] |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S FSW Signal and Spectrum Analyzer | ADC / DAC Frontend Performance | 知識庫未標示 | RAW names FSW as a Rohde & Schwarz signal and spectrum analyzer, and ADC / DAC Frontend Performance is marked for spectrum analyzers [37][38] | [37][38] | RAW does not state automotive application, required frequency range, bandwidth, options, or configuration |\n| R&S FSWX Signal and Spectrum Analyzer | ADC / DAC Frontend Performance | 知識庫未標示 | RAW names FSWX as a Rohde & Schwarz signal and spectrum analyzer, and ADC / DAC Frontend Performance is marked for spectrum analyzers [37][39] | [37][39] | RAW does not state automotive application, required frequency range, bandwidth, options, or configuration |\n| R&S FSV3000 Signal and Spectrum Analyzer | ADC / DAC Frontend Performance | 知識庫未標示 | RAW names FSV3000 as a Rohde & Schwarz signal and spectrum analyzer, and ADC / DAC Frontend Performance is marked for spectrum analyzers [37][40] | [37][40] | RAW does not state automotive application, required frequency range, bandwidth, options, or configuration |\n| R&S Signal Generators | ADC / DAC Frontend Performance | 知識庫未標示 | RAW marks Signal Generators applicable to ADC / DAC Frontend Performance [37] | [37] | RAW does not name any R&S signal generator model or automotive-specific use case |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| ADC / DAC Frontend Performance | Signal generator + R&S FSW / FSWX / FSV3000 signal and spectrum analyzer | Use the RAW-supported pairing of signal generators and spectrum analyzers for ADC / DAC frontend performance work [37][38][39][40] | Automotive linkage, DUT type, required options, frequency range, bandwidth, and measurement procedure are not stated in RAW |\n### 限制\nRAW evidence does not rank opportunities, does not explicitly mention automotive for ADC / DAC Frontend Performance, and does not provide any R&S signal generator model names or options [37][38][39][40].\n\n來源：\n[37] `raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md`\n[38] `raw/Productions/FSW_specs_en_5215-6749-22_v1701.md`\n[39] `raw/Productions/FSWX_specs_en_3684-1314-22_v1200.md`\n[40] `raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_TRgIragOCE3BIi1O2aMO5sM4",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "No RAW passage directly supports an automotive-specific opportunity; the only supported SG/SA opportunity is **ADC / DAC Frontend Performance**, which RAW evidence marks for both **Spectrum Analyzers** and **Signal Generators** [37], and the RAW-listed R&S signal/spectrum analyzer families are **R&S FSW**, **R&S FSWX**, and **R&S FSV3000** [38][39][40].\n### 推薦先賣\n| Opportunity | Supported instrument role | R&S products supported by RAW | Evidence strength |\n|---|---|---|---|\n| ADC / DAC Frontend Performance | Spectrum Analyzers and Signal Generators are both marked applicable [37] | R&S FSW Signal and Spectrum Analyzer [38]; R&S FSWX Signal and Spectrum Analyzer [39]; R&S FSV3000 Signal and Spectrum Analyzer [40] | Strongest currently supported RAW opportunity because it is the only RAW opportunity that explicitly includes both instrument categories [37] |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S FSW Signal and Spectrum Analyzer | ADC / DAC Frontend Performance | 知識庫未標示 | RAW names FSW as a Rohde & Schwarz signal and spectrum analyzer, and ADC / DAC Frontend Performance is marked for spectrum analyzers [37][38] | [37][38] | RAW does not state automotive application, required frequency range, bandwidth, options, or configuration |\n| R&S FSWX Signal and Spectrum Analyzer | ADC / DAC Frontend Performance | 知識庫未標示 | RAW names FSWX as a Rohde & Schwarz signal and spectrum analyzer, and ADC / DAC Frontend Performance is marked for spectrum analyzers [37][39] | [37][39] | RAW does not state automotive application, required frequency range, bandwidth, options, or configuration |\n| R&S FSV3000 Signal and Spectrum Analyzer | ADC / DAC Frontend Performance | 知識庫未標示 | RAW names FSV3000 as a Rohde & Schwarz signal and spectrum analyzer, and ADC / DAC Frontend Performance is marked for spectrum analyzers [37][40] | [37][40] | RAW does not state automotive application, required frequency range, bandwidth, options, or configuration |\n| R&S Signal Generators | ADC / DAC Frontend Performance | 知識庫未標示 | RAW marks Signal Generators applicable to ADC / DAC Frontend Performance [37] | [37] | RAW does not name any R&S signal generator model or automotive-specific use case |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| ADC / DAC Frontend Performance | Signal generator + R&S FSW / FSWX / FSV3000 signal and spectrum analyzer | Use the RAW-supported pairing of signal generators and spectrum analyzers for ADC / DAC frontend performance work [37][38][39][40] | Automotive linkage, DUT type, required options, frequency range, bandwidth, and measurement procedure are not stated in RAW |\n### 限制\nRAW evidence does not rank opportunities, does not explicitly mention automotive for ADC / DAC Frontend Performance, and does not provide any R&S signal generator model names or options [37][38][39][40].\n\n來源：\n[37] `raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md`\n[38] `raw/Productions/FSW_specs_en_5215-6749-22_v1701.md`\n[39] `raw/Productions/FSWX_specs_en_3684-1314-22_v1200.md`\n[40] `raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md`",
+          "evidence": {
+           "raw_citations": 4,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-b4abbf0d66ff426b9b6fc4009ef10922",
+            "request_id": "request-b4abbf0d66ff426b9b6fc4009ef10922",
+            "span_id": "span-b4abbf0d66ff426b9b6fc4009ef10922",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "Based on current vault evidence, what are the strongest opportunities for Signal Generator / Signal Analyzer in Automotive, and what evidence supports each opportunity? Focus on Rohde & Schwarz signal generators and signal/spectrum analyzers in automotive applications, with citations to Raw evidence.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 9.54184
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 讀圖補充\n以下內容來自讀圖補充，可信度低於正文，不用於推翻正文。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 3.676378
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n這份來源是 [[R&S AREG800A]] Automotive Radar Echo Generator 的 specifications，文件編號 `PD 3609.8015.22`，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`，文件標題為 `AREG800A Automotive Radar Echo Generator`，Copyright `© 2021–2025 Rohde & Schwarz`。\n\n[[R&S AREG800A]] 的 echo generator type 為 `dynamic artificial object generation`。Echo generation concept 分為：\n\n- `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n- `digital`：針對 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 `air gap value`；maximum generated distance 為 `3000 m`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 在環境溫度下儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格資料定義：\n\n- `Specifications with limits`：代表保證的產品效能，以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 的方式指定與測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：代表保證的產品效能，通常為 dimensions 或 setting parameter resolution 等無偏差或偏差可忽略的值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依據 GUM 計算，納入 environmental conditions、aging、wear and tear。\n- `Data without tolerance limits is not binding`；文件 `subject to change`。\n\n主要能力與限制：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 3.027699
+             },
+             {
+              "text": "R&S AREG800A › 讀圖補充\n以下內容來自 [[AREG800A_specs_en_3609-8015-22_v0900]] 的讀圖補充，可信度低於正文，不用於推翻正文。本次提供的 raw 摘要未附圖片 wikilink，因此未嵌入圖片。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 48,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 12.24203
+             },
+             {
+              "text": "R&S AREG800A\n[[R&S AREG800A]] 是 [[Rohde & Schwarz]] 的 Automotive Radar Echo Generator，用於 dynamic artificial object generation；本頁規格依 [[AREG800A_specs_en_3609-8015-22_v0900]]，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 11.97628
+             },
+             {
+              "text": "R&S AREG800A › 文件與適用條件\n- 來源文件：[[AREG800A_specs_en_3609-8015-22_v0900]]。\n- 文件編號：`PD 3609.8015.22`。\n- 文件版本：`Version 09.00`。\n- 文件日期：`September 2025（LA）`。\n- 文件名稱：`AREG800A Automotive Radar Echo Generator`。\n- Copyright：`© 2021–2025 Rohde & Schwarz`。\n- 資料註記：無 tolerance limits 的資料不具 binding 效力；資料 `subject to change`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 於環境溫度儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格定義（Version 09.00, September 2025）：\n\n- `Specifications with limits`：以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示保證產品性能。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：表示保證產品性能，通常為 dimensions 或 setting parameter resolution 等值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依 GUM 計算。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 8.06036
+             },
+             {
+              "text": "NG eCall EN 17240 2024 verification\n[[NG eCall EN 17240 2024 verification]] 是 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]] 中描述的 PR 層級驗證活動：[[Rohde & Schwarz]] 與 [[Qualcomm Technologies]] 使用 [[R&S CMX500]] 驗證 [[Snapdragon Auto 5G Modem-RF]] 的 NG eCall functionality 符合 [[EN 17240]]:2024。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              },
+              "score": 2.356016
+             },
+             {
+              "text": "NG eCall EN 17240 2024 verification › 驗證範圍\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 驗證對象：[[Snapdragon Auto 5G Modem-RF]] 的 [[Next Generation eCall]] functionality。\n- 合作方：[[Rohde & Schwarz]] 與 [[Qualcomm Technologies]]。\n- 測試設備：[[R&S CMX500]] mobile radio tester。\n- Software context：來源稱 [[R&S CMX500]] with [[R&S CMX-KA098]] software option can be effectively used for NG eCall testing under realistic network conditions。\n- 標準：[[EN 17240]]:2024。\n- 測試情境：simulating a [[PSAP]]。\n- 驗證內容：NG eCall including voice and data transmission，並 validated the compliance of the implementation at both ends with EN 17240:2024。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              },
+              "score": 1.98409
+             },
+             {
+              "text": "NG eCall EN 17240 2024 verification › 與既有 NGeCall / hybrid eCall 頁面的關係\n- [[NGeCall over LTE]] 整理 CMW500 與 CMX500 capability lists，本頁只整理 PR 中的 Qualcomm / Snapdragon verification event。\n- [[CMX500 NGeCall configuration]] 整理 configuration guide 的 mandatory / optional items，本頁不取代正式 configuration 或 quote。\n- [[Hybrid eCall testing]] 以 EN 18052:2025 與 hybrid fallback 為核心；本頁聚焦 EN 17240:2024 NG eCall verification，不描述 classic CS fallback 或 EN 18052 test scope。\n- [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 提到 EN 17240:2024+A1:2026 與 cetecom advanced certification testing；本頁來源只提 EN 17240:2024，且未說第三方 certification report。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              },
+              "score": 1.239329
+             },
+             {
+              "text": "cetecom advanced › 來源中的定位\n依 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]]：\n\n- [[cetecom advanced]] conducted certification testing of the Rohde & Schwarz hybrid eCall and Next Generation eCall test solution。\n- 來源稱 cetecom advanced is a leading independent test laboratory for product testing and worldwide certification。\n- 來源列出的服務領域包含 communication technologies、automotive、medical technology、payment & identification。\n- [[Thomas Reschka]] 以 Senior Technical Consultant at cetecom advanced 身分在新聞稿中被引用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/cetecom advanced.md"
+              },
+              "score": 1.606586
+             },
+             {
+              "text": "cetecom advanced › 使用限制\n- 本頁只依新聞稿記錄 cetecom advanced 在本次 R&S eCall solution certification testing 中的角色。\n- 不可由此推論 cetecom advanced 對所有 [[Rohde & Schwarz]] automotive test solutions 皆有 certification 關係。\n- 來源未提供 cetecom advanced 的完整法律名稱、總部地址、認證範圍、accreditation number 或測試報告。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/cetecom advanced.md"
+              },
+              "score": 1.300473
+             },
+             {
+              "text": "cetecom advanced › 與 R&S eCall 測試方案的關係\n[[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 說 [[Rohde & Schwarz]] 的 solution 通過 cetecom advanced certification testing。該 solution 以 [[R&S CMX500]] 為基礎，並使用更新後的 [[R&S CMX-KA09x]] eCall evaluation solution，以支援 [[EN 18052]]:2025 與 [[EN 17240]]:2024+A1:2026。\n\n來源並未說明 cetecom advanced 是否出具 formal certificate、certificate number、測試報告編號或完整 type-approval authority role。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/cetecom advanced.md"
+              },
+              "score": 0.746948
+             },
+             {
+              "text": "R&S CMP180\n[[R&S CMP180]] 是 [[Rohde & Schwarz]] 的 **Radio Communication Tester**，用於 production / wireless communication device 測試，依文件可配置多埠 RF generator/analyzer、通訊標準 measurement options、waveform options 與 [[R&S VSE]] 分析能力。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 8.5434
+             },
+             {
+              "text": "R&S CMP180 › Warranty and service\n依 [[CMP180 Specifications Version 08.00]]：\n\n- Base unit warranty：1 year。\n- All other items warranty：1 year。\n- Service plans：on demand up to five years；extended periods require contacting Rohde & Schwarz sales office。\n- Calibration：pay per calibration。\n- Warranty and repair：up to five years，standard price repair。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 23,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 6.36876
+             },
+             {
+              "text": "R&S CMP180 › 產品定位\n[[R&S CMP180]] 是 Radio Communication Tester。依 [[CMP180 Features and Functions Version 09]]，文件涵蓋 global options、Bluetooth、CDMA2000、GSM、LP-IoT、LTE、NB-IoT、NR、spectrum analysis、UWB、WCDMA、WLAN、[[R&S VSE]] options 與 ordering information。\n\n依 [[CMP180 Specifications Version 08.00]]，CMP180 支援 simultaneous receiver and transmitter testing，並提供 RF generator/analyzer no. 1 與可選 RF generator/analyzer no. 2 的多埠 RF 測試架構。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 5.521754
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › RF generator / analyzer 功能\nGeneral functions：\n\n- simultaneous receiver and transmitter testing。\n- RF generator/analyzer no. 1：**8 × SnapN**，RF input/output to DUT，RF 1.1 to RF 1.8。\n- RF generator/analyzer no. 2：**8 × SnapN**，RF input/output to DUT，RF 2.1 to RF 2.8；requires **R&S CMP-K102** or **R&S CMP-K105** software license key。\n\nReceiver test functions：\n\n- RF generator signal is split and forwarded to 8 output ports each。\n- every output can be switched off separately。\n- collective output level setting for RF 1.1 to RF 1.8 and RF 2.1 to RF 2.8。\n- frequency-dependent attenuation（FDA）table for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。\n\nTransmitter test functions：\n\n- 8 input signals multiplexed to RF analyzer no. 1。\n- 8 input signals multiplexed to RF analyzer no. 2。\n- frequency-dependent attenuation（FDA）tables for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。\n\nVSWR：\n\n| Port | Frequency | 規格 |\n|---|---|---|\n| RF x.1 to RF x.8 | 400 MHz to 4000 MHz | < 1.6 |\n| RF x.1 to RF x.8 | 4000 MHz to 8000 MHz | < 2.0 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 4.973668
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › 產品與文件\n- [[R&S CMP180]]：Radio Communication Tester；本來源提供 Version 08.00 specifications。\n- [[Rohde & Schwarz]]：文件版權方與產品廠商。\n- [[Rohde & Schwarz GmbH & Co. KG]]：R&S registered trademark 所屬組織。\n- [[Bluetooth SIG]]：Bluetooth word mark and logos 所屬組織；Rohde & Schwarz under license 使用。\n- [[HDMI Licensing]]：HDMI / HDMI High-Definition Multimedia Interface / HDMI Logo 商標所屬組織。\n- [[Semtech Corporation]]：LoRa Mark and LoRa Logo registered trademarks 所屬組織。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 4.969609
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › Ordering information 摘要\n| Designation | Type | Order no. |\n|---|---|---|\n| Non-cellular measurements pack 1 | R&S CMP-PKM30 | 1212.3689.02 |\n| Cellular measurements pack 1 | R&S CMP-PKM40 | 1212.3695.02 |\n| Advanced path loss measurements（serial number ≥ 102160） | R&S CMP-KM115 | 1212.2201.02 |\n| Advanced path loss measurements（serial number < 102160） | R&S CMP-U115 | 1212.4291.02 |\n| Spectrum analyzer | R&S CMP-KM140 | 1212.4410.02 |\n| Signal analysis base software | R&S CMP-KM150 | 1212.3972.02 |\n| Signal analysis, digital | R&S CMP-KM152 | 1212.3989.02 |\n| NB-IoT measurements | R&S CMP-KM250 | 1212.2218.02 |\n| LP-IoT measurements, Zigbee | R&S CMP-KM280 | 1212.2224.02 |\n| Ultra-wideband production measurements | R&S CMP-KM305 | 1212.4304.02 |\n| UWB IEEE 802.15.4ab production measurements | R&S CMP-KM306 | 1212.4691.02 |\n| Bluetooth measurements, Classic / Low Energy up to Rel. 5.3 | R&S CMP-KM310 | 1212.2230.02 |\n| Bluetooth HDT measurements Rel. 7.0 | R&S CMP-KM317 | 1212.4591.02 |\n| WLAN IEEE 802.11a/b/g/n/ac SISO measurements | R&S CMP-KM350 | 1212.2247.02 |\n| WLAN IEEE 802.11ax SISO measurements | R&S CMP-KM351 | 1212.2253.02 |\n| WLAN IEEE 802.11be SISO measurements | R&S CMP-KM352 | 1212.2260.02 |\n| WLAN true MIMO 2x2 and 4x4 measurements | R&S CMP-KM360 | 1212.2276.02 |\n| WLAN true MIMO 5x5 and 6x6 measurements | R&S CMP-KM361 | 1212.4685.02 |\n| WLAN packet error rate acknowledgement measurements | R&S CMP-KM365 | 1212.4562.02 |\n| GSM measurements | R&S CMP-KM420 | 1212.2282.02 |\n| WCDMA measurements | R&S CMP-KM440 | 1212.2299.02 |\n| CDMA2000 1xRTT measurements | R&S CMP-KM480 | 1212.2730.02 |\n| LTE measurements | R&S CMP-KM500 | 1212.2301.02 |\n| LTE C-V2X measurements, PC5 | R&S CMP-KM570 | 1212.2318.02 |\n| NR FR1 measurements, single carrier | R&S CMP-KM600 | 1212.2101.02 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 4.87622
+             },
+             {
+              "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 關鍵實體與概念\n- [[Rohde & Schwarz]] — 新聞稿發布公司，提供 test and measurement solutions 與 automotive testing solution。\n- [[Rohde & Schwarz GmbH & Co KG]] — raw frontmatter author 與 R&S registered trademark owner 名稱。\n- [[Qualcomm Technologies]] — 與 [[Rohde & Schwarz]] 共同進行 NG eCall implementation verification 的公司實體。\n- [[Snapdragon Auto 5G Modem-RF]] — 本來源中的 Qualcomm Technologies automotive-grade platform / modem-RF platform。\n- [[R&S CMX500]] — 用於 verification process 的 mobile radio tester / comprehensive testing solution。\n- [[R&S CMX-KA098]] — 本來源稱 CMX500 with CMX-KA098 software option 可用於 NG eCall testing under realistic network conditions。\n- [[Juergen Meyer]] — [[Rohde & Schwarz]] Vice President Market Segment Automotive，引述人物。\n- [[Patrizia Muehlbauer]] — press and media contact。\n- [[NG eCall EN 17240 2024 verification]] — 本來源的主要 verification 主題。\n- [[NGeCall over LTE]]、[[NGeCall over NR-LTE]]、[[IMS eCall]]、[[EN 17240]]、[[PSAP]]、[[GNSS]]、[[V2X]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+              },
+              "score": 2.321037
+             },
+             {
+              "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 原文未解的問題\n- unresolved：新聞稿 frontmatter 的 published 欄位為空，正文也未標示正式發布日期；raw created 為 2026-09-11，但不可等同正式發布日。\n- unresolved：來源未標示 document version、press release ID 或 revision。\n- unresolved：來源未提供 European Commission regulation 的正式文件編號、標題或 publication date，只說 NG eCall will be obligatory starting January 1, 2026。\n- unresolved：來源未提供 EN 17240:2024 的完整標準標題、發布組織、章節或 test case IDs。\n- unresolved：來源未提供 [[Snapdragon Auto 5G Modem-RF]] 的完整型號、chipset generation、firmware、software build、module supplier 或 commercial availability。\n- unresolved：來源未提供 [[R&S CMX500]] configuration、[[R&S CMX-KA098]] version、license dependencies、test setup、radio conditions、IMS configuration、voice codec、GNSS simulation setup 或 pass/fail details。\n- unresolved：來源只說 simulating a [[PSAP]]，未列 PSAP scenario IDs、acceptance criteria 或是否涵蓋所有 EN 17240:2024 requirements。\n- unresolved：來源未說 mutual customers 的產業範圍、客戶名稱或 adoption status。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+              },
+              "score": 0.996917
+             },
+             {
+              "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 重點摘要\n- [[Rohde & Schwarz]] 宣稱其與 [[Qualcomm Technologies]] 合作，驗證 [[Snapdragon Auto 5G Modem-RF]] 上 [[Next Generation eCall]]（NG eCall）的 implementation，並稱其符合 [[EN 17240]]:2024。\n- 來源說 [[eCall]] 於 2015 年導入，且自 2018 年起成為歐盟境內所有新車銷售的 mandatory requirement。\n- 來源指出，隨著 2G / 3G circuit-switched cellular networks 逐漸 obsolete，emergency call systems 需要適配到 4G / 5G packet-switched cellular networks。\n- 來源稱 [[European Commission]] 在其 most recent regulation 中定義 NG eCall 將自 **2026-01-01** 起成為 obligatory。\n- 來源稱 EN 17240:2024 建立在 IP Multimedia Subsystem（[[IMS]]）networks 上測試 eCall systems 的 guidelines，涵蓋 advanced 4G LTE 與 5G NR technologies。\n- [[Snapdragon Auto 5G Modem-RF]] 被描述為 5G automotive-grade platform，支援 high-speed connectivity、advanced positioning、Vehicle-to-Everything（[[V2X]]）、multi-band [[GNSS]] navigation 與 enhanced safety。\n- 來源稱驗證流程使用 [[R&S CMX500]] mobile radio tester，作為 NG eCall voice and data transmission 的 comprehensive testing solution。\n- 來源稱測試模擬 [[PSAP]]，並驗證 implementation at both ends with the [[EN 17240]]:2024 standard。\n- 來源說 [[R&S CMX500]] 支援 4G 與 5G technologies，目標是讓方案 future-proof。\n- [[Juergen Meyer]] 以 [[Rohde & Schwarz]] Vice President Market Segment Automotive 身分在新聞稿中引述，稱此次 collaboration 為 future emergency call services 建立 new benchmark。\n- 來源稱 [[R&S CMX500]] 搭配 [[R&S CMX-KA098]] software option 可在 realistic network conditions 下用於 NG eCall testing。\n- 來源將合作定位為 mutually validating solutions、reducing effort、accelerating time to market for mutual customers。\n- Press and media contact 為 [[Patrizia Muehlbauer]]，職稱 PR Manager Products & Standard Systems。\n- 公司資訊段落稱 [[Rohde & Schwarz]] 2024/2025 fiscal year net revenue 為 EUR 3.16 billion，2025-06-30 worldwide employees more than 15,000。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+              },
+              "score": 0.911615
+             },
+             {
+              "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 重點摘要\n- [[Rohde & Schwarz]] 宣稱其 hybrid eCall 與 Next Generation eCall test solution 已成功通過 [[cetecom advanced]] 的 certification testing。\n- 來源描述 [[cetecom advanced]] 是 independent test laboratory，服務範圍包含 communication technologies、automotive、medical technology、payment & identification 等產品測試與 worldwide certification。\n- 測試方案以 [[R&S CMX500]] radio communication tester 為基礎，搭配更新後的 eCall option，以支援最新 eCall regulations and standards。\n- 來源說 [[Hybrid eCall testing]] 所依據的 [[EN 18052]] 要求 hybrid system 結合不同 transmission paths and protocols，使 eCall 能可靠到達目的地。\n- 來源說實務上車輛會使用 NG eCall functions，即 IP/IMS-based voice and data over 4G/5G；但在 coverage 或 service quality 降低時，可自動 fallback 到 classic CS eCall 2G/3G transport paths。\n- 製造商需要驗證 hybrid implementations 能 trigger calls、transmit [[MSD]]、maintain [[GNSS]] positioning，並在 [[VoNR]]、[[VoLTE]] 與 circuit-switched fallback 等多種 network scenarios 下提供 intelligible voice quality。\n- [[Rohde & Schwarz]] 宣稱其 eCall evaluation solution [[R&S CMX-KA09x]] 已更新，以支援 compliance with [[EN 18052]]:2025 與 [[EN 17240]]:2024+A1:2026。\n- [[R&S CMX-KA099]] option completed Public Safety Answering Point scenario tests according to [[EN 18052]]:2025。\n- [[R&S CMX-KA098]] option completed Public Safety Answering Point scenario tests according to [[EN 17240]]:2024+A1:2026。\n- [[Thomas Reschka]] 以 [[cetecom advanced]] Senior Technical Consultant 身分表示，該 solution 用於 functional tests、protocol conformity tests，以及 type-approval of [[IVS]] implementing hybrid eCall and NG eCall。\n- 來源稱 test environment 可 simulation real-world mobile network conditions 並 emulation various network scenarios，用於 certifications 或 new vehicle model market launch 前準備。\n- Press contact 為 [[Patrizia Muehlbauer]]，職稱 PR Manager Products & Standard Systems。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+              },
+              "score": 1.665616
+             },
+             {
+              "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 原文未解的問題\n- unresolved：新聞稿 frontmatter 的 published 欄位為空；來源正文也未標示發布日期。raw created 為 2026-09-11，但不可等同正式發布日。\n- unresolved：新聞稿未標示 document version、press release ID 或 revision。\n- unresolved：來源未提供 cetecom advanced certification report number、certificate number、測試日期、測試環境版本或完整 acceptance criteria。\n- unresolved：來源未提供 [[R&S CMX-KA09x]]、[[R&S CMX-KA098]]、[[R&S CMX-KA099]] 的完整 order number、license dependencies、software version 或 maintenance mapping。\n- unresolved：來源只稱 CMX-KA099 / CMX-KA098 completed PSAP test scenarios，未列出各 PSAP scenario 的 test case IDs、pass/fail detail 或是否涵蓋所有 EN 18052:2025 / EN 17240:2024+A1:2026 requirements。\n- unresolved：來源提到 national requirements，但未列國家、法規名稱或版本。\n- unresolved：來源未展開 [[EN 18052]]、[[EN 17240]] 的發布組織、正式標題或 amendment 細節。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+              },
+              "score": 1.478876
+             },
+             {
+              "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 關鍵實體與概念\n- [[Rohde & Schwarz]] — 新聞稿發布公司，提供 automotive test solutions。\n- [[R&S CMX500]] — 測試方案基礎設備，radio communication tester。\n- [[R&S CMX-KA09x]] — 來源中的 updated eCall evaluation solution 泛稱，支援 EN 18052:2025 與 EN 17240:2024+A1:2026 compliance。\n- [[R&S CMX-KA099]] — 來源稱已完成 EN 18052:2025 的 PSAP test scenarios。\n- [[R&S CMX-KA098]] — 來源稱已完成 EN 17240:2024+A1:2026 的 PSAP test scenarios。\n- [[cetecom advanced]] — 執行 certification testing 的 independent test laboratory。\n- [[Thomas Reschka]] — cetecom advanced Senior Technical Consultant，新聞稿引述人物。\n- [[Patrizia Muehlbauer]] — Rohde & Schwarz press and media contact。\n- [[Hybrid eCall testing]] — hybrid eCall / NG eCall 測試主題，涵蓋 NG eCall、classic CS eCall fallback、GNSS、MSD、voice quality、handover 與 degraded radio conditions。\n- [[EN 18052]]、[[EN 17240]]、[[CEN]]、[[ETSI]]、[[3GPP]]、[[NGeCall over LTE]]、[[NGeCall over NR-LTE]]、[[IMS eCall]]、[[IVS]]、[[PSAP]]、[[MSD]]、[[GNSS]]、[[VoNR]]、[[VoLTE]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+              },
+              "score": 1.28646
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100 › 重點摘要\n- [[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援 3GPP [[5G NR]] technology，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD 與 TDD device testing。\n- [[R&S CMX500]] 配置包含 OBT lite、OBT、OBT plus、OBT FR1 specialist、OBT FR2 specialist，主要差異在 [[R&S CMX-B200A]] accelerator unit、[[R&S CMX-B500A]] IF unit、[[R&S CMX-B600B]] RF unit 的數量。\n- [[NR FR1]] 與 [[LTE]] 測試使用 integrated RF units；[[R&S CMX-B600B]] RF unit 的 frequency range 為 **400 MHz to 8000 MHz**。\n- [[NR FR2]] 測試可搭配 [[R&S CMXHEAD30]]、[[R&S CMXHEAD50]] 或 [[R&S CMXHEAD50-Evo]] remote radio head；remote radio head 在 IF 與 5G NR FR2 frequency ranges 間執行 upconversion / downconversion。\n- 適用的 radiated chamber test environments 包含 [[R&S CMQ500]] shielding cube 與 [[R&S ATS800R]] CATR rack based antenna test system。\n- [[R&S CMX500]] 內建 vector signal analysis 與 ARB generator，可做 FR2 transmitters / receivers RF parametric testing；5G NR receiver tests 可在 3GPP fading propagation conditions 下使用 internal baseband fading emulation。\n- Product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘，符合指定 environmental conditions，遵守 recommended calibration interval，且已執行所有適用的 internal automatic adjustments。\n- 文件區分 specifications with limits、non-traceable specifications with limits、specifications without limits、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n- 文件聲明：**Data without tolerance limits is not binding**；**Subject to change**。\n- 版權：© 2019–2025 [[Rohde & Schwarz]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 7.919066
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100 › Ordering information 摘錄\n| 項目 | Type / code | Order No. | 原文說明 |\n|---|---|---|---|\n| CMX500 Radio communication tester | CMX500 | 1201.0002K70 | accessories 包含 power cords、operating manual、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters |\n| CMX500 basic assembly | R&S CMX-PB70H | 1222.0676.09 | basic assembly |\n| Accelerator unit | R&S CMX-B200A | 1222.0747.02 | accelerated digital signal processing |\n| Processing unit | R&S CMX-B300C | 1222.0801.04 | generic high-performance computing platform |\n| IF unit | R&S CMX-B500A | 1222.0924.02 | IF vector signal analysis and ARB based generator |\n| RF unit | R&S CMX-B600B | 1222.0953.03 | FR1 vector signal analysis and ARB based generator |\n| WLAN TX measurements 802.11a/b/g/n/ac | R&S CMX-KM350 | 1222.7135.02 | analyzer option |\n| WLAN TX measurements 802.11ax | R&S CMX-KM351 | 1222.7141.02 | analyzer option |\n| WLAN TX measurements 802.11be | R&S CMX-KM352 | 1222.7158.02 | analyzer option |\n| LTE analyzer | R&S CMX-KM500 | 1222.5603.02 | analyzer option |\n| 5G NR analyzer | R&S CMX-KM600 | 1222.4013.02 | analyzer option |\n| 5G NR generator | R&S CMX-KW601 | 1222.1920.02 | generator option |\n| Remote radio head | R&S CMXHEAD30 | 1201.0002K73 | mmWave extension with CMXHEAD30 |\n| Hardware unit | R&S CMXH-B73A | 1430.9106.02 | for CMXHEAD30 |\n| Remote radio head | R&S CMXHEAD50 | 1201.0002K76 | mmWave extension with CMXHEAD50 / CMXHEAD50-Evo |\n| Hardware unit | R&S CMXH-B73B | 1430.9106.03 | for CMXHEAD50 |\n| Advanced TRX unit for signaling | R&S CMXH-B73C | 1430.9106.04 | for CMXHEAD50-Evo |\n| High-class synthesizer | R&S CMXH-B74A | 1430.7555.02 | for CMXHEAD50-Evo |\n| Housing for R&S CMXH-B74A | R&S CMXH-B76A | 1430.7710.02 | housing |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 6.286843
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100 › 測試主題與技術\n- [[5G NR]]、[[NR FR1]]、[[NR FR2]]、[[LTE]]、[[NSA]]、[[SA]]、[[FDD]]、[[TDD]]、[[Fading]]、[[ARB generator]]、[[Vector signal analysis]]、[[FFT spectrum analyzer]]、[[EVM]]、[[Displayed average noise level]]、[[Remote radio head]]。\n- 引用標準包含 [[3GPP TS 38.521-1]]、[[3GPP TS 38.521-2]] 與 Guide to the Expression of Uncertainty in Measurement（GUM）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 5.754918
+             },
+             {
+              "text": "CMX configuration guide\nCMX configuration guide 是 [[Rohde & Schwarz]] 內部 / 產品管理語境中用來列出 [[R&S CMX500]]、[[R&S CMW500]] 與相關附件 / software options 在特定 application 下所需配置的表格型資料；[[CMX_Configuration_Guide]]、[[CMX_Configuration_Guide_LTE-DTC]] 與 [[CMX_Configuration_Guide_NR-NTN]] 是目前支撐此概念的來源。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX configuration guide.md"
+              },
+              "score": 5.279687
+             },
+             {
+              "text": "CMX configuration guide › WLAN\nWLAN（CMX500）區段列出 WLAN signaling、measurement 與 ARB generator options，包含 [[R&S CMX-KS350B]]、[[R&S CMX-KS351B]]、[[R&S CMX-KS352B]]、[[R&S CMX-KS355B]]、[[R&S CMX-KS356B]]、[[R&S CMX-KS360B]]、[[R&S CMX-KM350]]、[[R&S CMX-KM351]]、[[R&S CMX-KM352]]、[[R&S CMX-KM360]]、[[R&S CMX-KW350]]、[[R&S CMX-KW351]] 與 [[R&S CMX-KW352]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX configuration guide.md"
+              },
+              "score": 2.960993
+             },
+             {
+              "text": "CMX500 NGeCall configuration › CMX500 NGeCall 4G/5G configuration\n來源註記：provided hardware configurations are based on current NGeCall specifications, which may change；這可能影響 CMX500 的 hardware and software requirements。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 NGeCall configuration.md"
+              },
+              "score": 5.174202
+             },
+             {
+              "text": "CMX500 NGeCall configuration › CMW500 到 CMX500 的 NGeCall 轉換脈絡\n[[CMX_Configuration_Guide]] 在 CMWPC / CMW500 區段列出：\n\n- [[R&S CMW-KA096]]（1211.2450.02）：Enabling test software for NGeCall，optional for 4G NG eCall 17240:2018。\n- [[R&S CMWrun KT111]] / CMW-KT111（1211.3733.02）：CMW500 – NgeCall Test Scripts for CMWrun (17240:2018)，optional for 4G NG eCall 17240:2018。\n\n同一來源明示：CMW supports the 2018 specification；new specifications are published and not compatible with the CMW500；therefore recommend switching to the CMX500。它也明示 license transfer for LTE、DAU and KA096 from [[R&S CMW500]] to [[R&S CMX500]] is allowed。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 NGeCall configuration.md"
+              },
+              "score": 1.850988
+             },
+             {
+              "text": "Snapdragon Auto 5G Modem-RF\n[[Snapdragon Auto 5G Modem-RF]] 是 [[Qualcomm Technologies]] 的 5G automotive-grade platform；[[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]] 稱其 NG eCall functionality 已由 [[Rohde & Schwarz]] 與 [[Qualcomm Technologies]] 使用 [[R&S CMX500]] 依 [[EN 17240]]:2024 驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Snapdragon Auto 5G Modem-RF.md"
+              },
+              "score": 3.05148
+             },
+             {
+              "text": "Snapdragon Auto 5G Modem-RF › 來源中的定位\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 來源稱 [[Snapdragon Auto 5G Modem-RF]] 是 5G automotive-grade platform。\n- 來源描述它 paving the way for next-generation connected vehicles。\n- 來源稱其提供 high-speed connectivity、advanced positioning 與 support for [[V2X]] technology。\n- 來源稱它 designed to meet the demands of modern telematics。\n- 來源稱它支援 reliable connectivity、precise multi-band [[GNSS]] navigation 與 enhanced safety。\n- 來源稱 [[Rohde & Schwarz]] 與 [[Qualcomm Technologies]] successfully verified the compliance of the Snapdragon Auto 5G Modem-RF's NG eCall functionality with the most recent eCall standards。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Snapdragon Auto 5G Modem-RF.md"
+              },
+              "score": 2.230263
+             },
+             {
+              "text": "Snapdragon Auto 5G Modem-RF › unresolved\n- 來源未提供 [[Snapdragon Auto 5G Modem-RF]] 的完整料號、commercial product name、silicon revision、firmware 或 software build。\n- 來源未提供 verification date、lab、test campaign ID、test report number 或 acceptance criteria。\n- 來源未說 verification 是否由第三方實驗室執行；本來源只說 joint effort by [[Rohde & Schwarz]] and [[Qualcomm Technologies]]。\n- 來源未列 [[EN 17240]]:2024 的完整標準題名與發布組織。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Snapdragon Auto 5G Modem-RF.md"
+              },
+              "score": 1.00457
+             },
+             {
+              "text": "Wi-Fi 8 › 480 MHz waveform candidate 說法\n[[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 稱：\n\n- [[R&S CMP180]] supports bandwidths up to 500 MHz。\n- [[R&S CMP180]] will demonstrate its ability to verify a [[WLAN]] waveform with **480 MHz bandwidth** in loopback mode。\n- 該 480 MHz waveform 被稱為 potential waveform candidate for the yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] standard。\n\n此說法目前只能作為 MWC 2024 PR 的 candidate / discussion 記錄；不得推論 480 MHz 已成為 [[IEEE 802.11bn]] 標準通道頻寬。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+              },
+              "score": 2.550795
+             },
+             {
+              "text": "Juergen Meyer\n[[Juergen Meyer]] 是 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]] 中列名的 [[Rohde & Schwarz]] Vice President Market Segment Automotive。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Juergen Meyer.md"
+              },
+              "score": 2.387412
+             },
+             {
+              "text": "ADC / DAC Frontend Performance\n- Spectrum Analyzers\n- Signal Generators\n4\n+\n+",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-74f44a4409e2b694",
+                "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+                "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+                "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "section": 76,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 31.665782
+             },
+             {
+              "text": "Rohde & Schwarz FSW Signal and Spectrum Analyzer",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-c2f3b544bbc2af25",
+                "original_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+                "sha256": "c2f3b544bbc2af258d83e5a75a2409a763c52243d44eccd1ecd6e5987c48a5df",
+                "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 30.829848
+             },
+             {
+              "text": "Rohde & Schwarz FSWX Signal and Spectrum Analyzer",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-929c216e7fdc00a8",
+                "original_ref": "raw/Productions/FSWX_specs_en_3684-1314-22_v1200.md",
+                "sha256": "929c216e7fdc00a8ff87ebc25c97199cd5a35ece4535925cb340461811717f91",
+                "raw_ref": "raw/Productions/FSWX_specs_en_3684-1314-22_v1200.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/FSWX_specs_en_3684-1314-22_v1200.md",
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 30.829848
+             },
+             {
+              "text": "Rohde & Schwarz R&S®FSV3000 Signal and Spectrum Analyzer",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-d12e714aff195b62",
+                "original_ref": "raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md",
+                "sha256": "d12e714aff195b62726a6b5520a3c376c40bf4dde661355373f991ab5174c64d",
+                "raw_ref": "raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md",
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 29.376643
+             }
+            ],
+            "text": "No RAW passage directly supports an automotive-specific opportunity; the only supported SG/SA opportunity is **ADC / DAC Frontend Performance**, which RAW evidence marks for both **Spectrum Analyzers** and **Signal Generators** [37], and the RAW-listed R&S signal/spectrum analyzer families are **R&S FSW**, **R&S FSWX**, and **R&S FSV3000** [38][39][40].\n### 推薦先賣\n| Opportunity | Supported instrument role | R&S products supported by RAW | Evidence strength |\n|---|---|---|---|\n| ADC / DAC Frontend Performance | Spectrum Analyzers and Signal Generators are both marked applicable [37] | R&S FSW Signal and Spectrum Analyzer [38]; R&S FSWX Signal and Spectrum Analyzer [39]; R&S FSV3000 Signal and Spectrum Analyzer [40] | Strongest currently supported RAW opportunity because it is the only RAW opportunity that explicitly includes both instrument categories [37] |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S FSW Signal and Spectrum Analyzer | ADC / DAC Frontend Performance | 知識庫未標示 | RAW names FSW as a Rohde & Schwarz signal and spectrum analyzer, and ADC / DAC Frontend Performance is marked for spectrum analyzers [37][38] | [37][38] | RAW does not state automotive application, required frequency range, bandwidth, options, or configuration |\n| R&S FSWX Signal and Spectrum Analyzer | ADC / DAC Frontend Performance | 知識庫未標示 | RAW names FSWX as a Rohde & Schwarz signal and spectrum analyzer, and ADC / DAC Frontend Performance is marked for spectrum analyzers [37][39] | [37][39] | RAW does not state automotive application, required frequency range, bandwidth, options, or configuration |\n| R&S FSV3000 Signal and Spectrum Analyzer | ADC / DAC Frontend Performance | 知識庫未標示 | RAW names FSV3000 as a Rohde & Schwarz signal and spectrum analyzer, and ADC / DAC Frontend Performance is marked for spectrum analyzers [37][40] | [37][40] | RAW does not state automotive application, required frequency range, bandwidth, options, or configuration |\n| R&S Signal Generators | ADC / DAC Frontend Performance | 知識庫未標示 | RAW marks Signal Generators applicable to ADC / DAC Frontend Performance [37] | [37] | RAW does not name any R&S signal generator model or automotive-specific use case |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| ADC / DAC Frontend Performance | Signal generator + R&S FSW / FSWX / FSV3000 signal and spectrum analyzer | Use the RAW-supported pairing of signal generators and spectrum analyzers for ADC / DAC frontend performance work [37][38][39][40] | Automotive linkage, DUT type, required options, frequency range, bandwidth, and measurement procedure are not stated in RAW |\n### 限制\nRAW evidence does not rank opportunities, does not explicitly mention automotive for ADC / DAC Frontend Performance, and does not provide any R&S signal generator model names or options [37][38][39][40].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "ADC / DAC Frontend Performance\n- Spectrum Analyzers\n- Signal Generators\n4\n+\n+",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-74f44a4409e2b694",
+               "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+               "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "section": 76,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 31.665782
+            },
+            {
+             "text": "Rohde & Schwarz FSW Signal and Spectrum Analyzer",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-c2f3b544bbc2af25",
+               "original_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+               "sha256": "c2f3b544bbc2af258d83e5a75a2409a763c52243d44eccd1ecd6e5987c48a5df",
+               "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.829848
+            },
+            {
+             "text": "Rohde & Schwarz FSWX Signal and Spectrum Analyzer",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-929c216e7fdc00a8",
+               "original_ref": "raw/Productions/FSWX_specs_en_3684-1314-22_v1200.md",
+               "sha256": "929c216e7fdc00a8ff87ebc25c97199cd5a35ece4535925cb340461811717f91",
+               "raw_ref": "raw/Productions/FSWX_specs_en_3684-1314-22_v1200.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/FSWX_specs_en_3684-1314-22_v1200.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 30.829848
+            },
+            {
+             "text": "Rohde & Schwarz R&S®FSV3000 Signal and Spectrum Analyzer",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d12e714aff195b62",
+               "original_ref": "raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md",
+               "sha256": "d12e714aff195b62726a6b5520a3c376c40bf4dde661355373f991ab5174c64d",
+               "raw_ref": "raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/FSV3000_specs_en_5216-1334-22_v1601.md",
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 29.376643
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": []
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

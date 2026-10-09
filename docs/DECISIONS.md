@@ -2004,3 +2004,17 @@ Decision (owner: try Skill guidance first, then multi-round retrieval only if it
 Reason: in core-002, the new FAILs came from the reviewer finding the answer's main claims beyond its passages. Three patterns did that: products recommended for a market no passage tied them to (Q0196, Q0351); the Host's evidence rules quoted as cited findings (Q0039, Q0339); and an inferred chain put into a table (Q0871). The old guidance required a `推薦先賣` section for every product/market question, which pushed the model to recommend.
 
 Measured by `runs/core-003` against `runs/core-002`. If it does not improve, the next step is model-driven multi-round retrieval (owner, 2026-10-10).
+
+## 2026-10-10: Model-directed search rounds for wiki-primary Knowledge (Skill 1.9.0)
+
+Decision (owner: "try it" after 1.8.0 left coverage flat): the wiki-primary Knowledge capability may run model-directed search rounds after its first retrieval. The design is `docs/phases/KNOWLEDGE_MULTI_ROUND_RETRIEVAL.md`.
+- The Gateway model sees search results and marks relevant pages.
+- It asks for new searches; the Host runs them and reads only pages a search showed.
+- Citation and Host checks are unchanged.
+- A Skill opts in with `retrieval_rounds` (0-3, default 0). Skill 1.9.0 sets 2.
+
+Result (`runs/core-004`): reference files offered to synthesis rose from 22% to 41%, and those cited from 17% to 26%. Answer key-point coverage stayed flat (0.28 to 0.30). Contradictions fell from 7 to 4. Median latency rose from 137 to 200 s. The limit has moved from retrieval to synthesis. Whether to keep 1.9.0 is with the owner.
+
+Rejected alternatives:
+- Giving the model file-reading tools directly: the model would supply evidence text and step outside the Bridge capability's boundary.
+- An unbounded loop: cost and latency without a stop.

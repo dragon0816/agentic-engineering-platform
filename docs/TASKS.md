@@ -1579,5 +1579,8 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   questions PASS 13 -> 16, false insufficient 6 -> 0, FAIL 3 -> 6.
 - [x] Knowledge answer overreach: Skill 1.8.0 guidance (2026-10-10). core-003
   on the 22 answerable questions: PASS 18, FAIL 2 (was 6), coverage 0.28.
-- [ ] Knowledge coverage: model-driven multi-round retrieval (architecture
-  change, owner to confirm; see runs/core-003/review.zh-TW.md).
+- [x] Knowledge multi-round retrieval, Skill 1.9.0 (13354e4, 2026-10-10):
+  reference files offered to synthesis 22% -> 41%, cited 17% -> 26%;
+  answerable coverage 0.28 -> 0.30, contradictions 7 -> 4, median latency
+  137 -> 200 s (runs/core-004/review.zh-TW.md).
+- [ ] Owner: keep Skill 1.9.0, return to 1.8.0, or work on synthesis next.

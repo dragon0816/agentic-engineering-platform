@@ -30,10 +30,14 @@ Knowledge retrieval was changed after the first comparison.
   `answer_guidance` changed. `runs/core-003`: on the 22 answerable questions
   PASS 18, FAIL 2, coverage 0.28; see `runs/core-003/review.zh-TW.md`.
 
-Next action: the owner said to do multi-round retrieval if the guidance did
-not help. The guidance fixed overreach but not coverage, so the owner was asked
-whether to start model-driven multi-round retrieval (a Harness architecture
-change).
+- 2026-10-10: multi-round retrieval (13354e4) and Knowledge Skill 1.9.0
+  (`retrieval_rounds: 2`; 1.8.0 in `disabled/`) are live. `runs/core-004`:
+  retrieval clearly better (reference files offered 22% -> 41%), answer
+  coverage flat (0.30), contradictions down, median latency +60 s.
+
+Next action: owner chooses among keeping 1.9.0, returning to 1.8.0 (move the
+file back from `disabled/` and restart Agent Web), or working on synthesis.
+See `runs/core-004/review.zh-TW.md` section 5.
 
 ## Repository and runtime state
 
