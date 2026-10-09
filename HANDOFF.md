@@ -17,9 +17,10 @@ Knowledge retrieval was changed after the first comparison.
   their passages.
 - Live: Knowledge Skill `company-agent/knowledge-query@1.7.0` installed in
   the workspace (1.6.0 moved to `disabled/`); Agent Web restarted on f729827.
-- The company LLM had a 503 outage from about 12:54 to 20:56 (UTC+8 log
-  times differ); `.scratch` probe script logic is in the conversation, not
-  needed again.
+- The company LLM returns short bursts of 503 (vLLM unavailable behind
+  LiteLLM): 14 questions in sample-004, and about 20:54-20:56 Taipei time
+  during the first core-002 attempt, which was discarded and re-run.
+  Telemetry timestamps are UTC.
 - The JEV/Laya tunnel host 172.25.228.141 is unreachable from this PC's new
   network (owner, 2026-10-09).
 - Post-unification benchmarks: coding_v1 fix-run-016 20/20, lab fix-012 13
