@@ -1971,3 +1971,24 @@ Decision (owner): Claude Code answers the coverage-selected questions first, and
 Rejected alternatives:
 - Claude Code as the grader of every run: it would spend owner usage on every benchmark run, while the reference is written once per question.
 - Exact text match against the reference: a correct answer in other words would fail.
+
+## 2026-10-09: Bilingual retrieval for wiki-primary Knowledge (Skill 1.7.0)
+
+Decision (owner asked to fix the Harness after core-001): a Knowledge Skill opt-in, `bilingual_retrieval`, changes how the wiki-primary path retrieves; checks and citation rules are unchanged. Skill `company-agent/knowledge-query@1.7.0` turns it on; 1.6.0 moved to `disabled/`.
+
+Investigation: the core-001 misses were not the facet check and not a missing retry. Retrieval missed the pages: for "What is EVM ...", `wiki/concepts/EVM.md` ranked 20th behind pages matched by the question template's words and by question-independent facet queries ("product option specification feature"). Measured against the files the Claude Code reference answers cite (22 answerable core questions, 120 files), one lexical pass found 12%. Many reference files are Traditional Chinese pages that English question words cannot reach.
+
+What the opt-in does, measured as one set (recall 0.12 → 0.26; questions with at least one reference file 9 → 16 of 22):
+- The Gateway model writes up to six bilingual keyword queries before retrieval (`knowledge/query_rewrite.py`). A failed rewrite leaves retrieval as before.
+- English function words are dropped from query ranking.
+- Facet queries carry the question's own words when no subject or focus prefix names them.
+- 36 Wiki sections are kept instead of 24.
+
+Each change alone gave 0.11-0.20. A larger budget alone reached 0.23 with 48 sections.
+
+Rejected alternatives:
+- Changing the facet trigger for definition questions: the facet was covered once the right pages were retrieved.
+- Tuning focus-hint expansions per market: fits the benchmark's grid, not retrieval in general.
+- A model-driven multi-round search, as Claude Code and NousResearch hermes-agent do: likely the next step if recall stays low. It changes the Harness's retrieval step, so it waits for the owner.
+
+Also fixed: the tool route's `failure_code` is read from the capability result, not the outcome root.

@@ -31,8 +31,11 @@ Q1001、Q1021 第一次遇到公司 LLM 503（服務暫時不可用），重問�
    都被 Harness 拒絕；拒絕訊息是「requested product/option/spec evidence was missing」。
    定義題不需要產品/選件/規格面向，看起來是面向評估把定義題當成產品題處理。這是 Harness 行為，
    修改前需 owner 決定。已逐題核對：6 題都是 `phase=needs_input`、`missing_facets` 含
-   `product_option_spec`、Raw 引用 0 條，而且 `retrieval_attempts` 是空的，也就是 Skill 1.6.0 的
-   擴大檢索重試沒有執行，Harness 在第一次面向評估就停了。
+   `product_option_spec`、Raw 引用 0 條。
+   **更正（同日調查後）：** `retrieval_attempts` 是空的，只是因為查詢失敗時沒有 record 可讀，不代表重試沒跑；
+   telemetry 顯示重試有排程。真正原因是檢索：例如問 EVM 時，`wiki/concepts/EVM.md` 只排在第 20 名，前面被
+   題目句型字詞和與題目無關的面向檢索詞占滿。以參考答案引用的檔案量測，檢索召回率只有 0.12。
+   修正見 DECISIONS 2026-10-09「Bilingual retrieval」與 `runs/core-002`。
 3. **開放題涵蓋率天生偏低。** solution_mapping、strategic 類題目（例如 Q0121「市場需求 → 參數 → 儀器能力」）
    有多條正確路徑；參考答案走 5G FWA，AEP 走 Wi-Fi 7，兩者都有根據。這類題的涵蓋率只能當參考。
 4. **答得好的題確實高分。** 例如 Q0011（Wi-Fi 7/8 信令與非信令）0.81。
