@@ -259,3 +259,20 @@ def test_the_host_registers_an_install_and_its_grants_while_running() -> None:
     policy.add(grant)
     policy.add(grant.model_copy(update={"approval_ref": "y"}))  # the first one stays
     assert policy._grants[("owner", grant.asset.key)].approval_ref == "x"
+
+
+def test_a_revision_that_drops_a_step_must_say_so(tmp_path: Path) -> None:
+    """Harness unification U6 (owner 2026-10-09): a Workflow lost its script
+    step after a failure and then 'succeeded' without producing anything."""
+    chat, _ = studio(tmp_path)
+    two = workflow("read-it")
+    two["steps"] = [*two["steps"], {"capability": "lab/write-it@1.0.0",
+                                    "inputs": {"value": {"source": "run", "path": ["month"]}}}]
+    first, _ = chat.draft("owner", None, "Echo", two)
+    assert first is not None
+    revised, problems = chat.draft("owner", None, "Echo", workflow("read-it"),
+                                   first.candidate_id)
+    assert revised is None and "removes step(s) lab/write-it@1.0.0" in problems[0]
+    allowed = {**workflow("read-it"), "allow_removed_steps": True}
+    accepted, problems = chat.draft("owner", None, "Echo", allowed, first.candidate_id)
+    assert accepted is not None and problems == []

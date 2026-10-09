@@ -1,6 +1,6 @@
 # AEP Harness 設計說明（審閱用）
 
-日期：2026-10-09　版本：以 commit `b6ffa5f` 為準　撰寫：Claude Code
+日期：2026-10-09　版本：已更新為 Harness 統一後（U1–U6）的狀態　撰寫：Claude Code
 用途：給 owner 審閱目前 Harness 的實際設計、邊界、限制與已知缺口。內容描述「程式現在怎麼做」，與規劃文件不一致之處另列於第 12 節。
 
 ---
@@ -8,6 +8,21 @@
 ## 0. 一句話摘要
 
 AEP 的 Harness 是包在模型與工具外面的**有界控制迴圈**：模型只負責「提議」（選工具、填參數、寫答案或寫程式），**Host 決定範圍與驗收、Bridge 決定能不能執行**。目前有四條實作中的 Harness 路徑——對話（Gateway tool loop）、Knowledge、Coding、Workflow——共用同一套 Bridge 授權、核准與遙測，但**只有 Knowledge 直接路徑**接上了通用的 Harness 狀態機（plan → collect → execute → validate → retry）。
+
+---
+
+## 0.1 2026-10-09 更新：Harness 已統一
+
+owner 審閱本文件後決定**統一成一個 Harness 骨架**（`docs/phases/HARNESS_UNIFICATION.md`）。現在四個領域都跑在同一個狀態機（plan → [collect] → execute → validate → retry / needs_input / failed）上，差異只在「領域 adapter」與 Skill：
+
+| 領域 | collect | execute（執行方式） | validate（Host checks） | retry |
+|---|---|---|---|---|
+| Knowledge（直接路徑與**工具路徑**） | 選定知識資產 | Bridge 的 knowledge-query 能力 | answer_nonempty、facet_coverage、claim_support | 預算由 Knowledge Skill 決定；重試時擴大檢索 |
+| Coding（coding/change） | 模型提出計畫並檢查路徑/命令 | 套用變更（沙箱、worktree 不變） | declared_commands（宣告的 pytest） | 從 execute 重試＝修復；用盡為 repair_budget_exceeded |
+| Workflow | — | Workflow 引擎（journal/復原不變） | steps_succeeded＋Workflow 宣告的輸出檢查（`checks`） | 0（整個 Workflow 不重跑，避免重複副作用） |
+| 對話回合 | — | Gateway tool loop | no_unbacked_action_claim、named_outputs_exist | 1 次，帶失敗原因；仍失敗則答案附上 Host 註記 |
+
+其他：Knowledge 工具路徑改為**直接回傳 Harness 驗證過的答案**（模型不再改寫）；草稿修訂若刪除步驟必須明確聲明；外部 agent 執行已安裝未修改的 Workflow 也比照「安裝即核准」；遙測各領域回報相同的 phase 名稱，coding 有獨立的 `coding_change` run。下文第 6–12 節中標註「（已處理）」者為統一前的狀態描述。
 
 ---
 
@@ -171,7 +186,7 @@ stateDiagram-v2
 
 ### 6.4 現在的接線範圍
 
-只有 **Agent Web 的 Knowledge 直接路徑**（`web.py` `_ask_knowledge`）呼叫 `plan_task` / `run_harness`。而且該處 TaskContract 的 `max_retries=0`，所以**通用重試分支目前不會在 Knowledge 觸發**；Knowledge 真正的「再檢索」發生在 facet 評估內部（見 7.2）。Coding 與 Workflow 仍用各自的迴圈（G4 未完成）。
+（已處理，見 0.1）統一前只有 **Agent Web 的 Knowledge 直接路徑**（`web.py` `_ask_knowledge`）呼叫 `plan_task` / `run_harness`。而且該處 TaskContract 的 `max_retries=0`，所以**通用重試分支目前不會在 Knowledge 觸發**；Knowledge 真正的「再檢索」發生在 facet 評估內部（見 7.2）。Coding 與 Workflow 仍用各自的迴圈（G4 未完成）。
 
 ---
 
@@ -318,19 +333,19 @@ flowchart LR
 
 ## 12. 已知缺口、文件與程式不一致處
 
-1. **共用狀態機只接到 Knowledge 直接路徑**；Coding（`src/harness`）與 Workflow 引擎各自一套迴圈（G4 未完成），因此「跨領域驗收（G5）」尚無法成立。
-2. **Knowledge 的通用重試永遠不會觸發**：直接路徑的 TaskContract 寫死 `max_retries=0`；實際的補檢索在 facet 評估內部，不在共用狀態機裡。
-3. **Knowledge 工具路徑繞過 Host checks**，答案由對話模型改寫，是 knowledge_v1 失敗的主因。
-4. `HARNESS_6_LAYER_STATUS.md` 寫「最多 5 輪、4 次工具呼叫」，**程式已是 21 輪、20 次**（文件過時）。
+1. （已處理）**共用狀態機只接到 Knowledge 直接路徑**；Coding（`src/harness`）與 Workflow 引擎各自一套迴圈（G4 未完成），因此「跨領域驗收（G5）」尚無法成立。
+2. （已處理）**Knowledge 的通用重試永遠不會觸發**：直接路徑的 TaskContract 寫死 `max_retries=0`；實際的補檢索在 facet 評估內部，不在共用狀態機裡。
+3. （已處理）**Knowledge 工具路徑繞過 Host checks**，答案由對話模型改寫，是 knowledge_v1 失敗的主因。
+4. （已處理）`HARNESS_6_LAYER_STATUS.md` 寫「最多 5 輪、4 次工具呼叫」，**程式已是 21 輪、20 次**（文件過時）。
 5. Gateway docstring 提到未知工具有「一次有界修復」，**程式沒有獨立計數**，未知工具只是消耗工具預算。
 6. HANDOFF 提到工具路徑合成上限 800 token，**程式已是 procedure 值或 4,000**（HANDOFF 過時）。
-7. 遙測沒有獨立的 `coding_change` run，coding 事件掛在所在的對話或 Workflow run 底下（契約 v0.2 列了這個 run_kind，但尚未單獨開 run）。
-8. 外部 agent 路徑沒有「已安裝版本直接執行」的捷徑（對話路徑有），兩者行為不一致。
-9. 對話中的 Agent 曾在失敗後**自行刪除步驟**讓 Workflow「成功」（yahoo-stock 案例）；目前沒有機制偵測「草稿修訂降低了功能」。
+7. （已處理）遙測沒有獨立的 `coding_change` run，coding 事件掛在所在的對話或 Workflow run 底下（契約 v0.2 列了這個 run_kind，但尚未單獨開 run）。
+8. （已處理）外部 agent 路徑沒有「已安裝版本直接執行」的捷徑（對話路徑有），兩者行為不一致。
+9. （已處理：刪除步驟需明確聲明）對話中的 Agent 曾在失敗後**自行刪除步驟**讓 Workflow「成功」（yahoo-stock 案例）；目前沒有機制偵測「草稿修訂降低了功能」。
 
 ---
 
-## 13. 請 owner 審閱與決定的項目
+## 13. 請 owner 審閱與決定的項目（2026-10-09：1、3–6 已依建議決定並實作；2 仍暫停；7 已更新）
 
 1. **Knowledge 工具路徑**（暫停中）：(a) 直接回傳 Harness 答案、(b) 讓更多問題走直接路徑、(c) 維持現狀。
 2. **階段閘門 / Coding Skill 1.8.0 措辭**（暫停中）：是否採用 #4 分析提出的規則（完整閱讀規則、缺值依請求或範本、保留範本公式、輸出對照輸入檢查）。

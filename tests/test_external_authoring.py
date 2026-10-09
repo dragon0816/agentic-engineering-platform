@@ -275,3 +275,16 @@ def test_the_catalog_names_installed_assets_without_what_people_wrote_about_them
                                      "parameters": [{"name": "month", "kind": "text",
                                                      "required": True}]}]
     assert "ACME" not in json.dumps(catalog) and catalog["skills"][0]["alias"] == "ncc"  # type: ignore[index]
+
+
+def test_an_installed_unchanged_workflow_runs_directly_for_an_external_agent(
+    tmp_path: Path,
+) -> None:
+    authoring, recorder = desk(tmp_path)
+    submitted = authoring.submit_workflow(workflow("write-it"), "Echo")
+    candidate_id = str(submitted["candidate_id"])
+    authoring.chat.decide(str(authoring.install_workflow(candidate_id)["approval_id"]),
+                          "owner", True)
+    ran = authoring.run_workflow(candidate_id, {"month": "SECRET-11"})
+    assert ran["ran"] is True and recorder.calls == ["SECRET-11"]
+    assert "SECRET-11" not in json.dumps(ran)

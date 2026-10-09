@@ -1555,4 +1555,15 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   `tests/test_telemetry.py`.
 - [ ] Atlas side (owner: Atlas): event-stream provider, run timeline, state
   graph, heatmap (contract v0.2 §8).
+- [x] Harness unification U1-U6 (owner 2026-10-09,
+  `docs/phases/HARNESS_UNIFICATION.md`): Coding, Workflow, conversation turns
+  and the Knowledge tool route run on the shared plan/execute/validate/retry
+  state machine; Workflows may declare output checks; conversation answers
+  are checked against the turn's real tools and files; the Knowledge tool
+  route returns the validated Harness answer and retries widen retrieval;
+  revisions that drop steps must say so; external agents run installed
+  Workflows directly.
+- [ ] Harness unification U7: benchmarks after the change (non-GUI any time,
+  GUI while the owner is away) and a Knowledge Skill 1.6.0 with a retry
+  budget on the live host.
 

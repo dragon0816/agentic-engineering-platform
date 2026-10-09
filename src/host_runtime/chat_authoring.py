@@ -357,6 +357,19 @@ class ChatAuthoring:
                 problems.extend(self._workspace_problems(index, step))
         if not manifest.steps:
             problems.append("the Workflow has no steps")
+        if previous is not None and not raw.get("allow_removed_steps"):
+            # A revision that drops what the Workflow did must say so (owner
+            # 2026-10-09: a stock Workflow lost its script step after a failure
+            # and then "succeeded" without producing anything).
+            kept = {_key(step.capability) for step in manifest.steps
+                    if isinstance(step, WorkflowStep)}
+            removed = sorted({_key(step.capability) for step in previous.draft.steps
+                              if isinstance(step, WorkflowStep)} - kept)
+            if removed:
+                problems.append(
+                    "this revision removes step(s) " + ", ".join(removed) + " that the "
+                    "previous version had; if that is intended, pass \"allow_removed_steps\": "
+                    "true and tell the person what the Workflow no longer does")
         return (None, problems) if problems else (manifest, [])
 
     def _workspace_problems(self, index: int, step: WorkflowStep) -> list[str]:

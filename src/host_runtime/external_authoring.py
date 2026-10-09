@@ -184,9 +184,13 @@ class ExternalAuthoring:
         self, candidate_id: str, arguments: dict[str, JsonValue]
     ) -> dict[str, JsonValue]:
         item = self.chat.candidate(candidate_id, self.actor)
-        if self.chat.read_only(item.draft):
-            result = self.chat.execute(self.actor, item, arguments,
-                                       f"external-read-only:{candidate_id}")
+        installed = item.status == "installed" and item.installed_digest == digest(item.draft)
+        if installed or self.chat.read_only(item.draft):
+            # Read-only, or the installed version unchanged: installing was the
+            # owner's approval, as in conversations (harness unification U6).
+            result = self.chat.execute(
+                self.actor, item, arguments,
+                f"external-{'installed' if installed else 'read-only'}:{candidate_id}")
             return {"ok": True, "ran": True, "run": run_codes(result),
                     "note": "statuses and codes only; the owner sees the data in Agent Web"}
         request = self.chat.request(self.actor, None, "run", candidate_id, arguments,
