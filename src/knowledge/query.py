@@ -913,6 +913,36 @@ class RetrievalSnapshot:
             ]
         return self._wiki_sections
 
+    def wiki_titles(self) -> dict[str, str]:
+        """Wiki page path -> title."""
+        return {rel: title for rel, title in self._vault.wiki_pages()}
+
+    def search_wiki_pages(
+        self, query: str, *, exclude: set[str], limit: int = 8,
+    ) -> tuple[Passage, ...]:
+        """The best section of each Wiki page a query finds that is not yet in
+        `exclude`: what a person reads in search results before opening a page."""
+        found: list[Passage] = []
+        for passage in _retrieve_docs(
+            self._wiki_section_docs(), content_words(query), k=40, min_raw=0
+        ):
+            page = passage.citation.wiki_page or ""
+            if page in exclude or any(item.citation.wiki_page == page for item in found):
+                continue
+            found.append(passage)
+            if len(found) >= limit:
+                break
+        return tuple(found)
+
+    def wiki_page_sections(self, page: str, query: str, *, k: int = 3) -> tuple[Passage, ...]:
+        """A page's sections ranked for the question, or its first sections when
+        none share a word with it."""
+        docs = [doc for doc in self._wiki_section_docs() if doc.citation.wiki_page == page]
+        ranked = _retrieve_docs(docs, content_words(query), k=k, min_raw=0) if docs else ()
+        return ranked or tuple(
+            Passage(text=doc.text, citation=doc.citation, score=0) for doc in docs[:k]
+        )
+
     def wiki_primary_passages(
         self, queries: tuple[str, ...], *, k: int = 24, per_page: int = 3,
         index_k: int = 8, raw_k: int = 4, max_chars: int = 40000, linked_from: int = 6,

@@ -77,6 +77,9 @@ class KnowledgeProcedure(Contract):
     # queries carry the question's own words when no subject or focus names
     # them, and more Wiki sections are kept. Measured as one set.
     bilingual_retrieval: bool = False
+    # Opt-in, wiki_primary only (owner 2026-10-10): extra model-directed
+    # search rounds after the first retrieval; 0 keeps one pass.
+    retrieval_rounds: int = Field(default=0, ge=0, le=3, strict=True)
 
     @model_validator(mode="after")
     def valid_patterns(self) -> Self:

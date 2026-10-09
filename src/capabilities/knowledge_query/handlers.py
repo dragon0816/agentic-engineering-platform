@@ -35,6 +35,7 @@ from knowledge.query import (
     cited_numbers,
 )
 from knowledge.query_rewrite import content_words, rewrite_queries
+from knowledge.search_rounds import search_rounds
 from knowledge.vault import Vault
 from models.contracts import ModelClient
 
@@ -300,6 +301,11 @@ class KnowledgeQueryHandler:
         passages = snapshot.wiki_primary_passages(
             tuple(dict.fromkeys(queries))[:12], k=36 if bilingual else 24,
             content_only=bilingual)
+        if procedure.retrieval_rounds and passages:
+            passages = search_rounds(
+                snapshot, self.model, self.alias, context.trace, request.question,
+                passages, rounds=procedure.retrieval_rounds,
+                k=36 if bilingual else 24)
         if not passages:
             raise CapabilityRefused("knowledge_insufficient_evidence")
         assessment = assess_wiki_primary(passages, request.question, procedure)
