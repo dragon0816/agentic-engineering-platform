@@ -28,10 +28,12 @@ RUN_KINDS = ("conversation_turn", "workflow_run", "knowledge_query", "coding_cha
 # Recommended state names per harness (contract v0.2 addition), so state graphs
 # compare across runs; `state` stays an open string.
 STATES = {
+    # Every domain on the shared Harness reports the same phases (unification
+    # 2026-10-09), so state graphs compare across Coding, Workflow and Knowledge.
+    "harness": ("collecting", "executing", "validating", "validated", "needs_input",
+                "failed", "stopped"),
     "conversation_turn": ("routing", "skill_selection", "model", "tool", "answer"),
     "workflow_run": ("step",),
-    "knowledge_query": ("collecting", "executing", "validating", "retrying"),
-    "coding_change": ("plan", "change", "validate", "repair"),
 }
 
 MAX_STRING = 300
