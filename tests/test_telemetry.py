@@ -261,3 +261,35 @@ def test_atlas_reads_runs_events_and_the_stream_without_the_token(
         assert seen[-2:] == ["run.started", "run.completed"]
     finally:
         sock.close()
+
+
+def test_strategies_compare_on_success_latency_and_retries(tmp_path: Path) -> None:
+    from telemetry.report import compare, markdown
+
+    item = TelemetryStore(tmp_path / "t.sqlite")
+    now = datetime.now(UTC)
+    rows = []
+    for index, (strategy, status, duration) in enumerate(
+            [("st-a", "succeeded", 100), ("st-a", "failed", 300), ("st-b", "succeeded", 50)]):
+        run = f"run-{index}"
+        rows += [
+            TelemetryEvent(event_id=f"{index}s".ljust(32, "x"), run_id=run, trace_id="t",
+                           span_id="s", sequence=0, timestamp=now, event_type="run.started",
+                           status="started", attributes={"run_kind": "conversation_turn",
+                                                         "strategy_id": strategy}),
+            TelemetryEvent(event_id=f"{index}c".ljust(32, "x"), run_id=run, trace_id="t",
+                           span_id="s", sequence=1, timestamp=now, event_type="run.completed",
+                           status=status, attributes={"duration_ms": duration, "llm_calls": 2,
+                                                      "input_tokens": None}),
+        ]
+    rows.append(TelemetryEvent(event_id="r".ljust(32, "x"), run_id="run-1", trace_id="t",
+                               span_id="s", sequence=2, timestamp=now,
+                               event_type="retry.scheduled", status="succeeded"))
+    item.append(rows)
+    item.close()
+    report = {row["strategy_id"]: row for row in compare(tmp_path / "t.sqlite")}
+    assert report["st-a"]["runs"] == 2 and report["st-a"]["success_rate"] == 0.5
+    assert report["st-a"]["retried_runs"] == 1 and report["st-a"]["token_coverage"] == 0.0
+    assert report["st-b"]["p50_ms"] == 50.0
+    assert "| st-a | conversation_turn | 2 |" in markdown(list(report.values()),
+                                                         ("strategy_id", "run_kind"))

@@ -212,6 +212,13 @@ def _parser() -> argparse.ArgumentParser:
     tele_export.add_argument("--out", type=Path, help="a .jsonl file; the screen by default")
     tele_export.add_argument("--since", help="RFC3339 time; only events from then on")
     tele_export.add_argument("--run", help="only this run")
+    tele_compare = tele_actions.add_parser(
+        "compare", help="success, latency and loops per strategy (and run kind)")
+    tele_compare.add_argument("--by", default="strategy_id,run_kind",
+                              help="comma-separated: strategy_id, run_kind, skill_id")
+    tele_compare.add_argument("--since", help="RFC3339 start")
+    tele_compare.add_argument("--until", help="RFC3339 end")
+    tele_compare.add_argument("--json", action="store_true")
     mcp = commands.add_parser("mcp", help="serve authoring tools to a coding agent over stdio")
     mcp.add_argument("--config", required=True, type=Path)
     mcp.add_argument("--agent", default="mcp", help="who is connecting, e.g. codex")
@@ -615,6 +622,13 @@ def _telemetry(args: argparse.Namespace, workspace_root: Path) -> int:
     if not path.is_file():
         print(f"no telemetry recorded yet ({path})", file=sys.stderr)
         return 1
+    if args.telemetry_action == "compare":
+        from telemetry.report import compare, markdown
+
+        by = tuple(item.strip() for item in args.by.split(",") if item.strip())
+        rows = compare(path, by=by, since=args.since, until=args.until)
+        print(json.dumps(rows, ensure_ascii=False, indent=2) if args.json else markdown(rows, by))
+        return 0
     store = TelemetryStore(path)
     try:
         if args.telemetry_action == "runs":
