@@ -1992,3 +1992,15 @@ Rejected alternatives:
 - A model-driven multi-round search, as Claude Code and NousResearch hermes-agent do: likely the next step if recall stays low. It changes the Harness's retrieval step, so it waits for the owner.
 
 Also fixed: the tool route's `failure_code` is read from the capability result, not the outcome root.
+
+## 2026-10-10: Knowledge Skill 1.8.0 holds answers to links their passages state
+
+Decision (owner: try Skill guidance first, then multi-round retrieval only if it does not help): `company-agent/knowledge-query@1.8.0` changes only `answer_guidance`; 1.7.0 moved to `disabled/`. The new rules:
+- A product is claimed to fit a market, application or customer only where a cited passage states that link. Otherwise the answer gives the product facts and writes 知識庫未證實 for the link, including under `推薦先賣`.
+- Nothing is ranked (strongest, most important) unless a passage ranks it.
+- No table cell or heading states a link the passages do not.
+- The instructions' own evidence rules and facet names (such as `direct_relationship`) are never presented as findings or cited.
+
+Reason: in core-002, the new FAILs came from the reviewer finding the answer's main claims beyond its passages. Three patterns did that: products recommended for a market no passage tied them to (Q0196, Q0351); the Host's evidence rules quoted as cited findings (Q0039, Q0339); and an inferred chain put into a table (Q0871). The old guidance required a `推薦先賣` section for every product/market question, which pushed the model to recommend.
+
+Measured by `runs/core-003` against `runs/core-002`. If it does not improve, the next step is model-driven multi-round retrieval (owner, 2026-10-10).
