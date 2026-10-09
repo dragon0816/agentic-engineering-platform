@@ -43,6 +43,26 @@ def test_a_validated_harness_answer_is_the_turn_answer_without_a_rewrite() -> No
     assert asked == [("CMP180?", RS)] and handler.inputs == []  # no raw capability call
 
 
+def test_a_validated_tool_answer_keeps_its_cited_passages_for_checking() -> None:
+    model, handler = CallsVault("knowledge__rs-knowledge", {"question": "CMP180?"}), Recording()
+    built = gateway(model, handler)
+    record = {"answer": {"passages": [{"text": "CMP180 supports 5G NR",
+                                       "citation": {"kind": "wiki", "wiki_page": "wiki/a.md"}}]}}
+    built.knowledge_harness = lambda question, asset: {
+        "ok": True, "answer": "CMP180 supports 5G NR [1].", "evidence": {}, "record": record,
+        "harness": {"phase": "validated"}, "outcome": {"failure": None}}
+    import asyncio
+
+    from test_gateway import request
+
+    from models.contracts import ModelMessage
+
+    result = asyncio.run(built.converse(request("q"), (ModelMessage(role="user", text="q"),)))
+    data = result.tools[0].host.data
+    assert data["record"] == record and data["phase"] == "validated"
+    assert data["failure_code"] is None
+
+
 def test_an_unvalidated_answer_goes_back_to_the_model_marked_as_such() -> None:
     model, handler = CallsVault("knowledge__rs-knowledge", {"question": "CMP180?"}), Recording()
     built = gateway(model, handler)
@@ -58,6 +78,7 @@ def test_an_unvalidated_answer_goes_back_to_the_model_marked_as_such() -> None:
     assert result.text == "answered" and len(model.calls) == 2
     observation = model.calls[1].messages[-1].text
     assert "not_validated" in observation and "not from the knowledge base" in observation
+    assert '"record"' not in observation  # the model's observation stays small
 
 
 def test_without_a_harness_the_tool_route_keeps_the_bridge_call() -> None:

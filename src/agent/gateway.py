@@ -806,6 +806,13 @@ class Gateway:
             asset = AssetIdentity.model_validate(bound["asset"])
             answer = await asyncio.to_thread(self.knowledge_harness, question, asset)
             validated = bool(answer.get("ok"))
+            raw_outcome, raw_state = answer.get("outcome"), answer.get("harness")
+            ran = raw_outcome if isinstance(raw_outcome, dict) else {}
+            state = raw_state if isinstance(raw_state, dict) else {}
+            # A validated answer ends the turn, so its record (the cited
+            # passages) is kept for whoever checks the citations; an
+            # unvalidated one goes back to the model and stays small.
+            kept = {"record": answer.get("record")} if validated else {}
             return ConversationToolExecution(
                 call_id=call.call_id, name=call.name,
                 host=HostToolOutcome(
@@ -813,6 +820,9 @@ class Gateway:
                     data={"knowledge_harness": "validated" if validated else "not_validated",
                           "answer": str(answer.get("answer") or "")[:12000],
                           "evidence": answer.get("evidence"),
+                          "phase": state.get("phase"),
+                          "failure_code": (ran.get("failure") or {}).get("code"),
+                          **kept,
                           "instruction": (
                               "This answer passed the Host's evidence checks and is shown to "
                               "the person as it is." if validated else
