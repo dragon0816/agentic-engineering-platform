@@ -1567,3 +1567,10 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   GUI while the owner is away) and a Knowledge Skill 1.6.0 with a retry
   budget on the live host.
 
+- [x] knowledge_v1 reference answers (2026-10-09): `reference.py` (Claude Code,
+  read-only, quotes verified) and `reference_grade.py` (company model labels
+  key-point coverage). Trial: Q0011, Q1001, 8/8 quotes verified each. Grader
+  1.2 reads the tool route's host-validated answer; the Gateway keeps its
+  cited passages (a18421a, 875d3e3).
+- [ ] knowledge_v1 reference answers for the other 34 core questions: wait for
+  the owner after a fresh Q0011/Q1001 run on the restarted Agent Web.
