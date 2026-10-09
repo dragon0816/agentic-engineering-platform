@@ -1,0 +1,70 @@
+{
+  "id": "Q0011",
+  "question": "For a Wireless Communication use case involving Wi-Fi 7/8, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "tags": {
+    "market": "Wireless Communication",
+    "product": "Signaling / Non-signaling Tester",
+    "type": "application",
+    "difficulty": "L2"
+  },
+  "answer": "In the Vault's framing, the signaling tester and the non-signaling tester sit at two different stages of the same Wi-Fi 7/8 device workflow. Early/R&D and validation work belongs to the signaling tester: the R&S CMX500 is described as a multi-technology, multi-channel one-box signaling tester whose Wi-Fi 7 tests run in signaling mode under real-world conditions to measure RF TX/RX characteristics, plus MLO/multiple RF chains, 2x2 MIMO, 6 GHz out-of-band discovery, coexistence and E2E tests, and (via the integrated N3IWF gateway and POLQA) 5G/WLAN offloading and Voice over WLAN interworking. For Wi-Fi 8 / IEEE 802.11bn the same CMX500 signaling mode is where the first RF tests were implemented even before final IEEE ratification, covering PHY features such as distributed resource units (dRU) and unequal modulation (UEQM) on a Broadcom prototype device at MWC Barcelona 2026. The non-signaling tester comes later, in the production phase: the Vault says all RF measurements in WLAN device production are executed in non-signaling mode to save time, with the R&S CMP180 positioned as optimized for that purpose (Wi-Fi 6E/Wi-Fi 7 and 5G NR FR1 up to 8 GHz, bandwidths up to 500 MHz, two analyzers/generators and eight-port sets for 2x2 MIMO, scalable to 4x4 MIMO APs with two boxes). The broader 5G device-testing value chain note places the same split generically: CMX500/CMW500/CMsquares under Signaling/protocol/application, and CMP180/CMP200/CMW100 under Production/manufacturing. Concretely, CMX500 signaling coverage is licensed per generation (e.g. WLAN Signaling 11be options for Wi-Fi 7 AP or station emulation), while CMP180 is the non-signaling production box — its 480 MHz loopback WLAN waveform is only called a potential Wi-Fi 8 candidate, not a ratified spec. The Vault's sources are PR/solution-overview level, so no option codes, software versions or test-case lists for Wi-Fi 8 can be derived from them.",
+  "sufficient": true,
+  "missing": "The Vault has no formal end-to-end Wi-Fi test workflow document (no Wi-Fi Alliance certification / pre-conformance / carrier-acceptance stage mapping comparable to the 5G value chain note); the Wi-Fi 7/8 evidence is PR and OneNote solution-note level only. It lacks Wi-Fi 8 option codes, CMX500 software/CSW versions, RF chain counts, test-case lists and measurement uncertainties; it does not state whether CMP180 (or CMP200/CMW100) will support Wi-Fi 8 non-signaling production measurements; and it gives no Wi-Fi-specific OTA-chamber or de-sense workflow step order, test limits or automation flow (the UAV de-sense material is conceptual configuration guidance only).",
+  "key_points": [
+    {
+      "point": "The Vault's Wi-Fi 7 workflow splits CMX500 (R&D signaling/interworking) from CMP180 (production non-signaling RF), i.e. signaling tester early, non-signaling tester at production.",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "以 [[R&S CMX500]] 覆蓋 R&D signaling / interworking 測試，以 [[R&S CMP180]] 覆蓋 production non-signaling RF 測試。",
+      "verified": true
+    },
+    {
+      "point": "In the production phase all WLAN RF measurements are run in non-signaling mode to save test time, and the CMP180 is positioned as optimized for that stage.",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。",
+      "verified": true
+    },
+    {
+      "point": "Wi-Fi 7 R&D testing requires signaling mode with real-world conditions to measure RF TX/RX characteristics (MLO makes multiple RF chains important).",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "Wi-Fi 7 R&D 測試需在 signaling mode 與 real-world conditions 下量測 RF TX / RX characteristics。",
+      "verified": true
+    },
+    {
+      "point": "For Wi-Fi 8 / IEEE 802.11bn, the first RF tests were implemented in CMX500 signaling mode before final IEEE standard ratification, on a Broadcom prototype WLAN device.",
+      "source": "wiki/concepts/Wi-Fi 8 RF signaling tests.md",
+      "quote": "first [[Wi-Fi 8]] RF tests in signaling mode 實作到 [[R&S CMX500]] one-box signaling tester",
+      "verified": true
+    },
+    {
+      "point": "Wi-Fi 8 signaling-mode tests target PHY features such as distributed resource units (dRU) and unequal modulation (UEQM), i.e. pre-standard PHY validation rather than production screening.",
+      "source": "wiki/concepts/Wi-Fi 8 RF signaling tests.md",
+      "quote": "comprehensive signaling mode tests | 來源稱可 cover a broad range of Wi‑Fi 8 features 並執行 in-depth analysis of performance characteristics。",
+      "verified": true
+    },
+    {
+      "point": "The 5G device testing value chain note maps the same tool split generically: signaling/protocol/application layer = CMX500/CMW500/CMsquares; production/manufacturing = CMP180/CMP200/CMW100.",
+      "source": "wiki/concepts/5G device testing value chain.md",
+      "quote": "| Production / manufacturing | [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100]]、[[R&S CMX500]] / [[R&S CMW500]] |",
+      "verified": true
+    },
+    {
+      "point": "CMX500 Wi-Fi signaling coverage is licensed per Wi-Fi generation, e.g. WLAN Signaling 11be options for Wi-Fi 7 AP or station emulation, alongside WLAN TX measurement and ARB generator options.",
+      "source": "wiki/sources/Signaling test solution.md",
+      "quote": "| [[R&S CMX-KS352B]] | SW | 1222.7087.02 | WLAN Signaling 11 be Station Testing | required for WiFi7 AP emulation |",
+      "verified": true
+    },
+    {
+      "point": "CMP180's non-signaling production scope covers Wi-Fi 6E/Wi-Fi 7 and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz; its 480 MHz loopback waveform is only a potential Wi-Fi 8 candidate, not confirmed Wi-Fi 8 production support.",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T08:15:10+00:00",
+  "seconds": 127.2,
+  "num_turns": 19,
+  "cost_usd_estimate": 1.2711235000000003,
+  "error": null
+}

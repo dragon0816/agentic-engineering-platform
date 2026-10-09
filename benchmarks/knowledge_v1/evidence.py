@@ -50,8 +50,21 @@ def knowledge_use(exchange: dict[str, Any]) -> dict[str, Any]:
         return {"route": "none", "status": conversation.get("status"),
                 "failure": (conversation.get("failure") or {}).get("code"), "phase": None,
                 "record": {}, "text": text, "evidence": {}, "tools": names}
+    harnessed = [t for t in used if isinstance((t.get("host") or {}).get("data"), dict)
+                 and "knowledge_harness" in t["host"]["data"]]
+    if harnessed:
+        # Since 2026-10-09 the tool route runs the Knowledge Harness on the
+        # host; a validated answer is the turn's answer, cited like the direct
+        # route's.
+        host = harnessed[-1]["host"]
+        data = host["data"]
+        return {"route": "tool", "status": host.get("status"),
+                "failure": data.get("failure_code") or (host.get("failure") or {}).get("code"),
+                "phase": data.get("phase") or conversation.get("status"),
+                "record": data.get("record") or {}, "text": text, "evidence": data.get("evidence") or {},
+                "tools": names, "harnessed": True, "conversation_status": conversation.get("status")}
     # The last Knowledge call is what the answer rests on; earlier ones were searches.
-    good = [t for t in used if (t.get("capability") or {}).get("status") == "succeeded"]
+    good =[t for t in used if (t.get("capability") or {}).get("status") == "succeeded"]
     last = (good or used)[-1]
     capability = last.get("capability") or {}
     failure = capability.get("failure") or last.get("failure") or {}
@@ -87,7 +100,7 @@ def cited_passages(use: dict[str, Any]) -> list[dict[str, Any]]:
     the turn whose file the answer names is taken; failing that, the passages
     the Knowledge answers themselves cited."""
     text = use.get("text") or ""
-    if use.get("route") == "direct":
+    if use.get("route") == "direct" or use.get("harnessed"):
         passages = ((use.get("record") or {}).get("answer") or {}).get("passages") or []
         return [{"number": n, **passages[n - 1]} for n in cited_numbers(text)
                 if 1 <= n <= len(passages)]

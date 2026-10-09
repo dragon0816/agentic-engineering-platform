@@ -1958,3 +1958,16 @@ Rejected alternatives:
 - Only patching gaps: it would leave four loops with different stop reasons, retries and evidence.
 
 Plan: `docs/phases/HARNESS_UNIFICATION.md` (U1-U7).
+
+## 2026-10-09: Claude Code reference answers for knowledge_v1, graded by key-point coverage
+
+Decision (owner): Claude Code answers the coverage-selected questions first, and the Harness + company LLM answers are measured against those reference answers. The trial ran on 2 questions (Q0011, Q1001). Expanding to the 36 core questions waits until the comparison has been checked end to end (the owner chose this order to save Claude Code usage).
+
+- **Reference.** `benchmarks/knowledge_v1/reference.py` runs `claude -p` headless in the Vault folder with Read, Grep and Glob only (no Bash, edits, web or MCP). It writes an answer, 2-8 key points each with a source file and a verbatim quote, and what the Vault lacks. Every quote is checked against the cited file; an unverified point is marked, not trusted.
+- **Data exception.** This is the one place native Claude Code reads Vault content, which the PUBLIC rule otherwise withholds from external agents. It is allowed because host.json marks this Vault `privacy: public` and the owner approved the trial. Other Vaults or company data stay under the PUBLIC rule.
+- **Grading.** `benchmarks/knowledge_v1/reference_grade.py` has the company Gateway model label each reference key point `covered`, `partial`, `missing` or `contradicted` in the AEP answer, and list claims the answer states as fact that the reference says the Vault lacks. Coverage is (covered + partial / 2) / key points. It is reported next to run.py's verdict and does not replace it: an answer can be right in other words or with other evidence.
+- **Tool-route record.** A validated tool-route Knowledge answer now carries its record (the cited passages), its phase and its failure code in the host record, so citations can be checked as on the direct route. An unvalidated one goes back to the model without the record, to keep the observation small. knowledge_v1 grader 1.2 reads it. Traces recorded before this change are NEEDS_HUMAN_REVIEW, not FAIL.
+
+Rejected alternatives:
+- Claude Code as the grader of every run: it would spend owner usage on every benchmark run, while the reference is written once per question.
+- Exact text match against the reference: a correct answer in other words would fail.

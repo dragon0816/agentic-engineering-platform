@@ -1,0 +1,69 @@
+{
+  "id": "Q1001",
+  "question": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+  "tags": {
+    "technical": "RF / Measurement Fundamentals",
+    "topic": "EVM",
+    "product_related": "true"
+  },
+  "answer": "In this Vault, EVM is Error Vector Magnitude: per the WIC Glossary it is only the abbreviation expansion, and per the 1C111 3GPP pre-conformance guides it is \"a measurement of the difference between the reference waveform and the measured waveform\", defined in 3GPP TS 38.521-1 test case 6.4.2.1 Error Vector Magnitude PUCCH/PUSCH. Several product/test decisions hinge on it. First, test-case setup: the Test ID fixes RB allocation and modulation scheme, and the pass limit is modulation-dependent (Pi/2-BPSK 30+TT%, QPSK 17.5+TT%, 16QAM 12.5+TT%, 64QAM 8+TT%, 256QAM 3.5+TT%) with Test Tolerance 0% except 256QAM (0.3% at max power, 1.1% at min power), so choosing 256QAM forces tighter limits and a Pmin+10 dB target power. Second, power-point decisions: EVM must be measured at both DUT max power and min power, with CMX setting max power first and the DUT then driven to min power via TPC closed-loop settings; the EVM result is only valid if the zero-forcing equalizer correction meets the spectrum-flatness requirement (6.4.2.4/6.4.2.5). Third, instrument and option selection: CMX500's R&S CMX-KM600 NR analyzer and CMX-KW601 generator are quoted as EVM < 0.5% only under stated FR1/SCS/modulation/level/temperature conditions (CMP180's CMP-KM600 likewise), and CMX500/CMP200 IF generator/analyzer EVM figures are \"measured values\" bound to waveform, SCS, bandwidth, PAR and port conditions. Fourth, FR2/mmWave configuration: the CMX-RF42E frontend specifies TX/RX \"output level range for best EVM\", and EVM with an external local oscillator requires an R&S SMA100B with an ultra-low-phase-noise option — where the Vault flags an unresolved option-code discrepancy (SMA-B711 vs SMAB-B711) to check before quoting. Fifth, test-plan and chamber/production scoping: EVM appears as an RF-parametric item in FWA CPE test plans and FR2 ODU DVT, as an OTA capability of ATS1800C/PWC200, and as a TX-verification item in a PVT360A small-cell production demo.",
+  "sufficient": true,
+  "missing": "The Vault lacks the full EVM formula, filtering/averaging and reference-waveform generation method, and test-equipment measurement-uncertainty budgets; only selected NR FR1 SA limits are excerpted (complete TS 38.521-1 tables are not included). It also lacks EVM limits and test conditions for FR2, Wi-Fi, LTE, base-station (TS 38.141 6.5.2/6.5.3 modulation quality) and production-line testing — e.g. the FR2 EVM item in FWA CPE / Airspan Air5G ODU DVT has no standard reference, limit or configuration, and the PVT360A/LITEON production-demo EVM item has no limits.",
+  "key_points": [
+    {
+      "point": "EVM stands for Error Vector Magnitude and is defined as a measurement of the difference between the reference waveform and the measured waveform (3GPP TS 38.521-1 test case 6.4.2.1).",
+      "source": "wiki/concepts/EVM.md",
+      "quote": "Error Vector Magnitude（EVM）是 reference waveform 與 measured waveform 之間差異的量測。",
+      "verified": true
+    },
+    {
+      "point": "The EVM pass/fail limit depends on the chosen modulation scheme plus a Test Tolerance, so modulation/Test-ID selection directly changes the applicable limit (Pi/2-BPSK 30+TT%, QPSK 17.5+TT%, 16QAM 12.5+TT%, 64QAM 8+TT%, 256QAM 3.5+TT%).",
+      "source": "wiki/concepts/EVM.md",
+      "quote": "EVM measurement results 必須低於 [[3GPP TS 38.521-1]] Table 6.4.2.1.5-1 的 maximum error percentage，並套用 Table 6.4.2.1.5-2 定義的 Test Tolerance（TT）",
+      "verified": true
+    },
+    {
+      "point": "EVM must be measured at both DUT max power and min power; CMX sets max power automatically first, then the DUT is driven to min power with TPC closed-loop settings (and 256QAM Test IDs target Pmin + 10 dB).",
+      "source": "wiki/concepts/EVM.md",
+      "quote": "CMX 會先自動設定 max power；完成 max power EVM verification 後，DUT 需使用 TPC Closed Loop settings 設定為 min power。",
+      "verified": true
+    },
+    {
+      "point": "An EVM measurement is only valid if the zero-forcing equalizer correction applied in the EVM measurement process meets the spectral flatness requirement (test cases 6.4.2.4 / 6.4.2.5).",
+      "source": "wiki/sources/1C111_1e_3GPPPreConfGuide.md",
+      "quote": "EVM measurement process 中套用的 zero-forcing equalizer correction 必須符合 spectral flatness requirement，EVM measurement 才有效",
+      "verified": true
+    },
+    {
+      "point": "Instrument option selection depends on EVM specs stated only under fixed conditions — e.g. the CMX500 R&S CMX-KM600 NR analyzer is EVM < 0.5 % only for FR1, SCS 30 kHz, 16QAM, +15 °C to +35 °C and a defined input level/bandwidth.",
+      "source": "wiki/entities/R&S CMX500.md",
+      "quote": "R&S CMX-KM600 option 的 5G NR analyzer 條件為 FR1、SCS 30 kHz、16QAM、temperature range +15 °C to +35 °C",
+      "verified": true
+    },
+    {
+      "point": "FR2 level-setting decisions are expressed as level ranges for best EVM on the R&S CMX-RF42E active RF frontend (TX/downlink and RX/uplink, per amplification setting).",
+      "source": "wiki/entities/R&S CMX500.md",
+      "quote": "| TX/downlink output level range for best EVM | low：–84 dBm to +6 dBm RMS nom.；high：–17 dBm to +18 dBm RMS nom. |",
+      "verified": true
+    },
+    {
+      "point": "EVM with an external local oscillator on CMXHEAD50/HEAD50-Evo requires an R&S SMA100B with an ultra-low-phase-noise option, and the Vault flags an unresolved option-code discrepancy (SMA-B711 vs SMAB-B711) to verify before configuring or quoting.",
+      "source": "wiki/entities/R&S CMPHEAD50.md",
+      "quote": "EVM with external local oscillator 條件中指出搭配 [[R&S SMA100B]] RF and microwave signal generator",
+      "verified": true
+    },
+    {
+      "point": "EVM is also a scoping item in product test plans and OTA/production setups: FWA CPE RF-parametric plans list EVM alongside output power, OBW and sensitivity BLER, and ATS1800C is described as supporting ACLR/EVM/EiRP/TRP/EiS measurements.",
+      "source": "wiki/entities/R&S ATS1800C.md",
+      "quote": "支援 active 與 passive measurements，包括 3D antenna gain patterns、ACLR、EVM、EiRP、TRP、EiS。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-09T08:17:20+00:00",
+  "seconds": 130.1,
+  "num_turns": 12,
+  "cost_usd_estimate": 1.3337705,
+  "error": null
+}

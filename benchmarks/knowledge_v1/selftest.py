@@ -16,6 +16,7 @@ sys.path.insert(0, str(HERE.parents[1] / "benchmarks" / "coding_v1"))
 sys.path.insert(0, str(HERE))
 
 import compare  # noqa: E402
+import reference_grade  # noqa: E402
 from questions import load, sample  # noqa: E402
 from run import grade  # noqa: E402
 
@@ -118,6 +119,20 @@ def compare_cases() -> int:
     return sum(1 for ok in checks.values() if not ok)
 
 
+def hosted(text: str, passages: list[dict[str, Any]] | None, validated: bool = True,
+           failure: str | None = None) -> dict[str, Any]:
+    """The tool route since 2026-10-09: the host ran the Knowledge Harness."""
+    data: dict[str, Any] = {"knowledge_harness": "validated" if validated else "not_validated",
+                            "answer": text, "phase": "validated" if validated else "needs_input",
+                            "failure_code": failure}
+    if passages is not None:
+        data["record"] = {"answer": {"passages": passages}}
+    call = {"name": "knowledge__rs-knowledge",
+            "host": {"status": "succeeded" if validated else "failed", "data": data}}
+    return {"http_status": 200, "timed_out": False, "seconds": 1.0, "reply": {"answer": {
+        "answer": text, "outcome": {"conversation": {"status": "answered", "text": text, "tools": [call]}}}}}
+
+
 def main() -> int:
     question = {"id": "Q0001", "text": "What does the tester measure?"}
     with tempfile.TemporaryDirectory() as folder:
@@ -128,6 +143,11 @@ def main() -> int:
         cases = [
             ("PASS", direct("It measures EVM [1].", [PASSAGE]), Reviewer(True)),
             ("PASS", tool("It measures EVM (raw/doc.md, section 1).", [PASSAGE]), Reviewer(True)),
+            ("PASS", hosted("It measures EVM [1].", [PASSAGE]), Reviewer(True)),
+            ("FAIL", hosted("It measures EVM [1].", [FORGED]), Reviewer(True)),
+            ("NEEDS_HUMAN_REVIEW", hosted("It measures EVM [1].", None), Reviewer(True)),
+            ("INSUFFICIENT_KNOWLEDGE", hosted("Not in the Vault.", None, False,
+                                              "knowledge_insufficient_evidence"), Reviewer(True)),
             ("FAIL", plain("It measures EVM."), Reviewer(True)),
             ("FAIL", direct("It measures EVM [1].", [FORGED]), Reviewer(True)),
             ("FAIL", direct("It measures EVM.", [PASSAGE]), Reviewer(True)),
@@ -150,6 +170,15 @@ def main() -> int:
     print(f"{'PASS' if shape_ok else 'FAIL'}  question bank 1100, sample 110")
     wrong += 0 if shape_ok else 1
     wrong += compare_cases()
+    reference = {"key_points": [{"point": f"p{n}", "verified": True} for n in range(4)]}
+    scored = reference_grade.score(reference, {"points": [
+        {"n": 1, "label": "covered"}, {"n": 2, "label": "partial"},
+        {"n": 3, "label": "contradicted"}, {"n": 9, "label": "covered"}],
+        "invented": ["CMP180 supports Wi-Fi 8"]})
+    graded_ok = (scored["coverage"] == 0.375 and scored["contradicted"] == 1
+                 and scored["points"][3]["label"] == "missing" and len(scored["invented"]) == 1)
+    print(f"{'PASS' if graded_ok else 'FAIL'}  reference grade: coverage, unlabeled point is missing")
+    wrong += 0 if graded_ok else 1
     print("selftest:", "all good" if not wrong else f"{wrong} case(s) wrong")
     return 1 if wrong else 0
 
