@@ -464,6 +464,18 @@ def parameter_value_problem(field: WorkflowParameter, value: Any) -> str | None:
     return None
 
 
+class WorkflowOutputCheck(Contract):
+    """What a Workflow run must have produced to count as done (harness
+    unification U3, owner 2026-10-09). Checked by the Host after the steps,
+    never claimed by a step."""
+
+    check_id: Symbol
+    step_index: int = Field(ge=0, strict=True)
+    kind: Literal["data_nonempty", "files_nonempty", "file_exists"]
+    # A file-name glob (`*.xlsx`) for the file kinds.
+    pattern: str | None = Field(default=None, max_length=200)
+
+
 class WorkflowManifest(ExecutableManifest):
     kind: Literal["workflow"] = "workflow"
     # Optional numeric shortcut for a single installed workflow version.
@@ -476,11 +488,13 @@ class WorkflowManifest(ExecutableManifest):
     # The run occupies the machine (a browser session, Excel or Outlook UI),
     # so it must not overlap another such run (rs_workflow_system `block`).
     occupies_machine: StrictBool = False
+    # Output checks the Host runs after the steps; empty keeps older digests.
+    checks: tuple[WorkflowOutputCheck, ...] = Field(default=(), max_length=20)
 
     @model_serializer(mode="wrap")
     def _serialize(self, handler: SerializerFunctionWrapHandler) -> dict[str, Any]:
         return _omit_unused(
-            self, handler, frozenset({"progress_steps", "occupies_machine"})
+            self, handler, frozenset({"progress_steps", "occupies_machine", "checks"})
         )
 
     @field_validator("parameters")

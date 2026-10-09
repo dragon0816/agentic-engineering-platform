@@ -174,6 +174,8 @@ def assemble(
         "input_contract": f"{namespace}.{name}.input.v1",
         "output_contract": f"{namespace}.{name}.output.v1",
         "steps": steps,
+        # What a run must produce (harness unification U3); checked by the Host.
+        "checks": [item for item in raw.get("checks") or [] if isinstance(item, dict)],
     }
 
 

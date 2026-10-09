@@ -55,6 +55,7 @@ from host_runtime.workspace import documents, write_atomically
 from models.contracts import ModelTool
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import InstalledWorkflows, WorkflowEngine, WorkflowRunSnapshot
+from workflow.harness import run_workflow_checked
 
 CandidateStatus = Literal["draft", "previewed", "installed"]
 ApprovalKind = Literal["run", "install", "install_skill"]
@@ -183,6 +184,10 @@ DRAFT_GUIDE = (
     "it is ready for reuse, run the version that will be reused (the installed one, once "
     "installed) and check what it wrote; fix and rerun until it does the job. When asked to "
     "rerun it with new values, run that installed version unchanged. "
+    "Declare what a successful run must produce in `checks`, so the Host can tell a run "
+    "that did the job from one that only ended: [{\"check_id\": snake_case, \"step_index\": "
+    "N, \"kind\": \"files_nonempty\"|\"file_exists\"|\"data_nonempty\", \"pattern\": "
+    "\"*.xlsx\"}] (a run-python step lists its output files). "
     "Never put a password, token or key in a fixed value. Pass `candidate_id` to revise a "
     "candidate you drafted before. The host fills in owner, version and lifecycle."
 )
@@ -444,8 +449,8 @@ class ChatAuthoring:
         self, actor: str, candidate: ChatCandidate, arguments: dict[str, JsonValue], ref: str
     ) -> dict[str, JsonValue]:
         engine = self._engine(candidate.draft, actor, ref)
-        snapshot = asyncio.run(engine.execute(
-            self._context(actor, self.namespace, candidate.session_id, "run"),
+        snapshot = asyncio.run(run_workflow_checked(
+            engine, self._context(actor, self.namespace, candidate.session_id, "run"),
             candidate.draft.metadata.identity, arguments,
             timeout_seconds=self.run_timeout_seconds,
         ))

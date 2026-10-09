@@ -935,6 +935,14 @@ class WorkflowEngine:
         start: int = 0,
     ) -> None:
         identity = record.workflow
+        current = telemetry.current_run()
+        if current is not None and current.kind == "workflow_run":
+            # Opened by the Harness around this run (workflow/harness.py).
+            try:
+                await self._drive_steps(record, manifest, context, arguments, start)
+            finally:
+                telemetry.set_run(workflow_run_id=record.run_id)
+            return
         with telemetry.run("workflow_run", run_id=record.run_id,
                            trace_id=context.trace.trace_id, attributes={
                                "workflow_id": f"{identity.namespace}/{identity.name}@"

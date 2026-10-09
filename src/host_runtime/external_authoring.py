@@ -50,6 +50,9 @@ WORKFLOW_FORMAT: dict[str, JsonValue] = {
                     "scope": "runtime", "required": True}],
     "steps": [{"capability": "namespace/name@1.2.3 from the catalog",
                "inputs": {"<input field>": "an input source"}}],
+    "checks": [{"check_id": "snake_case", "step_index": 0,
+                "kind": "files_nonempty|file_exists|data_nonempty", "pattern": "*.xlsx",
+                "note": "what a successful run must produce; the Host checks it"}],
     "input sources": [
         {"source": "fixed", "value": "any JSON the Workflow fixes"},
         {"source": "run", "path": ["<parameter>"], "note": "[] is all run values"},

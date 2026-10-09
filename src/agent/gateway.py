@@ -57,6 +57,7 @@ from models.contracts import (
 from workflow.checkpoints import CheckpointStoreError
 from workflow.dispatch import BridgeExecutor
 from workflow.engine import ProgressStream, WorkflowEngine, WorkflowRunSnapshot
+from workflow.harness import run_workflow_checked
 from workflow.journal import SuspensionConfirmation
 
 # A reply cut at the output limit is retried this often within a turn, with
@@ -906,14 +907,9 @@ class Gateway:
         # The engine's run table belongs to one event loop at a time, and a
         # workflow may change shared resources: serialize runs across threads.
         with self.bridge.exclusive:
-            if workflow_timeout_seconds is None:
-                return await self.engine.execute(
-                    request, workflow, arguments, idempotency_key=workflow_idempotency_key
-                )
-            return await self.engine.execute(
-                request,
-                workflow,
-                arguments,
+            # Through the shared Harness: steps, then the Workflow's output checks.
+            return await run_workflow_checked(
+                self.engine, request, workflow, arguments,
                 timeout_seconds=workflow_timeout_seconds,
                 idempotency_key=workflow_idempotency_key,
             )

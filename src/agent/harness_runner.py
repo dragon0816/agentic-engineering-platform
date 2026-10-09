@@ -4,7 +4,8 @@ Actions own payloads and side effects. The runner records only evidence refs
 and Host check results; it cannot grant capabilities or validate its own output.
 """
 
-from typing import Protocol
+import inspect
+from typing import Any, Protocol
 
 import telemetry.recorder as telemetry
 from agent.harness_plan import AgentHarnessPlan
@@ -56,6 +57,44 @@ def run_harness(plan: AgentHarnessPlan, actions: HarnessActions) -> AgentHarness
                 checks = actions.validate()
                 for check in checks:
                     # The validator and its verdict, never a claim of correctness.
+                    telemetry.emit(
+                        "verification.completed", state="validating",
+                        status="succeeded" if check.status == "passed" else "failed",
+                        attributes={"validator": check.check_id, "loop_index": attempt})
+                run = validate_run(run, checks)
+                if run.phase not in ("validated", "needs_input", "failed"):
+                    attempt += 1
+                    telemetry.emit("retry.scheduled", state="validating", attributes={
+                        "retry_reason": "validation_failed", "loop_index": attempt})
+        except HarnessActionFailure as error:
+            telemetry.emit("state.entered", status="failed", state="stopped",
+                           attributes={"failure_code": error.code})
+            return stop_harness(run, error.code, needs_input=error.needs_input)
+    telemetry.emit("state.entered", status="succeeded" if run.phase == "validated"
+                   else "failed", state=run.phase)
+    return run
+
+
+async def _maybe(value: Any) -> Any:
+    return await value if inspect.isawaitable(value) else value
+
+
+async def run_harness_async(plan: AgentHarnessPlan, actions: Any) -> AgentHarnessRun:
+    """`run_harness` for adapters whose actions are coroutines (the Workflow
+    engine runs on an event loop). Same states, checks and telemetry."""
+    run = start_harness(plan)
+    attempt = 0
+    while run.phase not in ("validated", "needs_input", "failed"):
+        telemetry.emit("state.entered", status="started", state=run.phase,
+                       attributes={"loop_index": attempt, "domain": plan.domain})
+        try:
+            if run.phase == "collecting":
+                run = observe_context(run, await _maybe(actions.collect_context()))
+            elif run.phase == "executing":
+                run = observe_execution(run, await _maybe(actions.execute()))
+            else:
+                checks = tuple(await _maybe(actions.validate()))
+                for check in checks:
                     telemetry.emit(
                         "verification.completed", state="validating",
                         status="succeeded" if check.status == "passed" else "failed",

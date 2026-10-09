@@ -49,19 +49,22 @@ operations with the CLI, which prints JSON:
    `<workspace>/output`, and puts run values in output file names. Systems the
    person signs in to are reached only through `browser/operate` or
    `desktop/operate` steps, never fetched by the script.
-5. **Check.** Run `aep_check_workflow` and fix every problem it lists. Repeat
+5. **Declare the outputs.** Add `checks` naming what a successful run must
+   produce (e.g. a non-empty `*.xlsx` from the run-python step). The Host checks
+   them after every run; a run that ends without them counts as failed.
+6. **Check.** Run `aep_check_workflow` and fix every problem it lists. Repeat
    until it says `ok`. Problems are exact: a missing capability, a field path,
    or a name that belongs to someone else.
-6. **Submit.** `aep_submit_workflow` returns a `candidate_id`. Pass that
+7. **Submit.** `aep_submit_workflow` returns a `candidate_id`. Pass that
    `candidate_id` when you revise, so the candidate keeps one history.
-7. **Test on the Host.** `aep_run_workflow` with realistic test values.
+8. **Test on the Host.** `aep_run_workflow` with realistic test values.
    - A read-only Workflow runs now and returns step statuses and failure
      codes.
    - Anything else returns an `approval_id`. Tell the person it waits for
      their approval in Agent Web, then poll `aep_status`.
    - When a step fails, fix the cause, resubmit with the same `candidate_id`,
      and run again.
-8. **Ask to install.** Once a run succeeds, call `aep_install_workflow` and
+9. **Ask to install.** Once a run succeeds, call `aep_install_workflow` and
    tell the person to approve it in Agent Web. It is reusable only after
    approval.
 
