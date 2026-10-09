@@ -1,0 +1,65 @@
+{
+ "id": "Q0671",
+ "grader": "1.2",
+ "coverage": 0.25,
+ "points": [
+  {
+   "n": 1,
+   "point": "The AI market requirement is stated as servers/data centers for AI and HPC deployment needing high-speed internal interconnect and interfaces (downstream tier of the high-speed SerDes eco-chain).",
+   "verified": true,
+   "label": "missing",
+   "why": "No AI/HPC high-speed interconnect/interface requirement"
+  },
+  {
+   "n": 2,
+   "point": "The measurable signal-integrity parameters for high-speed PCB/PCBA are IL, Xtalk, Eye diagram and TDR impedance (Slide 20 signal integrity flow).",
+   "verified": true,
+   "label": "missing",
+   "why": "No IL, Xtalk, eye diagram, or TDR impedance"
+  },
+  {
+   "n": 3,
+   "point": "The Interface Test block maps to the oscilloscope (Scopes) together with BERTs, AWGs and switch matrices — this is the required oscilloscope capability for high-speed interface validation.",
+   "verified": true,
+   "label": "missing",
+   "why": "No Interface Test mapping to Scopes/BERTs/AWGs/switch matrices"
+  },
+  {
+   "n": 4,
+   "point": "The Power Distribution Network block maps to oscilloscopes plus network analyzers, giving a second oscilloscope capability leg (PDN / power integrity).",
+   "verified": true,
+   "label": "partial",
+   "why": "Mentions PDN/power oscilloscope leg, but not network analyzers"
+  },
+  {
+   "n": 5,
+   "point": "On the power side, the AI requirement (Blackwell platform power doubling, high-density power demand) is mapped to MXO for power rail / multiphase DC / PI measurement.",
+   "verified": true,
+   "label": "partial",
+   "why": "Maps power need to MXO power rail, but omits Blackwell doubling/high-density demand and multiphase DC/PI"
+  },
+  {
+   "n": 6,
+   "point": "For AI server motherboard/PCBA, the measurable parameters PDN Target Z and power rail / multiphase DC / PI are mapped to R&S ZNL and MXO respectively.",
+   "verified": true,
+   "label": "partial",
+   "why": "Mentions PDN Target Z and MXO, but omits R&S ZNL and full power rail/multiphase DC/PI mapping"
+  },
+  {
+   "n": 7,
+   "point": "The Vault explicitly records that the source provides no oscilloscope model, bandwidth, data rate or test standard, so the chain cannot be quantified into a scope specification.",
+   "verified": true,
+   "label": "partial",
+   "why": "Says no verified end-to-end requirement, but not the explicit lack of model/bandwidth/data rate/test standard"
+  },
+  {
+   "n": 8,
+   "point": "The instrument mappings carry no option, firmware, fixture or calibration conditions, limiting them to sales-level clues rather than a formal test configuration.",
+   "verified": true,
+   "label": "missing",
+   "why": "No mention of missing options, firmware, fixtures, or calibration conditions"
+  }
+ ],
+ "contradicted": 0,
+ "invented": []
+}

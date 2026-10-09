@@ -1,0 +1,175 @@
+{
+ "question": {
+  "id": "Q0571",
+  "text": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Vector Network Analyzer.",
+  "market": "Automotive",
+  "product": "Vector Network Analyzer",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-26208a27bc804029b455825fdc81a8aa",
+ "exchange": {
+  "sent": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Vector Network Analyzer.",
+  "http_status": 200,
+  "seconds": 195.532,
+  "timed_out": false,
+  "reply": {
+   "ok": false,
+   "conversation": {
+    "session_id": "conversation-26208a27bc804029b455825fdc81a8aa",
+    "actor": "leo.chi",
+    "title": "Map the chain from a Automotive market requirement to a measurable param…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T09:09:08.409070Z",
+    "updated_at": "2026-10-09T09:12:23.677693Z",
+    "messages": [
+     {
+      "message_id": "message-692646df22684fc99a40eb03c8bacf07",
+      "role": "user",
+      "text": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Vector Network Analyzer.",
+      "created_at": "2026-10-09T09:09:08.418073Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-72b7e4ad32364ad4b69ca040af251da0",
+      "role": "assistant",
+      "text": "The Knowledge query did not produce a validated answer. Unverified requested facets: market_segment.",
+      "created_at": "2026-10-09T09:12:23.677693Z",
+      "status": "needs_input",
+      "trace": {
+       "trace_id": "trace-cdcba6c9dc5a478d8feeb36e1abb6727",
+       "request_id": "request-cdcba6c9dc5a478d8feeb36e1abb6727",
+       "span_id": "span-cdcba6c9dc5a478d8feeb36e1abb6727",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": false,
+    "answer": "The Knowledge query did not produce a validated answer. Unverified requested facets: market_segment.",
+    "status": "needs_input",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-cdcba6c9dc5a478d8feeb36e1abb6727",
+      "request_id": "request-cdcba6c9dc5a478d8feeb36e1abb6727",
+      "span_id": "span-cdcba6c9dc5a478d8feeb36e1abb6727",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-cdcba6c9dc5a478d8feeb36e1abb6727",
+       "request_id": "request-cdcba6c9dc5a478d8feeb36e1abb6727",
+       "span_id": "span-cdcba6c9dc5a478d8feeb36e1abb6727",
+       "parent_span_id": null
+      },
+      "status": "failed",
+      "data": null,
+      "failure": {
+       "code": "knowledge_insufficient_evidence",
+       "message": "Capability invocation did not complete",
+       "retryable": false
+      },
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-3957dc5827b046e48c4abbf44e4f01f6",
+      "task_sha256": "95ad0eb45980f4d9b4ebc1d38e3e33e785aca4562e21ecf3d9be76048e4fe7ae",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.6.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "needs_input",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "needs_input",
+       "evidence_ref": null
+      }
+     ],
+     "checks": [],
+     "failure_code": "knowledge_insufficient_evidence"
+    },
+    "evidence": {
+     "raw_citations": 0,
+     "facet_status": "missing",
+     "missing_facets": [
+      "market_segment"
+     ],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {}
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

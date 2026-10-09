@@ -1,0 +1,175 @@
+{
+ "question": {
+  "id": "Q0321",
+  "text": "Map the chain from a Aerospace / Defense market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "market": "Aerospace / Defense",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-fc8d5595406f4f8dbcb8877b2ce461d6",
+ "exchange": {
+  "sent": "Map the chain from a Aerospace / Defense market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "http_status": 200,
+  "seconds": 101.64,
+  "timed_out": false,
+  "reply": {
+   "ok": false,
+   "conversation": {
+    "session_id": "conversation-fc8d5595406f4f8dbcb8877b2ce461d6",
+    "actor": "leo.chi",
+    "title": "Map the chain from a Aerospace / Defense market requirement to a measura…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T08:38:07.699056Z",
+    "updated_at": "2026-10-09T08:39:42.295202Z",
+    "messages": [
+     {
+      "message_id": "message-32f7013ee40e4fceb578f49c79329c4e",
+      "role": "user",
+      "text": "Map the chain from a Aerospace / Defense market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+      "created_at": "2026-10-09T08:38:07.708902Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-abb6cbf6bfb54f4f9fb45bd21373f298",
+      "role": "assistant",
+      "text": "The configured LLM Gateway could not synthesize an answer from the retrieved evidence. (knowledge_model_failed)",
+      "created_at": "2026-10-09T08:39:42.295202Z",
+      "status": "failed",
+      "trace": {
+       "trace_id": "trace-b242807b92444194ac42556a9cf86ed6",
+       "request_id": "request-b242807b92444194ac42556a9cf86ed6",
+       "span_id": "span-b242807b92444194ac42556a9cf86ed6",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": false,
+    "answer": "The configured LLM Gateway could not synthesize an answer from the retrieved evidence. (knowledge_model_failed)",
+    "status": "failed",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-b242807b92444194ac42556a9cf86ed6",
+      "request_id": "request-b242807b92444194ac42556a9cf86ed6",
+      "span_id": "span-b242807b92444194ac42556a9cf86ed6",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-b242807b92444194ac42556a9cf86ed6",
+       "request_id": "request-b242807b92444194ac42556a9cf86ed6",
+       "span_id": "span-b242807b92444194ac42556a9cf86ed6",
+       "parent_span_id": null
+      },
+      "status": "failed",
+      "data": null,
+      "failure": {
+       "code": "knowledge_model_failed",
+       "message": "Capability invocation did not complete",
+       "retryable": false
+      },
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-aaabd29e37f040dbabf701a20302738e",
+      "task_sha256": "8aa2c1dc947e81a7ed89e39b0b1cf86c78d1a9aadf2e0f327cdc28a2fadd03d6",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.6.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "failed",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "failed",
+       "evidence_ref": null
+      }
+     ],
+     "checks": [],
+     "failure_code": "knowledge_model_failed"
+    },
+    "evidence": {
+     "raw_citations": 0,
+     "facet_status": "missing",
+     "missing_facets": [
+      "market_segment"
+     ],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {}
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

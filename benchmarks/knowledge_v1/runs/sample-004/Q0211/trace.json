@@ -1,0 +1,123 @@
+{
+ "question": {
+  "id": "Q0211",
+  "text": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "market": "Aerospace / Defense",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-00d7d3a2c99e4da29e08ca8683f2e4cc",
+ "exchange": {
+  "sent": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 112.11,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-00d7d3a2c99e4da29e08ca8683f2e4cc",
+    "actor": "leo.chi",
+    "title": "For a Aerospace / Defense use case involving radar, where would Signalin…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T08:19:56.826044Z",
+    "updated_at": "2026-10-09T08:21:48.576664Z",
+    "messages": [
+     {
+      "message_id": "message-ed531634fa3249fb88e27fc1c205a7f0",
+      "role": "user",
+      "text": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+      "created_at": "2026-10-09T08:19:56.846603Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-3d9efaf1bd02498e91828915fa0d70ec",
+      "role": "assistant",
+      "text": "The CMX500 is positioned as a callbox that quickly establishes a DUT connection for RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance, and non-signaling R&D verification [1].\nIts example use cases include R&D verification of new bands, sensitivity testing, desense testing, 3GPP pre-conformance testing, RF measurements, high-throughput testing, and non-signaling verification [9].\nIn an A&D context, the supported mission drivers are tactical-edge connectivity, smart jamming/EW, contested spectrum, private 5G, autonomous systems and drones needing low latency, and secure command-and-control networks [10].\nThe roadmap context also mentions early ISAC deployment for drone detection and perimeter defense, but it does not define a radar test workflow [3].\nThe CMX500 is also described as a 5G one-box signaling tester that supports early R&D through fading and channel emulation, plus satellite-constellation visualization [26].\nIn 5G resilience work, the CMX500 is used as a network emulator for an unmodified 5G DUT [17].\n【推論】For a radar-involved A&D system, the Signaling Tester would fit after the communications DUT or radio subsystem is ready to attach to an emulated 5G/NTN network, where its role is to establish the DUT connection and verify RF, mobility, application, NTN, desense, fading/channel, and pre-conformance behavior [1][17][26].\n【推論】The Non-signaling Tester would fit earlier or in parallel in R&D/RF verification, where its supported role is non-signaling verification, new-band R&D verification, sensitivity testing, desense testing, and RF measurements [9].\n【推論】It should be treated as a communications/network-emulation and RF-verification tool around the radar platform, not as a radar waveform, target-simulation, or radar-performance validation tool, because the supplied passages only support cellular/NTN/private-5G/ISAC-related test roles [1][3][9][10][17][26].\n\n來源：\n[1] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[3] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[9] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[17] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[26] `raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`",
+      "created_at": "2026-10-09T08:21:48.576664Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-61d05032a0564192a121c4853fddd5a9",
+       "request_id": "request-61d05032a0564192a121c4853fddd5a9",
+       "span_id": "span-61d05032a0564192a121c4853fddd5a9",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "The CMX500 is positioned as a callbox that quickly establishes a DUT connection for RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance, and non-signaling R&D verification [1].\nIts example use cases include R&D verification of new bands, sensitivity testing, desense testing, 3GPP pre-conformance testing, RF measurements, high-throughput testing, and non-signaling verification [9].\nIn an A&D context, the supported mission drivers are tactical-edge connectivity, smart jamming/EW, contested spectrum, private 5G, autonomous systems and drones needing low latency, and secure command-and-control networks [10].\nThe roadmap context also mentions early ISAC deployment for drone detection and perimeter defense, but it does not define a radar test workflow [3].\nThe CMX500 is also described as a 5G one-box signaling tester that supports early R&D through fading and channel emulation, plus satellite-constellation visualization [26].\nIn 5G resilience work, the CMX500 is used as a network emulator for an unmodified 5G DUT [17].\n【推論】For a radar-involved A&D system, the Signaling Tester would fit after the communications DUT or radio subsystem is ready to attach to an emulated 5G/NTN network, where its role is to establish the DUT connection and verify RF, mobility, application, NTN, desense, fading/channel, and pre-conformance behavior [1][17][26].\n【推論】The Non-signaling Tester would fit earlier or in parallel in R&D/RF verification, where its supported role is non-signaling verification, new-band R&D verification, sensitivity testing, desense testing, and RF measurements [9].\n【推論】It should be treated as a communications/network-emulation and RF-verification tool around the radar platform, not as a radar waveform, target-simulation, or radar-performance validation tool, because the supplied passages only support cellular/NTN/private-5G/ISAC-related test roles [1][3][9][10][17][26].\n\n來源：\n[1] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[3] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[9] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[17] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[26] `raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-61d05032a0564192a121c4853fddd5a9",
+      "request_id": "request-61d05032a0564192a121c4853fddd5a9",
+      "span_id": "span-61d05032a0564192a121c4853fddd5a9",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-61d05032a0564192a121c4853fddd5a9",
+       "request_id": "request-61d05032a0564192a121c4853fddd5a9",
+       "span_id": "span-61d05032a0564192a121c4853fddd5a9",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The CMX500 is positioned as a callbox that quickly establishes a DUT connection for RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance, and non-signaling R&D verification [1].\nIts example use cases include R&D verification of new bands, sensitivity testing, desense testing, 3GPP pre-conformance testing, RF measurements, high-throughput testing, and non-signaling verification [9].\nIn an A&D context, the supported mission drivers are tactical-edge connectivity, smart jamming/EW, contested spectrum, private 5G, autonomous systems and drones needing low latency, and secure command-and-control networks [10].\nThe roadmap context also mentions early ISAC deployment for drone detection and perimeter defense, but it does not define a radar test workflow [3].\nThe CMX500 is also described as a 5G one-box signaling tester that supports early R&D through fading and channel emulation, plus satellite-constellation visualization [26].\nIn 5G resilience work, the CMX500 is used as a network emulator for an unmodified 5G DUT [17].\n【推論】For a radar-involved A&D system, the Signaling Tester would fit after the communications DUT or radio subsystem is ready to attach to an emulated 5G/NTN network, where its role is to establish the DUT connection and verify RF, mobility, application, NTN, desense, fading/channel, and pre-conformance behavior [1][17][26].\n【推論】The Non-signaling Tester would fit earlier or in parallel in R&D/RF verification, where its supported role is non-signaling verification, new-band R&D verification, sensitivity testing, desense testing, and RF measurements [9].\n【推論】It should be treated as a communications/network-emulation and RF-verification tool around the radar platform, not as a radar waveform, target-simulation, or radar-performance validation tool, because the supplied passages only support cellular/NTN/private-5G/ISAC-related test roles [1][3][9][10][17][26].\n\n來源：\n[1] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[3] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[9] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[17] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[26] `raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_6sSL6dIOaNtSvPHAGXLgPe8Z",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "The CMX500 is positioned as a callbox that quickly establishes a DUT connection for RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance, and non-signaling R&D verification [1].\nIts example use cases include R&D verification of new bands, sensitivity testing, desense testing, 3GPP pre-conformance testing, RF measurements, high-throughput testing, and non-signaling verification [9].\nIn an A&D context, the supported mission drivers are tactical-edge connectivity, smart jamming/EW, contested spectrum, private 5G, autonomous systems and drones needing low latency, and secure command-and-control networks [10].\nThe roadmap context also mentions early ISAC deployment for drone detection and perimeter defense, but it does not define a radar test workflow [3].\nThe CMX500 is also described as a 5G one-box signaling tester that supports early R&D through fading and channel emulation, plus satellite-constellation visualization [26].\nIn 5G resilience work, the CMX500 is used as a network emulator for an unmodified 5G DUT [17].\n【推論】For a radar-involved A&D system, the Signaling Tester would fit after the communications DUT or radio subsystem is ready to attach to an emulated 5G/NTN network, where its role is to establish the DUT connection and verify RF, mobility, application, NTN, desense, fading/channel, and pre-conformance behavior [1][17][26].\n【推論】The Non-signaling Tester would fit earlier or in parallel in R&D/RF verification, where its supported role is non-signaling verification, new-band R&D verification, sensitivity testing, desense testing, and RF measurements [9].\n【推論】It should be treated as a communications/network-emulation and RF-verification tool around the radar platform, not as a radar waveform, target-simulation, or radar-performance validation tool, because the supplied passages only support cellular/NTN/private-5G/ISAC-related test roles [1][3][9][10][17][26].\n\n來源：\n[1] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[3] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[9] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[17] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[26] `raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`",
+          "evidence": {
+           "raw_citations": 6,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

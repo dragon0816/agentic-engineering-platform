@@ -1,0 +1,72 @@
+{
+ "id": "Q0211",
+ "grader": "1.2",
+ "coverage": 0.062,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's radar-specific instrument is the AREG800A automotive radar echo generator, not a signaling tester.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention AREG800A or automotive radar echo generation"
+  },
+  {
+   "n": 2,
+   "point": "Radar in the Vault's defense/counter-UAV context is only a detection sensor category with no test method or product detail.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not state defense radar is only a sensor category with no test detail"
+  },
+  {
+   "n": 3,
+   "point": "In the device testing value chain, signaling testers (CMX500/CMW500) occupy the signaling / protocol / application layer.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions CMX500 signaling testing but not the device value-chain signaling/protocol/application layer"
+  },
+  {
+   "n": 4,
+   "point": "Non-signaling testers (CMP180/CMP200/CMW100) are mapped to the production / manufacturing stage.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not place non-signaling testers in production/manufacturing"
+  },
+  {
+   "n": 5,
+   "point": "The CMP180 is explicitly characterized as a production / R&D non-signaling tester.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention CMP180 as production/R&D non-signaling tester"
+  },
+  {
+   "n": 6,
+   "point": "In the defense (A&D) private-5G resilience work the signaling tester is used as the 5G network emulator for the communications link, not for radar.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "places signaling tester in the radar-related workflow instead of only the A&D communications-link role"
+  },
+  {
+   "n": 7,
+   "point": "On air vehicles the signaling tester's role is link signaling plus multi-technology de-sense validation across co-located radios.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not describe air-vehicle link signaling or de-sense validation"
+  },
+  {
+   "n": 8,
+   "point": "The Vault forbids inferring a signaling tester into the EMC/EME (system-level defense) test domain or the reverse.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention the prohibition on crossing signaling and EMC/EME domains"
+  }
+ ],
+ "contradicted": 1,
+ "invented": [
+  "Signaling Tester would fit in the early R&D test stage, after implementation and before or during debug and validation",
+  "the cited workflow spans “implementation → test → debug → validation”",
+  "Its role is to act as the core test-system instrument for connected/RX-type testing",
+  "its role includes fading and channel emulation in early R&D",
+  "For advanced RF/FR3 work, the CMX500 OBT signaling tester supports multi-technology, multi-channel testing and adaptation to different NR numerologies",
+  "A signaling solution is specifically indicated “in case” it is required for RX test or other tests"
+ ]
+}

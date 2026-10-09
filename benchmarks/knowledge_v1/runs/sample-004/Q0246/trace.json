@@ -1,0 +1,123 @@
+{
+ "question": {
+  "id": "Q0246",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Aerospace / Defense, and what evidence supports each opportunity?",
+  "market": "Aerospace / Defense",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-f3ff6ac38a054bbf9b350982ed740f2f",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Aerospace / Defense, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 134.125,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-f3ff6ac38a054bbf9b350982ed740f2f",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T08:25:45.504123Z",
+    "updated_at": "2026-10-09T08:27:59.409187Z",
+    "messages": [
+     {
+      "message_id": "message-99b1f3849b8447299494c8322da52b37",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Aerospace / Defense, and what evidence supports each opportunity?",
+      "created_at": "2026-10-09T08:25:45.623908Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-fa66210d9836466aa597aaeef2770315",
+      "role": "assistant",
+      "text": "### 推薦先賣\nCMX500 最有防務切入證據，因為 vault 明示 smart jamming / contested spectrum / tactical private 5G / secure command-and-control 是 mission drivers [11]。\nCMX500 可定位為 defense 5G resilience 測試用 network emulator，因為 vault 明示該 white paper 使用 CMX500 as network emulator [19]。\nCMX500 也有 NTN 測試入口，因為 Raw 僅明示存在 “CMX500 for NTN testing” 資訊頁 [25]。\nCMP180 可作為 Wi‑Fi 7 / high-bandwidth WLAN R&D-production 非信令測試機會，因為 Raw 明示 CMP180 會以 loopback mode 驗證 480 MHz bandwidth waveform，並定位為 R&D and production future-proof solution [26]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 | Defense private 5G resilience、smart jamming、contested spectrum、tactical private 5G、secure command-and-control。 | 知識庫未標示 option code。 | 該機會最強，因為 vault 直接把 CMX500 與 5G resilience white paper 的 network emulator 角色相連。 | Mission drivers 包含 tactical edge connectivity、smart jamming、contested spectrum、private 5G、drones low latency、secure command-and-control。[11] CMX500 被明示為 white paper 測試使用的 network emulator。[19] | 目前 evidence 不是 CMX500 binding specifications，不能直接推導正式 option、交付內容或 defense customer fit。[19] |\n| R&S CMX500 | NTN / satellite-adjacent aerospace communication testing。 | 知識庫未標示 option code。 | 可作為 aerospace/space 方向的早期線索，因為 Raw 明示有 CMX500 for NTN testing 頁面。 | Raw 說 “For more information on the CMX500 for NTN testing”。[25] | Raw 只證明 NTN testing 資訊入口，未證明 defense customer、satellite terminal spec、任務或採購需求。[25] |\n| R&S CMX500 | Wi‑Fi 7 + cellular/non-cellular converged R&D testing for mission devices。 | Newly added Wi‑Fi 7 testing capabilities；single instrument setup；multi-technology multi-channel signaling tester。 | 適合做研發端 signaling tester，因為 Raw 明示 CMX500 可在單一儀器中測試 cellular and non-cellular latest-generation standards。 | Raw 說 CMX500 是 multi-technology multi-channel signaling tester，新增 Wi‑Fi 7 testing capabilities，並讓 R&D engineers 在 single instrument setup 測試 cellular and non-cellular standards。[26] | Raw 未把此 Wi‑Fi 7 use case 直接連到 aerospace/defense，因此只能作為技術能力切入而非已驗證國防需求。[26] |\n| R&S CMP180 | Wi‑Fi 7 / high-bandwidth WLAN non-signaling R&D and production testing。 | 480 MHz bandwidth waveform in loopback mode。 | 適合做 production / R&D 非信令測試機會，因為 Raw 明示 CMP180 驗證 480 MHz waveform 並定位 R&D and production。 | Raw 說 CMP180 radio communication tester will verify a 480 MHz bandwidth waveform in loopback mode and be a future-proof solution for R&D and production beyond Wi‑Fi 7。[26] | Raw 未把 CMP180 直接連到 aerospace/defense、military WLAN 或 customer program。[26] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Defense private 5G resilience lab | CMX500 | 以 smart jamming、contested spectrum、tactical edge connectivity、secure command-and-control 作為需求語言。[11] | 需確認實際測試方案、CMX500 option、客戶 DUT 與 acceptance criteria，因為 vault 只說 CMX500 是 white paper 使用的 network emulator。[19] |\n| NTN / space communications testing | CMX500 | 以 CMX500 for NTN testing 作為 satellite-adjacent aerospace 開口。[25] | 目前 Raw 未說明 NTN 測試能力細節、option code、satellite payload、user terminal 或 defense mission。[25] |\n| Wi‑Fi 7 mission device R&D | CMX500 | 以 single-box signaling tester 支援 cellular and non-cellular standards 的 converged radio R&D 測試切入。[26] | 目前 Raw 未證明 Wi‑Fi 7 CMX500 測試已用於 aerospace/defense program。[26] |\n| Wi‑Fi 7 / future WLAN production test | CMP180 | 以 480 MHz loopback waveform、R&D and production、beyond Wi‑Fi 7 的非信令測試能力切入。[26] | 目前 Raw 未證明 CMP180 在 aerospace/defense production line 使用。[26] |\n### 限制\n【推論】CMX500 是最強 prioritization，因為 defense private 5G resilience 需求與 CMX500 network emulator 角色在 vault 中同時被明示，而 CMP180 只有 Wi‑Fi 7 / 480 MHz R&D-production 能力、未被直接連到 defense。[11][19][26]\n【推論】CMP180 的較強切入點應限於 defense/aerospace 裝置的 WLAN R&D-production 測試能力討論，而不是已驗證的 aerospace/defense program。[26]\n【推論】CMX500 NTN 是 aerospace/space 方向的可開發線索，但目前只能作為 discovery opportunity，因為 Raw 只明示 CMX500 for NTN testing 資訊入口。[25]\n\n來源：\n[11] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[19] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[25] `raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md`\n[26] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+      "created_at": "2026-10-09T08:27:59.409187Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-5f606670400b4337bf6a7163cc3fbc20",
+       "request_id": "request-5f606670400b4337bf6a7163cc3fbc20",
+       "span_id": "span-5f606670400b4337bf6a7163cc3fbc20",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "### 推薦先賣\nCMX500 最有防務切入證據，因為 vault 明示 smart jamming / contested spectrum / tactical private 5G / secure command-and-control 是 mission drivers [11]。\nCMX500 可定位為 defense 5G resilience 測試用 network emulator，因為 vault 明示該 white paper 使用 CMX500 as network emulator [19]。\nCMX500 也有 NTN 測試入口，因為 Raw 僅明示存在 “CMX500 for NTN testing” 資訊頁 [25]。\nCMP180 可作為 Wi‑Fi 7 / high-bandwidth WLAN R&D-production 非信令測試機會，因為 Raw 明示 CMP180 會以 loopback mode 驗證 480 MHz bandwidth waveform，並定位為 R&D and production future-proof solution [26]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 | Defense private 5G resilience、smart jamming、contested spectrum、tactical private 5G、secure command-and-control。 | 知識庫未標示 option code。 | 該機會最強，因為 vault 直接把 CMX500 與 5G resilience white paper 的 network emulator 角色相連。 | Mission drivers 包含 tactical edge connectivity、smart jamming、contested spectrum、private 5G、drones low latency、secure command-and-control。[11] CMX500 被明示為 white paper 測試使用的 network emulator。[19] | 目前 evidence 不是 CMX500 binding specifications，不能直接推導正式 option、交付內容或 defense customer fit。[19] |\n| R&S CMX500 | NTN / satellite-adjacent aerospace communication testing。 | 知識庫未標示 option code。 | 可作為 aerospace/space 方向的早期線索，因為 Raw 明示有 CMX500 for NTN testing 頁面。 | Raw 說 “For more information on the CMX500 for NTN testing”。[25] | Raw 只證明 NTN testing 資訊入口，未證明 defense customer、satellite terminal spec、任務或採購需求。[25] |\n| R&S CMX500 | Wi‑Fi 7 + cellular/non-cellular converged R&D testing for mission devices。 | Newly added Wi‑Fi 7 testing capabilities；single instrument setup；multi-technology multi-channel signaling tester。 | 適合做研發端 signaling tester，因為 Raw 明示 CMX500 可在單一儀器中測試 cellular and non-cellular latest-generation standards。 | Raw 說 CMX500 是 multi-technology multi-channel signaling tester，新增 Wi‑Fi 7 testing capabilities，並讓 R&D engineers 在 single instrument setup 測試 cellular and non-cellular standards。[26] | Raw 未把此 Wi‑Fi 7 use case 直接連到 aerospace/defense，因此只能作為技術能力切入而非已驗證國防需求。[26] |\n| R&S CMP180 | Wi‑Fi 7 / high-bandwidth WLAN non-signaling R&D and production testing。 | 480 MHz bandwidth waveform in loopback mode。 | 適合做 production / R&D 非信令測試機會，因為 Raw 明示 CMP180 驗證 480 MHz waveform 並定位 R&D and production。 | Raw 說 CMP180 radio communication tester will verify a 480 MHz bandwidth waveform in loopback mode and be a future-proof solution for R&D and production beyond Wi‑Fi 7。[26] | Raw 未把 CMP180 直接連到 aerospace/defense、military WLAN 或 customer program。[26] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Defense private 5G resilience lab | CMX500 | 以 smart jamming、contested spectrum、tactical edge connectivity、secure command-and-control 作為需求語言。[11] | 需確認實際測試方案、CMX500 option、客戶 DUT 與 acceptance criteria，因為 vault 只說 CMX500 是 white paper 使用的 network emulator。[19] |\n| NTN / space communications testing | CMX500 | 以 CMX500 for NTN testing 作為 satellite-adjacent aerospace 開口。[25] | 目前 Raw 未說明 NTN 測試能力細節、option code、satellite payload、user terminal 或 defense mission。[25] |\n| Wi‑Fi 7 mission device R&D | CMX500 | 以 single-box signaling tester 支援 cellular and non-cellular standards 的 converged radio R&D 測試切入。[26] | 目前 Raw 未證明 Wi‑Fi 7 CMX500 測試已用於 aerospace/defense program。[26] |\n| Wi‑Fi 7 / future WLAN production test | CMP180 | 以 480 MHz loopback waveform、R&D and production、beyond Wi‑Fi 7 的非信令測試能力切入。[26] | 目前 Raw 未證明 CMP180 在 aerospace/defense production line 使用。[26] |\n### 限制\n【推論】CMX500 是最強 prioritization，因為 defense private 5G resilience 需求與 CMX500 network emulator 角色在 vault 中同時被明示，而 CMP180 只有 Wi‑Fi 7 / 480 MHz R&D-production 能力、未被直接連到 defense。[11][19][26]\n【推論】CMP180 的較強切入點應限於 defense/aerospace 裝置的 WLAN R&D-production 測試能力討論，而不是已驗證的 aerospace/defense program。[26]\n【推論】CMX500 NTN 是 aerospace/space 方向的可開發線索，但目前只能作為 discovery opportunity，因為 Raw 只明示 CMX500 for NTN testing 資訊入口。[25]\n\n來源：\n[11] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[19] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[25] `raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md`\n[26] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-5f606670400b4337bf6a7163cc3fbc20",
+      "request_id": "request-5f606670400b4337bf6a7163cc3fbc20",
+      "span_id": "span-5f606670400b4337bf6a7163cc3fbc20",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-5f606670400b4337bf6a7163cc3fbc20",
+       "request_id": "request-5f606670400b4337bf6a7163cc3fbc20",
+       "span_id": "span-5f606670400b4337bf6a7163cc3fbc20",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "### 推薦先賣\nCMX500 最有防務切入證據，因為 vault 明示 smart jamming / contested spectrum / tactical private 5G / secure command-and-control 是 mission drivers [11]。\nCMX500 可定位為 defense 5G resilience 測試用 network emulator，因為 vault 明示該 white paper 使用 CMX500 as network emulator [19]。\nCMX500 也有 NTN 測試入口，因為 Raw 僅明示存在 “CMX500 for NTN testing” 資訊頁 [25]。\nCMP180 可作為 Wi‑Fi 7 / high-bandwidth WLAN R&D-production 非信令測試機會，因為 Raw 明示 CMP180 會以 loopback mode 驗證 480 MHz bandwidth waveform，並定位為 R&D and production future-proof solution [26]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 | Defense private 5G resilience、smart jamming、contested spectrum、tactical private 5G、secure command-and-control。 | 知識庫未標示 option code。 | 該機會最強，因為 vault 直接把 CMX500 與 5G resilience white paper 的 network emulator 角色相連。 | Mission drivers 包含 tactical edge connectivity、smart jamming、contested spectrum、private 5G、drones low latency、secure command-and-control。[11] CMX500 被明示為 white paper 測試使用的 network emulator。[19] | 目前 evidence 不是 CMX500 binding specifications，不能直接推導正式 option、交付內容或 defense customer fit。[19] |\n| R&S CMX500 | NTN / satellite-adjacent aerospace communication testing。 | 知識庫未標示 option code。 | 可作為 aerospace/space 方向的早期線索，因為 Raw 明示有 CMX500 for NTN testing 頁面。 | Raw 說 “For more information on the CMX500 for NTN testing”。[25] | Raw 只證明 NTN testing 資訊入口，未證明 defense customer、satellite terminal spec、任務或採購需求。[25] |\n| R&S CMX500 | Wi‑Fi 7 + cellular/non-cellular converged R&D testing for mission devices。 | Newly added Wi‑Fi 7 testing capabilities；single instrument setup；multi-technology multi-channel signaling tester。 | 適合做研發端 signaling tester，因為 Raw 明示 CMX500 可在單一儀器中測試 cellular and non-cellular latest-generation standards。 | Raw 說 CMX500 是 multi-technology multi-channel signaling tester，新增 Wi‑Fi 7 testing capabilities，並讓 R&D engineers 在 single instrument setup 測試 cellular and non-cellular standards。[26] | Raw 未把此 Wi‑Fi 7 use case 直接連到 aerospace/defense，因此只能作為技術能力切入而非已驗證國防需求。[26] |\n| R&S CMP180 | Wi‑Fi 7 / high-bandwidth WLAN non-signaling R&D and production testing。 | 480 MHz bandwidth waveform in loopback mode。 | 適合做 production / R&D 非信令測試機會，因為 Raw 明示 CMP180 驗證 480 MHz waveform 並定位 R&D and production。 | Raw 說 CMP180 radio communication tester will verify a 480 MHz bandwidth waveform in loopback mode and be a future-proof solution for R&D and production beyond Wi‑Fi 7。[26] | Raw 未把 CMP180 直接連到 aerospace/defense、military WLAN 或 customer program。[26] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Defense private 5G resilience lab | CMX500 | 以 smart jamming、contested spectrum、tactical edge connectivity、secure command-and-control 作為需求語言。[11] | 需確認實際測試方案、CMX500 option、客戶 DUT 與 acceptance criteria，因為 vault 只說 CMX500 是 white paper 使用的 network emulator。[19] |\n| NTN / space communications testing | CMX500 | 以 CMX500 for NTN testing 作為 satellite-adjacent aerospace 開口。[25] | 目前 Raw 未說明 NTN 測試能力細節、option code、satellite payload、user terminal 或 defense mission。[25] |\n| Wi‑Fi 7 mission device R&D | CMX500 | 以 single-box signaling tester 支援 cellular and non-cellular standards 的 converged radio R&D 測試切入。[26] | 目前 Raw 未證明 Wi‑Fi 7 CMX500 測試已用於 aerospace/defense program。[26] |\n| Wi‑Fi 7 / future WLAN production test | CMP180 | 以 480 MHz loopback waveform、R&D and production、beyond Wi‑Fi 7 的非信令測試能力切入。[26] | 目前 Raw 未證明 CMP180 在 aerospace/defense production line 使用。[26] |\n### 限制\n【推論】CMX500 是最強 prioritization，因為 defense private 5G resilience 需求與 CMX500 network emulator 角色在 vault 中同時被明示，而 CMP180 只有 Wi‑Fi 7 / 480 MHz R&D-production 能力、未被直接連到 defense。[11][19][26]\n【推論】CMP180 的較強切入點應限於 defense/aerospace 裝置的 WLAN R&D-production 測試能力討論，而不是已驗證的 aerospace/defense program。[26]\n【推論】CMX500 NTN 是 aerospace/space 方向的可開發線索，但目前只能作為 discovery opportunity，因為 Raw 只明示 CMX500 for NTN testing 資訊入口。[25]\n\n來源：\n[11] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[19] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[25] `raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md`\n[26] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_sZi7vVH3VDcqHkDDMJPRJ97G",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "### 推薦先賣\nCMX500 最有防務切入證據，因為 vault 明示 smart jamming / contested spectrum / tactical private 5G / secure command-and-control 是 mission drivers [11]。\nCMX500 可定位為 defense 5G resilience 測試用 network emulator，因為 vault 明示該 white paper 使用 CMX500 as network emulator [19]。\nCMX500 也有 NTN 測試入口，因為 Raw 僅明示存在 “CMX500 for NTN testing” 資訊頁 [25]。\nCMP180 可作為 Wi‑Fi 7 / high-bandwidth WLAN R&D-production 非信令測試機會，因為 Raw 明示 CMP180 會以 loopback mode 驗證 480 MHz bandwidth waveform，並定位為 R&D and production future-proof solution [26]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 | Defense private 5G resilience、smart jamming、contested spectrum、tactical private 5G、secure command-and-control。 | 知識庫未標示 option code。 | 該機會最強，因為 vault 直接把 CMX500 與 5G resilience white paper 的 network emulator 角色相連。 | Mission drivers 包含 tactical edge connectivity、smart jamming、contested spectrum、private 5G、drones low latency、secure command-and-control。[11] CMX500 被明示為 white paper 測試使用的 network emulator。[19] | 目前 evidence 不是 CMX500 binding specifications，不能直接推導正式 option、交付內容或 defense customer fit。[19] |\n| R&S CMX500 | NTN / satellite-adjacent aerospace communication testing。 | 知識庫未標示 option code。 | 可作為 aerospace/space 方向的早期線索，因為 Raw 明示有 CMX500 for NTN testing 頁面。 | Raw 說 “For more information on the CMX500 for NTN testing”。[25] | Raw 只證明 NTN testing 資訊入口，未證明 defense customer、satellite terminal spec、任務或採購需求。[25] |\n| R&S CMX500 | Wi‑Fi 7 + cellular/non-cellular converged R&D testing for mission devices。 | Newly added Wi‑Fi 7 testing capabilities；single instrument setup；multi-technology multi-channel signaling tester。 | 適合做研發端 signaling tester，因為 Raw 明示 CMX500 可在單一儀器中測試 cellular and non-cellular latest-generation standards。 | Raw 說 CMX500 是 multi-technology multi-channel signaling tester，新增 Wi‑Fi 7 testing capabilities，並讓 R&D engineers 在 single instrument setup 測試 cellular and non-cellular standards。[26] | Raw 未把此 Wi‑Fi 7 use case 直接連到 aerospace/defense，因此只能作為技術能力切入而非已驗證國防需求。[26] |\n| R&S CMP180 | Wi‑Fi 7 / high-bandwidth WLAN non-signaling R&D and production testing。 | 480 MHz bandwidth waveform in loopback mode。 | 適合做 production / R&D 非信令測試機會，因為 Raw 明示 CMP180 驗證 480 MHz waveform 並定位 R&D and production。 | Raw 說 CMP180 radio communication tester will verify a 480 MHz bandwidth waveform in loopback mode and be a future-proof solution for R&D and production beyond Wi‑Fi 7。[26] | Raw 未把 CMP180 直接連到 aerospace/defense、military WLAN 或 customer program。[26] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Defense private 5G resilience lab | CMX500 | 以 smart jamming、contested spectrum、tactical edge connectivity、secure command-and-control 作為需求語言。[11] | 需確認實際測試方案、CMX500 option、客戶 DUT 與 acceptance criteria，因為 vault 只說 CMX500 是 white paper 使用的 network emulator。[19] |\n| NTN / space communications testing | CMX500 | 以 CMX500 for NTN testing 作為 satellite-adjacent aerospace 開口。[25] | 目前 Raw 未說明 NTN 測試能力細節、option code、satellite payload、user terminal 或 defense mission。[25] |\n| Wi‑Fi 7 mission device R&D | CMX500 | 以 single-box signaling tester 支援 cellular and non-cellular standards 的 converged radio R&D 測試切入。[26] | 目前 Raw 未證明 Wi‑Fi 7 CMX500 測試已用於 aerospace/defense program。[26] |\n| Wi‑Fi 7 / future WLAN production test | CMP180 | 以 480 MHz loopback waveform、R&D and production、beyond Wi‑Fi 7 的非信令測試能力切入。[26] | 目前 Raw 未證明 CMP180 在 aerospace/defense production line 使用。[26] |\n### 限制\n【推論】CMX500 是最強 prioritization，因為 defense private 5G resilience 需求與 CMX500 network emulator 角色在 vault 中同時被明示，而 CMP180 只有 Wi‑Fi 7 / 480 MHz R&D-production 能力、未被直接連到 defense。[11][19][26]\n【推論】CMP180 的較強切入點應限於 defense/aerospace 裝置的 WLAN R&D-production 測試能力討論，而不是已驗證的 aerospace/defense program。[26]\n【推論】CMX500 NTN 是 aerospace/space 方向的可開發線索，但目前只能作為 discovery opportunity，因為 Raw 只明示 CMX500 for NTN testing 資訊入口。[25]\n\n來源：\n[11] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[19] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[25] `raw/Productions/PR/Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite.md`\n[26] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+          "evidence": {
+           "raw_citations": 4,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

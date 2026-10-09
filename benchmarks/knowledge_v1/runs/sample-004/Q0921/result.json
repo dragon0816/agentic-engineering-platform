@@ -1,0 +1,61 @@
+{
+ "id": "Q0921",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 169.125,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 16,
+   "kind": "wiki",
+   "ref": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 12,
+   "kind": "wiki",
+   "ref": "wiki/sources/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 7,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S SMA100B.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 28,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "建議主軸：Semiconductor 切入可先聚焦「energy-efficient Radio Unit SoC / O-RU power management」與「O-RU chipset/reference designer RF verification」",
+   "可把「energy savings」主張落到功率隨時間或頻率的量測",
+   "O-RU chipset/reference designer R&D 到 production 測試：Signal generator / analyzer 組合依 NPR 與 power 量測需求配置"
+  ],
+  "reason": "The main mapping is backed by the cited passages: O-RU semiconductor/chipset and power-management needs are in [12]/[16], SMA100B power-analysis modes and NRP sensors in [7], and SMW200A/SMW-K61 plus FSW NPR/intermodulation capability in [28]. Some recommendations and translating energy-savings claims into specific measurement workflows are inferential, but the answer flags missing procedures/limits and remains a fair reading of the evidence.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

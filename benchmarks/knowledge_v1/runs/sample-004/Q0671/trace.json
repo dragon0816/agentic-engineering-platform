@@ -1,0 +1,745 @@
+{
+ "question": {
+  "id": "Q0671",
+  "text": "Map the chain from a AI market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+  "market": "AI",
+  "product": "Oscilloscope",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-ba01c26e6a1140b3a722e0a2c1cdab2f",
+ "exchange": {
+  "sent": "Map the chain from a AI market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+  "http_status": 200,
+  "seconds": 70.672,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-ba01c26e6a1140b3a722e0a2c1cdab2f",
+    "actor": "leo.chi",
+    "title": "Map the chain from a AI market requirement to a measurable parameter and…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T09:22:44.310896Z",
+    "updated_at": "2026-10-09T09:23:51.476405Z",
+    "messages": [
+     {
+      "message_id": "message-d8b38dfa5d9f4d8e82768d0b5debb617",
+      "role": "user",
+      "text": "Map the chain from a AI market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+      "created_at": "2026-10-09T09:22:44.339478Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-0dc0c933786645c585fdb4b0f6fd56a3",
+      "role": "assistant",
+      "text": "| AI market requirement | Measurable parameter / test need | Required Oscilloscope capability |\n|---|---|---|\n| AI data center infrastructure emphasizes **Power** as one of its core capability areas, alongside Connectivity and Resilience [21]. | The R&S solution mapping adds test-entry points such as **PDN Target Z** for AI server / PCB-related needs [10]. | The oscilloscope-side capability mapped in the knowledge base is **MXO power rail analysis**; the same mapping lists MXO for **power rail / motor driver analysis** [23]. |\n【推論】Chain: **AI data center Power requirement** → **PDN Target Z / power-rail measurement need** → **Oscilloscope must support power rail analysis, represented in the knowledge base by MXO** [21][10][23].\n\n來源：\n[10] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[21] Wiki：AI 資料中心基礎設施（來源：`0. AI Data Center image 1.md`、`0. AI Data Center image 2.md`、`0. AI Data Center image 3.md`…）\n[23] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+      "created_at": "2026-10-09T09:23:51.476405Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-eec6370ebb784fd6a198fc52d54bbb9b",
+       "request_id": "request-eec6370ebb784fd6a198fc52d54bbb9b",
+       "span_id": "span-eec6370ebb784fd6a198fc52d54bbb9b",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": true,
+    "answer": "| AI market requirement | Measurable parameter / test need | Required Oscilloscope capability |\n|---|---|---|\n| AI data center infrastructure emphasizes **Power** as one of its core capability areas, alongside Connectivity and Resilience [21]. | The R&S solution mapping adds test-entry points such as **PDN Target Z** for AI server / PCB-related needs [10]. | The oscilloscope-side capability mapped in the knowledge base is **MXO power rail analysis**; the same mapping lists MXO for **power rail / motor driver analysis** [23]. |\n【推論】Chain: **AI data center Power requirement** → **PDN Target Z / power-rail measurement need** → **Oscilloscope must support power rail analysis, represented in the knowledge base by MXO** [21][10][23].\n\n來源：\n[10] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[21] Wiki：AI 資料中心基礎設施（來源：`0. AI Data Center image 1.md`、`0. AI Data Center image 2.md`、`0. AI Data Center image 3.md`…）\n[23] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-eec6370ebb784fd6a198fc52d54bbb9b",
+      "request_id": "request-eec6370ebb784fd6a198fc52d54bbb9b",
+      "span_id": "span-eec6370ebb784fd6a198fc52d54bbb9b",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-eec6370ebb784fd6a198fc52d54bbb9b",
+       "request_id": "request-eec6370ebb784fd6a198fc52d54bbb9b",
+       "span_id": "span-eec6370ebb784fd6a198fc52d54bbb9b",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.2"
+       },
+       "trace": {
+        "trace_id": "trace-eec6370ebb784fd6a198fc52d54bbb9b",
+        "request_id": "request-eec6370ebb784fd6a198fc52d54bbb9b",
+        "span_id": "span-eec6370ebb784fd6a198fc52d54bbb9b",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "Map the chain from a AI market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "AI data center ecosystem map 12-10-2025 重複來源 › 相關來源\n- [[4 AI Data Center Eco-Chain image 1]] — 頁尾標示 12/10/2025（日期格式未標示）的 AI data center ecosystem map。\n- [[4 AI Data Center Eco-Chain image 9]] — 頁尾標示 12/10/2025、RS、Rohde & Schwarz、頁碼 25 的 AI data center ecosystem map OCR 來源，與 [[4 AI Data Center Eco-Chain image 1]] 高度重疊。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/AI data center ecosystem map 12-10-2025 重複來源.md"
+          },
+          "score": 0.75806
+         },
+         {
+          "text": "Bluetest Flow › unresolved\n- [[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]] 未標示 [[Bluetest Flow]] software version；[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 則標示 latest version 為 v1.18。\n- 來源未標示 [[Bluetest Flow]] v1.18 release date、release notes、license requirement 或相容性矩陣。\n- 來源未標示整合 [[R&S CMX500 OBT]] 所需的 CMX500 software version、option code、license、firmware / CSW requirement 或 hardware configuration。\n- 來源未標示 [[Bluetest Flow]] 可控制哪些 [[Bluetest]] RTS 型號；既有來源只舉 [[Bluetest RTS65]] 作為 reverberation chamber example，新來源只連到 Bluetest RTS chambers 網頁。\n- 來源未提供 automation API、test case list、report format、throughput / latency / MIMO stress test metric 或 measurement uncertainty。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Bluetest Flow.md"
+          },
+          "score": 3.86609
+         },
+         {
+          "text": "AISeverEcosystem R&S solution mapping\n[[AISeverEcosystem R&S solution mapping]] 是用來保存 [[AISeverEcosystem]] 中 AI server ecosystem 分類與 [[R&S Solution]] 欄位對應關係的概念頁；它只表示該 Excel 表中的銷售 / 測試方案線索，不代表正式產品配置、客戶關係或已驗證商機。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+          },
+          "score": 4.372183
+         },
+         {
+          "text": "台光電 › 高階 CCL 表內狀態\n[[AI Server PCB test image 21]]（來源未標示日期；取得於 2026-09-04）對 [[台光電]] 的表內狀態如下。來源未提供 **○** 的圖例定義，因此本表不將其解讀為量產、供貨、客戶導入或已出貨。\n\n| 板型 | 規格 | 表內狀態 | 日期 / 期間 | 來源 |\n|---|---|---|---|---|\n| 一般 PCB板 | M6 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |\n| 一般 PCB板 | M7 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |\n| 一般 PCB板 | M8 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |\n| HDI板 | M6 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |\n| HDI板 | M7 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |\n| HDI板 | M8 | ○ | 來源未標示日期 | [[AI Server PCB test image 21]] |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/台光電.md"
+          },
+          "score": 0.572455
+         },
+         {
+          "text": "AI 伺服器 PCB 供應鏈升級 › 升級面向整理\n| 面向 | 來源文字 | 可追溯數字 / 時間 | 限制 |\n|---|---|---|---|\n| AI伺服器趨勢 | 推升 PCB 邁向高層數、大面積與高速傳輸，供應鏈全面翻新 | [[AI Server PCB test image 4]] 來源未標示日期 | 未提供出貨量、平台樣本、PCB 面積或層數分布 |\n| ASIC平台進展 | AWS Trainium 2 Max、Google TPU V6、Meta MTIA 2量產，2026年新平台將陸續推出 | 2026年；量產時間未標示 | 未定義量產、未列出出貨量、客戶或供應鏈 |\n| 材料升級方向 | HVLP銅箔進入第4、5代，CCL以M8為主，導入低介電、低損耗與高散熱設計 | 第4、5代；來源未標示日期 | 未定義 HVLP 世代、M8、低介電、低損耗或高散熱設計的測試條件 |\n| 製程挑戰 | 主板層數達30～40層，縱深比需達12～14倍，需應對厚銅、雷射鑽孔等高階製程 | 30～40層；12～14倍；來源未標示日期 | 未說明板種、平台、線寬線距、孔徑、板厚或良率 |\n| TPCA Show焦點 | 聚焦玻纖布、HVLP銅箔、CCL發展與高縱深比設備 | 來源未標示日期 | 未標示 TPCA Show 年份、場次、展會期間或參展廠商 |\n| GB200 / GB300 / VR200 板件升級比較 | [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 將 ComputeTray 從 GB200 / GB300 的 5層22L列到 VR200 的 6層26L，NVSwitch Tray 從 24L HLC 列到 32L (N+N HLC)，並列出 VR200 Midplane 44L(N+N HLC) | GB200：25Q1試產、25Q2量產；GB300：25H2樣機/2026放量；VR200：26H2樣機/2027放量；來源發布日期未標示 | 未定義試產、量產、樣機、放量；未提供板厚、孔徑、線寬線距、良率、出貨量或平台驗證證據 |\n| VR200 材料升級與供應商列名 | [[HSD PCB image 11]] 列出 VR200 計算板斗山(M8+LDK+HVLP4)+M4、交換板M8(LDK2+HVLP4) 生益科技/台光電/南亞(交期最快)、HVLP4銅箔三井/古河/盧森堡/金居/福田 | VR200：26H2樣機/2027放量；來源發布日期未標示 | 與 [[HSD PCB image 1]] 既有抄錄「南亞(交期最長)」矛盾；未說明南亞完整公司名稱、交期數字、材料型號、認證狀態或供應關係 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+          },
+          "score": 11.659528
+         },
+         {
+          "text": "Data center full-spectrum connectivity\n[[Data center full-spectrum connectivity]] 是 [[full-spectrum-data-center-connectivity-brochure]] 呈現的 portfolio 視角：把 AI / data center 的 high-speed electrical interconnect、optical interconnect、fiber deployment、rack power distribution、busbar、liquid cooling 與 leak detection 放在同一張 data center connectivity brochure 中。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+          },
+          "score": 4.973467
+         },
+         {
+          "text": "AI 資料中心基礎設施 › 可追溯範圍\n本頁根據五張圖像來源建立：[[0. AI Data Center image 1]]、[[0. AI Data Center image 2]]、[[0. AI Data Center image 3]]、[[0. AI Data Center image]] 與 [[4 AI Data Center Eco-Chain image 1]]。\n\n- [[0. AI Data Center image 1]] 可追溯的主張限於：AI / data center 場景與 **Enabling AI**、[[Connectivity]]、[[Power]]、[[Resilience]] 的視覺關聯。\n- [[0. AI Data Center image 2]] 可追溯的主張限於：資料中心 / 機房 solution diagram 中列出的子系統分類與 1–11 編號設備 / 系統名稱。\n- [[0. AI Data Center image 3]] 可追溯的主張限於：**Enabling AI** 與資料中心 / 機房 / 基礎設施場景的視覺關聯，以及 [[Connectivity]]、[[Power]]、[[Resilience]] 三個明示重點方塊。\n- [[0. AI Data Center image]] 可追溯的主張限於：資料中心 / 機房 solution diagram 中列出的子系統分類、1–11 編號設備 / 系統名稱，以及「2 or 3」共同標示造成的位置未決問題。\n- [[4 AI Data Center Eco-Chain image 1]] 可追溯的主張限於：12/10/2025（日期格式未標示）頁面上的 ecosystem map 分類、公司 / 品牌 / logo 列名、頁尾 Rohde & Schwarz / COMPANY RESTRICT / RS / 頁碼 25 等可見資訊。\n- 由於前四份來源都未標示日期，所有與時序、市場現況、供應商名單、產品導入、客戶採用、出貨量或市場占比相關的判斷都需要其他來源補強。\n- 即使 [[4 AI Data Center Eco-Chain image 1]] 有頁尾日期 12/10/2025，它仍未提供市場數值、排名、關係線或採用狀態，因此不能單獨支持市場份額、導入狀態、供應鏈上下游關係或 R&S 往來關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+          },
+          "score": 3.971463
+         },
+         {
+          "text": "AI data center ecosystem map 12-10-2025 重複來源\n[[AI data center ecosystem map 12-10-2025 重複來源]] 比對 [[4 AI Data Center Eco-Chain image 1]] 與 [[4 AI Data Center Eco-Chain image 9]] 兩份來源，避免同一張或高度相近的 AI data center ecosystem map 被當作兩個獨立市場驗證來源。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/AI data center ecosystem map 12-10-2025 重複來源.md"
+          },
+          "score": 0.70758
+         },
+         {
+          "text": "Bluetest RTS65\n[[Bluetest RTS65]] 是 [[Bluetest]] 在 [[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]] 中舉例的 reverberation chamber，用於 wireless devices 的 over-the-air performance evaluation。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Bluetest RTS65.md"
+          },
+          "score": 2.815099
+         },
+         {
+          "text": "AISeverEcosystem R&S solution mapping › 與既有知識的關係\n- [[R&S PCB test solutions]] 提供 2026.3.4 R&S high-speed digital 簡報中的 PCB fabricator / system house 測試流程；本頁則來自市場 Excel，將 R&S 儀器與 AI server supply-chain 類別做銷售 mapping。\n- [[高頻高速 PCB 測試解決方案]] 與 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 已有 Keysight / PCB test 圖像來源；本頁新增 R&S 方案對應，但未提供可替代正式規格的量測條件。\n- [[AI 伺服器 PCB 供應鏈升級]] 記錄材料與板層升級；本頁只補充對應測試入口，例如 IL、TDR、high speed trace、PDN Target Z。\n- [[資料中心電力電子生態系]]、[[NVIDIA 800V HVDC 架構]] 與 [[AI 資料中心高壓直流供電]] 記錄 data center power electronics；本頁補充 [[MXO]]、[[R&S FSWP]]、[[ZISO]] 與 BMS test 的 sales mapping 線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+          },
+          "score": 3.944209
+         },
+         {
+          "text": "台燿 › 可追溯範圍\n- 本頁只記錄來源圖上的台燿列名，不推論供應合約、出貨量、市占率、客戶、材料規格、國別或 R&S 往來關係。\n- 本頁不自動把台燿與 [[台耀]] 合併；需要人工確認命名與同義頁處理。\n- [[AI Server PCB test image 23]] 的「2023 Q1 接獲AI通用基板(UBB) 訂單」只支持圖上說法；來源未提供訂單客戶、合約、數量、金額、出貨期間或公告。\n- [[AI Server PCB test image 23]] 的「800G交換器材料認證中」只支持圖上說法；來源未標示認證對象、測試項目、材料型號、完成時間或結果。\n- [[AI Server PCB test image 23]] 的客戶欄只記錄圖上文字；不得改寫成已驗證直接客戶或現行供應關係。\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]] 的低軌衛星與基地台高頻材料說法只支持該 2026-09-15 報告中的市場定位，不能推論具體產品料號、衛星平台或基地台客戶。\n- [[Switch server- optical switch]] 的 800G 交換器材料供應商句子只支持 OneNote 文字列名；來源未標示材料種類、產品型號、客戶、出貨、認證、合約或原始資料來源，不能升格為已驗證供應關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/台燿.md"
+          },
+          "score": 3.392776
+         },
+         {
+          "text": "AI 伺服器 PCB 供應鏈升級 › 來源中的說法\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）標題為「PCB供應鏈升級重點」。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 AI伺服器趨勢推升 [[PCB]] 邁向高層數、大面積與高速傳輸，供應鏈全面翻新。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 [[AWS Trainium 2 Max]]、[[Google TPU V6]]、[[Meta MTIA 2]] 量產，並稱 2026年新平台將陸續推出。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 [[HVLP銅箔]] 進入第4、5代，[[CCL]] 以 [[M8]] 為主，導入低介電、低損耗與高散熱設計。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱主板層數達 30～40 層，縱深比需達 12～14 倍，並需應對厚銅、雷射鑽孔等高階製程。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 TPCA Show 焦點聚焦玻纖布、HVLP銅箔、CCL 發展與高縱深比設備，反映材料與製程全面升級。\n- [[HSD PCB image 1]]（來源發布日期未標示；取得於 2026-09-04）以「GB200/GB300/VR200規格：南亞和臻鼎為亮點」為標題，比較 [[GB200]] NVL72(72GPU)、[[GB300]] NVL72(72GPU) 與 [[VR200]] NVL144(72GPU) 的時間、製程、功耗、載板、CCL 材料、上游材料、ComputeTray、NVSwitch Tray、CPX 與 Midplane。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）與 [[HSD PCB image 1]] 高度重疊，同樣以「GB200/GB300/VR200規格：南亞和臻鼎為亮點」為標題，右上角標示「資料來源：產業調研、福邦投顧整理」。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[GB200]] / [[GB300]] ComputeTray 為 **5層22L**，[[VR200]] ComputeTray 為 **6層26L**；[[GB200]] / [[GB300]] NVSwitch Tray 為 **24L HLC**，[[VR200]] NVSwitch Tray 為 **32L (N+N HLC)**，[[VR200]] Midplane 為 **44L(N+N HLC)**。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[GB300]] 使用 **HVLP3銅箔**，[[VR200]] 使用 **HVLP4銅箔**，並將 [[VR200]] 交換板 CCL 材料列為 **M8(LDK2+HVLP4) 生益科技/台光電/南亞(交期最快)**。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[VR200]] ComputeTray PCB 供應商 / 占比為 **欣興35~40% > 臻鼎25~30% = 勝宏25~30%**。\n\n⚠️ [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）說 [[VR200]] 交換板 CCL 材料供應為「生益科技/台光電/南亞(交期最快)」，但既有頁面 [[AI 伺服器 PCB 供應鏈升級]] 說 [[HSD PCB image 1]] 的對應欄位為「生益科技/台光電/南亞(交期最長)」。判斷：最快 / 最長方向相反，影響對 [[南亞]] 供應鏈定位的解讀；在回看原圖前不得擇一。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+          },
+          "score": 7.489254
+         },
+         {
+          "text": "Data center full-spectrum connectivity › 與既有概念的關係\n- [[Data center server 高速互連產品組合]] 偏向 data center server interconnect portfolio 的分類表；[[Data center full-spectrum connectivity]] 更強調 full-spectrum：electrical interconnect + optical + fiber + power + cooling。\n- [[Compute tray component solutions]] 偏向 compute tray connectors、cables、power connector、busbar 與 backplane interconnect；本頁納入 optical transceiver、CPO、fiber deployment 與 liquid cooling。\n- [[高速伺服器儲存互連]] 可連接本頁中的 [[Mini Cool Edge IO]]、[[Cool Express Link]]、[[Direct Attached Copper Cables]]、[[PCIe CEM 7 Connectors]] 與 storage / EDSFF 類產品。\n- [[CPO]]、[[Optical I-O]]、[[Near-Packaged Optics]] 可連接本頁的 [[Amphenol Co-packaged Optics]] 與 [[LEAP On-Board Transceiver]]，但本來源不是技術標準或市場採用證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+          },
+          "score": 2.817565
+         },
+         {
+          "text": "AI 資料中心基礎設施 › 相關來源\n- [[0. AI Data Center image 1]] — 未標示日期的 AI data center 概念示意圖，明示 **Enabling AI**、[[Connectivity]]、[[Power]]、[[Resilience]]。\n- [[0. AI Data Center image 2]] — 未標示日期的 data center / 機房整合基礎設施 3D 示意圖，列出 [[Power Management]]、[[Rack & Accessories]]、[[Management System]]、[[Precision Cooling]]、[[Service]] 與 1–11 的設備 / 系統對應。\n- [[0. AI Data Center image 3]] — 未標示日期的 AI data center 概念示意圖，明示 **Enabling AI**、[[Connectivity]]、[[Power]]、[[Resilience]]，並描述電塔、資料中心、機櫃、冷卻 / 管線、電子設備機箱、通訊線路與鎖頭圖示等視覺元素。\n- [[0. AI Data Center image]] — 未標示日期的 data center / 機房解決方案示意圖，列出 [[Power Management]]、[[Rack & Accessories]]、[[Management System]]、[[Precision Cooling]]、[[Service]] 與 1–11 的設備 / 系統對應。\n- [[4 AI Data Center Eco-Chain image 1]] — 頁尾標示 12/10/2025（日期格式未標示）的 AI data center ecosystem map，列出 cloud service、datacenter、AI server、compute 與 peripheral 相關分類與企業 / 品牌名稱。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+          },
+          "score": 3.74537
+         },
+         {
+          "text": "AI data center ecosystem map 12-10-2025 重複來源 › 比對結論\n- [[4 AI Data Center Eco-Chain image 1]] 與 [[4 AI Data Center Eco-Chain image 9]] 都是 AI / data center ecosystem map，標題皆為拼字 **Ecosytem**。\n- 兩者都標示 **12/10/2025**，且日期格式未標示。\n- [[4 AI Data Center Eco-Chain image 9]] 頁尾可辨識 **RS**、**25**、**Rohde & Schwarz**、**12/10/2025**、**COMPANY RESTRICT**。\n- 既有頁面對 [[4 AI Data Center Eco-Chain image 1]] 的描述同樣保留 Rohde & Schwarz / RS / 頁碼 25 等頁尾資訊，因此兩者在日期、頁碼、主題與分類上高度重疊。\n- 本頁判斷：[[4 AI Data Center Eco-Chain image 9]] 不能視為獨立於 [[4 AI Data Center Eco-Chain image 1]] 的市場驗證，只能作為重複 / 近重複 OCR 來源，用來補足辨識差異與未決事項。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/AI data center ecosystem map 12-10-2025 重複來源.md"
+          },
+          "score": 0.705616
+         },
+         {
+          "text": "R&S CMX500 › Front panel interfaces and display\n- USB：for keyboard、mouse、USB flash drive；2 × USB 2.0 與 1 × USB 3.0 type A connector。\n- Sensor：for R&S NRP-Zxx power sensors；8-pin socket。\n- Display：1.9 inch e-paper TFT EPD black/white display；resolution 144 × 128 pixel。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 38,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 4.642635
+         },
+         {
+          "text": "AISeverEcosystem R&S solution mapping › 相關來源\n- [[AISeverEcosystem]] — AISeverEcosystem.xlsx 的 lossy markdown 轉檔摘要，保存 ServerRack 與 ICs 兩張表中的供應鏈分類、公司列名、R&S solution 與未決限制。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+          },
+          "score": 0.381226
+         },
+         {
+          "text": "聯茂 › 未決事項\n- [[AI Server PCB test image 19]]、[[AI Server PCB test image 21]]、[[AI Server PCB test image 45]] 與 [[AI Server PCB test image 47]] 均未標示內容日期、年份、季度或資料期間。\n- [[AI Server PCB test image 19]] 與 [[AI Server PCB test image 45]] 未說明 [[Df]] 的完整名稱、測試頻率、測試方法、量測條件或標準版本。\n- [[AI Server PCB test image 45]] 的 `IT-999GS...` 尾端無法完整辨識，與 [[AI Server PCB test image 19]] 抄錄的 `IT-999GS` 不一致。\n- [[AI Server PCB test image 45]] 的 Low Loss 型號 `IT9568` 與 [[AI Server PCB test image 19]] 抄錄的 `IT958G` 不一致。\n- [[AI Server PCB test image 45]] 的 Ultra Low Loss 型號 `IT988G/SE` 重複出現，且與 [[AI Server PCB test image 19]] 抄錄的 `IT988GJ / SE` 不一致。\n- [[AI Server PCB test image 47]] 未說明聯茂 M8 空白格代表無資料、無產品、未導入、未驗證、不可辨識或其他狀態。\n- [[AI Server PCB test image 23]] 未說明「CCL: 驗證中」的驗證對象、客戶、材料、平台或階段。\n- [[AI Server PCB test image 26]] 未標示法說會日期、簡報名稱、文件版次、頁碼或原始網址。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/聯茂.md"
+          },
+          "score": 0.658702
+         },
+         {
+          "text": "AI 伺服器 PCB 供應鏈升級 › 可追溯限制\n- [[AI Server PCB test image 4]] 是一張表格整理圖，不是統計圖表；沒有座標軸、圖例、樣本數、營收、出貨量、市占率、ASP 或產能資料。\n- [[AI Server PCB test image 4]] 的頁尾只標示「資料來源：採訪整理」與「製表：楊絡懸」，未提供完整資料來源。\n- 本頁不能把 [[AWS Trainium 2 Max]]、[[Google TPU V6]]、[[Meta MTIA 2]] 的「量產」改寫成客觀市場事實；只能寫成 [[AI Server PCB test image 4]]（來源未標示日期）的表格說法。\n- [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 都是來源發布日期未標示的規格比較表；圖中雖有 25Q1、25Q2、25H2、2026、26H2、2027 等平台時間，但不能替代來源發布日期。\n- [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 的試產、量產、樣機、放量、供應商占比、價格與交期說法都缺少定義、樣本、資料來源與驗證文件；不得改寫成客觀已發生事實。\n- [[HSD PCB image 11]] 與 [[HSD PCB image 1]] 高度重疊，不能把兩者當作相互獨立的市場驗證來源。\n- 公司列名不可推論為完整供應鏈、市場排名、採購名單、供應合約、R&S 往來對象或投資建議。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+          },
+          "score": 2.698339
+         },
+         {
+          "text": "Data center full-spectrum connectivity › Power 與 cooling connectivity\n- [[Amphenol BarKlip I-O products]] / [[BarKlip Busbar Connectors]] — 來源稱其 distribute high-current power between busbars、cables and circuit boards，適用 power-dense data centers、OCP rack and power solutions。\n- [[60 A Universal AC Input Connector and Cable Assemblies]] — 來源稱其 meet 2OU power distribution architecture standards，將 power 從 busway routing 到 power shelf。\n- [[M-CRPS +54V Connectors and Cable Assemblies]] — 來源稱其 meet OCP M-CRPS power supply input specifications。\n- [[PwrBlade ULTRA HD+ Cable Assembly]] — 來源稱其 Cable-to-Board serves as high-power I/O cable configuration in a low-profile design。\n- [[OSFP-RHS 224G Cold Plate and Cage Assembly]] — 來源稱其 optimizes port thermal efficiency and reliability，meeting MSA requirements，並提供 one-step press assembly。\n- [[Amphenol Liquid Cooling Leakage Detection Sensor Cable Assembly]] — 來源稱其 detects coolant leaks and ensures system reliability。\n- [[Liquid Cooling Quick Disconnect Connectors]] — 來源稱其用於 high-efficiency thermal management。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+          },
+          "score": 2.086605
+         },
+         {
+          "text": "AI 資料中心基礎設施\nAI 資料中心基礎設施是此 vault 用來記錄支撐 AI 部署或運作的資料中心能力組合；在 [[0. AI Data Center image 1]] 與 [[0. AI Data Center image 3]] 中，來源未標示日期的圖像明示其核心面向包含 **Connectivity**、**Power**、**Resilience**，而 [[0. AI Data Center image 2]] 與 [[0. AI Data Center image]] 則以未標示日期的 3D 機房示意圖列出 Power Management、Rack & Accessories、Management System、Precision Cooling 與 Service 等資料中心 solution components。[[4 AI Data Center Eco-Chain image 1]] 則在頁尾標示 12/10/2025（日期格式未標示）的 ecosystem map 中，補充 cloud service、datacenter、AI server、compute 與 peripheral 的市場參與者 / 品牌分類視角。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+          },
+          "score": 1.949982
+         },
+         {
+          "text": "Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices › 原文未解的問題\n- unresolved：來源未標示新聞稿發布日期；raw frontmatter 的 created 為 2026-09-11，但不可視為新聞稿發布日。\n- unresolved：來源未標示 [[Bluetest Flow]] software version、integration release version、license requirement 或相容性矩陣。\n- unresolved：來源未標示 [[Bluetest RTS65]] 的完整規格、版本、chamber dimensions、frequency range 或 option configuration。\n- unresolved：來源未標示 [[R&S CMX500]] 此 Wi-Fi 7 integration 所需 software option code、minimum CSW version、硬體配置、RF chains 數量或 order number。\n- unresolved：來源未標示實際測試案例、throughput / latency / MIMO stress test pass-fail metric、校準條件或 measurement uncertainty。\n- unresolved：來源未說明與 anechoic chamber 結果的可比性、correlation method 或 certification / conformance applicability。\n- unresolved：來源中的 Wi-Fi 7 capability（320 MHz、up to 16 spatial streams、4096 QAM、MLO）是技術背景敘述，不等同於 [[R&S CMX500]] 或 [[Bluetest RTS65]] 對所有組合的完整支援聲明。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md"
+          },
+          "score": 3.171027
+         },
+         {
+          "text": "AISeverEcosystem › 與既有知識的關係\n- [[AI Server 供應鏈總覽]] 已整理 AI server 從 demand、compute、ODM、networking、PCB/interconnect、power、cooling 到 infrastructure 的八段式供應鏈；本來源新增更偏台股 / customer targeting / R&S solution mapping 的 Excel 表格視角。\n- [[AI 資料中心生態系]] 已整理多張 AI data center ecosystem / industrial chain 圖；本來源提供更細的 server rack 零組件與 IC 分類，但來源未標示日期，不能直接更新為市場現況。\n- [[臺灣 AI 伺服器供應鏈]] 依 TAITRA 2024/4 圖整理上中下游；本來源與其在 [[台光電]]、[[台燿]]、[[聯茂]]、[[欣興]]、[[南電]]、[[景碩]]、[[鴻海]]、[[廣達]]、[[緯創]]、[[英業達]]、[[台達電]]、[[光寶科]]、[[康舒]]、[[建準]]、[[川湖]]、[[勤誠]]等列名上高度相鄰，但本來源另加入 R&S solution 欄。\n- [[AI 伺服器 ODM]] 已整理台系 ODM 比較表與組裝代工列名；本來源在 [[伺服器整合／ODM]] 欄再次列出 [[鴻海]]、[[廣達]]、[[緯創]]、[[緯穎]]、[[英業達]]、[[華碩]]、[[神達]]、[[技嘉]]，但沒有營收、出貨或期間資料。\n- [[AI 伺服器 PCB 供應鏈升級]] 已記錄 GB200 / GB300 / VR200 與 PCB 材料升級；本來源只以 `GB200/NVL72帶動層數、材料等級暴衝` 和 `20+層UBB、高階ABF、低Dk CCL` 補充銷售 / solution mapping 脈絡，沒有新增可量化規格。\n- [[AI 伺服器液冷散熱]] 已整理液冷 / Microchannel lid 與 VR200 散熱估算；本來源新增 [[GPU]] TDP 700 W → 1200 W 與液冷 / 滑軌升級的表格說法，但未標示平台、年份或測試條件。\n- [[資料中心電力電子生態系]] 與 [[NVIDIA 800V HVDC 架構]] 已整理 HVDC、PSU、BBU、PDU 等 power electronics 脈絡；本來源補充電源供應器分類中的 HVDC、5–10 kW PSU、液冷電源櫃、BBU 與 Blackwell 平台功耗翻倍說法，但未提供引用文件或期間。\n- [[R&S PCB test solutions]] 已整理 R&S 2026.3.4 high-speed digital 簡報中的 material measurement、stackup selection、SI testing 與 sampling / process monitoring；本來源把部分 R&S solution 對應到特定市場分類，例如 [[R&S ZNA]] / [[R&S ZNB]] 的 IL / TDR、[[R&S FSWP]] 的 jitter / phase noise / LDO NSD test、[[MXO]] 的 power rail / motor driver analysis。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AISeverEcosystem.md"
+          },
+          "score": 5.404416
+         },
+         {
+          "text": "欣興 › 可追溯範圍\n- 本頁不自行合併不同來源的分類口徑，也不推論[[欣興]]與 AI server、AMD、NVIDIA、網路通訊設備品牌或 R&S 的交易關係。\n- [[AI Server PCB test image 11]] 與 [[AI Server PCB test image 37]] 的主要客戶只能記為表格說法；來源未提供採購金額、出貨量、供貨產品、合約期間或有效日期。\n- [[AI Server PCB test image 12]] 與 [[AI Server PCB test image 38]] 的 24% 只能記為未標題圓餅圖中的圖上數值；不得寫成市場占有率、營收占比、出貨量占比、產能占比或 AI server PCB 供應比例。\n- [[AI Server PCB test image 17]] 的 30% 只能記為來源對 AI PC 市場份額的說法；不得與營收占比或未定義圓餅圖占比互相比較。\n- [[AI Server PCB test image 22]] 與 [[AI Server PCB test image 48]] 的伺服器 / 載板 / 晶片客戶欄只代表表格文字；不得改寫為已驗證直接客戶、採購關係、供應合約或現行狀態。\n- [[AI Server PCB test image 48]] 與 [[AI Server PCB test image 22]] 高度重疊，不可視為兩份獨立市場驗證。\n- [[HSD PCB image 10]] 的台廠ABF載板龍頭與 Blackwell第二大載板供應商只代表該未標示日期圖卡說法；不得改寫為已驗證供應排名或現行狀態。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/欣興.md"
+          },
+          "score": 3.231288
+         },
+         {
+          "text": "> Converted from `4 AI Data Center Eco-Chain image.jpg`. This is a lossy derivative; the original is the source of truth.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-f39056c3a59b3a77",
+            "original_ref": "raw/Market/4 AI Data Center Eco-Chain image.md",
+            "sha256": "f39056c3a59b3a77406f46f5a926424a0de822917aa55474cfefed16c3b1f7fa",
+            "raw_ref": "raw/Market/4 AI Data Center Eco-Chain image.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/4 AI Data Center Eco-Chain image.md",
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.884392
+         },
+         {
+          "text": "For easier analysis, you can switch from the default \"Flat\" view to a \"Grouped\" view of flows or visualize\nthe connections on a world map.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-bc47a8ad4da77a6a",
+            "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+            "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+           "section": 3477,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.563123
+         },
+         {
+          "text": "> Converted from `4 AI Data Center Eco-Chain image 1.png`. This is a lossy derivative; the original is the source of truth.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-08d93c68a0f6e703",
+            "original_ref": "raw/Market/4 AI Data Center Eco-Chain image 1.md",
+            "sha256": "08d93c68a0f6e70382d1fc1b7cf0008c1703bbacf918ebf647647f6718c76118",
+            "raw_ref": "raw/Market/4 AI Data Center Eco-Chain image 1.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/4 AI Data Center Eco-Chain image 1.md",
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.480131
+         },
+         {
+          "text": "> Converted from `4 AI Data Center Eco-Chain image 10.png`. This is a lossy derivative; the original is the source of truth.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-6401210e618a8121",
+            "original_ref": "raw/Market/4 AI Data Center Eco-Chain image 10.md",
+            "sha256": "6401210e618a81211063d0334851bf212dc567f633e3fd0f8b9dec11fe49e5d6",
+            "raw_ref": "raw/Market/4 AI Data Center Eco-Chain image 10.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/4 AI Data Center Eco-Chain image 10.md",
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.480131
+         }
+        ],
+        "text": "| AI market requirement | Measurable parameter / test need | Required Oscilloscope capability |\n|---|---|---|\n| AI data center infrastructure emphasizes **Power** as one of its core capability areas, alongside Connectivity and Resilience [21]. | The R&S solution mapping adds test-entry points such as **PDN Target Z** for AI server / PCB-related needs [10]. | The oscilloscope-side capability mapped in the knowledge base is **MXO power rail analysis**; the same mapping lists MXO for **power rail / motor driver analysis** [23]. |\n【推論】Chain: **AI data center Power requirement** → **PDN Target Z / power-rail measurement need** → **Oscilloscope must support power rail analysis, represented in the knowledge base by MXO** [21][10][23].",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "AISeverEcosystem R&S solution mapping › 與既有知識的關係\n- [[R&S PCB test solutions]] 提供 2026.3.4 R&S high-speed digital 簡報中的 PCB fabricator / system house 測試流程；本頁則來自市場 Excel，將 R&S 儀器與 AI server supply-chain 類別做銷售 mapping。\n- [[高頻高速 PCB 測試解決方案]] 與 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 已有 Keysight / PCB test 圖像來源；本頁新增 R&S 方案對應，但未提供可替代正式規格的量測條件。\n- [[AI 伺服器 PCB 供應鏈升級]] 記錄材料與板層升級；本頁只補充對應測試入口，例如 IL、TDR、high speed trace、PDN Target Z。\n- [[資料中心電力電子生態系]]、[[NVIDIA 800V HVDC 架構]] 與 [[AI 資料中心高壓直流供電]] 記錄 data center power electronics；本頁補充 [[MXO]]、[[R&S FSWP]]、[[ZISO]] 與 BMS test 的 sales mapping 線索。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 8,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+         },
+         "score": 3.944209
+        },
+        {
+         "text": "AI 資料中心基礎設施\nAI 資料中心基礎設施是此 vault 用來記錄支撐 AI 部署或運作的資料中心能力組合；在 [[0. AI Data Center image 1]] 與 [[0. AI Data Center image 3]] 中，來源未標示日期的圖像明示其核心面向包含 **Connectivity**、**Power**、**Resilience**，而 [[0. AI Data Center image 2]] 與 [[0. AI Data Center image]] 則以未標示日期的 3D 機房示意圖列出 Power Management、Rack & Accessories、Management System、Precision Cooling 與 Service 等資料中心 solution components。[[4 AI Data Center Eco-Chain image 1]] 則在頁尾標示 12/10/2025（日期格式未標示）的 ecosystem map 中，補充 cloud service、datacenter、AI server、compute 與 peripheral 的市場參與者 / 品牌分類視角。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+         },
+         "score": 1.949982
+        },
+        {
+         "text": "AISeverEcosystem › 與既有知識的關係\n- [[AI Server 供應鏈總覽]] 已整理 AI server 從 demand、compute、ODM、networking、PCB/interconnect、power、cooling 到 infrastructure 的八段式供應鏈；本來源新增更偏台股 / customer targeting / R&S solution mapping 的 Excel 表格視角。\n- [[AI 資料中心生態系]] 已整理多張 AI data center ecosystem / industrial chain 圖；本來源提供更細的 server rack 零組件與 IC 分類，但來源未標示日期，不能直接更新為市場現況。\n- [[臺灣 AI 伺服器供應鏈]] 依 TAITRA 2024/4 圖整理上中下游；本來源與其在 [[台光電]]、[[台燿]]、[[聯茂]]、[[欣興]]、[[南電]]、[[景碩]]、[[鴻海]]、[[廣達]]、[[緯創]]、[[英業達]]、[[台達電]]、[[光寶科]]、[[康舒]]、[[建準]]、[[川湖]]、[[勤誠]]等列名上高度相鄰，但本來源另加入 R&S solution 欄。\n- [[AI 伺服器 ODM]] 已整理台系 ODM 比較表與組裝代工列名；本來源在 [[伺服器整合／ODM]] 欄再次列出 [[鴻海]]、[[廣達]]、[[緯創]]、[[緯穎]]、[[英業達]]、[[華碩]]、[[神達]]、[[技嘉]]，但沒有營收、出貨或期間資料。\n- [[AI 伺服器 PCB 供應鏈升級]] 已記錄 GB200 / GB300 / VR200 與 PCB 材料升級；本來源只以 `GB200/NVL72帶動層數、材料等級暴衝` 和 `20+層UBB、高階ABF、低Dk CCL` 補充銷售 / solution mapping 脈絡，沒有新增可量化規格。\n- [[AI 伺服器液冷散熱]] 已整理液冷 / Microchannel lid 與 VR200 散熱估算；本來源新增 [[GPU]] TDP 700 W → 1200 W 與液冷 / 滑軌升級的表格說法，但未標示平台、年份或測試條件。\n- [[資料中心電力電子生態系]] 與 [[NVIDIA 800V HVDC 架構]] 已整理 HVDC、PSU、BBU、PDU 等 power electronics 脈絡；本來源補充電源供應器分類中的 HVDC、5–10 kW PSU、液冷電源櫃、BBU 與 Blackwell 平台功耗翻倍說法，但未提供引用文件或期間。\n- [[R&S PCB test solutions]] 已整理 R&S 2026.3.4 high-speed digital 簡報中的 material measurement、stackup selection、SI testing 與 sampling / process monitoring；本來源把部分 R&S solution 對應到特定市場分類，例如 [[R&S ZNA]] / [[R&S ZNB]] 的 IL / TDR、[[R&S FSWP]] 的 jitter / phase noise / LDO NSD test、[[MXO]] 的 power rail / motor driver analysis。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/AISeverEcosystem.md"
+         },
+         "score": 5.404416
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [
+         {
+          "name": "market_segment",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 6,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/syntheses/AI data center ecosystem map 12-10-2025 重複來源.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/台光電.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 9,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/syntheses/AI data center ecosystem map 12-10-2025 重複來源.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+         "raw_refs": [
+          "raw/Market/OneNote/AISeverEcosystem.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md",
+         "raw_refs": [
+          "raw/Market/0. AI Data Center image 1.md",
+          "raw/Market/0. AI Data Center image 2.md",
+          "raw/Market/0. AI Data Center image 3.md",
+          "raw/Market/0. AI Data Center image.md",
+          "raw/Market/4 AI Data Center Eco-Chain image 1.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/AISeverEcosystem.md",
+         "raw_refs": [
+          "raw/Market/OneNote/AISeverEcosystem.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-13e968160ded4760a45c4c15e988b287",
+      "task_sha256": "f22355d04c35f9f967d158f002ff2c4b96ae5b38a8c85b9010086a0ba034ea35",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.6.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "validated",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validated",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "passed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": null
+    },
+    "evidence": {
+     "raw_citations": 3,
+     "facet_status": "covered",
+     "missing_facets": [],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {
+      "market_segment": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,802 @@
+{
+ "question": {
+  "id": "Q0521",
+  "text": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "market": "Automotive",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-79be86322ea54aed995ff0b6ae699432",
+ "exchange": {
+  "sent": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "http_status": 200,
+  "seconds": 146.0,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-79be86322ea54aed995ff0b6ae699432",
+    "actor": "leo.chi",
+    "title": "Map the chain from a Automotive market requirement to a measurable param…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T09:02:30.217792Z",
+    "updated_at": "2026-10-09T09:04:56.102173Z",
+    "messages": [
+     {
+      "message_id": "message-4510065cd7874dceb79488d6d988cbf6",
+      "role": "user",
+      "text": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+      "created_at": "2026-10-09T09:02:30.232528Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-8d32cc25258d4d168de6ceb253a78baf",
+      "role": "assistant",
+      "text": "### 鏈結對照\n| Automotive market requirement | Measurable parameter / verification target | Required capability of Signal Generator / Signal Analyzer | 支援狀態 |\n|---|---|---|---|\n| EU eCall since 2018 is mandatory for all new cars sold in the EU, and NG eCall is stated as obligatory from 2026-01-01 because 2G/3G circuit-switched networks become obsolete and systems must adapt to 4G/5G packet-switched networks [13]. | EN 17240:2024 establishes testing guidelines for eCall systems over IMS networks including 4G LTE and 5G NR [13]. | The supported R&S capability in the passages is R&S CMX500 with R&S CMX-KA098 for NG eCall testing under realistic network conditions, including PSAP simulation and voice/data transmission compliance validation [8]. | This chain is supported for a mobile radio tester, not for a Signal Generator / Signal Analyzer [8]. |\n| Automotive radar testing uses R&S AREG800A as an Automotive Radar Echo Generator [9]. | Echo generation is specified as dynamic artificial object generation, with hybrid short-distance objects below 17 m via analog stepped delay line and longer distances up to 3000 m via fully digital implementation [4]. | R&S AREG-P1 provides one digital channel, one object per channel, 5 GHz instantaneous bandwidth, near-object range possibility, analog IF output interfaces, and remote control interfaces [24]. | This chain is supported for radar echo generation, but the source states this use is automotive radar echo generation and not an RF signal generator or spectrum analyzer [3]. |\n| Automotive radar FMCW testing is covered by the AREG800A digital echo generation concept [4]. | For FMCW radar, the minimum generated distance equals the radar-under-test air gap value and the maximum generated distance is 3000 m [4]. | R&S AREG-P2 provides two digital channels, and R&S AREG-P3 provides three digital channels with one object per channel and monostatic or bistatic frontend support [24]. | This chain is supported for radar echo generation, not for Signal Generator / Signal Analyzer [3]. |\n| No passage directly connects an Automotive market requirement to a required Signal Generator / Signal Analyzer capability. | No passage provides a complete automotive-to-measurable-parameter-to-Signal-Generator/Analyzer chain. | RAW evidence only states that R&S SMW200A with R&S SMW-K61 can generate an MCCW signal and that R&S FSW analyzer can read NPR results with notch depth up to 50 dB over 2 GHz bandwidth [28]. | The automotive link for this Signal Generator / Signal Analyzer capability is not supported. |\n\n來源：\n[3] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[4] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[8] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[9] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[13] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[24] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[28] `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+      "created_at": "2026-10-09T09:04:56.102173Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-e05a80a3ef2e43e5b4a7af37cfa1fbe4",
+       "request_id": "request-e05a80a3ef2e43e5b4a7af37cfa1fbe4",
+       "span_id": "span-e05a80a3ef2e43e5b4a7af37cfa1fbe4",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": true,
+    "answer": "### 鏈結對照\n| Automotive market requirement | Measurable parameter / verification target | Required capability of Signal Generator / Signal Analyzer | 支援狀態 |\n|---|---|---|---|\n| EU eCall since 2018 is mandatory for all new cars sold in the EU, and NG eCall is stated as obligatory from 2026-01-01 because 2G/3G circuit-switched networks become obsolete and systems must adapt to 4G/5G packet-switched networks [13]. | EN 17240:2024 establishes testing guidelines for eCall systems over IMS networks including 4G LTE and 5G NR [13]. | The supported R&S capability in the passages is R&S CMX500 with R&S CMX-KA098 for NG eCall testing under realistic network conditions, including PSAP simulation and voice/data transmission compliance validation [8]. | This chain is supported for a mobile radio tester, not for a Signal Generator / Signal Analyzer [8]. |\n| Automotive radar testing uses R&S AREG800A as an Automotive Radar Echo Generator [9]. | Echo generation is specified as dynamic artificial object generation, with hybrid short-distance objects below 17 m via analog stepped delay line and longer distances up to 3000 m via fully digital implementation [4]. | R&S AREG-P1 provides one digital channel, one object per channel, 5 GHz instantaneous bandwidth, near-object range possibility, analog IF output interfaces, and remote control interfaces [24]. | This chain is supported for radar echo generation, but the source states this use is automotive radar echo generation and not an RF signal generator or spectrum analyzer [3]. |\n| Automotive radar FMCW testing is covered by the AREG800A digital echo generation concept [4]. | For FMCW radar, the minimum generated distance equals the radar-under-test air gap value and the maximum generated distance is 3000 m [4]. | R&S AREG-P2 provides two digital channels, and R&S AREG-P3 provides three digital channels with one object per channel and monostatic or bistatic frontend support [24]. | This chain is supported for radar echo generation, not for Signal Generator / Signal Analyzer [3]. |\n| No passage directly connects an Automotive market requirement to a required Signal Generator / Signal Analyzer capability. | No passage provides a complete automotive-to-measurable-parameter-to-Signal-Generator/Analyzer chain. | RAW evidence only states that R&S SMW200A with R&S SMW-K61 can generate an MCCW signal and that R&S FSW analyzer can read NPR results with notch depth up to 50 dB over 2 GHz bandwidth [28]. | The automotive link for this Signal Generator / Signal Analyzer capability is not supported. |\n\n來源：\n[3] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[4] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[8] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[9] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[13] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[24] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[28] `raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-e05a80a3ef2e43e5b4a7af37cfa1fbe4",
+      "request_id": "request-e05a80a3ef2e43e5b4a7af37cfa1fbe4",
+      "span_id": "span-e05a80a3ef2e43e5b4a7af37cfa1fbe4",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-e05a80a3ef2e43e5b4a7af37cfa1fbe4",
+       "request_id": "request-e05a80a3ef2e43e5b4a7af37cfa1fbe4",
+       "span_id": "span-e05a80a3ef2e43e5b4a7af37cfa1fbe4",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.2"
+       },
+       "trace": {
+        "trace_id": "trace-e05a80a3ef2e43e5b4a7af37cfa1fbe4",
+        "request_id": "request-e05a80a3ef2e43e5b4a7af37cfa1fbe4",
+        "span_id": "span-e05a80a3ef2e43e5b4a7af37cfa1fbe4",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "R&S SMA100B › 軟體 / keycode options\n| Licence code | 名稱 | Order No. | 原文說明 / requires |\n|---|---|---|---|\n| R&S®SMAB-K725 | Chirp signal generation | 1420.9861.02 | 需要 R&S®SMAB-K22、R&S®SMAB-K23、R&S®SMAB-K720；FW version > 4.70.xxx required |\n| R&S®SMAB-K28 | Power analysis | 1420.9755.02 | 建議使用 latest power sensor firmware version |\n| R&S®SMAB-K722 | Clock synthesizer frequency extension to 6 GHz | 1420.9810.02 | not available for instruments equipped with R&S®SMAB-B103 |\n| R&S®SMAB-K724 | High dynamic uninterrupted level sweep | 1420.9832.02 | serial number < 102000 需聯絡 Rohde & Schwarz service department |\n| R&S®SMAB-K980 | Health and utilization monitoring service HUMS | 1420.9284.02 | 支援 SNMP、REST JSON、SCPI、device web |\n| R&S®SMAB-K554 | R&S®SZM control via USB by the R&S®SMA100B microwave signal generator | 1420.9884.02 | Recommended extra |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 26,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMA100B.md"
+          },
+          "score": 11.210268
+         },
+         {
+          "text": "NG eCall EN 17240 2024 verification › 與既有 NGeCall / hybrid eCall 頁面的關係\n- [[NGeCall over LTE]] 整理 CMW500 與 CMX500 capability lists，本頁只整理 PR 中的 Qualcomm / Snapdragon verification event。\n- [[CMX500 NGeCall configuration]] 整理 configuration guide 的 mandatory / optional items，本頁不取代正式 configuration 或 quote。\n- [[Hybrid eCall testing]] 以 EN 18052:2025 與 hybrid fallback 為核心；本頁聚焦 EN 17240:2024 NG eCall verification，不描述 classic CS fallback 或 EN 18052 test scope。\n- [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 提到 EN 17240:2024+A1:2026 與 cetecom advanced certification testing；本頁來源只提 EN 17240:2024，且未說第三方 certification report。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+          },
+          "score": 1.588172
+         },
+         {
+          "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+          },
+          "score": 2.449444
+         },
+         {
+          "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S AREG800A.md"
+          },
+          "score": 6.421744
+         },
+         {
+          "text": "欣銓 › 來源中的說法\n- [[Power IC - Power Management IC]] 在功率半導體封測區塊將 [[欣銓]] 寫為「車用與功率IC測試核心廠」。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/欣銓.md"
+          },
+          "score": 2.8079
+         },
+         {
+          "text": "Juergen Meyer\n[[Juergen Meyer]] 是 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]] 中列名的 [[Rohde & Schwarz]] Vice President Market Segment Automotive。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Juergen Meyer.md"
+          },
+          "score": 2.02218
+         },
+         {
+          "text": "R&S SMA100B › Platform height options\n| Option code | 名稱 | Order No. | 原文說明 |\n|---|---|---|---|\n| R&S®SMAB-B92 | 2 HU with 5-inch touch display | 1420.8288.04 | 2 HU model；dimensions 460 mm × 107 mm × 503 mm；without handles and feet 445 mm × 89 mm × 485 mm；weight 14.4 kg；rated current 3.5 A to 1.6 A at 50 Hz to 60 Hz、3.5 A to 2.9 A at 400 Hz；rated power fully equipped 300 W measured |\n| R&S®SMAB-B93 | 3 HU with 7-inch touch display | 1420.8388.04 | 3 HU model；dimensions 460 mm × 151 mm × 503 mm；without handles and feet 445 mm × 133 mm × 485 mm；weight 18.0 kg；rated current 7.3 A to 4.6 A；rated power fully equipped 380 W measured |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMA100B.md"
+          },
+          "score": 7.279215
+         },
+         {
+          "text": "NG eCall EN 17240 2024 verification › 驗證範圍\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 驗證對象：[[Snapdragon Auto 5G Modem-RF]] 的 [[Next Generation eCall]] functionality。\n- 合作方：[[Rohde & Schwarz]] 與 [[Qualcomm Technologies]]。\n- 測試設備：[[R&S CMX500]] mobile radio tester。\n- Software context：來源稱 [[R&S CMX500]] with [[R&S CMX-KA098]] software option can be effectively used for NG eCall testing under realistic network conditions。\n- 標準：[[EN 17240]]:2024。\n- 測試情境：simulating a [[PSAP]]。\n- 驗證內容：NG eCall including voice and data transmission，並 validated the compliance of the implementation at both ends with EN 17240:2024。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+          },
+          "score": 1.219887
+         },
+         {
+          "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n這份來源是 [[R&S AREG800A]] Automotive Radar Echo Generator 的 specifications，文件編號 `PD 3609.8015.22`，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`，文件標題為 `AREG800A Automotive Radar Echo Generator`，Copyright `© 2021–2025 Rohde & Schwarz`。\n\n[[R&S AREG800A]] 的 echo generator type 為 `dynamic artificial object generation`。Echo generation concept 分為：\n\n- `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n- `digital`：針對 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 `air gap value`；maximum generated distance 為 `3000 m`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 在環境溫度下儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格資料定義：\n\n- `Specifications with limits`：代表保證的產品效能，以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 的方式指定與測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：代表保證的產品效能，通常為 dimensions 或 setting parameter resolution 等無偏差或偏差可忽略的值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依據 GUM 計算，納入 environmental conditions、aging、wear and tear。\n- `Data without tolerance limits is not binding`；文件 `subject to change`。\n\n主要能力與限制：",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+          },
+          "score": 2.401593
+         },
+         {
+          "text": "欣銓 › 限制與不可推論事項\n- 來源未標示 Threads 原文發布日期。\n- 來源未提供 [[欣銓]] 的測試項目、車用 / 功率 IC 占比、客戶、營收、產能或市占率。\n- 「核心廠」是來源用語，缺少排名或供應關係證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/欣銓.md"
+          },
+          "score": 2.213529
+         },
+         {
+          "text": "Juergen Meyer › 來源中的列名\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 人名：Juergen Meyer。\n- 組織：[[Rohde & Schwarz]]。\n- 職稱：Vice President Market Segment Automotive at Rohde & Schwarz。\n- 引言主旨：他表示 [[Rohde & Schwarz]] 很高興與 [[Qualcomm Technologies]] 合作驗證其 chipsets 的 NG eCall implementation，並稱此 collaboration 為 future emergency call services 設定 new benchmark，為 automotive industry 提供 robust and dependable solution 以 meet latest eCall standards。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Juergen Meyer.md"
+          },
+          "score": 1.441507
+         },
+         {
+          "text": "R&S SMA100B › Power analysis\n- R&S®SMAB-K28 Power analysis 建議使用 latest power sensor firmware version。\n- 支援 modes：power versus frequency、power versus power、power versus time trace mode。\n- Supported power sensors：R&S®NRP-Z81/-Z85/-Z86 支援 power versus frequency、power versus time、pulse data measurement and power versus power；來源標示為 phased-out products。R&S®NRP18P/NRP40P/NRP50P 支援 power versus frequency、power versus time、pulse data measurement and power versus power。\n- Number of points per sweep：10 to 1000。\n- Frequency range：依 R&S®NRP power sensor and R&S®SMA100B frequency option，為 signal generator 或 power sensor full frequency range 較低者；支援 frequency-converting DUTs。\n- Y-axis setting range：–200 dBm to +100 dBm。\n- Number of traces：4；number of markers：4；trace data export file formats JPG、BMP、XPM、PNG、CSV。\n- Power versus time mode with R&S®NRP-Z81/-Z85/-Z86：sweep time 100 ns to 1 s；resolution 12.5 ns 或 2 ns（periodic signals、internally triggered）；pulse data measurement 僅適用 R&S®NRP-Z81/-Z85/-Z86。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 19,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMA100B.md"
+          },
+          "score": 7.063615
+         },
+         {
+          "text": "NG eCall EN 17240 2024 verification › Regulatory transition context\n同一來源提供下列背景，但未列 regulation 文件編號：\n\n- [[eCall]] automated vehicle emergency call system introduced in 2015。\n- eCall 自 2018 年起是 all new cars sold within the European Union 的 mandatory requirement。\n- 來源稱 2G / 3G circuit-switched cellular networks become obsolete，因此 emergency call systems 需要 adapted to 4G / 5G packet-switched cellular networks。\n- 來源稱 [[European Commission]] most recent regulation 定義 NG eCall will be obligatory starting **2026-01-01**。\n- 來源稱 EN 17240:2024 establishes guidelines for testing eCall systems over [[IMS]] networks, including advanced 4G LTE and 5G NR technologies。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+          },
+          "score": 1.129084
+         },
+         {
+          "text": "AREG800A_specs_en_3609-8015-22_v0900 › 讀圖補充\n以下內容來自讀圖補充，可信度低於正文，不用於推翻正文。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+          },
+          "score": 1.79307
+         },
+         {
+          "text": "R&S SGT100A › General data\nPower supply：\n\n| 項目 | 規格 |\n|---|---|\n| AC input voltage range | `100 V to 240 V`, `±10 %` |\n| AC supply frequency | `50 Hz to 60 Hz`, `±5 %` |\n| Maximum input current | `1.7 A` |\n| Power consumption | `65 W (meas.)` |\n| Power factor correction | complies with `EN 61000-3-2` |\n\nCompliance / environmental：\n\n- Electrical safety compliance：`IEC 61010-1`, `EN 61010-1`, `CAN/CSA-C22.2 No. 61010-1-04`, `UL 61010-1`。\n- Test marks：`VDE-GS`, `CSA C US`。\n- EMC：`EN 55011 class A`, `EN 61326-1 (industrial environment)`, `EN 61326-2-1`。\n- Vibration sinusoidal：`5 Hz to 150 Hz`，55 Hz 時 max. `2 g`，55 Hz to 150 Hz 時 const. `0.5 g`，符合 `EN 60068-2-6`。\n- Vibration random：`10 Hz to 300 Hz`，acceleration `1.2 g (RMS)`，符合 `EN 60068-2-64`。\n- Shock：`40 g shock spectrum`，符合 `MIL-STD-810E`, method no. 516.4, procedure I。\n- Operating temperature range：`0 °C to +50 °C`，符合 `EN 60068-2-1`, `EN 60068-2-2`。\n- Storage temperature range：`–40 °C to +71 °C`。\n- Climatic resistance：`+40 °C / 95 % relative humidity`，符合 `EN 60068-2-30`。\n- Altitude：operating up to `4600 m`；storage up to `4600 m`。\n\nDimensions / weight：\n\n| 條件 | Dimensions | Weight |\n|---|---|---|\n| without `R&S®SGT-B88` option | `246 mm × 52.5 mm × 401 mm (9.69 in × 2.07 in × 15.79 in)`, `1 HU`, `½ 19 inch rack width` | fully equipped `4.0 kg (8.82 lb)` |\n| with `R&S®SGT-B88` option | `246 mm × 98 mm × 401 mm (9.69 in × 3.86 in × 15.79 in)`, `2 HU`, `½ 19 inch rack width` | `4.6 kg (10.14 lb)` |\n\nCalibration interval：recommended calibration interval `3 years`，條件 `40 h/week operation in the full range of the specified environmental conditions`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 23,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SGT100A.md"
+          },
+          "score": 2.490012
+         },
+         {
+          "text": "欣銓\n[[欣銓]] 是 [[Power IC - Power Management IC]]（原文未標示日期；raw converted 2026-09-16）列於 [[功率半導體封測]] 分類的公司名稱。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/欣銓.md"
+          },
+          "score": 0.154007
+         },
+         {
+          "text": "Juergen Meyer › 使用限制\n- 本頁只記錄來源中的 person / role / quote context。\n- 來源未提供 [[Juergen Meyer]] 的部門全名、任期、所在地、email、其他職務或是否仍在任。\n- 來源中的 chipset 字樣指向 [[Qualcomm Technologies]] 的 NG eCall implementation context；不可由此推論具體 chipset list。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Juergen Meyer.md"
+          },
+          "score": 0.839359
+         },
+         {
+          "text": "R&S SMW200A › Remote control、connectors 與一般資料\n- Remote control interfaces：IEC 60625 GPIB IEEE-488.2、Ethernet/LAN 10/100/1000BASE-T、USB 3.0 super speed、serial RS-232 via `R&S®TS-USB1`。\n- Remote command set：`SCPI 1999.5 or compatible command sets`。\n- Ethernet/LAN protocols and services：VISA VXI-11、Telnet/RawEthernet、VNC、FTP、SMB。\n- Front panel RF 50 Ω path A connector：3/6/7.5 GHz options 為 N female；12.75/20/31.8/40 GHz options 為 test port adapter PC 2.92 mm female；44 GHz options 為 PC 1.85 mm male with adapter；56/67 GHz options 為 1.85 mm female with wear and tear adapter。\n- Front panel RF 50 Ω path B connector：3/6/7.5 GHz options 為 N female；12.75/20/31.8 GHz options 為 test port adapter PC 2.92 mm female；44 GHz options 為 PC 1.85 mm male with adapter。\n- Rear panel 包含 REF IN/OUT、INST TRG A/B、USER 4/5/6、EFC、LO IN/OUT、IEEE 488、LAN、USB DEVICE、EXT 1/2、DIG I/Q OUT、HS DIG I/Q OUT 等。\n- Rated power when fully equipped：`550 W measured`；with `R&S®SMW-B94L` fully equipped：`750 W measured`。\n- Operating temperature range：`0 °C to +45 °C`；with `R&S®SMW-B1056`、`R&S®SMW-B1067`、`R&S®SMW-B1067N`、`R&S®SMW-B1067O` 為 `+5 °C to +45 °C`。\n- Dimensions：standard `435 mm × 192 mm × 460 mm`；with `R&S®SMW-B94L` 為 `435 mm × 192 mm × 560 mm`。\n- Weight：fully equipped `21 kg`；with `R&S®SMW-B94L` fully equipped `30 kg`。\n- Non-volatile memory：SSD，`512 Gbyte`。\n- Recommended calibration interval：`3 years`，條件 `40 h/week operation in the full range of the specified environmental conditions`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 22,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 3.153957
+         },
+         {
+          "text": "R&S PCB test solutions › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 既有內容來自 Keysight 圖像，流程是原材料表徵、材料選擇、電路板抽樣測試、大批量監控；本頁保存 R&S 簡報中的類似但不完全相同的流程詞。\n- [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 均已有既有頁面；本來源增加 2026.3.4 R&S 簡報的追溯來源，但沒有新增可量化規格。\n- [[SerDes 與 SI PI 測試概覽]] 連接 Slide 11 和 Slide 20 的 validation challenges / SI flow；本頁聚焦 Slide 21 的 PCB test solutions。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 3.741485
+         },
+         {
+          "text": "朋程 › 來源中的說法\n- [[Power IC - Power Management IC image 1]]（來源未標示日期；取得於 2026-09-04）將 [[朋程]] 列於產業分類「整流/車用二極體」。\n- [[Power IC - Power Management IC image 1]]（來源未標示日期；取得於 2026-09-04）在核心能力欄寫「車用整流二極體全球第一」。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/朋程.md"
+          },
+          "score": 3.44403
+         },
+         {
+          "text": "R&S AREG800A › 相關來源\n- [[AREG800A_specs_en_3609-8015-22_v0900]] — R&S AREG800A Automotive Radar Echo Generator Specifications，Version 09.00，September 2025。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 50,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S AREG800A.md"
+          },
+          "score": 5.811304
+         },
+         {
+          "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 3.606005
+         },
+         {
+          "text": "朋程 › 限制與不可推論事項\n- 「全球第一」是圖上用語；來源未提供排名口徑、市占率、年度、產品範圍或資料來源拆分。\n- 來源未標示日期，因此不能把上述列名寫成特定時間點的市場現況。\n- 來源是概念股整理表，不構成投資建議或供應鏈驗證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/朋程.md"
+          },
+          "score": 0.401528
+         },
+         {
+          "text": "R&S AREG800A › Automotive radar production configurations\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- [[R&S AREG-P1]] radar mini configuration / [[R&S AREG-DBP1]] base unit option：one digital channel，one object per channel，5 GHz instantaneous bandwidth，near object range possibility，analog IF output interfaces，remote control interfaces，[[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option one frontend per channel required。\n- [[R&S AREG-P2]] radar golden configuration / [[R&S AREG-DBP2]] base unit option：two digital channels。\n- [[R&S AREG-P3]] radar pro configuration / [[R&S AREG-DBP3]] base unit option：搭配 [[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option；frontend 支援 monostatic 或 bistatic；three digital channels；one object per channel。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 31,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S AREG800A.md"
+          },
+          "score": 5.221941
+         },
+         {
+          "text": "Addition of an AWGN signal of settable bandwidth and settable C/N ratio or Eb/N0 to a wanted signal. If the noise generator is used,\na frequency offset cannot be added to the wanted signal.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-8ec180d5f5e4ded7",
+            "original_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+            "sha256": "8ec180d5f5e4ded7daf73d9a99dc85b471116e2789518fb2949545a4a27543fa",
+            "raw_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/SMM100A_specs_en_3608-7680-22_v3100.md",
+           "section": 612,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.883489
+         },
+         {
+          "text": "Addition of an AWGN signal of settable bandwidth and settable C/N ratio or Eb/N0 to a wanted signal. If the noise generator is used,\na frequency offset cannot be added to the wanted signal.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-06da2c5f1d2f72f1",
+            "original_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+            "sha256": "06da2c5f1d2f72f119e80e8c7c835aa45e792602f9337b4e7dee78622469a272",
+            "raw_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+           "section": 1202,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.883489
+         },
+         {
+          "text": "For easier analysis, you can switch from the default \"Flat\" view to a \"Grouped\" view of flows or visualize\nthe connections on a world map.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-bc47a8ad4da77a6a",
+            "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+            "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+           "section": 3477,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.563123
+         },
+         {
+          "text": "intermodulation products the device under test produces. ► No previous calibration is needed to measure NPR\nnotch depth up to 50 dB using flat signals over a\nThe R&S®SMW200A vector signal generator equipped 2 GHz bandwidth\nwith R&S®SMW-K61 option can be used to generate a ► The test signal is easy to create and modify\nmulti-carrier c ontinuous wave (MCCW) signal to simulate ► Easy read out of the results on the R&S®FSW analyzer",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-4eedd79b08d7a305",
+            "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+            "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+            "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+           "section": 13,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.333577
+         }
+        ],
+        "text": "### 鏈結對照\n| Automotive market requirement | Measurable parameter / verification target | Required capability of Signal Generator / Signal Analyzer | 支援狀態 |\n|---|---|---|---|\n| EU eCall since 2018 is mandatory for all new cars sold in the EU, and NG eCall is stated as obligatory from 2026-01-01 because 2G/3G circuit-switched networks become obsolete and systems must adapt to 4G/5G packet-switched networks [13]. | EN 17240:2024 establishes testing guidelines for eCall systems over IMS networks including 4G LTE and 5G NR [13]. | The supported R&S capability in the passages is R&S CMX500 with R&S CMX-KA098 for NG eCall testing under realistic network conditions, including PSAP simulation and voice/data transmission compliance validation [8]. | This chain is supported for a mobile radio tester, not for a Signal Generator / Signal Analyzer [8]. |\n| Automotive radar testing uses R&S AREG800A as an Automotive Radar Echo Generator [9]. | Echo generation is specified as dynamic artificial object generation, with hybrid short-distance objects below 17 m via analog stepped delay line and longer distances up to 3000 m via fully digital implementation [4]. | R&S AREG-P1 provides one digital channel, one object per channel, 5 GHz instantaneous bandwidth, near-object range possibility, analog IF output interfaces, and remote control interfaces [24]. | This chain is supported for radar echo generation, but the source states this use is automotive radar echo generation and not an RF signal generator or spectrum analyzer [3]. |\n| Automotive radar FMCW testing is covered by the AREG800A digital echo generation concept [4]. | For FMCW radar, the minimum generated distance equals the radar-under-test air gap value and the maximum generated distance is 3000 m [4]. | R&S AREG-P2 provides two digital channels, and R&S AREG-P3 provides three digital channels with one object per channel and monostatic or bistatic frontend support [24]. | This chain is supported for radar echo generation, not for Signal Generator / Signal Analyzer [3]. |\n| No passage directly connects an Automotive market requirement to a required Signal Generator / Signal Analyzer capability. | No passage provides a complete automotive-to-measurable-parameter-to-Signal-Generator/Analyzer chain. | RAW evidence only states that R&S SMW200A with R&S SMW-K61 can generate an MCCW signal and that R&S FSW analyzer can read NPR results with notch depth up to 50 dB over 2 GHz bandwidth [28]. | The automotive link for this Signal Generator / Signal Analyzer capability is not supported. |",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+         },
+         "score": 2.449444
+        },
+        {
+         "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 4,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S AREG800A.md"
+         },
+         "score": 6.421744
+        },
+        {
+         "text": "NG eCall EN 17240 2024 verification › 驗證範圍\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 驗證對象：[[Snapdragon Auto 5G Modem-RF]] 的 [[Next Generation eCall]] functionality。\n- 合作方：[[Rohde & Schwarz]] 與 [[Qualcomm Technologies]]。\n- 測試設備：[[R&S CMX500]] mobile radio tester。\n- Software context：來源稱 [[R&S CMX500]] with [[R&S CMX-KA098]] software option can be effectively used for NG eCall testing under realistic network conditions。\n- 標準：[[EN 17240]]:2024。\n- 測試情境：simulating a [[PSAP]]。\n- 驗證內容：NG eCall including voice and data transmission，並 validated the compliance of the implementation at both ends with EN 17240:2024。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+         },
+         "score": 1.219887
+        },
+        {
+         "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n這份來源是 [[R&S AREG800A]] Automotive Radar Echo Generator 的 specifications，文件編號 `PD 3609.8015.22`，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`，文件標題為 `AREG800A Automotive Radar Echo Generator`，Copyright `© 2021–2025 Rohde & Schwarz`。\n\n[[R&S AREG800A]] 的 echo generator type 為 `dynamic artificial object generation`。Echo generation concept 分為：\n\n- `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n- `digital`：針對 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 `air gap value`；maximum generated distance 為 `3000 m`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 在環境溫度下儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格資料定義：\n\n- `Specifications with limits`：代表保證的產品效能，以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 的方式指定與測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：代表保證的產品效能，通常為 dimensions 或 setting parameter resolution 等無偏差或偏差可忽略的值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依據 GUM 計算，納入 environmental conditions、aging、wear and tear。\n- `Data without tolerance limits is not binding`；文件 `subject to change`。\n\n主要能力與限制：",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+         },
+         "score": 2.401593
+        },
+        {
+         "text": "NG eCall EN 17240 2024 verification › Regulatory transition context\n同一來源提供下列背景，但未列 regulation 文件編號：\n\n- [[eCall]] automated vehicle emergency call system introduced in 2015。\n- eCall 自 2018 年起是 all new cars sold within the European Union 的 mandatory requirement。\n- 來源稱 2G / 3G circuit-switched cellular networks become obsolete，因此 emergency call systems 需要 adapted to 4G / 5G packet-switched cellular networks。\n- 來源稱 [[European Commission]] most recent regulation 定義 NG eCall will be obligatory starting **2026-01-01**。\n- 來源稱 EN 17240:2024 establishes guidelines for testing eCall systems over [[IMS]] networks, including advanced 4G LTE and 5G NR technologies。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+         },
+         "score": 1.129084
+        },
+        {
+         "text": "R&S AREG800A › Automotive radar production configurations\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- [[R&S AREG-P1]] radar mini configuration / [[R&S AREG-DBP1]] base unit option：one digital channel，one object per channel，5 GHz instantaneous bandwidth，near object range possibility，analog IF output interfaces，remote control interfaces，[[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option one frontend per channel required。\n- [[R&S AREG-P2]] radar golden configuration / [[R&S AREG-DBP2]] base unit option：two digital channels。\n- [[R&S AREG-P3]] radar pro configuration / [[R&S AREG-DBP3]] base unit option：搭配 [[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option；frontend 支援 monostatic 或 bistatic；three digital channels；one object per channel。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 31,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S AREG800A.md"
+         },
+         "score": 5.221941
+        },
+        {
+         "text": "intermodulation products the device under test produces. ► No previous calibration is needed to measure NPR\nnotch depth up to 50 dB using flat signals over a\nThe R&S®SMW200A vector signal generator equipped 2 GHz bandwidth\nwith R&S®SMW-K61 option can be used to generate a ► The test signal is easy to create and modify\nmulti-carrier c ontinuous wave (MCCW) signal to simulate ► Easy read out of the results on the R&S®FSW analyzer",
+         "citation": {
+          "kind": "raw",
+          "source": {
+           "source_id": "src-4eedd79b08d7a305",
+           "original_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+           "sha256": "4eedd79b08d7a3054f151f6ac4e854888e22150ad8e99a8c2f13f84a75219602",
+           "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+           "page": null,
+           "slide": null,
+           "parent_source_id": null
+          },
+          "raw_ref": "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md",
+          "section": 13,
+          "page": null,
+          "slide": null,
+          "wiki_page": null
+         },
+         "score": 23.333577
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [
+         {
+          "name": "market_segment",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/欣銓.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Juergen Meyer.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+         "raw_refs": [
+          "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S AREG800A.md",
+         "raw_refs": [
+          "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md",
+         "raw_refs": [
+          "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+          "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-fec2c6616c9141098cc4843b1a77c757",
+      "task_sha256": "8d57ec2791407634d3e17505f023950d97b9d255a828793170b7f1438630c257",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.6.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "validated",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validated",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "passed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": null
+    },
+    "evidence": {
+     "raw_citations": 7,
+     "facet_status": "covered",
+     "missing_facets": [],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {
+      "market_segment": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

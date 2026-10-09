@@ -1,0 +1,127 @@
+{
+ "question": {
+  "id": "Q1001",
+  "text": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+  "technical": "RF / Measurement Fundamentals",
+  "topic": "EVM",
+  "product_related": "true"
+ },
+ "session_id": "conversation-fae59cb90d914516ad51ddcd052de33c",
+ "exchange": {
+  "sent": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 168.391,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-fae59cb90d914516ad51ddcd052de33c",
+    "actor": "leo.chi",
+    "title": "What is EVM, and which product-related measurement decisions depend on u…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T11:11:32.712352Z",
+    "updated_at": "2026-10-09T11:14:20.969511Z",
+    "messages": [
+     {
+      "message_id": "message-bdae4c70a13f4c189a9626de69926748",
+      "role": "user",
+      "text": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-09T11:11:32.744537Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-7091d8d5b7e54a9089a9045b4bb0796d",
+      "role": "assistant",
+      "text": "The knowledge base gave no answer: the RS knowledge query did not produce a validated answer, with missing evidence for the requested product/option/spec facet.  \n\nNot from the knowledge base:  \n\n**EVM, or Error Vector Magnitude**, is a measure of modulation quality. It compares the ideal constellation point of a digitally modulated signal with the actual measured point. The “error vector” is the difference between them, and EVM is usually expressed as a percentage or in dB.\n\nIn simple terms: **lower EVM means a cleaner, more accurate transmitted signal**. High EVM can indicate problems such as phase noise, IQ imbalance, compression, nonlinear PA behavior, frequency error, timing error, or noise.\n\nProduct-related measurement decisions that depend on understanding EVM include:\n\n1. **Choosing the right signal analyzer**\n   - Wideband signals such as 5G NR, Wi‑Fi 6/7, UWB, or satellite links require analyzers with enough bandwidth, dynamic range, phase-noise performance, and demodulation capability.\n   - If the analyzer’s own residual EVM is too high, it cannot accurately measure a high-performance DUT.\n\n2. **Selecting vector signal generator performance**\n   - When generating reference signals for receiver or transceiver tests, the generator must have sufficiently low EVM.\n   - Otherwise, the test signal itself becomes the limiting factor.\n\n3. **Picking software/options for modulation analysis**\n   - EVM is standard-specific: LTE, 5G NR, WLAN, Bluetooth, DVB, and satellite waveforms all have different demodulation and limit requirements.\n   - Product option decisions often depend on which standards and bandwidths need EVM measurement.\n\n4. **Deciding bandwidth requirements**\n   - EVM must be measured over the occupied signal bandwidth.\n   - A 100 MHz, 400 MHz, or wider 5G/Wi‑Fi signal requires corresponding analysis bandwidth in the measurement product.\n\n5. **Evaluating RF front-end and PA linearity**\n   - EVM is a key result when testing power amplifiers, transmitters, RFICs, and modules.\n   - Decisions about using a spectrum/signal analyzer, VSA software, or load-pull/PA test setup depend on the required EVM accuracy.\n\n6. **Choosing between conducted and OTA testing**\n   - For antennas, modules, and finished devices, EVM may need to be measured over the air.\n   - That affects whether the product setup needs chambers, OTA positioners, compact antenna test ranges, or conducted RF fixtures.\n\n7. **Determining phase-noise and frequency-reference needs**\n   - For higher-order modulation such as 256QAM, 1024QAM, or 4096QAM, phase noise and frequency accuracy strongly affect EVM.\n   - This influences choices around signal sources, analyzers, clocks, and synchronization.\n\n8. **Setting production test limits**\n   - EVM is often used as a pass/fail metric in manufacturing.\n   - The measurement instrument must be fast enough, repeatable enough, and accurate enough for production margins.\n\n9. **Validating compliance with wireless standards**\n   - Standards specify maximum allowed EVM for different modulation schemes and channels.\n   - Understanding EVM determines which conformance test system, analyzer application, and test cases are needed.\n\nSo, EVM is not just a result on a screen; it drives decisions about **which analyzer, generator, bandwidth option, demodulation software, OTA setup, phase-noise performance, and production test strategy** are appropriate for a given wireless product.",
+      "created_at": "2026-10-09T11:14:20.969511Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-1d7b5824c457406cbef8e85fdb4ad12e",
+       "request_id": "request-1d7b5824c457406cbef8e85fdb4ad12e",
+       "span_id": "span-1d7b5824c457406cbef8e85fdb4ad12e",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+    "ok": true,
+    "answer": "The knowledge base gave no answer: the RS knowledge query did not produce a validated answer, with missing evidence for the requested product/option/spec facet.  \n\nNot from the knowledge base:  \n\n**EVM, or Error Vector Magnitude**, is a measure of modulation quality. It compares the ideal constellation point of a digitally modulated signal with the actual measured point. The “error vector” is the difference between them, and EVM is usually expressed as a percentage or in dB.\n\nIn simple terms: **lower EVM means a cleaner, more accurate transmitted signal**. High EVM can indicate problems such as phase noise, IQ imbalance, compression, nonlinear PA behavior, frequency error, timing error, or noise.\n\nProduct-related measurement decisions that depend on understanding EVM include:\n\n1. **Choosing the right signal analyzer**\n   - Wideband signals such as 5G NR, Wi‑Fi 6/7, UWB, or satellite links require analyzers with enough bandwidth, dynamic range, phase-noise performance, and demodulation capability.\n   - If the analyzer’s own residual EVM is too high, it cannot accurately measure a high-performance DUT.\n\n2. **Selecting vector signal generator performance**\n   - When generating reference signals for receiver or transceiver tests, the generator must have sufficiently low EVM.\n   - Otherwise, the test signal itself becomes the limiting factor.\n\n3. **Picking software/options for modulation analysis**\n   - EVM is standard-specific: LTE, 5G NR, WLAN, Bluetooth, DVB, and satellite waveforms all have different demodulation and limit requirements.\n   - Product option decisions often depend on which standards and bandwidths need EVM measurement.\n\n4. **Deciding bandwidth requirements**\n   - EVM must be measured over the occupied signal bandwidth.\n   - A 100 MHz, 400 MHz, or wider 5G/Wi‑Fi signal requires corresponding analysis bandwidth in the measurement product.\n\n5. **Evaluating RF front-end and PA linearity**\n   - EVM is a key result when testing power amplifiers, transmitters, RFICs, and modules.\n   - Decisions about using a spectrum/signal analyzer, VSA software, or load-pull/PA test setup depend on the required EVM accuracy.\n\n6. **Choosing between conducted and OTA testing**\n   - For antennas, modules, and finished devices, EVM may need to be measured over the air.\n   - That affects whether the product setup needs chambers, OTA positioners, compact antenna test ranges, or conducted RF fixtures.\n\n7. **Determining phase-noise and frequency-reference needs**\n   - For higher-order modulation such as 256QAM, 1024QAM, or 4096QAM, phase noise and frequency accuracy strongly affect EVM.\n   - This influences choices around signal sources, analyzers, clocks, and synchronization.\n\n8. **Setting production test limits**\n   - EVM is often used as a pass/fail metric in manufacturing.\n   - The measurement instrument must be fast enough, repeatable enough, and accurate enough for production margins.\n\n9. **Validating compliance with wireless standards**\n   - Standards specify maximum allowed EVM for different modulation schemes and channels.\n   - Understanding EVM determines which conformance test system, analyzer application, and test cases are needed.\n\nSo, EVM is not just a result on a screen; it drives decisions about **which analyzer, generator, bandwidth option, demodulation software, OTA setup, phase-noise performance, and production test strategy** are appropriate for a given wireless product.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-1d7b5824c457406cbef8e85fdb4ad12e",
+      "request_id": "request-1d7b5824c457406cbef8e85fdb4ad12e",
+      "span_id": "span-1d7b5824c457406cbef8e85fdb4ad12e",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-1d7b5824c457406cbef8e85fdb4ad12e",
+       "request_id": "request-1d7b5824c457406cbef8e85fdb4ad12e",
+       "span_id": "span-1d7b5824c457406cbef8e85fdb4ad12e",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no answer: the RS knowledge query did not produce a validated answer, with missing evidence for the requested product/option/spec facet.  \n\nNot from the knowledge base:  \n\n**EVM, or Error Vector Magnitude**, is a measure of modulation quality. It compares the ideal constellation point of a digitally modulated signal with the actual measured point. The “error vector” is the difference between them, and EVM is usually expressed as a percentage or in dB.\n\nIn simple terms: **lower EVM means a cleaner, more accurate transmitted signal**. High EVM can indicate problems such as phase noise, IQ imbalance, compression, nonlinear PA behavior, frequency error, timing error, or noise.\n\nProduct-related measurement decisions that depend on understanding EVM include:\n\n1. **Choosing the right signal analyzer**\n   - Wideband signals such as 5G NR, Wi‑Fi 6/7, UWB, or satellite links require analyzers with enough bandwidth, dynamic range, phase-noise performance, and demodulation capability.\n   - If the analyzer’s own residual EVM is too high, it cannot accurately measure a high-performance DUT.\n\n2. **Selecting vector signal generator performance**\n   - When generating reference signals for receiver or transceiver tests, the generator must have sufficiently low EVM.\n   - Otherwise, the test signal itself becomes the limiting factor.\n\n3. **Picking software/options for modulation analysis**\n   - EVM is standard-specific: LTE, 5G NR, WLAN, Bluetooth, DVB, and satellite waveforms all have different demodulation and limit requirements.\n   - Product option decisions often depend on which standards and bandwidths need EVM measurement.\n\n4. **Deciding bandwidth requirements**\n   - EVM must be measured over the occupied signal bandwidth.\n   - A 100 MHz, 400 MHz, or wider 5G/Wi‑Fi signal requires corresponding analysis bandwidth in the measurement product.\n\n5. **Evaluating RF front-end and PA linearity**\n   - EVM is a key result when testing power amplifiers, transmitters, RFICs, and modules.\n   - Decisions about using a spectrum/signal analyzer, VSA software, or load-pull/PA test setup depend on the required EVM accuracy.\n\n6. **Choosing between conducted and OTA testing**\n   - For antennas, modules, and finished devices, EVM may need to be measured over the air.\n   - That affects whether the product setup needs chambers, OTA positioners, compact antenna test ranges, or conducted RF fixtures.\n\n7. **Determining phase-noise and frequency-reference needs**\n   - For higher-order modulation such as 256QAM, 1024QAM, or 4096QAM, phase noise and frequency accuracy strongly affect EVM.\n   - This influences choices around signal sources, analyzers, clocks, and synchronization.\n\n8. **Setting production test limits**\n   - EVM is often used as a pass/fail metric in manufacturing.\n   - The measurement instrument must be fast enough, repeatable enough, and accurate enough for production margins.\n\n9. **Validating compliance with wireless standards**\n   - Standards specify maximum allowed EVM for different modulation schemes and channels.\n   - Understanding EVM determines which conformance test system, analyzer application, and test cases are needed.\n\nSo, EVM is not just a result on a screen; it drives decisions about **which analyzer, generator, bandwidth option, demodulation software, OTA setup, phase-noise performance, and production test strategy** are appropriate for a given wireless product.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_5zw4I5mZNsiILw7nP1eSFQDR",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "failed",
+         "data": {
+          "knowledge_harness": "not_validated",
+          "answer": "The Knowledge query did not produce a validated answer. Unverified requested facets: product_option_spec.",
+          "evidence": {
+           "raw_citations": 0,
+           "facet_status": "missing",
+           "missing_facets": [
+            "product_option_spec"
+           ],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {}
+          },
+          "phase": "needs_input",
+          "failure_code": null,
+          "instruction": "The knowledge base did not validate an answer. Tell the person what is above; anything you add is not from the knowledge base and must say so."
+         },
+         "failure": {
+          "code": "knowledge_not_validated",
+          "message": "The Knowledge Harness did not validate an answer",
+          "retryable": false
+         }
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

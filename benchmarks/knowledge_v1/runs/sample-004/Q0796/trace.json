@@ -1,0 +1,118 @@
+{
+ "question": {
+  "id": "Q0796",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in AI, and what evidence supports each opportunity?",
+  "market": "AI",
+  "product": "Vector Network Analyzer",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-d8283f48c2d5441cae0255bf3ce327b8",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in AI, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 155.625,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-d8283f48c2d5441cae0255bf3ce327b8",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T09:41:06.012912Z",
+    "updated_at": "2026-10-09T09:43:41.520853Z",
+    "messages": [
+     {
+      "message_id": "message-d3b6a6bebc1d4cd6b4e69a39be92458b",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in AI, and what evidence supports each opportunity?",
+      "created_at": "2026-10-09T09:41:06.022631Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-e312ef806fb145c38586e9c1244437c5",
+      "role": "assistant",
+      "text": "The available RAW evidence only confirms VNA product/system facts: R&S ZNA67EXT consists of one R&S ZNA67 VNA plus up to four external test sets [26], and RAW ordering information lists VNA base units from 3 GHz to 20 GHz plus spectrum-analysis and extended-power-range options [27].\n| Opportunity | Supporting evidence | RAW evidence available |\n|---|---|---|\n| AI server PCB / UBB / high-speed PCB SI: IL, TDR, high-speed trace, stackup/material characterization | The AI server ecosystem mapping lists PCB as `20+層UBB、高階ABF、低Dk CCL`, says GB200/NVL72 drives layer count and material-grade increases, and maps R&S ZNA/ZNB to IL and TDR [22]. The R&S PCB test flow targets PCB fabricators and system houses and includes impedance/TDR, DK/DF extraction, IL, roughness, Xtalk, TL modeling, eye diagram, Delta-L, and cable/connector testing [11]. AI server PCB upgrade evidence says AI-server trends push PCBs toward high layer count, large area, and high-speed transmission; it also cites HVLP 4/5, M8 CCL, and 30–40-layer boards [9]. | RAW confirms an R&S ZNA67EXT VNA system configuration with one ZNA67 VNA and up to four external test sets [26]. RAW also lists VNA base units from 3 GHz to 20 GHz and options including spectrum analysis and extended power range [27]. |\n| Server motherboard / PCBA high-speed trace validation | The AI server ecosystem maps server motherboard/PCBA R&S solutions to R&S ZNA for high-speed trace test, alongside PDN Target Z, power rail, PI, LDO NSD, and clock jitter test tools [22]. The SIPI/SerDes source says high-speed electrical-interface validation includes transmission channel, measurement path to DUT/test-board development, PDN, ADC/DAC frontend performance, reference-clock/PLL jitter, interface test, and network analyzers among the instrument types [6]. | RAW confirms an R&S ZNA67EXT VNA system configuration with one ZNA67 VNA and up to four external test sets [26]. |\n| High-speed connectors and cables for AI servers: PCIe 6/7, InfiniBand, 800G AOC, high-speed cable | The AI server ecosystem lists connector/cable key components as CPU/GPU Socket, UQD water-cooling quick connect, and 800G AOC, says PCIe 6/PCIe 7 and InfiniBand 800Gbe raise connector ASP, and maps R&S ZNA/ZNB + OSP to high-speed cable testing [22]. The data-center connectivity evidence places high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection in one AI/data-center connectivity portfolio view [5]. | RAW confirms VNA base units from 3 GHz to 20 GHz and options including spectrum analysis and extended power range [27]. |\n| Silicon photonics / optical VNA for 400G/800G, CPO/NPO, pluggable optical modules | The AI server ecosystem lists silicon-photonics key components as 40G/100G/400G/800G optical transceiver modules, CPO/NEO near-packaged optics, and pluggable optics; it says CPO increases active/passive SiPh, advanced-packaging, and test demand; and it maps optical VNA to R&S ZNA/ZNB + PSA with ThinkLands and R&S ZNA/ZNB + GOCA with Newkey [22]. The full-spectrum data-center connectivity source also includes optical transceivers, CPO/NPO, fiber deployment, power, and cooling in data-center connectivity scope [20]. | RAW confirms an R&S ZNA67EXT VNA system configuration with one ZNA67 VNA and up to four external test sets [26]. |\n| AI networking / switch validation | The AI server ecosystem lists network-switch companies and maps the switch category to R&S FSWP for jitter/phase-noise test, VNA using R&S ZNA/ZNB, and EMI pretest [22]. The SerDes/SIPI source lists Ultra Ethernet, InfiniBand, PCIe, NVLink, UALink, OIF CEI-112G, USB, HDMI, DisplayPort, and other high-speed SerDes standards/interfaces in the high-speed digital test context [6]. | RAW confirms VNA base units from 3 GHz to 20 GHz and options including spectrum analysis and extended power range [27]. |\nLimitation: no provided RAW passage directly states an AI-specific VNA opportunity; the AI opportunity mapping is supported by WIKI passages, while RAW evidence only supports the available VNA product/system facts [26][27].\n\n來源：\n[5] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[6] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[9] Wiki：AI 伺服器 PCB 供應鏈升級（來源：`AI Server PCB test image 4.md`、`HSD PCB image 1.md`、`HSD PCB image 11.md`）\n[11] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[20] Wiki：Amphenol Communications Solutions（來源：`HSD Cable test image 1.md`、`HSD Cable test image 2.md`、`HSD Cable test image 3.md`…）\n[22] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n[26] `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`\n[27] `raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md`",
+      "created_at": "2026-10-09T09:43:41.520853Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-77749f1884854a2982b1daf17ef2193b",
+       "request_id": "request-77749f1884854a2982b1daf17ef2193b",
+       "span_id": "span-77749f1884854a2982b1daf17ef2193b",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "The available RAW evidence only confirms VNA product/system facts: R&S ZNA67EXT consists of one R&S ZNA67 VNA plus up to four external test sets [26], and RAW ordering information lists VNA base units from 3 GHz to 20 GHz plus spectrum-analysis and extended-power-range options [27].\n| Opportunity | Supporting evidence | RAW evidence available |\n|---|---|---|\n| AI server PCB / UBB / high-speed PCB SI: IL, TDR, high-speed trace, stackup/material characterization | The AI server ecosystem mapping lists PCB as `20+層UBB、高階ABF、低Dk CCL`, says GB200/NVL72 drives layer count and material-grade increases, and maps R&S ZNA/ZNB to IL and TDR [22]. The R&S PCB test flow targets PCB fabricators and system houses and includes impedance/TDR, DK/DF extraction, IL, roughness, Xtalk, TL modeling, eye diagram, Delta-L, and cable/connector testing [11]. AI server PCB upgrade evidence says AI-server trends push PCBs toward high layer count, large area, and high-speed transmission; it also cites HVLP 4/5, M8 CCL, and 30–40-layer boards [9]. | RAW confirms an R&S ZNA67EXT VNA system configuration with one ZNA67 VNA and up to four external test sets [26]. RAW also lists VNA base units from 3 GHz to 20 GHz and options including spectrum analysis and extended power range [27]. |\n| Server motherboard / PCBA high-speed trace validation | The AI server ecosystem maps server motherboard/PCBA R&S solutions to R&S ZNA for high-speed trace test, alongside PDN Target Z, power rail, PI, LDO NSD, and clock jitter test tools [22]. The SIPI/SerDes source says high-speed electrical-interface validation includes transmission channel, measurement path to DUT/test-board development, PDN, ADC/DAC frontend performance, reference-clock/PLL jitter, interface test, and network analyzers among the instrument types [6]. | RAW confirms an R&S ZNA67EXT VNA system configuration with one ZNA67 VNA and up to four external test sets [26]. |\n| High-speed connectors and cables for AI servers: PCIe 6/7, InfiniBand, 800G AOC, high-speed cable | The AI server ecosystem lists connector/cable key components as CPU/GPU Socket, UQD water-cooling quick connect, and 800G AOC, says PCIe 6/PCIe 7 and InfiniBand 800Gbe raise connector ASP, and maps R&S ZNA/ZNB + OSP to high-speed cable testing [22]. The data-center connectivity evidence places high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection in one AI/data-center connectivity portfolio view [5]. | RAW confirms VNA base units from 3 GHz to 20 GHz and options including spectrum analysis and extended power range [27]. |\n| Silicon photonics / optical VNA for 400G/800G, CPO/NPO, pluggable optical modules | The AI server ecosystem lists silicon-photonics key components as 40G/100G/400G/800G optical transceiver modules, CPO/NEO near-packaged optics, and pluggable optics; it says CPO increases active/passive SiPh, advanced-packaging, and test demand; and it maps optical VNA to R&S ZNA/ZNB + PSA with ThinkLands and R&S ZNA/ZNB + GOCA with Newkey [22]. The full-spectrum data-center connectivity source also includes optical transceivers, CPO/NPO, fiber deployment, power, and cooling in data-center connectivity scope [20]. | RAW confirms an R&S ZNA67EXT VNA system configuration with one ZNA67 VNA and up to four external test sets [26]. |\n| AI networking / switch validation | The AI server ecosystem lists network-switch companies and maps the switch category to R&S FSWP for jitter/phase-noise test, VNA using R&S ZNA/ZNB, and EMI pretest [22]. The SerDes/SIPI source lists Ultra Ethernet, InfiniBand, PCIe, NVLink, UALink, OIF CEI-112G, USB, HDMI, DisplayPort, and other high-speed SerDes standards/interfaces in the high-speed digital test context [6]. | RAW confirms VNA base units from 3 GHz to 20 GHz and options including spectrum analysis and extended power range [27]. |\nLimitation: no provided RAW passage directly states an AI-specific VNA opportunity; the AI opportunity mapping is supported by WIKI passages, while RAW evidence only supports the available VNA product/system facts [26][27].\n\n來源：\n[5] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[6] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[9] Wiki：AI 伺服器 PCB 供應鏈升級（來源：`AI Server PCB test image 4.md`、`HSD PCB image 1.md`、`HSD PCB image 11.md`）\n[11] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[20] Wiki：Amphenol Communications Solutions（來源：`HSD Cable test image 1.md`、`HSD Cable test image 2.md`、`HSD Cable test image 3.md`…）\n[22] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n[26] `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`\n[27] `raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-77749f1884854a2982b1daf17ef2193b",
+      "request_id": "request-77749f1884854a2982b1daf17ef2193b",
+      "span_id": "span-77749f1884854a2982b1daf17ef2193b",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-77749f1884854a2982b1daf17ef2193b",
+       "request_id": "request-77749f1884854a2982b1daf17ef2193b",
+       "span_id": "span-77749f1884854a2982b1daf17ef2193b",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The available RAW evidence only confirms VNA product/system facts: R&S ZNA67EXT consists of one R&S ZNA67 VNA plus up to four external test sets [26], and RAW ordering information lists VNA base units from 3 GHz to 20 GHz plus spectrum-analysis and extended-power-range options [27].\n| Opportunity | Supporting evidence | RAW evidence available |\n|---|---|---|\n| AI server PCB / UBB / high-speed PCB SI: IL, TDR, high-speed trace, stackup/material characterization | The AI server ecosystem mapping lists PCB as `20+層UBB、高階ABF、低Dk CCL`, says GB200/NVL72 drives layer count and material-grade increases, and maps R&S ZNA/ZNB to IL and TDR [22]. The R&S PCB test flow targets PCB fabricators and system houses and includes impedance/TDR, DK/DF extraction, IL, roughness, Xtalk, TL modeling, eye diagram, Delta-L, and cable/connector testing [11]. AI server PCB upgrade evidence says AI-server trends push PCBs toward high layer count, large area, and high-speed transmission; it also cites HVLP 4/5, M8 CCL, and 30–40-layer boards [9]. | RAW confirms an R&S ZNA67EXT VNA system configuration with one ZNA67 VNA and up to four external test sets [26]. RAW also lists VNA base units from 3 GHz to 20 GHz and options including spectrum analysis and extended power range [27]. |\n| Server motherboard / PCBA high-speed trace validation | The AI server ecosystem maps server motherboard/PCBA R&S solutions to R&S ZNA for high-speed trace test, alongside PDN Target Z, power rail, PI, LDO NSD, and clock jitter test tools [22]. The SIPI/SerDes source says high-speed electrical-interface validation includes transmission channel, measurement path to DUT/test-board development, PDN, ADC/DAC frontend performance, reference-clock/PLL jitter, interface test, and network analyzers among the instrument types [6]. | RAW confirms an R&S ZNA67EXT VNA system configuration with one ZNA67 VNA and up to four external test sets [26]. |\n| High-speed connectors and cables for AI servers: PCIe 6/7, InfiniBand, 800G AOC, high-speed cable | The AI server ecosystem lists connector/cable key components as CPU/GPU Socket, UQD water-cooling quick connect, and 800G AOC, says PCIe 6/PCIe 7 and InfiniBand 800Gbe raise connector ASP, and maps R&S ZNA/ZNB + OSP to high-speed cable testing [22]. The data-center connectivity evidence places high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection in one AI/data-center connectivity portfolio view [5]. | RAW confirms VNA base units from 3 GHz to 20 GHz and options including spectrum analysis and extended power range [27]. |\n| Silicon photonics / optical VNA for 400G/800G, CPO/NPO, pluggable optical modules | The AI server ecosystem lists silicon-photonics key components as 40G/100G/400G/800G optical transceiver modules, CPO/NEO near-packaged optics, and pluggable optics; it says CPO increases active/passive SiPh, advanced-packaging, and test demand; and it maps optical VNA to R&S ZNA/ZNB + PSA with ThinkLands and R&S ZNA/ZNB + GOCA with Newkey [22]. The full-spectrum data-center connectivity source also includes optical transceivers, CPO/NPO, fiber deployment, power, and cooling in data-center connectivity scope [20]. | RAW confirms an R&S ZNA67EXT VNA system configuration with one ZNA67 VNA and up to four external test sets [26]. |\n| AI networking / switch validation | The AI server ecosystem lists network-switch companies and maps the switch category to R&S FSWP for jitter/phase-noise test, VNA using R&S ZNA/ZNB, and EMI pretest [22]. The SerDes/SIPI source lists Ultra Ethernet, InfiniBand, PCIe, NVLink, UALink, OIF CEI-112G, USB, HDMI, DisplayPort, and other high-speed SerDes standards/interfaces in the high-speed digital test context [6]. | RAW confirms VNA base units from 3 GHz to 20 GHz and options including spectrum analysis and extended power range [27]. |\nLimitation: no provided RAW passage directly states an AI-specific VNA opportunity; the AI opportunity mapping is supported by WIKI passages, while RAW evidence only supports the available VNA product/system facts [26][27].\n\n來源：\n[5] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[6] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[9] Wiki：AI 伺服器 PCB 供應鏈升級（來源：`AI Server PCB test image 4.md`、`HSD PCB image 1.md`、`HSD PCB image 11.md`）\n[11] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[20] Wiki：Amphenol Communications Solutions（來源：`HSD Cable test image 1.md`、`HSD Cable test image 2.md`、`HSD Cable test image 3.md`…）\n[22] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n[26] `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`\n[27] `raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_91fycVtep1eIuAbH5LU1EoJd",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "The available RAW evidence only confirms VNA product/system facts: R&S ZNA67EXT consists of one R&S ZNA67 VNA plus up to four external test sets [26], and RAW ordering information lists VNA base units from 3 GHz to 20 GHz plus spectrum-analysis and extended-power-range options [27].\n| Opportunity | Supporting evidence | RAW evidence available |\n|---|---|---|\n| AI server PCB / UBB / high-speed PCB SI: IL, TDR, high-speed trace, stackup/material characterization | The AI server ecosystem mapping lists PCB as `20+層UBB、高階ABF、低Dk CCL`, says GB200/NVL72 drives layer count and material-grade increases, and maps R&S ZNA/ZNB to IL and TDR [22]. The R&S PCB test flow targets PCB fabricators and system houses and includes impedance/TDR, DK/DF extraction, IL, roughness, Xtalk, TL modeling, eye diagram, Delta-L, and cable/connector testing [11]. AI server PCB upgrade evidence says AI-server trends push PCBs toward high layer count, large area, and high-speed transmission; it also cites HVLP 4/5, M8 CCL, and 30–40-layer boards [9]. | RAW confirms an R&S ZNA67EXT VNA system configuration with one ZNA67 VNA and up to four external test sets [26]. RAW also lists VNA base units from 3 GHz to 20 GHz and options including spectrum analysis and extended power range [27]. |\n| Server motherboard / PCBA high-speed trace validation | The AI server ecosystem maps server motherboard/PCBA R&S solutions to R&S ZNA for high-speed trace test, alongside PDN Target Z, power rail, PI, LDO NSD, and clock jitter test tools [22]. The SIPI/SerDes source says high-speed electrical-interface validation includes transmission channel, measurement path to DUT/test-board development, PDN, ADC/DAC frontend performance, reference-clock/PLL jitter, interface test, and network analyzers among the instrument types [6]. | RAW confirms an R&S ZNA67EXT VNA system configuration with one ZNA67 VNA and up to four external test sets [26]. |\n| High-speed connectors and cables for AI servers: PCIe 6/7, InfiniBand, 800G AOC, high-speed cable | The AI server ecosystem lists connector/cable key components as CPU/GPU Socket, UQD water-cooling quick connect, and 800G AOC, says PCIe 6/PCIe 7 and InfiniBand 800Gbe raise connector ASP, and maps R&S ZNA/ZNB + OSP to high-speed cable testing [22]. The data-center connectivity evidence places high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection in one AI/data-center connectivity portfolio view [5]. | RAW confirms VNA base units from 3 GHz to 20 GHz and options including spectrum analysis and extended power range [27]. |\n| Silicon photonics / optical VNA for 400G/800G, CPO/NPO, pluggable optical modules | The AI server ecosystem lists silicon-photonics key components as 40G/100G/400G/800G optical transceiver modules, CPO/NEO near-packaged optics, and pluggable optics; it says CPO increases active/passive SiPh, advanced-packaging, and test demand; and it maps optical VNA to R&S ZNA/ZNB + PSA with ThinkLands and R&S ZNA/ZNB + GOCA with Newkey [22]. The full-spectrum data-center connectivity source also includes optical transceivers, CPO/NPO, fiber deployment, power, and cooling in data-center connectivity scope [20]. | RAW confirms an R&S ZNA67EXT VNA system configuration with one ZNA67 VNA and up to four external test sets [26]. |\n| AI networking / switch validation | The AI server ecosystem lists network-switch companies and maps the switch category to R&S FSWP for jitter/phase-noise test, VNA using R&S ZNA/ZNB, and EMI pretest [22]. The SerDes/SIPI source lists Ultra Ethernet, InfiniBand, PCIe, NVLink, UALink, OIF CEI-112G, USB, HDMI, DisplayPort, and other high-speed SerDes standards/interfaces in the high-speed digital test context [6]. | RAW confirms VNA base units from 3 GHz to 20 GHz and options including spectrum analysis and extended power range [27]. |\nLimitation: no provided RAW passage directly states an AI-specific VNA opportunity; the AI opportunity mapping is supported by WIKI passages, while RAW evidence only supports the available VNA product/system facts [26][27].\n\n來源：\n[5] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[6] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[9] Wiki：AI 伺服器 PCB 供應鏈升級（來源：`AI Server PCB test image 4.md`、`HSD PCB image 1.md`、`HSD PCB image 11.md`）\n[11] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[20] Wiki：Amphenol Communications Solutions（來源：`HSD Cable test image 1.md`、`HSD Cable test image 2.md`、`HSD Cable test image 3.md`…）\n[22] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n[26] `raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md`\n[27] `raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md`",
+          "evidence": {
+           "raw_citations": 8,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

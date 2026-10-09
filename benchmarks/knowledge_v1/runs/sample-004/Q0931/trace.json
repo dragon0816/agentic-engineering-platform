@@ -1,0 +1,123 @@
+{
+ "question": {
+  "id": "Q0931",
+  "text": "How do changes in RFIC validation technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+  "market": "Semiconductor",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-6db438809c664e44beb400f8fa45ba66",
+ "exchange": {
+  "sent": "How do changes in RFIC validation technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+  "http_status": 200,
+  "seconds": 135.953,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-6db438809c664e44beb400f8fa45ba66",
+    "actor": "leo.chi",
+    "title": "How do changes in RFIC validation technology affect the measurement capa…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T10:04:57.321858Z",
+    "updated_at": "2026-10-09T10:07:12.701720Z",
+    "messages": [
+     {
+      "message_id": "message-68c1b6f0afa9487e9949e2c8b19a934d",
+      "role": "user",
+      "text": "How do changes in RFIC validation technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+      "created_at": "2026-10-09T10:04:57.350191Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-572d6f56175e4f0894cd70b6740a1b70",
+      "role": "assistant",
+      "text": "Short answer: RFIC validation is moving toward more realistic, multi-standard, multi-channel, wider-bandwidth, radiated, and non-signaling test flows, so Signal Generator / Signal Analyzer capability must expand from basic conducted TX/RX measurement to integrated generation/analysis, signaling or non-signaling operation, FR1/FR2 coverage, fading/AWGN/channel realism, MIMO/multiple RF chains, high bandwidth, and high-sensitivity radiated measurements.[1][5][20][23][24]\n| RFIC validation trend | Required Signal Generator / Signal Analyzer capability |\n|---|---|\n| 5G NTN validation is moving toward more standardized, repeatable, realistic, and reliable test environments as deployment approaches.[1] | The test setup needs network emulation and measurement with NR-NTN signaling, NTN fading profiles, and user-defined fading support.[5][18] |\n| 5G NR validation spans LTE, NR FR1, NR FR2, NSA, SA, FDD, and TDD device testing.[5] | The instrument must support LTE and NR FR1/FR2 signaling and TX measurements in one test solution.[5] |\n| 5G FR2 changes the test setup from conducted to radiated measurement.[2] | The analyzer side must support radiated setups and radiated spurious emissions testing, including FR2 RSE measurements up to 200 GHz with high sensitivity of -40 dBm/MHz.[23] |\n| Wi-Fi 7 R&D requires signaling-mode testing under real-world conditions to measure RF TX/RX characteristics.[20] | The generator/analyzer must support multi-technology signaling test functions and real-world-condition RF TX/RX measurement.[20] |\n| Wi-Fi 7 MLO makes a test environment with multiple RF chains important.[20] | The generator/analyzer must provide multi-channel or multi-RF-chain capability for tests such as 2x2 MIMO, coexistence, 6 GHz operation, and end-to-end testing.[20] |\n| Production RF validation moves to non-signaling mode to save time.[24] | The signal generator/analyzer must support fast non-signaling RF measurements for cellular and non-cellular technologies.[24] |\n| Wi-Fi 7 and future WLAN production validation pushes bandwidth requirements higher.[24] | The generator/analyzer must support bandwidths up to 500 MHz, and the cited setup demonstrates loopback validation of a 480 MHz WLAN waveform.[24] |\n| Multi-antenna RFICs and access points require higher MIMO scalability.[24] | The instrument must integrate multiple analyzers, generators, and RF ports, such as two analyzers, two generators, and two sets of eight RF ports for 2x2 MIMO, with scaling to four analyzers and generators for 4x4 MIMO.[24] |\n| Regulatory and conformance-oriented validation includes radio spectrum, CTIA-OTA, TRP/TRS, and RSE testing.[2] | The measurement chain must support OTA/radiated RF performance and spurious-emission measurements rather than only conducted RF parametric tests.[2][23] |\n| EMC validation still needs both radio-enabled and radio-disabled conditions for 5G NR devices.[12] | The setup needs a 5G NR signaling solution to place the DUT into the required radio states during EMC-related measurements.[12] |\n【推論】Overall, the required Signal Generator / Signal Analyzer capability is shifting toward a combined, software-defined, multi-port vector generation and analysis platform because the supported test needs include signaling/non-signaling operation, FR1/FR2, NTN fading, Wi-Fi 7 MLO, MIMO, high bandwidth, and radiated high-sensitivity analysis.[5][18][20][23][24]\n\n來源：\n[1] Wiki：Peter Mariager（來源：`Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing.md`）\n[2] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[5] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[12] Wiki：R&S TS9982 EMS Test System（來源：`Regulatory test for wireless devices with cellular technology.md`）\n[18] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[20] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[23] Wiki：R&S TS8996（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[24] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）",
+      "created_at": "2026-10-09T10:07:12.701720Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-297900d511054cc097b2c39a72c2a776",
+       "request_id": "request-297900d511054cc097b2c39a72c2a776",
+       "span_id": "span-297900d511054cc097b2c39a72c2a776",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "Short answer: RFIC validation is moving toward more realistic, multi-standard, multi-channel, wider-bandwidth, radiated, and non-signaling test flows, so Signal Generator / Signal Analyzer capability must expand from basic conducted TX/RX measurement to integrated generation/analysis, signaling or non-signaling operation, FR1/FR2 coverage, fading/AWGN/channel realism, MIMO/multiple RF chains, high bandwidth, and high-sensitivity radiated measurements.[1][5][20][23][24]\n| RFIC validation trend | Required Signal Generator / Signal Analyzer capability |\n|---|---|\n| 5G NTN validation is moving toward more standardized, repeatable, realistic, and reliable test environments as deployment approaches.[1] | The test setup needs network emulation and measurement with NR-NTN signaling, NTN fading profiles, and user-defined fading support.[5][18] |\n| 5G NR validation spans LTE, NR FR1, NR FR2, NSA, SA, FDD, and TDD device testing.[5] | The instrument must support LTE and NR FR1/FR2 signaling and TX measurements in one test solution.[5] |\n| 5G FR2 changes the test setup from conducted to radiated measurement.[2] | The analyzer side must support radiated setups and radiated spurious emissions testing, including FR2 RSE measurements up to 200 GHz with high sensitivity of -40 dBm/MHz.[23] |\n| Wi-Fi 7 R&D requires signaling-mode testing under real-world conditions to measure RF TX/RX characteristics.[20] | The generator/analyzer must support multi-technology signaling test functions and real-world-condition RF TX/RX measurement.[20] |\n| Wi-Fi 7 MLO makes a test environment with multiple RF chains important.[20] | The generator/analyzer must provide multi-channel or multi-RF-chain capability for tests such as 2x2 MIMO, coexistence, 6 GHz operation, and end-to-end testing.[20] |\n| Production RF validation moves to non-signaling mode to save time.[24] | The signal generator/analyzer must support fast non-signaling RF measurements for cellular and non-cellular technologies.[24] |\n| Wi-Fi 7 and future WLAN production validation pushes bandwidth requirements higher.[24] | The generator/analyzer must support bandwidths up to 500 MHz, and the cited setup demonstrates loopback validation of a 480 MHz WLAN waveform.[24] |\n| Multi-antenna RFICs and access points require higher MIMO scalability.[24] | The instrument must integrate multiple analyzers, generators, and RF ports, such as two analyzers, two generators, and two sets of eight RF ports for 2x2 MIMO, with scaling to four analyzers and generators for 4x4 MIMO.[24] |\n| Regulatory and conformance-oriented validation includes radio spectrum, CTIA-OTA, TRP/TRS, and RSE testing.[2] | The measurement chain must support OTA/radiated RF performance and spurious-emission measurements rather than only conducted RF parametric tests.[2][23] |\n| EMC validation still needs both radio-enabled and radio-disabled conditions for 5G NR devices.[12] | The setup needs a 5G NR signaling solution to place the DUT into the required radio states during EMC-related measurements.[12] |\n【推論】Overall, the required Signal Generator / Signal Analyzer capability is shifting toward a combined, software-defined, multi-port vector generation and analysis platform because the supported test needs include signaling/non-signaling operation, FR1/FR2, NTN fading, Wi-Fi 7 MLO, MIMO, high bandwidth, and radiated high-sensitivity analysis.[5][18][20][23][24]\n\n來源：\n[1] Wiki：Peter Mariager（來源：`Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing.md`）\n[2] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[5] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[12] Wiki：R&S TS9982 EMS Test System（來源：`Regulatory test for wireless devices with cellular technology.md`）\n[18] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[20] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[23] Wiki：R&S TS8996（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[24] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-297900d511054cc097b2c39a72c2a776",
+      "request_id": "request-297900d511054cc097b2c39a72c2a776",
+      "span_id": "span-297900d511054cc097b2c39a72c2a776",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-297900d511054cc097b2c39a72c2a776",
+       "request_id": "request-297900d511054cc097b2c39a72c2a776",
+       "span_id": "span-297900d511054cc097b2c39a72c2a776",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Short answer: RFIC validation is moving toward more realistic, multi-standard, multi-channel, wider-bandwidth, radiated, and non-signaling test flows, so Signal Generator / Signal Analyzer capability must expand from basic conducted TX/RX measurement to integrated generation/analysis, signaling or non-signaling operation, FR1/FR2 coverage, fading/AWGN/channel realism, MIMO/multiple RF chains, high bandwidth, and high-sensitivity radiated measurements.[1][5][20][23][24]\n| RFIC validation trend | Required Signal Generator / Signal Analyzer capability |\n|---|---|\n| 5G NTN validation is moving toward more standardized, repeatable, realistic, and reliable test environments as deployment approaches.[1] | The test setup needs network emulation and measurement with NR-NTN signaling, NTN fading profiles, and user-defined fading support.[5][18] |\n| 5G NR validation spans LTE, NR FR1, NR FR2, NSA, SA, FDD, and TDD device testing.[5] | The instrument must support LTE and NR FR1/FR2 signaling and TX measurements in one test solution.[5] |\n| 5G FR2 changes the test setup from conducted to radiated measurement.[2] | The analyzer side must support radiated setups and radiated spurious emissions testing, including FR2 RSE measurements up to 200 GHz with high sensitivity of -40 dBm/MHz.[23] |\n| Wi-Fi 7 R&D requires signaling-mode testing under real-world conditions to measure RF TX/RX characteristics.[20] | The generator/analyzer must support multi-technology signaling test functions and real-world-condition RF TX/RX measurement.[20] |\n| Wi-Fi 7 MLO makes a test environment with multiple RF chains important.[20] | The generator/analyzer must provide multi-channel or multi-RF-chain capability for tests such as 2x2 MIMO, coexistence, 6 GHz operation, and end-to-end testing.[20] |\n| Production RF validation moves to non-signaling mode to save time.[24] | The signal generator/analyzer must support fast non-signaling RF measurements for cellular and non-cellular technologies.[24] |\n| Wi-Fi 7 and future WLAN production validation pushes bandwidth requirements higher.[24] | The generator/analyzer must support bandwidths up to 500 MHz, and the cited setup demonstrates loopback validation of a 480 MHz WLAN waveform.[24] |\n| Multi-antenna RFICs and access points require higher MIMO scalability.[24] | The instrument must integrate multiple analyzers, generators, and RF ports, such as two analyzers, two generators, and two sets of eight RF ports for 2x2 MIMO, with scaling to four analyzers and generators for 4x4 MIMO.[24] |\n| Regulatory and conformance-oriented validation includes radio spectrum, CTIA-OTA, TRP/TRS, and RSE testing.[2] | The measurement chain must support OTA/radiated RF performance and spurious-emission measurements rather than only conducted RF parametric tests.[2][23] |\n| EMC validation still needs both radio-enabled and radio-disabled conditions for 5G NR devices.[12] | The setup needs a 5G NR signaling solution to place the DUT into the required radio states during EMC-related measurements.[12] |\n【推論】Overall, the required Signal Generator / Signal Analyzer capability is shifting toward a combined, software-defined, multi-port vector generation and analysis platform because the supported test needs include signaling/non-signaling operation, FR1/FR2, NTN fading, Wi-Fi 7 MLO, MIMO, high bandwidth, and radiated high-sensitivity analysis.[5][18][20][23][24]\n\n來源：\n[1] Wiki：Peter Mariager（來源：`Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing.md`）\n[2] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[5] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[12] Wiki：R&S TS9982 EMS Test System（來源：`Regulatory test for wireless devices with cellular technology.md`）\n[18] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[20] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[23] Wiki：R&S TS8996（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[24] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_zUWd2qXtTBcPqFC4dzjsTSM4",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "Short answer: RFIC validation is moving toward more realistic, multi-standard, multi-channel, wider-bandwidth, radiated, and non-signaling test flows, so Signal Generator / Signal Analyzer capability must expand from basic conducted TX/RX measurement to integrated generation/analysis, signaling or non-signaling operation, FR1/FR2 coverage, fading/AWGN/channel realism, MIMO/multiple RF chains, high bandwidth, and high-sensitivity radiated measurements.[1][5][20][23][24]\n| RFIC validation trend | Required Signal Generator / Signal Analyzer capability |\n|---|---|\n| 5G NTN validation is moving toward more standardized, repeatable, realistic, and reliable test environments as deployment approaches.[1] | The test setup needs network emulation and measurement with NR-NTN signaling, NTN fading profiles, and user-defined fading support.[5][18] |\n| 5G NR validation spans LTE, NR FR1, NR FR2, NSA, SA, FDD, and TDD device testing.[5] | The instrument must support LTE and NR FR1/FR2 signaling and TX measurements in one test solution.[5] |\n| 5G FR2 changes the test setup from conducted to radiated measurement.[2] | The analyzer side must support radiated setups and radiated spurious emissions testing, including FR2 RSE measurements up to 200 GHz with high sensitivity of -40 dBm/MHz.[23] |\n| Wi-Fi 7 R&D requires signaling-mode testing under real-world conditions to measure RF TX/RX characteristics.[20] | The generator/analyzer must support multi-technology signaling test functions and real-world-condition RF TX/RX measurement.[20] |\n| Wi-Fi 7 MLO makes a test environment with multiple RF chains important.[20] | The generator/analyzer must provide multi-channel or multi-RF-chain capability for tests such as 2x2 MIMO, coexistence, 6 GHz operation, and end-to-end testing.[20] |\n| Production RF validation moves to non-signaling mode to save time.[24] | The signal generator/analyzer must support fast non-signaling RF measurements for cellular and non-cellular technologies.[24] |\n| Wi-Fi 7 and future WLAN production validation pushes bandwidth requirements higher.[24] | The generator/analyzer must support bandwidths up to 500 MHz, and the cited setup demonstrates loopback validation of a 480 MHz WLAN waveform.[24] |\n| Multi-antenna RFICs and access points require higher MIMO scalability.[24] | The instrument must integrate multiple analyzers, generators, and RF ports, such as two analyzers, two generators, and two sets of eight RF ports for 2x2 MIMO, with scaling to four analyzers and generators for 4x4 MIMO.[24] |\n| Regulatory and conformance-oriented validation includes radio spectrum, CTIA-OTA, TRP/TRS, and RSE testing.[2] | The measurement chain must support OTA/radiated RF performance and spurious-emission measurements rather than only conducted RF parametric tests.[2][23] |\n| EMC validation still needs both radio-enabled and radio-disabled conditions for 5G NR devices.[12] | The setup needs a 5G NR signaling solution to place the DUT into the required radio states during EMC-related measurements.[12] |\n【推論】Overall, the required Signal Generator / Signal Analyzer capability is shifting toward a combined, software-defined, multi-port vector generation and analysis platform because the supported test needs include signaling/non-signaling operation, FR1/FR2, NTN fading, Wi-Fi 7 MLO, MIMO, high bandwidth, and radiated high-sensitivity analysis.[5][18][20][23][24]\n\n來源：\n[1] Wiki：Peter Mariager（來源：`Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing.md`）\n[2] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[5] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[12] Wiki：R&S TS9982 EMS Test System（來源：`Regulatory test for wireless devices with cellular technology.md`）\n[18] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[20] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[23] Wiki：R&S TS8996（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[24] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）",
+          "evidence": {
+           "raw_citations": 8,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

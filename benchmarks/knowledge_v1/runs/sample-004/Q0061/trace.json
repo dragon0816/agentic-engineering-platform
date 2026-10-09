@@ -1,0 +1,122 @@
+{
+ "question": {
+  "id": "Q0061",
+  "text": "For a Wireless Communication use case involving Wi-Fi 7/8, where would Oscilloscope fit in the test workflow?",
+  "market": "Wireless Communication",
+  "product": "Oscilloscope",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-17f00b72271d4e14ac40fd8414696002",
+ "exchange": {
+  "sent": "For a Wireless Communication use case involving Wi-Fi 7/8, where would Oscilloscope fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 160.953,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-17f00b72271d4e14ac40fd8414696002",
+    "actor": "leo.chi",
+    "title": "For a Wireless Communication use case involving Wi-Fi 7/8, where would O…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T08:02:25.187729Z",
+    "updated_at": "2026-10-09T08:05:05.970520Z",
+    "messages": [
+     {
+      "message_id": "message-fc209f35818944c6a87427713bb5a9d8",
+      "role": "user",
+      "text": "For a Wireless Communication use case involving Wi-Fi 7/8, where would Oscilloscope fit in the test workflow?",
+      "created_at": "2026-10-09T08:02:25.197868Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-6d4716090dd04530a5d38487e148d994",
+      "role": "assistant",
+      "text": "The knowledge base gave no answer: it found insufficient validated evidence for this specific Wi‑Fi 7/8 oscilloscope workflow question.\n\nNot from the knowledge base: in a Wi‑Fi 7/8 wireless communication test workflow, an oscilloscope typically fits around the **digital, timing, power, and RF-adjacent debug layers**, rather than replacing the main RF signal analyzer/vector signal generator tests.\n\nA practical placement would be:\n\n1. **Baseband / digital interface validation**\n   - Validate high-speed digital interfaces feeding the RF front end or chipset.\n   - Examples: PCIe, USB, Ethernet, MIPI, memory interfaces, clock lines.\n\n2. **Power integrity and transient analysis**\n   - Check voltage rail noise, droop, ripple, and transient response during Wi‑Fi 7/8 burst transmission.\n   - Especially relevant for high peak current events from MLO, 320 MHz channels, high-order modulation, and multi-radio operation.\n\n3. **Clock and timing debug**\n   - Measure jitter, skew, phase noise-related timing behavior, synchronization signals, and trigger relationships.\n   - Useful when debugging EVM degradation, packet errors, or unstable links.\n\n4. **RF front-end control timing**\n   - Observe timing of PA enable, LNA switching, antenna switch control, T/R switching, FEM control lines, and coexistence signals.\n   - Important for multi-band/multi-link operation in Wi‑Fi 7 and likely Wi‑Fi 8 scenarios.\n\n5. **Debug correlation with RF measurements**\n   - Use the oscilloscope alongside a signal analyzer to correlate RF impairments with root causes in power, clock, or control domains.\n   - Example: an EVM spike seen on the analyzer may align with supply droop or switch-control timing error seen on the oscilloscope.\n\n6. **Protocol-adjacent system validation**\n   - Not for decoding full Wi‑Fi protocol frames like a WLAN tester would, but useful for verifying trigger timing, packet burst timing, sleep/wake behavior, coexistence, and latency events.\n\nSo, in short: the oscilloscope fits **after or alongside RF performance testing**, mainly as a **debug and validation instrument for power integrity, timing, digital interfaces, and RF front-end control**, while signal generators/analyzers or wireless testers handle the core Wi‑Fi 7/8 RF/protocol measurements such as EVM, spectrum, sensitivity, throughput, and packet error rate.",
+      "created_at": "2026-10-09T08:05:05.970520Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-59e25c0b59b24419be96e677cb6bb6a1",
+       "request_id": "request-59e25c0b59b24419be96e677cb6bb6a1",
+       "span_id": "span-59e25c0b59b24419be96e677cb6bb6a1",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+    "ok": true,
+    "answer": "The knowledge base gave no answer: it found insufficient validated evidence for this specific Wi‑Fi 7/8 oscilloscope workflow question.\n\nNot from the knowledge base: in a Wi‑Fi 7/8 wireless communication test workflow, an oscilloscope typically fits around the **digital, timing, power, and RF-adjacent debug layers**, rather than replacing the main RF signal analyzer/vector signal generator tests.\n\nA practical placement would be:\n\n1. **Baseband / digital interface validation**\n   - Validate high-speed digital interfaces feeding the RF front end or chipset.\n   - Examples: PCIe, USB, Ethernet, MIPI, memory interfaces, clock lines.\n\n2. **Power integrity and transient analysis**\n   - Check voltage rail noise, droop, ripple, and transient response during Wi‑Fi 7/8 burst transmission.\n   - Especially relevant for high peak current events from MLO, 320 MHz channels, high-order modulation, and multi-radio operation.\n\n3. **Clock and timing debug**\n   - Measure jitter, skew, phase noise-related timing behavior, synchronization signals, and trigger relationships.\n   - Useful when debugging EVM degradation, packet errors, or unstable links.\n\n4. **RF front-end control timing**\n   - Observe timing of PA enable, LNA switching, antenna switch control, T/R switching, FEM control lines, and coexistence signals.\n   - Important for multi-band/multi-link operation in Wi‑Fi 7 and likely Wi‑Fi 8 scenarios.\n\n5. **Debug correlation with RF measurements**\n   - Use the oscilloscope alongside a signal analyzer to correlate RF impairments with root causes in power, clock, or control domains.\n   - Example: an EVM spike seen on the analyzer may align with supply droop or switch-control timing error seen on the oscilloscope.\n\n6. **Protocol-adjacent system validation**\n   - Not for decoding full Wi‑Fi protocol frames like a WLAN tester would, but useful for verifying trigger timing, packet burst timing, sleep/wake behavior, coexistence, and latency events.\n\nSo, in short: the oscilloscope fits **after or alongside RF performance testing**, mainly as a **debug and validation instrument for power integrity, timing, digital interfaces, and RF front-end control**, while signal generators/analyzers or wireless testers handle the core Wi‑Fi 7/8 RF/protocol measurements such as EVM, spectrum, sensitivity, throughput, and packet error rate.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-59e25c0b59b24419be96e677cb6bb6a1",
+      "request_id": "request-59e25c0b59b24419be96e677cb6bb6a1",
+      "span_id": "span-59e25c0b59b24419be96e677cb6bb6a1",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-59e25c0b59b24419be96e677cb6bb6a1",
+       "request_id": "request-59e25c0b59b24419be96e677cb6bb6a1",
+       "span_id": "span-59e25c0b59b24419be96e677cb6bb6a1",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no answer: it found insufficient validated evidence for this specific Wi‑Fi 7/8 oscilloscope workflow question.\n\nNot from the knowledge base: in a Wi‑Fi 7/8 wireless communication test workflow, an oscilloscope typically fits around the **digital, timing, power, and RF-adjacent debug layers**, rather than replacing the main RF signal analyzer/vector signal generator tests.\n\nA practical placement would be:\n\n1. **Baseband / digital interface validation**\n   - Validate high-speed digital interfaces feeding the RF front end or chipset.\n   - Examples: PCIe, USB, Ethernet, MIPI, memory interfaces, clock lines.\n\n2. **Power integrity and transient analysis**\n   - Check voltage rail noise, droop, ripple, and transient response during Wi‑Fi 7/8 burst transmission.\n   - Especially relevant for high peak current events from MLO, 320 MHz channels, high-order modulation, and multi-radio operation.\n\n3. **Clock and timing debug**\n   - Measure jitter, skew, phase noise-related timing behavior, synchronization signals, and trigger relationships.\n   - Useful when debugging EVM degradation, packet errors, or unstable links.\n\n4. **RF front-end control timing**\n   - Observe timing of PA enable, LNA switching, antenna switch control, T/R switching, FEM control lines, and coexistence signals.\n   - Important for multi-band/multi-link operation in Wi‑Fi 7 and likely Wi‑Fi 8 scenarios.\n\n5. **Debug correlation with RF measurements**\n   - Use the oscilloscope alongside a signal analyzer to correlate RF impairments with root causes in power, clock, or control domains.\n   - Example: an EVM spike seen on the analyzer may align with supply droop or switch-control timing error seen on the oscilloscope.\n\n6. **Protocol-adjacent system validation**\n   - Not for decoding full Wi‑Fi protocol frames like a WLAN tester would, but useful for verifying trigger timing, packet burst timing, sleep/wake behavior, coexistence, and latency events.\n\nSo, in short: the oscilloscope fits **after or alongside RF performance testing**, mainly as a **debug and validation instrument for power integrity, timing, digital interfaces, and RF front-end control**, while signal generators/analyzers or wireless testers handle the core Wi‑Fi 7/8 RF/protocol measurements such as EVM, spectrum, sensitivity, throughput, and packet error rate.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_DpBykVxif1WSrrUypWqhxnxU",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "failed",
+         "data": {
+          "knowledge_harness": "not_validated",
+          "answer": "No sufficient evidence was found in the selected Knowledge asset. (knowledge_insufficient_evidence)",
+          "evidence": {
+           "raw_citations": 0,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "instruction": "The knowledge base did not validate an answer. Tell the person what is above; anything you add is not from the knowledge base and must say so."
+         },
+         "failure": {
+          "code": "knowledge_not_validated",
+          "message": "The Knowledge Harness did not validate an answer",
+          "retryable": false
+         }
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

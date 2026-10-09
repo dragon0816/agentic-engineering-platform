@@ -1,0 +1,175 @@
+{
+ "question": {
+  "id": "Q0489",
+  "text": "What evidence is required to compare our Oscilloscope solution with a competitor for Automotive without making unsupported claims?",
+  "market": "Automotive",
+  "product": "Oscilloscope",
+  "type": "competitive",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-8b6bfa00704b4cd299f231e0b63b3c3d",
+ "exchange": {
+  "sent": "What evidence is required to compare our Oscilloscope solution with a competitor for Automotive without making unsupported claims?",
+  "http_status": 200,
+  "seconds": 185.734,
+  "timed_out": false,
+  "reply": {
+   "ok": false,
+   "conversation": {
+    "session_id": "conversation-8b6bfa00704b4cd299f231e0b63b3c3d",
+    "actor": "leo.chi",
+    "title": "What evidence is required to compare our Oscilloscope solution with a co…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T08:57:32.577422Z",
+    "updated_at": "2026-10-09T09:00:38.157587Z",
+    "messages": [
+     {
+      "message_id": "message-90625f1ed75e4b2b9fd9357f821170b5",
+      "role": "user",
+      "text": "What evidence is required to compare our Oscilloscope solution with a competitor for Automotive without making unsupported claims?",
+      "created_at": "2026-10-09T08:57:32.584070Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-2c30660e4a09419c89246924f2cd8e7f",
+      "role": "assistant",
+      "text": "The Knowledge query did not produce a validated answer. Unverified requested facets: competitor.",
+      "created_at": "2026-10-09T09:00:38.157587Z",
+      "status": "needs_input",
+      "trace": {
+       "trace_id": "trace-24cc70b3a21e4835979d598f9e5c77df",
+       "request_id": "request-24cc70b3a21e4835979d598f9e5c77df",
+       "span_id": "span-24cc70b3a21e4835979d598f9e5c77df",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": false,
+    "answer": "The Knowledge query did not produce a validated answer. Unverified requested facets: competitor.",
+    "status": "needs_input",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-24cc70b3a21e4835979d598f9e5c77df",
+      "request_id": "request-24cc70b3a21e4835979d598f9e5c77df",
+      "span_id": "span-24cc70b3a21e4835979d598f9e5c77df",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-24cc70b3a21e4835979d598f9e5c77df",
+       "request_id": "request-24cc70b3a21e4835979d598f9e5c77df",
+       "span_id": "span-24cc70b3a21e4835979d598f9e5c77df",
+       "parent_span_id": null
+      },
+      "status": "failed",
+      "data": null,
+      "failure": {
+       "code": "knowledge_insufficient_evidence",
+       "message": "Capability invocation did not complete",
+       "retryable": false
+      },
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-5fa3154ba51043db87a2698b9e0aa699",
+      "task_sha256": "2db4799b283935dbe863298ef4d186046be75408ac48d47e732e41f557b975a5",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.6.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "needs_input",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "needs_input",
+       "evidence_ref": null
+      }
+     ],
+     "checks": [],
+     "failure_code": "knowledge_insufficient_evidence"
+    },
+    "evidence": {
+     "raw_citations": 0,
+     "facet_status": "missing",
+     "missing_facets": [
+      "competitor"
+     ],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {}
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

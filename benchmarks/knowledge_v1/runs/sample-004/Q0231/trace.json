@@ -1,0 +1,123 @@
+{
+ "question": {
+  "id": "Q0231",
+  "text": "How do changes in radar technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "market": "Aerospace / Defense",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-82da0ee8d4624724945f67a188f92e4d",
+ "exchange": {
+  "sent": "How do changes in radar technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "http_status": 200,
+  "seconds": 108.297,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-82da0ee8d4624724945f67a188f92e4d",
+    "actor": "leo.chi",
+    "title": "How do changes in radar technology affect the measurement capability req…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T08:21:48.958407Z",
+    "updated_at": "2026-10-09T08:23:36.986649Z",
+    "messages": [
+     {
+      "message_id": "message-ef217e0aea3844cfbc479ca63f2e48e1",
+      "role": "user",
+      "text": "How do changes in radar technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+      "created_at": "2026-10-09T08:21:48.970813Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-977f12b5351f486db6d8f36d8c4e2a10",
+      "role": "assistant",
+      "text": "Short answer: as wireless technology moves to newer standards, wider bandwidths, higher frequencies, multi-channel/MIMO operation, and cellular/non-cellular coexistence, testers need broader technology coverage, more RF chains/ports, wider measurement bandwidth, and more realistic signaling or non-signaling RF measurement modes [19][21][24].\n| Technology change | Measurement capability impact | Signaling tester implication | Non-signaling tester implication |\n|---|---|---|---|\n| Wi‑Fi 7 / IEEE 802.11be alongside LTE and 5G creates new parallel-operation test challenges.[19] | Tester must cover both cellular and non-cellular standards in one setup.[19] | CMX500 is positioned as a multi-technology, multi-channel signaling tester with integrated Wi‑Fi 7 functionality for cellular and non-cellular testing.[19] | CMP180 is positioned for production non-signaling RF testing across cellular and non-cellular technologies including Wi‑Fi 6E, Wi‑Fi 7, and 5G NR FR1.[24] |\n| Wi‑Fi 7 R&D requires signaling-mode testing under real-world conditions, including RF TX/RX characteristics, MLO, multiple RF chains, 2x2 MIMO, 6 GHz out-of-band discovery, coexistence, and E2E capabilities.[21] | Measurement must handle multiple RF chains, MIMO, coexistence, and end-to-end behavior rather than only isolated RF parameters.[21] | Signaling testers need network/device interaction plus RF TX/RX measurement in realistic operating modes.[21] | Not the primary R&D mode here; production focuses on fast RF measurements in non-signaling mode.[24] |\n| Production WLAN RF measurements are performed in non-signaling mode to save time.[24] | Tester must provide fast RF analyzer/generator capability without establishing full protocol signaling.[24] | Signaling tester is less suited to the production-time-saving role described here.[24] | CMP180 is optimized for this non-signaling production purpose.[24] |\n| Wider bandwidth is emerging beyond Wi‑Fi 7: CMP180 demonstrates a 480 MHz WLAN waveform, while Wi‑Fi 8 / IEEE 802.11bn is still not formally defined in this source.[24] | Non-signaling testers need wider analysis/generation bandwidth headroom; CMP180 is stated to support bandwidths up to 500 MHz.[24] | Signaling passages do not state a 480 MHz Wi‑Fi signaling requirement. | Non-signaling testers should support wideband waveform generation/analysis such as 480 MHz loopback verification and up to 500 MHz bandwidth.[24] |\n| EMC and SAR contexts require device operation under controlled radio states or extreme transmit conditions.[3][13] | Tester must provide signaling/network-emulation functions to drive the DUT into required operating conditions.[3][13] | 5G NR SAR testing requires a 5G NR network emulator to drive the EUT to extreme transmission conditions, and EMC tests need enabled/disabled radio conditions, implying a 5G NR signaling solution.[3][13] | Non-signaling testers are not described as fulfilling these SAR/EMC signaling-control needs in the cited passages. |\n【推論】For signaling testers, technology change mainly increases the need for multi-technology network emulation plus realistic RF TX/RX, MLO, MIMO, coexistence, FR1/FR2, and application/E2E coverage, because the cited CMX500 use cases combine cellular/non-cellular signaling, Wi‑Fi 7 R&D, and NR FR1/FR2 support.[1][6][19][21]\n【推論】For non-signaling testers, technology change mainly increases the need for faster production RF measurements, wider bandwidth, more analyzers/generators, more RF ports, and scalable MIMO support, because the cited CMP180 role emphasizes non-signaling production testing, up to 500 MHz bandwidth, 480 MHz WLAN waveform loopback, 2x2 MIMO in one box, and 4x4 MIMO by combining two units.[24]\n【推論】If the question meant “radar” literally, the knowledge base does not state radar-specific signaling or non-signaling tester requirements; the supported conclusions above apply only to wireless radio technologies such as Wi‑Fi, LTE, and 5G NR.[19][21][24]\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[3] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[6] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[13] Wiki：R&S TS9982 EMS Test System（來源：`Regulatory test for wireless devices with cellular technology.md`）\n[19] Wiki：Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024（來源：`CMP180_specs_en_3609-7348-22_v0800.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[21] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[24] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）",
+      "created_at": "2026-10-09T08:23:36.986649Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-4e73ad0d6e804b61b1797dc6a0b5fcb1",
+       "request_id": "request-4e73ad0d6e804b61b1797dc6a0b5fcb1",
+       "span_id": "span-4e73ad0d6e804b61b1797dc6a0b5fcb1",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "Short answer: as wireless technology moves to newer standards, wider bandwidths, higher frequencies, multi-channel/MIMO operation, and cellular/non-cellular coexistence, testers need broader technology coverage, more RF chains/ports, wider measurement bandwidth, and more realistic signaling or non-signaling RF measurement modes [19][21][24].\n| Technology change | Measurement capability impact | Signaling tester implication | Non-signaling tester implication |\n|---|---|---|---|\n| Wi‑Fi 7 / IEEE 802.11be alongside LTE and 5G creates new parallel-operation test challenges.[19] | Tester must cover both cellular and non-cellular standards in one setup.[19] | CMX500 is positioned as a multi-technology, multi-channel signaling tester with integrated Wi‑Fi 7 functionality for cellular and non-cellular testing.[19] | CMP180 is positioned for production non-signaling RF testing across cellular and non-cellular technologies including Wi‑Fi 6E, Wi‑Fi 7, and 5G NR FR1.[24] |\n| Wi‑Fi 7 R&D requires signaling-mode testing under real-world conditions, including RF TX/RX characteristics, MLO, multiple RF chains, 2x2 MIMO, 6 GHz out-of-band discovery, coexistence, and E2E capabilities.[21] | Measurement must handle multiple RF chains, MIMO, coexistence, and end-to-end behavior rather than only isolated RF parameters.[21] | Signaling testers need network/device interaction plus RF TX/RX measurement in realistic operating modes.[21] | Not the primary R&D mode here; production focuses on fast RF measurements in non-signaling mode.[24] |\n| Production WLAN RF measurements are performed in non-signaling mode to save time.[24] | Tester must provide fast RF analyzer/generator capability without establishing full protocol signaling.[24] | Signaling tester is less suited to the production-time-saving role described here.[24] | CMP180 is optimized for this non-signaling production purpose.[24] |\n| Wider bandwidth is emerging beyond Wi‑Fi 7: CMP180 demonstrates a 480 MHz WLAN waveform, while Wi‑Fi 8 / IEEE 802.11bn is still not formally defined in this source.[24] | Non-signaling testers need wider analysis/generation bandwidth headroom; CMP180 is stated to support bandwidths up to 500 MHz.[24] | Signaling passages do not state a 480 MHz Wi‑Fi signaling requirement. | Non-signaling testers should support wideband waveform generation/analysis such as 480 MHz loopback verification and up to 500 MHz bandwidth.[24] |\n| EMC and SAR contexts require device operation under controlled radio states or extreme transmit conditions.[3][13] | Tester must provide signaling/network-emulation functions to drive the DUT into required operating conditions.[3][13] | 5G NR SAR testing requires a 5G NR network emulator to drive the EUT to extreme transmission conditions, and EMC tests need enabled/disabled radio conditions, implying a 5G NR signaling solution.[3][13] | Non-signaling testers are not described as fulfilling these SAR/EMC signaling-control needs in the cited passages. |\n【推論】For signaling testers, technology change mainly increases the need for multi-technology network emulation plus realistic RF TX/RX, MLO, MIMO, coexistence, FR1/FR2, and application/E2E coverage, because the cited CMX500 use cases combine cellular/non-cellular signaling, Wi‑Fi 7 R&D, and NR FR1/FR2 support.[1][6][19][21]\n【推論】For non-signaling testers, technology change mainly increases the need for faster production RF measurements, wider bandwidth, more analyzers/generators, more RF ports, and scalable MIMO support, because the cited CMP180 role emphasizes non-signaling production testing, up to 500 MHz bandwidth, 480 MHz WLAN waveform loopback, 2x2 MIMO in one box, and 4x4 MIMO by combining two units.[24]\n【推論】If the question meant “radar” literally, the knowledge base does not state radar-specific signaling or non-signaling tester requirements; the supported conclusions above apply only to wireless radio technologies such as Wi‑Fi, LTE, and 5G NR.[19][21][24]\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[3] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[6] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[13] Wiki：R&S TS9982 EMS Test System（來源：`Regulatory test for wireless devices with cellular technology.md`）\n[19] Wiki：Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024（來源：`CMP180_specs_en_3609-7348-22_v0800.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[21] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[24] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-4e73ad0d6e804b61b1797dc6a0b5fcb1",
+      "request_id": "request-4e73ad0d6e804b61b1797dc6a0b5fcb1",
+      "span_id": "span-4e73ad0d6e804b61b1797dc6a0b5fcb1",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-4e73ad0d6e804b61b1797dc6a0b5fcb1",
+       "request_id": "request-4e73ad0d6e804b61b1797dc6a0b5fcb1",
+       "span_id": "span-4e73ad0d6e804b61b1797dc6a0b5fcb1",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Short answer: as wireless technology moves to newer standards, wider bandwidths, higher frequencies, multi-channel/MIMO operation, and cellular/non-cellular coexistence, testers need broader technology coverage, more RF chains/ports, wider measurement bandwidth, and more realistic signaling or non-signaling RF measurement modes [19][21][24].\n| Technology change | Measurement capability impact | Signaling tester implication | Non-signaling tester implication |\n|---|---|---|---|\n| Wi‑Fi 7 / IEEE 802.11be alongside LTE and 5G creates new parallel-operation test challenges.[19] | Tester must cover both cellular and non-cellular standards in one setup.[19] | CMX500 is positioned as a multi-technology, multi-channel signaling tester with integrated Wi‑Fi 7 functionality for cellular and non-cellular testing.[19] | CMP180 is positioned for production non-signaling RF testing across cellular and non-cellular technologies including Wi‑Fi 6E, Wi‑Fi 7, and 5G NR FR1.[24] |\n| Wi‑Fi 7 R&D requires signaling-mode testing under real-world conditions, including RF TX/RX characteristics, MLO, multiple RF chains, 2x2 MIMO, 6 GHz out-of-band discovery, coexistence, and E2E capabilities.[21] | Measurement must handle multiple RF chains, MIMO, coexistence, and end-to-end behavior rather than only isolated RF parameters.[21] | Signaling testers need network/device interaction plus RF TX/RX measurement in realistic operating modes.[21] | Not the primary R&D mode here; production focuses on fast RF measurements in non-signaling mode.[24] |\n| Production WLAN RF measurements are performed in non-signaling mode to save time.[24] | Tester must provide fast RF analyzer/generator capability without establishing full protocol signaling.[24] | Signaling tester is less suited to the production-time-saving role described here.[24] | CMP180 is optimized for this non-signaling production purpose.[24] |\n| Wider bandwidth is emerging beyond Wi‑Fi 7: CMP180 demonstrates a 480 MHz WLAN waveform, while Wi‑Fi 8 / IEEE 802.11bn is still not formally defined in this source.[24] | Non-signaling testers need wider analysis/generation bandwidth headroom; CMP180 is stated to support bandwidths up to 500 MHz.[24] | Signaling passages do not state a 480 MHz Wi‑Fi signaling requirement. | Non-signaling testers should support wideband waveform generation/analysis such as 480 MHz loopback verification and up to 500 MHz bandwidth.[24] |\n| EMC and SAR contexts require device operation under controlled radio states or extreme transmit conditions.[3][13] | Tester must provide signaling/network-emulation functions to drive the DUT into required operating conditions.[3][13] | 5G NR SAR testing requires a 5G NR network emulator to drive the EUT to extreme transmission conditions, and EMC tests need enabled/disabled radio conditions, implying a 5G NR signaling solution.[3][13] | Non-signaling testers are not described as fulfilling these SAR/EMC signaling-control needs in the cited passages. |\n【推論】For signaling testers, technology change mainly increases the need for multi-technology network emulation plus realistic RF TX/RX, MLO, MIMO, coexistence, FR1/FR2, and application/E2E coverage, because the cited CMX500 use cases combine cellular/non-cellular signaling, Wi‑Fi 7 R&D, and NR FR1/FR2 support.[1][6][19][21]\n【推論】For non-signaling testers, technology change mainly increases the need for faster production RF measurements, wider bandwidth, more analyzers/generators, more RF ports, and scalable MIMO support, because the cited CMP180 role emphasizes non-signaling production testing, up to 500 MHz bandwidth, 480 MHz WLAN waveform loopback, 2x2 MIMO in one box, and 4x4 MIMO by combining two units.[24]\n【推論】If the question meant “radar” literally, the knowledge base does not state radar-specific signaling or non-signaling tester requirements; the supported conclusions above apply only to wireless radio technologies such as Wi‑Fi, LTE, and 5G NR.[19][21][24]\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[3] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[6] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[13] Wiki：R&S TS9982 EMS Test System（來源：`Regulatory test for wireless devices with cellular technology.md`）\n[19] Wiki：Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024（來源：`CMP180_specs_en_3609-7348-22_v0800.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[21] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[24] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_PwVpG3CsUIGrdALkOK9nhyZO",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "Short answer: as wireless technology moves to newer standards, wider bandwidths, higher frequencies, multi-channel/MIMO operation, and cellular/non-cellular coexistence, testers need broader technology coverage, more RF chains/ports, wider measurement bandwidth, and more realistic signaling or non-signaling RF measurement modes [19][21][24].\n| Technology change | Measurement capability impact | Signaling tester implication | Non-signaling tester implication |\n|---|---|---|---|\n| Wi‑Fi 7 / IEEE 802.11be alongside LTE and 5G creates new parallel-operation test challenges.[19] | Tester must cover both cellular and non-cellular standards in one setup.[19] | CMX500 is positioned as a multi-technology, multi-channel signaling tester with integrated Wi‑Fi 7 functionality for cellular and non-cellular testing.[19] | CMP180 is positioned for production non-signaling RF testing across cellular and non-cellular technologies including Wi‑Fi 6E, Wi‑Fi 7, and 5G NR FR1.[24] |\n| Wi‑Fi 7 R&D requires signaling-mode testing under real-world conditions, including RF TX/RX characteristics, MLO, multiple RF chains, 2x2 MIMO, 6 GHz out-of-band discovery, coexistence, and E2E capabilities.[21] | Measurement must handle multiple RF chains, MIMO, coexistence, and end-to-end behavior rather than only isolated RF parameters.[21] | Signaling testers need network/device interaction plus RF TX/RX measurement in realistic operating modes.[21] | Not the primary R&D mode here; production focuses on fast RF measurements in non-signaling mode.[24] |\n| Production WLAN RF measurements are performed in non-signaling mode to save time.[24] | Tester must provide fast RF analyzer/generator capability without establishing full protocol signaling.[24] | Signaling tester is less suited to the production-time-saving role described here.[24] | CMP180 is optimized for this non-signaling production purpose.[24] |\n| Wider bandwidth is emerging beyond Wi‑Fi 7: CMP180 demonstrates a 480 MHz WLAN waveform, while Wi‑Fi 8 / IEEE 802.11bn is still not formally defined in this source.[24] | Non-signaling testers need wider analysis/generation bandwidth headroom; CMP180 is stated to support bandwidths up to 500 MHz.[24] | Signaling passages do not state a 480 MHz Wi‑Fi signaling requirement. | Non-signaling testers should support wideband waveform generation/analysis such as 480 MHz loopback verification and up to 500 MHz bandwidth.[24] |\n| EMC and SAR contexts require device operation under controlled radio states or extreme transmit conditions.[3][13] | Tester must provide signaling/network-emulation functions to drive the DUT into required operating conditions.[3][13] | 5G NR SAR testing requires a 5G NR network emulator to drive the EUT to extreme transmission conditions, and EMC tests need enabled/disabled radio conditions, implying a 5G NR signaling solution.[3][13] | Non-signaling testers are not described as fulfilling these SAR/EMC signaling-control needs in the cited passages. |\n【推論】For signaling testers, technology change mainly increases the need for multi-technology network emulation plus realistic RF TX/RX, MLO, MIMO, coexistence, FR1/FR2, and application/E2E coverage, because the cited CMX500 use cases combine cellular/non-cellular signaling, Wi‑Fi 7 R&D, and NR FR1/FR2 support.[1][6][19][21]\n【推論】For non-signaling testers, technology change mainly increases the need for faster production RF measurements, wider bandwidth, more analyzers/generators, more RF ports, and scalable MIMO support, because the cited CMP180 role emphasizes non-signaling production testing, up to 500 MHz bandwidth, 480 MHz WLAN waveform loopback, 2x2 MIMO in one box, and 4x4 MIMO by combining two units.[24]\n【推論】If the question meant “radar” literally, the knowledge base does not state radar-specific signaling or non-signaling tester requirements; the supported conclusions above apply only to wireless radio technologies such as Wi‑Fi, LTE, and 5G NR.[19][21][24]\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[3] Wiki：Regulatory test for wireless devices with cellular technology（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[6] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[13] Wiki：R&S TS9982 EMS Test System（來源：`Regulatory test for wireless devices with cellular technology.md`）\n[19] Wiki：Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024（來源：`CMP180_specs_en_3609-7348-22_v0800.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[21] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[24] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）",
+          "evidence": {
+           "raw_citations": 7,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

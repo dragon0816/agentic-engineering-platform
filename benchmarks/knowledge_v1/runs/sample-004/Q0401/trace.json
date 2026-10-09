@@ -1,0 +1,123 @@
+{
+ "question": {
+  "id": "Q0401",
+  "text": "What are the most important signaling test capabilities for applications in Automotive?",
+  "market": "Automotive",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "basic",
+  "difficulty": "L1"
+ },
+ "session_id": "conversation-85b75f350fe24084b722436ad899d26d",
+ "exchange": {
+  "sent": "What are the most important signaling test capabilities for applications in Automotive?",
+  "http_status": 200,
+  "seconds": 118.032,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-85b75f350fe24084b722436ad899d26d",
+    "actor": "leo.chi",
+    "title": "What are the most important signaling test capabilities for applications…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T08:47:15.654661Z",
+    "updated_at": "2026-10-09T08:49:13.499364Z",
+    "messages": [
+     {
+      "message_id": "message-2c2da4c5c0054991b6b281bf4d7a58cf",
+      "role": "user",
+      "text": "What are the most important signaling test capabilities for applications in Automotive?",
+      "created_at": "2026-10-09T08:47:15.666750Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-5b2478f9acca4620879804977b937478",
+      "role": "assistant",
+      "text": "建議主軸：Automotive signaling test 最重要應先聚焦 **NG eCall / IMS over LTE-5G 的真實網路條件驗證**，其次才擴展到 5G/LTE modem signaling、IMS voice/data、IP/application traffic，以及 NTN 相關場景 [10][17]。\n### 推薦先賣\n**NG eCall EN 17240:2024 signaling / compliance test**：R&S 與 Qualcomm Technologies 已用 **R&S CMX500** 驗證 **Snapdragon Auto 5G Modem-RF** 的 **Next Generation eCall** functionality；CMX500 搭配 **R&S CMX-KA098** 可在 realistic network conditions 下做 NG eCall testing，測試情境包含 simulating a PSAP，驗證 voice and data transmission，以及 EN 17240:2024 compliance [10]。\n**4G/5G packet-switched / IMS emergency-call migration testing**：eCall 自 2018 年起是 EU all new cars mandatory requirement；因 2G/3G circuit-switched networks obsolete，emergency call systems 需要適配 4G/5G packet-switched cellular networks；EN 17240:2024 covers eCall over IMS networks including 4G LTE and 5G NR technologies [17]。\n**Automotive modem 的 cellular signaling / network emulation**：CMX500 是 universal one-box network emulation and measurement test solution，支援 5G NR device testing，涵蓋 LTE、NR FR1、NR FR2，並支援 NSA、SA、FDD、TDD；CMX500 也提供 NR FR1/FR2 signaling、LTE signaling、IMS/audio/POLQA、application test、IP traffic analysis、throughput measurement、BLER、fading、AWGN 與 CSI report [8]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 | NG eCall EN 17240:2024 verification for automotive modem | R&S CMX-KA098 software option | 已用於 Snapdragon Auto 5G Modem-RF 的 NG eCall functionality verification；可在 realistic network conditions 下做 NG eCall testing，並 simulating a PSAP，驗證 voice and data transmission 與 EN 17240:2024 compliance | [10] | 知識庫未標示 CMX-KA098 的完整訂購料號、價格或必備硬體配置 |\n| R&S CMX500 | 4G/5G cellular signaling and network emulation | LTE、NR FR1、NR FR2；NSA、SA、FDD、TDD；NR FR1/FR2 signaling；LTE signaling | Automotive NG eCall 正在從 2G/3G circuit-switched 轉向 4G/5G packet-switched / IMS networks；CMX500 支援 LTE/NR network emulation and signaling | [8][17] | 知識庫未直接列出所有 automotive TCU、IVI 或 V2X test cases |\n| R&S CMX500 | IMS voice/data, audio quality, IP/application behavior | IMS/audio/POLQA、application test、IP traffic analysis、throughput measurement | NG eCall verification 包含 voice and data transmission；CMX500 具備 IMS/audio/POLQA、application test 與 IP traffic analysis capability | [8][10] | 知識庫未提供 EN 17240:2024 的逐項 test case list |\n| R&S CMX500 | Radio-link robustness under signaling | Fading、AWGN、BLER、CSI report、throughput measurement | CMX500 提供 fading、AWGN、BLER、CSI report 與 throughput measurement，可支援 device testing 的 radio-link and performance validation | [8] | 知識庫未直接說明這些項目已用於特定 automotive certification |\n| R&S SMW | NTN channel emulation for automotive-related NTN interest | Support for long path delays、enhanced Doppler capabilities、customized dynamic fading | RAW 來源指出 5G NTN-NR gaining interest from chipset/device manufacturers, automotive and satellite/space industry，且 SMW 有 channel emulation capabilities to support NTN testing | [25] | 這是 channel emulation capability，不是知識庫中已確認的完整 automotive signaling conformance solution |\n### 限制\n知識庫中，直接把 **automotive application** 與 **signaling test** 連在一起的最強證據是 **NG eCall over CMX500 / CMX-KA098** [10]。\nWi‑Fi 7 passages support CMX500 Wi‑Fi 7 signaling R&D tests, but passages do not directly connect Wi‑Fi 7 testing to automotive applications, so it should not be presented as a primary automotive signaling capability from this evidence set [14]。\nAREG800A 是 automotive radar echo generator，來源描述的是 radar echo generation，不是 cellular/IMS signaling test capability [3][4]。\n\n來源：\n[3] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[4] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[8] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[14] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[17] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[25] `raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md`",
+      "created_at": "2026-10-09T08:49:13.499364Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-2d296298d17b456f9efe466d575d7237",
+       "request_id": "request-2d296298d17b456f9efe466d575d7237",
+       "span_id": "span-2d296298d17b456f9efe466d575d7237",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "建議主軸：Automotive signaling test 最重要應先聚焦 **NG eCall / IMS over LTE-5G 的真實網路條件驗證**，其次才擴展到 5G/LTE modem signaling、IMS voice/data、IP/application traffic，以及 NTN 相關場景 [10][17]。\n### 推薦先賣\n**NG eCall EN 17240:2024 signaling / compliance test**：R&S 與 Qualcomm Technologies 已用 **R&S CMX500** 驗證 **Snapdragon Auto 5G Modem-RF** 的 **Next Generation eCall** functionality；CMX500 搭配 **R&S CMX-KA098** 可在 realistic network conditions 下做 NG eCall testing，測試情境包含 simulating a PSAP，驗證 voice and data transmission，以及 EN 17240:2024 compliance [10]。\n**4G/5G packet-switched / IMS emergency-call migration testing**：eCall 自 2018 年起是 EU all new cars mandatory requirement；因 2G/3G circuit-switched networks obsolete，emergency call systems 需要適配 4G/5G packet-switched cellular networks；EN 17240:2024 covers eCall over IMS networks including 4G LTE and 5G NR technologies [17]。\n**Automotive modem 的 cellular signaling / network emulation**：CMX500 是 universal one-box network emulation and measurement test solution，支援 5G NR device testing，涵蓋 LTE、NR FR1、NR FR2，並支援 NSA、SA、FDD、TDD；CMX500 也提供 NR FR1/FR2 signaling、LTE signaling、IMS/audio/POLQA、application test、IP traffic analysis、throughput measurement、BLER、fading、AWGN 與 CSI report [8]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 | NG eCall EN 17240:2024 verification for automotive modem | R&S CMX-KA098 software option | 已用於 Snapdragon Auto 5G Modem-RF 的 NG eCall functionality verification；可在 realistic network conditions 下做 NG eCall testing，並 simulating a PSAP，驗證 voice and data transmission 與 EN 17240:2024 compliance | [10] | 知識庫未標示 CMX-KA098 的完整訂購料號、價格或必備硬體配置 |\n| R&S CMX500 | 4G/5G cellular signaling and network emulation | LTE、NR FR1、NR FR2；NSA、SA、FDD、TDD；NR FR1/FR2 signaling；LTE signaling | Automotive NG eCall 正在從 2G/3G circuit-switched 轉向 4G/5G packet-switched / IMS networks；CMX500 支援 LTE/NR network emulation and signaling | [8][17] | 知識庫未直接列出所有 automotive TCU、IVI 或 V2X test cases |\n| R&S CMX500 | IMS voice/data, audio quality, IP/application behavior | IMS/audio/POLQA、application test、IP traffic analysis、throughput measurement | NG eCall verification 包含 voice and data transmission；CMX500 具備 IMS/audio/POLQA、application test 與 IP traffic analysis capability | [8][10] | 知識庫未提供 EN 17240:2024 的逐項 test case list |\n| R&S CMX500 | Radio-link robustness under signaling | Fading、AWGN、BLER、CSI report、throughput measurement | CMX500 提供 fading、AWGN、BLER、CSI report 與 throughput measurement，可支援 device testing 的 radio-link and performance validation | [8] | 知識庫未直接說明這些項目已用於特定 automotive certification |\n| R&S SMW | NTN channel emulation for automotive-related NTN interest | Support for long path delays、enhanced Doppler capabilities、customized dynamic fading | RAW 來源指出 5G NTN-NR gaining interest from chipset/device manufacturers, automotive and satellite/space industry，且 SMW 有 channel emulation capabilities to support NTN testing | [25] | 這是 channel emulation capability，不是知識庫中已確認的完整 automotive signaling conformance solution |\n### 限制\n知識庫中，直接把 **automotive application** 與 **signaling test** 連在一起的最強證據是 **NG eCall over CMX500 / CMX-KA098** [10]。\nWi‑Fi 7 passages support CMX500 Wi‑Fi 7 signaling R&D tests, but passages do not directly connect Wi‑Fi 7 testing to automotive applications, so it should not be presented as a primary automotive signaling capability from this evidence set [14]。\nAREG800A 是 automotive radar echo generator，來源描述的是 radar echo generation，不是 cellular/IMS signaling test capability [3][4]。\n\n來源：\n[3] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[4] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[8] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[14] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[17] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[25] `raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-2d296298d17b456f9efe466d575d7237",
+      "request_id": "request-2d296298d17b456f9efe466d575d7237",
+      "span_id": "span-2d296298d17b456f9efe466d575d7237",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-2d296298d17b456f9efe466d575d7237",
+       "request_id": "request-2d296298d17b456f9efe466d575d7237",
+       "span_id": "span-2d296298d17b456f9efe466d575d7237",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "建議主軸：Automotive signaling test 最重要應先聚焦 **NG eCall / IMS over LTE-5G 的真實網路條件驗證**，其次才擴展到 5G/LTE modem signaling、IMS voice/data、IP/application traffic，以及 NTN 相關場景 [10][17]。\n### 推薦先賣\n**NG eCall EN 17240:2024 signaling / compliance test**：R&S 與 Qualcomm Technologies 已用 **R&S CMX500** 驗證 **Snapdragon Auto 5G Modem-RF** 的 **Next Generation eCall** functionality；CMX500 搭配 **R&S CMX-KA098** 可在 realistic network conditions 下做 NG eCall testing，測試情境包含 simulating a PSAP，驗證 voice and data transmission，以及 EN 17240:2024 compliance [10]。\n**4G/5G packet-switched / IMS emergency-call migration testing**：eCall 自 2018 年起是 EU all new cars mandatory requirement；因 2G/3G circuit-switched networks obsolete，emergency call systems 需要適配 4G/5G packet-switched cellular networks；EN 17240:2024 covers eCall over IMS networks including 4G LTE and 5G NR technologies [17]。\n**Automotive modem 的 cellular signaling / network emulation**：CMX500 是 universal one-box network emulation and measurement test solution，支援 5G NR device testing，涵蓋 LTE、NR FR1、NR FR2，並支援 NSA、SA、FDD、TDD；CMX500 也提供 NR FR1/FR2 signaling、LTE signaling、IMS/audio/POLQA、application test、IP traffic analysis、throughput measurement、BLER、fading、AWGN 與 CSI report [8]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 | NG eCall EN 17240:2024 verification for automotive modem | R&S CMX-KA098 software option | 已用於 Snapdragon Auto 5G Modem-RF 的 NG eCall functionality verification；可在 realistic network conditions 下做 NG eCall testing，並 simulating a PSAP，驗證 voice and data transmission 與 EN 17240:2024 compliance | [10] | 知識庫未標示 CMX-KA098 的完整訂購料號、價格或必備硬體配置 |\n| R&S CMX500 | 4G/5G cellular signaling and network emulation | LTE、NR FR1、NR FR2；NSA、SA、FDD、TDD；NR FR1/FR2 signaling；LTE signaling | Automotive NG eCall 正在從 2G/3G circuit-switched 轉向 4G/5G packet-switched / IMS networks；CMX500 支援 LTE/NR network emulation and signaling | [8][17] | 知識庫未直接列出所有 automotive TCU、IVI 或 V2X test cases |\n| R&S CMX500 | IMS voice/data, audio quality, IP/application behavior | IMS/audio/POLQA、application test、IP traffic analysis、throughput measurement | NG eCall verification 包含 voice and data transmission；CMX500 具備 IMS/audio/POLQA、application test 與 IP traffic analysis capability | [8][10] | 知識庫未提供 EN 17240:2024 的逐項 test case list |\n| R&S CMX500 | Radio-link robustness under signaling | Fading、AWGN、BLER、CSI report、throughput measurement | CMX500 提供 fading、AWGN、BLER、CSI report 與 throughput measurement，可支援 device testing 的 radio-link and performance validation | [8] | 知識庫未直接說明這些項目已用於特定 automotive certification |\n| R&S SMW | NTN channel emulation for automotive-related NTN interest | Support for long path delays、enhanced Doppler capabilities、customized dynamic fading | RAW 來源指出 5G NTN-NR gaining interest from chipset/device manufacturers, automotive and satellite/space industry，且 SMW 有 channel emulation capabilities to support NTN testing | [25] | 這是 channel emulation capability，不是知識庫中已確認的完整 automotive signaling conformance solution |\n### 限制\n知識庫中，直接把 **automotive application** 與 **signaling test** 連在一起的最強證據是 **NG eCall over CMX500 / CMX-KA098** [10]。\nWi‑Fi 7 passages support CMX500 Wi‑Fi 7 signaling R&D tests, but passages do not directly connect Wi‑Fi 7 testing to automotive applications, so it should not be presented as a primary automotive signaling capability from this evidence set [14]。\nAREG800A 是 automotive radar echo generator，來源描述的是 radar echo generation，不是 cellular/IMS signaling test capability [3][4]。\n\n來源：\n[3] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[4] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[8] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[14] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[17] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[25] `raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_ZM8sCPQCRNFYCt9d365XnSE5",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "建議主軸：Automotive signaling test 最重要應先聚焦 **NG eCall / IMS over LTE-5G 的真實網路條件驗證**，其次才擴展到 5G/LTE modem signaling、IMS voice/data、IP/application traffic，以及 NTN 相關場景 [10][17]。\n### 推薦先賣\n**NG eCall EN 17240:2024 signaling / compliance test**：R&S 與 Qualcomm Technologies 已用 **R&S CMX500** 驗證 **Snapdragon Auto 5G Modem-RF** 的 **Next Generation eCall** functionality；CMX500 搭配 **R&S CMX-KA098** 可在 realistic network conditions 下做 NG eCall testing，測試情境包含 simulating a PSAP，驗證 voice and data transmission，以及 EN 17240:2024 compliance [10]。\n**4G/5G packet-switched / IMS emergency-call migration testing**：eCall 自 2018 年起是 EU all new cars mandatory requirement；因 2G/3G circuit-switched networks obsolete，emergency call systems 需要適配 4G/5G packet-switched cellular networks；EN 17240:2024 covers eCall over IMS networks including 4G LTE and 5G NR technologies [17]。\n**Automotive modem 的 cellular signaling / network emulation**：CMX500 是 universal one-box network emulation and measurement test solution，支援 5G NR device testing，涵蓋 LTE、NR FR1、NR FR2，並支援 NSA、SA、FDD、TDD；CMX500 也提供 NR FR1/FR2 signaling、LTE signaling、IMS/audio/POLQA、application test、IP traffic analysis、throughput measurement、BLER、fading、AWGN 與 CSI report [8]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 | NG eCall EN 17240:2024 verification for automotive modem | R&S CMX-KA098 software option | 已用於 Snapdragon Auto 5G Modem-RF 的 NG eCall functionality verification；可在 realistic network conditions 下做 NG eCall testing，並 simulating a PSAP，驗證 voice and data transmission 與 EN 17240:2024 compliance | [10] | 知識庫未標示 CMX-KA098 的完整訂購料號、價格或必備硬體配置 |\n| R&S CMX500 | 4G/5G cellular signaling and network emulation | LTE、NR FR1、NR FR2；NSA、SA、FDD、TDD；NR FR1/FR2 signaling；LTE signaling | Automotive NG eCall 正在從 2G/3G circuit-switched 轉向 4G/5G packet-switched / IMS networks；CMX500 支援 LTE/NR network emulation and signaling | [8][17] | 知識庫未直接列出所有 automotive TCU、IVI 或 V2X test cases |\n| R&S CMX500 | IMS voice/data, audio quality, IP/application behavior | IMS/audio/POLQA、application test、IP traffic analysis、throughput measurement | NG eCall verification 包含 voice and data transmission；CMX500 具備 IMS/audio/POLQA、application test 與 IP traffic analysis capability | [8][10] | 知識庫未提供 EN 17240:2024 的逐項 test case list |\n| R&S CMX500 | Radio-link robustness under signaling | Fading、AWGN、BLER、CSI report、throughput measurement | CMX500 提供 fading、AWGN、BLER、CSI report 與 throughput measurement，可支援 device testing 的 radio-link and performance validation | [8] | 知識庫未直接說明這些項目已用於特定 automotive certification |\n| R&S SMW | NTN channel emulation for automotive-related NTN interest | Support for long path delays、enhanced Doppler capabilities、customized dynamic fading | RAW 來源指出 5G NTN-NR gaining interest from chipset/device manufacturers, automotive and satellite/space industry，且 SMW 有 channel emulation capabilities to support NTN testing | [25] | 這是 channel emulation capability，不是知識庫中已確認的完整 automotive signaling conformance solution |\n### 限制\n知識庫中，直接把 **automotive application** 與 **signaling test** 連在一起的最強證據是 **NG eCall over CMX500 / CMX-KA098** [10]。\nWi‑Fi 7 passages support CMX500 Wi‑Fi 7 signaling R&D tests, but passages do not directly connect Wi‑Fi 7 testing to automotive applications, so it should not be presented as a primary automotive signaling capability from this evidence set [14]。\nAREG800A 是 automotive radar echo generator，來源描述的是 radar echo generation，不是 cellular/IMS signaling test capability [3][4]。\n\n來源：\n[3] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[4] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[8] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[14] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[17] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[25] `raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md`",
+          "evidence": {
+           "raw_citations": 7,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

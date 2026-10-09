@@ -1,0 +1,855 @@
+{
+ "question": {
+  "id": "Q0221",
+  "text": "Map the chain from a Aerospace / Defense market requirement to a measurable parameter and then to a required capability of Signaling / Non-signaling Tester.",
+  "market": "Aerospace / Defense",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-c4e2b7509be34964adae85d377fd4112",
+ "exchange": {
+  "sent": "Map the chain from a Aerospace / Defense market requirement to a measurable parameter and then to a required capability of Signaling / Non-signaling Tester.",
+  "http_status": 200,
+  "seconds": 335.156,
+  "timed_out": false,
+  "reply": {
+   "ok": false,
+   "conversation": {
+    "session_id": "conversation-c4e2b7509be34964adae85d377fd4112",
+    "actor": "leo.chi",
+    "title": "Map the chain from a Aerospace / Defense market requirement to a measura…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T10:26:45.163714Z",
+    "updated_at": "2026-10-09T10:32:20.027750Z",
+    "messages": [
+     {
+      "message_id": "message-cc635abbe14e47119504ecaaea08e777",
+      "role": "user",
+      "text": "Map the chain from a Aerospace / Defense market requirement to a measurable parameter and then to a required capability of Signaling / Non-signaling Tester.",
+      "created_at": "2026-10-09T10:26:45.189035Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-70842deed0ea4267b5bf84487e99cac5",
+      "role": "assistant",
+      "text": "已查到可引用的部分資料：\n\n| Chain step | Supported mapping | Evidence |\n|---|---|---|\n| Aerospace / Defense market requirement | Defense/private-5G drivers include tactical edge connectivity, smart jamming and improved EW tactics, complex RF environment and contested spectrum, autonomous systems and drones requiring low latency, tactical private 5G networks on military bases, and secure command-and-control networks. | [10] |\n| Roadmap context | The defense/Future-G roadmap includes widespread 5G tactical-network deployment in 2025–2028, mmWave phased arrays for field testing, 5G/6G-capable SDRs in 2028–2032, early ISAC for drone detection/perimeter defense, and URLLC services for autonomy. | [3] |\n| Measurable parameter / test condition | NTN T&M requires reproducible, accurate, comparable test conditions and setups that include high path loss, Doppler shift, time delay, delay variance, atmospheric effects, Faraday effect, scintillation, and weather influences. | [24] |\n| Signaling Tester required capability | For 5G resilience testing, the source explicitly relates the scenario to an unmodified 5G DUT, handover frequency hopping, smart jamming, and states that R&S CMX500 was used as a network emulator. | [17] |\n| Signaling options status | A RAW source says required R&S CMX options exist for selected signaling features, but it does not provide option codes or detailed specifications. | [27] |\n【推論】For the supported A&D private-5G resilience chain, the clearest Signaling Tester capability is 5G network emulation for an unmodified DUT, using CMX500, with appropriate CMX signaling-feature options where applicable; this is inferred from the CMX500 network-emulator statement and the generic CMX signaling-options statement. [17][27]\n【推論】The measurable parameters most likely to drive tester capability in satellite/NTN-related aerospace use are high path loss, Doppler shift, time delay, delay variance, and propagation effects, but the passages do not bind these to a named Non-signaling Tester. [24]\n【推論】For drone/autonomy defense use, latency/URLLC is the measurable focus, because the market drivers mention drones requiring low latency and the roadmap mentions URLLC services for autonomy; no passage gives a latency threshold or tester option. [10][3]\n\n來源：\n[3] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[10] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[17] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[24] Wiki：NTN test and measurement aspects（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[27] `raw/Productions/CMX500_Features_CSW9-20-0_en_32.md`\n\n尚未證實：direct_relationship。因此不能把上列資料當成完整的推薦或比較。",
+      "created_at": "2026-10-09T10:32:20.027750Z",
+      "status": "failed",
+      "trace": {
+       "trace_id": "trace-9b8041edf83f48f9aac7f40aefa264ac",
+       "request_id": "request-9b8041edf83f48f9aac7f40aefa264ac",
+       "span_id": "span-9b8041edf83f48f9aac7f40aefa264ac",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": false,
+    "answer": "已查到可引用的部分資料：\n\n| Chain step | Supported mapping | Evidence |\n|---|---|---|\n| Aerospace / Defense market requirement | Defense/private-5G drivers include tactical edge connectivity, smart jamming and improved EW tactics, complex RF environment and contested spectrum, autonomous systems and drones requiring low latency, tactical private 5G networks on military bases, and secure command-and-control networks. | [10] |\n| Roadmap context | The defense/Future-G roadmap includes widespread 5G tactical-network deployment in 2025–2028, mmWave phased arrays for field testing, 5G/6G-capable SDRs in 2028–2032, early ISAC for drone detection/perimeter defense, and URLLC services for autonomy. | [3] |\n| Measurable parameter / test condition | NTN T&M requires reproducible, accurate, comparable test conditions and setups that include high path loss, Doppler shift, time delay, delay variance, atmospheric effects, Faraday effect, scintillation, and weather influences. | [24] |\n| Signaling Tester required capability | For 5G resilience testing, the source explicitly relates the scenario to an unmodified 5G DUT, handover frequency hopping, smart jamming, and states that R&S CMX500 was used as a network emulator. | [17] |\n| Signaling options status | A RAW source says required R&S CMX options exist for selected signaling features, but it does not provide option codes or detailed specifications. | [27] |\n【推論】For the supported A&D private-5G resilience chain, the clearest Signaling Tester capability is 5G network emulation for an unmodified DUT, using CMX500, with appropriate CMX signaling-feature options where applicable; this is inferred from the CMX500 network-emulator statement and the generic CMX signaling-options statement. [17][27]\n【推論】The measurable parameters most likely to drive tester capability in satellite/NTN-related aerospace use are high path loss, Doppler shift, time delay, delay variance, and propagation effects, but the passages do not bind these to a named Non-signaling Tester. [24]\n【推論】For drone/autonomy defense use, latency/URLLC is the measurable focus, because the market drivers mention drones requiring low latency and the roadmap mentions URLLC services for autonomy; no passage gives a latency threshold or tester option. [10][3]\n\n來源：\n[3] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[10] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[17] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[24] Wiki：NTN test and measurement aspects（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[27] `raw/Productions/CMX500_Features_CSW9-20-0_en_32.md`\n\n尚未證實：direct_relationship。因此不能把上列資料當成完整的推薦或比較。",
+    "status": "failed",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-9b8041edf83f48f9aac7f40aefa264ac",
+      "request_id": "request-9b8041edf83f48f9aac7f40aefa264ac",
+      "span_id": "span-9b8041edf83f48f9aac7f40aefa264ac",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-9b8041edf83f48f9aac7f40aefa264ac",
+       "request_id": "request-9b8041edf83f48f9aac7f40aefa264ac",
+       "span_id": "span-9b8041edf83f48f9aac7f40aefa264ac",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.2"
+       },
+       "trace": {
+        "trace_id": "trace-9b8041edf83f48f9aac7f40aefa264ac",
+        "request_id": "request-9b8041edf83f48f9aac7f40aefa264ac",
+        "span_id": "span-9b8041edf83f48f9aac7f40aefa264ac",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "Map the chain from a Aerospace / Defense market requirement to a measurable parameter and then to a required capability of Signaling / Non-signaling Tester.",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "Space Supply Chain › 與既有知識的關係\n- 與 [[4. Satellite Eco-chain in Taiwan]] 類似，本來源主要是 satellite / space supply chain link hub；兩者都含未擷取外部資料與未 OCR 圖片，不可直接當成已驗證供應鏈證據。\n- 與 [[3. Satcom market summary]] 類似，本來源列出外部新聞與文章連結；在正文未擷取前，只能作為待讀索引。\n- 與 [[0.Satcom Industry]]、[[台灣太空產業]]、[[台灣太空產業地圖]]、[[通訊衛星製造產業平台]]相關，但本來源沒有提供可直接增補的台灣太空產業地圖版本、公司名單、分類規則或政策資料。\n- 與 [[低軌衛星零組件與地面終端供應鏈]]相關，但 Yahoo 連結標題中的 [[事欣科]] / AST 訂單說法尚未取得正文或公告，不更新該供應鏈表格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Space Supply Chain.md"
+          },
+          "score": 1.643996
+         },
+         {
+          "text": "事欣科\n[[事欣科]]是 [[Space Supply Chain]] 中 Yahoo 股市文章連結標題括號內出現的公司名稱；本 vault 目前尚未擷取該新聞正文或公司公告。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/事欣科.md"
+          },
+          "score": 0.943275
+         },
+         {
+          "text": "5G private network resilience against smart jamming › Program / roadmap 脈絡\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 把 private 5G resilience 放入 defense / Future-G roadmap：\n\n| 期間 | 來源說法 |\n|---|---|\n| 2025–2028 | widespread deployment of 5G tactical networks；mmWave phased arrays available for field testing；hybrid commercial / military networks such as 5G.MIL-style architectures |\n| 2028–2032 | 5G/6G-capable software-defined radios replacing multi-radio tactical stacks；early [[ISAC]] deployment for drone detection and perimeter defense；[[URLLC]] services for autonomy |\n| 2032–2035+ | full 6G networks with integrated sensing；AI-native battlefield connectivity；high-precision location sensing and spectrum-aware autonomy |\n\n來源也列出 [[5G.MIL]]、[[Raytheon OXYGEN]]、[[L3Harris Tactical Network Demo]]、[[DoD EMS Superiority Strategy]] 與 [[FutureG ISAC]] / spectrum sharing programs，作為 FHSS 與 5G convergence 的 program examples。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+          },
+          "score": 1.683943
+         },
+         {
+          "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 3.606005
+         },
+         {
+          "text": "DO-160 airborne equipment EMC testing › 使用限制\n- 本頁不是 [[RTCA DO-160]] 正式標準摘要；只保存 [[2025RS Drone Solution]] 的簡報文字。\n- 不得由本頁推論 DO-160G / DO-160 任何 section 的完整 category、limit、waveform、test setup 或 pass / fail criteria。\n- 來源把 DO-160 放在 military / aviation drone example 中，但未說明特定 drone、eVTOL 或 avionics equipment 的 qualification plan。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+          },
+          "score": 3.16751
+         },
+         {
+          "text": "衛星地面設備 › Satellite Ground Station / Operation and Control Center 線索\n- [[Satellite Ground Station]]（raw converted 2026-09-17；來源正文未標示正式發布日期）列出 TASA | Satellite Operation and Control Center 外部連結。\n- 該連結指向 TASA 網站的 `space-facilities/satellite/satellite-operation-and-control-center` URL。\n- 本來源只提供 link hub 與未 OCR 圖片，尚未提供 [[Satellite Operation and Control Center]] 的正文內容。\n- 因此，這筆資料只可作為後續查證 [[TASA]] / [[國家太空中心]] 衛星地面站或操作控制中心的入口，不可視為設施規格或能力證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/衛星地面設備.md"
+          },
+          "score": 5.317672
+         },
+         {
+          "text": "Satellite Operation and Control Center › 可追溯限制\n- [[Satellite Ground Station]] 尚未擷取 TASA 外部頁正文，因此不能確認 [[Satellite Operation and Control Center]] 的中文正式名稱、法律 / 組織歸屬、地址、設備、任務、操作衛星、天線規格或服務能力。\n- 不得把外部連結標題改寫為 TASA 已公開某項地面站技術規格。\n- 不得從檔名或圖片嵌入推論設施照片內容、天線數量、frequency band、tracking capability、mission control workflow 或客戶 / 任務關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Satellite Operation and Control Center.md"
+          },
+          "score": 3.261989
+         },
+         {
+          "text": "經緯航太\n[[經緯航太]] 是 [[0. UAV產業分析報告架構]] 中列於 [[台灣無人機供應鏈]] 下游的公司，來源描述其與智慧農業與多用途無人機相關；[[4. UAV Eco-chain in Taiwan]] 另在 System Integrator 區段列出經緯航太名稱。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/經緯航太.md"
+          },
+          "score": 0.70924
+         },
+         {
+          "text": "Space Supply Chain\n這份 OneNote 來源是 space / satellite supply chain 的外部資料與圖片 link hub，列出 [[Satellite Applications Catapult]] 的 Space Capabilities Catalogue、Yahoo 股市文章連結、[[PARPRO]] aerospace & defense solution 連結，以及多張未 OCR 圖片；本次 ingest 未擷取外部網頁正文，也未擷取圖片文字。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Space Supply Chain.md"
+          },
+          "score": 0.839992
+         },
+         {
+          "text": "5G private network resilience against smart jamming › Mission context 與 industry drivers\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 列出的 mission / market drivers 包含：\n\n- tactical edge connectivity needs；\n- rise of smart jamming and improved [[EW]] tactics；\n- complex RF environment 與 contested spectrum；\n- growing adoption of private 5G networks；\n- autonomous systems and drones requiring low latency；\n- expansion of tactical private 5G networks on military bases；\n- demand for secure command-and-control networks；\n- strategic partnerships，例如來源提到 Nokia + L3Harris in 2024；\n- multi-year contracts，例如來源提到 Northrop Grumman 5G battlefield networking in 2024。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 另稱 United States Department of Defense has recently embarked on a strategy leveraging both public and private 5G networks，並說 5G could become the de-facto communications network between NATO members。此為 white paper statement；來源未附完整 DoD / NATO 文件引用。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+          },
+          "score": 1.281171
+         },
+         {
+          "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 2.354196
+         },
+         {
+          "text": "DO-160 airborne equipment EMC testing\n[[DO-160 airborne equipment EMC testing]] 是 [[2025RS Drone Solution]] 中引用 [[RTCA DO-160]] 作為 airborne equipment environmental conditions and test procedures 的測試線索，用於 military / aviation drone EMC proposal context。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+          },
+          "score": 2.269403
+         },
+         {
+          "text": "衛星地面設備 › 與既有頁面的關係\n- [[低軌衛星零組件與地面終端供應鏈]] 已整理 2026-09-15 市場報告中的地面設備與用戶終端公司，例如 [[啟碁]]、[[耀登]]、[[鐳洋科技]]、[[稜研科技]]與[[濰元科技]]。\n- [[Satellite User Terminal 外部資料清單]] 保存 [[User Terminal]] 來源中的 OneWeb / Kuiper / Starlink user terminal、test flow 與 supply-chain 待讀材料。\n- [[相控陣列天線]] 是地面終端與電子掃描天線相關的主題；[[User Terminal]] 補入 flat-panel antenna、ESA、phased array OTA testing、active phased array characterization 等待讀連結。\n- [[手機直連衛星供應鏈]] 涉及衛星通訊服務與手機終端，但 [[0.Satcom Industry]] 的「衛星地面設備」數字不可直接套用到手機直連衛星市場。\n- [[Satellite Operation and Control Center]] 是 [[Satellite Ground Station]] 新增的 TASA 外部頁線索，應待外部正文擷取後再判斷其與地面設備、ground station、mission control 或 satellite operations 的關係。\n- [[低軌衛星通信終端設備技術規範與相關檢測]]補入規範 / 檢測視角，連到 [[衛星地球電臺設備技術規範]]、[[低軌衛星終端設備檢測]]與[[電信技術中心]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/衛星地面設備.md"
+          },
+          "score": 3.646841
+         },
+         {
+          "text": "TASA › Satellite Operation and Control Center 待讀線索\n- [[Satellite Ground Station]] 只提供外部連結標題與 URL，未擷取 TASA 頁面正文。\n- 本線索連到 [[Satellite Operation and Control Center]]，可作為後續補強 [[衛星地面設備]]、[[台灣太空產業]] 與 TASA space facilities 資料的入口。\n- 目前不能根據該 link hub 判斷 TASA 地面站的地點、設備、操作衛星、任務範圍、建置年份或技術規格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/TASA.md"
+          },
+          "score": 4.303038
+         },
+         {
+          "text": "經緯航太 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[經緯航太]] 列在台灣無人機產業供應鏈下游，分類為整機製造與應用服務，描述為智慧農業與多用途無人機。\n- [[4. UAV Eco-chain in Taiwan]]（來源未標示正式日期；raw 轉檔 2026-09-17）在 System Integrator 區段列出經緯航太，但未附 URL 或補充文字。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/經緯航太.md"
+          },
+          "score": 0.642929
+         },
+         {
+          "text": "Space Supply Chain › References（來源原文列出但未擷取正文）\n- `https://sa.catapult.org.uk/space-capabilities-catalogue/` — [[Satellite Applications Catapult]] Space Capabilities Catalogue。\n- `![[Space Supply Chain image.png]]`\n- `202507:` + `![[Space Supply Chain image 1.png]]`\n- `2022:` + `![[Space Supply Chain image.jpg]]`\n- `2021:` + `![[Space Supply Chain image 2.png]]`\n- Yahoo 股市連結：連結文字包含「低軌衛星黑馬出列！它『拿下 AST 訂單』在手訂單突破 1.3 億美元 股價勁揚逾 8%（事欣科）」。\n- `https://www.parpro.com.tw/solutions/aerospace-defense/`\n- `![[Space Supply Chain image 1.jpg]]`\n- `![[Space Supply Chain image 2.jpg]]`\n- `![[Space Supply Chain image 3.png]]`\n- `![[Space Supply Chain image 4.png]]`\n- `https://teams.microsoft.com/v2/`\n- `![[Space Supply Chain image 5.png]]`\n- `![[Space Supply Chain image 6.png]]`\n- `![[Space Supply Chain image 7.png]]`\n- `![[Space Supply Chain image 8.png]]`\n- `![[Space Supply Chain image 9.png]]`\n- `![[Space Supply Chain image 10.png]]`",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Space Supply Chain.md"
+          },
+          "score": 0.770897
+         },
+         {
+          "text": "5G private network resilience against smart jamming › 與既有頁面的關係\n- [[DUT]]：本概念的限制條件是 unmodified 5G DUT。\n- [[Handover frequency hopping]]：白皮書中最具體的 implementation。\n- [[Frequency hopping for 5G resilience]]：本概念的主要技術方向。\n- [[Smart Jamming]]：本概念要處理的 threat model。\n- [[R&S CMX500]]：白皮書明示測試使用 CMX500 作為 network emulator；但該 Market source 不是 CMX500 binding specifications。\n- [[Counter-UAV 技術]]：簡報 mid-term roadmap 提到 drone detection 與 perimeter defense，但不是 counter-UAV 系統評估來源。\n- [[Beamforming]]：簡報短期 roadmap 提到 mmWave phased arrays field testing，但沒有 beamforming 定義或測試方法。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+          },
+          "score": 1.143075
+         },
+         {
+          "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 2.082402
+         },
+         {
+          "text": "DO-160 airborne equipment EMC testing › 來源中的 DO-160 定位\n[[2025RS Drone Solution]] 說 [[RTCA DO-160]] is important because it provides the minimum operational performance standards for electronic systems and equipment that support aviation to pursue increased safety, system capacity and efficiency。\n\n來源另說其 purpose 是提供 means of determining performance characteristics of airborne equipment in environmental conditions which may be encountered in airborne operation of the equipment，並可與 applicable standards 一起作為 minimum specification。\n\n使用限制：來源未提供 DO-160 的正式版次文件、section limit table、category matrix 或適用 drone 類型。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+          },
+          "score": 0.396179
+         },
+         {
+          "text": "衛星地面設備 › Satellite user terminal link hub\n[[User Terminal]]（來源正文標示 links current as of January 7, 2026, 1:33 PM CST；raw converted 2026-09-17）提供一組衛星 user terminal、OEM terminal manufacturers、RF components、infrastructure、Kuiper / Starlink test flow 與 supply chain 待讀資料索引。\n\n該來源列出三個本機附件但未擷取正文：\n\n- `oneweb_ut_final_presentation.html`。\n- `Kuiper UT Test & Supply Chain.pptx`。\n- `Starlink UT Test Flow.pptx`。\n\n該來源表格列出 user terminal / terminal ecosystem 線索：\n\n- Primary OEM Terminal Manufacturers：[[Intellian]]、[[Hughes]]、[[Kymeta]]、[[Sharp]]。\n- Expanded OEM Ecosystem：[[Gilat ESR-2030Ku]]、[[ThinKom Ka2517]]、[[SatixFy ESMA]]、[[Intelsat ESA]]。\n- RF Components & Semiconductors：[[Qorvo QPA1722]]、[[MediaTek M80]]、[[Analog Devices]] / [[ADAR1000]]。\n- Infrastructure & Distribution：[[Hughes Network]]、[[Airbus OneWeb]]、[[Eutelsat]]、[[KVH]]。\n- Kuiper / Amazon：[[Project Kuiper]]、[[Amazon Leo]]、[[Amazon]] official terminal links、FCC appendix、R&S / Keysight phased array testing references。\n- Starlink：[[Starlink]] user terminal supply chain、teardown、FCC filings、R&S / Keysight / GSOA testing links、Taiwan Focus references。\n\n這些內容目前只可作為 [[Satellite User Terminal 外部資料清單]] 的待讀索引；不可直接視為產品規格、供應鏈驗證、測試報告或商用狀態證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/衛星地面設備.md"
+          },
+          "score": 3.235659
+         },
+         {
+          "text": "國家太空中心 › 來源中的說法\n- [[0.Satcom Industry]]（來源正文未標示正式發布日期；內容含 2025 年資料點；raw converted 2026-09-17）稱[[國家太空中心]] / [[TASA]] 於美國 [[Satellite 2025]] 展會中首度發表《[[台灣太空產業地圖]]》。\n- 同一來源稱《[[台灣太空產業地圖]]》涵蓋 222 家企業與機構，展現完整供應鏈與國際合作潛力。\n- 同一來源將台灣太空產業描述為歷經三期國家太空科技發展長程計畫，並稱第三期計畫強調「韌性」與「產業化」。\n- [[02160280]]（頁尾標示《科儀新知》216期 `107.9`；raw converted 2026-09-17）稱 [[FORMOSAT-5]] 是台灣首次由 National Space Organization, Taiwan 自行完成 design、analysis、assembly、validation and test 的 spacecraft。\n- [[02160280]] 稱 [[FORMOSAT-5]] [[衛星電力次系統]]由太空中心主導；[[PCDU]]由中科院與太空中心設計、製作與驗證測試；衛星線束由太空中心設計並委託國外製作；演算法與控制軟體由太空中心設計、編碼與系統驗證。\n- [[02160280]] 文末作者簡介稱[[葉嘉靖]]為 National Space Organization, NARLabs 的 Electrical Engineering Division principal engineer。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/國家太空中心.md"
+          },
+          "score": 3.228805
+         },
+         {
+          "text": "經緯航太 › 可追溯限制\n- 來源未提供經緯航太的無人機型號、客戶、出貨、認證、營收或得標資料。\n- 來源未標示股票代號；本頁不推補。\n- [[4. UAV Eco-chain in Taiwan]] 僅列名稱，不能推論其具體 System Integrator 產品、服務或供應關係。\n- 本頁不把來源列名改寫為已確認供應、量產或採購關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/經緯航太.md"
+          },
+          "score": 0.557813
+         },
+         {
+          "text": "Randy Schnell\n[[Randy Schnell]] 是 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 封面列名的 Business Development Manager，Aerospace & Defense Test。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Randy Schnell.md"
+          },
+          "score": 1.393525
+         },
+         {
+          "text": "NTN test and measurement aspects › NTN 對 T&M 的 paradigm change\n來源指出 [[NTN]] 改變傳統 wireless T&M 假設：\n\n- 傳統假設 UE mobile、network entities stationary。\n- NTN 需考慮 UE 與 network entities 兩者 mobility。\n- 測試條件需 reproducible、accurate、comparable，但 setup 需加入 high path loss、Doppler shift、time delay、delay variance、atmospheric effects、Faraday effect、scintillation、weather influences。\n- satellite 入軌後 maintenance / replacement 困難，使 simulation、software-assisted testing、digital twin、in-orbit monitoring 更重要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+          },
+          "score": 5.946902
+         },
+         {
+          "text": "https://www.parpro.com.tw/solutions/aerospace-defense/",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-6ae422456b68416f",
+            "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+            "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+            "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.758653
+         },
+         {
+          "text": "For easier analysis, you can switch from the default \"Flat\" view to a \"Grouped\" view of flows or visualize\nthe connections on a world map.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-bc47a8ad4da77a6a",
+            "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+            "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+           "section": 3477,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.563123
+         },
+         {
+          "text": "The following tables list the required R&S CMX-... options for a selection of signaling\nfeatures.",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-bc47a8ad4da77a6a",
+            "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+            "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+           "section": 393,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 22.0844
+         },
+         {
+          "text": "If a HD-UE is configured by higher layers to transmit SRS, or PUCCH, or PUSCH in a set of symbols and the UE\ndetects a DCI format indicating to the HD-UE to receive CSI-RS or PDSCH in a subset of symbols from the set of\nsymbols, then",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-2e1893bfa566bdfc",
+            "original_ref": "raw/Knowledge/Half-Duplex UE in paired spectrum.md",
+            "sha256": "2e1893bfa566bdfc0b0212f4bf4f68e132e1be61d655c953c089ec511a2e4b51",
+            "raw_ref": "raw/Knowledge/Half-Duplex UE in paired spectrum.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Knowledge/Half-Duplex UE in paired spectrum.md",
+           "section": 21,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 22.050995
+         }
+        ],
+        "text": "| Chain step | Supported mapping | Evidence |\n|---|---|---|\n| Aerospace / Defense market requirement | Defense/private-5G drivers include tactical edge connectivity, smart jamming and improved EW tactics, complex RF environment and contested spectrum, autonomous systems and drones requiring low latency, tactical private 5G networks on military bases, and secure command-and-control networks. | [10] |\n| Roadmap context | The defense/Future-G roadmap includes widespread 5G tactical-network deployment in 2025–2028, mmWave phased arrays for field testing, 5G/6G-capable SDRs in 2028–2032, early ISAC for drone detection/perimeter defense, and URLLC services for autonomy. | [3] |\n| Measurable parameter / test condition | NTN T&M requires reproducible, accurate, comparable test conditions and setups that include high path loss, Doppler shift, time delay, delay variance, atmospheric effects, Faraday effect, scintillation, and weather influences. | [24] |\n| Signaling Tester required capability | For 5G resilience testing, the source explicitly relates the scenario to an unmodified 5G DUT, handover frequency hopping, smart jamming, and states that R&S CMX500 was used as a network emulator. | [17] |\n| Signaling options status | A RAW source says required R&S CMX options exist for selected signaling features, but it does not provide option codes or detailed specifications. | [27] |\n【推論】For the supported A&D private-5G resilience chain, the clearest Signaling Tester capability is 5G network emulation for an unmodified DUT, using CMX500, with appropriate CMX signaling-feature options where applicable; this is inferred from the CMX500 network-emulator statement and the generic CMX signaling-options statement. [17][27]\n【推論】The measurable parameters most likely to drive tester capability in satellite/NTN-related aerospace use are high path loss, Doppler shift, time delay, delay variance, and propagation effects, but the passages do not bind these to a named Non-signaling Tester. [24]\n【推論】For drone/autonomy defense use, latency/URLLC is the measurable focus, because the market drivers mention drones requiring low latency and the roadmap mentions URLLC services for autonomy; no passage gives a latency threshold or tester option. [10][3]",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "5G private network resilience against smart jamming › Program / roadmap 脈絡\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 把 private 5G resilience 放入 defense / Future-G roadmap：\n\n| 期間 | 來源說法 |\n|---|---|\n| 2025–2028 | widespread deployment of 5G tactical networks；mmWave phased arrays available for field testing；hybrid commercial / military networks such as 5G.MIL-style architectures |\n| 2028–2032 | 5G/6G-capable software-defined radios replacing multi-radio tactical stacks；early [[ISAC]] deployment for drone detection and perimeter defense；[[URLLC]] services for autonomy |\n| 2032–2035+ | full 6G networks with integrated sensing；AI-native battlefield connectivity；high-precision location sensing and spectrum-aware autonomy |\n\n來源也列出 [[5G.MIL]]、[[Raytheon OXYGEN]]、[[L3Harris Tactical Network Demo]]、[[DoD EMS Superiority Strategy]] 與 [[FutureG ISAC]] / spectrum sharing programs，作為 FHSS 與 5G convergence 的 program examples。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 7,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+         },
+         "score": 1.683943
+        },
+        {
+         "text": "5G private network resilience against smart jamming › Mission context 與 industry drivers\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 列出的 mission / market drivers 包含：\n\n- tactical edge connectivity needs；\n- rise of smart jamming and improved [[EW]] tactics；\n- complex RF environment 與 contested spectrum；\n- growing adoption of private 5G networks；\n- autonomous systems and drones requiring low latency；\n- expansion of tactical private 5G networks on military bases；\n- demand for secure command-and-control networks；\n- strategic partnerships，例如來源提到 Nokia + L3Harris in 2024；\n- multi-year contracts，例如來源提到 Northrop Grumman 5G battlefield networking in 2024。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 另稱 United States Department of Defense has recently embarked on a strategy leveraging both public and private 5G networks，並說 5G could become the de-facto communications network between NATO members。此為 white paper statement；來源未附完整 DoD / NATO 文件引用。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+         },
+         "score": 1.281171
+        },
+        {
+         "text": "5G private network resilience against smart jamming › 與既有頁面的關係\n- [[DUT]]：本概念的限制條件是 unmodified 5G DUT。\n- [[Handover frequency hopping]]：白皮書中最具體的 implementation。\n- [[Frequency hopping for 5G resilience]]：本概念的主要技術方向。\n- [[Smart Jamming]]：本概念要處理的 threat model。\n- [[R&S CMX500]]：白皮書明示測試使用 CMX500 作為 network emulator；但該 Market source 不是 CMX500 binding specifications。\n- [[Counter-UAV 技術]]：簡報 mid-term roadmap 提到 drone detection 與 perimeter defense，但不是 counter-UAV 系統評估來源。\n- [[Beamforming]]：簡報短期 roadmap 提到 mmWave phased arrays field testing，但沒有 beamforming 定義或測試方法。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 8,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+         },
+         "score": 1.143075
+        },
+        {
+         "text": "NTN test and measurement aspects › NTN 對 T&M 的 paradigm change\n來源指出 [[NTN]] 改變傳統 wireless T&M 假設：\n\n- 傳統假設 UE mobile、network entities stationary。\n- NTN 需考慮 UE 與 network entities 兩者 mobility。\n- 測試條件需 reproducible、accurate、comparable，但 setup 需加入 high path loss、Doppler shift、time delay、delay variance、atmospheric effects、Faraday effect、scintillation、weather influences。\n- satellite 入軌後 maintenance / replacement 困難，使 simulation、software-assisted testing、digital twin、in-orbit monitoring 更重要。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+         },
+         "score": 5.946902
+        },
+        {
+         "text": "The following tables list the required R&S CMX-... options for a selection of signaling\nfeatures.",
+         "citation": {
+          "kind": "raw",
+          "source": {
+           "source_id": "src-bc47a8ad4da77a6a",
+           "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+           "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+           "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+           "page": null,
+           "slide": null,
+           "parent_source_id": null
+          },
+          "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+          "section": 393,
+          "page": null,
+          "slide": null,
+          "wiki_page": null
+         },
+         "score": 22.0844
+        }
+       ],
+       "assessment": {
+        "status": "missing",
+        "facets": [
+         {
+          "name": "market_segment",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/Space Supply Chain.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 7,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 9,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/經緯航太.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/Space Supply Chain.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 3,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+           }
+          ],
+          "attempts": 1
+         },
+         {
+          "name": "technical_knowledge",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 3,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+           },
+           {
+            "kind": "raw",
+            "source": {
+             "source_id": "src-bc47a8ad4da77a6a",
+             "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+             "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+             "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+             "page": null,
+             "slide": null,
+             "parent_source_id": null
+            },
+            "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+            "section": 393,
+            "page": null,
+            "slide": null,
+            "wiki_page": null
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": true,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md",
+         "raw_refs": [
+          "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+          "raw/Market/OneNote/5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/NTN test and measurement aspects.md",
+         "raw_refs": [
+          "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-9419ceece9b14312b7683012c7d030e5",
+      "task_sha256": "d341bdd850ff2230ca4e914a7a8540cdca6e5de1d74f0b619865b029bac69e71",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.6.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "failed",
+     "retry_count": 1,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validation_failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "sequence": 4,
+       "kind": "retrying",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 5,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 6,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 7,
+       "kind": "validation_failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "sequence": 8,
+       "kind": "failed",
+       "evidence_ref": "bridge_facet_assessment"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": "host_check_failed"
+    },
+    "evidence": {
+     "raw_citations": 5,
+     "facet_status": "missing",
+     "missing_facets": [],
+     "relation_status": "missing",
+     "retrieval_attempts": {
+      "market_segment": 1,
+      "technical_knowledge": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

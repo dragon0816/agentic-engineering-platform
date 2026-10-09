@@ -31,7 +31,7 @@ sys.path.insert(0, str(HERE))
 from evidence import knowledge_use  # noqa: E402
 from run import HOST_JSON, credential  # noqa: E402
 
-GRADER_VERSION = "1.1"
+GRADER_VERSION = "1.2"
 LABELS = ("covered", "partial", "missing", "contradicted")
 
 RUBRIC = """You compare an ANSWER from a company knowledge assistant with a REFERENCE
@@ -45,8 +45,10 @@ For each key point decide, judging meaning and not wording:
 - contradicted: the answer states something incompatible with it.
 Then list, under "invented", claims the answer presents as fact that the
 reference's "not in the knowledge base" section says are absent. A claim that
-the reference answer or its key points also state is never invented. Leave it empty when
-there are none. Do not use your own knowledge of the facts.
+the reference answer or its key points also state is never invented. A claim
+the answer itself labels as not from the knowledge base (general knowledge,
+clearly marked) is not invented either. Leave it empty when there are none.
+Do not use your own knowledge of the facts.
 
 Reply with one JSON object:
 {"points": [{"n": 1, "label": "covered|partial|missing|contradicted",

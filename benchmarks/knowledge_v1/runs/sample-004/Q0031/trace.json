@@ -1,0 +1,123 @@
+{
+ "question": {
+  "id": "Q0031",
+  "text": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "market": "Wireless Communication",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-50ad46a2f0bd4606a73942a4b1192c9f",
+ "exchange": {
+  "sent": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "http_status": 200,
+  "seconds": 107.735,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-50ad46a2f0bd4606a73942a4b1192c9f",
+    "actor": "leo.chi",
+    "title": "How do changes in Wi-Fi 7/8 technology affect the measurement capability…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T07:56:33.699303Z",
+    "updated_at": "2026-10-09T07:58:16.340429Z",
+    "messages": [
+     {
+      "message_id": "message-7ab2f3c9d9fa480fba39a8bb08b03e02",
+      "role": "user",
+      "text": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+      "created_at": "2026-10-09T07:56:33.720934Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-8e25d3feea4149ffbc12cb955bda2848",
+      "role": "assistant",
+      "text": "| Tester type | Wi-Fi 7/8 technology change | Required measurement capability impact | RAW evidence |\n|---|---|---|---|\n| Signaling tester | Wi-Fi 7 requires WLAN-device RF transmitter and receiver measurements under real-world signaling conditions. | The tester must support signaling-mode RF TX/RX measurement under real-world conditions. | [26], [28] |\n| Signaling tester | Wi-Fi 7 makes MLO a key feature. | The tester must provide multiple RF chains for MLO testing. | [26], [28] |\n| Signaling tester | Wi-Fi 7-specific tests include 2x2 MIMO, 6 GHz band with out-of-band discovery, coexistence, and E2E testing. | The tester must cover multi-antenna, 6 GHz discovery, coexistence, and end-to-end test capabilities. | [28] |\n| Signaling tester | Wi-Fi 7 testing benefits from support for multiple radio technologies and embedded IP test capabilities. | The tester should support multi-radio test scenarios and IP-layer/application-related validation. | [26], [28] |\n| Signaling tester | Wi-Fi 8 retains Wi-Fi 7 physical-layer parameters such as frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz, 4096QAM, and MLO. | The tester must preserve Wi-Fi 7-class RF bandwidth, modulation, frequency-range, and MLO measurement capability for Wi-Fi 8. | [27] |\n| Signaling tester | Wi-Fi 8 introduces new PHY and MAC technologies to meet UHR goals. | The tester needs enhanced Wi-Fi 8 capability to handle new testing hurdles from those PHY/MAC changes. | [27] |\n| Signaling tester | Wi-Fi 8 testing is described as validating a prototype device and showcasing physical-layer features unique to Wi-Fi 8. | The tester must be able to validate prototype Wi-Fi 8 devices and exercise Wi-Fi 8-unique PHY features. | [25] |\n【推論】Because Wi-Fi 8 retains MLO and Wi-Fi 7 requires multiple RF chains for MLO, Wi-Fi 8 signaling testers should also maintain multiple-RF-chain capability. [26], [27]\n\n來源：\n[25] `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`\n[26] `raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`\n[27] `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`\n[28] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+      "created_at": "2026-10-09T07:58:16.340429Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-7a1e9a19082e4622806a0b211da24b05",
+       "request_id": "request-7a1e9a19082e4622806a0b211da24b05",
+       "span_id": "span-7a1e9a19082e4622806a0b211da24b05",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "| Tester type | Wi-Fi 7/8 technology change | Required measurement capability impact | RAW evidence |\n|---|---|---|---|\n| Signaling tester | Wi-Fi 7 requires WLAN-device RF transmitter and receiver measurements under real-world signaling conditions. | The tester must support signaling-mode RF TX/RX measurement under real-world conditions. | [26], [28] |\n| Signaling tester | Wi-Fi 7 makes MLO a key feature. | The tester must provide multiple RF chains for MLO testing. | [26], [28] |\n| Signaling tester | Wi-Fi 7-specific tests include 2x2 MIMO, 6 GHz band with out-of-band discovery, coexistence, and E2E testing. | The tester must cover multi-antenna, 6 GHz discovery, coexistence, and end-to-end test capabilities. | [28] |\n| Signaling tester | Wi-Fi 7 testing benefits from support for multiple radio technologies and embedded IP test capabilities. | The tester should support multi-radio test scenarios and IP-layer/application-related validation. | [26], [28] |\n| Signaling tester | Wi-Fi 8 retains Wi-Fi 7 physical-layer parameters such as frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz, 4096QAM, and MLO. | The tester must preserve Wi-Fi 7-class RF bandwidth, modulation, frequency-range, and MLO measurement capability for Wi-Fi 8. | [27] |\n| Signaling tester | Wi-Fi 8 introduces new PHY and MAC technologies to meet UHR goals. | The tester needs enhanced Wi-Fi 8 capability to handle new testing hurdles from those PHY/MAC changes. | [27] |\n| Signaling tester | Wi-Fi 8 testing is described as validating a prototype device and showcasing physical-layer features unique to Wi-Fi 8. | The tester must be able to validate prototype Wi-Fi 8 devices and exercise Wi-Fi 8-unique PHY features. | [25] |\n【推論】Because Wi-Fi 8 retains MLO and Wi-Fi 7 requires multiple RF chains for MLO, Wi-Fi 8 signaling testers should also maintain multiple-RF-chain capability. [26], [27]\n\n來源：\n[25] `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`\n[26] `raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`\n[27] `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`\n[28] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-7a1e9a19082e4622806a0b211da24b05",
+      "request_id": "request-7a1e9a19082e4622806a0b211da24b05",
+      "span_id": "span-7a1e9a19082e4622806a0b211da24b05",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-7a1e9a19082e4622806a0b211da24b05",
+       "request_id": "request-7a1e9a19082e4622806a0b211da24b05",
+       "span_id": "span-7a1e9a19082e4622806a0b211da24b05",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "| Tester type | Wi-Fi 7/8 technology change | Required measurement capability impact | RAW evidence |\n|---|---|---|---|\n| Signaling tester | Wi-Fi 7 requires WLAN-device RF transmitter and receiver measurements under real-world signaling conditions. | The tester must support signaling-mode RF TX/RX measurement under real-world conditions. | [26], [28] |\n| Signaling tester | Wi-Fi 7 makes MLO a key feature. | The tester must provide multiple RF chains for MLO testing. | [26], [28] |\n| Signaling tester | Wi-Fi 7-specific tests include 2x2 MIMO, 6 GHz band with out-of-band discovery, coexistence, and E2E testing. | The tester must cover multi-antenna, 6 GHz discovery, coexistence, and end-to-end test capabilities. | [28] |\n| Signaling tester | Wi-Fi 7 testing benefits from support for multiple radio technologies and embedded IP test capabilities. | The tester should support multi-radio test scenarios and IP-layer/application-related validation. | [26], [28] |\n| Signaling tester | Wi-Fi 8 retains Wi-Fi 7 physical-layer parameters such as frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz, 4096QAM, and MLO. | The tester must preserve Wi-Fi 7-class RF bandwidth, modulation, frequency-range, and MLO measurement capability for Wi-Fi 8. | [27] |\n| Signaling tester | Wi-Fi 8 introduces new PHY and MAC technologies to meet UHR goals. | The tester needs enhanced Wi-Fi 8 capability to handle new testing hurdles from those PHY/MAC changes. | [27] |\n| Signaling tester | Wi-Fi 8 testing is described as validating a prototype device and showcasing physical-layer features unique to Wi-Fi 8. | The tester must be able to validate prototype Wi-Fi 8 devices and exercise Wi-Fi 8-unique PHY features. | [25] |\n【推論】Because Wi-Fi 8 retains MLO and Wi-Fi 7 requires multiple RF chains for MLO, Wi-Fi 8 signaling testers should also maintain multiple-RF-chain capability. [26], [27]\n\n來源：\n[25] `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`\n[26] `raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`\n[27] `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`\n[28] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_Ryp99ZBeTRbxwTRKHoNOOA9J",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "| Tester type | Wi-Fi 7/8 technology change | Required measurement capability impact | RAW evidence |\n|---|---|---|---|\n| Signaling tester | Wi-Fi 7 requires WLAN-device RF transmitter and receiver measurements under real-world signaling conditions. | The tester must support signaling-mode RF TX/RX measurement under real-world conditions. | [26], [28] |\n| Signaling tester | Wi-Fi 7 makes MLO a key feature. | The tester must provide multiple RF chains for MLO testing. | [26], [28] |\n| Signaling tester | Wi-Fi 7-specific tests include 2x2 MIMO, 6 GHz band with out-of-band discovery, coexistence, and E2E testing. | The tester must cover multi-antenna, 6 GHz discovery, coexistence, and end-to-end test capabilities. | [28] |\n| Signaling tester | Wi-Fi 7 testing benefits from support for multiple radio technologies and embedded IP test capabilities. | The tester should support multi-radio test scenarios and IP-layer/application-related validation. | [26], [28] |\n| Signaling tester | Wi-Fi 8 retains Wi-Fi 7 physical-layer parameters such as frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz, 4096QAM, and MLO. | The tester must preserve Wi-Fi 7-class RF bandwidth, modulation, frequency-range, and MLO measurement capability for Wi-Fi 8. | [27] |\n| Signaling tester | Wi-Fi 8 introduces new PHY and MAC technologies to meet UHR goals. | The tester needs enhanced Wi-Fi 8 capability to handle new testing hurdles from those PHY/MAC changes. | [27] |\n| Signaling tester | Wi-Fi 8 testing is described as validating a prototype device and showcasing physical-layer features unique to Wi-Fi 8. | The tester must be able to validate prototype Wi-Fi 8 devices and exercise Wi-Fi 8-unique PHY features. | [25] |\n【推論】Because Wi-Fi 8 retains MLO and Wi-Fi 7 requires multiple RF chains for MLO, Wi-Fi 8 signaling testers should also maintain multiple-RF-chain capability. [26], [27]\n\n來源：\n[25] `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`\n[26] `raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`\n[27] `raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`\n[28] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+          "evidence": {
+           "raw_citations": 4,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

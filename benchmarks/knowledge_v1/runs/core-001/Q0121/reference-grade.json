@@ -1,0 +1,65 @@
+{
+ "id": "Q0121",
+ "grader": "1.2",
+ "coverage": 0.125,
+ "points": [
+  {
+   "n": 1,
+   "point": "市場需求端：5G FWA operator 的 Rel.16 需求包含 mmWave 載波聚合由 4CC/8CC 擴到 10CC，以及吞吐由 7.9 Gbps 提升到 10 Gbps、FR1+FR2 ENDC 轉為 DC/CA",
+   "verified": true,
+   "label": "missing",
+   "why": "未提 5G FWA Rel.16、4CC/8CC→10CC、7.9→10Gbps、ENDC→DC/CA"
+  },
+  {
+   "n": 2,
+   "point": "市場需求被轉成 RF parametric 可量測參數：Output power、EVM、OBW、receiver sensitivity level BLER、band permutations and CAs（多為 operator 要求）",
+   "verified": true,
+   "label": "partial",
+   "why": "只提 output power、spectrum/部分 EVM，缺 OBW、receiver sensitivity BLER、band permutations/CAs"
+  },
+  {
+   "n": 3,
+   "point": "這些測試需求對應到的儀器類別明確包含 VSA（signal analyzer）與 VSG（signal generator），具體型號為 R&S FSW 與 R&S SMW200A",
+   "verified": true,
+   "label": "partial",
+   "why": "有泛稱 Signal Analyzer/Generator，但未列 VSA/VSG 對應 R&S FSW 與 SMW200A"
+  },
+  {
+   "n": 4,
+   "point": "基地台側的可量測參數清單來自 3GPP TS 38.141-1 chapter 6，含 Modulation quality、Occupied bandwidth、ACLR 等 transmitted signal quality 與 unwanted emissions 項目",
+   "verified": true,
+   "label": "missing",
+   "why": "未提 3GPP TS 38.141-1 chapter 6、Modulation quality、OBW、ACLR 等基地台項目"
+  },
+  {
+   "n": 5,
+   "point": "參數 → signal analyzer 能力：ACLR（6.6.3）需要 FSW base unit 加 FSW-K144 5G NR option，並在 5G NR mode 以 Channel Power ACLR / EVM 量測功能執行；OBW 則用 spectrum analyzer mode 基本功能",
+   "verified": true,
+   "label": "missing",
+   "why": "未提 FSW base unit + FSW-K144、5G NR mode、Channel Power ACLR/EVM、OBW 用 spectrum analyzer mode"
+  },
+  {
+   "n": 6,
+   "point": "參數 → signal generator 能力：receiver 類參數（Dynamic range、ACS、blocking、intermodulation）需要 SMW200A 配 2× baseband generator、baseband main module B13T/B13XT、兩條 RF path、AWGN option K62 與 2× K144",
+   "verified": true,
+   "label": "missing",
+   "why": "未提 receiver 測試參數與 SMW200A、2×baseband、B13T/B13XT、2 RF path、AWGN K62、2×K144"
+  },
+  {
+   "n": 7,
+   "point": "頻寬需求（FR2 test model 100/200/400 MHz 與寬頻 CA）決定硬體能力門檻：signal generator 需 wideband baseband（SMW-B13XT）提供 up to 2 GHz RF modulation bandwidth",
+   "verified": true,
+   "label": "missing",
+   "why": "未提 FR2 test model 100/200/400 MHz、SMW-B13XT、up to 2 GHz RF modulation bandwidth"
+  },
+  {
+   "n": 8,
+   "point": "對應地 signal analyzer 需加購 analysis bandwidth 硬體選項（例如 FSW-B2001 提供 2 GHz analysis bandwidth）才能涵蓋寬頻訊號分析",
+   "verified": true,
+   "label": "missing",
+   "why": "未提 signal analyzer analysis bandwidth option，如 FSW-B2001 2 GHz"
+  }
+ ],
+ "contradicted": 0,
+ "invented": []
+}

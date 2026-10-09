@@ -1,0 +1,79 @@
+{
+ "id": "Q0121",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 105.75,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 14,
+   "kind": "wiki",
+   "ref": "wiki/sources/無線通訊認證實驗室.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 13,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S SMA100B.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 19,
+   "kind": "wiki",
+   "ref": "wiki/sources/2026台灣無線通訊代工製造產業_技術規格與市場分析報告.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 9,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP200.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 6,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP200.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 8,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP200.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "Signal Analyzer needs spectrum / power measurement coverage; Signal Generator needs controllable RF stimulus for conformance and interoperability testing.",
+   "High-bandwidth / high-order-modulation validation requires measuring signal quality over wide channels",
+   "Sporton",
+   "CM-Z310A and CMP200 IF generator are relevant [to] Wi‑Fi 7 / 6 GHz development",
+   "Evidence check: Wiki/Raw citations and requested facets verified."
+  ],
+  "reason": "The answer’s main chain is grounded in the cited passages: wireless certification and Wi‑Fi/LEO requirements come from [14]/[19], measurable RF/EMC items are listed in [14], and instrument frequency/power/EVM-related capabilities are drawn from [13], [6], [8], and [9]. Some capability-to-market links are inferential rather than explicitly stated, especially the Wi‑Fi 7 mapping to CMP200/CM-Z310A and the generic signal generator/analyzer roles, but these are mostly reasonable bridges for the requested mapping rather than fatal unsupported claims.",
+  "confidence": "medium"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

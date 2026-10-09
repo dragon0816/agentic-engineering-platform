@@ -1,0 +1,130 @@
+{
+ "question": {
+  "id": "Q0846",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Semiconductor, and what evidence supports each opportunity?",
+  "market": "Semiconductor",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-de990ab0c2d446bcb8b14bd1e68f3667",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Semiconductor, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 331.781,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-de990ab0c2d446bcb8b14bd1e68f3667",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-09T09:46:03.512291Z",
+    "updated_at": "2026-10-09T09:51:31.797539Z",
+    "messages": [
+     {
+      "message_id": "message-0b787295dd90414688340a6bc18a0929",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Semiconductor, and what evidence supports each opportunity?",
+      "created_at": "2026-10-09T09:46:03.524577Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-9e9da4fa79c7452ca35adf0602717eb8",
+      "role": "assistant",
+      "text": "The knowledge base did not validate a complete semiconductor-specific answer. It returned partial Raw evidence, and it explicitly noted that the direct semiconductor-market relationship is not proven in the retrieved evidence. Based on that evidence, the strongest supported opportunities are:\n\n| Rank | Opportunity | Tester fit | Evidence strength |\n|---|---|---|---|\n| 1 | Wi‑Fi 7 / beyond-Wi‑Fi‑7 connectivity chipset or module R&D and production test | CMX500 for signaling R&D; CMP180 for non-signaling RF / waveform validation and production-style testing | Strongest Raw support |\n| 2 | FR3 / pre-6G NR R&D for modem, RFIC, or platform vendors | CMX500 OBT / CMX500 one-box signaling test for new NR numerologies and FR3 research | Good Raw support, but mainly R&D |\n| 3 | NTN / Direct-to-Cell chipset validation | CMX500 NTN-related signaling and RF scenario validation | Technically plausible, but current returned evidence lacks Raw support |\n\n### 1. Wi‑Fi 7 / beyond-Wi‑Fi‑7 connectivity IC and module testing\n\n**Why it is the strongest opportunity:**  \nThis is the clearest match between signaling and non-signaling test in the returned evidence. The Raw evidence directly links R&S Wi‑Fi 7 testing to both R&D and production workflows, pairing CMX500 signaling-style validation with CMP180 non-signaling / production RF validation.\n\n**Tester opportunity:**\n\n- **CMX500**: Wi‑Fi 7 signaling R&D, multi-channel / multi-technology validation, coexistence and end-to-end behavior.\n- **CMP180**: Non-signaling RF test, production-oriented Wi‑Fi 7 measurements, high-bandwidth waveform validation.\n- **Semiconductor inference:** This maps naturally to Wi‑Fi chipset, connectivity SoC, combo-module, and reference-platform vendors, though the retrieved Raw evidence did not directly name semiconductor accounts.\n\n**Supporting evidence:**  \nRaw citation returned by the vault:\n\n- `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md` [27]\n\nThe returned vault summary says this Raw source directly pairs **CMX500 signaling R&D** with **CMP180 R&D / production non-signaling-style waveform validation** in one R&S Wi‑Fi 7 workflow.\n\n**Commercial angle:**  \nLead with “one-box Wi‑Fi 7 signaling plus production RF test coverage” for connectivity silicon and module teams moving from R&D validation into manufacturing test.\n\n---\n\n### 2. FR3 / next-generation NR / 6G research platforms\n\n**Why it matters:**  \nFR3 is an emerging research area between traditional sub‑6 GHz and mmWave. The returned Raw evidence ties R&S and Qualcomm work to the proposed FR3 frequency range, making this relevant to modem, RF front-end, and platform silicon R&D.\n\n**Tester opportunity:**\n\n- **CMX500 OBT / CMX500**: Network emulation and signaling test for next-generation NR research.\n- Supports work around different NR numerologies and new frequency-range exploration.\n- Best positioned for **advanced R&D**, not production yet.\n\n**Supporting evidence:**  \nRaw citation returned by the vault:\n\n- `raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md` [28]\n\nThe returned vault summary says this Raw evidence describes **CMX500 OBT** as adaptable to different NR numerologies and suitable for **FR3 R&D**.\n\n**Commercial angle:**  \nTarget semiconductor modem/RF platform teams doing 6G, FR3, or pre-standard NR research. This is less about immediate production volume and more about early design-win positioning.\n\n---\n\n### 3. NTN / Direct-to-Cell chipset and platform validation\n\n**Why it is an opportunity, but weaker in evidence:**  \nThe returned vault material includes Wiki-level support for CMX500 NTN options, NB‑NTN, NR‑NTN, Direct‑to‑Cell, RF/protocol/application-layer testing, mobility, handover, beam switching, and satellite scenario discovery. However, the tool explicitly reported that **no retrieved Raw passage supports this opportunity**.\n\n**Tester opportunity:**\n\n- **CMX500** with NTN-related features/options for signaling, fading, and RF scenario validation.\n- Potential use by cellular modem, IoT chipset, and satellite-direct-to-device platform vendors.\n\n**Evidence limitation:**  \nThis opportunity is technically plausible, but based on the returned result it is **not Raw-supported** in the current evidence set. I would treat it as a discovery topic, not a top evidence-backed sales thesis.\n\n---\n\n## Bottom line\n\nThe strongest evidence-backed semiconductor opportunity is:\n\n> **Wi‑Fi 7 / beyond-Wi‑Fi‑7 connectivity silicon testing, using CMX500 for signaling R&D and CMP180 for non-signaling RF / production validation.**\n\nSecond strongest:\n\n> **FR3 / next-generation NR R&D, especially with modem and RF platform vendors, using CMX500 OBT / CMX500.**\n\nLower-confidence but worth exploring:\n\n> **NTN / Direct-to-Cell chipset validation with CMX500**, pending stronger Raw evidence.",
+      "created_at": "2026-10-09T09:51:31.797539Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-0a69e3e947384243966f4dfdd4068994",
+       "request_id": "request-0a69e3e947384243966f4dfdd4068994",
+       "span_id": "span-0a69e3e947384243966f4dfdd4068994",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+    "ok": true,
+    "answer": "The knowledge base did not validate a complete semiconductor-specific answer. It returned partial Raw evidence, and it explicitly noted that the direct semiconductor-market relationship is not proven in the retrieved evidence. Based on that evidence, the strongest supported opportunities are:\n\n| Rank | Opportunity | Tester fit | Evidence strength |\n|---|---|---|---|\n| 1 | Wi‑Fi 7 / beyond-Wi‑Fi‑7 connectivity chipset or module R&D and production test | CMX500 for signaling R&D; CMP180 for non-signaling RF / waveform validation and production-style testing | Strongest Raw support |\n| 2 | FR3 / pre-6G NR R&D for modem, RFIC, or platform vendors | CMX500 OBT / CMX500 one-box signaling test for new NR numerologies and FR3 research | Good Raw support, but mainly R&D |\n| 3 | NTN / Direct-to-Cell chipset validation | CMX500 NTN-related signaling and RF scenario validation | Technically plausible, but current returned evidence lacks Raw support |\n\n### 1. Wi‑Fi 7 / beyond-Wi‑Fi‑7 connectivity IC and module testing\n\n**Why it is the strongest opportunity:**  \nThis is the clearest match between signaling and non-signaling test in the returned evidence. The Raw evidence directly links R&S Wi‑Fi 7 testing to both R&D and production workflows, pairing CMX500 signaling-style validation with CMP180 non-signaling / production RF validation.\n\n**Tester opportunity:**\n\n- **CMX500**: Wi‑Fi 7 signaling R&D, multi-channel / multi-technology validation, coexistence and end-to-end behavior.\n- **CMP180**: Non-signaling RF test, production-oriented Wi‑Fi 7 measurements, high-bandwidth waveform validation.\n- **Semiconductor inference:** This maps naturally to Wi‑Fi chipset, connectivity SoC, combo-module, and reference-platform vendors, though the retrieved Raw evidence did not directly name semiconductor accounts.\n\n**Supporting evidence:**  \nRaw citation returned by the vault:\n\n- `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md` [27]\n\nThe returned vault summary says this Raw source directly pairs **CMX500 signaling R&D** with **CMP180 R&D / production non-signaling-style waveform validation** in one R&S Wi‑Fi 7 workflow.\n\n**Commercial angle:**  \nLead with “one-box Wi‑Fi 7 signaling plus production RF test coverage” for connectivity silicon and module teams moving from R&D validation into manufacturing test.\n\n---\n\n### 2. FR3 / next-generation NR / 6G research platforms\n\n**Why it matters:**  \nFR3 is an emerging research area between traditional sub‑6 GHz and mmWave. The returned Raw evidence ties R&S and Qualcomm work to the proposed FR3 frequency range, making this relevant to modem, RF front-end, and platform silicon R&D.\n\n**Tester opportunity:**\n\n- **CMX500 OBT / CMX500**: Network emulation and signaling test for next-generation NR research.\n- Supports work around different NR numerologies and new frequency-range exploration.\n- Best positioned for **advanced R&D**, not production yet.\n\n**Supporting evidence:**  \nRaw citation returned by the vault:\n\n- `raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md` [28]\n\nThe returned vault summary says this Raw evidence describes **CMX500 OBT** as adaptable to different NR numerologies and suitable for **FR3 R&D**.\n\n**Commercial angle:**  \nTarget semiconductor modem/RF platform teams doing 6G, FR3, or pre-standard NR research. This is less about immediate production volume and more about early design-win positioning.\n\n---\n\n### 3. NTN / Direct-to-Cell chipset and platform validation\n\n**Why it is an opportunity, but weaker in evidence:**  \nThe returned vault material includes Wiki-level support for CMX500 NTN options, NB‑NTN, NR‑NTN, Direct‑to‑Cell, RF/protocol/application-layer testing, mobility, handover, beam switching, and satellite scenario discovery. However, the tool explicitly reported that **no retrieved Raw passage supports this opportunity**.\n\n**Tester opportunity:**\n\n- **CMX500** with NTN-related features/options for signaling, fading, and RF scenario validation.\n- Potential use by cellular modem, IoT chipset, and satellite-direct-to-device platform vendors.\n\n**Evidence limitation:**  \nThis opportunity is technically plausible, but based on the returned result it is **not Raw-supported** in the current evidence set. I would treat it as a discovery topic, not a top evidence-backed sales thesis.\n\n---\n\n## Bottom line\n\nThe strongest evidence-backed semiconductor opportunity is:\n\n> **Wi‑Fi 7 / beyond-Wi‑Fi‑7 connectivity silicon testing, using CMX500 for signaling R&D and CMP180 for non-signaling RF / production validation.**\n\nSecond strongest:\n\n> **FR3 / next-generation NR R&D, especially with modem and RF platform vendors, using CMX500 OBT / CMX500.**\n\nLower-confidence but worth exploring:\n\n> **NTN / Direct-to-Cell chipset validation with CMX500**, pending stronger Raw evidence.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-0a69e3e947384243966f4dfdd4068994",
+      "request_id": "request-0a69e3e947384243966f4dfdd4068994",
+      "span_id": "span-0a69e3e947384243966f4dfdd4068994",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-0a69e3e947384243966f4dfdd4068994",
+       "request_id": "request-0a69e3e947384243966f4dfdd4068994",
+       "span_id": "span-0a69e3e947384243966f4dfdd4068994",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base did not validate a complete semiconductor-specific answer. It returned partial Raw evidence, and it explicitly noted that the direct semiconductor-market relationship is not proven in the retrieved evidence. Based on that evidence, the strongest supported opportunities are:\n\n| Rank | Opportunity | Tester fit | Evidence strength |\n|---|---|---|---|\n| 1 | Wi‑Fi 7 / beyond-Wi‑Fi‑7 connectivity chipset or module R&D and production test | CMX500 for signaling R&D; CMP180 for non-signaling RF / waveform validation and production-style testing | Strongest Raw support |\n| 2 | FR3 / pre-6G NR R&D for modem, RFIC, or platform vendors | CMX500 OBT / CMX500 one-box signaling test for new NR numerologies and FR3 research | Good Raw support, but mainly R&D |\n| 3 | NTN / Direct-to-Cell chipset validation | CMX500 NTN-related signaling and RF scenario validation | Technically plausible, but current returned evidence lacks Raw support |\n\n### 1. Wi‑Fi 7 / beyond-Wi‑Fi‑7 connectivity IC and module testing\n\n**Why it is the strongest opportunity:**  \nThis is the clearest match between signaling and non-signaling test in the returned evidence. The Raw evidence directly links R&S Wi‑Fi 7 testing to both R&D and production workflows, pairing CMX500 signaling-style validation with CMP180 non-signaling / production RF validation.\n\n**Tester opportunity:**\n\n- **CMX500**: Wi‑Fi 7 signaling R&D, multi-channel / multi-technology validation, coexistence and end-to-end behavior.\n- **CMP180**: Non-signaling RF test, production-oriented Wi‑Fi 7 measurements, high-bandwidth waveform validation.\n- **Semiconductor inference:** This maps naturally to Wi‑Fi chipset, connectivity SoC, combo-module, and reference-platform vendors, though the retrieved Raw evidence did not directly name semiconductor accounts.\n\n**Supporting evidence:**  \nRaw citation returned by the vault:\n\n- `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md` [27]\n\nThe returned vault summary says this Raw source directly pairs **CMX500 signaling R&D** with **CMP180 R&D / production non-signaling-style waveform validation** in one R&S Wi‑Fi 7 workflow.\n\n**Commercial angle:**  \nLead with “one-box Wi‑Fi 7 signaling plus production RF test coverage” for connectivity silicon and module teams moving from R&D validation into manufacturing test.\n\n---\n\n### 2. FR3 / next-generation NR / 6G research platforms\n\n**Why it matters:**  \nFR3 is an emerging research area between traditional sub‑6 GHz and mmWave. The returned Raw evidence ties R&S and Qualcomm work to the proposed FR3 frequency range, making this relevant to modem, RF front-end, and platform silicon R&D.\n\n**Tester opportunity:**\n\n- **CMX500 OBT / CMX500**: Network emulation and signaling test for next-generation NR research.\n- Supports work around different NR numerologies and new frequency-range exploration.\n- Best positioned for **advanced R&D**, not production yet.\n\n**Supporting evidence:**  \nRaw citation returned by the vault:\n\n- `raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md` [28]\n\nThe returned vault summary says this Raw evidence describes **CMX500 OBT** as adaptable to different NR numerologies and suitable for **FR3 R&D**.\n\n**Commercial angle:**  \nTarget semiconductor modem/RF platform teams doing 6G, FR3, or pre-standard NR research. This is less about immediate production volume and more about early design-win positioning.\n\n---\n\n### 3. NTN / Direct-to-Cell chipset and platform validation\n\n**Why it is an opportunity, but weaker in evidence:**  \nThe returned vault material includes Wiki-level support for CMX500 NTN options, NB‑NTN, NR‑NTN, Direct‑to‑Cell, RF/protocol/application-layer testing, mobility, handover, beam switching, and satellite scenario discovery. However, the tool explicitly reported that **no retrieved Raw passage supports this opportunity**.\n\n**Tester opportunity:**\n\n- **CMX500** with NTN-related features/options for signaling, fading, and RF scenario validation.\n- Potential use by cellular modem, IoT chipset, and satellite-direct-to-device platform vendors.\n\n**Evidence limitation:**  \nThis opportunity is technically plausible, but based on the returned result it is **not Raw-supported** in the current evidence set. I would treat it as a discovery topic, not a top evidence-backed sales thesis.\n\n---\n\n## Bottom line\n\nThe strongest evidence-backed semiconductor opportunity is:\n\n> **Wi‑Fi 7 / beyond-Wi‑Fi‑7 connectivity silicon testing, using CMX500 for signaling R&D and CMP180 for non-signaling RF / production validation.**\n\nSecond strongest:\n\n> **FR3 / next-generation NR R&D, especially with modem and RF platform vendors, using CMX500 OBT / CMX500.**\n\nLower-confidence but worth exploring:\n\n> **NTN / Direct-to-Cell chipset validation with CMX500**, pending stronger Raw evidence.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_UP44TXwlzZYF24jyKGAxd0cR",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "failed",
+         "data": {
+          "knowledge_harness": "not_validated",
+          "answer": "已查到可引用的部分資料：\n\n### 建議主軸\nPrioritize Wi‑Fi 7 / beyond-Wi‑Fi‑7 connectivity test first, because Raw evidence directly pairs CMX500 signaling R&D with CMP180 R&D/production non-signaling-style waveform validation in one R&S workflow [27].\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 | Wi‑Fi 7 signaling R&D and cellular/non-cellular interworking test [27]. | Wiki confirms WLAN signaling and WLAN TX measurements for 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn, and 2x2 MIMO [4]. | CMX500 is directly described as a multi-technology multi-channel signaling tester with newly added Wi‑Fi 7 testing capabilities [27]. | Raw [27]; Wiki [4][19]. | The passages do not provide semiconductor account fit, pricing, or BOM. |\n| R&S CMX500 OBT | FR3 research and development [28]. | Wiki confirms CMX500 as a universal one-box network emulation and measurement solution for LTE and NR FR1/FR2 testing [13]. | Raw evidence says CMX500 OBT adapts to different NR numerologies and is ideal for FR3 R&D [28]. | Raw [28]; Wiki [13]. | The passages do not provide FR3 option codes or semiconductor-specific demand evidence. |\n| R&S CMX500 | NTN / DTC signaling and RF scenario validation [5][9]. | Wiki confirms CMX-KE611 NR NTN fading profiles, CMX-KE620 user-defined fading for LTE/NR/NTN, and CMX-KC665B NR-NTN 3GPP RF test scenarios [9]. | Wiki evidence ties NTN discovery to NB-NTN, NR-NTN, Direct-to-Cell, chipset or hardware platform, RF/protocol/application layers, and CMX500 environment questions [5][18]. | Wiki [5][9][18]. | No retrieved Raw passage supports this opportunity. |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Wi‑Fi 7 connectivity IC or module R&D through production | CMX500 for signaling R&D plus CMP180 for non-signaling production RF [19]. | Lead with one-box Wi‑Fi 7 signaling R&D, MLO, 2x2 MIMO, coexistence, E2E, and production non-signaling RF measurements [19]. | The passages do not directly identify semiconductor customers or production-line integration. |\n| Beyond-Wi‑Fi‑7 waveform exploration | CMP180 [27]. | Lead with 480 MHz loopback waveform validation beyond Wi‑Fi 7 [27]. | Wiki says the 480 MHz waveform is only a potential candidate for yet-to-be-defined Wi‑Fi 8 / IEEE 802.11bn, not a formal Wi‑Fi 8 specification [1]. |\n| FR3 / next-generation NR R&D | CMX500 OBT [28]. | Lead with multi-technology, multi-channel one-box signaling and adaptability to different NR numerologies [28]. | The passages do not state production use or semiconductor-specific market demand. |\n| NTN chipset-platform validation discovery | CMX500 with NTN-related options [5][9]. | Lead with NB-NTN, NR-NTN, Direct-to-Cell, RF/protocol/application testing, satellite gateway integration, mobility, handover, beam switching, and constellation workflow discovery [5]. | No retrieved Raw passage supports this opportunity. |\n### 限制\n【推論】Wi‑Fi 7 / beyond-Wi‑Fi‑7 is ranked first because it has the clearest Raw support for both CMX500 signaling R&D and CMP180 R&D/production validation, plus Wiki support for CMX500 R&D signaling and CMP180 production non-signaling roles [27][19].\n【推論】FR3 is ranked second because Raw evidence directly supports CMX500 OBT for FR3 R&D, but the provided evidence does not extend it to production or semiconductor demand [28].\n【推論】NTN / DTC is ranked third because Wiki evidence supports CMX500-related NTN signaling discovery and options, but no retrieved Raw passage supports it [5][9].\n\n來源：\n[1] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[4] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[5] Wiki：R&S NTN signaling solutions（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`cmx500_ntn_customer_questionnaire.md`）\n[9] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[13] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[18] Wiki：cmx500_ntn_customer_questionnaire（來源：`AIW_Products_Customer_Questionnaire.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[19] Wiki：Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024（來源：`CMP180_specs_en_3609-7348-22_v0800.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[27] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`\n[28] `raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md`\n\n尚未證實：direct_relationship。因此不能把上列資料當成完整的推薦或比較。",
+          "evidence": {
+           "raw_citations": 9,
+           "facet_status": "missing",
+           "missing_facets": [
+            "market_segment"
+           ],
+           "relation_status": "missing",
+           "retrieval_attempts": {
+            "market_segment": 1,
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "instruction": "The knowledge base did not validate an answer. Tell the person what is above; anything you add is not from the knowledge base and must say so."
+         },
+         "failure": {
+          "code": "knowledge_not_validated",
+          "message": "The Knowledge Harness did not validate an answer",
+          "retryable": false
+         }
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}
