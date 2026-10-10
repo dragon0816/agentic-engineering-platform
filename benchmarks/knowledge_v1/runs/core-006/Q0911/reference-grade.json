@@ -1,0 +1,76 @@
+{
+ "id": "Q0911",
+ "grader": "1.2",
+ "coverage": 0.0,
+ "points": [
+  {
+   "n": 1,
+   "point": "Vault 的實際 RFIC/半導體案例：Samsung Foundry RF/Analog Enablement Group，DUT 為 5G SoC including VCO，使用 FSWP50（analyzer）+ SMW200A 44GHz / SGS100A（signal generator）",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not mention Samsung Foundry RF/Analog Enablement, 5G SoC including VCO, FSWP50, SMW200A 44GHz, or SGS100A as the actual RFIC case"
+  },
+  {
+   "n": 2,
+   "point": "該案例的量測在 probe station 上進行，並搭配自動化 VCO tuning 軟體，顯示儀器位於晶片級 characterization / validation 這一步",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not mention probe station or automated VCO tuning software; instead places instruments in a generic lab RF bench"
+  },
+  {
+   "n": 3,
+   "point": "測試區塊對儀器類別的 mapping：RefClk 與 PLL jitter performance 由 phase noise analyzers 與 signal generators 負責",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not map RefClk / PLL jitter performance to phase noise analyzers and signal generators"
+  },
+  {
+   "n": 4,
+   "point": "ADC / DAC frontend performance 由 spectrum analyzers 與 signal generators 負責，是 signal generator / analyzer 在高速數位 / 混訊晶片驗證中的另一個落點",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not state ADC / DAC frontend performance is mapped to spectrum analyzers and signal generators"
+  },
+  {
+   "n": 5,
+   "point": "RFIC 的 bare board / socket / transmission line 評估這一段，來源明示的 fit 是 VNAs，而非 signal generator / analyzer",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not mention RFIC bare board / socket / transmission line evaluation being a VNA fit rather than signal generator / analyzer"
+  },
+  {
+   "n": 6,
+   "point": "2026.7 DDT success stories 把 SoC testing 對應到 FSWP、SMA100B（RF and Microwave Signal Generator）與 ZNA67",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not mention 2026.7 DDT success stories mapping SoC testing to FSWP, SMA100B, and ZNA67"
+  },
+  {
+   "n": 7,
+   "point": "Vault 明示不推論這些儀器在各應用中的角色分工（stimulus / analysis / phase noise / VNA / automation），因此「流程位置」只能到 mapping 層級",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Gives explicit workflow stages and explicit stimulus/analyzer roles, while the reference says Vault does not infer role division and only supports mapping-level placement"
+  },
+  {
+   "n": 8,
+   "point": "Samsung 案例被歸納為可包裝成 RF / analog enablement 測試方案，但軟體正式名稱與版本未標示",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not state Samsung case can be packaged as RF/analog enablement test solution or that software name/version are not marked"
+  }
+ ],
+ "contradicted": 1,
+ "invented": [
+  "early laboratory RF validation bench, before field link validation and commercialization readiness",
+  "month 1–3 laboratory RF test, month 3–5 field link validation, and month 5–7 commercialization readiness",
+  "measures G/T, NF, Tx power, and link equation items",
+  "The signal generator provides controlled RF/vector-modulated stimulus",
+  "the signal analyzer measures and verifies the RF output, spectrum, modulation, and emissions behavior",
+  "output power, frequency error, modulation quality, occupied bandwidth, ACLR, OBUE/SEM, and transmitter spurious emissions",
+  "5G NR software option R&S SMW200A-/SMBV100B-K144",
+  "R&S FSW ... covering 8 GHz to 85 GHz models ... extending to 90 GHz",
+  "R&S FSVA3000 ... models from 10 Hz to 4 GHz, 7.5 GHz, 13.6 GHz, 30 GHz, 44 GHz, and 50 GHz",
+  "analysis bandwidth hardware options range from 40 MHz up to 8.312 GHz"
+ ]
+}

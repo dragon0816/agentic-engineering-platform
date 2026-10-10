@@ -1,0 +1,67 @@
+{
+ "id": "Q1041",
+ "grader": "1.2",
+ "coverage": 0.312,
+ "points": [
+  {
+   "n": 1,
+   "point": "Vault 把 Eye diagram 列為 high-speed PCB/PCBA signal integrity flow 的量測項目之一（Slide 20），與 IL、Xtalk、TDR Impedance、Stackup Planner、TL Calculator 並列",
+   "verified": true,
+   "label": "covered",
+   "why": "states eye diagram is in high-speed PCB/PCBA SI flow alongside IL/Xtalk, TDR impedance, stackup planning, TL calculation"
+  },
+  {
+   "n": 2,
+   "point": "在 R&S PCB test solutions 流程中，Eye diagram 屬於 Material/Stackup selection 階段的量測 / 分析項目，因此材料與疊層選擇決策依賴它",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention Material/Stackup selection stage or material/stackup decisions"
+  },
+  {
+   "n": 3,
+   "point": "產品選配決策：R&S®ZNA-K20 提供含 eye diagram 的 extended time domain analysis，且必須搭配 R&S®ZNA-K2（TDR）",
+   "verified": true,
+   "label": "covered",
+   "why": "states ZNA-K20 includes eye diagram and requires ZNA-K2 TDR/time-domain option"
+  },
+  {
+   "n": 4,
+   "point": "同一選配關係在 ZNA67EXT 規格頁也成立，Requires 欄明示 R&S®ZNA-K2，Order No. 1332.4746.02",
+   "verified": true,
+   "label": "partial",
+   "why": "states ZNA67EXT K20 requires K2, but omits the explicit order number 1332.4746.02"
+  },
+  {
+   "n": 5,
+   "point": "PCB layout 決策依據：fiber weave 造成的 intra-pair skew 會顯著劣化 receiver 端看到的 differential eye diagram，並造成 duty cycle distortion、AC common-mode noise 與 EMI",
+   "verified": true,
+   "label": "missing",
+   "why": "does not state fiber weave intra-pair skew degrades receiver differential eye or causes DCD, AC common-mode noise, EMI"
+  },
+  {
+   "n": 6,
+   "point": "同一結論已落地為 wiki 說法，並連到 intra-pair skew 與 PCIe Gen5 layout mitigation 脈絡",
+   "verified": true,
+   "label": "missing",
+   "why": "does not state the wiki/intra-pair-skew/PCIe Gen5 mitigation linkage"
+  },
+  {
+   "n": 7,
+   "point": "缺少 eye diagram 資料被當作產品聲明的可追溯限制：沒有眼圖等實測資料時，不得把 brochure claim 寫成量產或實測證據",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention missing eye diagrams as a traceability limit on brochure claims"
+  },
+  {
+   "n": 8,
+   "point": "連接器頁同樣以缺少 PAM4 eye diagram / BER / compliance 為由，拒絕把 224 Gb/s PAM4 寫成認證或出貨狀態",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention connector pages rejecting 224G PAM4 certification/shipping claims due to missing eye diagram/BER/compliance"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "evaluated through eye-opening metrics such as eye height and eye width"
+ ]
+}

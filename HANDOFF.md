@@ -43,6 +43,11 @@ answerable coverage 0.30 -> 0.40, FAIL and contradictions about flat, overreach
 items 35 -> 63. Kept under the owner's rule. To roll back, move 1.9.0 back from
 `disabled/`, move 1.10.0 out, and restart Agent Web.
 
+Knowledge state (2026-10-10, latest): Skill 1.10.0 is live. A no-support retry check
+plus Skill 1.11.0 was tried in `runs/core-006`, came out worse and was rolled back
+(code revert ca110b0). The coverage target is 0.50, set after calibration
+(`benchmarks/knowledge_v1/references-b/`). Overreach remains the open problem.
+
 Benchmark telemetry (2026-10-10, d29ac63): every knowledge_v1, coding_v1 and
 business workflow lab run now writes a `benchmark_run` into
 `telemetry.sqlite`, and reference grading writes a `benchmark_grading` under

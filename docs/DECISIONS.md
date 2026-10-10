@@ -2044,3 +2044,21 @@ Atlas side: Codex had already built the AEP consumer in the Atlas working tree, 
 Rejected alternatives:
 - A write endpoint on Agent Web: it widens a loopback API the owner chose to keep read-only.
 - Atlas reading benchmark files directly: it would miss the live view and the trace link.
+
+## 2026-10-10: Knowledge targets after calibration; no-support replies; Skill 1.11.0
+
+Decision (owner agreed): the knowledge_v1 coverage target is a 0.50 mean on the 22 answerable core questions, not 0.7. Overreach is tracked beside coverage and should fall.
+
+Calibration (`benchmarks/knowledge_v1/references-b/`): a second, independent Claude Code answer reaches 0.53 against the reference, graded in the same direction as AEP (0.60 both ways). On those five questions AEP scores 0.50. Coverage of 0.7 is above what a second strong answer reaches, and chasing it would mostly lengthen answers and add overreach.
+
+Two changes followed from the per-question analysis of core-005:
+- **Harness (839711b).** A short reply whose opening says no passage supports an answer no longer passes `answer_nonempty`, even with a citation, so the Skill's retry runs. If the retry gives the same reply, it is shown unvalidated. In Q0296 the retry returned "no passage supports…" and was validated, while the same evidence gave a 10,000-character cited answer on another try.
+- **Skill 1.11.0 (guidance only).** The product table drops the speculative "為什麼適合" column. The scenario table lists only scenarios a passage names and has an evidence column instead of "切入重點". A sentence that does not restate a cited passage goes on a labeled inference line or is left out. Reason: overreach clustered in answers longer than 10,000 characters, inside those speculative columns.
+
+Measured by `runs/core-006` against core-005.
+
+**Result: rolled back (2026-10-10).** core-006 was worse. Answerable PASS fell from 17 to 12 and FAIL rose from 4 to 7, with 1 timeout. Coverage fell from 0.40 to 0.37. Overreach fell only from 65 to 57. Median latency rose from 156 to 206 s, and p90 from 236 to 429 s.
+- The no-support check fired on more replies than intended, and its retries added minutes.
+- The 1.11.0 guidance left some answers not addressing the question.
+
+Code reverted in ca110b0. Skill 1.10.0 is live again (1.11.0 is in `disabled/`). Review: `runs/core-006/review.zh-TW.md`.

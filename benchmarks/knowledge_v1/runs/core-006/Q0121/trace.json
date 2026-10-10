@@ -1,0 +1,1428 @@
+{
+ "question": {
+  "id": "Q0121",
+  "text": "Map the chain from a Wireless Communication market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "market": "Wireless Communication",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-6da51bbe026f416285979102d6a79445",
+ "exchange": {
+  "sent": "Map the chain from a Wireless Communication market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "http_status": 200,
+  "seconds": 200.281,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-6da51bbe026f416285979102d6a79445",
+    "actor": "leo.chi",
+    "title": "Map the chain from a Wireless Communication market requirement to a meas…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-10T10:42:28.509438Z",
+    "updated_at": "2026-10-10T10:45:48.645058Z",
+    "messages": [
+     {
+      "message_id": "message-34d59ddc49d1420481c90f59c1c21288",
+      "role": "user",
+      "text": "Map the chain from a Wireless Communication market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+      "created_at": "2026-10-10T10:42:28.542268Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-10caee7a8b1148228ec40171a8b0fe17",
+      "role": "assistant",
+      "text": "【推論】建議主軸：把 Wireless Communication 的「3GPP cellular 無線裝置 EMC / regulatory / conformance」需求，拆成可量測的 RF、EMC、通道與 NTN 參數，再對應到 Signal Generator 產生刺激/通道條件與 Signal Analyzer 量測結果的能力。[36][68]\n### 推薦先賣\n【推論】若切入 3GPP NTN，優先對接 R&S SMW200A，因為來源把它定義為 NTN 測試中的核心 signal generator / channel emulator。[2][3]\n【推論】若切入 component testing 或 SAN transmitter measurement，優先對接 R&S FSW，因為來源把它定義為 component testing 與 SAN transmitter measurement 的 spectrum / signal analysis instrument。[3][4]\n### 產品與 Option 對接表\n| 產品線 | 段落寫明的需求 | 知識庫確認的 option / 規格 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|\n| R&S SMW200A | Wireless devices 需要 RF、EMC、安全與一致性認證，主要測試項目包含頻譜、輸出功率、DFS、SAR、EMI / EMS、Protocol 相容性、互操作性與 PTCRB / GCF 認證。[36] | SMW200A 在 NTN component testing 中可提供 frequency up to 67 GHz、overrange 72 GHz、RF modulation bandwidth up to 2 GHz、with SMW-K555 up to 4 GHz，並支援 LTE、Cellular IoT、5G NR R17/18、OFDM 與 custom digital modulation signal generation software。[4] | [4][36] | 【推論】此列把一般 wireless certification 測試需求連到 component-level signal generation 能力，但 passages 未直接說 SMW200A 是一般 EMC / regulatory lab 的必需儀器。[4][36] |\n| R&S FSW | Wireless certification 的可量測項目包含頻譜與輸出功率。[36] | FSW 在 NTN component testing 中可提供 frequency up to 85 GHz、overrange 90 GHz、analysis bandwidth up to 8 GHz，並支援 LTE、Cellular IoT、5G NR R17/18、OFDM signal analysis 與 vector signal analysis software。[4] | [4][36] | 【推論】此列把頻譜/輸出功率測試需求連到 FSW analyzer 能力，但 passages 未直接說 FSW 是一般 EMC / regulatory lab 的指定儀器。[4][36] |\n| R&S SMW200A SAN configuration | 5G NR SAN conformance testing 需要支援 TS 38.181 Rel. 17 receiver characteristics 與 performance characteristics。[5] | SMW B10/B14 支援 up to 160 MHz signal bandwidth、delay requirements 與 LEO residual Doppler requirements。[5] | [5] | Recommended configurations 是簡報建議配置，不等同正式 configuration guide 或 quotation BOM。[7] |\n| R&S SMW200A SAN wideband configuration | 5G NR SAN conformance testing 需要支援 TS 38.181 Rel. 17 receiver characteristics 與 performance characteristics。[5] | SMW B9/B15 recommended 支援 up to 200 MHz bandwidth、delay requirements 與 LEO residual Doppler requirements。[5] | [5] | Recommended configurations 是簡報建議配置，不等同正式 configuration guide 或 quotation BOM。[7] |\n| R&S SMW200A + R&S SMW-K820 | E2E system testing 會用 service link channel emulator 與 feeder link channel emulator 模擬 UE、NTN payload 之間的 RF satellite link。[1] | SMW200A 需要 firmware version ≥ 5.30，B14 or B15 required，customized dynamic fading 需要 R&S SMW-K820，能力包含 satellite trajectory modelling、frequency-dependent atmospheric effects、longer path delays、enhanced Doppler、up to 1073 ms delay 與 up to ±1 MHz pure Doppler。[14] | [1][14] | 來源是 2025 簡報與 OneNote 轉檔，不是正式 datasheet、configuration guide、price book 或 3GPP specification。[15] |\n| R&S Space Nexus + R&S SMW200A | E2E channel emulation 的 key parameters 包含 update interval、delay、Doppler 與 pathloss。[1] | R&S Space Nexus 是 PC Software，available on request，可依 satellite trajectory 產生 SMW200A fading files。[14] | [1][14] | R&S Space Nexus 的正式 option availability、報價與 service plan 需回查正式資料。[15] |\n| R&S FSW / FSWX | NTN signal analysis 可用於 satellite payload testing、EVM、ACLR、group delay、DVB-S2X analysis 與 phase-coherent multichannel measurement。[37] | FSW 是 high-end Signal and Spectrum Analyzer，Version 17.01 涵蓋 8 GHz 至 85 GHz 型號，FSW85 搭配 FSW-B90G 可延伸至 90 GHz。[24] | [24][37] | R&S 產品能力需以正式 datasheet / configuration guide 為準。[40] |\n### 場景切入建議\n| 場景 | 推薦組合 | 證據 | 未驗證事項 |\n|---|---|---|---|\n| 3GPP NTN component testing | 【推論】用 SMW200A 產生 LTE、Cellular IoT、5G NR、OFDM 或 custom digital modulation stimulus，並用 FSW 做對應 signal analysis。[4] | Component testing 使用 DUT、SMW200A 與 FSW。[4] | 此來源是簡報摘要值，不取代 SMW200A 與 FSW formal specifications。[4] |\n| 5G NR SAN conformance testing | 【推論】160 MHz 需求對接 SMW B10/B14，200 MHz 需求對接 SMW B9/B15 recommended。[5] | 兩種配置都支援 TS 38.181 Rel. 17 SAN testing requirements、delay requirements 與 LEO residual Doppler requirements。[5] | Recommended configurations 不能直接視為可報價 BOM。[7] |\n| NTN E2E RF satellite link emulation | 【推論】用 SMW200A + B14/B15 + SMW-K820 產生 trajectory-based fading、delay、Doppler 與 pathloss 條件。[1][14] | E2E testing 使用 service link 與 feeder link channel emulator 模擬 RF satellite link，且 K820 key parameters 包含 update interval、delay、Doppler 與 pathloss。[1] | Space Nexus available on request，正式 availability 需另查。[14][15] |\n| OTA / phased-array NTN testing | 【推論】以 SMW200A 供訊號/通道條件，FSW / FSWX 供量測分析，對應 PAAM 與 NTN beam metrics。[39] | OTA / PAAM metrics 包含 radiation pattern、scan loss、pointing error、HPBW、sidelobe levels、EIRP、G/T、noise density、EVM、beam switching、beam pointing accuracy 與 beam stability。[39] | OTA / PAAM setup 的 fixtures、chamber dimensions、quiet zone、polarization 與 frequency conversions 需回查原圖與 setup note。[40] |\n### 限制\n來源中的 recommended configurations 不能直接視為可報價 BOM [7]。\n來源中的 R&S 產品能力需以正式 datasheet 或 configuration guide 為準 [40]。\n\n來源：\n[1] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）\n[2] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）\n[3] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）\n[4] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）\n[5] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）\n[7] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）\n[14] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[15] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[24] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[36] Wiki：無線通訊認證實驗室（來源：`Test House.md`、`無線通訊認證實驗室.md`）\n[37] Wiki：NTN test and measurement aspects（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[39] Wiki：NTN test and measurement aspects（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[40] Wiki：NTN test and measurement aspects（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[68] `raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md`\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+      "created_at": "2026-10-10T10:45:48.645058Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-3036e7d90fed4f4ab5472e1c3599b068",
+       "request_id": "request-3036e7d90fed4f4ab5472e1c3599b068",
+       "span_id": "span-3036e7d90fed4f4ab5472e1c3599b068",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": true,
+    "answer": "【推論】建議主軸：把 Wireless Communication 的「3GPP cellular 無線裝置 EMC / regulatory / conformance」需求，拆成可量測的 RF、EMC、通道與 NTN 參數，再對應到 Signal Generator 產生刺激/通道條件與 Signal Analyzer 量測結果的能力。[36][68]\n### 推薦先賣\n【推論】若切入 3GPP NTN，優先對接 R&S SMW200A，因為來源把它定義為 NTN 測試中的核心 signal generator / channel emulator。[2][3]\n【推論】若切入 component testing 或 SAN transmitter measurement，優先對接 R&S FSW，因為來源把它定義為 component testing 與 SAN transmitter measurement 的 spectrum / signal analysis instrument。[3][4]\n### 產品與 Option 對接表\n| 產品線 | 段落寫明的需求 | 知識庫確認的 option / 規格 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|\n| R&S SMW200A | Wireless devices 需要 RF、EMC、安全與一致性認證，主要測試項目包含頻譜、輸出功率、DFS、SAR、EMI / EMS、Protocol 相容性、互操作性與 PTCRB / GCF 認證。[36] | SMW200A 在 NTN component testing 中可提供 frequency up to 67 GHz、overrange 72 GHz、RF modulation bandwidth up to 2 GHz、with SMW-K555 up to 4 GHz，並支援 LTE、Cellular IoT、5G NR R17/18、OFDM 與 custom digital modulation signal generation software。[4] | [4][36] | 【推論】此列把一般 wireless certification 測試需求連到 component-level signal generation 能力，但 passages 未直接說 SMW200A 是一般 EMC / regulatory lab 的必需儀器。[4][36] |\n| R&S FSW | Wireless certification 的可量測項目包含頻譜與輸出功率。[36] | FSW 在 NTN component testing 中可提供 frequency up to 85 GHz、overrange 90 GHz、analysis bandwidth up to 8 GHz，並支援 LTE、Cellular IoT、5G NR R17/18、OFDM signal analysis 與 vector signal analysis software。[4] | [4][36] | 【推論】此列把頻譜/輸出功率測試需求連到 FSW analyzer 能力，但 passages 未直接說 FSW 是一般 EMC / regulatory lab 的指定儀器。[4][36] |\n| R&S SMW200A SAN configuration | 5G NR SAN conformance testing 需要支援 TS 38.181 Rel. 17 receiver characteristics 與 performance characteristics。[5] | SMW B10/B14 支援 up to 160 MHz signal bandwidth、delay requirements 與 LEO residual Doppler requirements。[5] | [5] | Recommended configurations 是簡報建議配置，不等同正式 configuration guide 或 quotation BOM。[7] |\n| R&S SMW200A SAN wideband configuration | 5G NR SAN conformance testing 需要支援 TS 38.181 Rel. 17 receiver characteristics 與 performance characteristics。[5] | SMW B9/B15 recommended 支援 up to 200 MHz bandwidth、delay requirements 與 LEO residual Doppler requirements。[5] | [5] | Recommended configurations 是簡報建議配置，不等同正式 configuration guide 或 quotation BOM。[7] |\n| R&S SMW200A + R&S SMW-K820 | E2E system testing 會用 service link channel emulator 與 feeder link channel emulator 模擬 UE、NTN payload 之間的 RF satellite link。[1] | SMW200A 需要 firmware version ≥ 5.30，B14 or B15 required，customized dynamic fading 需要 R&S SMW-K820，能力包含 satellite trajectory modelling、frequency-dependent atmospheric effects、longer path delays、enhanced Doppler、up to 1073 ms delay 與 up to ±1 MHz pure Doppler。[14] | [1][14] | 來源是 2025 簡報與 OneNote 轉檔，不是正式 datasheet、configuration guide、price book 或 3GPP specification。[15] |\n| R&S Space Nexus + R&S SMW200A | E2E channel emulation 的 key parameters 包含 update interval、delay、Doppler 與 pathloss。[1] | R&S Space Nexus 是 PC Software，available on request，可依 satellite trajectory 產生 SMW200A fading files。[14] | [1][14] | R&S Space Nexus 的正式 option availability、報價與 service plan 需回查正式資料。[15] |\n| R&S FSW / FSWX | NTN signal analysis 可用於 satellite payload testing、EVM、ACLR、group delay、DVB-S2X analysis 與 phase-coherent multichannel measurement。[37] | FSW 是 high-end Signal and Spectrum Analyzer，Version 17.01 涵蓋 8 GHz 至 85 GHz 型號，FSW85 搭配 FSW-B90G 可延伸至 90 GHz。[24] | [24][37] | R&S 產品能力需以正式 datasheet / configuration guide 為準。[40] |\n### 場景切入建議\n| 場景 | 推薦組合 | 證據 | 未驗證事項 |\n|---|---|---|---|\n| 3GPP NTN component testing | 【推論】用 SMW200A 產生 LTE、Cellular IoT、5G NR、OFDM 或 custom digital modulation stimulus，並用 FSW 做對應 signal analysis。[4] | Component testing 使用 DUT、SMW200A 與 FSW。[4] | 此來源是簡報摘要值，不取代 SMW200A 與 FSW formal specifications。[4] |\n| 5G NR SAN conformance testing | 【推論】160 MHz 需求對接 SMW B10/B14，200 MHz 需求對接 SMW B9/B15 recommended。[5] | 兩種配置都支援 TS 38.181 Rel. 17 SAN testing requirements、delay requirements 與 LEO residual Doppler requirements。[5] | Recommended configurations 不能直接視為可報價 BOM。[7] |\n| NTN E2E RF satellite link emulation | 【推論】用 SMW200A + B14/B15 + SMW-K820 產生 trajectory-based fading、delay、Doppler 與 pathloss 條件。[1][14] | E2E testing 使用 service link 與 feeder link channel emulator 模擬 RF satellite link，且 K820 key parameters 包含 update interval、delay、Doppler 與 pathloss。[1] | Space Nexus available on request，正式 availability 需另查。[14][15] |\n| OTA / phased-array NTN testing | 【推論】以 SMW200A 供訊號/通道條件，FSW / FSWX 供量測分析，對應 PAAM 與 NTN beam metrics。[39] | OTA / PAAM metrics 包含 radiation pattern、scan loss、pointing error、HPBW、sidelobe levels、EIRP、G/T、noise density、EVM、beam switching、beam pointing accuracy 與 beam stability。[39] | OTA / PAAM setup 的 fixtures、chamber dimensions、quiet zone、polarization 與 frequency conversions 需回查原圖與 setup note。[40] |\n### 限制\n來源中的 recommended configurations 不能直接視為可報價 BOM [7]。\n來源中的 R&S 產品能力需以正式 datasheet 或 configuration guide 為準 [40]。\n\n來源：\n[1] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）\n[2] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）\n[3] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）\n[4] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）\n[5] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）\n[7] Wiki：3GPP NTN Signal Generator Solutions Overview-EN-UR（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`、`FSW_specs_en_5215-6749-22_v1701.md`、`SMW200A_config-guide_en_3606-8037-92_v0600.md`…）\n[14] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[15] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[24] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[36] Wiki：無線通訊認證實驗室（來源：`Test House.md`、`無線通訊認證實驗室.md`）\n[37] Wiki：NTN test and measurement aspects（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[39] Wiki：NTN test and measurement aspects（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[40] Wiki：NTN test and measurement aspects（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[68] `raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md`\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-3036e7d90fed4f4ab5472e1c3599b068",
+      "request_id": "request-3036e7d90fed4f4ab5472e1c3599b068",
+      "span_id": "span-3036e7d90fed4f4ab5472e1c3599b068",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-3036e7d90fed4f4ab5472e1c3599b068",
+       "request_id": "request-3036e7d90fed4f4ab5472e1c3599b068",
+       "span_id": "span-3036e7d90fed4f4ab5472e1c3599b068",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.2"
+       },
+       "trace": {
+        "trace_id": "trace-3036e7d90fed4f4ab5472e1c3599b068",
+        "request_id": "request-3036e7d90fed4f4ab5472e1c3599b068",
+        "span_id": "span-3036e7d90fed4f4ab5472e1c3599b068",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "Map the chain from a Wireless Communication market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › NTN end-to-end system testing\n來源 slide 24–28 說 E2E system testing 會以 channel emulator for service link 與 channel emulator for feeder link 模擬 UE、NTN payload 之間的 RF satellite link。\n\n來源 slide 25 標示 `SMW firmware version ≥ 5.30`，key features 包含：\n\n- Flexible definition of terrestrial channel profiles；B14 or B15 required。\n- Customized dynamic fading；K820 required。\n- Model satellite trajectory。\n- Account for frequency-dependent atmospheric effects。\n- Longer path delays and enhanced Doppler capabilities。\n- Up to 1073 ms delay。\n- Up to ±1 MHz Doppler（pure Doppler）。\n\n來源 slide 26 對 [[R&S SMW-K820]] customized dynamic fading 的 E2E testing key features：customer-provided list、flexible definition of satellite movement、possibility to account for frequency-dependent atmospheric effects、longer path delays and enhanced Doppler capabilities。Key parameters：update interval、delay、Doppler、pathloss。\n\n來源 slide 27 說 [[R&S Space Nexus]] 是 PC Software，available on request，可 generate SMW200A fading files based on a satellite trajectory；key parameters 同為 update interval、delay、Doppler、pathloss。\n\n來源 slide 28 的 SMW200A channel emulation table：",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 3.475633
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 重點摘要\n此來源是由 `3GPP NTN Signal Generator Solutions Overview-EN-UR.pptx` 轉出的 lossy markdown；封面標示 `1GP` 與 `12-2025`，末頁標示 `Last updated: 08/25`，其中 slide 27 另標示 `2025-09-29 Nokia Workshop at R&S - SigGen Product Update`。本頁以來源原文呈現的 2025 年簡報語境處理，不自行推論正式發布日。\n\n簡報主題是 [[Rohde & Schwarz]] 針對 [[3GPP]] [[NTN]] 的 signal generator / channel emulation 測試方案，涵蓋：\n\n- [[5G NTN-NR]] 的 Release 17 / 18 / 19 演進與頻段。\n- [[Satellite Access Node]]（[[SAN]]）conformance testing。\n- [[NTN signal generator solutions]] 的 component testing、SAN testing、end-to-end system testing 與 UE testing 分層。\n- [[R&S SMW200A]] 作為 channel emulator / signal generator 的 NTN 測試能力。\n- [[R&S FSW]] 與 [[R&S FSVA3000]] 在 component testing / SAN transmitter measurement 中的角色。\n- [[R&S Space Nexus]] 依 satellite trajectory 產生 [[R&S SMW200A]] fading files 的待請求 PC software 線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 0.115016
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 關鍵實體與概念\n- [[R&S SMW200A]]：核心 signal generator / channel emulator。\n- [[R&S FSW]]：component testing 與 SAN transmitter measurement 的 spectrum / signal analysis instrument。\n- [[R&S FSVA3000]]：來源 slide 33 說 5G NR options on FSW / FSVA support Chapter 6 & 9 measurements。\n- [[R&S Space Nexus]]：來源 slide 27 的 PC software，available on request，用於依 satellite trajectory 產生 SMW200A fading files。\n- [[NTN signal generator solutions]]：本來源的 solution-level 概念節點。\n- [[5G NR SAN conformance testing]]：本來源最明確的 3GPP conformance testing 應用。\n- [[SMW200A NTN end-to-end channel emulation]]：本來源對 SMW200A + K820 / Space Nexus 的 E2E satellite RF link emulation 說法。\n- [[3GPP TS 38.108]]、[[3GPP TS 38.181]]、[[3GPP TS 36.108]]、[[3GPP TS 36.181]]、[[3GPP TR 38.821]]、[[3GPP TR 38.863]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 13,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 0.113008
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › NTN component testing\n來源 slide 16 的 component testing 方案：\n\n- DUT 搭配 [[R&S SMW200A]] 與 [[R&S FSW]]。\n- [[R&S SMW200A]]：frequency up to 67 GHz，overrange 72 GHz；RF modulation bandwidth up to 2 GHz，up to 4 GHz with [[R&S SMW-K555]]；signal generation software 包含 LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal generation（K114）、custom digital modulation。\n- [[R&S FSW]]：frequency up to 85 GHz，overrange 90 GHz；analysis bandwidth up to 8 GHz；signal analysis software 包含 LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal analysis（K96）、vector signal analysis（K70）。\n\n此處是簡報摘要值，不取代 [[R&S SMW200A]] 與 [[R&S FSW]] formal specifications。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 0.103008
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 5G NTN SAN conformance testing\n| Configuration | 來源說法 |\n|---|---|\n| SMW B10/B14 | Solution for testing needs up to 160 MHz；full support of [[3GPP TS 38.181]] Rel. 17 SAN testing requirements；receiver characteristics；performance characteristics；support signal bandwidths up to 160 MHz；support delay requirements；support residual Doppler requirements for LEO。 |\n| SMW B9/B15 recommended | Solution for testing needs up to 200 MHz；full support of [[3GPP TS 38.181]] Rel. 17 SAN testing requirements；receiver characteristics；performance characteristics；support bandwidths up to 200 MHz；support delay requirements；supports residual Doppler requirements for LEO。 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 0.094778
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 與既有知識的關係\n- 與 [[R&S SMW200A]]：補充 NTN channel emulation、SAN conformance testing 與 E2E testing 的 application / configuration 視角；不取代 [[SMW200A_specs_en_3606-8037-22_v3100]] 或 [[SMW200A_config-guide_en_3606-8037-92_v0600]]。\n- 與 [[R&S FSW]]：補充在 NTN component testing 中的分析角色與簡報級摘要規格；正式 frequency / bandwidth / option 仍以 [[FSW_specs_en_5215-6749-22_v1701]] 為準。\n- 與 [[R&S FSVA3000]]：補充 FSW / FSVA 5G NR options support Chapter 6 & 9 measurements 的簡報說法；未列出 FSVA3000 具體型號或 option stack。\n- 與 [[5G NTN validation and testing]]：新增 signal-generator-centric / channel-emulation-centric 的 NTN validation path，與既有 CMX500 / partner PR 語境互補。\n- 與 [[NR-NTN conformance testing]]：既有頁偏向 UE / GCF / PTCRB / TS8980 / CMX500 conformance validation；本來源聚焦 [[Satellite Access Node]] conformance testing 與 [[3GPP TS 38.181]] / [[3GPP TS 38.108]]。\n- 與 [[NTN propagation emulation and fading]]：既有頁整理 CMX500 PR 中 propagation emulation 與 fading 區分；本來源提供 SMW200A dynamic fading / Doppler / path delay 的 signal generator 實作線索，但未使用相同術語區分。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 14,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 0.094433
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › Recommended configurations\n來源 slide 44 / 45 提供 5G NR SAN conformance testing Release 17 recommended standard / wideband SMW200A configurations；slide 46 / 47 提供 E2E system testing Release 17 recommended standard / wideband configuration。這些是簡報建議配置，不等同正式 configuration guide 或 quotation BOM。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 12,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 0.088649
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › R&S SMW200A channel emulation\n來源 slide 11–14 說 [[R&S SMW200A]] 是 powerful fading emulator / versatile channel emulator，支援：\n\n- flexible definition of profiles。\n- profile presets incl. SCM and car2car。\n- standards-compliant presets。\n- SISO。\n- MIMO incl. correlations。\n- carrier aggregation。\n- RF performance testing：Signal Generator → Channel Emulator → Receiver / DUT，可 conducted and OTA。\n- E2E system testing：Transmitter → Channel Emulator → Receiver / Transmitter。\n\n來源 slide 13 區分兩組 integrated fading emulation hardware：\n\n| SMW200A configuration | 來源說法 |\n|---|---|\n| Standard baseband：B13 / B13T + B10 | Up to 160 MHz RF bandwidth；up to 8 RF outputs with additional SGTs；B14 fading emulator up to 32 fading channels；up to 160 MHz fading bandwidth per carrier；up to 160 MHz aggregated bandwidth。 |\n| Wideband baseband：B13XT + B9 | Up to 2 GHz RF bandwidth；up to 8 RF outputs with additional SGTs；B15 fading emulator up to 64 fading channels；up to 800 MHz fading bandwidth per carrier；up to 800 MHz aggregated bandwidth。 |\n\n來源 slide 14 指出可透過 fader hardware、channel models、MIMO fading、MIMO with carrier aggregation、standard delay profiles、TDL models、dynamic fading profiles、CDL models 與 advanced fading models 擴充；但註記 dynamic fading profiles `not supported together with K822 and K823`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 0.087399
+         },
+         {
+          "text": "NTN signal generator solutions\n[[NTN signal generator solutions]] 是 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]]（封面標示 12-2025；末頁標示 Last updated: 08/25）中用來整理 [[R&S SMW200A]]、[[R&S FSW]] 與相關 software options 在 [[3GPP]] [[NTN]] 測試中的 solution-level 應用框架。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 0.23628
+         },
+         {
+          "text": "NTN signal generator solutions › Component testing\n依 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]] slide 16，component testing 使用 DUT、[[R&S SMW200A]] 與 [[R&S FSW]]：\n\n- [[R&S SMW200A]]：frequency up to 67 GHz，overrange 72 GHz；RF modulation bandwidth up to 2 GHz，up to 4 GHz with [[R&S SMW-K555]]。\n- [[R&S SMW200A]] signal generation SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal generation（K114）、custom digital modulation。\n- [[R&S FSW]]：frequency up to 85 GHz，overrange 90 GHz；analysis bandwidth up to 8 GHz。\n- [[R&S FSW]] signal analysis SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal analysis（K96）、Vector signal analysis（K70）。\n\n以上是 2025 簡報摘要值；正式產品規格仍需回查 [[R&S SMW200A]]、[[R&S FSW]] 與其對應 specifications。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 0.212237
+         },
+         {
+          "text": "NTN signal generator solutions › SAN testing\n來源將 SAN testing 連到 [[3GPP TS 38.108]]、[[3GPP TS 38.181]]、[[3GPP TS 36.108]] 與 [[3GPP TS 36.181]]。在 signal generator 角度，[[R&S SMW200A]] 提供：\n\n- Fixed Reference Channels（FRCs）。\n- Test Models（TMs）。\n- Fading Module。\n- AWGN Module。\n- static UE propagation models。\n- TDL and moving propagation。\n- SISO / MIMO。\n- NB-IoT options：K119 / K115 / K143 / K146。\n- NR options：K144 / K148 / K171。\n- B14 / B15 + K71 moving propagation。\n\n詳見 [[5G NR SAN conformance testing]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 0.203853
+         },
+         {
+          "text": "NTN signal generator solutions › 來源中的 solution 分層\n[[3GPP NTN Signal Generator Solutions Overview-EN-UR]] 將 NTN testing 分為四類：\n\n- Component Testing。\n- [[Satellite Access Node]]（[[SAN]]）Testing。\n- End-to-end System Testing。\n- User Equipment（UE）Testing。\n\n來源可讀內容主要展開前三者，尤其是 [[R&S SMW200A]] 的 channel emulation、[[5G NR SAN conformance testing]] 與 [[SMW200A NTN end-to-end channel emulation]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 0.198463
+         },
+         {
+          "text": "NTN signal generator solutions › 與 NTN validation / conformance 的關係\n- [[5G NTN validation and testing]]：較寬的 NTN validation、partner collaboration、CMX500 / SMBV100B / Viasat / Gatehouse / MediaTek PR 語境。\n- [[NR-NTN conformance testing]]：偏 UE / GCF / PTCRB / TS8980 / CMX500 conformance validation。\n- [[5G NR SAN conformance testing]]：本來源新增的 Satellite Access Node 測試概念，聚焦 SAN transmitter、receiver、performance 與 OTA chapters。\n- [[NTN propagation emulation and fading]]：既有 CMX500 PR 中 propagation emulation 與 fading 的概念；本來源補充 SMW200A dynamic fading / Doppler / path delay 實作線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 0.128133
+         },
+         {
+          "text": "NTN signal generator solutions › End-to-end system testing\n來源將 E2E system testing 描述為對 UE、NTN payload、service link channel emulator 與 feeder link channel emulator 的 RF satellite link emulation。[[R&S SMW200A]] 需要 firmware version ≥ 5.30，並透過 B14 或 B15 搭配 [[R&S SMW-K820]] customized dynamic fading 支援：\n\n- satellite trajectory modelling。\n- frequency-dependent atmospheric effects。\n- longer path delays。\n- enhanced Doppler capabilities。\n- up to 1073 ms delay。\n- up to ±1 MHz Doppler（pure Doppler）。\n\n[[R&S Space Nexus]] 在來源中被描述為 PC Software，available on request，可依 satellite trajectory 產生 [[R&S SMW200A]] fading files。\n\n詳見 [[SMW200A NTN end-to-end channel emulation]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 0.121891
+         },
+         {
+          "text": "NTN signal generator solutions › 使用限制\n- 來源是 2025 簡報與 OneNote 轉檔，不是正式 datasheet、configuration guide、price book 或 3GPP specification。\n- 來源標示 12-2025、Last updated 08/25 與 2025-09-29 workshop date；正式發布日期未標示。\n- 來源中的 recommended configurations 不能直接視為可報價 BOM；需回查正式 configuration guide、option availability、export control 與 service plan。\n- 來源中的 R17/18 option wording 不可直接覆寫正式 product option name；正式命名仍以產品規格書為準。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 0.107878
+         },
+         {
+          "text": "R&S SMW200A\n[[R&S SMW200A]] 是 Rohde & Schwarz 的 vector signal generator；依 `R&S®SMW200A Vector Signal Generator Specifications` `Version 31.00`（`May 2026`），RF path A 可覆蓋 `100 kHz to 67 GHz`，RF path B 可覆蓋至 `44 GHz`，並可由 single-path vector signal generator 擴充到 multichannel MIMO receiver tester（來源：[[SMW200A_specs_en_3606-8037-22_v3100]]）。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 5.33223
+         },
+         {
+          "text": "R&S SMW200A › Signal routing and baseband main module\n| Code | Name / description | Order No. | 原文說明 / 限制 |\n|---|---|---:|---|\n| `R&S®SMW-B13` | Signal routing and baseband main module，one I/Q path to RF section | `1413.2807.02` | Standard baseband section；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13T` | Signal routing and baseband main module，two I/Q paths to RF section | `1413.3003.02` | Standard baseband section；若要安裝 RF path B 需 `B13T` 或 `B13XT`；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13XT` | Wideband baseband main module，two I/Q paths to RF section | `1413.8005.02` | Wideband baseband section；RF modulation bandwidth up to `2 GHz`。 |\n\n- Standard baseband section：`R&S®SMW-B13` 或 `R&S®SMW-B13T`；RF modulation bandwidth 最高 `160 MHz`；可安裝 `R&S®SMW-B10` standard baseband generator 與 `R&S®SMW-B14` fading simulator。\n- Wideband baseband section：`R&S®SMW-B13XT`；RF modulation bandwidth 最高 `2 GHz`；可安裝 `R&S®SMW-B9` / `R&S®SMW-B9F` wideband baseband generator 與 `R&S®SMW-B15` fading simulator and signal processor。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 4.495094
+         },
+         {
+          "text": "R&S SMW200A › 文件依據\n- 來源：[[SMW200A_config-guide_en_3606-8037-92_v0600]]。\n- 文件名稱：`R&S®SMW200A Vector Signal Generator – Configuration guide`。\n- 文件代碼：`PD 3606.8037.92`。\n- 文件版次：`Version 06.00`。\n- 文件日期：`May 2024`。\n- 文件性質：configuration guide；適合查 mandatory configuration、requires / not compatible / retrofitting notes、ordering information、recommended extras 與 service notes。\n\n- 來源：[[SMW200A_specs_en_3606-8037-22_v3100]]。\n- 文件名稱：`R&S®SMW200A Vector Signal Generator Specifications`。\n- 文件代碼：`PD 3606.8037.22`。\n- 文件版次：`Version 31.00`。\n- 文件日期：`May 2026`。\n- 文件性質：產品 specifications；記錄 RF/baseband performance、interfaces、environmental data、ordering information 與 options。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 4.1337
+         },
+         {
+          "text": "R&S SMW200A › 基本訂購限制\n依 [[SMW200A_config-guide_en_3606-8037-92_v0600]] 與 [[SMW200A_specs_en_3606-8037-22_v3100]]：\n\n- Base unit：`R&S®SMW200A`，Order No. `1412.0000.02`。\n- 原文說明：Vector signal generator；includes power cable and quick start guide。\n- Base unit can only be ordered with an `R&S®SMW-B10xx` frequency option and an `R&S®SMW-B13`、`R&S®SMW-B13T` or `R&S®SMW-B13XT` signal routing and baseband main module。\n- 最低配置必須包含 RF path A 的一個 frequency option，以及一個 signal routing and baseband main module。\n- Step 1 RF path A frequency options 不能 retrofitted。\n- Step 2 baseband main module options 可 factory retrofitted；`R&S®SMW-B13XT` retrofitting only for serial number `102700` or higher。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 4.085558
+         },
+         {
+          "text": "R&S SMW200A › 產品定位與架構\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]（Version 31.00，May 2026）與 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（Version 06.00，May 2024）：\n\n- [[R&S SMW200A]] 可從 single-path vector signal generator 擴充到 multichannel [[MIMO]] receiver tester。\n- 支援最多 `8` 個 signal sources 與最多 `64` 個 fading channels。\n- 可連接 [[R&S SGT100A]] signal generator modules，提供最多 `8` 條 RF paths。\n- 最多可在 `2` 個 internal baseband modules 上配置 `8` 個 baseband generators，具 real-time coder 與 ARB。\n- 單機可配置最多兩個 internal RF paths：RF path A 為 mandatory，RF path B 為 optional second RF path。\n- Baseband section 分成 standard baseband section 與 wideband baseband section；standard baseband 最高 `160 MHz` RF modulation bandwidth，wideband baseband 最高 `2 GHz` RF modulation bandwidth。\n- 可選 integrated fading section，channel emulation bandwidth 最高 `800 MHz`；最多可安裝 `4` 個 fading modules，提供最多 `64` 個 logical faders。\n- 單一儀器可實作 MIMO fading scenarios：`2x2`、`3x3`、`4x4`、`8x4`、`4x8`、`2x4x4`。\n- Path-specific、baseband-specific 與 fading/MIMO software options 採 floating license concept；若同一 feature 需同時在兩個 paths 或兩個 baseband generators 使用，通常需安裝兩份對應 option。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 3.757127
+         },
+         {
+          "text": "R&S SMW200A › RF path combination 與 chassis\n- RF path combination table：`●` 代表 possible；`–` 代表 not possible；灰底格代表該 RF path combination 需要 `R&S®SMW-B94L` deeper chassis；白底格使用 standard chassis。\n- `R&S®SMW-B94L`：Deeper chassis，Order No. `1438.8150.02`。\n- `R&S®SMW-B94L` required and only possible for RF path combinations：`2 × 12.75 GHz`、`2 × 31.8 GHz`、`2 × 44 GHz`。\n- 44 GHz 組合限制：`R&S®SMW-B1044` 只能與 `R&S®SMW-B2044` 組合；`R&S®SMW-B1044N` 只能與 `R&S®SMW-B2044N` 組合；`R&S®SMW-B1044O` 只能與 `R&S®SMW-B2044O` 組合。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 3.528146
+         },
+         {
+          "text": "R&S SMW200A › Digital I/Q\n- Standard digital baseband outputs 至少需 `R&S®SMW-K18`；wideband digital baseband outputs 至少需 `R&S®SMW-K19`。\n- Digital I/Q input/output 可用於 [[R&S SMW200A]] 與其他 Rohde & Schwarz 儀器之間的 lossless connection，例如 [[R&S SGT100A]]、[[R&S SMM100A]]、[[R&S SMCV100B]] 或 CMW500 wideband radio communication tester 的 fading applications。\n- DIG I/Q interface 符合 `R&S®Digital I/Q Interface PAD-R`，level `LVDS`，connector `26-pin MDR`。\n- HS DIG I/Q interface 符合 `R&S®Digital I/Q Interface 40G PAD-R`，connector `QSFP+/QSFP 28`。\n- Wideband HS DIG I/Q standard system configuration mode：40G up to `1.05 GHz`，50G up to `1.25 GHz`；advanced mode with `R&S®SMW-K822` input up to `500 MHz`，with `R&S®SMW-K823` input up to `1000 MHz`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 18,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 3.356994
+         },
+         {
+          "text": "R&S SMW200A › Digital standards、R&S WinIQSIM2、Pulse Sequencer、MIMO 與 fading\n- Internal digital modulation systems 至少需安裝一個 `R&S®SMW-B10` 或 `R&S®SMW-B9`。\n- 來源列出 cellular、wireless connectivity、navigation、broadcast 與 other standards options；包含 `GSM/EDGE`、`3GPP FDD`、`LTE Release 8` 到 `Release 15`、`Cellular IoT`、`5G New Radio`、`5G NR Release 16/17`、`IEEE 802.11a/b/g/n/j/p/ac/ax/be/ad/ay`、`Bluetooth EDR/5.x/5.4`、`GNSS`、`DVB-S2/S2X`、`DVB-RCS2`、`LoRa`、`HRP UWB` 等。\n- 來源描述 digital standards 不需要 separate PC software；但 waveform packages for signals from [[R&S WinIQSIM2]] 另明列 [[R&S WinIQSIM2]] requires an external PC。判斷：前者指 instrument internal digital standards，後者指 WinIQSIM2 workflow，不合併為單一規則。\n- `R&S®SMW-K144`：5G New Radio，Order No. `1414.4990.02`。\n- `R&S®SMW-K145`：5G New Radio closed-loop BS test，Order No. `1414.6506.02`。\n- `R&S®SMW-K148`：5G NR Release 16，Order No. `1414.6664.02`。\n- `R&S®SMW-K170`：5G NR sidelink，Order No. `1413.8640.02`。\n- `R&S®SMW-K171`：5G NR Release 17，Order No. `1413.7280.02`。\n- [[R&S WinIQSIM2]] requires an external PC；`R&S®SMW-K200` waveform packages 可登錄 1、5 或 50 waveforms，每台 instrument 最多 `250 waveforms`。\n- [[R&S Pulse Sequencer]] 相關 options 包含 `R&S®SMW-K300`、`K301`、`K302`、`K304`、`K306`、`K307`、`K308`、`K315`、`K350`。\n- Multichannel、MIMO and fading 完整規格另見 `PD 3673.1276.22`；digital standards 完整規格另見 `PD 5213.9434.22`；GNSS/avionics 另見 `PD 3607.6896.22`；Pulse Sequencer 另見 `PD 3607.1388.22`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 21,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 2.362151
+         },
+         {
+          "text": "R&S FSW\nR&S FSW 是 Rohde & Schwarz 的 high-end Signal and Spectrum Analyzer 系列，依 Version 17.01（September 2025）涵蓋 8 GHz 至 85 GHz 型號，[[R&S FSW85]] 搭配 R&S FSW-B90G 可延伸至 90 GHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSW.md"
+          },
+          "score": 4.139259
+         },
+         {
+          "text": "R&S FSW › 其他硬體 options（摘錄）\n| Option code | 名稱 | Order No. | 原文說明 / 限制 |\n|---|---|---|---|\n| R&S FSW-B4 | OCXO precision frequency reference | 1313.0703.02 | user-retrofittable |\n| R&S FSW-B8E | Resolution bandwidth up to 40 MHz | 1338.6911.02 | 適用 [[R&S FSW8]]/13/26/43/50/67/85；signal analysis bandwidth 不由 B8E 定義 |\n| R&S FSW-B8 | Resolution bandwidth up to 80 MHz | 1313.2464.26 或 1313.2464.02 | 1313.2464.26 適用 [[R&S FSW8]]/13/26；1313.2464.02 適用 [[R&S FSW43]]/50/67/85 且 export license required |\n| R&S FSW-B10 | External generator control | 1313.1622.02 | contact service center |\n| R&S FSW-B13 | Highpass filter for harmonic measurements | 1313.0761.02 | user-retrofittable |\n| R&S FSW-B17 | Digital baseband Interface | 1313.0784.02 | user-retrofittable |\n| R&S FSW-B18 | Spare solid state drive | 1313.0790.21 | user-retrofittable |\n| R&S FSW-B21 | LO/IF connections for external mixers | 1313.1100.28 / 1313.1100.86 | 不適用 [[R&S FSW8]]、[[R&S FSW13]]；.28 適用 [[R&S FSW26]]/43/50/67；.86 適用 [[R&S FSW85]] |\n| R&S FSW-B24 | RF preamplifier | 1313.0832.13/.26/.43/.49/.51/.66/.67 | 適用範圍依型號與 order no.；來源未列 [[R&S FSW85]] 適用 B24 |\n| R&S FSW-B25 | Electronic attenuator, 1 dB steps | 1313.0990.02 | 適用 [[R&S FSW8]]/13/26 |\n| R&S FSW-B33 | USB mass memory write protection | 1313.3602.02 | 不可 retrofittable；factory pre-installed |\n| R&S FSW-B71 | Analog baseband inputs | 1313.1651.13/.26/.67/.86 | order no. 依型號範圍不同 |\n| R&S FSW-B71E | 80 MHz analysis bandwidth for analog baseband inputs | 1313.6547.02 | 需 R&S FSW-B71；user-retrofittable |\n| R&S FSW-B2071 | Oscilloscope baseband inputs | 1331.8302.02 | 適用所有 FSW models；user-retrofittable |\n| R&S FSW-B90G | Frequency extension 90 GHz | 1331.7693.02 | 不可 retrofittable；僅適用 [[R&S FSW85]]；f > 85 GHz without preselection |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSW.md"
+          },
+          "score": 3.298777
+         },
+         {
+          "text": "R&S FSW › Analysis bandwidth options（硬體 options）\n| Option code | 名稱 | Order No. | 適用與限制 |\n|---|---|---|---|\n| R&S FSW-B40 | 40 MHz analysis bandwidth | 1313.0861.02 | user-retrofittable |\n| R&S FSW-B80 | 80 MHz analysis bandwidth | 1313.0878.02 | user-retrofittable |\n| R&S FSW-B160 | 160 MHz analysis bandwidth | 1325.4850.14 | contact service center |\n| R&S FSW-B320 | 320 MHz analysis bandwidth | 1325.4867.14 | includes 200 MHz IF filter |\n| R&S FSW-B512 | 512 MHz analysis bandwidth | 1331.7106.14 | includes 200 MHz IF filter |\n| R&S FSW-B512R | Real-time spectrum analyzer 512 MHz, POI ≤ 15 µs | 1331.7106.16 | contact service center；includes 512 MHz analysis bandwidth and 200 MHz IF filter |\n| R&S FSW-B1200 | 1.2 GHz analysis bandwidth | 1331.6400.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory；不適用 [[R&S FSW8]]、[[R&S FSW13]] |\n| R&S FSW-B2001 | 2 GHz analysis bandwidth | 1331.6916.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory |\n| R&S FSW-B4001 | 4.4 GHz analysis bandwidth | 1338.5215.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；contact service center |\n| R&S FSW-B6001 | 6.4 GHz analysis bandwidth | 1338.5221.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B8001 | 8.312 GHz analysis bandwidth | 1338.5238.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B800R | Real-time spectrum analyzer 800 MHz, POI ≤ 15 µs | 1331.6400.16 | 適用 [[R&S FSW26]]/43/50/67/85；export license required |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSW.md"
+          },
+          "score": 3.20355
+         },
+         {
+          "text": "R&S FSW › Firmware / licence options（摘錄）\n- R&S FSW-K6 Pulse measurements，Order No. 1313.1322.02。\n- R&S FSW-K7 AM/FM/PM modulation analysis，Order No. 1313.1339.02。\n- R&S FSW-K8 Bluetooth BR/EDR/LE measurements，Order No. 1313.1351.02；R&S FSW-K8E Bluetooth 6.0 channel sounding，Order No. 1353.3284.02，需 R&S FSW-K8。\n- R&S FSW-K40 Phase noise measurements，Order No. 1313.1397.02。\n- R&S FSW-K54 EMI measurements，Order No. 1313.1400.02。\n- R&S FSW-K70 Vector signal analysis，Order No. 1313.1416.02。\n- WLAN options：R&S FSW-K91、K91N、K91AC、K91AX、K91BE、K91P、K91BN、K95、K97；其中 K95/K97 需 R&S FSW-B2001/-B800R/-B4001/-B6001/-B8001 option。\n- 5G NR options：R&S FSW-K144、K145、K147、K147C、K148、K171、K175、K184；requires 依原文列示，報價前需回查 [[FSW_specs_en_5215-6749-22_v1701]]。\n- Real-time application firmware：R&S FSW-K161R、K512RE、K800RE，各自有 bandwidth option requires/excludes。\n- R&S FSW-K553 External frontend control，Order No. 1350.6118.02；支援 [[R&S FE44S]]、[[R&S FE50DTR]]、[[R&S FE110SR]]、[[R&S FE170SR]]。\n- R&S FSW-K575 I/Q noise cancellation，Order No. 1353.2894.02。\n- R&S FSW-K980 Health and utilization monitoring service（HUMS），Order No. 1350.6718.02。\n- 標註 59 的 firmware 也可作為 floating license；order number 由 `.02` 改為 `.51`，並需 R&S FSW-FL hardware option。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSW.md"
+          },
+          "score": 1.04339
+         },
+         {
+          "text": "R&S CMP200 › R&S CM-Z310A UWB head\n[[R&S CM-Z310A]] UWB head 是 [[R&S CMP200]] 的 ultra wideband extension：\n\n| 項目 | 規格 |\n|---|---|\n| Order No. | 1215.0000.02 |\n| Connection cable | [[R&S CM-Z33A]]，3 m，1215.0500.02 |\n| Step attenuator | RF 1、RF 2、RF 3、RF 4，user controlled |\n| Attenuation range | 0 dB to 20 dB |\n| Attenuation step size | 1 dB |\n| Generator frequency range | 6 GHz to 13 GHz |\n| Generator output level range | RMS，step attenuator 20 dB：–110 dBm to –46 dBm；step attenuator 0 dB overrange：up to –10 dBm |\n| Analyzer frequency range | 4 GHz to 13 GHz |\n| Analyzer absolute maximum | 30 V DC，+15 dBm |\n| Analyzer displayed average noise level | +15 °C to +35 °C，4 GHz to 13 GHz：< –154.5 dBm/Hz meas. |\n| Calibration interval | 24 months |\n| Dimensions | 245 mm × 185 mm × 38 mm |\n| Weight | 約 2.0 kg |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 20,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP200.md"
+          },
+          "score": 4.108461
+         },
+         {
+          "text": "R&S CMP200 › IF generator\n| 項目 | 規格 |\n|---|---|\n| Ports | 3 × IF Out，port 1/2/3 |\n| Connector | SMA |\n| Frequency range | 6 GHz to 20 GHz，含 modulation bandwidth |\n| Frequency resolution | < 0.1 Hz |\n| Frequency uncertainty | same as timebase + frequency resolution |\n| Frequency settling time | < 300 µs |\n| Maximum reverse power | 0 V DC，+25 dBm |\n| Output level range | 6 GHz ≤ f ≤ 20 GHz，PEP，best SNR/IMD performance：–20 dBm to +2 dBm；overrange up to +10 dBm |\n| Output level resolution | 0.1 dB |\n| Output level uncertainty | +15 °C 至 +35 °C、no overranging、6 GHz to 20 GHz：< 1.5 dB |\n| Output level repeatability | 1 h warm-up 後 typical < 0.1 dB |\n| Harmonics attenuation | second harmonics > 35 dB nom.；third harmonics > 45 dB nom. |\n\nIF generator EVM 條件為 5G NR PDSCH、100 MHz channel bandwidth、full allocation、SCS 60 kHz / 120 kHz、64QAM、+15 °C 至 +35 °C、signal PAR = 11.8 dB；來源標示 EVM 為 measured values。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP200.md"
+          },
+          "score": 3.553294
+         },
+         {
+          "text": "R&S CMP200 › R&S CMPHEAD30\n[[R&S CMPHEAD30]] remote radio head 用於 28 GHz / 39 GHz FR2 frequency ranges：\n\n| 項目 | 規格 |\n|---|---|\n| Order No. | 1201.0002K23 |\n| Hardware unit | [[R&S CMPH-B23A]]，1430.8000.02 |\n| Connector type | RF 1、RF 2，front panel，wear adapter，2.4 mm（Q），female |\n| Duplex mode | half duplex（TDD） |\n| Frequency range | 28 GHz band：24.25 GHz to 31.80 GHz；39 GHz band：37.00 GHz to 43.50 GHz |\n| Generator output level range | 28 GHz PEP –84 dBm to +20 dBm；37–40 GHz PEP –78 dBm to +19 dBm；40–43.5 GHz PEP –78 dBm to +17 dBm |\n| Analyzer frequency extension | 28 GHz band：23.45 GHz to 24.25 GHz；39 GHz band：43.50 GHz to 44.30 GHz |\n| Analyzer frequency error | < ±0.01 ppm，符合 [[3GPP TS 38.521-2]] V17.0.0 |\n| Isolation of RF ports | RF 1 to RF 2 > 27 dB，35 dB typ. |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 18,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP200.md"
+          },
+          "score": 3.09082
+         },
+         {
+          "text": "R&S CMP200 › Specifications data sheet\n本頁硬體、IF、RRH、UWB head、ordering、mechanical、environmental 與 conformance 相關主張主要來自 [[CMP200_specs_en_5216-4391-22_v0800]]：\n\n- 文件名稱：**CMP200 Radio Communication Tester Specifications Data Sheet**。\n- 文件代碼：**PD 5216.4391.22**。\n- 文件版本：**Version 08.00**。\n- 文件日期：**August 2024**。\n- 版權：**© 2019–2024 Rohde & Schwarz**。\n- 產品：**Rohde & Schwarz CMP200 Radio Communication Tester**。\n- 注意：**Data without tolerance limits is not binding**；**Subject to change**。\n- Recommended calibration interval：CMP200 與 RRH 為 **12 months**；[[R&S CM-Z310A]] UWB head 為 **24 months**。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP200.md"
+          },
+          "score": 2.941981
+         },
+         {
+          "text": "R&S CMP200 › R&S VSE options\n[[R&S VSE]] 是 high-performance analysis software，supported instruments 清單包含 [[R&S CMP200]]。若由 CMP200 提供 VSE licenses，需要 VSE base software option **R&S CMP-KM150**。\n\n| Code | CMP200 designation | CMP200 order no. | Dongle type | Dongle order no. | 相依關係 |\n|---|---|---:|---|---:|---|\n| R&S CMP-KM150 | Signal analysis base software | 1212.3972.xx | R&S VSE | 1345.1105.xx | 由 CMP200 提供 VSE licenses 時需要 |\n| R&S CMP-KM152 | Signal analysis digital | 1212.3989.xx | R&S VSE-K70 | 1320.7522.xx | 來源未標示 |\n| R&S CMP-KM160 | WLAN 802.11a/b/g meas. | 1212.4340.xx | R&S VSE-K91 | 1320.7597.xx | 來源未標示 |\n| R&S CMP-KM162 | WLAN 802.11BE measurement | 1212.4362.xx | R&S VSE-K91BE | 1345.1428.xx | 需要 R&S CMP-KM160 |\n| R&S CMP-KM180 | OFDM signal analysis app. | 1212.4356.xx | R&S VSE-K96 | 1320.7922.xx | 來源未標示 |\n| R&S CMP-KM580 | OneWeb reverse link meas. | 1212.4085.xx | R&S VSE-K201 | 1345.2001.xx | 來源未標示 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 17,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP200.md"
+          },
+          "score": 2.914686
+         },
+         {
+          "text": "R&S CMP200 › Base unit 與 ordering information\n| 項目 | Order No. | 原文說明 |\n|---|---:|---|\n| CMP200 Radio communication tester | 1201.0002K20 | 主機 |\n| R&S CMP-PB20A | 1212.0209.02 | Basic assembly |\n| R&S CMP-B500A | 1212.0444.02 | IF unit |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP200.md"
+          },
+          "score": 2.903006
+         },
+         {
+          "text": "R&S CMP200 › 產品定位\n依 [[CMP200_specs_en_5216-4391-22_v0800]]，[[R&S CMP200]] 與 [[R&S CMPHEAD30]] / [[R&S CMPHEAD50]] remote radio head（RRH）形成 5G NR FR2（mmWave）nonsignaling one-box test solution，目標應用為：\n\n- R&D 的 RF parametric testing。\n- Manufacturing 的 high-volume RF parametric testing。\n- Fully assembled smart devices 的 pure radiated mmWave setup。\n- 具 IF interface 的 mmWave RF integrated circuits 的 mixed radiated mmWave / conducted IF setup。\n- 具 mmWave interface 的 mmWave RF integrated circuits 的 mixed radiated mmWave / conducted mmWave setup。\n\nCMP200 本體提供 IF frequency range 的 vector signal analysis 與 ARB-based generator functionality；[[R&S CMPHEAD30]] / [[R&S CMPHEAD50]] 作為 compact remote radio head，負責 upconversion / downconversion 至 5G NR FR2 frequencies。分離式 one-box tester + RRH 架構可在 mmWave frequency range 使用較短 RF cable lengths，以改善 radiated test environments 的 link budget。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP200.md"
+          },
+          "score": 2.86081
+         },
+         {
+          "text": "R&S CMP200\n[[R&S CMP200]] 是 [[Rohde & Schwarz]] 的 **Radio Communication Tester**；依 [[CMP200_specs_en_5216-4391-22_v0800]]，它與 [[R&S CMPHEAD30]] / [[R&S CMPHEAD50]] remote radio head 組成 5G NR FR2（mmWave）nonsignaling one-box test solution，並依 [[CMP200_Features_V8-14-22_en_09]] 透過 options 提供 [[NR FR2]]、[[UWB]]、[[LP-IoT]]、UWB PHY test plans、waveform playback/generation 與 [[R&S VSE]] analysis 相關功能。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMP200.md"
+          },
+          "score": 2.544003
+         },
+         {
+          "text": "無線通訊認證實驗室 › 重點摘要\n本來源是由 `無線通訊認證實驗室.pptx` 轉出的 company restricted 簡報，正式發布日期與文件版次未標示；raw frontmatter 顯示 converted 日期為 2026-09-17。\n\n來源將[[無線通訊認證實驗室]]定義為測試與驗證無線設備符合法規、安全與性能標準的實驗室，涵蓋 [[RF 測試]]、[[EMC]]、安規與一致性認證，並稱其可支援 [[Global Market Access]]（GMA）與加速上市。\n\n主要內容包括：\n\n- 無線設備認證實驗室涵蓋 RF、EMC、安規與一致性認證。\n- 主要測試項目包含頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試與 [[PTCRB]] / [[GCF]] 認證。\n- 來源稱認證必要性包括防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端與 6G 等需求。\n- 來源列出台灣 [[NCC]] 認證流程：準備文件 / 樣品 / 電路圖 / 天線規格、提交 [[RCB]] 核驗機構初審、[[TAF]] 認可實驗室 RF / EMC 測試約 3–4 週、報告審查與證書核發，並稱證書有效期 5 年。\n- 來源列出台灣領先認證實驗室：[[耕興]]、[[SGS]]、[[電信技術中心]] / [[ISL]]。\n- 來源稱[[耕興]]具 30 MHz–325 GHz 全頻段測試能力、108 座測試場地、連續 10 年 FCC 最佳實驗室認證、10 米半電波暗室、OTA / SAR / [[相控陣列天線]]測試等能力。\n- 來源簡述 [[FCC 無線設備法規測試]]、[[CE RED 無線設備法規測試]]、Wi‑Fi / BLE 聯盟流程的差異。\n- 來源將 LEO 衛星終端認證應用連到 Starlink / Kuiper user terminal RF validation、[[相控陣列天線]] beamforming 測試、mmWave / MIMO 高頻測試、台灣供應鏈 GMA，以及耕興等 [[RCB]] 提供 8–12 週 GMA 週期的說法。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+          },
+          "score": 1.022569
+         },
+         {
+          "text": "NTN test and measurement aspects › Signal generation、analysis 與 SpaceNexus\n來源描述：\n\n- [[R&S SMW200A]] 可配備 fading emulator，支援 TDL / CDL、custom fading profile、Doppler、delay、path loss，以及 [[R&S SMW-K820]] customized dynamic fading。\n- [[R&S SpaceNexus]] 可設定 satellite constellation、UE position / mobility、time-variant Doppler、time-variant propagation delay、path loss、weather-induced attenuation，並 remote configure SMW200A。\n- [[R&S FSW]] / [[R&S FSWX]] 支援 satellite payload testing、EVM、ACLR、group delay、DVB-S2X analysis、phase-coherent multichannel measurement。\n- [[R&S PVT360A]] 被描述為 potential satellite production testing platform，整合 vector signal generator 與 vector spectrum analyzer。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+          },
+          "score": 7.308329
+         },
+         {
+          "text": "NTN test and measurement aspects › NTN 對 T&M 的 paradigm change\n來源指出 [[NTN]] 改變傳統 wireless T&M 假設：\n\n- 傳統假設 UE mobile、network entities stationary。\n- NTN 需考慮 UE 與 network entities 兩者 mobility。\n- 測試條件需 reproducible、accurate、comparable，但 setup 需加入 high path loss、Doppler shift、time delay、delay variance、atmospheric effects、Faraday effect、scintillation、weather influences。\n- satellite 入軌後 maintenance / replacement 困難，使 simulation、software-assisted testing、digital twin、in-orbit monitoring 更重要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+          },
+          "score": 2.153193
+         },
+         {
+          "text": "NTN test and measurement aspects › OTA / phased array / PAAM testing\nNTN UE、VSAT、SAN、satellite 可能使用 directive antennas / phased array antennas，因此 OTA testing 重要。\n\n來源整理：\n\n- OTA methods：far field、near field、CATR、plane wave conversion、anechoic chamber、reverberation chamber。\n- PAAM metrics：radiation pattern、scan loss、pointing error、HPBW、sidelobe levels、EIRP、G/T、noise density、EVM、beam switching。\n- NTN beam metrics：beam center、beam peak、beam pair、beam pointing accuracy、beam stability、beam squint、OSDD、beam shape capability。\n- Rohde & Schwarz setups 使用 [[R&S ZNA]]、[[R&S SMW200A]]、[[R&S FSW]]、[[R&S FSWX]]、[[R&S ATS1800C]]、[[R&S ATS800B]]、[[R&S ATS800R]]、[[R&S ATS1800M]] 等。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+          },
+          "score": 1.62425
+         },
+         {
+          "text": "NTN test and measurement aspects › 使用限制\n- 本頁是 T&M 技術總覽；正式 test methods、limits、tolerances、test case IDs 與 validation status 需查 [[TS 38.101-5]]、[[TS 38.521-5]]、[[TS 38.523]]、[[TS 38.533]]、[[TS 38.181]]、[[TS 38.108]]、GCF / PTCRB public documents。\n- R&S 產品能力需以正式 datasheet / configuration guide 為準；白皮書中的 solution-level 描述不可直接作為 quote / BOM / orderable capability。\n- OTA / PAAM setup 的 fixtures、antenna modules、chamber dimensions、quiet zone、polarization、frequency conversions 等需以原圖與 setup note 回查。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+          },
+          "score": 1.484458
+         },
+         {
+          "text": "NTN propagation emulation and fading › 與 NTN technical challenges 的關係\n同一來源也指出 [[Non-Terrestrial Network]] 的 technical hurdles 包含：\n\n- rapid satellite movement。\n- frequent changes in signal characteristics。\n- [[Doppler frequency shift]]。\n- variable propagation delay。\n- high path loss。\n- advanced channel emulation。\n- multiple orbits：[[LEO]]、[[MEO]]、[[GEO]]。\n- multiple frequency bands。\n- [[FDD]] 在 NTN 中 often necessitated，而 terrestrial networks 常見 [[TDD]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN propagation emulation and fading.md"
+          },
+          "score": 1.399187
+         },
+         {
+          "text": "NTN propagation emulation and fading › 使用限制\n- 來源是 PR，不是 channel model specification、measurement application note 或 formal datasheet。\n- 來源未提供 propagation emulation 與 fading 的正式模型名稱、3GPP clause、parameter range、implementation architecture、supported bands、supported orbit profiles 或 calibration method。\n- 來源宣稱 only available NTN test solution，但未提供競品清單、比較日期或 benchmark 方法。\n- 不可由本來源推論 [[R&S CMX500]] 的正式 fading option、channel emulator 規格、measurement uncertainty 或 conformance coverage。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN propagation emulation and fading.md"
+          },
+          "score": 1.042184
+         },
+         {
+          "text": "SMW200A NTN end-to-end channel emulation › E2E system testing 架構\n依 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]] slide 24，E2E system testing 圖中包含：\n\n- UE。\n- Channel emulator for service link。\n- NTN payload。\n- Channel emulator for feeder link。\n- 圖上另標示兩組 2 paths。\n\n來源將此歸為 [[NTN signal generator solutions]] 的 End-to-end System Testing 類別。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SMW200A NTN end-to-end channel emulation.md"
+          },
+          "score": 4.126927
+         },
+         {
+          "text": "SMW200A NTN end-to-end channel emulation › SMW firmware 與 key features\n依來源 slide 25：\n\n- [[R&S SMW200A]] firmware version ≥ 5.30。\n- Flexible definition of terrestrial channel profiles；B14 or B15 required。\n- Customized dynamic fading；[[R&S SMW-K820]] required。\n- Model satellite trajectory。\n- Account for frequency-dependent atmospheric effects。\n- Longer path delays and enhanced Doppler capabilities。\n- Up to 1073 ms delay。\n- Up to ±1 MHz Doppler（pure Doppler）。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SMW200A NTN end-to-end channel emulation.md"
+          },
+          "score": 3.013573
+         },
+         {
+          "text": "SMW200A NTN end-to-end channel emulation\n[[SMW200A NTN end-to-end channel emulation]] 是 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]]（封面標示 12-2025）中描述的 end-to-end NTN system testing 方法：用 [[R&S SMW200A]] 的 fading / channel emulation 功能模擬 service link 與 feeder link 的 RF satellite link，並透過 [[R&S SMW-K820]] customized dynamic fading 或 [[R&S Space Nexus]] 產生 trajectory-based fading files。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SMW200A NTN end-to-end channel emulation.md"
+          },
+          "score": 2.919273
+         },
+         {
+          "text": "5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100 › 與既有知識的關係\n- [[5G NTN validation and testing]] 既有頁面以 PR、partner collaboration、Viasat / Gatehouse / MediaTek demo 與 certification test plan 為主；本白皮書提供更完整的技術背景、標準 release evolution、test specification 與 T&M 分層。\n- [[NR-NTN conformance testing]] 既有頁面記錄 GCF WI-555 / PTCRB RFT 555 的 PR validated 口徑；本白皮書補充 GCF WI-555 描述 124 個 NTN conformance related test cases，並列出 early 2026 狀態下 RRM 93、RF 38、protocol 22 的概略數量。\n- [[CMX500 NTN one-box tester]] 既有頁面偏 PR positioning；本白皮書補充 CMX500 在 UE NTN RF、protocol、RRM、application、mobility、Constellation Insight、XLAPI、ScriptAssist 與 E2E test bed 中的 test lifecycle 定位。\n- [[NTN signal generator solutions]] 既有頁面偏 [[R&S SMW200A]] signal generator / SAN / E2E channel emulation solution；本白皮書補充 fading profiles、TDL / CDL channel models、SpaceNexus、MATLAB integration、FSW / FSWX signal analysis 與 satellite component / production testing。\n- [[NTN propagation emulation and fading]] 既有頁面偏 CMX500 PR 中 propagation emulation 與 fading 的概念；本白皮書補充 [[TR 38.811]]、[[TR 38.901]]、[[TS 38.181]] 中 TDL / CDL / moving propagation condition，以及 Rel. 19 time-varying Doppler and propagation delay model。\n- [[5G NTN 商業化路線]] 偏市場 roadmap；本白皮書明確說明排除 market data，因此應作為 technical / standardization reference，而非 commercial deployment source。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md"
+          },
+          "score": 4.077967
+         },
+         {
+          "text": "5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100 › 實體\n- [[Rohde & Schwarz]]：white paper 作者與 test & measurement solution provider。\n- [[Reiner Stuhlfauth]]、[[Lucas Chavarria]]、[[Debasis Ratha]]：white paper 作者。\n- [[R&S CMX500]]：文件多次作為 NTN UE testing、one-box testing、protocol / RF / application testing、Constellation Insight deployment 與 E2E NTN test bed 的核心測試平台。\n- [[R&S TS8980 Conformance Test Platform]]：文件作為 UE NTN conformance / type approval test system，補充 [[R&S CMX500]]，支援 full type approval、multiple cells、OOB / spurious / blocking 等測試。\n- [[R&S SMW200A]]、[[R&S FSW]]、[[R&S FSWX]]、[[R&S PVT360A]]、[[R&S SpaceNexus]]：文件中的 NTN signal generation、channel emulation、signal analysis、phase-coherent multichannel analysis、production testing 與 satellite trajectory / channel scenario configuration 工具。\n- [[VIAVI TM500-AS2]]、[[VIAVI TeraVM]]：R&S / VIAVI transparent payload NTN E2E test bed 中的 UE emulator 與 real data application / core emulator components。\n- [[3GPP]]、[[ITU]]、[[GCF]]、[[PTCRB]]、[[O-RAN ALLIANCE]]、[[Small Cell Forum]]、[[DIFI]]、[[CTIA]]、[[GSMA]]、[[GSA]]：文件引用的重要標準、certification、產業與研究組織。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md"
+          },
+          "score": 1.666882
+         },
+         {
+          "text": "5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100 › 使用限制\n- 本頁是來源摘要，不是 3GPP specification、GCF/PTCRB test plan、R&S formal datasheet 或產品配置文件。\n- 引用 technical values 時需保留 release、specification、scenario、frequency range、UE category、test setup 與 measurement condition。\n- 文件明示 Data without tolerance limits is not binding；Subject to change。\n- Market / deployment / commercial availability 應另以 [[Market]] 類來源查證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md"
+          },
+          "score": 0.982698
+         },
+         {
+          "text": "5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100 › 重點摘要\n- [[6G NTN 展望]] 部分整理 MB-ML-MD 3D network、RIS、UE-SAT-UE、MFSS、PNT、ISAC、6G use cases、waveform candidates、routing、security、AI for RAN 與 3GPP timeline to 6G。\n- 文件刻意排除市場資訊，例如 deployed constellations、alliances、operators 與 contracts，理由是 market related information 很快過時。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md"
+          },
+          "score": 0.781137
+         },
+         {
+          "text": "5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100 › 重點摘要\n- 文件類型是 Rohde & Schwarz white paper；作者為 [[Reiner Stuhlfauth]]、[[Lucas Chavarria]]、[[Debasis Ratha]]；文件識別為 PD 3673.3210.52，Version 01.00，August 2026。\n- 本文件是 2022 年 Rohde & Schwarz white paper《5G NTN takes flight: Technical overview of 5G non-terrestrial networks》的技術更新，聚焦 [[NR-NTN]] 的更細技術細節與 testing aspects。\n- 文件明確指出 [[3GPP Release 17]] 是 [[NTN]] 的 technology baseline；[[3GPP Release 18]]、[[3GPP Release 19]] 與 [[3GPP Release 20]] 持續加入 NTN enhancements，並銜接 [[6G]] unified 3D network。\n- 文件區分四種 NTN paradigms：[[Non-3GPP satellite communications]]、[[Direct-to-cell]]、[[IoT-NTN]]、[[NR-NTN]]。其中 DTC 被描述為 faster time-to-market / interim stage，NR-NTN 則被描述為 long-term evolution waypoint。\n- [[NTN 頻譜與頻段]] 部分整理 FR1-NTN、FR2-NTN、Ku-band 口語 FR3、Upper C-band study、Q/V/E/D-band 與 WRC-27 相關議題。\n- [[NTN 架構與 payload]] 部分整理 transparent payload、regenerative payload、CU-DU split、O-RAN split 7_2、SCF split option 6、RIC enabling NTN deployments、DIFI digital IF interface 與 TN/NTN interworking。\n- [[NTN mobility procedures]] 部分整理 baseline handover、conditional handover、RACH-less handover、L1/L2 triggered mobility、satellite switch with resynchronization、feeder link switchover、TN/NTN mobility、EUTRA TN 與 NR NTN mobility、dual-connectivity 與 ATSSS / MASSS。\n- [[NTN protocol signaling]] 部分整理 [[SIB19]]、[[SIB25]]、[[SIB27]]、Koffset、Kmac、timing advance、T430、random access、HARQ 32 processes / disable feedback、DRX、location verification、GNSS resilient operation 等。\n- [[NTN test and measurement aspects]] 部分整理 NTN fading profiles、TDL / CDL channel models、SAN testing、UE RF / protocol / RRM / LBS / conformance testing、operator acceptance testing、OTA / PAAM testing、MNT field testing 與 Rohde & Schwarz solution mapping。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md"
+          },
+          "score": 0.427142
+         },
+         {
+          "text": "CMX500_specs_en_5216-4127-22_v1100 › Ordering information 摘錄\n| 項目 | Type / code | Order No. | 原文說明 |\n|---|---|---|---|\n| CMX500 Radio communication tester | CMX500 | 1201.0002K70 | accessories 包含 power cords、operating manual、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters |\n| CMX500 basic assembly | R&S CMX-PB70H | 1222.0676.09 | basic assembly |\n| Accelerator unit | R&S CMX-B200A | 1222.0747.02 | accelerated digital signal processing |\n| Processing unit | R&S CMX-B300C | 1222.0801.04 | generic high-performance computing platform |\n| IF unit | R&S CMX-B500A | 1222.0924.02 | IF vector signal analysis and ARB based generator |\n| RF unit | R&S CMX-B600B | 1222.0953.03 | FR1 vector signal analysis and ARB based generator |\n| WLAN TX measurements 802.11a/b/g/n/ac | R&S CMX-KM350 | 1222.7135.02 | analyzer option |\n| WLAN TX measurements 802.11ax | R&S CMX-KM351 | 1222.7141.02 | analyzer option |\n| WLAN TX measurements 802.11be | R&S CMX-KM352 | 1222.7158.02 | analyzer option |\n| LTE analyzer | R&S CMX-KM500 | 1222.5603.02 | analyzer option |\n| 5G NR analyzer | R&S CMX-KM600 | 1222.4013.02 | analyzer option |\n| 5G NR generator | R&S CMX-KW601 | 1222.1920.02 | generator option |\n| Remote radio head | R&S CMXHEAD30 | 1201.0002K73 | mmWave extension with CMXHEAD30 |\n| Hardware unit | R&S CMXH-B73A | 1430.9106.02 | for CMXHEAD30 |\n| Remote radio head | R&S CMXHEAD50 | 1201.0002K76 | mmWave extension with CMXHEAD50 / CMXHEAD50-Evo |\n| Hardware unit | R&S CMXH-B73B | 1430.9106.03 | for CMXHEAD50 |\n| Advanced TRX unit for signaling | R&S CMXH-B73C | 1430.9106.04 | for CMXHEAD50-Evo |\n| High-class synthesizer | R&S CMXH-B74A | 1430.7555.02 | for CMXHEAD50-Evo |\n| Housing for R&S CMXH-B74A | R&S CMXH-B76A | 1430.7710.02 | housing |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 12,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+          },
+          "score": 5.625707
+         },
+         {
+          "text": "CMX500_specs_en_5216-4127-22_v1100 › 產品與硬體\n- [[R&S CMX500]] — Radio Communication Tester；base unit order no. **1201.0002K70**。\n- [[R&S CMX-PB70H]] — CMX500 basic assembly；order no. **1222.0676.09**。\n- [[R&S CMX-B200A]] — accelerator unit；order no. **1222.0747.02**；提供 accelerated digital signal processing capabilities 與 two high-speed digital I/Q interfaces。\n- [[R&S CMX-B300C]] — processing unit；order no. **1222.0801.04**；需要 [[R&S CMX-PB70H]]，提供 high-performance computing platform、LAN DAU、internal LAN 與 USB 3.0 DAU interface。\n- [[R&S CMX-B500A]] — IF unit；order no. **1222.0924.02**；提供 IF frequency range 的 vector signal analysis 與 ARB based generator functionality。\n- [[R&S CMX-B600B]] — RF unit；order no. **1222.0953.03**；提供 FR1 frequency range 的 vector signal analysis 與 ARB based generator functionality。\n- [[R&S CMXHEAD30]] — remote radio head；order no. **1201.0002K73**；搭配 [[R&S CMXH-B73A]] hardware unit，order no. **1430.9106.02**。\n- [[R&S CMXHEAD50]] — remote radio head；order no. **1201.0002K76**；搭配 [[R&S CMXH-B73B]] hardware unit，order no. **1430.9106.03**。\n- [[R&S CMXHEAD50-Evo]] — HEAD50-Evo setup 使用 [[R&S CMXH-B73C]]、[[R&S CMXH-B74A]] 與 [[R&S CMXH-B76A]]。\n- [[R&S CMX-RF42E]] — Active RF frontend for NR FR2 extension；order no. **1441.3004K02**。\n- [[R&S CM-Z30A]] — remote radio head connection cable，length 3 m；order no. **1212.1040.02**。\n- [[R&S CMX-ZG100A]] — monitor；order no. **1222.3100.02**。\n- [[R&S CMX-Z101A]] — monitor mount；order no. **1222.3098.02**。\n- [[R&S ZZA-KN7]] — 19 inch adapter，7 HU，1/1；order no. **1175.3062.00**。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+          },
+          "score": 3.810884
+         },
+         {
+          "text": "CMX500_specs_en_5216-4127-22_v1100 › 測試主題與技術\n- [[5G NR]]、[[NR FR1]]、[[NR FR2]]、[[LTE]]、[[NSA]]、[[SA]]、[[FDD]]、[[TDD]]、[[Fading]]、[[ARB generator]]、[[Vector signal analysis]]、[[FFT spectrum analyzer]]、[[EVM]]、[[Displayed average noise level]]、[[Remote radio head]]。\n- 引用標準包含 [[3GPP TS 38.521-1]]、[[3GPP TS 38.521-2]] 與 Guide to the Expression of Uncertainty in Measurement（GUM）。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+          },
+          "score": 3.541475
+         },
+         {
+          "text": "CMX500_specs_en_5216-4127-22_v1100 › [[R&S CMX-B500A]] IF unit\n- IF generator frequency range：**6 GHz to 20 GHz**，inclusive modulation bandwidth；frequency resolution **< 0.1 Hz**；frequency settling time **< 300 µs**。\n- IF generator output level range：6 GHz to 20 GHz，PEP，for best SNR/IMD performance **–20 dBm to +2 dBm**；overrange up to **+10 dBm**；output level resolution **0.1 dB**。\n- IF generator output level uncertainty：+15 °C to +35 °C、no overranging、within ±5 °C from last level alignment procedure temperature，6 GHz to 20 GHz **< 1.5 dB**，**< 0.5 dB typ.**。\n- IF analyzer frequency range：**4 GHz to 20 GHz**，inclusive modulation bandwidth；bandwidth up to **1 GHz**。\n- IF analyzer expected nominal power setting range：4 GHz to 20 GHz，PEP，for ADC full scale **–5 dBm to +15 dBm**。\n- IF analyzer level uncertainty：+15 °C to +35 °C、no overranging，4 GHz to 20 GHz、P > –45 dBm RMS 時 **< 1.5 dB**，**< 0.5 dB typ.**。\n- IF analyzer displayed average noise level：+15 °C to +35 °C、ENP < –35 dBm，4 GHz to 16 GHz except 9.0 GHz to 12.5 GHz 為 **< –152 dBm (1 Hz)**，16 GHz to 17 GHz 為 **< –150 dBm (1 Hz)**。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+          },
+          "score": 2.473992
+         },
+         {
+          "text": "CMX500_specs_en_5216-4127-22_v1100\n這份來源是 [[R&S CMX500]] Radio Communication Tester 的 **Specifications** 文件，文件編號 **PD 5216.4127.22**，文件版本 **Version 11.00**，文件日期 **August 2025**。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+          },
+          "score": 2.353892
+         },
+         {
+          "text": "CMX500_specs_en_5216-4127-22_v1100 › mmWave RF generator / analyzer\n- [[R&S CMXHEAD30]] frequency range：28 GHz band **24.25 GHz to 31.80 GHz**；39 GHz band **37.00 GHz to 43.50 GHz**；duplex mode half duplex（TDD）。\n- [[R&S CMXHEAD30]] generator output level range：28 GHz band PEP **–84 dBm to +20 dBm**；37 GHz to 40 GHz PEP **–78 dBm to +19 dBm**；40 GHz to 43.5 GHz PEP **–78 dBm to +17 dBm**。\n- [[R&S CMXHEAD30]] analyzer frequency extension narrowband spectrum emission mask：28 GHz band **23.45 GHz to 24.25 GHz**；39 GHz band **43.50 GHz to 44.30 GHz**。\n- [[R&S CMXHEAD50]] / [[R&S CMXHEAD50-Evo]] frequency range：**21.84 GHz to 50.20 GHz**；duplex mode half duplex（TDD）。\n- HEAD50 / HEAD50-Evo external local oscillator：Tx LO In 或 Rx LO In rear panel，SMA，maximum input level **+6 dBm**，nominal **+3 dBm**，input level range **+2 dBm to +4 dBm**，frequency range **8.0 GHz to 12.5 GHz**。\n- HEAD50 / HEAD50-Evo generator output level range：21.84 GHz < f < 29.5 GHz PEP **–84 dBm to +21 dBm**；29.5 GHz < f < 40 GHz PEP **–84 dBm to +19 dBm**；40 GHz < f < 43.5 GHz PEP **–84 dBm to +17 dBm**；43.5 GHz < f < 50.2 GHz PEP **–84 dBm to +14 dBm**。\n- HEAD50 / HEAD50-Evo analyzer input absolute maximum values：RF 1 / RF 2 front panel highest attenuation / lowest sensitivity **+22 dBm CW**；lowest attenuation / highest sensitivity **–8 dBm CW**；Rx Low Noise In **–10 dBm CW**；DC **0 V DC**。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+          },
+          "score": 2.196595
+         },
+         {
+          "text": "CMX500_specs_en_5216-4127-22_v1100 › Software / measurement options\n- [[R&S CMX-KM350]] — WLAN TX measurements IEEE 802.11a/b/g/n/ac；order no. **1222.7135.02**。\n- [[R&S CMX-KM351]] — WLAN TX measurements IEEE 802.11ax；order no. **1222.7141.02**。\n- [[R&S CMX-KM352]] — WLAN TX measurements IEEE 802.11be；order no. **1222.7158.02**。\n- [[R&S CMX-KM500]] — LTE analyzer；order no. **1222.5603.02**。\n- [[R&S CMX-KM600]] — 5G NR analyzer；order no. **1222.4013.02**。\n- [[R&S CMX-KW601]] — 5G NR generator；order no. **1222.1920.02**。\n- [[R&S CMXH-K50G]] — extended frequency range up to 50.2 GHz for [[R&S CMXHEAD50]] / [[R&S CMXHEAD50-Evo]]；order no. **1222.6568.02**。\n- [[R&S CMXH-K51RX]] — enable Rx Low Noise In port；order no. **1222.6551.02**。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+          },
+          "score": 2.037642
+         },
+         {
+          "text": "CMX500_specs_en_5216-4127-22_v1100 › [[R&S CMX-B600B]] RF unit\n- RF unit frequency range：**400 MHz to 8000 MHz**。\n- RF generator modulation bandwidth：RF Com 1、RF Com 2、RF Out 1 to RF Out 4；instantaneous bandwidth（iBW），non-contiguous **1000 MHz**；RF bandwidth **250 MHz**。\n- RF analyzer demodulation bandwidth：RF Com 1、RF Com 2、RF In 1、RF In 2 為 **250 MHz**。\n- RF Com 1 / RF Com 2 generator output level range：400 MHz to 6300 MHz，CW **–120 dBm to +2 dBm**，PEP up to **+2 dBm**，overrange up to **+10 dBm**；6300 MHz to 8000 MHz，CW **–120 dBm to 0 dBm**。\n- RF Out 1 to RF Out 4 output level range：400 MHz to 7375 MHz，CW **–120 dBm to +8 dBm**，PEP up to **+8 dBm**，overrange up to **+15 dBm**；7375 MHz to 8000 MHz，CW **–120 dBm to +4 dBm**，PEP up to **+4 dBm**，overrange up to **+15 dBm**。\n- RF analyzer absolute maximum values：RF Com 1 / RF Com 2 continuous power RMS max **+30 dBm**，PEP max **+38 dBm**，maximum input DC **0 V DC**；RF In 1 / RF In 2 RMS max **+25 dBm**，PEP max **+33 dBm**，maximum input DC **0 V DC**。\n- RX displayed average noise level：RF Com 1 / RF Com 2，400 MHz to 7000 MHz **< –154 dBm (1 Hz)**，7000 MHz to 8000 MHz **< –153 dBm (1 Hz)**；RF In 1 / RF In 2，400 MHz to 7000 MHz **< –160 dBm (1 Hz)**，7000 MHz to 8000 MHz **< –157 dBm (1 Hz)**。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+          },
+          "score": 1.864842
+         },
+         {
+          "text": "SMM100A_specs_en_3608-7680-22_v3100 › 讀圖補充\n以下資訊來自讀圖補充，不等同於文字層原文；本次來源摘錄未提供可嵌入的圖片 wikilink，因此未能帶入 `![[...]]` 圖片供核對。\n\n- 封面頁顯示一張 R&S SMM100A Vector Signal Generator 儀器前左側斜視照片；螢幕可辨識 `44.000 000 000 000...` 與 `SMM100A - Vector Signal Generator`，但單位與功能方塊細節無法辨識。\n- p049 幾乎空白，可見 `Version 31.00, June 2026`、`Rohde & Schwarz RS®SMW100A Vector Signal Generator`、`49`。\n- p050 幾乎空白，可見 `Version 31.00, June 2026`、`50`、`Rohde & Schwarz R&S®SMM100A Vector Signal Generator`。\n- p051 幾乎空白，可見 `Version 31.00, June 2026`、`Rohde & Schwarz R&S®SMW100A Vector Signal Generator`、`51`。\n- p049 與 p051 的頁尾 `SMW100A` 與封面、p050、文件名稱及 ordering information 的 `SMM100A` 不一致。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 17,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md"
+          },
+          "score": 1.777333
+         },
+         {
+          "text": "SMM100A_specs_en_3608-7680-22_v3100 › Baseband generator、enhancements 與 signal performance\n- Signal performance examples include 5G NR EVM with `R&S®SMM-K144`、EUTRA/LTE ACPR with `R&S®SMM-K55`、3GPP FDD EVM with `R&S®SMM-K42`、IEEE 802.11be EVM with `R&S®SMM-K147`、custom digital modulation measured deviation/phase error examples。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md"
+          },
+          "score": 1.642209
+         },
+         {
+          "text": "SMM100A_specs_en_3608-7680-22_v3100 › 與既有知識的關係\n- [[R&S SMM100A]] 屬於 Rohde & Schwarz signal generator / vector signal generator 產品線，功能定位高於或不同於既有的 [[R&S SMBV100B]]、[[R&S SMCV100B]]、[[R&S SGT100A]]、[[R&S SMB100B]] 與 [[R&S SMA100B]]。\n- 與 [[R&S SMBV100B]] 相比，本來源顯示 [[R&S SMM100A]] 覆蓋到 `44 GHz`，並支援最高 `2 GHz` internal RF modulation bandwidth；[[R&S SMBV100B]] 既有頁面依 Version 13.01 記錄為最高 `6 GHz`、RF modulation bandwidth 最高 `1 GHz`。\n- 與 [[R&S SMCV100B]] 相比，本來源顯示 [[R&S SMM100A]] 面向更高 RF frequency 與更高 baseband bandwidth；[[R&S SMCV100B]] 既有頁面依 Version 17.00 記錄為最高 `7.125 GHz`、baseband extension 到 `240 MHz RF bandwidth`。\n- 與 [[R&S SMA100B]] / [[R&S SMB100B]] 的 analog/RF signal generator 類產品相比，本來源的 [[R&S SMM100A]] 重點在 vector modulation、internal real-time signal generation、ARB 與 digital standards。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 18,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md"
+          },
+          "score": 1.611234
+         },
+         {
+          "text": "SMM100A_specs_en_3608-7680-22_v3100 › 重點摘要\n這份來源是 `R&S®SMM100A Vector Signal Generator Specifications`，文件代碼 `PD 3608.7680.22`，`Version 31.00`；來源開頭標示 `June 2026`，文件識別段落標示 `May 2026 (nv)`，日期仍未決。\n\n[[R&S SMM100A]] 是 Rohde & Schwarz 的 vector signal generator。依本來源，frequency options 覆蓋 `100 kHz to 6 GHz`、`7.5 GHz`、`12.75 GHz`、`20 GHz`、`31.8 GHz` 與 `44 GHz`，最高輸出功率標示為 `up to +18 dBm`，internal RF modulation bandwidth 最高 `2 GHz`。來源定位包含 5G NR FR1/FR2 signal generation、future WLAN requirements、ARB、real-time baseband、custom digital modulation、envelope tracking、frequency response correction、HUMS 與 SCPI automation。\n\nProduct data 適用條件：在 ambient temperature 儲存 `3 hours` 後，warm-up operation `30 minutes`；符合 specified environmental conditions；遵守 recommended calibration interval；已執行所有 applicable internal automatic adjustments。Non-traceable specifications with limits、typical data、nominal values、measured values 不由 Rohde & Schwarz 保證。\n\n⚠️ [[SMM100A_specs_en_3608-7680-22_v3100]]（June 2026）讀圖補充 p049 與 p051 頁尾說 `R&S®SMW100A Vector Signal Generator`，但既有頁面 [[R&S SMM100A]] 說本文件產品為 `R&S®SMM100A Vector Signal Generator`。判斷為來源頁尾疑似誤植；本次 ingest 仍以封面、p050、文件名稱、ordering information 與 source_path 的 `SMM100A` 為主，並把頁尾不一致列入未解問題。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md"
+          },
+          "score": 1.598405
+         },
+         {
+          "text": "SMM100A_specs_en_3608-7680-22_v3100 › Base instrument\n| Designation | Type | Order No. | 原文說明 |\n|---|---|---|---|\n| Vector signal generator | `R&S®SMM100A` | `1440.8002.02` | Includes power cable and quick start guide. Base unit must be ordered together with `R&S®SMM-B10xx` frequency option. |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 12,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md"
+          },
+          "score": 1.514834
+         },
+         {
+          "text": "SMM100A_specs_en_3608-7680-22_v3100 › 關鍵實體與概念\n- [[R&S SMM100A]]：本來源的主要產品實體。\n- [[Rohde & Schwarz]]：製造商。\n- [[Vector signal generator]]：產品類型。\n- [[I-Q modulation]]：支援 external wideband I/Q 與 internal baseband I/Q，RF modulation bandwidth 依 frequency option 與頻率最高到 `±1 GHz`；產品描述稱 internal RF modulation bandwidth 最高 `2 GHz`。\n- [[Arbitrary waveform generator]]：需 `R&S®SMM-B9` baseband generator with ARB，standard `64 Msample`、`120 MHz RF bandwidth`，可用 keycode options 擴充 memory、sample rate 與 RF bandwidth。\n- [[AWGN]]：`R&S®SMM-K62`。\n- [[Envelope tracking]]：`R&S®SMM-K540`，requires `R&S®SMM-K17` and `R&S®SMM-B9`。\n- [[SCPI]]：remote control command set 為 `SCPI 1999.5 or compatible command sets`。\n- [[HUMS]]：`R&S®SMM-K980` Health and utilization monitoring service。\n- [[R&S WinIQSIM2]]、[[R&S Pulse Sequencer]]、[[R&S Pulse Sequencer DFS]]：外部 PC software 相關 options 需參照其他 specifications。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md"
+          },
+          "score": 1.348394
+         },
+         {
+          "text": "![](Picture4.jpg)\nWireless communication tester\nEMI test receiver\nSignal & spectrum analyzer\nWireless communication tester",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-4a179a13677acd8f",
+            "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+            "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "section": 175,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 29.267142
+         },
+         {
+          "text": "Signal Generator\nSignal Analyzer",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-c478cd76758e3230",
+            "original_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+            "sha256": "c478cd76758e32304c76f6cddcc468bbab6c09f305ddd986166116e13cef3c38",
+            "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+           "section": 37,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 22.699916
+         },
+         {
+          "text": "Network analyzer\nVector signal generator\nBroadband Amplifier",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-4a179a13677acd8f",
+            "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+            "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "section": 177,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 19.87828
+         },
+         {
+          "text": "# Let’s talk\nEMC& Regulatory test\nfor wireless devices with 3GPP cellular technology\nAll about test standards and R&S solutions\nXIE, Feng ˹Rich˼\nMarket Segment Manager\nWireless Communication\nfeng.xie@rohde-schwarz.com",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-4a179a13677acd8f",
+            "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+            "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 17.329539
+         }
+        ],
+        "text": "【推論】建議主軸：把 Wireless Communication 的「3GPP cellular 無線裝置 EMC / regulatory / conformance」需求，拆成可量測的 RF、EMC、通道與 NTN 參數，再對應到 Signal Generator 產生刺激/通道條件與 Signal Analyzer 量測結果的能力。[36][68]\n### 推薦先賣\n【推論】若切入 3GPP NTN，優先對接 R&S SMW200A，因為來源把它定義為 NTN 測試中的核心 signal generator / channel emulator。[2][3]\n【推論】若切入 component testing 或 SAN transmitter measurement，優先對接 R&S FSW，因為來源把它定義為 component testing 與 SAN transmitter measurement 的 spectrum / signal analysis instrument。[3][4]\n### 產品與 Option 對接表\n| 產品線 | 段落寫明的需求 | 知識庫確認的 option / 規格 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|\n| R&S SMW200A | Wireless devices 需要 RF、EMC、安全與一致性認證，主要測試項目包含頻譜、輸出功率、DFS、SAR、EMI / EMS、Protocol 相容性、互操作性與 PTCRB / GCF 認證。[36] | SMW200A 在 NTN component testing 中可提供 frequency up to 67 GHz、overrange 72 GHz、RF modulation bandwidth up to 2 GHz、with SMW-K555 up to 4 GHz，並支援 LTE、Cellular IoT、5G NR R17/18、OFDM 與 custom digital modulation signal generation software。[4] | [4][36] | 【推論】此列把一般 wireless certification 測試需求連到 component-level signal generation 能力，但 passages 未直接說 SMW200A 是一般 EMC / regulatory lab 的必需儀器。[4][36] |\n| R&S FSW | Wireless certification 的可量測項目包含頻譜與輸出功率。[36] | FSW 在 NTN component testing 中可提供 frequency up to 85 GHz、overrange 90 GHz、analysis bandwidth up to 8 GHz，並支援 LTE、Cellular IoT、5G NR R17/18、OFDM signal analysis 與 vector signal analysis software。[4] | [4][36] | 【推論】此列把頻譜/輸出功率測試需求連到 FSW analyzer 能力，但 passages 未直接說 FSW 是一般 EMC / regulatory lab 的指定儀器。[4][36] |\n| R&S SMW200A SAN configuration | 5G NR SAN conformance testing 需要支援 TS 38.181 Rel. 17 receiver characteristics 與 performance characteristics。[5] | SMW B10/B14 支援 up to 160 MHz signal bandwidth、delay requirements 與 LEO residual Doppler requirements。[5] | [5] | Recommended configurations 是簡報建議配置，不等同正式 configuration guide 或 quotation BOM。[7] |\n| R&S SMW200A SAN wideband configuration | 5G NR SAN conformance testing 需要支援 TS 38.181 Rel. 17 receiver characteristics 與 performance characteristics。[5] | SMW B9/B15 recommended 支援 up to 200 MHz bandwidth、delay requirements 與 LEO residual Doppler requirements。[5] | [5] | Recommended configurations 是簡報建議配置，不等同正式 configuration guide 或 quotation BOM。[7] |\n| R&S SMW200A + R&S SMW-K820 | E2E system testing 會用 service link channel emulator 與 feeder link channel emulator 模擬 UE、NTN payload 之間的 RF satellite link。[1] | SMW200A 需要 firmware version ≥ 5.30，B14 or B15 required，customized dynamic fading 需要 R&S SMW-K820，能力包含 satellite trajectory modelling、frequency-dependent atmospheric effects、longer path delays、enhanced Doppler、up to 1073 ms delay 與 up to ±1 MHz pure Doppler。[14] | [1][14] | 來源是 2025 簡報與 OneNote 轉檔，不是正式 datasheet、configuration guide、price book 或 3GPP specification。[15] |\n| R&S Space Nexus + R&S SMW200A | E2E channel emulation 的 key parameters 包含 update interval、delay、Doppler 與 pathloss。[1] | R&S Space Nexus 是 PC Software，available on request，可依 satellite trajectory 產生 SMW200A fading files。[14] | [1][14] | R&S Space Nexus 的正式 option availability、報價與 service plan 需回查正式資料。[15] |\n| R&S FSW / FSWX | NTN signal analysis 可用於 satellite payload testing、EVM、ACLR、group delay、DVB-S2X analysis 與 phase-coherent multichannel measurement。[37] | FSW 是 high-end Signal and Spectrum Analyzer，Version 17.01 涵蓋 8 GHz 至 85 GHz 型號，FSW85 搭配 FSW-B90G 可延伸至 90 GHz。[24] | [24][37] | R&S 產品能力需以正式 datasheet / configuration guide 為準。[40] |\n### 場景切入建議\n| 場景 | 推薦組合 | 證據 | 未驗證事項 |\n|---|---|---|---|\n| 3GPP NTN component testing | 【推論】用 SMW200A 產生 LTE、Cellular IoT、5G NR、OFDM 或 custom digital modulation stimulus，並用 FSW 做對應 signal analysis。[4] | Component testing 使用 DUT、SMW200A 與 FSW。[4] | 此來源是簡報摘要值，不取代 SMW200A 與 FSW formal specifications。[4] |\n| 5G NR SAN conformance testing | 【推論】160 MHz 需求對接 SMW B10/B14，200 MHz 需求對接 SMW B9/B15 recommended。[5] | 兩種配置都支援 TS 38.181 Rel. 17 SAN testing requirements、delay requirements 與 LEO residual Doppler requirements。[5] | Recommended configurations 不能直接視為可報價 BOM。[7] |\n| NTN E2E RF satellite link emulation | 【推論】用 SMW200A + B14/B15 + SMW-K820 產生 trajectory-based fading、delay、Doppler 與 pathloss 條件。[1][14] | E2E testing 使用 service link 與 feeder link channel emulator 模擬 RF satellite link，且 K820 key parameters 包含 update interval、delay、Doppler 與 pathloss。[1] | Space Nexus available on request，正式 availability 需另查。[14][15] |\n| OTA / phased-array NTN testing | 【推論】以 SMW200A 供訊號/通道條件，FSW / FSWX 供量測分析，對應 PAAM 與 NTN beam metrics。[39] | OTA / PAAM metrics 包含 radiation pattern、scan loss、pointing error、HPBW、sidelobe levels、EIRP、G/T、noise density、EVM、beam switching、beam pointing accuracy 與 beam stability。[39] | OTA / PAAM setup 的 fixtures、chamber dimensions、quiet zone、polarization 與 frequency conversions 需回查原圖與 setup note。[40] |\n### 限制\n來源中的 recommended configurations 不能直接視為可報價 BOM [7]。\n來源中的 R&S 產品能力需以正式 datasheet 或 configuration guide 為準 [40]。",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › NTN end-to-end system testing\n來源 slide 24–28 說 E2E system testing 會以 channel emulator for service link 與 channel emulator for feeder link 模擬 UE、NTN payload 之間的 RF satellite link。\n\n來源 slide 25 標示 `SMW firmware version ≥ 5.30`，key features 包含：\n\n- Flexible definition of terrestrial channel profiles；B14 or B15 required。\n- Customized dynamic fading；K820 required。\n- Model satellite trajectory。\n- Account for frequency-dependent atmospheric effects。\n- Longer path delays and enhanced Doppler capabilities。\n- Up to 1073 ms delay。\n- Up to ±1 MHz Doppler（pure Doppler）。\n\n來源 slide 26 對 [[R&S SMW-K820]] customized dynamic fading 的 E2E testing key features：customer-provided list、flexible definition of satellite movement、possibility to account for frequency-dependent atmospheric effects、longer path delays and enhanced Doppler capabilities。Key parameters：update interval、delay、Doppler、pathloss。\n\n來源 slide 27 說 [[R&S Space Nexus]] 是 PC Software，available on request，可 generate SMW200A fading files based on a satellite trajectory；key parameters 同為 update interval、delay、Doppler、pathloss。\n\n來源 slide 28 的 SMW200A channel emulation table：",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 10,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+         },
+         "score": 3.475633
+        },
+        {
+         "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 重點摘要\n此來源是由 `3GPP NTN Signal Generator Solutions Overview-EN-UR.pptx` 轉出的 lossy markdown；封面標示 `1GP` 與 `12-2025`，末頁標示 `Last updated: 08/25`，其中 slide 27 另標示 `2025-09-29 Nokia Workshop at R&S - SigGen Product Update`。本頁以來源原文呈現的 2025 年簡報語境處理，不自行推論正式發布日。\n\n簡報主題是 [[Rohde & Schwarz]] 針對 [[3GPP]] [[NTN]] 的 signal generator / channel emulation 測試方案，涵蓋：\n\n- [[5G NTN-NR]] 的 Release 17 / 18 / 19 演進與頻段。\n- [[Satellite Access Node]]（[[SAN]]）conformance testing。\n- [[NTN signal generator solutions]] 的 component testing、SAN testing、end-to-end system testing 與 UE testing 分層。\n- [[R&S SMW200A]] 作為 channel emulator / signal generator 的 NTN 測試能力。\n- [[R&S FSW]] 與 [[R&S FSVA3000]] 在 component testing / SAN transmitter measurement 中的角色。\n- [[R&S Space Nexus]] 依 satellite trajectory 產生 [[R&S SMW200A]] fading files 的待請求 PC software 線索。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+         },
+         "score": 0.115016
+        },
+        {
+         "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 關鍵實體與概念\n- [[R&S SMW200A]]：核心 signal generator / channel emulator。\n- [[R&S FSW]]：component testing 與 SAN transmitter measurement 的 spectrum / signal analysis instrument。\n- [[R&S FSVA3000]]：來源 slide 33 說 5G NR options on FSW / FSVA support Chapter 6 & 9 measurements。\n- [[R&S Space Nexus]]：來源 slide 27 的 PC software，available on request，用於依 satellite trajectory 產生 SMW200A fading files。\n- [[NTN signal generator solutions]]：本來源的 solution-level 概念節點。\n- [[5G NR SAN conformance testing]]：本來源最明確的 3GPP conformance testing 應用。\n- [[SMW200A NTN end-to-end channel emulation]]：本來源對 SMW200A + K820 / Space Nexus 的 E2E satellite RF link emulation 說法。\n- [[3GPP TS 38.108]]、[[3GPP TS 38.181]]、[[3GPP TS 36.108]]、[[3GPP TS 36.181]]、[[3GPP TR 38.821]]、[[3GPP TR 38.863]]。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 13,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+         },
+         "score": 0.113008
+        },
+        {
+         "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › NTN component testing\n來源 slide 16 的 component testing 方案：\n\n- DUT 搭配 [[R&S SMW200A]] 與 [[R&S FSW]]。\n- [[R&S SMW200A]]：frequency up to 67 GHz，overrange 72 GHz；RF modulation bandwidth up to 2 GHz，up to 4 GHz with [[R&S SMW-K555]]；signal generation software 包含 LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal generation（K114）、custom digital modulation。\n- [[R&S FSW]]：frequency up to 85 GHz，overrange 90 GHz；analysis bandwidth up to 8 GHz；signal analysis software 包含 LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal analysis（K96）、vector signal analysis（K70）。\n\n此處是簡報摘要值，不取代 [[R&S SMW200A]] 與 [[R&S FSW]] formal specifications。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 7,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+         },
+         "score": 0.103008
+        },
+        {
+         "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 5G NTN SAN conformance testing\n| Configuration | 來源說法 |\n|---|---|\n| SMW B10/B14 | Solution for testing needs up to 160 MHz；full support of [[3GPP TS 38.181]] Rel. 17 SAN testing requirements；receiver characteristics；performance characteristics；support signal bandwidths up to 160 MHz；support delay requirements；support residual Doppler requirements for LEO。 |\n| SMW B9/B15 recommended | Solution for testing needs up to 200 MHz；full support of [[3GPP TS 38.181]] Rel. 17 SAN testing requirements；receiver characteristics；performance characteristics；support bandwidths up to 200 MHz；support delay requirements；supports residual Doppler requirements for LEO。 |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 9,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+         },
+         "score": 0.094778
+        },
+        {
+         "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › Recommended configurations\n來源 slide 44 / 45 提供 5G NR SAN conformance testing Release 17 recommended standard / wideband SMW200A configurations；slide 46 / 47 提供 E2E system testing Release 17 recommended standard / wideband configuration。這些是簡報建議配置，不等同正式 configuration guide 或 quotation BOM。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 12,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+         },
+         "score": 0.088649
+        },
+        {
+         "text": "NTN signal generator solutions › End-to-end system testing\n來源將 E2E system testing 描述為對 UE、NTN payload、service link channel emulator 與 feeder link channel emulator 的 RF satellite link emulation。[[R&S SMW200A]] 需要 firmware version ≥ 5.30，並透過 B14 或 B15 搭配 [[R&S SMW-K820]] customized dynamic fading 支援：\n\n- satellite trajectory modelling。\n- frequency-dependent atmospheric effects。\n- longer path delays。\n- enhanced Doppler capabilities。\n- up to 1073 ms delay。\n- up to ±1 MHz Doppler（pure Doppler）。\n\n[[R&S Space Nexus]] 在來源中被描述為 PC Software，available on request，可依 satellite trajectory 產生 [[R&S SMW200A]] fading files。\n\n詳見 [[SMW200A NTN end-to-end channel emulation]]。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+         },
+         "score": 0.121891
+        },
+        {
+         "text": "NTN signal generator solutions › 使用限制\n- 來源是 2025 簡報與 OneNote 轉檔，不是正式 datasheet、configuration guide、price book 或 3GPP specification。\n- 來源標示 12-2025、Last updated 08/25 與 2025-09-29 workshop date；正式發布日期未標示。\n- 來源中的 recommended configurations 不能直接視為可報價 BOM；需回查正式 configuration guide、option availability、export control 與 service plan。\n- 來源中的 R17/18 option wording 不可直接覆寫正式 product option name；正式命名仍以產品規格書為準。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 7,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+         },
+         "score": 0.107878
+        },
+        {
+         "text": "R&S FSW\nR&S FSW 是 Rohde & Schwarz 的 high-end Signal and Spectrum Analyzer 系列，依 Version 17.01（September 2025）涵蓋 8 GHz 至 85 GHz 型號，[[R&S FSW85]] 搭配 R&S FSW-B90G 可延伸至 90 GHz。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S FSW.md"
+         },
+         "score": 4.139259
+        },
+        {
+         "text": "無線通訊認證實驗室 › 重點摘要\n本來源是由 `無線通訊認證實驗室.pptx` 轉出的 company restricted 簡報，正式發布日期與文件版次未標示；raw frontmatter 顯示 converted 日期為 2026-09-17。\n\n來源將[[無線通訊認證實驗室]]定義為測試與驗證無線設備符合法規、安全與性能標準的實驗室，涵蓋 [[RF 測試]]、[[EMC]]、安規與一致性認證，並稱其可支援 [[Global Market Access]]（GMA）與加速上市。\n\n主要內容包括：\n\n- 無線設備認證實驗室涵蓋 RF、EMC、安規與一致性認證。\n- 主要測試項目包含頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試與 [[PTCRB]] / [[GCF]] 認證。\n- 來源稱認證必要性包括防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端與 6G 等需求。\n- 來源列出台灣 [[NCC]] 認證流程：準備文件 / 樣品 / 電路圖 / 天線規格、提交 [[RCB]] 核驗機構初審、[[TAF]] 認可實驗室 RF / EMC 測試約 3–4 週、報告審查與證書核發，並稱證書有效期 5 年。\n- 來源列出台灣領先認證實驗室：[[耕興]]、[[SGS]]、[[電信技術中心]] / [[ISL]]。\n- 來源稱[[耕興]]具 30 MHz–325 GHz 全頻段測試能力、108 座測試場地、連續 10 年 FCC 最佳實驗室認證、10 米半電波暗室、OTA / SAR / [[相控陣列天線]]測試等能力。\n- 來源簡述 [[FCC 無線設備法規測試]]、[[CE RED 無線設備法規測試]]、Wi‑Fi / BLE 聯盟流程的差異。\n- 來源將 LEO 衛星終端認證應用連到 Starlink / Kuiper user terminal RF validation、[[相控陣列天線]] beamforming 測試、mmWave / MIMO 高頻測試、台灣供應鏈 GMA，以及耕興等 [[RCB]] 提供 8–12 週 GMA 週期的說法。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+         },
+         "score": 1.022569
+        },
+        {
+         "text": "NTN test and measurement aspects › Signal generation、analysis 與 SpaceNexus\n來源描述：\n\n- [[R&S SMW200A]] 可配備 fading emulator，支援 TDL / CDL、custom fading profile、Doppler、delay、path loss，以及 [[R&S SMW-K820]] customized dynamic fading。\n- [[R&S SpaceNexus]] 可設定 satellite constellation、UE position / mobility、time-variant Doppler、time-variant propagation delay、path loss、weather-induced attenuation，並 remote configure SMW200A。\n- [[R&S FSW]] / [[R&S FSWX]] 支援 satellite payload testing、EVM、ACLR、group delay、DVB-S2X analysis、phase-coherent multichannel measurement。\n- [[R&S PVT360A]] 被描述為 potential satellite production testing platform，整合 vector signal generator 與 vector spectrum analyzer。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 9,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+         },
+         "score": 7.308329
+        },
+        {
+         "text": "NTN test and measurement aspects › OTA / phased array / PAAM testing\nNTN UE、VSAT、SAN、satellite 可能使用 directive antennas / phased array antennas，因此 OTA testing 重要。\n\n來源整理：\n\n- OTA methods：far field、near field、CATR、plane wave conversion、anechoic chamber、reverberation chamber。\n- PAAM metrics：radiation pattern、scan loss、pointing error、HPBW、sidelobe levels、EIRP、G/T、noise density、EVM、beam switching。\n- NTN beam metrics：beam center、beam peak、beam pair、beam pointing accuracy、beam stability、beam squint、OSDD、beam shape capability。\n- Rohde & Schwarz setups 使用 [[R&S ZNA]]、[[R&S SMW200A]]、[[R&S FSW]]、[[R&S FSWX]]、[[R&S ATS1800C]]、[[R&S ATS800B]]、[[R&S ATS800R]]、[[R&S ATS1800M]] 等。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 8,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+         },
+         "score": 1.62425
+        },
+        {
+         "text": "NTN test and measurement aspects › 使用限制\n- 本頁是 T&M 技術總覽；正式 test methods、limits、tolerances、test case IDs 與 validation status 需查 [[TS 38.101-5]]、[[TS 38.521-5]]、[[TS 38.523]]、[[TS 38.533]]、[[TS 38.181]]、[[TS 38.108]]、GCF / PTCRB public documents。\n- R&S 產品能力需以正式 datasheet / configuration guide 為準；白皮書中的 solution-level 描述不可直接作為 quote / BOM / orderable capability。\n- OTA / PAAM setup 的 fixtures、antenna modules、chamber dimensions、quiet zone、polarization、frequency conversions 等需以原圖與 setup note 回查。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 11,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+         },
+         "score": 1.484458
+        },
+        {
+         "text": "# Let’s talk\nEMC& Regulatory test\nfor wireless devices with 3GPP cellular technology\nAll about test standards and R&S solutions\nXIE, Feng ˹Rich˼\nMarket Segment Manager\nWireless Communication\nfeng.xie@rohde-schwarz.com",
+         "citation": {
+          "kind": "raw",
+          "source": {
+           "source_id": "src-4a179a13677acd8f",
+           "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+           "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "page": null,
+           "slide": null,
+           "parent_source_id": null
+          },
+          "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": null
+         },
+         "score": 17.329539
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [
+         {
+          "name": "market_segment",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 21,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/R&S SMW200A.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 8,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/R&S FSW.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 17,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/R&S CMP200.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+         "raw_refs": [
+          "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+          "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md",
+          "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+          "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/NTN signal generator solutions.md",
+         "raw_refs": [
+          "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S FSW.md",
+         "raw_refs": [
+          "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/無線通訊認證實驗室.md",
+         "raw_refs": [
+          "raw/Market/OneNote/TestHouse/Test House.md",
+          "raw/Market/OneNote/無線通訊認證實驗室.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/NTN test and measurement aspects.md",
+         "raw_refs": [
+          "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-82b0756a162e48119cda4717eb765e05",
+      "task_sha256": "34b07abec1e9df553025e49ce92d6b960390c1e2f38e85b736d7605ab3d4de29",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.11.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "validated",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validated",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "passed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": null
+    },
+    "evidence": {
+     "raw_citations": 14,
+     "facet_status": "covered",
+     "missing_facets": [],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {
+      "market_segment": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

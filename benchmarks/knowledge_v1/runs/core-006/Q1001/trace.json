@@ -1,0 +1,130 @@
+{
+ "question": {
+  "id": "Q1001",
+  "text": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+  "technical": "RF / Measurement Fundamentals",
+  "topic": "EVM",
+  "product_related": "true"
+ },
+ "session_id": "conversation-51f19577295748df83622336254c6d45",
+ "exchange": {
+  "sent": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 303.391,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-51f19577295748df83622336254c6d45",
+    "actor": "leo.chi",
+    "title": "What is EVM, and which product-related measurement decisions depend on u…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-10T11:41:01.304985Z",
+    "updated_at": "2026-10-10T11:46:04.604528Z",
+    "messages": [
+     {
+      "message_id": "message-aff59d49852946378f795fe588f1e6c2",
+      "role": "user",
+      "text": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-10T11:41:01.492775Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-33aadb8081ef4b3b9e3b5525db951b7d",
+      "role": "assistant",
+      "text": "The knowledge base did not validate a complete answer. It only returned limited Raw evidence that EVM means “error vector magnitude,” including a product spec reference to “inherent error vector magnitude / inherent EVM,” and it also found “frequency measurement uncertainty” as a related product measurement item in `raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md` [68]. It did **not** validate broader product-option or product-selection evidence.\n\nFrom general RF/wireless test knowledge — not from the knowledge base — **EVM, or Error Vector Magnitude**, is a measure of modulation quality. It compares the ideal constellation point of a digitally modulated signal with the actually measured point. The difference is the “error vector,” usually reported as a percentage or in dB. Lower EVM means the transmitter or receiver chain is reproducing the intended modulation more accurately.\n\nProduct-related measurement decisions that depend on understanding EVM include:\n\n1. **Choosing the right signal analyzer or radio tester**\n   - The instrument’s own residual or inherent EVM must be much lower than the DUT’s expected EVM, otherwise the instrument masks the DUT performance.\n\n2. **Selecting bandwidth, modulation, and standard support**\n   - EVM requirements differ for LTE, 5G NR, Wi‑Fi, Bluetooth, etc., and for modulation orders such as QPSK, 16QAM, 64QAM, 256QAM, or 1024QAM.\n\n3. **Deciding whether a signaling or non-signaling tester is appropriate**\n   - Production test may use non-signaling EVM measurements, while protocol or end-to-end device validation may require signaling mode.\n\n4. **Specifying generator quality**\n   - If testing receiver demodulation or sensitivity, the signal generator’s modulation quality/EVM must be good enough to avoid corrupting the test signal.\n\n5. **Setting production test limits**\n   - EVM is often a pass/fail metric for RF transmitter quality, so limits must account for DUT spec, instrument uncertainty, and guard bands.\n\n6. **Evaluating RF impairments**\n   - EVM helps determine whether issues come from phase noise, IQ imbalance, compression, frequency error, timing error, noise, or nonlinear distortion.\n\n7. **Choosing calibration and uncertainty requirements**\n   - The Raw evidence specifically linked product measurement specs to “inherent EVM” and “frequency measurement uncertainty” [68], so uncertainty budgeting is part of deciding whether a product can support a given measurement.\n\nIn short: EVM tells you how cleanly a product transmits or measures digitally modulated signals, and it affects instrument selection, option selection, test method, uncertainty budget, and production pass/fail criteria.",
+      "created_at": "2026-10-10T11:46:04.604528Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-e83381e9fb63473f9d2e7f5ffd540e25",
+       "request_id": "request-e83381e9fb63473f9d2e7f5ffd540e25",
+       "span_id": "span-e83381e9fb63473f9d2e7f5ffd540e25",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+    "ok": true,
+    "answer": "The knowledge base did not validate a complete answer. It only returned limited Raw evidence that EVM means “error vector magnitude,” including a product spec reference to “inherent error vector magnitude / inherent EVM,” and it also found “frequency measurement uncertainty” as a related product measurement item in `raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md` [68]. It did **not** validate broader product-option or product-selection evidence.\n\nFrom general RF/wireless test knowledge — not from the knowledge base — **EVM, or Error Vector Magnitude**, is a measure of modulation quality. It compares the ideal constellation point of a digitally modulated signal with the actually measured point. The difference is the “error vector,” usually reported as a percentage or in dB. Lower EVM means the transmitter or receiver chain is reproducing the intended modulation more accurately.\n\nProduct-related measurement decisions that depend on understanding EVM include:\n\n1. **Choosing the right signal analyzer or radio tester**\n   - The instrument’s own residual or inherent EVM must be much lower than the DUT’s expected EVM, otherwise the instrument masks the DUT performance.\n\n2. **Selecting bandwidth, modulation, and standard support**\n   - EVM requirements differ for LTE, 5G NR, Wi‑Fi, Bluetooth, etc., and for modulation orders such as QPSK, 16QAM, 64QAM, 256QAM, or 1024QAM.\n\n3. **Deciding whether a signaling or non-signaling tester is appropriate**\n   - Production test may use non-signaling EVM measurements, while protocol or end-to-end device validation may require signaling mode.\n\n4. **Specifying generator quality**\n   - If testing receiver demodulation or sensitivity, the signal generator’s modulation quality/EVM must be good enough to avoid corrupting the test signal.\n\n5. **Setting production test limits**\n   - EVM is often a pass/fail metric for RF transmitter quality, so limits must account for DUT spec, instrument uncertainty, and guard bands.\n\n6. **Evaluating RF impairments**\n   - EVM helps determine whether issues come from phase noise, IQ imbalance, compression, frequency error, timing error, noise, or nonlinear distortion.\n\n7. **Choosing calibration and uncertainty requirements**\n   - The Raw evidence specifically linked product measurement specs to “inherent EVM” and “frequency measurement uncertainty” [68], so uncertainty budgeting is part of deciding whether a product can support a given measurement.\n\nIn short: EVM tells you how cleanly a product transmits or measures digitally modulated signals, and it affects instrument selection, option selection, test method, uncertainty budget, and production pass/fail criteria.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-e83381e9fb63473f9d2e7f5ffd540e25",
+      "request_id": "request-e83381e9fb63473f9d2e7f5ffd540e25",
+      "span_id": "span-e83381e9fb63473f9d2e7f5ffd540e25",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-e83381e9fb63473f9d2e7f5ffd540e25",
+       "request_id": "request-e83381e9fb63473f9d2e7f5ffd540e25",
+       "span_id": "span-e83381e9fb63473f9d2e7f5ffd540e25",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base did not validate a complete answer. It only returned limited Raw evidence that EVM means “error vector magnitude,” including a product spec reference to “inherent error vector magnitude / inherent EVM,” and it also found “frequency measurement uncertainty” as a related product measurement item in `raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md` [68]. It did **not** validate broader product-option or product-selection evidence.\n\nFrom general RF/wireless test knowledge — not from the knowledge base — **EVM, or Error Vector Magnitude**, is a measure of modulation quality. It compares the ideal constellation point of a digitally modulated signal with the actually measured point. The difference is the “error vector,” usually reported as a percentage or in dB. Lower EVM means the transmitter or receiver chain is reproducing the intended modulation more accurately.\n\nProduct-related measurement decisions that depend on understanding EVM include:\n\n1. **Choosing the right signal analyzer or radio tester**\n   - The instrument’s own residual or inherent EVM must be much lower than the DUT’s expected EVM, otherwise the instrument masks the DUT performance.\n\n2. **Selecting bandwidth, modulation, and standard support**\n   - EVM requirements differ for LTE, 5G NR, Wi‑Fi, Bluetooth, etc., and for modulation orders such as QPSK, 16QAM, 64QAM, 256QAM, or 1024QAM.\n\n3. **Deciding whether a signaling or non-signaling tester is appropriate**\n   - Production test may use non-signaling EVM measurements, while protocol or end-to-end device validation may require signaling mode.\n\n4. **Specifying generator quality**\n   - If testing receiver demodulation or sensitivity, the signal generator’s modulation quality/EVM must be good enough to avoid corrupting the test signal.\n\n5. **Setting production test limits**\n   - EVM is often a pass/fail metric for RF transmitter quality, so limits must account for DUT spec, instrument uncertainty, and guard bands.\n\n6. **Evaluating RF impairments**\n   - EVM helps determine whether issues come from phase noise, IQ imbalance, compression, frequency error, timing error, noise, or nonlinear distortion.\n\n7. **Choosing calibration and uncertainty requirements**\n   - The Raw evidence specifically linked product measurement specs to “inherent EVM” and “frequency measurement uncertainty” [68], so uncertainty budgeting is part of deciding whether a product can support a given measurement.\n\nIn short: EVM tells you how cleanly a product transmits or measures digitally modulated signals, and it affects instrument selection, option selection, test method, uncertainty budget, and production pass/fail criteria.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_hKKf2JsOOifnMenNipNkBm5c",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "failed",
+         "data": {
+          "knowledge_harness": "not_validated",
+          "answer": "已查到可引用的部分資料：\n\nEVM is “error vector magnitude”; the Raw evidence specifically mentions “inherent error vector magnitude (inherent EVM)” [68].\nThe product-related measurement items supported by Raw evidence are “inherent EVM” and “frequency measurement uncertainty” [68].\n\n來源：\n[68] `raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md`\n\n未能以證據支持：product_option_spec。因此不能把上列資料當成完整的推薦或比較。",
+          "evidence": {
+           "raw_citations": 1,
+           "facet_status": "missing",
+           "missing_facets": [
+            "product_option_spec"
+           ],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "product_option_spec": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "failed",
+          "failure_code": null,
+          "instruction": "The knowledge base did not validate an answer. Tell the person what is above; anything you add is not from the knowledge base and must say so."
+         },
+         "failure": {
+          "code": "knowledge_not_validated",
+          "message": "The Knowledge Harness did not validate an answer",
+          "retryable": false
+         }
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

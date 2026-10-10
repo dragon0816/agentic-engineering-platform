@@ -1588,7 +1588,9 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Knowledge synthesis evidence budget, Skill 1.10.0 (9cbe3ca, 2026-10-10):
   answerable coverage 0.30 -> 0.40, FAIL 3 -> 4, contradictions 4 -> 4,
   overreach items 35 -> 63 (runs/core-005/review.zh-TW.md). Kept.
-- [ ] Optional: reduce Knowledge overreach under Skill 1.10.0.
+- [x] Knowledge calibration: a second Claude Code answer scores 0.53; target set to 0.50 (9c4f81d).
+- [x] Tried no-support retry + Skill 1.11.0 (core-006): worse, rolled back (ca110b0, Skill 1.10.0 live).
+- [ ] Reduce Knowledge overreach under Skill 1.10.0 without losing coverage or latency (open).
 - [x] Benchmark results into telemetry for Atlas (d29ac63, contract v0.3):
   knowledge_v1 (+ reference grading), coding_v1 and the business workflow
   lab emit benchmark runs; /runs filters by trace_id and parent_run_id.

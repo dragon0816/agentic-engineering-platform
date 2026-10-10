@@ -1,0 +1,69 @@
+{
+ "id": "Q0211",
+ "grader": "1.2",
+ "coverage": 0.438,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's radar-specific instrument is the AREG800A automotive radar echo generator, not a signaling tester.",
+   "verified": true,
+   "label": "covered",
+   "why": "States AREG800A is automotive radar echo generator and tester is not radar instrument"
+  },
+  {
+   "n": 2,
+   "point": "Radar in the Vault's defense/counter-UAV context is only a detection sensor category with no test method or product detail.",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not state defense radar is only a detection sensor category with no method/product detail"
+  },
+  {
+   "n": 3,
+   "point": "In the device testing value chain, signaling testers (CMX500/CMW500) occupy the signaling / protocol / application layer.",
+   "verified": true,
+   "label": "partial",
+   "why": "Covers CMX500 signaling/network emulation, but not full CMX500/CMW500 value-chain mapping"
+  },
+  {
+   "n": 4,
+   "point": "Non-signaling testers (CMP180/CMP200/CMW100) are mapped to the production / manufacturing stage.",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not map CMP180/CMP200/CMW100 to production/manufacturing"
+  },
+  {
+   "n": 5,
+   "point": "The CMP180 is explicitly characterized as a production / R&D non-signaling tester.",
+   "verified": true,
+   "label": "missing",
+   "why": "No CMP180 production/R&D non-signaling tester characterization"
+  },
+  {
+   "n": 6,
+   "point": "In the defense (A&D) private-5G resilience work the signaling tester is used as the 5G network emulator for the communications link, not for radar.",
+   "verified": true,
+   "label": "covered",
+   "why": "Places CMX500 as network emulator for comms link, not radar"
+  },
+  {
+   "n": 7,
+   "point": "On air vehicles the signaling tester's role is link signaling plus multi-technology de-sense validation across co-located radios.",
+   "verified": true,
+   "label": "partial",
+   "why": "Mentions datalink/coexistence/desense, but not specifically air vehicles/co-located radios"
+  },
+  {
+   "n": 8,
+   "point": "The Vault forbids inferring a signaling tester into the EMC/EME (system-level defense) test domain or the reverse.",
+   "verified": true,
+   "label": "partial",
+   "why": "Avoids radar/EME crossing, but does not state explicit two-way prohibition"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "in a radar-related Aerospace / Defense workflow ... radar echo / artificial-target testing is covered by ... R&S AREG800A",
+  "supports hybrid echo generation and digital echo generation for FMCW radar",
+  "FMCW / non-FMCW production frontend ranges"
+ ]
+}

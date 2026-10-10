@@ -1,0 +1,1295 @@
+{
+ "question": {
+  "id": "Q0211",
+  "text": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "market": "Aerospace / Defense",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-65a997751feb409bb4af69cbc54658c3",
+ "exchange": {
+  "sent": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 126.343,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-65a997751feb409bb4af69cbc54658c3",
+    "actor": "leo.chi",
+    "title": "For a Aerospace / Defense use case involving radar, where would Signalin…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-10T10:47:00.532914Z",
+    "updated_at": "2026-10-10T10:49:06.704076Z",
+    "messages": [
+     {
+      "message_id": "message-68238f07a75e4d3590c8250aa80bd065",
+      "role": "user",
+      "text": "For a Aerospace / Defense use case involving radar, where would Signaling / Non-signaling Tester fit in the test workflow?",
+      "created_at": "2026-10-10T10:47:00.564550Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-e8d8a22cdbdb41f39f3c2cc2b1180df3",
+      "role": "assistant",
+      "text": "Short answer: A Signaling / Non-signaling Tester in the provided R&S knowledge is a communications-device tester, not the primary radar target/echo test instrument; in a radar-related Aerospace / Defense workflow it would fit only as an adjacent communications / network-emulation test element for platforms that also use LTE/5G/WLAN links, while radar echo / artificial-target testing is covered by radar echo generation instruments such as R&S AREG800A.[1][3][9][10][32]\n- R&S CMX500 is documented as a Radio Communication Tester and a universal one-box network emulation and measurement test solution for LTE, NR FR1, NR FR2, NSA/SA, FDD/TDD, RF parametric testing and fading propagation conditions.[3]  \n- CMX500 supports signaling and TX measurements for NR FR1/FR2, LTE signaling and measurements, NB-IoT / NB-NTN signaling, and WLAN signaling / TX measurements.[1]  \n- In callbox positioning, CMX500 is used to quickly establish DUT connections and perform RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance and non-signaling R&D verification.[9][10][11]  \n- For radar-specific stimulus, R&S AREG800A is documented as an Automotive Radar Echo Generator with dynamic artificial object generation; it supports hybrid echo generation and digital echo generation for FMCW radar, with generated distances up to 3000 m.[32]  \n- AREG800A artificial-object capabilities include dynamic object type, distance ranges such as `< 17 m to 3000 m`, `< 4 m to 3000 m`, or `≥ air gap to 3000 m`, and FMCW / non-FMCW production frontend ranges up to 350 m depending on configuration.[37]  \n- Aerospace / Defense-adjacent R&S drone solution knowledge emphasizes EMC / EME, military / aviation standards such as MIL-STD-461, MIL-STD-464 and RTCA DO-160, and customized solution themes including CUAS System Performance Verification and Electromagnetic Environment Emulation, but it does not define a CMX500 role inside a radar workflow.[26][27][29]  \n【推論】So, in a radar test workflow, put the Signaling / Non-signaling Tester at the “communications subsystem / datalink / coexistence / desense / application connectivity” layer of the system test, not at the “radar target echo generation” layer; the latter is the role supported in the passages by AREG800A radar echo generation facts.[1][9][10][32][37]  \n【推論】For an Aerospace / Defense radar platform that also has LTE/5G/WLAN connectivity, CMX500 can be positioned beside the radar/EME setup to emulate the network and verify signaling or non-signaling RF behavior while the radar environment is tested separately.[1][3][9][10][26]  \n【推論】The passages do not support claiming CMX500 itself tests radar detection performance, radar cross-section, or radar target scenarios; use AREG800A-type radar echo generation evidence for that part and CMX500 evidence only for cellular/WLAN signaling, RF, desense, pre-conformance and non-signaling verification.[1][9][10][32][37]\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[3] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[9] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[11] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[26] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[27] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[29] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[32] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[37] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）",
+      "created_at": "2026-10-10T10:49:06.704076Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-b854544c791b43d9bd9e3cf2462af7f9",
+       "request_id": "request-b854544c791b43d9bd9e3cf2462af7f9",
+       "span_id": "span-b854544c791b43d9bd9e3cf2462af7f9",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "Short answer: A Signaling / Non-signaling Tester in the provided R&S knowledge is a communications-device tester, not the primary radar target/echo test instrument; in a radar-related Aerospace / Defense workflow it would fit only as an adjacent communications / network-emulation test element for platforms that also use LTE/5G/WLAN links, while radar echo / artificial-target testing is covered by radar echo generation instruments such as R&S AREG800A.[1][3][9][10][32]\n- R&S CMX500 is documented as a Radio Communication Tester and a universal one-box network emulation and measurement test solution for LTE, NR FR1, NR FR2, NSA/SA, FDD/TDD, RF parametric testing and fading propagation conditions.[3]  \n- CMX500 supports signaling and TX measurements for NR FR1/FR2, LTE signaling and measurements, NB-IoT / NB-NTN signaling, and WLAN signaling / TX measurements.[1]  \n- In callbox positioning, CMX500 is used to quickly establish DUT connections and perform RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance and non-signaling R&D verification.[9][10][11]  \n- For radar-specific stimulus, R&S AREG800A is documented as an Automotive Radar Echo Generator with dynamic artificial object generation; it supports hybrid echo generation and digital echo generation for FMCW radar, with generated distances up to 3000 m.[32]  \n- AREG800A artificial-object capabilities include dynamic object type, distance ranges such as `< 17 m to 3000 m`, `< 4 m to 3000 m`, or `≥ air gap to 3000 m`, and FMCW / non-FMCW production frontend ranges up to 350 m depending on configuration.[37]  \n- Aerospace / Defense-adjacent R&S drone solution knowledge emphasizes EMC / EME, military / aviation standards such as MIL-STD-461, MIL-STD-464 and RTCA DO-160, and customized solution themes including CUAS System Performance Verification and Electromagnetic Environment Emulation, but it does not define a CMX500 role inside a radar workflow.[26][27][29]  \n【推論】So, in a radar test workflow, put the Signaling / Non-signaling Tester at the “communications subsystem / datalink / coexistence / desense / application connectivity” layer of the system test, not at the “radar target echo generation” layer; the latter is the role supported in the passages by AREG800A radar echo generation facts.[1][9][10][32][37]  \n【推論】For an Aerospace / Defense radar platform that also has LTE/5G/WLAN connectivity, CMX500 can be positioned beside the radar/EME setup to emulate the network and verify signaling or non-signaling RF behavior while the radar environment is tested separately.[1][3][9][10][26]  \n【推論】The passages do not support claiming CMX500 itself tests radar detection performance, radar cross-section, or radar target scenarios; use AREG800A-type radar echo generation evidence for that part and CMX500 evidence only for cellular/WLAN signaling, RF, desense, pre-conformance and non-signaling verification.[1][9][10][32][37]\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[3] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[9] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[11] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[26] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[27] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[29] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[32] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[37] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-b854544c791b43d9bd9e3cf2462af7f9",
+      "request_id": "request-b854544c791b43d9bd9e3cf2462af7f9",
+      "span_id": "span-b854544c791b43d9bd9e3cf2462af7f9",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-b854544c791b43d9bd9e3cf2462af7f9",
+       "request_id": "request-b854544c791b43d9bd9e3cf2462af7f9",
+       "span_id": "span-b854544c791b43d9bd9e3cf2462af7f9",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Short answer: A Signaling / Non-signaling Tester in the provided R&S knowledge is a communications-device tester, not the primary radar target/echo test instrument; in a radar-related Aerospace / Defense workflow it would fit only as an adjacent communications / network-emulation test element for platforms that also use LTE/5G/WLAN links, while radar echo / artificial-target testing is covered by radar echo generation instruments such as R&S AREG800A.[1][3][9][10][32]\n- R&S CMX500 is documented as a Radio Communication Tester and a universal one-box network emulation and measurement test solution for LTE, NR FR1, NR FR2, NSA/SA, FDD/TDD, RF parametric testing and fading propagation conditions.[3]  \n- CMX500 supports signaling and TX measurements for NR FR1/FR2, LTE signaling and measurements, NB-IoT / NB-NTN signaling, and WLAN signaling / TX measurements.[1]  \n- In callbox positioning, CMX500 is used to quickly establish DUT connections and perform RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance and non-signaling R&D verification.[9][10][11]  \n- For radar-specific stimulus, R&S AREG800A is documented as an Automotive Radar Echo Generator with dynamic artificial object generation; it supports hybrid echo generation and digital echo generation for FMCW radar, with generated distances up to 3000 m.[32]  \n- AREG800A artificial-object capabilities include dynamic object type, distance ranges such as `< 17 m to 3000 m`, `< 4 m to 3000 m`, or `≥ air gap to 3000 m`, and FMCW / non-FMCW production frontend ranges up to 350 m depending on configuration.[37]  \n- Aerospace / Defense-adjacent R&S drone solution knowledge emphasizes EMC / EME, military / aviation standards such as MIL-STD-461, MIL-STD-464 and RTCA DO-160, and customized solution themes including CUAS System Performance Verification and Electromagnetic Environment Emulation, but it does not define a CMX500 role inside a radar workflow.[26][27][29]  \n【推論】So, in a radar test workflow, put the Signaling / Non-signaling Tester at the “communications subsystem / datalink / coexistence / desense / application connectivity” layer of the system test, not at the “radar target echo generation” layer; the latter is the role supported in the passages by AREG800A radar echo generation facts.[1][9][10][32][37]  \n【推論】For an Aerospace / Defense radar platform that also has LTE/5G/WLAN connectivity, CMX500 can be positioned beside the radar/EME setup to emulate the network and verify signaling or non-signaling RF behavior while the radar environment is tested separately.[1][3][9][10][26]  \n【推論】The passages do not support claiming CMX500 itself tests radar detection performance, radar cross-section, or radar target scenarios; use AREG800A-type radar echo generation evidence for that part and CMX500 evidence only for cellular/WLAN signaling, RF, desense, pre-conformance and non-signaling verification.[1][9][10][32][37]\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[3] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[9] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[11] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[26] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[27] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[29] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[32] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[37] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_XmVvyZgEeNrgaQUtQ7waOSX4",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "Short answer: A Signaling / Non-signaling Tester in the provided R&S knowledge is a communications-device tester, not the primary radar target/echo test instrument; in a radar-related Aerospace / Defense workflow it would fit only as an adjacent communications / network-emulation test element for platforms that also use LTE/5G/WLAN links, while radar echo / artificial-target testing is covered by radar echo generation instruments such as R&S AREG800A.[1][3][9][10][32]\n- R&S CMX500 is documented as a Radio Communication Tester and a universal one-box network emulation and measurement test solution for LTE, NR FR1, NR FR2, NSA/SA, FDD/TDD, RF parametric testing and fading propagation conditions.[3]  \n- CMX500 supports signaling and TX measurements for NR FR1/FR2, LTE signaling and measurements, NB-IoT / NB-NTN signaling, and WLAN signaling / TX measurements.[1]  \n- In callbox positioning, CMX500 is used to quickly establish DUT connections and perform RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance and non-signaling R&D verification.[9][10][11]  \n- For radar-specific stimulus, R&S AREG800A is documented as an Automotive Radar Echo Generator with dynamic artificial object generation; it supports hybrid echo generation and digital echo generation for FMCW radar, with generated distances up to 3000 m.[32]  \n- AREG800A artificial-object capabilities include dynamic object type, distance ranges such as `< 17 m to 3000 m`, `< 4 m to 3000 m`, or `≥ air gap to 3000 m`, and FMCW / non-FMCW production frontend ranges up to 350 m depending on configuration.[37]  \n- Aerospace / Defense-adjacent R&S drone solution knowledge emphasizes EMC / EME, military / aviation standards such as MIL-STD-461, MIL-STD-464 and RTCA DO-160, and customized solution themes including CUAS System Performance Verification and Electromagnetic Environment Emulation, but it does not define a CMX500 role inside a radar workflow.[26][27][29]  \n【推論】So, in a radar test workflow, put the Signaling / Non-signaling Tester at the “communications subsystem / datalink / coexistence / desense / application connectivity” layer of the system test, not at the “radar target echo generation” layer; the latter is the role supported in the passages by AREG800A radar echo generation facts.[1][9][10][32][37]  \n【推論】For an Aerospace / Defense radar platform that also has LTE/5G/WLAN connectivity, CMX500 can be positioned beside the radar/EME setup to emulate the network and verify signaling or non-signaling RF behavior while the radar environment is tested separately.[1][3][9][10][26]  \n【推論】The passages do not support claiming CMX500 itself tests radar detection performance, radar cross-section, or radar target scenarios; use AREG800A-type radar echo generation evidence for that part and CMX500 evidence only for cellular/WLAN signaling, RF, desense, pre-conformance and non-signaling verification.[1][9][10][32][37]\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[3] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[9] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[10] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[11] Wiki：CMX500 Callbox（來源：`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[26] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[27] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[29] Wiki：2025RS Drone Solution（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`）\n[32] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[37] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）",
+          "evidence": {
+           "raw_citations": 10,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-2624b34d32dd4258b35c24ef3039addd",
+            "request_id": "request-2624b34d32dd4258b35c24ef3039addd",
+            "span_id": "span-2624b34d32dd4258b35c24ef3039addd",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "For an Aerospace / Defense use case involving radar, where would a Signaling / Non-signaling Tester fit in the radar test workflow? Please ground answer in RS knowledge.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 8.63149
+             },
+             {
+              "text": "R&S CMX500 › 使用介面與 automation\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n| 介面 | 原文定位 |\n|---|---|\n| [[CMsquares]] | 單一 graphical user interface，web-based、responsive，支援 RF tests、functional tests、advanced signaling tests、protocol tests |\n| [[R&S CMXmars]] | Message log analysis，可離線分析或在線監控 instrument messaging |\n| [[R&S CMsequencer]] | Graphical scripting interface，可在 CMX500 或 Windows PC 上建立、設定與執行 test scripts |\n| [[XLAPI]] | Python-based scripting interface，適合 complex scripting use cases |\n| [[SCPI]] | Remote control interface，適合 simple、standardized scripting use cases |\n\nXLAPI scripting environment：Python 3.10；script development computer 可為 Windows PC 或 CMX500；XLAPI installation package 為 **CMX-KF600X**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 36,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 7.525293
+             },
+             {
+              "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 6.539739
+             },
+             {
+              "text": "R&S CMX500 › Rear panel interfaces\n- LAN：Ethernet RJ-45 connector，1000 Mbps。\n- Trigger interfaces：Trig. A、Trig. B，2 × BNC connector，3.3 V TTL；Trig. C、Trig. D、Trig. E，3 × BNC connector，3.3 V TTL；AST Out，1 × BNC connector。\n- Flexx Sync interface：for future use；In 為 1 × mini SAS HD connector；Loop 為 2 × mini SAS HD connector；Out 為 1 × mini SAS HD connector。\n- Flexx Data interface：for future use；In/Out 各 1 × QSFP-DD connector。\n- Flexx IQ interface：for future use；In/Out 各 1 × QSFP-DD connector。\n- LAN Switch Subnet Only interface：for future use；port 1、port 2 各 1 × SFP+ connector。\n- USB：for keyboard、mouse、USB flash drive；2 × USB 3.1 type A connector。\n- HDMI：for external monitor；DisplayPort：for external monitor。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 37,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.864449
+             },
+             {
+              "text": "R&S CMX500 › R&S CMX-B300C processing unit\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX-B300C]] 需要 [[R&S CMX-PB70H]] option，提供 generic high-performance computing platform for advanced data processing。Interfaces：\n\n| 介面 | 規格 |\n|---|---|\n| LAN DAU | CMX500 subnet only；QSFP+；1 Gbps、10 Gbps、40 Gbps |\n| Internal use LAN | CMX500 subnet only；Ethernet RJ-45；1 Gbps |\n| USB DAU | for future use |\n| USB | USB 3.0 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.452923
+             },
+             {
+              "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.451712
+             },
+             {
+              "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx | WLAN SISO signaling |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx | 802.11ax station testing |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx | 802.11be station testing |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx | 802.11bn station testing |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx | 802.11ax AP testing |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx | 802.11be AP testing |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx | 802.11bn AP testing |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx | 2x2 MIMO support |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx | Enterprise security support |\n| R&S CMX-KS500B / M / X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx | 僅 LTE standalone 需要；NR NSA LTE anchor cells 包含於 NR signaling options |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx | D2C fixed / variable delay |\n| R&S CMX-KS600B / M / X | NR signaling enabler, Rel. 15 | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx | 包含 5G NR SA option 2、NSA option 3、DL 2x2/4x4 MIMO、one CC、UL 256QAM |\n| R&S CMX-KS610B / M / X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx | UL 2x2 MIMO、CA up to 9 CC |\n| R&S CMX-KS611B / M / X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx | SUL / Rel. 16 features |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.813784
+             },
+             {
+              "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS612B / M / X | NR signaling extension, CA 10 to 12 CC | 1222.6574.xx / 1222.6580.xx / 1222.6597.xx | CA 10 to 12 CC |\n| R&S CMX-KS613B / X | Multi-SIM enabler | 1222.9580.xx / 1222.9596.xx | Basic / expert |\n| R&S CMX-KS617B / M / X | NR signaling extension, Rel. 17, RedCap | 1222.6600.xx / 1222.6616.xx / 1222.6622.xx | RedCap |\n| R&S CMX-KS618B / X | NR signaling extension, Rel. 18, eRedCap | 1222.9609.xx / 1222.9621.xx | eRedCap |\n| R&S CMX-KS627B / M / X | NR signaling extension, Rel. 17, NTN | 1222.8690.xx / 1222.8702.xx / 1222.8719.xx | NTN |\n| R&S CMX-KS628B / X | NR signaling extension, Rel. 18, NTN | 1222.9638.xx / 1222.9650.xx | NTN |\n| R&S CMX-KS629B / X | NR signaling extension, Rel. 19, NTN | 1223.0086.xx / 1223.0092.xx | NTN |\n| R&S CMX-KS637B / M / X | NR signaling extension, Rel. 17 w/o RedCap & NTN | 1222.8777.xx / 1222.8783.xx / 1222.8790.xx | Rel. 17 without RedCap & NTN |\n| R&S CMX-KS638B / X | NR signaling extension w/o eRedCap & NTN Rel. 18 | 1222.9667.xx / 1222.9680.xx | Rel. 18 without eRedCap & NTN |\n| R&S CMX-KS527B / X | NB-NTN signaling, Rel. 17 | 1222.9738.xx / 1222.9744.xx | NB-IoT options set 中 basic / expert |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 26,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.732181
+             },
+             {
+              "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 5.441032
+             },
+             {
+              "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 3.646489
+             },
+             {
+              "text": "CMX500 Callbox › Callbox 定位\n依 [[CMX500_Callbox]]，callbox 的核心敘事是：\n\n- Easy to set up。\n- Easy to get in a call。\n- Easy to test with。\n- Focus on [[RF Testing]]，including [[3GPP pre-conformance]]。\n\n來源以 [[Device Under Test]]、cell tower 與 smartphone 圖示描述 [[R&S CMX500]] 作為 DUT 連線與測試環境的中心。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 1.8126
+             },
+             {
+              "text": "CMX500 Callbox › UI 與 automation\n來源將 [[CMsquares]] 描述為 web based、all-in-one configuration、all tools in one place、modern UI，並列出：\n\n- live views。\n- App Testing。\n- NTN live views。\n- Sequencer。\n- Log analysis。\n- One-click RF testing。\n\n在 RF pre-conformance 脈絡中，來源稱可 quick switch from manual to automated pre-conformance，且使用 same technology specific license，並指向 [[CMX500 Sequencer Test Packages]] 與 `Sequencer-CMX-Test_Packages_Database.xlsx`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 1.197831
+             },
+             {
+              "text": "CMX500 Callbox › Application / mobility use cases\n來源列出的 callbox application / mobility use cases 包含：\n\n- [[Mobility Testing]]。\n- [[Network Slicing]]。\n- [[IP Throughput]]。\n- [[Security Analysis]]。\n- [[Backend Service]]。\n- [[IMS Services]]。\n- [[WLAN offloading with Voice over WLAN]]。\n- [[ATSSS]]。\n- [[Power Consumption]]。\n- [[XR Responsiveness & L4S]]。\n- [[eCall]] / [[NGeCall]]。\n- [[Speech Quality]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 1.141189
+             },
+             {
+              "text": "CMX500 Callbox › Testing phases\n[[CMX500_Callbox]] 將測試階段放在下列脈絡中：\n\n- [[Go-NoGo Testing]]。\n- [[Non-Sig Testing]]。\n- [[Conformance Testing]]。\n- [[R&D Testing]]。\n\n來源未明確說這四者是完整 lifecycle，也未定義各階段 pass/fail 標準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 0.965981
+             },
+             {
+              "text": "CMX500 Callbox › unresolved\n- 來源未標示簡報版本、作者、正式發佈日期與對應 CSW software release。\n- 多個 use cases 未列出完整 option stack、BOM、DUT 條件或測試報告。\n- Roadmap 字樣如 coming soon、coming in 2025 and later、planned for CSW 9.00 / 9.10 需以 release note 或正式 product documentation 補證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 0.610394
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › XR / application testing 線索\n來源的 XR / Metaverse 章節以 [[R&S CMX500]] 連接 lab-based XR testbed：\n\n- Compact 3GPP-compliant OTA chamber for 5G NR mmWave signals。\n- 5G One Box Signaling Tester。\n- Cloud XR Server。\n- IP connection。\n- XR Client App。\n- Artificial Head on 3D positioner to emulate 6DoF。\n- HMD or AR glasses。\n- USB-C tethering。\n- future: WiFi7。\n\n來源另列 R&S CMX500 XR-related roadmap focuses on power savings and low latency，包含 BWP switching、SCell dormancy、cross-slot scheduling、uplink configured grant、enhanced cDRX、PDCCH skipping、low latency mobility 等 Release 15–18 / 19 features。此部分本次只作為待拆頁線索。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 3.031395
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › toolchain\n來源列出的 CMX500 toolchain 包含：\n\n- [[R&S CMsquares]]。\n- [[R&S CONTEST]]。\n- Conformance：LTE、NR、2G、3G、C-IoT。\n- 測試範圍：RF Conformance、RRM、LBS、NetOp、PCT、signaling tests、application、callbox、NPT、PQA、3GPP RF preconformance、ATE。\n- 相關設備：[[R&S CMX500]]、[[R&S ATS CATR]]、[[R&S NGM200]]、[[R&S TS8980 Conformance Test Platform]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 2.626862
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › CMX500 platform overview\n來源對 [[R&S CMX500]] 的 platform overview 說法包含：\n\n- Future proof 5G signaling test platform。\n- Running on Linux：faster and more robust。\n- Single web-based GUI for RF、protocol、application testing。\n- Modular and scalable HW architecture。\n- LTE & FR1：up to 8 GHz。\n- FR2：24–50 GHz。\n- Ready for up to 20 Gbps and more E2E IP performance。\n- Extensive IP and Application Test feature set onboard。\n\n此處屬 presentation claim；不能取代 formal frequency range、hardware configuration、software option 或 guaranteed performance 規格。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 2.566003
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › Shuffler\n來源描述 [[Shuffler]]：\n\n- RF / T-put test on all supported UE band combos in one go。\n- All Shuffler tests part of [[R&S CMX-KF612M]] test package。\n- Loop blocks provide flexibility to loop through bands、bandwidth、channels。\n- one test script with one test report can test RF TX / RX measurement、RX sensitivity measurement、throughput、VoLTE / VoNR。\n- Band combinations input via UE capabilities or user-defined Excel sheet。\n- Shuffler implemented in [[R&S CMsequencer]]。\n\n此處仍需正式 [[R&S CMX-KF612M]] 文件補證。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 1.714356
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › OBT\n來源列 OBT：\n\n- Support for FR2 2x2 MIMO and up to 8 CC。\n- Up to 16 CC LTE / FR1。\n- CB RF test up to 50 GHz。\n- 8CC FR2 2x2 + 4CC FR1 4x4。\n- 8CC FR2 2x2 + 8CC LTE 4x4。\n- 8CC FR1 4x4 + 8CC LTE 4x4。\n- >10 Gbps Data Throughput。\n- 3GPP pre-conformance tests。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 1.134028
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › unresolved\n- 來源未標示正式日期與投影片版次。\n- OBT Lite 5 GHz RF DL iBW 與 RedCap 章節 4 GHz RF DL iBW 的適用 configuration 未標示。\n- [[R&S CMX-KF612M]] 與 [[R&S CMX-KF678X]] 的正式 order number、release、option dependencies 與 test package contents 未確認。\n- XR-related roadmap 的 FW 7.20 / tbd / not agreed in 3GPP yet 條目需要對應正式 release note 與 3GPP status。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 0.821037
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › OBT Lite\n來源列 OBT Lite：\n\n- Supports FR2 SISO and FR1 / LTE 4x4 MIMO。\n- 5 GHz RF DL iBW。\n- Sub8：400 MHz–8 GHz。\n- mmW：22–50 GHz。\n\nRedCap 章節另列 [[R&S CMX500 OBT lite]]：\n\n- Supports LTE、5G NR FR1、WLAN。\n- Optimum configuration for 3GPP R17 RedCap RF parametric and functional test、protocol analysis、application testing。\n- Supports FR1 / LTE 4x4 MIMO RF callbox testing。\n- Supports 3GPP pre-conformance。\n- Supports data application testing。\n- 4 GHz RF DL iBW。\n- Sub8：400 MHz–8 GHz。\n\n上述 5 GHz / 4 GHz RF DL iBW 差異可能是投影片不同 use-case / configuration 語境；來源未提供 BOM、unit count 或 formal option stack，因此暫並列保存，不推論矛盾。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 0.698416
+             },
+             {
+              "text": "CMX500 use-case based 5G testing\n[[CMX500 use-case based 5G testing]] 是 [[Rethink 5G Testing solution overview 5G RedCap NTN FWA]] 中對 [[R&S CMX500]] 的 market / solution positioning：以 use-case based approach 支援 5G eMBB、FWA、RedCap、NTN、XR 等裝置測試，而不只是一組單點工具。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 0.11125
+             },
+             {
+              "text": "2025RS Drone Solution › 與既有知識的關係\n- [[UAV Technologies 外部資料清單]] 已保存 [[6. UAV Technologies]] 中 UAV regulation、standards、PDF 與 link hub 線索；本來源比 [[6. UAV Technologies]] 提供更完整的 drone EMC / EME test proposal 脈絡，但仍屬 Market 類簡報，缺 formal date / version。\n- [[UAV signaling test solution]] 聚焦 [[R&S CMX500]] 對 [[LTE]]、[[5G]]、[[Wi-Fi]] 的 signaling test 與 De-sense validation；本來源則聚焦 EMC / EME / immunity / emissions / system-level RF environment，兩者互補但不可互相替代。\n- [[UAV 通訊]] 記錄 C2、telemetry、payload data、SATCOM、4G/5G、Wi‑Fi、mesh 與 MAVLink / RTPS 等通訊議題；本來源補充通訊設備、GPS、mobile radio、broadcast emissions、data communications 與 power supply 可能形成 electromagnetic environment 的測試背景。\n- [[Counter-UAV 技術]] 討論 detection / neutralization；本來源只在 customised solution 中列 [[CUAS System Performance Verification]]，沒有提供 counter-UAS system 的技術分類、產品或效能數字。\n- [[UAV 系統方塊圖]] 整理 UAV 子系統；本來源補充 drone components 如 battery、BMS、ESC、FCM、CM、antennas 與 sensors，但未提供 specific architecture 或 BOM。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 2.956511
+             },
+             {
+              "text": "2025RS Drone Solution › R&S / 測試系統線索\n- [[Rohde & Schwarz]] — 來源多頁頁尾標示 Rohde & Schwarz，且整份簡報為 drone test solution proposal；來源未標示部門、作者或客戶。\n- [[R&S TS9975 EMI Test System]] — 來源在 `UAV/UAS Drones T&M Solutions` 的 standard system 中列名，描述為 EMI Test System；未提供規格、配置、order number 或軟體版本。\n- [[R&S TS9982 EMS Test System]] — 來源在 standard system 中列名，描述為 EMS Test System；未提供規格、配置、order number 或軟體版本。\n- [[R&S TS8997]] — 來源在 standard system 區段列出 `TS8997`，但 markdown 排版無法確認其完整產品名稱、功能或與 EMI / EMS 的關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 0.645687
+             },
+             {
+              "text": "2025RS Drone Solution › 重點摘要\n- 本來源是由 `2025RS Drone Solution.pdf` 轉出的 lossy markdown，標題為 `DRONE TEST SOLUTION PROPOSAL`；來源檔名含 `2025RS`，但正文未標示正式發布日期、作者、版本或簡報完整封面。\n- 來源以 [[EMC]] / [[EME]] 為主軸，說明 drone / [[UAV]] / [[UAS]] 在 residential、outdoor AUT、MIL battle environment 與 multi-domain operations 下會遭遇不同電磁干擾與測試需求。\n- 來源定義 [[UAV]] 為 platform vehicle，[[UAS]] 為支援 drone operation 的整體系統，包含 UAV、controller、datalink、sensors 等；並列出 battery、[[BMS]]、[[ESC]]、[[Flight Control Module]]、[[Communication Module]]、antennas 與 sensors 等 drone components。\n- 來源提出 [[UAV UAS Drones T&M Solutions]]：standard system 包含 [[R&S TS9975 EMI Test System]]、[[R&S TS9982 EMS Test System]] 與 [[R&S TS8997]]；customised solution 包含 [[B-RID Environment Performance]]、[[CUAS System Performance Verification]]、[[Electromagnetic Environment Emulation]] 與 [[High-Intensity RF]]。\n- 商用無人機部分，來源列出 [[European EMC Directive]] 2014/30/EU、[[Radio Equipment Directive]] 2014/53/EU、[[ETSI EN 301 489]] 系列、[[CISPR 32]] / [[EN 55032]]、[[CISPR 35]]、[[EN 61000-4-3]]、[[EN 61000-4-6]]、[[EN 61000-4-2]]、[[EN 61000-4-4]]、[[EN 61000-4-5]]、[[EN 61000-4-11]]、[[EN 61000-3-2]]、[[EN 61000-3-3]] 與 [[ISO 7637-2]] 等線索。\n- 軍用 / 航太部分，來源列出 [[MIL-STD-461]]、[[MIL-STD-464]]、[[RTCA DO-160]]、[[DEF STAN 59-411]]、[[GJB 151B]]、[[GJB 1389A]] 等標準線索，並補充 [[MIL-STD-464]] 涵蓋 external RF EME、[[HPM]]、[[EMP]]、lightning、RADHAZ、HERP / HERF / HERO、electrical bonding、TEMPEST 與 platform radiated emission 等系統層議題。\n- 來源指出 commercial drone radiated RF immunity default test level 為 3 V/m、frequency range 80 MHz to 6 GHz，但也問「Is this test level adequate for all environment?」，並指出 test level 需由 drone manufacturer 依 applications 定義，例如 higher test level 10 V/m 或 specialized test level。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 0.63429
+             },
+             {
+              "text": "2025RS Drone Solution › Military / aviation / system-level standards\n- [[MIL-STD-461]] — 來源說其為 control of electromagnetic interference emissions and susceptibility 的 requirements，並特別提到 [[MIL-STD-461G]]。\n- [[MIL-STD-464]] — 來源說其為 electromagnetic environmental effects requirements for systems；簡報同時出現 464C 與 464D 版本字樣，需後續核對。\n- [[RTCA DO-160]] — 來源說其提供 airborne equipment environmental conditions and test procedures。\n- [[CS114]] — 來源在 DO-160 Section 20 中說 conducted susceptibility similar to CS114 test。\n- [[RS103]] — 來源在 DO-160 Section 20 中說 radiated susceptibility similar to RS103。\n- [[CS117]] — 來源在 DO-160 Section 22 lightning induced transients 中列名。\n- [[RE102]] — 來源在 Section 21 emission of RF energy 標題中列 `RE102 / CE`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 0.525895
+             },
+             {
+              "text": "2025RS Drone Solution › 日期與期間\n| 項目 | 日期 / 期間 | 來源中的標示 |\n|---|---:|---|\n| 來源檔名 | `2025RS Drone Solution.pdf` | 只出現在 raw frontmatter `source_file`；不可直接推論正式發布日期。 |\n| raw 轉檔日期 | 2026-09-17 | frontmatter `converted: 2026-09-17`，不可當成簡報發布日期。 |\n| source SHA | `a8e4eb6491b3f0a1` | frontmatter `source_sha`。 |\n| formal document version | 來源未標示 | 未見 version、revision、author、issue date 或 confidentiality marking。 |\n| radiated layout frequency range | 80 MHz – 6 GHz | slide `Radiated Layout` 與 commercial drone immunity 章節皆出現 80 MHz to 6 GHz。 |\n| commercial drone immunity default test level | 3 V/m | [[EN 301 489-1]] Immunity Requirements；來源同時指出不同應用可能需 10 V/m 或 specialized test level。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 0.510398
+             },
+             {
+              "text": "2025RS Drone Solution › 原文未解的問題\n- 來源未標示正式發布日期、版本、作者、客戶、適用國家 / 地區或簡報完整頁數；只能以 raw 轉檔日期 2026-09-17 與檔名 `2025RS` 追溯。\n- 轉檔為 lossy derivative；多個表格與標準列名存在 OCR / 排版斷裂，例如 standards based on EUT、R&S test system list、ETSI 4709-x 描述與 MIL / satellite standards 表。\n- [[R&S TS8997]] 只出現代碼；來源未說明完整產品名稱或用途。\n- [[MIL-STD-464]] 在來源中同時出現 464C 與 464D，未說明版本差異或適用情境。\n- `Lighting` / `Lightning` 在來源中皆出現，需回 PDF 判斷是 illumination 還是 lightning / EMP 語境。\n- `DAV-B` 可能為 `DVB` 或其他 broadcast emission 文字；未決。\n- [[ETSI 4709-x]] 的正式標準名稱、版本與 drone network testing 關係未由來源清楚標示。\n- 來源列出的 standard applicability 不等於任一 drone product 必須全部測試；測試項目需依 EUT、intended environment、regulatory domain、application 與 manufacturer requirement 定義。\n- 來源列 [[B-RID Environment Performance]]、[[CUAS System Performance Verification]]、[[Electromagnetic Environment Emulation]] 與 [[High-Intensity RF]]，但未提供 test method、frequency plan、chamber / antenna setup、pass / fail criteria、threat waveform 或 safety condition。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 0.402691
+             },
+             {
+              "text": "Randy Schnell\n[[Randy Schnell]] 是 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 封面列名的 Business Development Manager，Aerospace & Defense Test。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Randy Schnell.md"
+              },
+              "score": 2.090287
+             },
+             {
+              "text": "Randy Schnell › 來源中的列名\n依 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]]（檔名 / raw title 含 2025-12-19；raw converted 2026-09-17）：\n\n- 封面列名：Randy Schnell。\n- 職稱 / 角色列名：Business Development Manager。\n- 組織 / 業務領域列名：Aerospace & Defense Test。\n- 簡報主題為 deployed [[5G]] private networks 在 [[Smart Jamming]] / [[EW]] 環境下的 resilience，以及 legacy [[Frequency hopping for 5G resilience]] 能否在不修改 [[DUT]] 的前提下提升連線韌性。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Randy Schnell.md"
+              },
+              "score": 1.223247
+             },
+             {
+              "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 6.421744
+             },
+             {
+              "text": "R&S AREG800A › Artificial objects\n| Frontend 組合 | Distance condition | Maximum artificial objects |\n|---|---|---:|\n| with [[R&S QAT100]] | `< 4 m to 3000 m + air gap` | 最多 8 個；4 m 至 17 m 最多 4 個，17 m 至 3000 m 最多 4 個 |\n| with [[R&S QAT100]] | `> 17 m to 3000 m + air gap` | 最多 8 個 |\n| with [[R&S QAT100]] | `≥ air gap to 3000 m` | 最多 8 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `< 4 m to 3000 m + air gap` | 最多 32 個，每 frontend 最多 8 個；4 m 至 17 m 最多 4 個，17 m 至 3000 m 最多 28 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `> 17 m to 3000 m + air gap` | 最多 32 個，每 frontend 最多 8 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `≥ air gap to 3000 m` | 最多 32 個，每 frontend 最多 8 個 |\n\n其他 artificial object 規格：\n\n- Object distance accuracy with [[R&S AREG8-B9]] option：`±5 cm (meas.)`。\n- Object distance step size with [[R&S AREG8-B9]] option：`1 cm`。\n- Air gap：object distances 與 resulting object radar cross-sections 會依 frontend reference plane 與 DUT 之間距離改變；來源建議 air gap 足夠大以符合 radar under test 的 far-field condition。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 3.546526
+             },
+             {
+              "text": "R&S AREG800A › Production base units\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n| 代碼 | 名稱 | Order No. | 原文的一句說明 |\n|---|---|---|---|\n| [[R&S AREG-DBP1]] | [[R&S AREG-P1]] radar mini | `1437.9676P02` | Production base unit option / radar mini configuration |\n| [[R&S AREG-DBP2]] | [[R&S AREG-P2]] radar golden | `1437.9682P02` | Production base unit option / radar golden configuration |\n| [[R&S AREG-DBP3]] | [[R&S AREG-P3]] radar pro | `1437.9699P02` | Production base unit option / radar pro configuration |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 41,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 3.3807
+             },
+             {
+              "text": "R&S AREG800A › Automotive radar production configurations\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- [[R&S AREG-P1]] radar mini configuration / [[R&S AREG-DBP1]] base unit option：one digital channel，one object per channel，5 GHz instantaneous bandwidth，near object range possibility，analog IF output interfaces，remote control interfaces，[[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option one frontend per channel required。\n- [[R&S AREG-P2]] radar golden configuration / [[R&S AREG-DBP2]] base unit option：two digital channels。\n- [[R&S AREG-P3]] radar pro configuration / [[R&S AREG-DBP3]] base unit option：搭配 [[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option；frontend 支援 monostatic 或 bistatic；three digital channels；one object per channel。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 31,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 2.997608
+             },
+             {
+              "text": "R&S AREG800A › 文件與適用條件\n- 來源文件：[[AREG800A_specs_en_3609-8015-22_v0900]]。\n- 文件編號：`PD 3609.8015.22`。\n- 文件版本：`Version 09.00`。\n- 文件日期：`September 2025（LA）`。\n- 文件名稱：`AREG800A Automotive Radar Echo Generator`。\n- Copyright：`© 2021–2025 Rohde & Schwarz`。\n- 資料註記：無 tolerance limits 的資料不具 binding 效力；資料 `subject to change`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 於環境溫度儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格定義（Version 09.00, September 2025）：\n\n- `Specifications with limits`：以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示保證產品性能。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：表示保證產品性能，通常為 dimensions 或 setting parameter resolution 等值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依 GUM 計算。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 2.82624
+             },
+             {
+              "text": "R&S AREG800A › Artificial objects\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Object type：`dynamic`。\n\nMinimum artificial object distance：\n\n| Option 組合 | Minimum artificial object distance |\n|---|---:|\n| [[R&S AREG8-B9]] | `< 17 m + air gap (meas.)` |\n| [[R&S AREG8-B9]] with [[R&S AREG8-B63]] | `< 4 m + air gap (meas.)` |\n| [[R&S AREG8-B9]] with [[R&S AREG8-K814]] | `≥ air gap (meas.)` |\n| [[R&S AREG8-B9]] with [[R&S AREG8-B63]] and [[R&S AREG8-K814]] | `≥ air gap (meas.)` |\n\nCovered distance range of artificial objects：\n\n| Option 組合 | Covered distance range |\n|---|---:|\n| [[R&S AREG8-B9]] | `< 17 m to 3000 m (meas.)` |\n| [[R&S AREG8-B9]] with [[R&S AREG8-B63]] | `< 4 m to 3000 m (meas.)` |\n| [[R&S AREG8-B9]] with [[R&S AREG8-K814]] | `≥ air gap to 3000 m (meas.)` |\n| [[R&S AREG8-B9]] with [[R&S AREG8-B63]] and [[R&S AREG8-K814]] | `≥ air gap to 3000 m (meas.)` |\n| [[R&S AREG-DBP1]] / [[R&S AREG-DBP2]] / [[R&S AREG-DBP3]] with [[R&S AREG-MFP]] / [[R&S AREG-BFP]] | FMCW：`≥ air gap to 350 m (meas.)`；non FMCW：`< 17 m to 350 m (meas.)` |\n\nMaximum number of artificial objects per AREG800A：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 2.624166
+             },
+             {
+              "text": "R&S AREG800A › 相關來源\n- [[AREG800A_specs_en_3609-8015-22_v0900]] — R&S AREG800A Automotive Radar Echo Generator Specifications，Version 09.00，September 2025。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 50,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 2.52692
+             },
+             {
+              "text": "R&S AREG800A › 讀圖補充\n以下內容來自 [[AREG800A_specs_en_3609-8015-22_v0900]] 的讀圖補充，可信度低於正文，不用於推翻正文。本次提供的 raw 摘要未附圖片 wikilink，因此未嵌入圖片。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 48,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 2.268505
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n這份來源是 [[R&S AREG800A]] Automotive Radar Echo Generator 的 specifications，文件編號 `PD 3609.8015.22`，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`，文件標題為 `AREG800A Automotive Radar Echo Generator`，Copyright `© 2021–2025 Rohde & Schwarz`。\n\n[[R&S AREG800A]] 的 echo generator type 為 `dynamic artificial object generation`。Echo generation concept 分為：\n\n- `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n- `digital`：針對 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 `air gap value`；maximum generated distance 為 `3000 m`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 在環境溫度下儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格資料定義：\n\n- `Specifications with limits`：代表保證的產品效能，以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 的方式指定與測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：代表保證的產品效能，通常為 dimensions 或 setting parameter resolution 等無偏差或偏差可忽略的值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依據 GUM 計算，納入 environmental conditions、aging、wear and tear。\n- `Data without tolerance limits is not binding`；文件 `subject to change`。\n\n主要能力與限制：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 2.82211
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.917073
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n- Base unit instantaneous IF bandwidth 依 option 為 `1 GHz`、`2 GHz` 或 `5 GHz`；overrange 分別為 `1.2 GHz (meas.)`、`2.2 GHz (meas.)`、`5.2 GHz (meas.)`。\n- AREG800A base unit IF frequency range：[[R&S AREG8-B9]] 為 `1.1 GHz to 2.1 GHz`；[[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 2.7 GHz`；來源另列 [[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 5.7 GHz`，但 5 GHz bandwidth ordering information 顯示還涉及 [[R&S AREG8-K528]]，此處未自行推論修正。\n- RF frequency bands：[[R&S AREG8-24S]] / [[R&S AREG8-24D]] 為 `24 GHz to 24.25 GHz`；[[R&S AREG8-81S]] / [[R&S AREG8-81D]] 與 [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]]、[[R&S QAT100]] 為 `76 GHz to 81 GHz`；[[R&S FE44S]] 為 `24 GHz to 44 GHz`。\n- 每台 [[R&S AREG800A]] base unit 支援 conventional mmWave frontends 最多 4 個，[[R&S QAT100]] 最多 8 個，[[R&S FE44S]] 最多 8 個 external frontends（4 個 TX、4 個 RX，共 4 pairs）。\n- Artificial object distance 可依 option 涵蓋 `< 17 m to 3000 m (meas.)`、`< 4 m to 3000 m (meas.)`、`≥ air gap to 3000 m (meas.)`；production frontend 組合列為 FMCW `≥ air gap to 350 m (meas.)`，non FMCW `< 17 m to 350 m (meas.)`。\n- Radial velocity：每個 artificial object 支援 individual Doppler frequency shift；with [[R&S AREG8-B9]] and [[R&S AREG8-B63]] velocity setting range 為 `±500 km/h`，velocity step size 為 `0.001 km/h`。\n- Remote control interfaces 包含 Ethernet 與 [[R&S AREG8-K986]] GPIB；remote control command set 為 `SCPI`。\n- HiL interface option 為 [[R&S AREG8-K109]]；open-standard protocol support 為 open simulation interface（OSI）；time synchronization protocol 為 `gPTP`、`NTP`。\n- Base unit `AREG800A` Order No. `1437.4400.02`，包含 power cable 與 quick start guide。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.133257
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG-MFP]]、[[R&S AREG-BFP]] — production frontend options，支援 monostatic 或 bistatic。\n- [[Automotive radar echo generation]]、[[FMCW radar]]、[[Radar cross-section]]、[[Doppler frequency shift]]、[[Hardware-in-the-loop]]、[[Open Simulation Interface]]、[[SCPI]]、[[Air gap]] — 本來源涉及的技術概念。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.010399
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 讀圖補充\n以下內容來自讀圖補充，可信度低於正文，不用於推翻正文。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 0.896535
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG800A]] — Automotive Radar Echo Generator；本來源主要產品實體。\n- [[Rohde & Schwarz]] — 製造商與文件發布者。\n- [[R&S AREG8-B9]] — Digital baseband，1 GHz IF bandwidth、1 IF path、1 individual artificial object；Order No. `1437.8011.02`。\n- [[R&S AREG8-B63]] — Analog stepped delay line，用於 short object generation；Order No. `1437.8205.02`。\n- [[R&S AREG8-K527]] — Baseband extension from 1 GHz to 2 GHz IF bandwidth；Order No. `1437.9882.02`。\n- [[R&S AREG8-K528]] — Baseband extension from 2 GHz to 5 GHz IF bandwidth；Order No. `1437.9799.02`。\n- [[R&S AREG8-K570]] — Activation of second IF path；Order No. `1437.9899.02`。\n- [[R&S AREG8-K812]] — One additional artificial object；Order No. `1437.9853.02`。\n- [[R&S AREG8-K813]] — Extended Doppler frequency shift up to 10 MHz；Order No. `1437.9901.02`。\n- [[R&S AREG8-K814]] — Near object range for FMCW；Order No. `1437.9776.02`。\n- [[R&S AREG8-K740]] — Analog IF output interfaces；Order No. `1437.9830.02`。\n- [[R&S AREG8-K741]] — Analog IF input interface；Order No. `1437.9847.02`。\n- [[R&S AREG8-K109]] — Hardware-in-the-loop control interface；Order No. `1437.9860.02`。\n- [[R&S AREG8-K549]] — Synchronization interface；Order No. `1437.9876.02`。\n- [[R&S AREG8-K986]] — Remote control GPIB；Order No. `1437.9818.02`。\n- [[R&S AREG8-B97]] — System alignment backend；Order No. `1437.9001.02`。\n- [[R&S AREG-P1]] / [[R&S AREG-DBP1]]、[[R&S AREG-P2]] / [[R&S AREG-DBP2]]、[[R&S AREG-P3]] / [[R&S AREG-DBP3]] — automotive radar production configurations / production base unit options。\n- [[R&S AREG8-24S]]、[[R&S AREG8-24D]]、[[R&S AREG8-81S]]、[[R&S AREG8-81D]]、[[R&S AREG8-81WS]]、[[R&S AREG8-81WD]]、[[R&S FE44S]] — 支援的 mmWave 或 external frontends。\n- [[R&S QAT100]]、[[R&S QAT-B2]]、[[R&S QAT-Z50]] — advanced antenna array 及其相關 option/accessory。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 0.659539
+             },
+             {
+              "text": "review-options › AREG800A / QAT100 判斷重點\n- [[R&S AREG800A]] 有 `3` 列待補描述，來源為 [[AREG800A_specs_en_3609-8015-22_v0900]]。\n- Production configurations：\n  - [[R&S AREG-P1]] / [[R&S AREG-DBP1]]：radar mini configuration，one digital channel，one object per channel。\n  - [[R&S AREG-P2]] / [[R&S AREG-DBP2]]：radar golden configuration，two digital channels，one object per channel，one frontend per channel required。\n  - [[R&S AREG-P3]] / [[R&S AREG-DBP3]]：radar pro configuration，three digital channels，one object per channel，with [[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option，monostatic or bistatic。\n- [[R&S QAT100]] 有 `2` 列待確認：\n  - [[R&S QAT-B2]]：Second line of 96 transmit antennas, for the R&S®QAT100，Order No. `1341.0162.02`；requires 指向 QAT100，但表裡沒有該 code。\n  - [[R&S QAT-Z50]]：Shielding system, for one R&S®QAT100, length 50 cm，Order No. `1341.0156.02`；requires 指向 QAT100，但表裡沒有該 code。\n- [[R&S AREG800A]] frontend / system alignment 相鄰片段疑似有欄位錯位，需要回查原 PDF，不應用相鄰文字直接覆蓋既有產品頁。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/review-options.md"
+              },
+              "score": 3.664274
+             },
+             {
+              "text": "R&S SMBV100B › GNSS and avionics options\n| Code | Name | Order No. | 原文說明 / 關係 |\n|---|---|---:|---|\n| R&S®SMBVB-K362 | GNSS test suite | 來源未標示 | Test suite。 |\n| R&S®SMBVB-K363 | Car navigation test suite | 來源未標示 | Test suite。 |\n| R&S®SMBVB-K364 | China national GNSS test standard | 來源未標示 | Test suite。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 24,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 4.748552
+             },
+             {
+              "text": "R&S SMBV100B › Analog modulation、sources 與 pulse\n- Pulse train：R&S®SMBVB-K27 option 擴充 R&S®SMBVB-K23，用於 radar applications；prerequisite 必須安裝 R&S®SMBVB-K23 option。\n- Multifunction generator：R&S®SMBVB-K24 option；LF generator 1/2 signal types sine、pulse、triangle、trapezoid；noise generator Gaussian、equal noise amplitude distribution。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 4.71113
+             },
+             {
+              "text": "R&S SMBV100B › Waveform package and recommended extras\n| Code | Name | Order No. | 原文說明 / 關係 |\n|---|---|---:|---|\n| R&S®SMBVB-K200 | 1 waveform | 1423.8714.71 | Waveform package for signals from R&S®WinIQSIM2、R&S®Pulse Sequencer Software、R&S®Pulse Sequencer DFS。 |\n| R&S®SMBVB-K200 | 5 waveforms | 1423.8714.72 | 每台儀器最多可註冊 250 waveforms。 |\n| R&S®SMBVB-K200 | 50 waveforms | 1423.8714.75 | 每台儀器最多可註冊 250 waveforms。 |\n| R&S®SMBVB-Z10 | Spare CFAST card | 3639.9910.02 | Recommended extra。 |\n| R&S®ZZA-KNA33 | 19-inch rack adapter | 1177.8090.00 | Recommended extra。 |\n| R&S®TS-USB1 | USB serial adapter for RS-232 remote control | 6124.2531.00 | Recommended extra；RS-232 remote control recommended extra。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 36,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 4.260067
+             },
+             {
+              "text": "R&S SMBV100B › Signal performance for selected standards\n- 3GPP FDD with R&S®SMBVB-K42：Error vector magnitude，1 DPCH，RMS，< 0.8 %，0.3 % measured；test frequency 1800 MHz to 2200 MHz。\n- 3GPP FDD ACLR 條件：test model 1、64 DPCH、1800 MHz to 2200 MHz、average channel power ≤ 0 dBm、I/Q input gain +4 dB、optimization mode high quality、temperature range +18 °C to +33 °C；5 MHz offset > 69 dB，typ. 72 dB；10 MHz offset > 71 dB，typ. 74 dB。\n- Custom digital modulation with R&S®SMBVB-K520 real-time mode：2FSK / 4FSK deviation error at symbol rate up to 2 MHz 為 0.4 % measured，up to 10 MHz 為 1.2 % measured；QPSK/OQPSK/π/4-DQPSK/8PSK/16QAM/32QAM/64QAM EVM at symbol rate up to 5 MHz 為 0.5 % RMS measured，up to 20 MHz 為 0.7 % RMS measured。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 26,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 3.371386
+             },
+             {
+              "text": "R&S SMBV100B › GNSS and avionics options\n| Code | Name | Order No. | 原文說明 / 關係 |\n|---|---|---:|---|\n| R&S®SMBVB-K44 | GPS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K66 | Galileo | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K94 | GLONASS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K97 | NavIC/IRNSS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K98 | Modernized GPS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K106 | SBAS/QZSS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K107 | BeiDou | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K108 | GNSS real world simulation | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K109 | GNSS real-time interface | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K111 | GBAS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K122 | RTK virtual reference station | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K123 | Modernized GLONASS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K129 | Matched spectrum GNSS interferer test | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K132 | Modernized BeiDou | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K133 | Single-satellite GNSS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K134 | Upgrade to dual-frequency GNSS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K135 | Upgrade to triple-frequency GNSS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K136 | Add 6 GNSS channels | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K137 | Add 12 GNSS channels | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K151 | ILS | 來源未標示 | Avionics option。 |\n| R&S®SMBVB-K152 | VOR | 來源未標示 | Avionics option。 |\n| R&S®SMBVB-K153 | DME | 來源未標示 | Avionics option。 |\n| R&S®SMBVB-K360 | ERA-GLONASS test suite | 來源未標示 | Test suite。 |\n| R&S®SMBVB-K361 | eCall test suite | 來源未標示 | Test suite。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 23,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 3.317914
+             },
+             {
+              "text": "R&S SMBV100B › 文件與適用範圍\n- 主要來源：[[SMBV100B_specs_en_3607-8201-22_v1301]]。\n- 文件：R&S®SMBV100B Vector Signal Generator Specifications。\n- 文件編號：PD 3607.8201.22。\n- 文件版次：Specifications Version 13.01。\n- 文件日期：August 2025（footer：August 2025 (la)）。\n- 產品：R&S®SMBV100B vector signal generator。\n- 規格適用條件：ambient temperature 下 storage 3 hours、warm-up operation 30 minutes、specified environmental conditions met、recommended calibration interval adhered to、all applicable internal automatic adjustments performed。\n- Rohde & Schwarz 不 warranted：Non-traceable specifications with limits、typical data、nominal values、measured values。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 3.229905
+             },
+             {
+              "text": "R&S SMBV100B › Baseband enhancements\n| Code | Name | Order No. | 原文說明 / 關係 |\n|---|---|---:|---|\n| R&S®SMBVB-K62 | Additive white Gaussian noise（AWGN） | 1423.7876.02 | Adds AWGN with settable bandwidth and settable C/N ratio or Eb/N0。 |\n| R&S®SMBVB-K80 | Bit error rate tester | 1423.7647.02 | BER and BLER measurement；clock rate 100 Hz to 100 MHz。 |\n| R&S®SMBVB-K540 | Envelope tracking | 1423.7701.02 | Analog I/Q outputs 可產生 envelope signal；prerequisite：必須安裝 R&S®SMBVB-K17 option。 |\n| R&S®SMBVB-K541 | AM/AM, AM/φM predistortion | 1423.7718.02 | Predistortion；state on/off；shaping polynomial、from table。 |\n| R&S®SMBVB-K544 | User-defined frequency response correction | 1423.8150.02 | Scattering parameter 與 additional frequency response correction；minimum compensation bandwidth 25 MHz。 |\n| R&S®SMBVB-K548 | Crest factor reduction | 1423.8820.02 | Clipping and filtering；desired crest factor delta –20 dB to 0 dB。 |\n| R&S®SMBVB-K811 | Notched signals | 1423.8972.02 | Up to 25 band-stop filters for baseband signal。 |\n| R&S®SMBVB-K980 | Health and utilization monitoring service（HUMS） | 1423.8872.02 | Data readout/display via SNMP、REST JSON、SCPI、device web；提供 device、options、licenses、status、service、utilization、event log 等資訊。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 35,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 3.126043
+             },
+             {
+              "text": "R&S SMBV100B › Remote control、HUMS 與 emulation\n- Standard interfaces / systems：Ethernet/LAN 10/100/1000BASE-T、IEC 60625（GPIB IEEE-488.2）、USB 2.0（USB-TMC）、serial（RS-232；需 recommended extra R&S®TS-USB1 USB serial adapter）。\n- Command set：SCPI 1999.5 或 compatible command sets。\n- Ethernet/LAN protocols and services：VISA VXI-11、Telnet/RawEthernet、VNC、FTP、SMB。\n- Ethernet/LAN addressing：DHCP、static；支援 ZeroConf 與 M-DNS。\n- R&S®SMBVB-K980 HUMS：Data readout and display 支援 SNMP v1/v2c/v3、REST（JSON）、SCPI、device web；提供 device information、options、licenses、status、service、mass storage、utilization、device history event log 等資訊。\n- Compatible command sets 可用於 emulating another instrument；每個 emulated instrument 的 *IDN? 與 *OPT? strings 可設定。\n- Legacy command emulation 涵蓋 Hewlett Packard、Agilent/Keysight Technologies、Aeroflex（IFR/Marconi）、Anritsu、Panasonic、Racal Dana、Rohde & Schwarz 等系列；來源明列 R&S®SMBV100A、Keysight MXG/EXG、Aeroflex、Anritsu 等。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 27,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 2.856817
+             },
+             {
+              "text": "SDR-assisted UAV security › SDR 作為 defense tool\n來源整理多個 defense-oriented use cases：\n\n- jamming detection and classification。\n- GPS spoofing detection。\n- UAV IDS。\n- signal source identification。\n- RF emitter localization。\n- passive RF monitoring。\n- counter-UAV detection and mitigation。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SDR-assisted UAV security.md"
+              },
+              "score": 5.126529
+             },
+             {
+              "text": "SDR-assisted UAV security › 主要限制\n- SDR security solutions 需要處理 power、size、weight、cost 與 processing latency。\n- SDR flexibility 可能增加 software modification / hacking 風險。\n- Jamming / spoofing 研究常需 Faraday cage、controlled rural environment、test authorization 或 lab setup；來源不提供一般部署授權。\n- Attack / defense performance numbers 受 SDR platform、antenna、frequency、distance、SNR、jamming power、dataset 與 classifier 影響，不可外推。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SDR-assisted UAV security.md"
+              },
+              "score": 2.998321
+             },
+             {
+              "text": "SDR-assisted UAV security › GPS spoofing / jamming detection\n來源指出 affordable SDR devices，如 [[HackRF One]]、[[BladeRF 2.0]] 與 [[BladeRF x40]]，可用於 GNSS spoofing / jamming attacks，也可用於測試 defense mechanisms：\n\n- [62] 提出 lightweight LSTM-based detection model，並以 knowledge distillation 壓縮，利於整合進 UAV control systems。\n- [63] 研究 [[HackRF One]] 1.0 與 external TCXO 對 GNSS signal spoofing / jamming threats 的影響；受測 UAV GNSS receivers 包含 3DR IRIS+、Tarot 650 v2.2、DJI Inspire、Sky Hunter。\n- [64] [[MAVIDS]] 使用 PCA 與 one-class classifiers，並以 [[HackRF One]]、[[GPS-SDR-SIM]] 與 [[GNU Radio Companion]] 進行 GPS spoofing / jamming experiments；macro-averaged F1 scores 為 GPS spoofing 90.57%、jamming 94.3%。\n- [66] 使用 cellular BS 與 Wi-Fi AP crowd-sourced information 進行 GPS spoofing detection / mitigation，並以 [[HackRF One]] + TCXO 產生 spoofing signals。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SDR-assisted UAV security.md"
+              },
+              "score": 2.748989
+             },
+             {
+              "text": "SDR-assisted UAV security › 與 Counter-UAV 的關係\n[[Counter-UAV 技術]] 既有頁面整理 RF detection、radar、optical、acoustic、jamming、spoofing、microwave、laser、net capture 與 cyber takeover 等高階類別。本來源補強其中 RF / SDR 相關部分：\n\n- SDR 可用於 passive RF detection and classification。\n- SDR 可用於 AoA、DoA、TDOA、MUSIC、Doppler frequency shift localization。\n- SDR 可用於 RF jamming 或 GPS spoofing 研究。\n- SDR-based anti-UAV systems 可結合 localization、jamming 與 spoofing。\n\n限制：來源中的 anti-UAV experiments 屬研究或 controlled environment；不得直接推論在任何地區可合法部署。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SDR-assisted UAV security.md"
+              },
+              "score": 1.750437
+             },
+             {
+              "text": "SDR-assisted UAV security › SDR 作為 attack / test tool\n來源明確指出 SDR technology 也可能削弱 security measures：\n\n- 可執行 GPS spoofing attacks。\n- 可產生 counterfeit GPS / GNSS signals。\n- 可發射 jamming signals。\n- 可用於 penetration testing，以檢查 UAV-based nodes 的 attack surface。\n\n例如：\n\n- [67] 使用 [[BladeRF x40]]、sensor data 與 NMEA messages 產生 mobile spoofing system，使 target GPS receivers 計算錯誤位置並被導向 designated landing areas。\n- [68] 使用 [[DJI Spark]]、[[Parrot Bebop 2 FPV]] 與 [[BladeRF x40]]，測試 barrage jamming、tone jamming、protocol-aware congestion 等 interference techniques；protocol-aware jamming 被描述為最有前景。\n- [69] 使用 [[DJI Phantom 3 Standard]] 與 [[BladeRF x40]] 建立 low-cost SDR-based portable anti-UAV system，具 detection、jamming、spoofing GPS signals 能力。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SDR-assisted UAV security.md"
+              },
+              "score": 1.26359
+             },
+             {
+              "text": "MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes › 實體\n- [[MVG]] — Microwave Vision Group，提供 antenna characterization、radar signature evaluation 與 electromagnetic measurements 相關測試方案；本來源說其 antenna measurement systems / multi-probe measurement systems 可搭配 [[R&S CMX500 OBT]] 執行 OTA signaling testing。\n- [[WaveStudio Software Suite]] — [[MVG]] 的 software suite；本來源說它已整合 [[R&S CMX500 OBT]]，用於簡化 5G OTA signaling test processes。\n- [[R&S CMX500 OBT]] — [[Rohde & Schwarz]] CMX500 One-Box Tester；本來源將其定位為可整合進 [[WaveStudio Software Suite]] 的 OTA signaling test component。\n- [[R&S CMX500]] — 來源引用 CMX500 product page，並在引言中稱其為 one-box signaling tester。\n- [[Pierre Jurek]] — [[MVG]] Chief Commercial Officer，於本來源提供引言。\n- [[Christoph Pointner]] — [[Rohde & Schwarz]] Senior Vice President of Mobile Radio Testers，於本來源提供引言。\n- [[Christian Mokry]] — [[Rohde & Schwarz]] press & media contact，PR Manager Test & measurement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+              },
+              "score": 2.959844
+             },
+             {
+              "text": "MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes › 重點摘要\n- [[MVG]]（Microwave Vision Group）已將 [[R&S CMX500 OBT]] 整合進 [[WaveStudio Software Suite]]。\n- 來源稱此整合讓使用者可直接使用 [[MVG]] antenna measurement systems 執行 [[5G NR]] 與 [[LTE]] [[OTA testing]] signaling tests。\n- [[R&S CMX500 OBT]] 被描述為支援 full stack generation and analysis of 4G、[[5G NR]]、[[WLAN]] 與 [[LTE]] signals。\n- 與 [[MVG]] multi-probe measurement systems 搭配時，來源稱可在 real-world conditions 下進行 precise OTA testing。\n- [[WaveStudio Software Suite]] 整合後，來源稱 [[MVG]] systems 可處理 [[5G NR Standalone]]（SA）mode、[[RedCap]] 與 [[LTE]]（FDD & TDD）signaling testing。\n- 來源稱整合支援 multiple hardware configurations of the [[R&S CMX500 OBT]]，包括 `CMX Lite` 與 `CMX Pro`；但未提供正式料號、BOM 或與既有 [[R&S CMX500]] standard hardware configurations 的對照。\n- 來源列出可支援的標準 / 場景包括 [[5G NR FR1]] SA、[[RedCap]] 與 [[LTE]]。\n- 來源稱此整合可移除 earlier setups 的複雜度，減少 preparation and measurements 所需時間，並加速 development cycles。\n- [[Pierre Jurek]] 以 [[MVG]] Chief Commercial Officer 身分表示，MVG 決定支援 different OBT configurations，並正快速擴充測試能力到 WiFi technologies，尤其是 [[Wi-Fi 7]] / [[IEEE 802.11be]]。\n- [[Christoph Pointner]] 以 [[Rohde & Schwarz]] Senior Vice President of Mobile Radio Testers 身分表示，[[R&S CMX500]] one-box signaling tester 的 multi-band capabilities 可顯著簡化 OTA test setup。\n- Press & media contact 為 [[Christian Mokry]]，PR Manager Test & measurement。\n- [[Rohde & Schwarz]] 公司資訊：2024/2025 fiscal year（July to June）net revenue EUR 3.16 billion；2025-06-30 員工超過 15,000 人。\n- [[MVG]] 公司資訊：Microwave Vision Group 提供 electromagnetic waves visualization 技術、antenna characterization、radar signature evaluation 與 electromagnetic measurements 測試方案；營運於 10 個國家，90% sales from exports，revenues exceeding €100 million。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+              },
+              "score": 1.733223
+             },
+             {
+              "text": "MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes › 與既有知識的關係\n- 與 [[R&S CMX500 OBT]] 的關係：既有頁面已收錄 [[R&S CMX500 OBT]] 在 [[Bluetest]] RTS / [[Bluetest Flow]] v1.18 的 4G、[[5G NR]] 與 [[WLAN]] OTA test 語境；本來源新增另一個 OTA chamber / antenna measurement partner [[MVG]] 與 [[WaveStudio Software Suite]]。\n- 與 [[R&S CMX500]] 的關係：既有 [[R&S CMX500]] 頁依 [[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]] 整理正式規格、hardware units、WLAN / NR / LTE options 與使用限制；本來源是 PR / solution-level statement，不提供新的 CMX500 formal specifications、option code 或完整硬體 BOM。\n- 與 [[Wi-Fi 7 and 5G RedCap OTA measurements]] 的關係：既有 [[EMITE]] 來源描述 [[R&S CMX500]] 整合進 [[EMITE]] OTA chambers 支援 [[Wi-Fi 7]] 與 [[5G RedCap]]；本來源則描述 [[R&S CMX500 OBT]] 整合進 [[MVG]] [[WaveStudio Software Suite]]，目前明確列出 [[5G NR]]、[[RedCap]]、[[LTE]]，並以 roadmap / expansion 語氣提到 [[Wi-Fi 7]]。\n- 與 [[4G 5G NR WLAN OTA MIMO stress testing]] 的關係：既有 [[Bluetest]] 來源聚焦 reverberation chamber / [[MIMO]] stress testing；本來源聚焦 [[MVG]] multi-probe measurement systems 與 WaveStudio workflow，不提供 reverberation chamber 或 MIMO stress testing 的同等描述。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+              },
+              "score": 1.567809
+             },
+             {
+              "text": "MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes › 原文未解的問題\n- unresolved：來源未標示新聞稿發布日期；raw frontmatter 的 created 為 2026-09-11，但不可視為新聞稿發布日。\n- unresolved：來源未標示文件版次、press release revision 或 WaveStudio integration release version。\n- unresolved：來源未標示 [[WaveStudio Software Suite]] 版本號、module 名稱、license requirement、API / driver 條件或 release notes。\n- unresolved：來源未標示 [[R&S CMX500 OBT]] 搭配 [[MVG]] systems 時所需 hardware configuration、RF chains 數量、IF / RF / AU 組合、software option code、CSW version、license 或 order number。\n- unresolved：來源提到 `CMX Lite` 與 `CMX Pro`，但未提供正式產品名稱、料號、BOM，亦未說明它們與既有 [[R&S CMX500]] standard hardware configurations 中 OBT lite / OBT plus / OBT FR1 specialist / OBT FR2 specialist 的關係。\n- unresolved：來源未列出 [[MVG]] antenna measurement systems / multi-probe measurement systems 的型號、chamber 規格、frequency range、DUT 尺寸、校準條件、measurement uncertainty 或相容性矩陣。\n- unresolved：來源未列出 [[5G NR]]、[[RedCap]]、[[LTE]]（FDD & TDD）或未來 [[Wi-Fi 7]] 的完整 test case list、band combinations、pass/fail metric、throughput / latency 指標或 conformance applicability。\n- unresolved：來源文字中 `single teser` 應為原文拼寫錯誤；本頁不據此建立新實體或技術名稱。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+              },
+              "score": 1.442481
+             },
+             {
+              "text": "MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes › 概念\n- [[MVG CMX500 OBT OTA signaling testing]] — 本來源描述的測試整合情境：[[R&S CMX500 OBT]] 透過 [[WaveStudio Software Suite]] 連到 [[MVG]] antenna / multi-probe measurement systems，用於 [[5G NR]]、[[RedCap]] 與 [[LTE]] OTA signaling testing。\n- [[OTA testing]]、[[5G NR Standalone]]、[[5G NR FR1]]、[[RedCap]]、[[LTE]]、[[WLAN]]、[[Wi-Fi 7]]、[[IEEE 802.11be]]、[[FDD]]、[[TDD]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes.md"
+              },
+              "score": 0.256274
+             },
+             {
+              "text": "https://www.parpro.com.tw/solutions/aerospace-defense/",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-6ae422456b68416f",
+                "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+                "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 23.758653
+             },
+             {
+              "text": "<!-- Slide number: 1 -->\n# Making Deployed 5G Private Networks more Resilient\nRandy Schnell\nBusiness Development Manager\nAerospace & Defense Test",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ee03d2faf62e9553",
+                "original_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "sha256": "ee03d2faf62e95530401e678c264a927c21cc58e47bb7aadc133b34233fc6940",
+                "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 23.33605
+             },
+             {
+              "text": "•  Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-c733beba88ba4b3a",
+                "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+                "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+                "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 23.288141
+             },
+             {
+              "text": "Mission Context & Industry Drivers\nProblem statement\nTechnical Mapping\nTest setup\nOutcome\nCurrent FHSS Use in Defense\nCall to Action",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ee03d2faf62e9553",
+                "original_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "sha256": "ee03d2faf62e95530401e678c264a927c21cc58e47bb7aadc133b34233fc6940",
+                "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 18.843878
+             }
+            ],
+            "text": "Short answer: A Signaling / Non-signaling Tester in the provided R&S knowledge is a communications-device tester, not the primary radar target/echo test instrument; in a radar-related Aerospace / Defense workflow it would fit only as an adjacent communications / network-emulation test element for platforms that also use LTE/5G/WLAN links, while radar echo / artificial-target testing is covered by radar echo generation instruments such as R&S AREG800A.[1][3][9][10][32]\n- R&S CMX500 is documented as a Radio Communication Tester and a universal one-box network emulation and measurement test solution for LTE, NR FR1, NR FR2, NSA/SA, FDD/TDD, RF parametric testing and fading propagation conditions.[3]  \n- CMX500 supports signaling and TX measurements for NR FR1/FR2, LTE signaling and measurements, NB-IoT / NB-NTN signaling, and WLAN signaling / TX measurements.[1]  \n- In callbox positioning, CMX500 is used to quickly establish DUT connections and perform RF, mobility, application, NTN, WLAN/cellular desense, pre-conformance and non-signaling R&D verification.[9][10][11]  \n- For radar-specific stimulus, R&S AREG800A is documented as an Automotive Radar Echo Generator with dynamic artificial object generation; it supports hybrid echo generation and digital echo generation for FMCW radar, with generated distances up to 3000 m.[32]  \n- AREG800A artificial-object capabilities include dynamic object type, distance ranges such as `< 17 m to 3000 m`, `< 4 m to 3000 m`, or `≥ air gap to 3000 m`, and FMCW / non-FMCW production frontend ranges up to 350 m depending on configuration.[37]  \n- Aerospace / Defense-adjacent R&S drone solution knowledge emphasizes EMC / EME, military / aviation standards such as MIL-STD-461, MIL-STD-464 and RTCA DO-160, and customized solution themes including CUAS System Performance Verification and Electromagnetic Environment Emulation, but it does not define a CMX500 role inside a radar workflow.[26][27][29]  \n【推論】So, in a radar test workflow, put the Signaling / Non-signaling Tester at the “communications subsystem / datalink / coexistence / desense / application connectivity” layer of the system test, not at the “radar target echo generation” layer; the latter is the role supported in the passages by AREG800A radar echo generation facts.[1][9][10][32][37]  \n【推論】For an Aerospace / Defense radar platform that also has LTE/5G/WLAN connectivity, CMX500 can be positioned beside the radar/EME setup to emulate the network and verify signaling or non-signaling RF behavior while the radar environment is tested separately.[1][3][9][10][26]  \n【推論】The passages do not support claiming CMX500 itself tests radar detection performance, radar cross-section, or radar target scenarios; use AREG800A-type radar echo generation evidence for that part and CMX500 evidence only for cellular/WLAN signaling, RF, desense, pre-conformance and non-signaling verification.[1][9][10][32][37]",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 8.63149
+            },
+            {
+             "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 6.539739
+            },
+            {
+             "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 5.441032
+            },
+            {
+             "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 3.646489
+            },
+            {
+             "text": "CMX500 Callbox › Callbox 定位\n依 [[CMX500_Callbox]]，callbox 的核心敘事是：\n\n- Easy to set up。\n- Easy to get in a call。\n- Easy to test with。\n- Focus on [[RF Testing]]，including [[3GPP pre-conformance]]。\n\n來源以 [[Device Under Test]]、cell tower 與 smartphone 圖示描述 [[R&S CMX500]] 作為 DUT 連線與測試環境的中心。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+             },
+             "score": 1.8126
+            },
+            {
+             "text": "2025RS Drone Solution › 重點摘要\n- 本來源是由 `2025RS Drone Solution.pdf` 轉出的 lossy markdown，標題為 `DRONE TEST SOLUTION PROPOSAL`；來源檔名含 `2025RS`，但正文未標示正式發布日期、作者、版本或簡報完整封面。\n- 來源以 [[EMC]] / [[EME]] 為主軸，說明 drone / [[UAV]] / [[UAS]] 在 residential、outdoor AUT、MIL battle environment 與 multi-domain operations 下會遭遇不同電磁干擾與測試需求。\n- 來源定義 [[UAV]] 為 platform vehicle，[[UAS]] 為支援 drone operation 的整體系統，包含 UAV、controller、datalink、sensors 等；並列出 battery、[[BMS]]、[[ESC]]、[[Flight Control Module]]、[[Communication Module]]、antennas 與 sensors 等 drone components。\n- 來源提出 [[UAV UAS Drones T&M Solutions]]：standard system 包含 [[R&S TS9975 EMI Test System]]、[[R&S TS9982 EMS Test System]] 與 [[R&S TS8997]]；customised solution 包含 [[B-RID Environment Performance]]、[[CUAS System Performance Verification]]、[[Electromagnetic Environment Emulation]] 與 [[High-Intensity RF]]。\n- 商用無人機部分，來源列出 [[European EMC Directive]] 2014/30/EU、[[Radio Equipment Directive]] 2014/53/EU、[[ETSI EN 301 489]] 系列、[[CISPR 32]] / [[EN 55032]]、[[CISPR 35]]、[[EN 61000-4-3]]、[[EN 61000-4-6]]、[[EN 61000-4-2]]、[[EN 61000-4-4]]、[[EN 61000-4-5]]、[[EN 61000-4-11]]、[[EN 61000-3-2]]、[[EN 61000-3-3]] 與 [[ISO 7637-2]] 等線索。\n- 軍用 / 航太部分，來源列出 [[MIL-STD-461]]、[[MIL-STD-464]]、[[RTCA DO-160]]、[[DEF STAN 59-411]]、[[GJB 151B]]、[[GJB 1389A]] 等標準線索，並補充 [[MIL-STD-464]] 涵蓋 external RF EME、[[HPM]]、[[EMP]]、lightning、RADHAZ、HERP / HERF / HERO、electrical bonding、TEMPEST 與 platform radiated emission 等系統層議題。\n- 來源指出 commercial drone radiated RF immunity default test level 為 3 V/m、frequency range 80 MHz to 6 GHz，但也問「Is this test level adequate for all environment?」，並指出 test level 需由 drone manufacturer 依 applications 定義，例如 higher test level 10 V/m 或 specialized test level。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+             },
+             "score": 0.63429
+            },
+            {
+             "text": "2025RS Drone Solution › Military / aviation / system-level standards\n- [[MIL-STD-461]] — 來源說其為 control of electromagnetic interference emissions and susceptibility 的 requirements，並特別提到 [[MIL-STD-461G]]。\n- [[MIL-STD-464]] — 來源說其為 electromagnetic environmental effects requirements for systems；簡報同時出現 464C 與 464D 版本字樣，需後續核對。\n- [[RTCA DO-160]] — 來源說其提供 airborne equipment environmental conditions and test procedures。\n- [[CS114]] — 來源在 DO-160 Section 20 中說 conducted susceptibility similar to CS114 test。\n- [[RS103]] — 來源在 DO-160 Section 20 中說 radiated susceptibility similar to RS103。\n- [[CS117]] — 來源在 DO-160 Section 22 lightning induced transients 中列名。\n- [[RE102]] — 來源在 Section 21 emission of RF energy 標題中列 `RE102 / CE`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+             },
+             "score": 0.525895
+            },
+            {
+             "text": "2025RS Drone Solution › 原文未解的問題\n- 來源未標示正式發布日期、版本、作者、客戶、適用國家 / 地區或簡報完整頁數；只能以 raw 轉檔日期 2026-09-17 與檔名 `2025RS` 追溯。\n- 轉檔為 lossy derivative；多個表格與標準列名存在 OCR / 排版斷裂，例如 standards based on EUT、R&S test system list、ETSI 4709-x 描述與 MIL / satellite standards 表。\n- [[R&S TS8997]] 只出現代碼；來源未說明完整產品名稱或用途。\n- [[MIL-STD-464]] 在來源中同時出現 464C 與 464D，未說明版本差異或適用情境。\n- `Lighting` / `Lightning` 在來源中皆出現，需回 PDF 判斷是 illumination 還是 lightning / EMP 語境。\n- `DAV-B` 可能為 `DVB` 或其他 broadcast emission 文字；未決。\n- [[ETSI 4709-x]] 的正式標準名稱、版本與 drone network testing 關係未由來源清楚標示。\n- 來源列出的 standard applicability 不等於任一 drone product 必須全部測試；測試項目需依 EUT、intended environment、regulatory domain、application 與 manufacturer requirement 定義。\n- 來源列 [[B-RID Environment Performance]]、[[CUAS System Performance Verification]]、[[Electromagnetic Environment Emulation]] 與 [[High-Intensity RF]]，但未提供 test method、frequency plan、chamber / antenna setup、pass / fail criteria、threat waveform 或 safety condition。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+             },
+             "score": 0.402691
+            },
+            {
+             "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 6.421744
+            },
+            {
+             "text": "R&S AREG800A › Artificial objects\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Object type：`dynamic`。\n\nMinimum artificial object distance：\n\n| Option 組合 | Minimum artificial object distance |\n|---|---:|\n| [[R&S AREG8-B9]] | `< 17 m + air gap (meas.)` |\n| [[R&S AREG8-B9]] with [[R&S AREG8-B63]] | `< 4 m + air gap (meas.)` |\n| [[R&S AREG8-B9]] with [[R&S AREG8-K814]] | `≥ air gap (meas.)` |\n| [[R&S AREG8-B9]] with [[R&S AREG8-B63]] and [[R&S AREG8-K814]] | `≥ air gap (meas.)` |\n\nCovered distance range of artificial objects：\n\n| Option 組合 | Covered distance range |\n|---|---:|\n| [[R&S AREG8-B9]] | `< 17 m to 3000 m (meas.)` |\n| [[R&S AREG8-B9]] with [[R&S AREG8-B63]] | `< 4 m to 3000 m (meas.)` |\n| [[R&S AREG8-B9]] with [[R&S AREG8-K814]] | `≥ air gap to 3000 m (meas.)` |\n| [[R&S AREG8-B9]] with [[R&S AREG8-B63]] and [[R&S AREG8-K814]] | `≥ air gap to 3000 m (meas.)` |\n| [[R&S AREG-DBP1]] / [[R&S AREG-DBP2]] / [[R&S AREG-DBP3]] with [[R&S AREG-MFP]] / [[R&S AREG-BFP]] | FMCW：`≥ air gap to 350 m (meas.)`；non FMCW：`< 17 m to 350 m (meas.)` |\n\nMaximum number of artificial objects per AREG800A：",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 2.624166
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "technical_knowledge",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 36,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 25,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 26,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/CMX500 Callbox.md",
+             "raw_refs": [
+              "raw/Market/OneNote/CMX500_Callbox.md",
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/2025RS Drone Solution.md",
+             "raw_refs": [
+              "raw/Market/OneNote/2025RS Drone Solution.md",
+              "raw/Market/OneNote/UAV/6. UAV Technologies.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S AREG800A.md",
+             "raw_refs": [
+              "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,124 @@
+{
+ "question": {
+  "id": "Q0461",
+  "text": "For a Automotive use case involving automotive radar, where would Oscilloscope fit in the test workflow?",
+  "market": "Automotive",
+  "product": "Oscilloscope",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-ec21cd3b94264049a0287452b9c3790d",
+ "exchange": {
+  "sent": "For a Automotive use case involving automotive radar, where would Oscilloscope fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 429.172,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-ec21cd3b94264049a0287452b9c3790d",
+    "actor": "leo.chi",
+    "title": "For a Automotive use case involving automotive radar, where would Oscill…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-10T11:02:25.253752Z",
+    "updated_at": "2026-10-10T11:09:30.340295Z",
+    "messages": [
+     {
+      "message_id": "message-8f60bae6e1034af19ac8eab402f42c67",
+      "role": "user",
+      "text": "For a Automotive use case involving automotive radar, where would Oscilloscope fit in the test workflow?",
+      "created_at": "2026-10-10T11:02:25.265169Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-7442ac694e714fa484d45d47b4e0ec53",
+      "role": "assistant",
+      "text": "The knowledge base gave no answer: it found insufficient validated Raw evidence for this question.\n\nNot from the knowledge base — general engineering view:\n\nIn an automotive radar test workflow, the oscilloscope usually fits **around the radar module’s digital, power, and time-domain signal validation**, rather than replacing RF radar target simulation or spectrum/vector signal analysis.\n\nTypical workflow placement:\n\n1. **Early hardware bring-up**\n   - Check power rails, startup sequencing, reset lines, clock presence, and trigger timing.\n   - Useful before RF/radar performance testing to confirm the ECU or radar sensor board is electrically healthy.\n\n2. **High-speed digital interface validation**\n   - Validate interfaces such as **MIPI CSI-2, SerDes, Ethernet, CAN/CAN-FD, SPI, I²C, or LVDS** depending on the radar module architecture.\n   - The oscilloscope helps check eye diagrams, timing margins, jitter, signal integrity, and protocol-level behavior.\n\n3. **Radar chirp/control timing correlation**\n   - Probe GPIOs, trigger signals, frame sync, chirp start markers, ADC capture timing, or processor interrupt timing.\n   - This is useful to correlate what the radar RF front end is doing with what the baseband processor or ECU believes is happening.\n\n4. **Power integrity and transient analysis**\n   - Measure supply ripple, load transients, noise coupling, voltage droop during radar transmit bursts, and startup/shutdown behavior.\n   - Important because automotive radar modules are sensitive to noise and must survive harsh vehicle electrical environments.\n\n5. **Debug during system/integration tests**\n   - When a radar target simulator, chamber, signal analyzer, or VNA shows abnormal radar behavior, the oscilloscope helps debug whether the root cause is timing, digital data transfer, power, or control signaling.\n\nSo in short:  \n**RF instruments validate the radar signal and target performance; the oscilloscope validates the radar module’s electrical, timing, power, and digital behavior that supports that RF performance.**",
+      "created_at": "2026-10-10T11:09:30.340295Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-722038b3c7a146dca412091880d005ac",
+       "request_id": "request-722038b3c7a146dca412091880d005ac",
+       "span_id": "span-722038b3c7a146dca412091880d005ac",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+    "ok": true,
+    "answer": "The knowledge base gave no answer: it found insufficient validated Raw evidence for this question.\n\nNot from the knowledge base — general engineering view:\n\nIn an automotive radar test workflow, the oscilloscope usually fits **around the radar module’s digital, power, and time-domain signal validation**, rather than replacing RF radar target simulation or spectrum/vector signal analysis.\n\nTypical workflow placement:\n\n1. **Early hardware bring-up**\n   - Check power rails, startup sequencing, reset lines, clock presence, and trigger timing.\n   - Useful before RF/radar performance testing to confirm the ECU or radar sensor board is electrically healthy.\n\n2. **High-speed digital interface validation**\n   - Validate interfaces such as **MIPI CSI-2, SerDes, Ethernet, CAN/CAN-FD, SPI, I²C, or LVDS** depending on the radar module architecture.\n   - The oscilloscope helps check eye diagrams, timing margins, jitter, signal integrity, and protocol-level behavior.\n\n3. **Radar chirp/control timing correlation**\n   - Probe GPIOs, trigger signals, frame sync, chirp start markers, ADC capture timing, or processor interrupt timing.\n   - This is useful to correlate what the radar RF front end is doing with what the baseband processor or ECU believes is happening.\n\n4. **Power integrity and transient analysis**\n   - Measure supply ripple, load transients, noise coupling, voltage droop during radar transmit bursts, and startup/shutdown behavior.\n   - Important because automotive radar modules are sensitive to noise and must survive harsh vehicle electrical environments.\n\n5. **Debug during system/integration tests**\n   - When a radar target simulator, chamber, signal analyzer, or VNA shows abnormal radar behavior, the oscilloscope helps debug whether the root cause is timing, digital data transfer, power, or control signaling.\n\nSo in short:  \n**RF instruments validate the radar signal and target performance; the oscilloscope validates the radar module’s electrical, timing, power, and digital behavior that supports that RF performance.**",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-722038b3c7a146dca412091880d005ac",
+      "request_id": "request-722038b3c7a146dca412091880d005ac",
+      "span_id": "span-722038b3c7a146dca412091880d005ac",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-722038b3c7a146dca412091880d005ac",
+       "request_id": "request-722038b3c7a146dca412091880d005ac",
+       "span_id": "span-722038b3c7a146dca412091880d005ac",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no answer: it found insufficient validated Raw evidence for this question.\n\nNot from the knowledge base — general engineering view:\n\nIn an automotive radar test workflow, the oscilloscope usually fits **around the radar module’s digital, power, and time-domain signal validation**, rather than replacing RF radar target simulation or spectrum/vector signal analysis.\n\nTypical workflow placement:\n\n1. **Early hardware bring-up**\n   - Check power rails, startup sequencing, reset lines, clock presence, and trigger timing.\n   - Useful before RF/radar performance testing to confirm the ECU or radar sensor board is electrically healthy.\n\n2. **High-speed digital interface validation**\n   - Validate interfaces such as **MIPI CSI-2, SerDes, Ethernet, CAN/CAN-FD, SPI, I²C, or LVDS** depending on the radar module architecture.\n   - The oscilloscope helps check eye diagrams, timing margins, jitter, signal integrity, and protocol-level behavior.\n\n3. **Radar chirp/control timing correlation**\n   - Probe GPIOs, trigger signals, frame sync, chirp start markers, ADC capture timing, or processor interrupt timing.\n   - This is useful to correlate what the radar RF front end is doing with what the baseband processor or ECU believes is happening.\n\n4. **Power integrity and transient analysis**\n   - Measure supply ripple, load transients, noise coupling, voltage droop during radar transmit bursts, and startup/shutdown behavior.\n   - Important because automotive radar modules are sensitive to noise and must survive harsh vehicle electrical environments.\n\n5. **Debug during system/integration tests**\n   - When a radar target simulator, chamber, signal analyzer, or VNA shows abnormal radar behavior, the oscilloscope helps debug whether the root cause is timing, digital data transfer, power, or control signaling.\n\nSo in short:  \n**RF instruments validate the radar signal and target performance; the oscilloscope validates the radar module’s electrical, timing, power, and digital behavior that supports that RF performance.**",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_huEtFHbLVudeKm4vuoSX7DR1",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "failed",
+         "data": {
+          "knowledge_harness": "not_validated",
+          "answer": "No sufficient evidence was found in the selected Knowledge asset. (knowledge_insufficient_evidence)",
+          "evidence": {
+           "raw_citations": 0,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "phase": "needs_input",
+          "failure_code": "knowledge_insufficient_evidence",
+          "instruction": "The knowledge base did not validate an answer. Tell the person what is above; anything you add is not from the knowledge base and must say so."
+         },
+         "failure": {
+          "code": "knowledge_not_validated",
+          "message": "The Knowledge Harness did not validate an answer",
+          "retryable": false
+         }
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

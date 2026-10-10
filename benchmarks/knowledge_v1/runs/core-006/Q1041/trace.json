@@ -1,0 +1,1241 @@
+{
+ "question": {
+  "id": "Q1041",
+  "text": "What is eye diagram, and which product-related measurement decisions depend on understanding it?",
+  "technical": "High-Speed / Signal Integrity",
+  "topic": "eye diagram",
+  "product_related": "true"
+ },
+ "session_id": "conversation-9d735530e00c47dc9031aa1e3fbcb093",
+ "exchange": {
+  "sent": "What is eye diagram, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 285.75,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-9d735530e00c47dc9031aa1e3fbcb093",
+    "actor": "leo.chi",
+    "title": "What is eye diagram, and which product-related measurement decisions dep…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-10T11:45:29.594183Z",
+    "updated_at": "2026-10-10T11:50:15.123542Z",
+    "messages": [
+     {
+      "message_id": "message-fe8fd1cb5c784d53bfe9739a4b3c3c2b",
+      "role": "user",
+      "text": "What is eye diagram, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-10T11:45:29.707581Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-bc3b3dc5df7545c3b307a39aaf56b1db",
+      "role": "assistant",
+      "text": "The passages do not provide a formal definition of an eye diagram; they only identify it as a high-speed PCB/PCBA signal-integrity item alongside insertion loss/crosstalk, TDR impedance, stackup planning, and transmission-line calculation in the R&S signal-integrity flow [65], and as something evaluated through eye-opening metrics such as eye height and eye width in PCIe Gen5 context [5].\n| Decision | Supported answer |\n|---|---|\n| Whether eye-diagram analysis is part of the high-speed PCB/PCBA SI workflow | Yes: the raw R&S flow lists “IL/Xtalk/Eye diagram” under “Signal integrity flow of high speed PCB/PCBA” [65]. |\n| Whether to select R&S ZNA-K20 on an R&S ZNA | R&S ZNA-K20 is “Extended time domain analysis including eye diagram,” and it requires R&S ZNA-K2 time-domain analysis/TDR [26]. |\n| Whether to select R&S ZNA-K20 on an R&S ZNA67EXT system | R&S ZNA67EXT also lists R&S ZNA-K20 as “Extended time domain analysis (including eye diagram),” requiring R&S ZNA-K2 [36]. |\n| Whether TDR/time-domain capability is needed before eye-diagram capability | For both ZNA and ZNA67EXT, the eye-diagram option K20 requires K2, which is the time-domain analysis/TDR option [26][36]. |\n| Which VNA family/range to consider if those options are needed | R&S ZNA is a Vector Network Analyzer series covering ZNA26/ZNA43/ZNA50/ZNA67 up to 67 GHz [25], while R&S ZNA67EXT is a 1.0 mm VNA system covering 10 MHz to 110 GHz [33]. |\n【推論】If a customer’s PCB/PCBA SI task includes “Eye diagram” as in the raw R&S flow, then the relevant R&S option decision is whether to include K20, and because K20 requires K2, whether to include K2 as well [65][26][36].\n\n來源：\n[5] Wiki：PCIe Gen5 high-speed PCB layout（來源：`snla426.md`）\n[25] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[26] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[33] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[36] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[65] `raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md`",
+      "created_at": "2026-10-10T11:50:15.123542Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-10a8f943d6a6493086993655a9893143",
+       "request_id": "request-10a8f943d6a6493086993655a9893143",
+       "span_id": "span-10a8f943d6a6493086993655a9893143",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "The passages do not provide a formal definition of an eye diagram; they only identify it as a high-speed PCB/PCBA signal-integrity item alongside insertion loss/crosstalk, TDR impedance, stackup planning, and transmission-line calculation in the R&S signal-integrity flow [65], and as something evaluated through eye-opening metrics such as eye height and eye width in PCIe Gen5 context [5].\n| Decision | Supported answer |\n|---|---|\n| Whether eye-diagram analysis is part of the high-speed PCB/PCBA SI workflow | Yes: the raw R&S flow lists “IL/Xtalk/Eye diagram” under “Signal integrity flow of high speed PCB/PCBA” [65]. |\n| Whether to select R&S ZNA-K20 on an R&S ZNA | R&S ZNA-K20 is “Extended time domain analysis including eye diagram,” and it requires R&S ZNA-K2 time-domain analysis/TDR [26]. |\n| Whether to select R&S ZNA-K20 on an R&S ZNA67EXT system | R&S ZNA67EXT also lists R&S ZNA-K20 as “Extended time domain analysis (including eye diagram),” requiring R&S ZNA-K2 [36]. |\n| Whether TDR/time-domain capability is needed before eye-diagram capability | For both ZNA and ZNA67EXT, the eye-diagram option K20 requires K2, which is the time-domain analysis/TDR option [26][36]. |\n| Which VNA family/range to consider if those options are needed | R&S ZNA is a Vector Network Analyzer series covering ZNA26/ZNA43/ZNA50/ZNA67 up to 67 GHz [25], while R&S ZNA67EXT is a 1.0 mm VNA system covering 10 MHz to 110 GHz [33]. |\n【推論】If a customer’s PCB/PCBA SI task includes “Eye diagram” as in the raw R&S flow, then the relevant R&S option decision is whether to include K20, and because K20 requires K2, whether to include K2 as well [65][26][36].\n\n來源：\n[5] Wiki：PCIe Gen5 high-speed PCB layout（來源：`snla426.md`）\n[25] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[26] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[33] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[36] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[65] `raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-10a8f943d6a6493086993655a9893143",
+      "request_id": "request-10a8f943d6a6493086993655a9893143",
+      "span_id": "span-10a8f943d6a6493086993655a9893143",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-10a8f943d6a6493086993655a9893143",
+       "request_id": "request-10a8f943d6a6493086993655a9893143",
+       "span_id": "span-10a8f943d6a6493086993655a9893143",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The passages do not provide a formal definition of an eye diagram; they only identify it as a high-speed PCB/PCBA signal-integrity item alongside insertion loss/crosstalk, TDR impedance, stackup planning, and transmission-line calculation in the R&S signal-integrity flow [65], and as something evaluated through eye-opening metrics such as eye height and eye width in PCIe Gen5 context [5].\n| Decision | Supported answer |\n|---|---|\n| Whether eye-diagram analysis is part of the high-speed PCB/PCBA SI workflow | Yes: the raw R&S flow lists “IL/Xtalk/Eye diagram” under “Signal integrity flow of high speed PCB/PCBA” [65]. |\n| Whether to select R&S ZNA-K20 on an R&S ZNA | R&S ZNA-K20 is “Extended time domain analysis including eye diagram,” and it requires R&S ZNA-K2 time-domain analysis/TDR [26]. |\n| Whether to select R&S ZNA-K20 on an R&S ZNA67EXT system | R&S ZNA67EXT also lists R&S ZNA-K20 as “Extended time domain analysis (including eye diagram),” requiring R&S ZNA-K2 [36]. |\n| Whether TDR/time-domain capability is needed before eye-diagram capability | For both ZNA and ZNA67EXT, the eye-diagram option K20 requires K2, which is the time-domain analysis/TDR option [26][36]. |\n| Which VNA family/range to consider if those options are needed | R&S ZNA is a Vector Network Analyzer series covering ZNA26/ZNA43/ZNA50/ZNA67 up to 67 GHz [25], while R&S ZNA67EXT is a 1.0 mm VNA system covering 10 MHz to 110 GHz [33]. |\n【推論】If a customer’s PCB/PCBA SI task includes “Eye diagram” as in the raw R&S flow, then the relevant R&S option decision is whether to include K20, and because K20 requires K2, whether to include K2 as well [65][26][36].\n\n來源：\n[5] Wiki：PCIe Gen5 high-speed PCB layout（來源：`snla426.md`）\n[25] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[26] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[33] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[36] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[65] `raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_vskcQU54y6ohrFoxnnWQAXEu",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "The passages do not provide a formal definition of an eye diagram; they only identify it as a high-speed PCB/PCBA signal-integrity item alongside insertion loss/crosstalk, TDR impedance, stackup planning, and transmission-line calculation in the R&S signal-integrity flow [65], and as something evaluated through eye-opening metrics such as eye height and eye width in PCIe Gen5 context [5].\n| Decision | Supported answer |\n|---|---|\n| Whether eye-diagram analysis is part of the high-speed PCB/PCBA SI workflow | Yes: the raw R&S flow lists “IL/Xtalk/Eye diagram” under “Signal integrity flow of high speed PCB/PCBA” [65]. |\n| Whether to select R&S ZNA-K20 on an R&S ZNA | R&S ZNA-K20 is “Extended time domain analysis including eye diagram,” and it requires R&S ZNA-K2 time-domain analysis/TDR [26]. |\n| Whether to select R&S ZNA-K20 on an R&S ZNA67EXT system | R&S ZNA67EXT also lists R&S ZNA-K20 as “Extended time domain analysis (including eye diagram),” requiring R&S ZNA-K2 [36]. |\n| Whether TDR/time-domain capability is needed before eye-diagram capability | For both ZNA and ZNA67EXT, the eye-diagram option K20 requires K2, which is the time-domain analysis/TDR option [26][36]. |\n| Which VNA family/range to consider if those options are needed | R&S ZNA is a Vector Network Analyzer series covering ZNA26/ZNA43/ZNA50/ZNA67 up to 67 GHz [25], while R&S ZNA67EXT is a 1.0 mm VNA system covering 10 MHz to 110 GHz [33]. |\n【推論】If a customer’s PCB/PCBA SI task includes “Eye diagram” as in the raw R&S flow, then the relevant R&S option decision is whether to include K20, and because K20 requires K2, whether to include K2 as well [65][26][36].\n\n來源：\n[5] Wiki：PCIe Gen5 high-speed PCB layout（來源：`snla426.md`）\n[25] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[26] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[33] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[36] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[65] `raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md`",
+          "evidence": {
+           "raw_citations": 6,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "product_option_spec": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-32cd3ac504934c1b8176e11895599656",
+            "request_id": "request-32cd3ac504934c1b8176e11895599656",
+            "span_id": "span-32cd3ac504934c1b8176e11895599656",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "What is an eye diagram, and which Rohde & Schwarz product-related measurement decisions depend on understanding it? Include citations to Raw evidence.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.853109
+             },
+             {
+              "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.51411
+             },
+             {
+              "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 1.394948
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › Dk / Df 與 fiber weave skew\n- [[snla426]]（June 2023）說 routing differential signals 時，每條 trace 會因 [[fiberglass weave]] 與 [[epoxy]] 的 static permittivity（εr）差異，而經歷不同 dielectric constants 與 signal velocities。\n- [[snla426]]（June 2023）說 fiberglass weave 的 εr 約為 6，epoxy 的 εr 約為 3。\n- [[snla426]]（June 2023）說 fiber glass laminate 中的 holes 或 openings 會造成 εr 與 loss tangent（Df）差異。\n- [[snla426]]（June 2023）說 εr 與 Df 差異會在 signal bandwidth 的不同頻率上造成 transmission media 的 [[return loss]] 或 [[insertion loss]] resonance / anti-resonance。\n- [[snla426]]（June 2023）說 differential pair 兩條 signal 若經過不同 fiberglass / epoxy 比例，會產生 [[intra-pair skew]]，並劣化 receiver 看到的 differential eye diagram。\n- [[snla426]]（June 2023）說 fiber weave skew 會造成 duty cycle distortion、AC common-mode voltage noise 與 EMI issues。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 4.396566
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › Eye opening requirements\n| Generation | Extrapolated Eye Height after EQ | Minimum Eye Width after EQ | 來源 | 日期 |\n|---|---:|---:|---|---|\n| [[PCIe Gen3]] | 25 mV | 0.3 UI（37.5 ps） | [[snla426]] | June 2023 |\n| [[PCIe Gen4]] | 15 ± 1.5 mV | 0.3 UI（18.75 ± 0.55 ps） | [[snla426]] | June 2023 |\n| [[PCIe Gen5]] | 15 ± 1.5 mV | 0.3 UI（9.375 ± 0.5 ps） | [[snla426]] | June 2023 |\n\n- [[snla426]]（June 2023）說 minimum eye width 與 eye height 在 post-equalization、3-tap DFE blocks 之前量測。\n- [[snla426]]（June 2023）說 PCIe redriver output 的 eye opening 需要大於或等於表列 eye opening 數值。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 4.374945
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › 未決事項\n- [[PCI Express Base Specification Revision 5.0]] 的正式版本、章節與發布組織頁尚未建立。\n- [[CXL 2.0]] 與 [[TI DS320PR1601]] data sheet 需另以正式 datasheet 補證。\n- `Roger` 是否應修正為 Rogers 或特定 laminate product family 仍需回查原文。\n- Megtron 6、GETEK、Nelco 4000-6、FR4、Tetra Functional FR4 的材料規格與 datasheet 未納入。\n- 來源未標示 TI 建議對不同 PCB stack-up、trace geometry 與 connector 類型的適用範圍。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 18,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 2.638695
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › 可追溯限制\n- 本頁只追溯 [[snla426]]（June 2023）摘要中的 application note 內容。\n- 來源摘要未提供完整頁碼、圖號、TI URL、修訂紀錄或 PCI-SIG 條文引用。\n- 來源摘要未提供所有 stack-up、routing geometry、via / anti-pad / capacitor pad 圖的原圖。\n- 來源摘要未提供材料表格的測試結構、trace geometry、copper roughness、溫度、濕度或 measurement / simulation 條件。\n- 本頁不把 TI application note 規則推論為所有 PCB、所有 PCIe implementations 或所有 high-speed standards 的通用要求。\n- 本頁不支撐產品供應鏈、客戶導入、量產、出貨、成本或市場份額主張。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 2.166932
+             },
+             {
+              "text": "snla426 › 原文未解的問題\n- 來源摘要未提供完整 application note 頁碼、版次修訂紀錄或 TI 網址。\n- 來源摘要未提供 [[PCI Express Base Specification Revision 5.0]] 的正式引用版本、章節或 PCI-SIG 文件狀態。\n- 來源摘要未提供所有 layout figures 的原圖，需回看原始文件才能確認 routing geometry、stack-up 圖與 HFSS simulation 圖。\n- 來源摘要未提供 [[TI DS320PR1601]] data sheet 的文件編號、版次與日期；僅列為 reference。\n- 來源摘要未說明 `Roger` 是否應為 Rogers 材料或特定 product family；本頁照抄為 [[Roger]]，待原文或 datasheet 確認。\n- 來源摘要未標示 eye opening requirement、loss budget 與 impedance requirement 對應的 PCIe spec 條文。\n- 來源摘要未提供 board material 表格的測試結構、trace geometry、stack-up、溫度、濕度、銅粗糙度或 simulation / measurement 方法。\n- 來源摘要未標示 TI application note 中所述 rules 是否適用於所有 PCIe Gen5 designs，或僅適用於 TI PCIe redriver / EVM design context。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/snla426.md"
+              },
+              "score": 3.758032
+             },
+             {
+              "text": "snla426 › 與既有知識的關係\n- [[Texas Instruments]] 既有頁面只記錄其在交換機上游 CPU/PHY chip 供應鏈圖中的公司列名；本來源新增 TI 作為 high-speed PCIe Gen5 PCB layout application note 發布者的技術文件脈絡。\n- [[Dk-Df]] 既有頁面主要整理市場圖卡中的 Dk / Df 語彙與 PCB 測試流程；本來源補入 Df / Dissipation Factor 與 dielectric loss 在 PCIe Gen5 PCB transmission line 中的技術說法與材料表格，但仍不把不同來源的 Df 測試條件直接互相換算。\n- [[玻纖布]] 既有頁面主要整理市場來源中的玻纖布分類與材料演進圖；本來源補入 fiberglass weave / epoxy εr 差異、fiber weave skew、rotation / zig-zag mitigation 等 high-speed PCB layout 技術脈絡。因路徑屬 [[Market 類資料]]，仍需保留來源日期與適用文件脈絡。\n- [[SerDes 與 SI PI 測試概覽]] 已由 R&S high-speed digital 簡報支撐；本來源以 TI application note 補充 [[PCIe Gen5]] channel / layout / material / via / AC coupling capacitor 端的設計規則。\n- [[HSD PCB 外部資料清單]] 既有頁面提到 `TI PCIE5 PCB` 本機 PDF file link 不可引用內容；本次 raw/Market/OneNote/snla426.md 已提供該類 TI PCIe Gen5 PCB layout 文件的可抽取摘要，可作為後續替代待讀線索的正式來源摘要。\n- [[PCIe Gen5 SSD]] 已記錄 PCIe Gen5 SSD / controller product brochures；本來源不是 SSD 產品規格，而是 PCIe Gen5 high-speed PCB layout application note，不可混入 SSD 容量、form factor 或 controller performance 主張。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/snla426.md"
+              },
+              "score": 2.370936
+             },
+             {
+              "text": "snla426 › 重點摘要\n- 來源比較 Ultra Low Loss material 與 standard loss material，並指出 Megtron 6 等 ultra low-loss material 在高溫下 insertion loss 預期比 nominal temperature 高最多 8%，FR4 等 higher loss material 在高溫下比 nominal temperature 高 11%。\n- 來源定義 high-speed signals 最可能影響其他 signals 或被其他 signals 影響，因此應在 PCB design process 早期 layout，最好最先 layout。\n- 來源列出 [[Texas Instruments]] PCIe device critical signals：PCIE_RXP、PCIE_RXN、PCIE_TXP、PCIE_TXN、REFCLKP/N（100 MHz Reference CLK）。\n- 來源指出 PCB materials / building block、PCB layout、connectors、passive components 等都需視為 RF elements，因為它們會影響 signal characteristics。\n- 來源說 [[fiberglass weave]] 與 epoxy 的 static permittivity（εr）差異會造成不同 dielectric constants 與 signal velocities；fiberglass weave 的 εr 約為 6，epoxy 的 εr 約為 3。\n- 來源指出 fiber glass laminate 中的 holes 或 openings 會造成 εr 與 loss tangent（Df）差異，進而在 signal bandwidth 的不同頻率造成 transmission media 的 return loss 或 insertion loss resonance / anti-resonance。\n- 來源說 differential pair 兩條 signal 若經過不同 fiberglass / epoxy 比例，會產生 [[intra-pair skew]]；skew 會劣化 receiver 看到的 differential eye diagram，並造成 duty cycle distortion、AC common-mode voltage noise 與 EMI issues。\n- 來源指出降低 PCB fiber weave 影響的兩種常見方法：將整個 signaling image plane 相對於 PCB fiber weave 旋轉 10° 到 35°；或將 high-speed differential signals 以 zig-zag 方式跨 PCB routing。\n- 來源說應選擇 tighter weave、less epoxy、greater εr uniformity across longer trace lengths 的 PCB style，並在送交 fabrication 前指定最能支援 high-speed signals 的 PCB style。\n- 來源列出 1 inch trace 在不同 PCB materials / frequency 下的 insertion loss（SDD21），包括 Megtron 6、Roger、GETEK、Nelco 4000-6、FR4、Tetra Functional FR4。\n- 來源說 Loss tangent（Df）或 Dissipation Factor 是 signal 沿 transmission line 傳播時 signal attenuation 的量測；dielectric loss 來自 dielectric material 對 electromagnetic wave 的吸收，且 frequency 增加時 dielectric loss 也成比例增加。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/snla426.md"
+              },
+              "score": 2.082607
+             },
+             {
+              "text": "snla426 › 重點摘要\n- [[Texas Instruments]] application note《High-Speed PCB Layout for PCIe Gen 5》文件編號為 SNLA426，作者為 Vicente Flores Prado，發布時間為 June 2023。\n- 來源目標是協助熟悉 [[PCB manufacturing]]、[[PCB layout]] 與 design 的系統設計者，理解 high-speed [[PCI Express]] 平台的 [[PCB layout]] best practices 與 layout options。\n- 來源指出 [[PCIe Gen5]] 的資料傳輸速率為 32 GT/s；Gen5 x16 lane 設計需以最佳化 [[crosstalk]]、[[return loss]]、[[insertion loss]] 為核心。\n- 來源稱 [[PCIe Gen5]] layout 面臨 traces、vias、reference planes、dielectrics 等高資料率挑戰。\n- 來源說 [[PCIe Gen5]] 與較低速率都使用 differential AC coupled transmission lines；[[PCIe]] 使用 NRZ data，因此允許 polarity inversion。\n- 來源說 [[PCIe]] 具 on-chip termination，在 Rx detect process 於 inputs 與 outputs asserted 後啟用，用於 [[signal integrity]]。\n- 來源說 [[PCIe Gen3]] 到 [[PCIe Gen5]] 使用 link training，允許 TX 與 RX link equalization。\n- 來源列出 loss budget：[[PCIe Gen3]] total system loss 23.5 dB；[[PCIe Gen4]] total system loss 28 dB；[[PCIe Gen5]] total system loss 36 dB，且 Gen5 crosstalk mitigation 為 4–5 dB、temperature / humidity loss 為 2–3 dB。\n- 來源列出 eye opening requirements：[[PCIe Gen5]] extrapolated eye height after EQ 為 15 ± 1.5 mV，minimum eye width after EQ 為 0.3 UI（9.375 ± 0.5 ps）。\n- 來源指出 Gen5 crosstalk 必須納入 total channel loss 考量；Gen5 至少需要比 total system loss 增加 4–5 dB signal strength，以改善 signal-to-noise ratio 與目標 BER 1E-12。\n- 來源指出 crosstalk mitigation 可透過降低 differential signal insertion loss（SDD21）或改善 crosstalk 達成；方法包括最大化 pair-to-pair spacing、ground stitching、最佳化 via anti-pads，並通常建議使用 closely coupled strip line。\n- 來源指出 [[TI DS320PR1601 EVM]] 使用 co-planar GND reference waveguide 以降低 crosstalk 影響。\n- 來源指出溫度與濕度升高時 [[insertion loss]] 會增加；data rate 越高，loss 越高；insertion loss 與 board material 有關。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/snla426.md"
+              },
+              "score": 1.257628
+             },
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- Slide 21 題為 **R&S PCB test solutions**，面向 **PCB Fabricator and System House**，將流程分成 Material Measurement、Material/Stackup selection、Signal Integrity modeling/testing、Sampling testing、PL/Process Monitoring，並列出 impedance (TDR)、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram、Delta-L、ISD/ADK、w/ cable / connector testing 等項目。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 2.481158
+             },
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 2.414463
+             },
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 關鍵實體與概念\n- [[Dr. Milton Lien]] — 封面列名的作者 / 講者。\n- [[RSTW]] — 封面單位文字之一，來源未展開完整名稱。\n- [[SerDes]] — 本簡報主題之一，並在 standards / eco-chain / transmission channel 脈絡中出現。\n- [[Signal Integrity]] — Slide 20 以 high speed PCB/PCBA signal integrity flow 呈現，包含 [[IL]]、[[Xtalk]]、[[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]] 與 [[TL Calculator]]。\n- [[Power Integrity]] — 封面題名中的 PI；Slide 11 以 [[Power Distribution Network]] 形式出現，並列 scopes 與 network analyzers。\n- [[High speed SerDes standards]] — Slide 4 的高速介面 / 標準列名。\n- [[High speed SerDes eco-chain]] — Slide 9 的上中下游產業鏈分類。\n- [[R&S PCB test solutions]] — Slide 21 的 PCB fabricator / system house 測試流程與工具 / 方法集合。\n- [[HDI vs Package substrate]] — Slide 17 的 HDI、package substrate、CoWoS、ABF、L/S、pitch 對照線索。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] — 既有概念頁可承接 Slide 20–21 的 PCB / PCBA 測試內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 1.144197
+             },
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 與既有知識的關係\n- 既有 [[SerDes]] 頁主要來自 D2D / SoC IP / XPU-HBM-Optical I/O 圖像來源；本來源補充 2026.3.4 簡報層級的 high speed SerDes standards、產業鏈與驗證挑戰脈絡，但不提供 SerDes 的資料率、lane 數或具體標準條文。\n- 既有 [[高頻高速 PCB 測試解決方案]] 主要記錄 Keysight 圖像中的原材料表徵、材料選擇、抽樣測試與量產監控；本來源的 [[R&S PCB test solutions]] 以 R&S 簡報角度列出 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 PL / process monitoring，可作為平行視角。\n- 既有 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 已記錄 Keysight 圖像來源；本來源 Slide 21 再次把 DK/DF extraction、TDR、Delta-L 與 ISD/ADK 放在 PCB test solutions 流程中，但沒有新增標準版本、儀器型號或 option code。\n- 既有 [[Package Substrate]] 與 [[ABF載板]] 頁已有多份市場圖像來源；本來源 Slide 17 顯示 HDI vs Package substrate / CoWoS / ABF 對照，但因 OCR / 轉檔結果不足，僅作為待回看原始投影片的線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 0.503811
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 未決事項\n- Slide 11 未標示各測試區塊對應的標準版本、測試流程、儀器型號、軟體 option 或測試條件。\n- Slide 20 未標示 IL、Xtalk、Eye diagram、TDR impedance、Stackup Planner 與 TL Calculator 的工具、供應商或規格。\n- 需回看原始 PPTX 才能確認圖片中的 waveform、diagram 與 instrument details。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 2.238004
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 1.802166
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 可追溯限制\n- 本來源是 lossy markdown derivative，多數圖像未 OCR；不可把未擷取的圖片內容當成已驗證主張。\n- Slide 11 的頁腳日期 **6/13/2025** 與封面日期 **2026.3.4** 並存，未能判定何者是內容日期。\n- 本頁不推論 R&S 具備所有列名儀器或方案，也不把儀器類型轉換成正式 product configuration。\n- 本頁不提供 [[Signal Integrity]]、[[Power Integrity]] 或 [[SerDes]] 的標準定義；只保存來源明示的測試區塊與儀器類型。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 1.525464
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 1.433208
+             },
+             {
+              "text": "112G PAM4 PCB 工程測試資料清單 › 與既有知識的關係\n- [[SerDes 與 SI PI 測試概覽]] 已記錄 high-speed digital validation challenges，包括 transmission channel、PCBs、connectors、scopes、BERTs、AWGs、network analyzers 等測試脈絡；本頁只補一個 112G PAM4 PCB 題名與 VNA / probe 類表頭，不新增測試方法。\n- [[R&S PCB test solutions]] 已保存 [[Dk-Df]]、[[TDR 阻抗測量]]、[[Delta-L]]、IL、Xtalk、Eye diagram、material / stackup selection 等流程詞；[[112G PAM4 PCB Engineering]] 沒有提供足夠內容把這些流程套到 112G PAM4 PCB。\n- [[高頻高速 PCB 測試解決方案]] 已保存 Keysight high-frequency / high-speed PCB 測試流程；本來源不足以比較 Keysight 與 R&S，也不足以建立採購配置。\n- [[SerDes]] 與 [[High speed SerDes standards]] 可作為 112G PAM4 的上位 high-speed interface / SerDes 脈絡，但本來源沒有明示任何 standard organization、standard version 或 compliance test。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+              },
+              "score": 2.77814
+             },
+             {
+              "text": "112G PAM4 PCB 工程測試資料清單 › 相關來源\n- [[112G PAM4 PCB Engineering]] — raw converted 2026-09-17、正式發布日期未標示的 company restricted 112G PAM4 PCB Engineering 來源摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+              },
+              "score": 1.202796
+             },
+             {
+              "text": "112G PAM4 PCB 工程測試資料清單 › 來源中的說法\n- [[112G PAM4 PCB Engineering]] 的 raw frontmatter 顯示原始檔名為 `112G PAM4 PCB Engineering.pdf`，轉檔日期為 2026-09-17。\n- [[112G PAM4 PCB Engineering]] 正文含 `COMPANY RESTRICTED`。\n- [[112G PAM4 PCB Engineering]] 正文含標題 `Transmission Lines on PCB`。\n- [[112G PAM4 PCB Engineering]] 保留一個空表格，欄位為 `Probe`、`Station/Handler`、`Software`、`VNA`。\n- [[112G PAM4 PCB Engineering]] 沒有保留任何表格資料列。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+              },
+              "score": 0.967989
+             },
+             {
+              "text": "112G PAM4 PCB 工程測試資料清單 › 可追溯線索\n| 線索 | 來源明示文字 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| 題名 | 112G PAM4 PCB Engineering | [[112G PAM4 PCB Engineering]] | 正式日期來源未標示；raw converted 2026-09-17 | 不足以推論標準版本、測試範圍或應用場景 |\n| 存取標記 | COMPANY RESTRICTED | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未說明限制範圍或文件控管規則 |\n| 章節 / 主題 | Transmission Lines on PCB | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 transmission line geometry、stackup、impedance 或 loss 數值 |\n| 測試配置欄位 | Probe | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 probe 型號、頻寬、pitch、供應商或 calibration method |\n| 測試配置欄位 | Station/Handler | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 station / handler 型號、夾治具或 automation context |\n| 測試配置欄位 | Software | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供軟體名稱、版本、script 或 license |\n| 測試配置欄位 | VNA | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 [[Vector Network Analyzer]] 型號、port 數、頻率範圍、校準件或 S-parameter 設定 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+              },
+              "score": 0.595798
+             },
+             {
+              "text": "R&S ZNA › Product data 適用條件\n依 [[ZNA_specs_en_5215-4652-22_v2400]]，product data 適用於：\n\n- Ambient temperature 下 storage 3 hours。\n- 接著 warm-up operation 90 minutes。\n- 符合 specified environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有 applicable internal automatic adjustments。\n\nSpecifications with limits、non-traceable specifications with limits、typical data、nominal values、measured values、uncertainties 的定義均依來源原文；Rohde & Schwarz 不保證 non-traceable specifications with limits、typical data、nominal values、measured values。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 8.795909
+             },
+             {
+              "text": "R&S ZNA\n[[R&S ZNA]] 是 Rohde & Schwarz 的 Vector Network Analyzer 系列，依 Version 24.00（April 2026）規格書涵蓋 [[R&S ZNA26]]、[[R&S ZNA43]]、[[R&S ZNA50]]、[[R&S ZNA67]]，頻率範圍從 10 MHz 延伸到最高 67 GHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 5.158157
+             },
+             {
+              "text": "R&S ZNA › Software / measurement options（摘錄）\n| Code | 名稱 / 原文說明 | 重要相依關係或限制 |\n|---|---|---|\n| R&S®ZNA-K1 | Spectrum analyzer mode | Order No. 1332.5320.02；cannot be combined with R&S®ZNA50-B312、R&S®ZNA67-B312、R&S®ZNA50-B511、R&S®ZNA67-B511 |\n| R&S®ZNA-K2 | Time domain analysis (TDR) | Order No. 1332.5336.02 |\n| R&S®ZNA-K20 | Extended time domain analysis including eye diagram | requires R&S®ZNA-K2；Order No. 1332.4746.02 |\n| R&S®ZNA-K4 | Scalar mixer measurements / arbitrary frequency-converting measurements | Order No. 1332.5342.02 |\n| R&S®ZNA-K5 | Vector mixer measurements | requires recommended setup in Options section；Order No. 1332.5359.02 |\n| R&S®ZNA-K6 | Phase coherent source control | Order No. 1332.5413.02 |\n| R&S®ZNA-K61 | True differential mode | requires R&S®ZNA-K6；Order No. 1332.5442.02 |\n| R&S®ZNA-K7 | Measurements on pulsed signals | requires R&S®ZNA-K17 together with pulse modulator；R&S®ZNA-B7 recommended；Order No. 1332.5371.02 |\n| R&S®ZNA-K17 | Increased IF bandwidth 30 MHz | Order No. 1332.5459.02 |\n| R&S®ZNA-K8 | mmWave converter support | requires recommended setup in Options section；Order No. 1332.5388.02 |\n| R&S®ZNA-K9 | Group delay measurements on frequency converters without LO access | requires recommended setup in Options section；Order No. 1332.5394.02 |\n| R&S®ZNA-K19 | 1 mHz frequency resolution | Order No. 1332.5513.02 |\n| R&S®ZNA-K28 | Continuous data recording | Order No. 1332.5613.02 |\n| R&S®ZNA-K30 | Noise figure measurement | requires recommended setup in Options section；Order No. 1332.5465.02 |\n| R&S®ZNA-K50 | Uncertainty analysis | Order No. 1332.5542.02 |\n| R&S®ZNA-K50P | Uncertainty analysis, pre-installed | Order No. 1332.5594.02 |\n| R&S®ZNA-K51 | Security write protection | Order No. 1332.5559.02 |\n| R&S®ZNA-K66 | Speed improvement | Order No. 1332.5820.02 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 4.563785
+             },
+             {
+              "text": "R&S ZNA › 讀圖補充\n[[ZNA_specs_en_5215-4652-22_v2400]]（讀圖）包含 4 頁無文字層頁面的模型讀圖結果；可信度低於正文，不應用來推翻正文。來源摘錄未提供圖片嵌入 wikilink，因此本頁無法帶入原圖附件。\n\n- p001（讀圖）：封面可辨識 R&S®ZNA、VECTOR NETWORK ANALYZER、Specifications、Version 24.00、ROHDE&SCHWARZ、Make ideas real；前面板可辨識 Port 1、Port 3、Port 2。\n- p044（讀圖）：圖說為 Test set configuration for R&S®ZNAXx-B501 low power spurious reduction port 1；可辨識 R&S®ZNAXx-B21、R&S®ZNAXx-B161、R&S®ZNAXx-B501、R&S®ZNAXx-B31 與 Source / Meas / Ref 連接標示。\n- p050（讀圖）：Side view of the R&S®ZNA，尺寸數值 452.1、407.6、131、272.43、272.43、116.1、161.95、56.3、110.5；尺寸單位無法辨識。\n- p059（讀圖）：頁面幾乎空白，無實質內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 19,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 2.850869
+             },
+             {
+              "text": "R&S ZNA › Measurement speed\n- Measurement speed 測試條件：firmware version 3.20、Windows 11 (64 bit)。\n- Acquisition time per point：1 MHz measurement bandwidth、IF filter analog wideband 時 1 µs；30 MHz measurement bandwidth 時 32 ns。\n- Linear frequency sweep 條件 201 points、10 GHz center frequency、200 MHz span：1 MHz measurement bandwidth、IF filter analog normal 時 time per sweep < 3.9 ms；sweep cycle time < 4.9 ms。\n- IEC/IEEE VXI11 over 1 Gbit/s LAN：201 measurement points、800 MHz start frequency、1 GHz stop frequency、1 MHz measurement bandwidth 的 measurement and data transfer time 為 14 ms / 13 ms；201 measurement points magnitude 的 data transfer time 為 1.7 ms / 0.9 ms。\n- Switching time between channels with a maximum of 2001 points：< 2 ms。\n- Continuous mode 不需要額外 data transfer time，因為 data transfer 與 measurement 同時進行。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 1.239261
+             },
+             {
+              "text": "R&S ZNA › Key performance（Version 24.00）\n- Dynamic range：> 129 dB specification without options；147 dB typical with options；maximum attainable range up to 170 dB allowing full 2-port correction。\n- Sensitivity：> –120 dBm，1 Hz IF bandwidth，specification without options；–162 dBm，1 Hz IF bandwidth，measured with options。來源註明 –162 dBm 是以 1 kHz measurement bandwidth 量測後 normalized to 1 Hz。\n- Power sweep range：100 dB typical continuous electronic sweep range；可使用 mechanical step attenuators 位移 sweep range。\n- Source power linearity：0.2 dB typical，範圍 –40 dBm to +10 dBm。\n- Receiver compression：0.05 dB typical，up to +8 dBm at test port，referenced to –10 dBm。\n- Trace noise：0.005 dB specification RMS、0.002 dB typical RMS，條件為 10 GHz、100 kHz measurement bandwidth、0 dB reflection。\n- Speed example：10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 0.947228
+             },
+             {
+              "text": "R&S ZNA › Dynamic range 與 noise level 摘錄\n- Dynamic range 定義：receiver noise floor 是 transmission magnitude data trace 的 RMS value，該 trace 由 noise 與 crosstalk 產生，條件為 test ports short-circuited。\n- Specification 適用於 10 Hz measurement bandwidth，未套用 user correction；使用 1 Hz measurement bandwidth 可增加 dynamic range；來源說明 crosstalk 不限制 dynamic range。\n- R&S®ZNA-B3n 條件下，receiver step attenuator 為 0 dB position；n 代表 port number 1/2/3/4。\n- R&S®ZNA26/43/50/67 的 system dynamic range，1 GHz to 16 GHz：spec. > 129 dB、typ. 139 dB；meas. spec. > 137 dB、typ. meas. 147 dB。\n- R&S®ZNA50/R&S®ZNA67，40 GHz to 50 GHz：spec. > 106 dB、typ. 116 dB；meas. spec. > 112 dB、typ. meas. 122 dB。\n- R&S®ZNA67，50 GHz to 67 GHz：spec. > 102 dB、typ. 112 dB；meas. spec. > 107 dB、typ. meas. 117 dB。\n- Standard configuration noise level，1 kHz measurement bandwidth normalized to 1 Hz，base unit 500 MHz to 30 GHz：spec. < –120 dBm、typ. –132 dBm。\n- Standard configuration noise level，1 kHz measurement bandwidth normalized to 1 Hz，base unit 50 GHz to 67 GHz：spec. < –104 dBm、typ. –119 dBm。\n- Reversed coupler configuration，base unit + R&S®ZNAxx-B16 + R&S®ZNAxx-B3n，50 GHz to 67 GHz：spec. < –116 dBm、typ. –130 dBm。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 0.939898
+             },
+             {
+              "text": "R&S ZNA › Frequency accuracy 與 measurement bandwidth\n- Static frequency accuracy 公式：time since last adjustment in years × aging per year + temperature drift + achievable initial calibration accuracy。\n- Aging per year：standard ±1 × 10–6；with [[R&S ZNA-B4]] precision frequency reference option ±1 × 10–7。\n- Temperature drift（+5 °C to +40 °C）：standard ±1 × 10–6；with [[R&S ZNA-B4]] ±1 × 10–8。\n- Achievable initial calibration accuracy：standard ±5 × 10–7；with [[R&S ZNA-B4]] ±5 × 10–8。\n- Measurement bandwidth：base unit 1 Hz to 1.5 MHz；with [[R&S ZNA-K17]] increased IF bandwidth 30 MHz option 時為 1 Hz to 30 MHz。\n- Analog frontend bandwidth：10 MHz to 5 GHz 為 50 MHz nominal；5 GHz to 67 GHz 為 2 GHz nominal。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 0.891415
+             },
+             {
+              "text": "R&S ZNA67EXT › 系統構成與適用條件\n依 [[ZNA67EXT_specs_en_5216-3743-22_v0900]]，[[R&S ZNA67EXT]] system consists of one [[R&S ZNA67]] vector network analyzer and up to four external test sets。\n\n來源明確限制：規格只適用於作為 **1.0 mm vector network analyzer system** 操作，且 system configuration 必須與 [[R&S ZNA67]] rear panel designation scheme 中的 type、serial numbers 及正確 port position 完全一致。\n\nProduct data 適用條件：\n\n- Three hours of storage at ambient temperature followed by 90 minutes of warm-up operation。\n- Specified environmental conditions met。\n- Recommended calibration interval adhered to。\n- All internal automatic adjustments performed, if applicable。\n\n資料定義依來源：specifications with limits 表示 warranted product performance；typical data、nominal values、measured values 與 non-traceable specifications with limits 不由 Rohde & Schwarz 保證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 7.346521
+             },
+             {
+              "text": "R&S ZNA67EXT\n[[R&S ZNA67EXT]] 是 Rohde & Schwarz 的 1.0 mm [[Vector Network Analyzer]] system，依 [[ZNA67EXT_specs_en_5216-3743-22_v0900]] Version 09.00（July 2025）涵蓋 **10 MHz to 110 GHz**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 5.648631
+             },
+             {
+              "text": "R&S ZNA67EXT › Warranty and service\n| 項目 | 來源標示 |\n|---|---|\n| Base unit warranty | 1 year |\n| All other items warranty | 1 year |\n| Service plans | On demand up to five years；for extended periods, contact Rohde & Schwarz sales office |\n| Calibration | pay per calibration |\n| Warranty and repair | up to five years；standard price repair |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 22,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 5.163686
+             },
+             {
+              "text": "R&S ZNA67EXT › p001\n![[ZNA67EXT_specs_en_5216-3743-22_v0900-p001.png]]\n\n讀圖可辨識文字：R&S®ZNA67EXT、VECTOR NETWORK ANALYZER SYSTEM、Specifications、Specifications Version 09.00、ROHDE&SCHWARZ、Make ideas real，以及 logo 內的 R / S。讀圖描述指出封面照片包含一台主機設備、前方兩個外接模組/機箱與多條纜線；設備螢幕上的細部內容無法辨識。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 24,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 3.959703
+             },
+             {
+              "text": "R&S ZNA67EXT › Software licences / firmware options\n| Code | 名稱 / 原文說明 | Requires | Order No. |\n|---|---|---|---:|\n| R&S®ZNA-K1 | Spectrum analyzer mode | 來源未標示 | 1332.5320.02 |\n| R&S®ZNA-K2 | Time domain analysis (TDR) | 來源未標示 | 1332.5336.02 |\n| R&S®ZNA-K20 | Extended time domain analysis (including eye diagram) | R&S®ZNA-K2 | 1332.4746.02 |\n| R&S®ZNA-K4 | Scalar mixer measurements, arbitrary frequency-converting measurements | 來源未標示 | 1332.5342.02 |\n| R&S®ZNA-K5 | Vector mixer measurements | 來源未標示 | 1332.5359.02 |\n| R&S®ZNA-K6 | Phase coherent source control | 來源未標示 | 1332.5413.02 |\n| R&S®ZNA-K61 | True differential mode | 來源未標示 | 1332.5442.02 |\n| R&S®ZNA-K7 | Measurements on pulsed signals together with pulse modulator | R&S®ZNA-K17；footnote also cites R&S®ZNAxx-B41/-B42/-B43/-B44 and/or R&S®ZNA-B91, and recommends R&S®ZNA-B7 | 1332.5371.02 |\n| R&S®ZNA-K17 | Increased IF bandwidth 30 MHz | 來源未標示 | 1332.5459.02 |\n| R&S®ZNA-K8 | mmWave converter support (mandatory) | 來源未標示 | 1332.5388.02 |\n| R&S®ZNA-K9 | Group delay measurements on frequency converters without LO access | 來源未標示 | 1332.5394.02 |\n| R&S®ZNA-K19 | 1 mHz frequency resolution | 來源未標示 | 1332.5513.02 |\n| R&S®ZNA-K28 | Continuous data recording | 來源未標示 | 1332.5613.02 |\n| R&S®ZNA-K50 | Uncertainty analysis | 來源未標示 | 1332.5542.02 |\n| R&S®ZNA-K50P | Uncertainty analysis, preinstalled | 來源未標示 | 1332.5594.02 |\n| R&S®ZNA-K51 | Security write protection | 來源未標示 | 1332.5559.02 |\n| R&S®ZNA67-K110 | Continuous sweep 110 GHz (mandatory) | 來源未標示 | 1332.5642.02 |\n| R&S®ZNA-K210 | Easy deembedding | 來源未標示 | 1339.3897.02 |\n| R&S®ZNA-K220 | In-situ deembedding | 來源未標示 | 1339.3900.02 |\n| R&S®ZNA-K230 | Smart fixture deembedding | 來源未標示 | 1339.3916.02 |\n| R&S®ZNA-K231 | Delta-L PCB characterization | 來源未標示 | 1339.3922.02 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 18,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 3.328708
+             },
+             {
+              "text": "R&S ZNA67EXT › 核心規格\n以下規格皆來自 [[ZNA67EXT_specs_en_5216-3743-22_v0900]] Version 09.00（July 2025）。\n\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Impedance | measurement range | 50 Ω |\n| Test port connector | measurement range | 1.0 mm, male |\n| Number of test ports | models .12/.13/.15/.16 | 2 |\n| Number of test ports | models .14/.17 | 4 |\n| Frequency range | measurement range | 10 MHz to 110 GHz |\n| Frequency resolution | measurement range | 1 Hz |\n| Number of measurement points | user-selectable | 1 to 100001 |\n| Measurement bandwidths | 1/1.5/2/3/5/7 steps | 1 Hz to 1.5 MHz |\n| Calibration interval | general data | 1 year |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 3.000179
+             },
+             {
+              "text": "R&S ZNA67EXT › Effective system data\n條件：valid between **+18 °C and +28 °C**，temperature after calibration varied by no more than **1 °C**；frequency points、measurement bandwidth、sweep time 必須與 calibration identical（no interpolation）。Data based on **10 Hz measurement bandwidth** and nominal source power **–10 dBm**。Calibration kit：[[R&S ZN-Z210]]。\n\n| 項目 | 10 MHz to 10 GHz | 10 GHz to 20 GHz | 20 GHz to 40 GHz | 40 GHz to 50 GHz | 50 GHz to 68 GHz | 68 GHz to 90 GHz | 90 GHz to 110 GHz |\n|---|---:|---:|---:|---:|---:|---:|---:|\n| Directivity in dB | ≥ 43 | ≥ 41 | ≥ 38 | ≥ 36 | ≥ 35 | ≥ 34 | ≥ 32 |\n| Source match in dB | ≥ 40 | ≥ 38 | ≥ 35 | ≥ 33 | ≥ 32 | ≥ 30 | ≥ 28 |\n| Load match in dB | ≥ 42 | ≥ 39 | ≥ 36 | ≥ 35 | ≥ 34 | ≥ 32 | ≥ 30 |\n| Reflection tracking in dB | ≤ 0.06 | ≤ 0.06 | ≤ 0.06 | ≤ 0.06 | ≤ 0.07 | ≤ 0.08 | ≤ 0.09 |\n| Transmission tracking in dB | ≤ 0.10 | ≤ 0.10 | ≤ 0.10 | ≤ 0.07 | ≤ 0.08 | ≤ 0.09 | ≤ 0.12 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 2.087145
+             },
+             {
+              "text": "R&S ZNA67EXT › Uncorrected system data\n資料有效條件：valid between **+18 °C and +28 °C**。\n\nTrace noise magnitude 條件：**1 kHz measurement bandwidth, 0 dB reflection (meas.)**。\n\n| Frequency range | Trace noise magnitude RMS |\n|---|---:|\n| 10 MHz to 20 MHz | < 0.2 dB (spec.) |\n| 20 MHz to 50 MHz | < 0.04 dB (spec.) |\n| 50 MHz to 150 MHz | < 0.015 dB (spec.) |\n| 150 MHz to 500 MHz | < 0.005 dB (spec.) |\n| 500 MHz to 20 GHz | < 0.003 dB (spec.) |\n| 20 GHz to 40 GHz | < 0.005 dB (spec.) |\n| 40 GHz to 68 GHz | < 0.01 dB (spec.) |\n| 68 GHz to 75 GHz | < 0.015 dB (spec.) |\n| 75 GHz to 100 GHz | < 0.01 dB (spec.) |\n| 100 GHz to 110 GHz | < 0.02 dB (spec.) |\n\nTrace noise phase 條件：**1 kHz measurement bandwidth, 0 dB reflection (meas.)**。\n\n| Frequency range | Trace noise phase RMS |\n|---|---:|\n| 10 MHz to 20 MHz | < 1° (spec.) |\n| 20 MHz to 50 MHz | < 0.2° (spec.) |\n| 50 MHz to 150 MHz | < 0.08° (spec.) |\n| 150 MHz to 500 MHz | < 0.03° (spec.) |\n| 500 MHz to 20 GHz | < 0.02° (spec.) |\n| 20 GHz to 40 GHz | < 0.04° (spec.) |\n| 40 GHz to 68 GHz | < 0.08° (spec.) |\n| 68 GHz to 75 GHz | < 0.08° (spec.) |\n| 75 GHz to 100 GHz | < 0.06° (spec.) |\n| 100 GHz to 110 GHz | < 0.1° (spec.) |\n\nTemperature dependence 條件：**at 0 dB transmission or reflection (typ.)**。\n\n| Frequency range | Temperature dependence |\n|---|---|\n| 10 MHz to 5 GHz | 0.01 dB/K, 0.1°/K |\n| 5 GHz to 40 GHz | 0.02 dB/K, 0.4°/K |\n| 40 GHz to 68 GHz | 0.04 dB/K, 0.8°/K |\n| 68 GHz to 110 GHz | 0.06 dB/K, 1.0°/K |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 1.685464
+             },
+             {
+              "text": "Time Domain Channel Properties\n[[Time Domain Channel Properties]]（TDCP）是 [[Release 18]] 中用於描述 channel time-domain behavior、[[UE]] relative mobility 與 associated Doppler 的新 measurement / CSI-related quantity，可協助 [[gNB]] 在 high-speed scenarios 中調整 transmission configuration。[[R18 CSI enhancements for high-speed Scenario]] [[TDCP Reporting]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Time Domain Channel Properties.md"
+              },
+              "score": 3.663464
+             },
+             {
+              "text": "Rohde & Schwarz GmbH & Co KG\n[[Rohde & Schwarz GmbH & Co KG]] 是多份 [[Rohde & Schwarz]] PR frontmatter 中列出的 author，且來源正文稱 R&S® 是其 registered trademark。[[1C111_1e_3GPPPreConfGuide]] 另在頁尾標示 © 2025 Rohde & Schwarz GmbH & Co. KG，81671 Munich, Germany。[[Dual Sim Dual Active]]、[[Extended Logical Channel IDs]]、[[Logical Channels]] 與 [[OCNG (NR)]] 頁尾也標示 `Rohde & Schwarz GmbH & Co. KG ©`，但部分技術筆記未給正式發布日期或文件編號。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Rohde & Schwarz GmbH & Co KG.md"
+              },
+              "score": 0.366589
+             },
+             {
+              "text": "Clock, CDR, Jitter\n這份來源是 [[SerDes]] / [[Clock]] / [[CDR]] / [[Jitter]] 相關的 OneNote link hub；正文只包含一個外部 URL，未擷取該網頁正文，因此不能把連結標題或 URL path 當成已驗證技術主張。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Clock, CDR, Jitter.md"
+              },
+              "score": 0.133364
+             },
+             {
+              "text": "手機直連衛星供應鏈 › 相關來源\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]] — 2026-09-15 的市場分析，第四章整理手機直連衛星技術原理、供應鏈結構與市場規模。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/手機直連衛星供應鏈.md"
+              },
+              "score": 5.44878
+             },
+             {
+              "text": "德宏 › 列名整理\n| 來源 | 日期 / 期間 | 圖上分類 | 圖上文字 | 限制 |\n|---|---|---|---|---|\n| [[AI Server PCB test image 25]] | Nov., 2025；取得於 2026-09-04 | [[原材料]] / [[玻纖布]] | 德宏 | 未說明產品規格、供應客戶、出貨期間或列名完整性。 |\n| [[HSD PCB image 15]] | 來源未標示日期；取得於 2026-09-04 | [[玻纖布]]圖卡註記 | 石英布:德宏(5475) | 未說明石英布是否屬於玻纖布、替代材料或另類材料。 |\n| [[HSD PCB image 18]] | 來源未標示日期；取得於 2026-09-04 | [[Q-Glass]] / 石英纖維 | 德宏 領先佈局 | 未說明「領先佈局」是產能、研發、投資、供應關係或作者描述。 |\n| [[HSD PCB image 8]] | 來源未標示日期；converted 2026-09-04 | [[Q-Glass]] / 石英纖維 | 德宏 領先佈局 | 與 [[HSD PCB image 18]] 在此欄位一致，但不可視為獨立市場驗證。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/德宏.md"
+              },
+              "score": 0.978017
+             },
+             {
+              "text": "R&S CMX500 › mmWave extension 與 remote radio heads\n[[CMX500_specs_en_5216-4127-22_v1100]] 指出 3GPP FR2 frequency range 測試可由 [[R&S CMX500]] 搭配 [[R&S CMXHEAD30]]、[[R&S CMXHEAD50]] 或 [[R&S CMXHEAD50-Evo]] 執行。Remote radio head 是獨立 compact unit，在 IF 與 5G NR FR2 frequency ranges 間執行 upconversion / downconversion。CMX500 與 remote radio head 的 split concept 可在 5G NR FR2 frequency range 使用短 RF cable lengths，以最佳化 radiated chamber test environments 的 link budget。\n\n適用 radiated chamber test environments：[[R&S CMQ500]] shielding cube 與 [[R&S ATS800R]] CATR rack based antenna test system。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 21,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 12.763353
+             },
+             {
+              "text": "Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR › 與既有知識的關係\n- 既有 [[R&S CMX500]] 頁已整理 [[R&S CMX500]] 是 Radio Communication Tester / one-box network emulation and measurement test solution；本來源補充其在 [[R&S TS-PCT]] protocol conformance test platform 中作為基礎的 PR 語境，但未提供新的 CMX500 formal specifications。\n- 既有 [[Qualcomm Technologies]] 頁已有 [[AI-enhanced CSI feedback]]、13 GHz [[FR3]] demonstration、[[FR1-FR3 carrier aggregation demonstration]] 等 PR 語境；本來源新增 [[3GPP Release 17]] SSSG conformance test case early verification 與 [[Qualcomm X105 5G Modem-RF]]。\n- 既有 [[Christian Mokry]] 頁已有多份 Rohde & Schwarz PR contact block；本來源延續相同姓名、職稱、電話與 press email。\n- 本來源屬 [[Productions]] / PR 類來源：可用於記錄 product / platform claim 與 conformance testing milestone，但不可等同 formal datasheet、certification approval、commercial availability 或 3GPP 官方變更結果。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR.md"
+              },
+              "score": 2.387254
+             },
+             {
+              "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 9.462097
+             },
+             {
+              "text": "Constellation Insight Tool\n[[Constellation Insight Tool]] 是 [[Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026]] 中描述的 [[R&S CMX500]] NTN testing 軟體工具，用於 satellite constellation visualization、mobility management、trajectory observation 與 handover scenario support。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Constellation Insight Tool.md"
+              },
+              "score": 2.142494
+             },
+             {
+              "text": "Time Domain Channel Properties › Spec change 線索\n[[TDCP Reporting]] 列出：\n\n- [[3GPP TS 38.215]]：TDCP definition。\n- [[3GPP TS 38.214]]：TDCP reporting changes；來源說 this spec best describes how this feature works。\n- [[3GPP TS 38.211]]：No changes relevant to Rel-18 TDCP CSI reporting。\n- [[3GPP TS 38.212]]：TDCP reporting parameter changes。\n- [[3GPP TS 38.306]]：UE Capabilities changes。\n- [[3GPP 38.822]]：TDCP-related capabilities。\n\n來源沒有列出 spec version、CR number 或 clause，因此這些只作為待回查索引。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Time Domain Channel Properties.md"
+              },
+              "score": 1.521451
+             },
+             {
+              "text": "Rohde & Schwarz GmbH & Co KG › 來源中的列名\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- frontmatter `author` 欄列出 [[Rohde & Schwarz GmbH & Co KG]]。\n- 正文末段寫明：R&S® is a registered trademark of Rohde & Schwarz GmbH & Co. KG。\n- 來源未展開公司法律登記資訊、地址、股權結構或組織層級。\n\n依 [[SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices]]：\n\n- frontmatter `author` 欄列出 [[Rohde & Schwarz GmbH & Co KG]]。\n- 正文末段同樣寫明：R&S® is a registered trademark of Rohde & Schwarz GmbH & Co. KG。\n- 來源正文以 [[Rohde & Schwarz]] 品牌 / 公司名稱描述與 [[SPEAG]] 的合作、[[R&S CMX500 OBT]] 與 [[DASY8-3D]] 的整合。\n\n依 [[1C111_1e_3GPPPreConfGuide]]：\n\n- R&S® 是 [[Rohde & Schwarz GmbH & Co KG]] 的 registered trademark。\n- Trade names 為其 owners 的 trademarks。\n- 文件頁尾標示：© 2025 Rohde & Schwarz GmbH & Co. KG，81671 Munich, Germany。\n- 文件頁尾也描述 [[Rohde & Schwarz]] electronics group 的 business fields 包含 test and measurement、broadcast and media、secure communications、cybersecurity、monitoring and network testing。\n- 來源稱 [[Rohde & Schwarz]] 成立超過 80 年，總部位於 Munich, Germany，並在超過 70 個國家設有 sales and service network。\n- 來源列出 website、training、customer support 與 ISO 9001 certified quality management 線索。\n\n依 [[Dual Sim Dual Active]]：\n\n- markdown 頁尾標示 `COMPANY CONFIDENTIAL`。\n- 頁尾列出 `Rohde & Schwarz GmbH & Co. KG ©`。\n- 本來源是 [[Dual SIM Dual Active]] / [[Multi-USIM operation]] 技術筆記，未標示正式發布日期、文件編號、作者或版本。\n\n依 [[Extended Logical Channel IDs]]：\n\n- markdown 頁尾標示 `COMPANY CONFIDENTIAL`。\n- 頁尾列出 `Rohde & Schwarz GmbH & Co. KG ©`。\n- 本來源是 [[Extended Logical Channel ID]] / [[3GPP TS 38.321]] / [[MAC Control Element]] 技術筆記，未標示正式發布日期、文件編號、作者或版本。\n- 來源本身只支撐頁尾 copyright / confidential 標示，不支撐公司法律資訊或產品承諾。\n\n依 [[Logical Channels]]：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Rohde & Schwarz GmbH & Co KG.md"
+              },
+              "score": 0.356388
+             },
+             {
+              "text": "Clock, CDR, Jitter › 概念\n- [[SerDes Clock CDR Jitter 外部資料清單]] — 保存本 OneNote link hub 的待讀 URL 與使用限制。\n- [[SerDes]] — 來源路徑位於 `Serdes IC IP` 資料夾，且頁名 / URL keywords 與高速介面 clocking / jitter 議題相關；但正文未提供 SerDes 技術細節。\n- [[Clock]] — 來源標題中的詞；URL path 含 `reference-clock`。\n- [[Reference Clock]] — URL path 中的待讀關鍵字；來源未提供技術定義或規格。\n- [[CDR]] — 來源標題中的詞；來源未展開縮寫，也未提供 clock data recovery 架構或規格。\n- [[Jitter]] — 來源標題中的詞；來源未提供 jitter 類型、量測方法、單位或限值。\n- [[TDECQ]] — URL path 中的待讀關鍵字；來源未提供展開、標準、測試方法或數值。\n- [[312 MHz]] — URL path 中的待讀關鍵字；來源未說明它是 reference clock、測試條件、頻率點或其他含義。\n- [[1.6T]] — URL path 中的待讀關鍵字；來源未說明它是資料率、乙太網路世代、系統容量或其他口徑。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Clock, CDR, Jitter.md"
+              },
+              "score": 0.129012
+             },
+             {
+              "text": "手機直連衛星供應鏈 › 技術原理\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）稱手機直連衛星讓一般市售 4G / 5G 智慧型手機在無需額外硬體、修改韌體或安裝特殊軟體的情況下，直接連結低軌衛星以提供簡訊、語音與數據服務。\n- 同一來源稱隨著 [[3GPP Release 17]]與[[3GPP Release 18]]持續將衛星通訊納入行動通訊標準規範，此技術正從緊急 SOS 簡訊擴展至語音通話與影音傳輸。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/手機直連衛星供應鏈.md"
+              },
+              "score": 3.667996
+             },
+             {
+              "text": "德宏 › 來源中的說法\n- [[AI Server PCB test image 25]]（Nov., 2025；取得於 2026-09-04）在[[玻纖布]]分類列出德宏。\n- [[HSD PCB image 15]]（來源未標示日期；取得於 2026-09-04）在玻纖布圖卡註記中寫「石英布:德宏(5475)」。\n- [[HSD PCB image 18]]（來源未標示日期；取得於 2026-09-04）在 [[Q-Glass]]（石英纖維 / 未來）區塊寫：「極致電氣特性，鎖定 6G 與次世代算力（德宏 領先佈局）。」\n- [[HSD PCB image 8]]（來源未標示日期；converted 2026-09-04）在 [[Q-Glass]]（石英纖維 / 未來）區塊同樣寫：「極致電氣特性，鎖定 6G 與次世代算力（德宏 領先佈局）。」",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/德宏.md"
+              },
+              "score": 0.704764
+             },
+             {
+              "text": "R&S TS8980 Conformance Test Platform › 來源中的角色（NR-NTN PR）\n依 [[Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP]]：\n\n- Test cases are conducted on the [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] and [[R&S CMX500]]。\n- 目的為 preparing the system’s upcoming validation by [[GCF]] and [[PTCRB]] for [[NR-NTN]] in [[NR FR1]]。\n- 測試領域包含 [[RF]]、[[RRM]] 與 [[PCT]]，但來源未指定 [[R&S TS8980 Conformance Test Platform]] 對應其中哪一個或哪些 domain。\n\n依 [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]]：\n\n- All measurements were conducted on [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] and [[R&S CMX500]] in [[NR FR1]]。\n- 測試用於 verifying latest [[Samsung NR-NTN chipset]] from [[Samsung]] as DUT。\n- 來源把這些 measurements 連到 [[GCF]] validated [[3GPP Release 17]] [[NR-NTN]] conformance test cases across [[RF]]、[[RRM]] and [[PCT]] domains。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md"
+              },
+              "score": 7.050261
+             },
+             {
+              "text": "Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR › 原文未解的問題\n- 來源未標示 PR 發布日期；raw `created: 2026-09-11` 只代表原始檔建立 / 擷取時間。\n- 來源未標示 [[R&S TS-PCT]] 文件版次、software version、hardware configuration、option / license、order number 或 test campaign ID。\n- 來源未標示 [[R&S CMX500]] 的 exact hardware configuration、software release、protocol stack version 或是否使用 [[R&S CMX500 OBT]]。\n- 來源未標示 [[Qualcomm X105 5G Modem-RF]] mobile test platform 的 chipset / module / device configuration、firmware、commercial status 或 test setup。\n- 來源未提供 [[TS 38.523-1]] TC 7.1.1.12.5 的完整測試步驟、pass/fail criteria、RAN5 submission ID、change request number 或 CR 狀態。\n- 來源未說明 “initial verification”、“formally submitted for RAN5 verification” 與正式 conformance certification / GCF / PTCRB certification 之間的狀態差異。\n- Qualcomm branded products 與 Qualcomm Technologies, Inc. / subsidiaries / Qualcomm Incorporated 的法律實體關係仍需其他來源確認。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR.md"
+              },
+              "score": 2.205897
+             },
+             {
+              "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 9.778871
+             },
+             {
+              "text": "ScriptAssist › 限制與未決事項\n- [[AIW_on_prem_prerequisites_ScriptAssist]] 未說明 24GB RAM 是最低需求、建議值或驗證配置。\n- [[AIW_on_prem_prerequisites_ScriptAssist]] 未列出 Linux、MacOS 或 Docker Engine 的版本。\n- [[AIW_on_prem_prerequisites_ScriptAssist]] 未列出支援的 [[Cursor]]、[[Copilot]] 或 [[Claude Code]] 版本。\n- [[AIW_on_prem_prerequisites_ScriptAssist]] 未列出 customer LLMs 或 [[Embedding Model]] 的模型版本、API 相容性、embedding dimension、context length 或效能門檻。\n- [[Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026]] 提供功能描述，但未提供 [[ScriptAssist]] version、deployment mode、license code、order number、supported XLAPI version、supported CMX software release 或 availability date。\n- [[Rohde & Schwarz highlights its unique CMX500 one-box tester tailored for NTN testing at MWC Barcelona 2026]] 未說明 [[ScriptAssist]] 是否等同 AI Workplace on-prem product、CMX500 option、cloud service、demo tool 或 roadmap feature。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/ScriptAssist.md"
+              },
+              "score": 4.193328
+             },
+             {
+              "text": "Time Domain Channel Properties › 來源中的定義\n依 [[R18 CSI enhancements for high-speed Scenario]]：\n\n- TDCP 全名為 Time Domain Channel Properties。\n- 它是 a new CSI quantity。\n- 它 can provide additional information about time domain channel variability and User Equipment motion relative to the gNodeB。\n- 來源說 TDCP measured via [[CSI-RS]] is being investigated to help the network track the channel's behavior over time。\n- 來源在 development section 說 report quantity `tdcp` should be added，主要在 [[RRC]] 與 [[MAC]]。\n- [[PHY]] can treat the new report type TDCP as a new [[CSI report]] type。\n\n依 [[TDCP Reporting]]：\n\n- TDCP is a new measurement introduced in Rel-18。\n- TDCP provides CSI information on the relative mobility of the UE and the associated Doppler on the channel with the gNodeB。\n- TDCP can be used to adjust configuration parameters such as codebook type or reference signal，以 adapt to channel conditions and ensure robust transmission in high-speed scenarios。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Time Domain Channel Properties.md"
+              },
+              "score": 1.239991
+             },
+             {
+              "text": "Rohde & Schwarz GmbH & Co KG › 與 Rohde & Schwarz 的關係\n本頁只記錄來源文字中的 legal / trademark name。來源正文同時以 [[Rohde & Schwarz]] 作為公司 / 品牌名稱，描述其 Test & Measurement、Technology Systems、Networks & Cybersecurity Divisions，以及 2024/2025 fiscal year 財務與員工資訊；[[1C111_1e_3GPPPreConfGuide]] 則提供 electronics group 的 business fields 與公司概述。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Rohde & Schwarz GmbH & Co KG.md"
+              },
+              "score": 0.335579
+             },
+             {
+              "text": "Clock, CDR, Jitter › 重點摘要\n- 來源標題為 **Clock, CDR, Jitter**。\n- raw frontmatter 顯示 `converted: 2026-09-17`，`converted_by: copy`，且註記為 unchanged copy。\n- raw path 含 `Serdes IC IP (2026-8-7)`，但來源正文未標示正式發布日期、作者、頁碼、版本或內容期間。\n- 來源正文只有一個外部連結：`https://www.simpletechtrend.com/post/reference-clock-tdecq-312mhz-benchmark-1-6t`。\n- 從 URL path 可見待讀關鍵字：`reference-clock`、`tdecq`、`312mhz`、`benchmark`、`1-6t`；這些只作為待讀索引，不代表已讀取或驗證該頁內容。\n- 本來源沒有擷取外部網頁正文，因此不提供 [[Reference Clock]]、[[TDECQ]]、[[312 MHz]]、[[1.6T]]、[[CDR]] 或 [[Jitter]] 的定義、數值、測試條件或市場主張。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Clock, CDR, Jitter.md"
+              },
+              "score": 0.123806
+             },
+             {
+              "text": "手機直連衛星供應鏈 › 可追溯範圍\n- 本頁只支持 [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）中的手機直連衛星市場與供應鏈說法。\n- 來源未提供 [[TrendForce]] 該研究的完整報告名稱、發布日期、頁碼、區域範圍、統計口徑或幣別換算方式；本頁不得延伸推算公司營收、市占率或區域市場規模。\n- 本頁不把品牌導入、晶片導入或 MOU 改寫為已商轉、已量產、已出貨、已採購或已在台灣合法營運。\n- 本頁不把 [[Starlink]]、[[AST SpaceMobile]]、[[Qualcomm]]、[[聯發科]]、[[Samsung]]、[[Google]]、[[Vivo]]與台灣廠商的同頁列名解讀為直接合約或供應關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/手機直連衛星供應鏈.md"
+              },
+              "score": 2.147426
+             },
+             {
+              "text": "德宏 › 可追溯範圍\n- 本頁只記錄圖上列名，不推論供應合約、出貨量、市占率、客戶、材料規格、國別或 R&S 往來關係。\n- [[HSD PCB image 18]] 與 [[HSD PCB image 8]] 的「領先佈局」不可改寫為德宏已量產 [[Q-Glass]]、已供應 [[NVIDIA]] / [[AMD]]、已取得 6G 或次世代算力客戶認證。\n- [[HSD PCB image 15]] 的「石英布」與 [[HSD PCB image 18]] / [[HSD PCB image 8]] 的 [[Q-Glass]] / 石英纖維看似相關，但來源沒有給出材料標準或正式等同關係，本頁不自行合併定義。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/德宏.md"
+              },
+              "score": 0.690231
+             },
+             {
+              "text": "R&S PCB test solutions › 未決事項\n- Slide 21 未標示 R&S PCB test solutions 的正式文件版次與產品 portfolio 對應。\n- Slide 21 未標示 [[TDR]]、[[Delta-L]]、ISD/ADK、DK/DF extraction 的標準版本、演算法、測試條件或工具型號。\n- Slide 21 未展開 PL、ISD、ADK、RSTW、SWISSTO12、QWED、KEYCOM。\n- 需回看原始 PPTX 圖像確認各圖示、商標、箭頭與工具對應關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 2.975052
+             },
+             {
+              "text": "Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR › 關鍵實體與概念\n- [[Rohde & Schwarz]]：PR 發布者與 [[R&S TS-PCT]] / [[R&S CMX500]] 供應商。\n- [[Qualcomm Technologies]]：與 [[Rohde & Schwarz]] 共同完成 SSSG conformance test case early verification 的合作方。\n- [[Qualcomm X105 5G Modem-RF]]：來源明示 mobile test platform 使用的 Qualcomm modem-RF platform。\n- [[R&S TS-PCT]]：Rohde & Schwarz protocol conformance test platform，來源稱其 based on [[R&S CMX500]]。\n- [[R&S CMX500]]：來源稱 [[R&S TS-PCT]] based on this 5G one-box signaling tester。\n- [[Search Space Set Group Switching]]：3GPP Rel. 17 的 5G NR UE power-saving mechanism。\n- [[3GPP Release 17]]：引入 SSSG 的 3GPP release。\n- [[3GPP RAN5]]：負責 conformance test specifications 的 3GPP group；來源稱 change request submitted to RAN5。\n- [[TS 38.523-1]]：本 PR 提到的 NR conformance test specification，測試案例為 TC 7.1.1.12.5。\n- [[PDCCH monitoring]]：SSSG 最佳化的 5G NR device monitoring behavior。\n- [[Christian Mokry]]：Press & media contact，職稱 PR Manager Test & measurement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR.md"
+              },
+              "score": 1.997372
+             },
+             {
+              "text": "# Signal integrity flow of high speed PCB/PCBA\nIL/Xtalk/Eye diagram\nTDR Impedance\nStackup Planner\nTL Calculator",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-74f44a4409e2b694",
+                "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+                "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+                "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "section": 104,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 17.791897
+             },
+             {
+              "text": "![https://cdn.rohde-schwarz.com/pws/product/n_1/nrq6/NRQ6_48940_05_lightbox_landscape.jpg](Picture2.jpg)",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ae261ae2c6ea49d8",
+                "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+                "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+                "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "section": 53,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 15.977504
+             },
+             {
+              "text": "For product brochure, see PD 5214.0601.12 and www.rohde-schwarz.com",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-bb00f7ed66cf3a5d",
+                "original_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+                "sha256": "bb00f7ed66cf3a5d5e0de6726bb22640f7873382a3abbbb5b905cb98d9c0c856",
+                "raw_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+               "section": 122,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 15.977504
+             },
+             {
+              "text": "Contact: Tim Seyler (tim.seyler@rohde-schwarz.com), Product Manager Mobile Radio Testing",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-3b343d1990f39b17",
+                "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+                "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+                "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 15.977504
+             }
+            ],
+            "text": "The passages do not provide a formal definition of an eye diagram; they only identify it as a high-speed PCB/PCBA signal-integrity item alongside insertion loss/crosstalk, TDR impedance, stackup planning, and transmission-line calculation in the R&S signal-integrity flow [65], and as something evaluated through eye-opening metrics such as eye height and eye width in PCIe Gen5 context [5].\n| Decision | Supported answer |\n|---|---|\n| Whether eye-diagram analysis is part of the high-speed PCB/PCBA SI workflow | Yes: the raw R&S flow lists “IL/Xtalk/Eye diagram” under “Signal integrity flow of high speed PCB/PCBA” [65]. |\n| Whether to select R&S ZNA-K20 on an R&S ZNA | R&S ZNA-K20 is “Extended time domain analysis including eye diagram,” and it requires R&S ZNA-K2 time-domain analysis/TDR [26]. |\n| Whether to select R&S ZNA-K20 on an R&S ZNA67EXT system | R&S ZNA67EXT also lists R&S ZNA-K20 as “Extended time domain analysis (including eye diagram),” requiring R&S ZNA-K2 [36]. |\n| Whether TDR/time-domain capability is needed before eye-diagram capability | For both ZNA and ZNA67EXT, the eye-diagram option K20 requires K2, which is the time-domain analysis/TDR option [26][36]. |\n| Which VNA family/range to consider if those options are needed | R&S ZNA is a Vector Network Analyzer series covering ZNA26/ZNA43/ZNA50/ZNA67 up to 67 GHz [25], while R&S ZNA67EXT is a 1.0 mm VNA system covering 10 MHz to 110 GHz [33]. |\n【推論】If a customer’s PCB/PCBA SI task includes “Eye diagram” as in the raw R&S flow, then the relevant R&S option decision is whether to include K20, and because K20 requires K2, whether to include K2 as well [65][26][36].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "PCIe Gen5 high-speed PCB layout › Eye opening requirements\n| Generation | Extrapolated Eye Height after EQ | Minimum Eye Width after EQ | 來源 | 日期 |\n|---|---:|---:|---|---|\n| [[PCIe Gen3]] | 25 mV | 0.3 UI（37.5 ps） | [[snla426]] | June 2023 |\n| [[PCIe Gen4]] | 15 ± 1.5 mV | 0.3 UI（18.75 ± 0.55 ps） | [[snla426]] | June 2023 |\n| [[PCIe Gen5]] | 15 ± 1.5 mV | 0.3 UI（9.375 ± 0.5 ps） | [[snla426]] | June 2023 |\n\n- [[snla426]]（June 2023）說 minimum eye width 與 eye height 在 post-equalization、3-tap DFE blocks 之前量測。\n- [[snla426]]（June 2023）說 PCIe redriver output 的 eye opening 需要大於或等於表列 eye opening 數值。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+             },
+             "score": 4.374945
+            },
+            {
+             "text": "R&S ZNA\n[[R&S ZNA]] 是 Rohde & Schwarz 的 Vector Network Analyzer 系列，依 Version 24.00（April 2026）規格書涵蓋 [[R&S ZNA26]]、[[R&S ZNA43]]、[[R&S ZNA50]]、[[R&S ZNA67]]，頻率範圍從 10 MHz 延伸到最高 67 GHz。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA.md"
+             },
+             "score": 5.158157
+            },
+            {
+             "text": "R&S ZNA › Software / measurement options（摘錄）\n| Code | 名稱 / 原文說明 | 重要相依關係或限制 |\n|---|---|---|\n| R&S®ZNA-K1 | Spectrum analyzer mode | Order No. 1332.5320.02；cannot be combined with R&S®ZNA50-B312、R&S®ZNA67-B312、R&S®ZNA50-B511、R&S®ZNA67-B511 |\n| R&S®ZNA-K2 | Time domain analysis (TDR) | Order No. 1332.5336.02 |\n| R&S®ZNA-K20 | Extended time domain analysis including eye diagram | requires R&S®ZNA-K2；Order No. 1332.4746.02 |\n| R&S®ZNA-K4 | Scalar mixer measurements / arbitrary frequency-converting measurements | Order No. 1332.5342.02 |\n| R&S®ZNA-K5 | Vector mixer measurements | requires recommended setup in Options section；Order No. 1332.5359.02 |\n| R&S®ZNA-K6 | Phase coherent source control | Order No. 1332.5413.02 |\n| R&S®ZNA-K61 | True differential mode | requires R&S®ZNA-K6；Order No. 1332.5442.02 |\n| R&S®ZNA-K7 | Measurements on pulsed signals | requires R&S®ZNA-K17 together with pulse modulator；R&S®ZNA-B7 recommended；Order No. 1332.5371.02 |\n| R&S®ZNA-K17 | Increased IF bandwidth 30 MHz | Order No. 1332.5459.02 |\n| R&S®ZNA-K8 | mmWave converter support | requires recommended setup in Options section；Order No. 1332.5388.02 |\n| R&S®ZNA-K9 | Group delay measurements on frequency converters without LO access | requires recommended setup in Options section；Order No. 1332.5394.02 |\n| R&S®ZNA-K19 | 1 mHz frequency resolution | Order No. 1332.5513.02 |\n| R&S®ZNA-K28 | Continuous data recording | Order No. 1332.5613.02 |\n| R&S®ZNA-K30 | Noise figure measurement | requires recommended setup in Options section；Order No. 1332.5465.02 |\n| R&S®ZNA-K50 | Uncertainty analysis | Order No. 1332.5542.02 |\n| R&S®ZNA-K50P | Uncertainty analysis, pre-installed | Order No. 1332.5594.02 |\n| R&S®ZNA-K51 | Security write protection | Order No. 1332.5559.02 |\n| R&S®ZNA-K66 | Speed improvement | Order No. 1332.5820.02 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 13,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA.md"
+             },
+             "score": 4.563785
+            },
+            {
+             "text": "R&S ZNA67EXT\n[[R&S ZNA67EXT]] 是 Rohde & Schwarz 的 1.0 mm [[Vector Network Analyzer]] system，依 [[ZNA67EXT_specs_en_5216-3743-22_v0900]] Version 09.00（July 2025）涵蓋 **10 MHz to 110 GHz**。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+             },
+             "score": 5.648631
+            },
+            {
+             "text": "R&S ZNA67EXT › Software licences / firmware options\n| Code | 名稱 / 原文說明 | Requires | Order No. |\n|---|---|---|---:|\n| R&S®ZNA-K1 | Spectrum analyzer mode | 來源未標示 | 1332.5320.02 |\n| R&S®ZNA-K2 | Time domain analysis (TDR) | 來源未標示 | 1332.5336.02 |\n| R&S®ZNA-K20 | Extended time domain analysis (including eye diagram) | R&S®ZNA-K2 | 1332.4746.02 |\n| R&S®ZNA-K4 | Scalar mixer measurements, arbitrary frequency-converting measurements | 來源未標示 | 1332.5342.02 |\n| R&S®ZNA-K5 | Vector mixer measurements | 來源未標示 | 1332.5359.02 |\n| R&S®ZNA-K6 | Phase coherent source control | 來源未標示 | 1332.5413.02 |\n| R&S®ZNA-K61 | True differential mode | 來源未標示 | 1332.5442.02 |\n| R&S®ZNA-K7 | Measurements on pulsed signals together with pulse modulator | R&S®ZNA-K17；footnote also cites R&S®ZNAxx-B41/-B42/-B43/-B44 and/or R&S®ZNA-B91, and recommends R&S®ZNA-B7 | 1332.5371.02 |\n| R&S®ZNA-K17 | Increased IF bandwidth 30 MHz | 來源未標示 | 1332.5459.02 |\n| R&S®ZNA-K8 | mmWave converter support (mandatory) | 來源未標示 | 1332.5388.02 |\n| R&S®ZNA-K9 | Group delay measurements on frequency converters without LO access | 來源未標示 | 1332.5394.02 |\n| R&S®ZNA-K19 | 1 mHz frequency resolution | 來源未標示 | 1332.5513.02 |\n| R&S®ZNA-K28 | Continuous data recording | 來源未標示 | 1332.5613.02 |\n| R&S®ZNA-K50 | Uncertainty analysis | 來源未標示 | 1332.5542.02 |\n| R&S®ZNA-K50P | Uncertainty analysis, preinstalled | 來源未標示 | 1332.5594.02 |\n| R&S®ZNA-K51 | Security write protection | 來源未標示 | 1332.5559.02 |\n| R&S®ZNA67-K110 | Continuous sweep 110 GHz (mandatory) | 來源未標示 | 1332.5642.02 |\n| R&S®ZNA-K210 | Easy deembedding | 來源未標示 | 1339.3897.02 |\n| R&S®ZNA-K220 | In-situ deembedding | 來源未標示 | 1339.3900.02 |\n| R&S®ZNA-K230 | Smart fixture deembedding | 來源未標示 | 1339.3916.02 |\n| R&S®ZNA-K231 | Delta-L PCB characterization | 來源未標示 | 1339.3922.02 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 18,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+             },
+             "score": 3.328708
+            },
+            {
+             "text": "# Signal integrity flow of high speed PCB/PCBA\nIL/Xtalk/Eye diagram\nTDR Impedance\nStackup Planner\nTL Calculator",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-74f44a4409e2b694",
+               "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+               "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "section": 104,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 17.791897
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "product_option_spec",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S ZNA.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 13,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S ZNA.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 19,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S ZNA.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 16,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S ZNA.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 7,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S ZNA.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+             "raw_refs": [
+              "raw/Market/OneNote/snla426.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S ZNA.md",
+             "raw_refs": [
+              "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S ZNA67EXT.md",
+             "raw_refs": [
+              "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}
