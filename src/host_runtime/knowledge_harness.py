@@ -248,7 +248,9 @@ class KnowledgeHarness:
                 "The Knowledge query did not produce a validated answer. "
                 "Unverified requested facets: " + ", ".join(required_facets) + "."
             )
-        elif run.phase == "validated" or not base["ok"]:
+        elif run.phase == "validated" or not base["ok"] or actions.no_support:
+            # A reply that only says nothing supports an answer is shown as it
+            # is, but it is not a validated answer.
             visible_answer = base["answer"]
             record = base.get("record") or {}
             if run.phase == "validated" and record.get("citation_policy") == "wiki_primary":
