@@ -1597,4 +1597,6 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   docs/HANDOFF.md). npm test 112 passed, build passed, live shell check passed.
 - [x] Atlas commit: Codex committed its AEP integration with the benchmark
   views as Atlas e59655d (not pushed); 6 benchmark tests re-run and passing.
-- [ ] Atlas browser acceptance and Python 3.13+ backend tests (Atlas HANDOFF).
+- [x] Atlas Windows backend tests on Python 3.13.15: 35 OK, 7 platform skips
+  (Atlas 8267f66).
+- [ ] Atlas browser acceptance (needs the owner at the computer).
