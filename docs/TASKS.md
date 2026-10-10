@@ -1585,5 +1585,9 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   137 -> 200 s (runs/core-004/review.zh-TW.md).
 - [x] Owner kept Knowledge Skill 1.9.0 (2026-10-10): better grounding over
   about 60 s more per answer.
-- [ ] Optional later: Knowledge synthesis coverage (answers use only part of
-  the retrieved reference pages); see runs/core-004/review.zh-TW.md.
+- [x] Knowledge synthesis evidence budget, Skill 1.10.0 (9cbe3ca, 2026-10-10):
+  answerable coverage 0.30 -> 0.40, FAIL 3 -> 4, contradictions 4 -> 4,
+  overreach items 35 -> 63 (runs/core-005/review.zh-TW.md). Kept.
+- [ ] Optional: reduce Knowledge overreach under Skill 1.10.0.
+- [ ] Benchmark results into telemetry for the Atlas dashboard (proposed,
+  waiting for the owner).

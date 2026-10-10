@@ -1,0 +1,120 @@
+{
+ "id": "Q0701",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 113.938,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 65,
+   "kind": "raw",
+   "ref": "raw/Knowledge/Q2_2026 Conformance & NetOp Updates_Customer.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S SMW200A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 48,
+   "kind": "wiki",
+   "ref": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S SMW200A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 52,
+   "kind": "wiki",
+   "ref": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 7,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S SMW200A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 62,
+   "kind": "wiki",
+   "ref": "wiki/sources/SMW200A_specs_en_3606-8037-22_v3100.md",
+   "ok": true,
+   "text_found": 0.97,
+   "why": ""
+  },
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S SMW200A.md",
+   "ok": true,
+   "text_found": 0.95,
+   "why": ""
+  },
+  {
+   "number": 61,
+   "kind": "wiki",
+   "ref": "wiki/sources/SMW200A_specs_en_3606-8037-22_v3100.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S SMW200A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 20,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S SMBV100B.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "Modern AI-adjacent connectivity and high-speed wireless test scenarios benefit from wideband stimulus generation",
+   "AI-assisted test planning and execution can require controlled stress conditions",
+   "For reliable automated pass/fail and root-cause workflows, generated signals may need calibrated impairments or corrections",
+   "SMM100A supports BER/BLER measurement with 100 Hz to 100 MHz clock rate and CCITT CRC16 BLER CRC type [52]"
+  ],
+  "reason": "The answer honestly notes that the passages do not directly rank AI signal-generator capabilities, then reasonably synthesizes the AI automation needs in [65] with documented signal-generator capabilities such as remote control, ARB/real-time generation, bandwidth, MIMO/fading, impairments, digital I/Q, and BER/BLER. Some rationale about why specific capabilities matter for AI is inferential rather than directly stated, and the detailed SMM100A BER/BLER clock/CRC claim is not fully present in the cited [52] passage.",
+  "confidence": "medium"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

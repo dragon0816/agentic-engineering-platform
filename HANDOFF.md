@@ -35,10 +35,18 @@ Knowledge retrieval was changed after the first comparison.
   retrieval clearly better (reference files offered 22% -> 41%), answer
   coverage flat (0.30), contradictions down, median latency +60 s.
 
-Owner decision (2026-10-10): keep Knowledge Skill 1.9.0. Nothing is pending
-on this thread. A possible later step is synthesis coverage (answers use only
-part of the retrieved reference pages). To roll back, move 1.8.0 back from
-`disabled/`, move 1.9.0 out, and restart Agent Web.
+Owner decision (2026-10-10): keep 1.9.0, then "try improving synthesis,
+roll back if worse". Knowledge Skill 1.10.0 is now live (1.9.0 in
+`disabled/`), adding the evidence budget (8 sections/page, 64 sections,
+80,000 chars) and a "cover every part" guidance line. `runs/core-005`:
+answerable coverage 0.30 -> 0.40, FAIL and contradictions about flat, overreach
+items 35 -> 63. Kept under the owner's rule. To roll back, move 1.9.0 back from
+`disabled/`, move 1.10.0 out, and restart Agent Web.
+
+Open proposal: emit benchmark results (`benchmark_run` runs,
+`benchmark.case_completed` events linked to the AEP trace) into telemetry so
+the Atlas dashboard can show test progress live and replay it. The owner was
+asked whether to do it, and whether to build the Atlas consumer too.
 
 ## Repository and runtime state
 

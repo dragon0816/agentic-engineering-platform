@@ -1,0 +1,113 @@
+{
+ "id": "Q1021",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 206.547,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 26,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NR resource grid.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 27,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NR resource grid.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 18,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NR cyclic prefix.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 31,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR numerology.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 23,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NR sample rate.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 35,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMW100 K06.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 13,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 12,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S VSE.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 61,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S VSE.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "OFDM ... is the waveform/resource structure",
+   "the user must understand OFDM standards, bandwidths, and MIMO measurement modes when selecting them",
+   "selecting CMX-KM600 measurement settings such as SCS, bandwidth, and uplink signal analysis depends on OFDM concepts",
+   "decisions about CMX500 NR analyzer/generator configuration rely on understanding OFDM numerology and waveform sampling",
+   "interpreting VSE 5G NR DL/UL and beamforming measurements depends on understanding OFDM symbols, subcarriers, and SCS"
+  ],
+  "reason": "The answer’s factual descriptions of the NR resource grid, cyclic prefix, numerology/sample-rate relationship, and the listed CMW100/CMX500/VSE options are backed by the cited passages. The dependency language is partly inferential rather than explicitly stated, but it is a fair connection from OFDM-based NR/WLAN concepts to product option and measurement-configuration decisions.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

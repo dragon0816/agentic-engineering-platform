@@ -2018,3 +2018,14 @@ Result (`runs/core-004`): reference files offered to synthesis rose from 22% to 
 Rejected alternatives:
 - Giving the model file-reading tools directly: the model would supply evidence text and step outside the Bridge capability's boundary.
 - An unbounded loop: cost and latency without a stop.
+
+## 2026-10-10: Knowledge Skill 1.10.0 widens the evidence synthesis reads
+
+Decision (owner: "try improving synthesis; roll back if worse"): the wiki-primary evidence budget is a Skill setting (`evidence_sections`, `evidence_chars`, `evidence_sections_per_page`). Skill 1.10.0 sets 64 sections, 80,000 characters and 8 sections per page, and its guidance asks the answer to state each cited fact for every part of the question.
+
+Reason: of the reference key points missing from core-004 answers, 26 of 33 sat on a page synthesis saw but in a section it was not given (three sections per page). Offline, the wider budget raised the share of reference quotes present in the evidence from 0.21 to 0.29.
+
+Result (`runs/core-005`): coverage on the 22 answerable questions rose from 0.30 to 0.40, and on the 14 insufficient ones from 0.18 to 0.29. FAIL went from 3 to 4 and contradictions stayed at 4. Overreach items rose from 35 to 63. The change was kept under the owner's rule, and overreach is the next point to work on.
+
+Rejected alternatives:
+- Changing the guidance alone: 7 of 33 misses were synthesis omissions, while 26 were evidence never offered.

@@ -1,0 +1,1205 @@
+{
+ "question": {
+  "id": "Q0461",
+  "text": "For a Automotive use case involving automotive radar, where would Oscilloscope fit in the test workflow?",
+  "market": "Automotive",
+  "product": "Oscilloscope",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-74e028ed7c074e2a9fc4a99db846bfc2",
+ "exchange": {
+  "sent": "For a Automotive use case involving automotive radar, where would Oscilloscope fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 92.938,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-74e028ed7c074e2a9fc4a99db846bfc2",
+    "actor": "leo.chi",
+    "title": "For a Automotive use case involving automotive radar, where would Oscill…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-10T04:16:13.242127Z",
+    "updated_at": "2026-10-10T04:17:46.017681Z",
+    "messages": [
+     {
+      "message_id": "message-75e6a6543d7e42ffbc44610ce7db256c",
+      "role": "user",
+      "text": "For a Automotive use case involving automotive radar, where would Oscilloscope fit in the test workflow?",
+      "created_at": "2026-10-10T04:16:13.250145Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-1b5b072e0b7e4a6a81c522e6064c40d2",
+      "role": "assistant",
+      "text": "Short answer: the oscilloscope is best placed as a **debug/validation instrument around the radar ECU or radar module electronics**, not as the primary automotive-radar target simulator; the primary radar workflow uses instruments such as the R&S AREG800A for automotive radar echo generation and RF/spectrum instruments for mmWave analysis [6][15][36][42].\n| Likely workflow stage | Where the oscilloscope fits | How it complements RF radar instruments |\n|---|---|---|\n| 1. PCB / PCBA bring-up, SI/PI, interfaces | Use the oscilloscope for interface tests and power-distribution checks, since the cited SI/PI workflow maps “Interface Test” to scopes/BERTs/AWGs/switch matrices and “Power Distribution Network” to scopes and network analyzers [16][17]. | This is before or alongside radar RF testing: the scope checks electrical interfaces and PDN behavior, while RF instruments address radar-band behavior and RF performance [16][17][36]. |\n| 2. Radar module IF/baseband debug | The AREG800A ecosystem includes analog IF output and analog IF input interface options, and the FSW family has an “oscilloscope baseband inputs” option, R&S FSW-B2071, applicable to all FSW models and requiring specific R&S RTO1000/RTO2000/RTO6 oscilloscope configurations for specified performance [13][42]. | The oscilloscope can inspect time-domain/baseband behavior around IF paths, while AREG800A generates dynamic artificial radar objects and RF instruments analyze frequency-domain/RF behavior [6][13][42]. |\n| 4. mmWave RF validation / spectrum analysis | Automotive radar bands in the AREG800A context include 24 GHz to 24.25 GHz, 76 GHz to 81 GHz, and 24 GHz to 44 GHz depending on frontend [15]. R&S FSW85 covers RF input up to 85 GHz, or up to 90 GHz with the R&S FSW-B90G option under stated conditions [36]. | RF/spectrum instruments cover the radar RF bands; the oscilloscope complements them on baseband, time-domain, trigger, interface, and PI/SI observations rather than being the main RF-band analyzer [16][36][42]. |\n| 5. Production-oriented radar test | AREG800A production configurations include radar mini/golden/pro variants with one, two, or three digital channels, one object per channel, frontend requirements, near object range possibility, analog IF output interfaces, and remote control interfaces [3]. | In production workflows, the radar echo generator provides repeatable object scenarios, while an oscilloscope is more likely used for setup/debug, interface validation, or troubleshooting of IF/baseband/electrical behavior rather than as the production echo-generation instrument [3][13][16]. |\n【推論】A practical automotive-radar workflow would place the oscilloscope early for PCB/interface/PDN bring-up, then alongside AREG800A and FSW-class RF instruments during IF/baseband debug and RF validation, because the passages separately identify scopes for interface/PDN testing, AREG800A for automotive radar echo generation, AREG IF interfaces, and FSW oscilloscope baseband inputs/RF coverage [6][13][16][36][42].\n\n來源：\n[3] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[6] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[13] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[15] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[16] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[17] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[36] Wiki：R&S FSW85（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[42] Wiki：FSW_specs_en_5215-6749-22_v1701（來源：`FSW_specs_en_5215-6749-22_v1701.md`）",
+      "created_at": "2026-10-10T04:17:46.017681Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-e1c0a0c0a1c84746a2281776f3b95d8b",
+       "request_id": "request-e1c0a0c0a1c84746a2281776f3b95d8b",
+       "span_id": "span-e1c0a0c0a1c84746a2281776f3b95d8b",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "Short answer: the oscilloscope is best placed as a **debug/validation instrument around the radar ECU or radar module electronics**, not as the primary automotive-radar target simulator; the primary radar workflow uses instruments such as the R&S AREG800A for automotive radar echo generation and RF/spectrum instruments for mmWave analysis [6][15][36][42].\n| Likely workflow stage | Where the oscilloscope fits | How it complements RF radar instruments |\n|---|---|---|\n| 1. PCB / PCBA bring-up, SI/PI, interfaces | Use the oscilloscope for interface tests and power-distribution checks, since the cited SI/PI workflow maps “Interface Test” to scopes/BERTs/AWGs/switch matrices and “Power Distribution Network” to scopes and network analyzers [16][17]. | This is before or alongside radar RF testing: the scope checks electrical interfaces and PDN behavior, while RF instruments address radar-band behavior and RF performance [16][17][36]. |\n| 2. Radar module IF/baseband debug | The AREG800A ecosystem includes analog IF output and analog IF input interface options, and the FSW family has an “oscilloscope baseband inputs” option, R&S FSW-B2071, applicable to all FSW models and requiring specific R&S RTO1000/RTO2000/RTO6 oscilloscope configurations for specified performance [13][42]. | The oscilloscope can inspect time-domain/baseband behavior around IF paths, while AREG800A generates dynamic artificial radar objects and RF instruments analyze frequency-domain/RF behavior [6][13][42]. |\n| 4. mmWave RF validation / spectrum analysis | Automotive radar bands in the AREG800A context include 24 GHz to 24.25 GHz, 76 GHz to 81 GHz, and 24 GHz to 44 GHz depending on frontend [15]. R&S FSW85 covers RF input up to 85 GHz, or up to 90 GHz with the R&S FSW-B90G option under stated conditions [36]. | RF/spectrum instruments cover the radar RF bands; the oscilloscope complements them on baseband, time-domain, trigger, interface, and PI/SI observations rather than being the main RF-band analyzer [16][36][42]. |\n| 5. Production-oriented radar test | AREG800A production configurations include radar mini/golden/pro variants with one, two, or three digital channels, one object per channel, frontend requirements, near object range possibility, analog IF output interfaces, and remote control interfaces [3]. | In production workflows, the radar echo generator provides repeatable object scenarios, while an oscilloscope is more likely used for setup/debug, interface validation, or troubleshooting of IF/baseband/electrical behavior rather than as the production echo-generation instrument [3][13][16]. |\n【推論】A practical automotive-radar workflow would place the oscilloscope early for PCB/interface/PDN bring-up, then alongside AREG800A and FSW-class RF instruments during IF/baseband debug and RF validation, because the passages separately identify scopes for interface/PDN testing, AREG800A for automotive radar echo generation, AREG IF interfaces, and FSW oscilloscope baseband inputs/RF coverage [6][13][16][36][42].\n\n來源：\n[3] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[6] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[13] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[15] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[16] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[17] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[36] Wiki：R&S FSW85（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[42] Wiki：FSW_specs_en_5215-6749-22_v1701（來源：`FSW_specs_en_5215-6749-22_v1701.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-e1c0a0c0a1c84746a2281776f3b95d8b",
+      "request_id": "request-e1c0a0c0a1c84746a2281776f3b95d8b",
+      "span_id": "span-e1c0a0c0a1c84746a2281776f3b95d8b",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-e1c0a0c0a1c84746a2281776f3b95d8b",
+       "request_id": "request-e1c0a0c0a1c84746a2281776f3b95d8b",
+       "span_id": "span-e1c0a0c0a1c84746a2281776f3b95d8b",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Short answer: the oscilloscope is best placed as a **debug/validation instrument around the radar ECU or radar module electronics**, not as the primary automotive-radar target simulator; the primary radar workflow uses instruments such as the R&S AREG800A for automotive radar echo generation and RF/spectrum instruments for mmWave analysis [6][15][36][42].\n| Likely workflow stage | Where the oscilloscope fits | How it complements RF radar instruments |\n|---|---|---|\n| 1. PCB / PCBA bring-up, SI/PI, interfaces | Use the oscilloscope for interface tests and power-distribution checks, since the cited SI/PI workflow maps “Interface Test” to scopes/BERTs/AWGs/switch matrices and “Power Distribution Network” to scopes and network analyzers [16][17]. | This is before or alongside radar RF testing: the scope checks electrical interfaces and PDN behavior, while RF instruments address radar-band behavior and RF performance [16][17][36]. |\n| 2. Radar module IF/baseband debug | The AREG800A ecosystem includes analog IF output and analog IF input interface options, and the FSW family has an “oscilloscope baseband inputs” option, R&S FSW-B2071, applicable to all FSW models and requiring specific R&S RTO1000/RTO2000/RTO6 oscilloscope configurations for specified performance [13][42]. | The oscilloscope can inspect time-domain/baseband behavior around IF paths, while AREG800A generates dynamic artificial radar objects and RF instruments analyze frequency-domain/RF behavior [6][13][42]. |\n| 4. mmWave RF validation / spectrum analysis | Automotive radar bands in the AREG800A context include 24 GHz to 24.25 GHz, 76 GHz to 81 GHz, and 24 GHz to 44 GHz depending on frontend [15]. R&S FSW85 covers RF input up to 85 GHz, or up to 90 GHz with the R&S FSW-B90G option under stated conditions [36]. | RF/spectrum instruments cover the radar RF bands; the oscilloscope complements them on baseband, time-domain, trigger, interface, and PI/SI observations rather than being the main RF-band analyzer [16][36][42]. |\n| 5. Production-oriented radar test | AREG800A production configurations include radar mini/golden/pro variants with one, two, or three digital channels, one object per channel, frontend requirements, near object range possibility, analog IF output interfaces, and remote control interfaces [3]. | In production workflows, the radar echo generator provides repeatable object scenarios, while an oscilloscope is more likely used for setup/debug, interface validation, or troubleshooting of IF/baseband/electrical behavior rather than as the production echo-generation instrument [3][13][16]. |\n【推論】A practical automotive-radar workflow would place the oscilloscope early for PCB/interface/PDN bring-up, then alongside AREG800A and FSW-class RF instruments during IF/baseband debug and RF validation, because the passages separately identify scopes for interface/PDN testing, AREG800A for automotive radar echo generation, AREG IF interfaces, and FSW oscilloscope baseband inputs/RF coverage [6][13][16][36][42].\n\n來源：\n[3] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[6] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[13] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[15] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[16] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[17] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[36] Wiki：R&S FSW85（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[42] Wiki：FSW_specs_en_5215-6749-22_v1701（來源：`FSW_specs_en_5215-6749-22_v1701.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_LicWgY7OiJhegf3qBTlf7QK7",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "Short answer: the oscilloscope is best placed as a **debug/validation instrument around the radar ECU or radar module electronics**, not as the primary automotive-radar target simulator; the primary radar workflow uses instruments such as the R&S AREG800A for automotive radar echo generation and RF/spectrum instruments for mmWave analysis [6][15][36][42].\n| Likely workflow stage | Where the oscilloscope fits | How it complements RF radar instruments |\n|---|---|---|\n| 1. PCB / PCBA bring-up, SI/PI, interfaces | Use the oscilloscope for interface tests and power-distribution checks, since the cited SI/PI workflow maps “Interface Test” to scopes/BERTs/AWGs/switch matrices and “Power Distribution Network” to scopes and network analyzers [16][17]. | This is before or alongside radar RF testing: the scope checks electrical interfaces and PDN behavior, while RF instruments address radar-band behavior and RF performance [16][17][36]. |\n| 2. Radar module IF/baseband debug | The AREG800A ecosystem includes analog IF output and analog IF input interface options, and the FSW family has an “oscilloscope baseband inputs” option, R&S FSW-B2071, applicable to all FSW models and requiring specific R&S RTO1000/RTO2000/RTO6 oscilloscope configurations for specified performance [13][42]. | The oscilloscope can inspect time-domain/baseband behavior around IF paths, while AREG800A generates dynamic artificial radar objects and RF instruments analyze frequency-domain/RF behavior [6][13][42]. |\n| 4. mmWave RF validation / spectrum analysis | Automotive radar bands in the AREG800A context include 24 GHz to 24.25 GHz, 76 GHz to 81 GHz, and 24 GHz to 44 GHz depending on frontend [15]. R&S FSW85 covers RF input up to 85 GHz, or up to 90 GHz with the R&S FSW-B90G option under stated conditions [36]. | RF/spectrum instruments cover the radar RF bands; the oscilloscope complements them on baseband, time-domain, trigger, interface, and PI/SI observations rather than being the main RF-band analyzer [16][36][42]. |\n| 5. Production-oriented radar test | AREG800A production configurations include radar mini/golden/pro variants with one, two, or three digital channels, one object per channel, frontend requirements, near object range possibility, analog IF output interfaces, and remote control interfaces [3]. | In production workflows, the radar echo generator provides repeatable object scenarios, while an oscilloscope is more likely used for setup/debug, interface validation, or troubleshooting of IF/baseband/electrical behavior rather than as the production echo-generation instrument [3][13][16]. |\n【推論】A practical automotive-radar workflow would place the oscilloscope early for PCB/interface/PDN bring-up, then alongside AREG800A and FSW-class RF instruments during IF/baseband debug and RF validation, because the passages separately identify scopes for interface/PDN testing, AREG800A for automotive radar echo generation, AREG IF interfaces, and FSW oscilloscope baseband inputs/RF coverage [6][13][16][36][42].\n\n來源：\n[3] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[6] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[13] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[15] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[16] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[17] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[36] Wiki：R&S FSW85（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[42] Wiki：FSW_specs_en_5215-6749-22_v1701（來源：`FSW_specs_en_5215-6749-22_v1701.md`）",
+          "evidence": {
+           "raw_citations": 8,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-0865ab24a9fa4a9d966d59295091a0a2",
+            "request_id": "request-0865ab24a9fa4a9d966d59295091a0a2",
+            "span_id": "span-0865ab24a9fa4a9d966d59295091a0a2",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "For an automotive use case involving automotive radar, where would an oscilloscope fit in the test workflow? Include the likely workflow stages and how the oscilloscope complements RF radar test instruments.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 6.421744
+             },
+             {
+              "text": "R&S AREG800A › 相關來源\n- [[AREG800A_specs_en_3609-8015-22_v0900]] — R&S AREG800A Automotive Radar Echo Generator Specifications，Version 09.00，September 2025。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 50,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 5.811304
+             },
+             {
+              "text": "R&S AREG800A › Automotive radar production configurations\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- [[R&S AREG-P1]] radar mini configuration / [[R&S AREG-DBP1]] base unit option：one digital channel，one object per channel，5 GHz instantaneous bandwidth，near object range possibility，analog IF output interfaces，remote control interfaces，[[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option one frontend per channel required。\n- [[R&S AREG-P2]] radar golden configuration / [[R&S AREG-DBP2]] base unit option：two digital channels。\n- [[R&S AREG-P3]] radar pro configuration / [[R&S AREG-DBP3]] base unit option：搭配 [[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option；frontend 支援 monostatic 或 bistatic；three digital channels；one object per channel。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 31,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 5.221941
+             },
+             {
+              "text": "R&S AREG800A › 讀圖補充\n以下內容來自 [[AREG800A_specs_en_3609-8015-22_v0900]] 的讀圖補充，可信度低於正文，不用於推翻正文。本次提供的 raw 摘要未附圖片 wikilink，因此未嵌入圖片。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 48,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 5.217013
+             },
+             {
+              "text": "R&S AREG800A › 基本訂購資訊\n| 類別 | 型號 / 代碼 | 名稱 | Order No. | 原文說明 |\n|---|---|---|---|---|\n| Base unit | `AREG800A` | Automotive radar echo generator | `1437.4400.02` | Includes power cable and quick start guide |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 5.136838
+             },
+             {
+              "text": "R&S AREG800A\n[[R&S AREG800A]] 是 [[Rohde & Schwarz]] 的 Automotive Radar Echo Generator，用於 dynamic artificial object generation；本頁規格依 [[AREG800A_specs_en_3609-8015-22_v0900]]，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 5.093052
+             },
+             {
+              "text": "R&S AREG800A › Artificial objects\n| Frontend 組合 | Distance condition | Maximum artificial objects |\n|---|---|---:|\n| with [[R&S QAT100]] | `< 4 m to 3000 m + air gap` | 最多 8 個；4 m 至 17 m 最多 4 個，17 m 至 3000 m 最多 4 個 |\n| with [[R&S QAT100]] | `> 17 m to 3000 m + air gap` | 最多 8 個 |\n| with [[R&S QAT100]] | `≥ air gap to 3000 m` | 最多 8 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `< 4 m to 3000 m + air gap` | 最多 32 個，每 frontend 最多 8 個；4 m 至 17 m 最多 4 個，17 m 至 3000 m 最多 28 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `> 17 m to 3000 m + air gap` | 最多 32 個，每 frontend 最多 8 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `≥ air gap to 3000 m` | 最多 32 個，每 frontend 最多 8 個 |\n\n其他 artificial object 規格：\n\n- Object distance accuracy with [[R&S AREG8-B9]] option：`±5 cm (meas.)`。\n- Object distance step size with [[R&S AREG8-B9]] option：`1 cm`。\n- Air gap：object distances 與 resulting object radar cross-sections 會依 frontend reference plane 與 DUT 之間距離改變；來源建議 air gap 足夠大以符合 radar under test 的 far-field condition。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 3.546526
+             },
+             {
+              "text": "R&S AREG800A › Production base units\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n| 代碼 | 名稱 | Order No. | 原文的一句說明 |\n|---|---|---|---|\n| [[R&S AREG-DBP1]] | [[R&S AREG-P1]] radar mini | `1437.9676P02` | Production base unit option / radar mini configuration |\n| [[R&S AREG-DBP2]] | [[R&S AREG-P2]] radar golden | `1437.9682P02` | Production base unit option / radar golden configuration |\n| [[R&S AREG-DBP3]] | [[R&S AREG-P3]] radar pro | `1437.9699P02` | Production base unit option / radar pro configuration |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 41,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 3.3807
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 3.874981
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n這份來源是 [[R&S AREG800A]] Automotive Radar Echo Generator 的 specifications，文件編號 `PD 3609.8015.22`，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`，文件標題為 `AREG800A Automotive Radar Echo Generator`，Copyright `© 2021–2025 Rohde & Schwarz`。\n\n[[R&S AREG800A]] 的 echo generator type 為 `dynamic artificial object generation`。Echo generation concept 分為：\n\n- `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n- `digital`：針對 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 `air gap value`；maximum generated distance 為 `3000 m`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 在環境溫度下儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格資料定義：\n\n- `Specifications with limits`：代表保證的產品效能，以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 的方式指定與測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：代表保證的產品效能，通常為 dimensions 或 setting parameter resolution 等無偏差或偏差可忽略的值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依據 GUM 計算，納入 environmental conditions、aging、wear and tear。\n- `Data without tolerance limits is not binding`；文件 `subject to change`。\n\n主要能力與限制：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 2.401593
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 讀圖補充\n以下內容來自讀圖補充，可信度低於正文，不用於推翻正文。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.79307
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG-MFP]]、[[R&S AREG-BFP]] — production frontend options，支援 monostatic 或 bistatic。\n- [[Automotive radar echo generation]]、[[FMCW radar]]、[[Radar cross-section]]、[[Doppler frequency shift]]、[[Hardware-in-the-loop]]、[[Open Simulation Interface]]、[[SCPI]]、[[Air gap]] — 本來源涉及的技術概念。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.754071
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG800A]] — Automotive Radar Echo Generator；本來源主要產品實體。\n- [[Rohde & Schwarz]] — 製造商與文件發布者。\n- [[R&S AREG8-B9]] — Digital baseband，1 GHz IF bandwidth、1 IF path、1 individual artificial object；Order No. `1437.8011.02`。\n- [[R&S AREG8-B63]] — Analog stepped delay line，用於 short object generation；Order No. `1437.8205.02`。\n- [[R&S AREG8-K527]] — Baseband extension from 1 GHz to 2 GHz IF bandwidth；Order No. `1437.9882.02`。\n- [[R&S AREG8-K528]] — Baseband extension from 2 GHz to 5 GHz IF bandwidth；Order No. `1437.9799.02`。\n- [[R&S AREG8-K570]] — Activation of second IF path；Order No. `1437.9899.02`。\n- [[R&S AREG8-K812]] — One additional artificial object；Order No. `1437.9853.02`。\n- [[R&S AREG8-K813]] — Extended Doppler frequency shift up to 10 MHz；Order No. `1437.9901.02`。\n- [[R&S AREG8-K814]] — Near object range for FMCW；Order No. `1437.9776.02`。\n- [[R&S AREG8-K740]] — Analog IF output interfaces；Order No. `1437.9830.02`。\n- [[R&S AREG8-K741]] — Analog IF input interface；Order No. `1437.9847.02`。\n- [[R&S AREG8-K109]] — Hardware-in-the-loop control interface；Order No. `1437.9860.02`。\n- [[R&S AREG8-K549]] — Synchronization interface；Order No. `1437.9876.02`。\n- [[R&S AREG8-K986]] — Remote control GPIB；Order No. `1437.9818.02`。\n- [[R&S AREG8-B97]] — System alignment backend；Order No. `1437.9001.02`。\n- [[R&S AREG-P1]] / [[R&S AREG-DBP1]]、[[R&S AREG-P2]] / [[R&S AREG-DBP2]]、[[R&S AREG-P3]] / [[R&S AREG-DBP3]] — automotive radar production configurations / production base unit options。\n- [[R&S AREG8-24S]]、[[R&S AREG8-24D]]、[[R&S AREG8-81S]]、[[R&S AREG8-81D]]、[[R&S AREG8-81WS]]、[[R&S AREG8-81WD]]、[[R&S FE44S]] — 支援的 mmWave 或 external frontends。\n- [[R&S QAT100]]、[[R&S QAT-B2]]、[[R&S QAT-Z50]] — advanced antenna array 及其相關 option/accessory。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.319078
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 原文未解的問題\n- `AREG800A base unit IF frequency range` 中來源列出 [[R&S AREG8-B9]] with [[R&S AREG8-K527]]：`0.7 GHz to 5.7 GHz`；同份來源 ordering information 顯示 5 GHz IF bandwidth extension 為 [[R&S AREG8-K528]]。本頁未自行推論修正，需回查原始 datasheet 表格。\n- `AUX IF output frequency range` 也出現 [[R&S AREG8-B9]] with [[R&S AREG8-K527]]：`0.7 GHz to 5.7 GHz`；同樣需回查是否漏列 [[R&S AREG8-K528]]。\n- 多處 RF transfer characteristics 條件萃取為 `R&S®AREG8-B9 with 未完整標示 option`，未保留完整 option code；不得自行補碼。\n- Datasheet 未列出價格。\n- Datasheet 未列出 service plan 具體 order code。\n- Extended warranty periods 需聯絡 Rohde & Schwarz sales office；datasheet 未列出具體 code 或期限組合。\n- 本次提供的 raw 摘要包含圖片補充文字，但未提供可嵌入的圖片 wikilink；因此 wiki 僅保留讀圖文字註記，未新增圖片嵌入。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 0.876813
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n- Base unit instantaneous IF bandwidth 依 option 為 `1 GHz`、`2 GHz` 或 `5 GHz`；overrange 分別為 `1.2 GHz (meas.)`、`2.2 GHz (meas.)`、`5.2 GHz (meas.)`。\n- AREG800A base unit IF frequency range：[[R&S AREG8-B9]] 為 `1.1 GHz to 2.1 GHz`；[[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 2.7 GHz`；來源另列 [[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 5.7 GHz`，但 5 GHz bandwidth ordering information 顯示還涉及 [[R&S AREG8-K528]]，此處未自行推論修正。\n- RF frequency bands：[[R&S AREG8-24S]] / [[R&S AREG8-24D]] 為 `24 GHz to 24.25 GHz`；[[R&S AREG8-81S]] / [[R&S AREG8-81D]] 與 [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]]、[[R&S QAT100]] 為 `76 GHz to 81 GHz`；[[R&S FE44S]] 為 `24 GHz to 44 GHz`。\n- 每台 [[R&S AREG800A]] base unit 支援 conventional mmWave frontends 最多 4 個，[[R&S QAT100]] 最多 8 個，[[R&S FE44S]] 最多 8 個 external frontends（4 個 TX、4 個 RX，共 4 pairs）。\n- Artificial object distance 可依 option 涵蓋 `< 17 m to 3000 m (meas.)`、`< 4 m to 3000 m (meas.)`、`≥ air gap to 3000 m (meas.)`；production frontend 組合列為 FMCW `≥ air gap to 350 m (meas.)`，non FMCW `< 17 m to 350 m (meas.)`。\n- Radial velocity：每個 artificial object 支援 individual Doppler frequency shift；with [[R&S AREG8-B9]] and [[R&S AREG8-B63]] velocity setting range 為 `±500 km/h`，velocity step size 為 `0.001 km/h`。\n- Remote control interfaces 包含 Ethernet 與 [[R&S AREG8-K986]] GPIB；remote control command set 為 `SCPI`。\n- HiL interface option 為 [[R&S AREG8-K109]]；open-standard protocol support 為 open simulation interface（OSI）；time synchronization protocol 為 `gPTP`、`NTP`。\n- Base unit `AREG800A` Order No. `1437.4400.02`，包含 power cable 與 quick start guide。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 0.835576
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 2.532468
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 2.087881
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 0.561905
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽\n[[SerDes 與 SI PI 測試概覽]] 是依 [[0 Digital Test - What are SIPI and Serdes]] 建立的 high-speed digital 測試主題頁，用來連接 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]]、[[PCB]] / [[PCBA]] 與相關驗證儀器類型。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 0.507563
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 與既有知識的關係\n- [[SerDes]] 已記錄 die-to-die、SoC IP 與封裝示意圖中的 SerDes 語彙；本頁補充 R&S 簡報中 SerDes 與 SI / PI / validation challenges 的測試場景。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]] 與 [[TDR 阻抗測量]] 可承接 Slide 20–21 中對 high speed PCB / PCBA signal integrity flow 與 PCB test solutions 的列名。\n- [[Power Integrity 外部資料清單]] 保存既有 OneNote link hub 中的 PDN impedance 待讀資料；本頁只加入 Slide 11 明示的 [[Power Distribution Network]] 測試區塊。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 0.362916
+             },
+             {
+              "text": "R&S SMBV100B › GNSS and avionics options\n| Code | Name | Order No. | 原文說明 / 關係 |\n|---|---|---:|---|\n| R&S®SMBVB-K362 | GNSS test suite | 來源未標示 | Test suite。 |\n| R&S®SMBVB-K363 | Car navigation test suite | 來源未標示 | Test suite。 |\n| R&S®SMBVB-K364 | China national GNSS test standard | 來源未標示 | Test suite。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 24,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 4.748552
+             },
+             {
+              "text": "R&S SMBV100B › Analog modulation、sources 與 pulse\n- Pulse train：R&S®SMBVB-K27 option 擴充 R&S®SMBVB-K23，用於 radar applications；prerequisite 必須安裝 R&S®SMBVB-K23 option。\n- Multifunction generator：R&S®SMBVB-K24 option；LF generator 1/2 signal types sine、pulse、triangle、trapezoid；noise generator Gaussian、equal noise amplitude distribution。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 4.71113
+             },
+             {
+              "text": "R&S SMBV100B › Sweep、list mode 與 phase coherence\n- Frequency and level sweep：digital sweep in discrete steps；parameters 為 RF frequency、RF level；sweep range 為 fully specified frequency and level range。\n- Sweep trigger modes：auto、single、extern single、step、extern step、extern start/stop。\n- Sweep source：external trigger signal（rear panel INST TRIG）、rotary knob、touch panel、remote control。\n- Sweep shape：sawtooth、triangle。\n- Dwell time setting range：5 ms to 100 s；resolution 0.1 ms。\n- List mode：Frequency and level values 可儲存在 list，並由 internal timer 或 external trigger 觸發；maximum number of steps（learned mode）：10000；each step dwell time 1 ms to 100 s。\n- Phase coherence：R&S®SMBVB-K90 option enables phase-coherent RF outputs of two or more instruments in I/Q mode。\n- Phase coherence frequency range：R&S®SMBVB-B103：80 MHz < f ≤ 3 GHz；R&S®SMBVBKB106：80 MHz < f ≤ 6 GHz。\n- LO IN / LO OUT：rear panel SMA female；LO signal frequency 為 1.0 × RF setting；input / output level range +7 dBm to +13 dBm；50 Ω nom.",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 4.556078
+             },
+             {
+              "text": "R&S SMBV100B › Frequency / RF / modulation\n| Code | Name | Order No. | 原文說明 / 關係 |\n|---|---|---:|---|\n| R&S®SMBVBKB106 | Frequency extension to 6 GHz | 1423.6370.02 | 搭配 R&S®SMBVB-B103 將 CW mode 擴至 8 kHz to 6 GHz，I/Q mode 擴至 1 MHz to 6 GHz。 |\n| R&S®SMBVB-K704 | Flexible reference input from 1 MHz to 100 MHz | 1423.7618.02 | Variable reference input frequency 1.0 MHz to 100 MHz，step 0.1 Hz；internal 10 MHz reference oscillator lock 到 input frequency；source note 限 5 MHz to 13 MHz 與 95 MHz to 100 MHz input ranges。 |\n| R&S®SMBVB-K31 | High output power | 1423.6670.02 | RF output power option；level setting range at 1 MHz ≤ f ≤ 6 GHz 可至 +30 dBm。 |\n| R&S®SMBVB-K90 | Phase coherence | 1423.7601.02 | Enables phase-coherent RF outputs of two or more instruments in I/Q mode。 |\n| R&S®SMBVB-K22 | Pulse modulator | 1423.7560.02 | Pulse modulation；modulation source external。 |\n| R&S®SMBVB-K23 | Pulse generator | 1423.7576.02 | Pulse generator；搭配 K22 時 pulse modulation source 可 external、internal。 |\n| R&S®SMBVB-K27 | Pulse train | 1423.9279.02 | 擴充 R&S®SMBVB-K23 pulse generator；prerequisite：必須安裝 R&S®SMBVB-K23 option。 |\n| R&S®SMBVB-K24 | Multifunction generator | 1423.7582.02 | LF generator 1/2 signal types sine、pulse、triangle、trapezoid；noise generator Gaussian、equal noise amplitude distribution。 |\n| R&S®SMBVB-K720 | AM/FM/M | 1423.7599.02 | Analog modulation option；來源規格段落描述 AM、FM、φM。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 33,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 3.704496
+             },
+             {
+              "text": "R&S SMBV100B › Signal performance for selected standards\n- 3GPP FDD with R&S®SMBVB-K42：Error vector magnitude，1 DPCH，RMS，< 0.8 %，0.3 % measured；test frequency 1800 MHz to 2200 MHz。\n- 3GPP FDD ACLR 條件：test model 1、64 DPCH、1800 MHz to 2200 MHz、average channel power ≤ 0 dBm、I/Q input gain +4 dB、optimization mode high quality、temperature range +18 °C to +33 °C；5 MHz offset > 69 dB，typ. 72 dB；10 MHz offset > 71 dB，typ. 74 dB。\n- Custom digital modulation with R&S®SMBVB-K520 real-time mode：2FSK / 4FSK deviation error at symbol rate up to 2 MHz 為 0.4 % measured，up to 10 MHz 為 1.2 % measured；QPSK/OQPSK/π/4-DQPSK/8PSK/16QAM/32QAM/64QAM EVM at symbol rate up to 5 MHz 為 0.5 % RMS measured，up to 20 MHz 為 0.7 % RMS measured。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 26,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 3.371386
+             },
+             {
+              "text": "R&S SMBV100B › GNSS and avionics options\n| Code | Name | Order No. | 原文說明 / 關係 |\n|---|---|---:|---|\n| R&S®SMBVB-K44 | GPS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K66 | Galileo | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K94 | GLONASS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K97 | NavIC/IRNSS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K98 | Modernized GPS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K106 | SBAS/QZSS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K107 | BeiDou | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K108 | GNSS real world simulation | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K109 | GNSS real-time interface | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K111 | GBAS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K122 | RTK virtual reference station | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K123 | Modernized GLONASS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K129 | Matched spectrum GNSS interferer test | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K132 | Modernized BeiDou | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K133 | Single-satellite GNSS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K134 | Upgrade to dual-frequency GNSS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K135 | Upgrade to triple-frequency GNSS | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K136 | Add 6 GNSS channels | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K137 | Add 12 GNSS channels | 來源未標示 | GNSS and avionics option。 |\n| R&S®SMBVB-K151 | ILS | 來源未標示 | Avionics option。 |\n| R&S®SMBVB-K152 | VOR | 來源未標示 | Avionics option。 |\n| R&S®SMBVB-K153 | DME | 來源未標示 | Avionics option。 |\n| R&S®SMBVB-K360 | ERA-GLONASS test suite | 來源未標示 | Test suite。 |\n| R&S®SMBVB-K361 | eCall test suite | 來源未標示 | Test suite。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 23,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 3.317914
+             },
+             {
+              "text": "R&S SMBV100B › Baseband options\n| Code | Name | Order No. | 原文說明 / 關係 |\n|---|---|---:|---|\n| R&S®SMBVB-K17 | Differential analog I/Q outputs | 1423.7624.02 | Single-ended / differential analog I/Q outputs；Envelope tracking K540 prerequisite。 |\n| R&S®SMBVB-K19 | Digital baseband output | 1423.7630.02 | Digital baseband outputs 需安裝一個 R&S®SMBVB-K19 option。 |\n| R&S®SMBVB-K511 | ARB memory extension to 512 Msample | 1423.7653.02 | Waveform length extension to 512 Msample。 |\n| R&S®SMBVB-K512 | ARB memory extension to 1 Gsample | 1423.7660.02 | With K511 and K512 waveform length to 1 Gsample。 |\n| R&S®SMBVB-K513 | ARB memory extension to 2 Gsample | 1423.8589.02 | With K511、K512、K513 waveform length to 2 Gsample。 |\n| R&S®SMBVB-K520 | Baseband real-time extension, incl. CDM | 1423.7676.02 | Internal digital standards 需此 option；支援 ASK/FSK/PSK/QAM、coding、filters。 |\n| R&S®SMBVB-K523 | Baseband extension to 240 MHz RF bandwidth | 1423.7682.02 | ARB sample rate to 300 MHz；RF bandwidth to 240 MHz。 |\n| R&S®SMBVB-K524 | Baseband extension to 500 MHz RF bandwidth | 1423.7699.02 | With K523 and K524，ARB sample rate to 600 MHz；RF bandwidth to 500 MHz。 |\n| R&S®SMBVB-K525 | Baseband extension to 1 GHz RF bandwidth | 1423.8920.02 | With K523、K524、K525，ARB sample rate to 1200 MHz；RF bandwidth to 1000 MHz。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 34,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 1.794129
+             },
+             {
+              "text": "R&S SMBV100B › Front panel\n- RF 50 Ω RF output：N female。\n- Sensor connector for R&S®NRP-Zxx power sensor：6-pin ODU MINI-SNAP® series B。\n- USB：USB 2.0 high speed，2 connectors，USB type A。\n- USER 1、USER 2：user-configurable inputs or outputs，例如 trigger input 或 marker output，BNC female。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 28,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 1.714574
+             },
+             {
+              "text": "R&S FSW8 › 適用硬體 options（摘錄）\n| Option code | 名稱 | Order No. | 原文限制 |\n|---|---|---|---|\n| R&S FSW-B2071 | Oscilloscope baseband inputs | 1331.8302.02 | 適用所有 FSW models |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW8.md"
+              },
+              "score": 2.496006
+             },
+             {
+              "text": "R&S FSW8 › 主要規格\n| 規格 | 數值與條件 |\n|---|---|\n| Frequency range, DC coupled | 2 Hz to 8 GHz |\n| Frequency range, AC coupled | 10 MHz to 8 GHz |\n| Frequency resolution | 0.01 Hz |\n| RF input impedance | 50 Ω |\n| RF input connector | N female |\n| Maximum DC voltage, AC coupled | 50 V |\n| Maximum DC voltage, DC coupled | 0 V |\n| RF input VSWR | RF attenuation ≤ 4 dB、10 MHz ≤ f ≤ 8 GHz：typ. 1.87 |\n| Power consumption | 150 W without options；250 W with all options（meas.），all options 不含 B512R/B1200/B2001/B800R |\n| Dimensions | 462 mm × 240 mm × 504 mm（nom.，including front handles and rear feet） |\n| Net weight without options | 20.2 kg（44.5 lb）nominal |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW8.md"
+              },
+              "score": 1.822162
+             },
+             {
+              "text": "R&S FSW8 › Sensitivity 摘錄\n- Displayed average noise level 條件：RF attenuation = 0 dB、termination = 50 Ω、normalized to 1 Hz RBW、RBW = 1 kHz、VBW = 1 Hz、+5 °C to +40 °C。\n- RF preamplifier off：2 Hz ≤ f ≤ 100 Hz 為 –110 dBm，typ. –120 dBm；1 MHz < f ≤ 1 GHz 為 –150 dBm，typ. –154 dBm；3 GHz ≤ f ≤ 8 GHz 為 –152 dBm，typ. –156 dBm。\n- With R&S FSW-B24、RF preamplifier = 30 dB：50 MHz < f ≤ 150 MHz 為 –163 dBm，typ. –166 dBm；150 MHz < f ≤ 8 GHz 為 –166 dBm，typ. –169 dBm。\n- 若安裝 R&S FSW-B25，來源列示值加 1 dB。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW8.md"
+              },
+              "score": 1.668362
+             },
+             {
+              "text": "R&S FSW8 › 適用硬體 options（摘錄）\n| Option code | 名稱 | Order No. | 原文限制 |\n|---|---|---|---|\n| R&S FSW-B4 | OCXO precision frequency reference | 1313.0703.02 | user-retrofittable |\n| R&S FSW-B8E | Resolution bandwidth up to 40 MHz | 1338.6911.02 | 適用；序號起點 FSW8 101342 |\n| R&S FSW-B8 | Resolution bandwidth up to 80 MHz | 1313.2464.26 | 適用 R&S FSW8/13/26；contact service center |\n| R&S FSW-B10 | External generator control | 1313.1622.02 | contact service center |\n| R&S FSW-B13 | Highpass filter for harmonic measurements | 1313.0761.02 | user-retrofittable |\n| R&S FSW-B17 | Digital baseband Interface | 1313.0784.02 | user-retrofittable |\n| R&S FSW-B21 | LO/IF connections for external mixers | 不適用 | 原文明列不適用 R&S FSW8 |\n| R&S FSW-B24 | RF preamplifier, 100 kHz to 13.6 GHz | 1313.0832.13 | 適用 R&S FSW8/13 |\n| R&S FSW-B25 | Electronic attenuator, 1 dB steps | 1313.0990.02 | 適用 R&S FSW8/13/26 |\n| R&S FSW-B40 | 40 MHz analysis bandwidth | 1313.0861.02 | user-retrofittable |\n| R&S FSW-B80 | 80 MHz analysis bandwidth | 1313.0878.02 | user-retrofittable |\n| R&S FSW-B160 | 160 MHz analysis bandwidth | 1325.4850.14 | contact service center |\n| R&S FSW-B320 | 320 MHz analysis bandwidth | 1325.4867.14 | includes 200 MHz IF filter |\n| R&S FSW-B512 | 512 MHz analysis bandwidth | 1331.7106.14 | includes 200 MHz IF filter |\n| R&S FSW-B1200 / B2001 / B800R | 1.2 GHz / 2 GHz / real-time 800 MHz | 不適用 | 原文說 R&S FSW-B1200/B2001/B800R 適用所有型號，R&S FSW8、R&S FSW13 除外 |\n| R&S FSW-B4001 / B6001 / B8001 | 4.4 GHz / 6.4 GHz / 8.312 GHz analysis bandwidth | 不適用 | 僅適用 R&S FSW43/50/67/85 |\n| R&S FSW-B71 | Analog baseband inputs, 40 MHz analysis bandwidth | 1313.1651.13 | 適用 R&S FSW8/13；contact service center |\n| R&S FSW-B71E | 80 MHz analysis bandwidth for analog baseband inputs | 1313.6547.02 | 需 R&S FSW-B71 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW8.md"
+              },
+              "score": 0.460264
+             },
+             {
+              "text": "review-options › AREG800A / QAT100 判斷重點\n- [[R&S AREG800A]] 有 `3` 列待補描述，來源為 [[AREG800A_specs_en_3609-8015-22_v0900]]。\n- Production configurations：\n  - [[R&S AREG-P1]] / [[R&S AREG-DBP1]]：radar mini configuration，one digital channel，one object per channel。\n  - [[R&S AREG-P2]] / [[R&S AREG-DBP2]]：radar golden configuration，two digital channels，one object per channel，one frontend per channel required。\n  - [[R&S AREG-P3]] / [[R&S AREG-DBP3]]：radar pro configuration，three digital channels，one object per channel，with [[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option，monostatic or bistatic。\n- [[R&S QAT100]] 有 `2` 列待確認：\n  - [[R&S QAT-B2]]：Second line of 96 transmit antennas, for the R&S®QAT100，Order No. `1341.0162.02`；requires 指向 QAT100，但表裡沒有該 code。\n  - [[R&S QAT-Z50]]：Shielding system, for one R&S®QAT100, length 50 cm，Order No. `1341.0156.02`；requires 指向 QAT100，但表裡沒有該 code。\n- [[R&S AREG800A]] frontend / system alignment 相鄰片段疑似有欄位錯位，需要回查原 PDF，不應用相鄰文字直接覆蓋既有產品頁。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/review-options.md"
+              },
+              "score": 3.664274
+             },
+             {
+              "text": "review-options › SMW200A 判斷重點\n- [[R&S SMW200A]] 有 `71` 列需要判斷。\n- `R&S®SMW-B10xx`、`R&S®SMW-B1xxx`、`R&S®SMW-B1xxxO`、`R&S®SMW-B20xx`、`R&S®SMW-B2xx`、`R&S®SMW-B2xxx` 看起來是 datasheet 用 `xx` 或 `xxx` 表示任一 frequency option 的 placeholder，不是真正 code；確認後可整批刪除，不必逐列判斷。\n- RF path B 的 `R&S®SMW-B20xx frequency option` 使用條件：必須安裝 `R&S®SMW-B13T` 或 `R&S®SMW-B13XT` 作為 baseband main module。\n- `R&S®SMW-B13` 與 `R&S®SMW-B13T` 可出現在同一段 RF path / baseband main module 條件中。\n- `R&S®SMW-B13` 與 `R&S®SMW-B13T` 不能安裝在配備下列 frequency options 的儀器上：\n  - `R&S®SMW-B1044O`\n  - `R&S®SMW-B2044O`\n  - `R&S®SMW-B1056O`\n  - `R&S®SMW-B1067O`\n- `R&S®SMW-B81`、`R&S®SMW-B82`、`R&S®SMW-B83` 的 `requires` 來源使用 `or` 或縮寫串列，但表格欄位不能表達選一或 series variant。\n- 多個 [[R&S SMW200A]] software option 的 `requires` 指向 `SMW-B9/-B10`，而抽取表中沒有 `SMW-B9` 或 `SMW-B10`；來源指出需確認是抽取表漏列、打錯，或應補列。\n- [[R&S SMW200A]] 既有頁面已依正式 configuration guide / specifications 記錄 `R&S®SMW-B9` 與 `R&S®SMW-B10`，因此本來源的「表裡沒有」應理解為 Option 表缺漏，不是 datasheet 不存在該 option。\n- `R&S®SMW-K200` 是 `Waveform packages for signals from R&S®WinIQSIM2`，包含 `1 waveform`、`5 waveforms`、`50 waveforms`；每台 instrument 最多 `250 waveforms`。\n- 若同一 standard 的兩個 waveforms 需同時輸出，對應 software option 必須安裝兩次；來源例子包含 `two R&S®SMW-K240 for GSM/EDGE` 與 `two R&S®SMW-K350 for DFS`。\n- Software option 不綁定特定 baseband generator。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/review-options.md"
+              },
+              "score": 1.803972
+             },
+             {
+              "text": "review-options › FSWP / FSW 判斷重點\n- [[R&S FSWP]] 區塊共有 `7` 列。\n- `R&S®FSWP-K60C` requires `R&S®FSWP-B1 and R&S®FSWP-K60 options`。\n- `R&S®FSWP-K60P` requires `R&S®FSWP-B1`、`R&S®FSWP-K60` and `R&S®FSWP-K60C or R&S®FSWP-K60H`。\n- `R&S®FSWP-K6P` requires `R&S®FSWP-B1`、`R&S®FSWP-B64` and `R&S®FSWP-K6`。\n- `R&S®FSWP-K6S` requires `R&S®FSWP-B1 and R&S®FSWP-K6`。\n- `R&S®FSWP-K70M` 與 `R&S®FSWP-K70P` requires `R&S®FSWP-B1 and R&S®FSWP-K70`。\n- `R&S®FS-SNS18` 代表 smart noise sources family 的其中一個型號；原文 family 包含 `R&S®FS-SNS18/26/40/55/67/90/110`，order no. 格式 `1338.8008.xx`。\n- [[R&S FSW]] 中 `R&S®FSW-K1017` 目前沒有描述；相鄰原文顯示 `R&S®FSW-K552 Custom digital baseband connection` requires `R&S®FSW-B517 or R&S®FSW-K1017 option`。\n- `R&S®FSW-K72` 為 `3GPP FDD (WCDMA) BS measurements`，Order No. `1313.1422.02`。\n- `R&S®NRP-Z8x`、`R&S®NRPxxT/TN`、`R&S®NRPxxA/AN`、`R&S®NRPxxS/SN` power sensors 可作為 wideband RF power trigger sources；其中部分註記為 average power measurement only 或 product discontinued。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/review-options.md"
+              },
+              "score": 1.676341
+             },
+             {
+              "text": "R&S FSW85 › 主要規格\n| 規格 | 數值與條件 |\n|---|---|\n| RF1 input standard, DC coupled | 2 Hz to 85 GHz |\n| RF1 input standard, AC coupled | 10 MHz to 85 GHz |\n| RF1 input with R&S FSW-B90G, YIG preselector off, DC coupled | 2 Hz to 90 GHz |\n| RF1 input with R&S FSW-B90G, YIG preselector off, AC coupled | 10 MHz to 90 GHz |\n| RF2 input, DC coupled | 2 Hz to 67 GHz |\n| RF2 input, AC coupled | 10 MHz to 67 GHz |\n| RF1 input connector | 1.00 mm male |\n| RF2 input connector | 1.85 mm male，compatible with 2.4 mm |\n| RF input impedance | 50 Ω |\n| Maximum DC voltage, AC coupled | 25 V |\n| Maximum DC voltage, DC coupled | 0 V |\n| RF attenuation | Mechanical RF attenuator 10 dB steps；Electronic IF attenuator 1 dB steps |\n| RF input VSWR | 70 GHz < f ≤ 85 GHz / 90 GHz：2.4 nominal；RF input 2 在上述 VSWR 數值上加 0.2 nominal |\n| Power consumption | 230 W without options；330 W with all options（meas.），all options 不含 B512R/B1200/B2001/B800R |\n| Dimensions | 462 mm × 240 mm × 610 mm nominal |\n| Net weight without options | 27.9 kg（61.5 lb）nominal |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW85.md"
+              },
+              "score": 1.7998
+             },
+             {
+              "text": "R&S FSW85 › 適用硬體 options（摘錄）\n| Option code | 名稱 | Order No. | 原文限制 |\n|---|---|---|---|\n| R&S FSW-B8E | Resolution bandwidth up to 40 MHz | 1338.6911.02 | 適用；序號起點 FSW85 101573 |\n| R&S FSW-B8 | Resolution bandwidth up to 80 MHz | 1313.2464.02 | 適用 R&S FSW43/50/67/85；export license required |\n| R&S FSW-B21 | LO/IF connections for external mixers | 1313.1100.86 | 適用 R&S FSW85；contact service center |\n| R&S FSW-B24 | RF preamplifier | 來源未標示 | 來源的 R&S FSW-B24 frequency range 與 order no. 列至 R&S FSW67，未列 R&S FSW85 |\n| R&S FSW-B40/B80/B160/B320/B512 | 40 MHz to 512 MHz analysis bandwidth | 見 [[R&S FSW]] | 適用 |\n| R&S FSW-B1200 | 1.2 GHz analysis bandwidth | 1331.6400.14 | 適用 ex-factory |\n| R&S FSW-B2001 | 2 GHz analysis bandwidth | 1331.6916.14 | 適用 ex-factory |\n| R&S FSW-B4001 | 4.4 GHz analysis bandwidth | 1338.5215.14 | 適用 ex-factory；retrofittable 僅適用序號 R&S FSW85 101650 起 |\n| R&S FSW-B6001 | 6.4 GHz analysis bandwidth | 1338.5221.14 | 適用 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B8001 | 8.312 GHz analysis bandwidth | 1338.5238.14 | 適用 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B90G | Frequency extension 90 GHz | 1331.7693.02 | 不可 retrofittable；僅適用 R&S FSW85；f > 85 GHz without preselection |\n| R&S FSW-B71 | Analog baseband inputs | 1313.1651.86 | 適用 R&S FSW85 |\n| R&S FSW-B2071 | Oscilloscope baseband inputs | 1331.8302.02 | 適用所有 FSW models |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW85.md"
+              },
+              "score": 1.692501
+             },
+             {
+              "text": "R&S FSW85 › Sensitivity 摘錄\n- RF input 1：2 Hz ≤ f ≤ 100 Hz 為 –105 dBm，typ. –115 dBm；1 MHz < f ≤ 1 GHz 為 –145 dBm，typ. –150 dBm；80 GHz < f ≤ 85 GHz 為 –120 dBm，typ. –123 dBm。\n- YIG preselector off、with R&S FSW-B90G option for f > 85 GHz：85 GHz < f ≤ 88 GHz 為 –125 dBm；88 GHz < f ≤ 90 GHz 為 –120 dBm。\n- RF input 2：frequencies > 44 GHz 的上述值加 1 dB。\n- Noise cancellation improvement：f ≤ 43 GHz 為 13 dB（nom.）；f > 43 GHz 且 YIG preselector on 為 13 dB（nom.）；f > 43 GHz 且 YIG preselector off 為 0 dB（nom.）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW85.md"
+              },
+              "score": 1.531215
+             },
+             {
+              "text": "R&S FSW › 其他硬體 options（摘錄）\n| Option code | 名稱 | Order No. | 原文說明 / 限制 |\n|---|---|---|---|\n| R&S FSW-B4 | OCXO precision frequency reference | 1313.0703.02 | user-retrofittable |\n| R&S FSW-B8E | Resolution bandwidth up to 40 MHz | 1338.6911.02 | 適用 [[R&S FSW8]]/13/26/43/50/67/85；signal analysis bandwidth 不由 B8E 定義 |\n| R&S FSW-B8 | Resolution bandwidth up to 80 MHz | 1313.2464.26 或 1313.2464.02 | 1313.2464.26 適用 [[R&S FSW8]]/13/26；1313.2464.02 適用 [[R&S FSW43]]/50/67/85 且 export license required |\n| R&S FSW-B10 | External generator control | 1313.1622.02 | contact service center |\n| R&S FSW-B13 | Highpass filter for harmonic measurements | 1313.0761.02 | user-retrofittable |\n| R&S FSW-B17 | Digital baseband Interface | 1313.0784.02 | user-retrofittable |\n| R&S FSW-B18 | Spare solid state drive | 1313.0790.21 | user-retrofittable |\n| R&S FSW-B21 | LO/IF connections for external mixers | 1313.1100.28 / 1313.1100.86 | 不適用 [[R&S FSW8]]、[[R&S FSW13]]；.28 適用 [[R&S FSW26]]/43/50/67；.86 適用 [[R&S FSW85]] |\n| R&S FSW-B24 | RF preamplifier | 1313.0832.13/.26/.43/.49/.51/.66/.67 | 適用範圍依型號與 order no.；來源未列 [[R&S FSW85]] 適用 B24 |\n| R&S FSW-B25 | Electronic attenuator, 1 dB steps | 1313.0990.02 | 適用 [[R&S FSW8]]/13/26 |\n| R&S FSW-B33 | USB mass memory write protection | 1313.3602.02 | 不可 retrofittable；factory pre-installed |\n| R&S FSW-B71 | Analog baseband inputs | 1313.1651.13/.26/.67/.86 | order no. 依型號範圍不同 |\n| R&S FSW-B71E | 80 MHz analysis bandwidth for analog baseband inputs | 1313.6547.02 | 需 R&S FSW-B71；user-retrofittable |\n| R&S FSW-B2071 | Oscilloscope baseband inputs | 1331.8302.02 | 適用所有 FSW models；user-retrofittable |\n| R&S FSW-B90G | Frequency extension 90 GHz | 1331.7693.02 | 不可 retrofittable；僅適用 [[R&S FSW85]]；f > 85 GHz without preselection |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 2.811202
+             },
+             {
+              "text": "FSW_specs_en_5215-6749-22_v1701 › 外部附件與支援設備\n- High-power attenuators：R&S RBU100、R&S RBU50、R&S RDL50。\n- External harmonic mixers 適用於 R&S FSW26/43/50/67/85 with R&S FSW-B21 option：RPG FS-Z60、FS-Z75、FS-Z90、FS-Z110、FS-Z140、FS-Z170、FS-Z220、FS-Z325。\n- Frequency converter：R&S FC330SR downconverter，220 GHz to 330 GHz，Order No. 1444.6310.02。\n- External frontends supported by R&S FSW-K553：R&S FE44S、R&S FE50DTR、R&S FE110SR、R&S FE170SR。\n- Power sensors supported：僅用於 average power measurement；部分 R&S NRP-Z8x、R&S NRPxxT/TN、R&S NRPxxA/AN、R&S NRPxxS/SN power sensors 除 RF power measurements 外，也可作為 wideband RF power trigger sources。\n- R&S FSW-B71/-B71E 支援多款 R&S RT-ZS、RT-ZD、RT-ZM probes；RF measurements using probes 不支援 R&S FSW67、R&S FSW85。\n- R&S FSW-B2071 支援 R&S RTO1000、R&S RTO2000、R&S RTO6 oscilloscope configurations；部分 RTO1000 型號為 discontinued。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/FSW_specs_en_5215-6749-22_v1701.md"
+              },
+              "score": 4.260539
+             },
+             {
+              "text": "FSW_specs_en_5215-6749-22_v1701 › RF input 與介面\n- RF input impedance：50 Ω。\n- [[R&S FSW8]]、[[R&S FSW13]] connector：N female。\n- [[R&S FSW26]] connector：APC 3.5 mm male，compatible with SMA。\n- [[R&S FSW43]] connector：2.92 mm male，compatible with SMA。\n- [[R&S FSW50]]、[[R&S FSW67]] connector：1.85 mm male，compatible with 2.4 mm。\n- [[R&S FSW85]] RF1 input connector：1.00 mm male；RF2 input connector：1.85 mm male，compatible with 2.4 mm。\n- R&S FSW8 至 R&S FSW67：Mechanical RF attenuator 為 5 dB steps；Electronic IF attenuator 為 1 dB steps。\n- R&S FSW85：Mechanical RF attenuator 為 10 dB steps；Electronic IF attenuator 為 1 dB steps。\n- IF output 2 GHz 僅適用 [[R&S FSW26]]、[[R&S FSW43]]、[[R&S FSW50]]、[[R&S FSW67]]、[[R&S FSW85]]；RF frequency range 在 span = 0 Hz 時為 8 GHz 至 instrument model 的 maximum frequency。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/FSW_specs_en_5215-6749-22_v1701.md"
+              },
+              "score": 3.073833
+             },
+             {
+              "text": "FSW_specs_en_5215-6749-22_v1701 › 重要 options 條件\n- R&S FSW-B4 OCXO precision frequency reference：Order No. 1313.0703.02，user-retrofittable。\n- R&S FSW-B8E Resolution bandwidth up to 40 MHz：Order No. 1338.6911.02，適用 R&S FSW8/13/26/43/50/67/85；signal analysis bandwidth 不由 R&S FSW-B8E 定義。\n- R&S FSW-B8 Resolution bandwidth up to 80 MHz：Order No. 1313.2464.26 適用 R&S FSW8/13/26；Order No. 1313.2464.02 適用 R&S FSW43/50/67/85，且 export license required。\n- R&S FSW-B21 LO/IF connections for external mixers：不適用 [[R&S FSW8]]、[[R&S FSW13]]；[[R&S FSW26]]/43/50/67 用 Order No. 1313.1100.28，[[R&S FSW85]] 用 Order No. 1313.1100.86。\n- R&S FSW-B21 的 external mixer IF input frequency 會依 analysis bandwidth option 改變；R&S FSW-B800R/-B1200/-B2001/-B4001/-B6001/-B8001 options 不支援 2-port mixers。\n- R&S FSW-B24 RF preamplifier：來源列出適用 [[R&S FSW8]] 至 [[R&S FSW67]]；未列 [[R&S FSW85]] 的 B24 RF preamplifier 適用型號。\n- R&S FSW-B25 electronic attenuator：適用 [[R&S FSW8]]、[[R&S FSW13]]、[[R&S FSW26]]，Order No. 1313.0990.02。\n- R&S FSW-B71 analog baseband inputs：Order No. 1313.1651.13 適用 R&S FSW8/13；1313.1651.26 適用 R&S FSW26/43/50；1313.1651.67 適用 R&S FSW67；1313.1651.86 適用 R&S FSW85。\n- R&S FSW-B71E 80 MHz analysis bandwidth for analog baseband inputs：Order No. 1313.6547.02，需 R&S FSW-B71。\n- R&S FSW-B2071 oscilloscope baseband inputs：Order No. 1331.8302.02，適用所有 FSW models；需搭配特定 [[R&S RTO1000]]、[[R&S RTO2000]] 或 [[R&S RTO6]] configuration 才能達到指定 performance。\n- R&S FSW-B90G Frequency extension 90 GHz：Order No. 1331.7693.02，不可 retrofittable，僅適用 [[R&S FSW85]]；f > 85 GHz without preselection。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/FSW_specs_en_5215-6749-22_v1701.md"
+              },
+              "score": 2.948478
+             },
+             {
+              "text": "FSW_specs_en_5215-6749-22_v1701 › 原文未解的問題\n- 來源為轉換後 markdown 摘要，且目前 markdown 為 lossy derivative；報價或驗證規格前應回查原始 PDF。\n- 價格未標示。\n- 多數 firmware options 可否在特定客戶既有儀器上升級，除來源明列 requires/excludes/contact service center/user-retrofittable 外，仍需依實際 serial number 與 configure 工具判定。\n- R&S FSW-B24 RF preamplifier 的來源適用範圍列至 [[R&S FSW67]]；未標示 [[R&S FSW85]] 適用 B24。不要推論 [[R&S FSW85]] 可訂 B24。\n- 來源列出多個 discontinued power sensors 與 discontinued oscilloscope configurations；若需報價或替代品，來源未指明後繼型號者不可自行推論。\n- 來源未標示價格。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 19,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/FSW_specs_en_5215-6749-22_v1701.md"
+              },
+              "score": 2.858737
+             },
+             {
+              "text": "FSW_specs_en_5215-6749-22_v1701 › 產品資料與規格標示規則\n- Specifications with limits 代表 warranted product performance。\n- Non-traceable specifications with limits（n. trc.）依同樣方式指定與測試，但因缺少可 traceable to national metrology standards 的 measuring equipment，product performance 不保證。\n- Specifications without limits 代表 warranted product performance，通常為指定值無偏差或偏差可忽略的參數。\n- Typical data（typ.）為代表性資訊；標 range 時表示 production time 約 80% instruments 可達成。\n- Nominal values（nom.）不做 statistical evaluation，production 時不測試該 parameter。\n- Measured values（meas.）是 individual samples 的 measurement results。\n- Non-traceable specifications with limits、typical data、nominal values、measured values 不由 Rohde & Schwarz 保證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/FSW_specs_en_5215-6749-22_v1701.md"
+              },
+              "score": 2.115837
+             },
+             {
+              "text": "FSW_specs_en_5215-6749-22_v1701 › Analysis bandwidth options\n- Standard maximum signal analysis bandwidth：28 MHz（nom.）。\n- R&S FSW-B40：40 MHz analysis bandwidth，Order No. 1313.0861.02。\n- R&S FSW-B80：80 MHz analysis bandwidth，Order No. 1313.0878.02。\n- R&S FSW-B160：160 MHz analysis bandwidth，Order No. 1325.4850.14。\n- R&S FSW-B320：320 MHz analysis bandwidth，Order No. 1325.4867.14。\n- R&S FSW-B512 / B512R：512 MHz analysis bandwidth；B512 Order No. 1331.7106.14，B512R Order No. 1331.7106.16。\n- R&S FSW-B1200：1.2 GHz analysis bandwidth，Order No. 1331.6400.14；適用 [[R&S FSW26]]、[[R&S FSW43]]、[[R&S FSW50]]、[[R&S FSW67]]、[[R&S FSW85]]，不適用 [[R&S FSW8]]、[[R&S FSW13]]。\n- R&S FSW-B2001：2 GHz analysis bandwidth，Order No. 1331.6916.14；適用 [[R&S FSW26]]、[[R&S FSW43]]、[[R&S FSW50]]、[[R&S FSW67]]、[[R&S FSW85]]，不適用 [[R&S FSW8]]、[[R&S FSW13]]。\n- R&S FSW-B4001：4.4 GHz analysis bandwidth，Order No. 1338.5215.14；僅適用 [[R&S FSW43]]、[[R&S FSW50]]、[[R&S FSW67]]、[[R&S FSW85]]。\n- R&S FSW-B6001：6.4 GHz analysis bandwidth，Order No. 1338.5221.14；僅適用 [[R&S FSW43]]、[[R&S FSW50]]、[[R&S FSW67]]、[[R&S FSW85]]。\n- R&S FSW-B8001：8.312 GHz analysis bandwidth，Order No. 1338.5238.14；僅適用 [[R&S FSW43]]、[[R&S FSW50]]、[[R&S FSW67]]、[[R&S FSW85]]。\n- Serial numbers below R&S FSW8: 101619、R&S FSW13: 101533、R&S FSW26: 102669、R&S FSW43: 102176、R&S FSW50: 101651、R&S FSW67: 101698、R&S FSW85: 101730 的 instruments，standard maximum signal analysis bandwidth 為 10 MHz，可用 R&S FSW-B28 option 擴充至 28 MHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/FSW_specs_en_5215-6749-22_v1701.md"
+              },
+              "score": 1.707273
+             },
+             {
+              "text": "R&S CMX-KC661B\n[[R&S CMX-KC661B]] 是 [[R&S CMX500]] 的 **NR SA FR1 3GPP RF Test Scenarios** option / license；在 [[1C111_0e_3GPPPreConfGuide]] 與 [[1C111_1e_3GPPPreConfGuide]] 中，它是執行 5G NR FR1 SA R&D RF pre-conformance WebGUI workflow 所需的 test scenario license；[[CMX500_Callbox]] 也在 callbox example use case 中將它列為 3GPP Pre-Conformance Testing 的 option 線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KC661B.md"
+              },
+              "score": 3.656137
+             },
+             {
+              "text": "Gatehouse Satcom › 與 Rohde & Schwarz 的合作\n依 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]]：\n\n- [[Gatehouse Satcom]] 與 [[Rohde & Schwarz]] formalized collaboration，以 strengthening validation and testing of [[5G IoT-NTN]] and [[NR-NTN]] technologies。\n- 合作目標是將 [[Gatehouse Satcom]] 的 5G [[NTN]] software expertise 與 [[Rohde & Schwarz]] test and measurement capabilities 結合。\n- [[Gatehouse Satcom]] gains access to the [[R&S CMX500]] platform，作為共同 further develop advanced orbit and channel emulation capabilities for NTN use cases 的一部分。\n- [[Gatehouse Satcom]] contributes end-to-end NTN test results、technical insight and engineering feedback，協助 [[Rohde & Schwarz]] 強化 NTN-focused test capabilities。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Gatehouse Satcom.md"
+              },
+              "score": 0.674002
+             },
+             {
+              "text": "朋程 › 來源中的說法\n- [[Power IC - Power Management IC image 1]]（來源未標示日期；取得於 2026-09-04）將 [[朋程]] 列於產業分類「整流/車用二極體」。\n- [[Power IC - Power Management IC image 1]]（來源未標示日期；取得於 2026-09-04）在核心能力欄寫「車用整流二極體全球第一」。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/朋程.md"
+              },
+              "score": 5.211454
+             },
+             {
+              "text": "Amazon Prometheus SoC › 在 Project Kuiper 架構中的角色\n依 [[Kuiper UT Test & Supply Chain]]，Prometheus SoC 連接下列脈絡：\n\n- [[Project Kuiper 用戶終端]]的 Ka-band 相控陣與基帶處理。\n- [[Kuiper UT 測試流程]]中的 FAT、熱電性能、協議棧驗證、資料處理與端對端模擬。\n- [[AWS]] 整合、加密與安全、企業私網延伸等服務定位。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Amazon Prometheus SoC.md"
+              },
+              "score": 3.712017
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › TTC 毫米波測試量能線索\n[[低軌衛星通信終端設備技術規範與相關檢測]]（來源標示 111年08月）介紹[[電信技術中心]]毫米波頻段測試量能：\n\n- 5G FR2 毫米波天線縮距量測場 CATR。\n- 來源稱該 chamber 依據 3GPP 技術規範標準，已通過 TAF 認證。\n- 可支援主波發射頻段 3–40 GHz。\n- 不必要發射至 90 GHz。\n- 可量測 TRP、TIS、EVM。\n- Quiet Zone 可達 90 cm。\n\n同一來源另描述[[電信技術中心]]提供電信設備審驗認證服務，並協助研擬電信技術標準規範。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 4.303389
+             },
+             {
+              "text": "電信技術中心 › 毫米波測試量能\n[[低軌衛星通信終端設備技術規範與相關檢測]]介紹電信技術中心毫米波頻段測試量能：\n\n- 5G FR2 毫米波天線縮距量測場 CATR。\n- 來源稱該 chamber 依據 3GPP 技術規範標準，已通過 TAF 認證。\n- 支援主波發射頻段 3–40 GHz。\n- 不必要發射可至 90 GHz。\n- 可量測 TRP、TIS、EVM。\n- Quiet Zone 可達 90 cm。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/電信技術中心.md"
+              },
+              "score": 3.116188
+             },
+             {
+              "text": "NG eCall EN 17240 2024 verification › 與既有 NGeCall / hybrid eCall 頁面的關係\n- [[NGeCall over LTE]] 整理 CMW500 與 CMX500 capability lists，本頁只整理 PR 中的 Qualcomm / Snapdragon verification event。\n- [[CMX500 NGeCall configuration]] 整理 configuration guide 的 mandatory / optional items，本頁不取代正式 configuration 或 quote。\n- [[Hybrid eCall testing]] 以 EN 18052:2025 與 hybrid fallback 為核心；本頁聚焦 EN 17240:2024 NG eCall verification，不描述 classic CS fallback 或 EN 18052 test scope。\n- [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 提到 EN 17240:2024+A1:2026 與 cetecom advanced certification testing；本頁來源只提 EN 17240:2024，且未說第三方 certification report。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              },
+              "score": 1.588172
+             },
+             {
+              "text": "欣銓 › 來源中的說法\n- [[Power IC - Power Management IC]] 在功率半導體封測區塊將 [[欣銓]] 寫為「車用與功率IC測試核心廠」。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/欣銓.md"
+              },
+              "score": 2.8079
+             },
+             {
+              "text": "R&S CMX-KC661B › 在 1C111 workflow 中的角色\n依 [[1C111_1e_3GPPPreConfGuide]]：\n\n- 文件中的 test steps 需要 [[R&S CMX-KC661B]]、[[R&S CMX-KS600B]] 與 [[R&S CMX-KM600]]。\n- [[R&S CMX-KC661B]] 對應 SA FR1 3GPP RF Test Scenarios。\n- Test case 會依 selected test case 與 test ID，自動調整 reference measurement channel（RMC）configurations、UL power control settings 與 additional spectrum emission values。\n- [[R&S CMsequencer]] 3GPP 5G SA pre-conformance solution 包含於 KC661 license，提供 automated execution、validation 與 comprehensive reporting。\n- WebGUI workflow 可用於 selected [[3GPP TS 38.521-1]] pre-conformance test cases 的 setup、configuration、execution 與 verification。\n\n依 [[1C111_0e_3GPPPreConfGuide]]，同一 license 也被描述為 [[R&S CMX500]] 3GPP RF conformance / pre-conformance WebGUI workflow 的必要 license。\n\n依 [[CMX500_Callbox]]：\n\n- 3GPP Pre-Conformance Wizard takes care of 3GPP RMC settings。\n- Quick and easy 3GPP pre-conformance testing in GUI。\n- Coming in 2025 and later 的 roadmap 包含 dynamic workspaces per TC、LTE TCs + workspace、NSA TCs + workspace。\n- 該來源的 roadmap / GUI wording 不提供 KC661 的 formal coverage matrix。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KC661B.md"
+              },
+              "score": 2.277255
+             },
+             {
+              "text": "R&S CMX500 › Base unit 與主要訂購資訊\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n| 項目 | Type / code | Order No. | 原文說明 |\n|---|---|---|---|\n| CMX500 Radio communication tester | CMX500 | 1201.0002K70 | accessories 包含 power cords、operating manual (getting started)、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters |\n| CMX500 basic assembly | R&S CMX-PB70H | 1222.0676.09 | basic assembly |\n| R&S CMX accelerator unit | R&S CMX-B200A | 1222.0747.02 | accelerated digital signal processing capabilities |\n| R&S CMX processing unit | R&S CMX-B300C | 1222.0801.04 | generic high-performance computing platform for advanced data processing |\n| R&S CMX IF unit | R&S CMX-B500A | 1222.0924.02 | IF frequency range vector signal analysis and ARB based generator |\n| R&S CMX RF unit | R&S CMX-B600B | 1222.0953.03 | FR1 frequency range vector signal analysis and ARB based generator |\n\n[[CMX500_Features_CSW9-20-0_en_32]] 使用 generic code [[R&S CMX-B500x]] 與 [[R&S CMX-B600x]]；[[CMX500_specs_en_5216-4127-22_v1100]] 在 ordering information 中列出具體 orderable unit 為 [[R&S CMX-B500A]] 與 [[R&S CMX-B600B]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 2.845056
+             },
+             {
+              "text": "朋程 › 限制與不可推論事項\n- 「全球第一」是圖上用語；來源未提供排名口徑、市占率、年度、產品範圍或資料來源拆分。\n- 來源未標示日期，因此不能把上述列名寫成特定時間點的市場現況。\n- 來源是概念股整理表，不構成投資建議或供應鏈驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/朋程.md"
+              },
+              "score": 0.629682
+             },
+             {
+              "text": "AWS › 未決事項\n- [[AI Server PCB test image 4]] 未標示 AWS Trainium 2 Max 的量產日期、出貨量、客戶、供應鏈或資料來源。\n- [[AI Server PCB test image 4]] 未標示 2026年新平台是否包含 AWS 平台。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/AWS.md"
+              },
+              "score": 0.816442
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › 已擷取的無線通訊認證實驗室簡報內容\n依 [[無線通訊認證實驗室]]：\n\n- [[無線通訊認證實驗室]]用於測試與驗證無線設備符合法規、安全與性能標準，涵蓋 [[RF 測試]]、[[EMC]]、安規及一致性認證。\n- 來源稱其可經 [[NCC]]、[[TAF]]、[[FCC]] 等機構認可，並支援 [[Global Market Access]] 與上市加速。\n- 主要測試項目包含：頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試、[[PTCRB]] / [[GCF]] 認證。\n- 認證必要性包含防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端、6G 等需求。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 2.048391
+             },
+             {
+              "text": "NG eCall EN 17240 2024 verification › 驗證範圍\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 驗證對象：[[Snapdragon Auto 5G Modem-RF]] 的 [[Next Generation eCall]] functionality。\n- 合作方：[[Rohde & Schwarz]] 與 [[Qualcomm Technologies]]。\n- 測試設備：[[R&S CMX500]] mobile radio tester。\n- Software context：來源稱 [[R&S CMX500]] with [[R&S CMX-KA098]] software option can be effectively used for NG eCall testing under realistic network conditions。\n- 標準：[[EN 17240]]:2024。\n- 測試情境：simulating a [[PSAP]]。\n- 驗證內容：NG eCall including voice and data transmission，並 validated the compliance of the implementation at both ends with EN 17240:2024。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              },
+              "score": 1.219887
+             },
+             {
+              "text": "欣銓 › 限制與不可推論事項\n- 來源未標示 Threads 原文發布日期。\n- 來源未提供 [[欣銓]] 的測試項目、車用 / 功率 IC 占比、客戶、營收、產能或市占率。\n- 「核心廠」是來源用語，缺少排名或供應關係證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/欣銓.md"
+              },
+              "score": 2.213529
+             },
+             {
+              "text": "R&S CMX-KC661B › 使用限制\n- 本頁只記錄來源明示的 option role 與 order number，不構成正式報價、license entitlement 或 complete configuration rule。\n- [[1C111_1e_3GPPPreConfGuide]] 是 application note，且來源明示其 procedures 可能相較 [[3GPP]] specification 更 streamlined 或 simplified，不嚴格遵循所有 parameters。\n- [[CMX500_Callbox]] 是簡報來源，補充 use-case / roadmap / GUI 敘事；不可用來覆蓋 formal features、specs 或 package database。\n- 完整 test case coverage、supported band / bandwidth / UE capability、software version 與 automation behavior 仍需查正式 R&S documentation、sequencer database、release notes 與 configurator。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KC661B.md"
+              },
+              "score": 1.670333
+             },
+             {
+              "text": "朋程\n[[朋程]] 是 [[Power IC - Power Management IC image 1]]（來源未標示日期；取得於 2026-09-04）列於「功率半導體概念股」表中的公司名稱，圖上代號為 8255。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/朋程.md"
+              },
+              "score": 0.382748
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › LEO 衛星終端與高頻測試線索\n[[無線通訊認證實驗室]]將認證實驗室應用連到 [[LEO 衛星終端認證]]：\n\n- 支援 [[Starlink]] / [[Project Kuiper]] 用戶終端 RF 驗證。\n- [[相控陣列天線]] beamforming 測試。\n- [[mmWave]] 與 [[MIMO]] 高頻測試能力。\n- 台灣供應鏈加速全球市場准入。\n- [[耕興]]等 [[RCB]] 提供 8–12 週 GMA 週期。\n\n這些說法可連到 [[低軌衛星終端設備檢測]]、[[相控陣列天線]]、[[Satellite User Terminal 外部資料清單]]，但不可直接改寫為已驗證的 Starlink / Kuiper 認證服務、客戶案例或完整測試能力。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 1.839634
+             },
+             {
+              "text": "R&S CMX500 › unresolved\n- [[CMX500_Features_CSW9-20-0_en_32]] 未標示文件發布日期；僅標示 Version 32、CSW 9.20.0 and higher 與 © 2026。\n- [[CMX500_Features_CSW9-20-0_en_32]] 多數 software option order number 以 `.xx` 結尾；完整後綴來源未標示。\n- [[CMX500_specs_en_5216-4127-22_v1100]] 未列價格。\n- [[CMX500_specs_en_5216-4127-22_v1100]] accessories 中提到 power cords、operating manual、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters，但未逐一列完整料號。\n- [[CMX500_specs_en_5216-4127-22_v1100]] 提到 [[R&S CMX-RF42E]] 更多資訊見 PD 3609.7719.22，但未提供該文件版次或日期。\n- FR2 remote radio head、active frontend、external LO 與 chamber setup 的完整相容性需要 configure 工具與各附件 / options 文件確認；本頁不推論。\n- XLAPI scripting interface 另有獨立 features and functions 文件；[[CMX500_Features_CSW9-20-0_en_32]] 未提供該文件識別碼、版次或日期。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 44,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 7.617746
+             },
+             {
+              "text": "AREG800A\nAUTOMOTIVE RADAR ECHO GENERATOR",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ef4aac4d3faf4e63",
+                "original_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+                "sha256": "ef4aac4d3faf4e63bdb175a0db3d7498612f2a12568d5de9fb4e9095cd4a8787",
+                "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 21.005088
+             },
+             {
+              "text": "AREG800A configurations for automotive radar production",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ef4aac4d3faf4e63",
+                "original_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+                "sha256": "ef4aac4d3faf4e63bdb175a0db3d7498612f2a12568d5de9fb4e9095cd4a8787",
+                "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+               "section": 309,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 20.472372
+             },
+             {
+              "text": "Rohde & Schwarz AREG800A Automotive Radar Echo Generator",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ef4aac4d3faf4e63",
+                "original_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+                "sha256": "ef4aac4d3faf4e63bdb175a0db3d7498612f2a12568d5de9fb4e9095cd4a8787",
+                "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.966007
+             },
+             {
+              "text": "<!-- Slide number: 46 -->\n# Test case wizard\n(with one RF Port)",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-78bf3069c4d9ec56",
+                "original_ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+                "sha256": "78bf3069c4d9ec56257898ce4889bcdb258402fa1db341a7ff4cbf02487e94f6",
+                "raw_ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+               "section": 185,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.727705
+             }
+            ],
+            "text": "Short answer: the oscilloscope is best placed as a **debug/validation instrument around the radar ECU or radar module electronics**, not as the primary automotive-radar target simulator; the primary radar workflow uses instruments such as the R&S AREG800A for automotive radar echo generation and RF/spectrum instruments for mmWave analysis [6][15][36][42].\n| Likely workflow stage | Where the oscilloscope fits | How it complements RF radar instruments |\n|---|---|---|\n| 1. PCB / PCBA bring-up, SI/PI, interfaces | Use the oscilloscope for interface tests and power-distribution checks, since the cited SI/PI workflow maps “Interface Test” to scopes/BERTs/AWGs/switch matrices and “Power Distribution Network” to scopes and network analyzers [16][17]. | This is before or alongside radar RF testing: the scope checks electrical interfaces and PDN behavior, while RF instruments address radar-band behavior and RF performance [16][17][36]. |\n| 2. Radar module IF/baseband debug | The AREG800A ecosystem includes analog IF output and analog IF input interface options, and the FSW family has an “oscilloscope baseband inputs” option, R&S FSW-B2071, applicable to all FSW models and requiring specific R&S RTO1000/RTO2000/RTO6 oscilloscope configurations for specified performance [13][42]. | The oscilloscope can inspect time-domain/baseband behavior around IF paths, while AREG800A generates dynamic artificial radar objects and RF instruments analyze frequency-domain/RF behavior [6][13][42]. |\n| 4. mmWave RF validation / spectrum analysis | Automotive radar bands in the AREG800A context include 24 GHz to 24.25 GHz, 76 GHz to 81 GHz, and 24 GHz to 44 GHz depending on frontend [15]. R&S FSW85 covers RF input up to 85 GHz, or up to 90 GHz with the R&S FSW-B90G option under stated conditions [36]. | RF/spectrum instruments cover the radar RF bands; the oscilloscope complements them on baseband, time-domain, trigger, interface, and PI/SI observations rather than being the main RF-band analyzer [16][36][42]. |\n| 5. Production-oriented radar test | AREG800A production configurations include radar mini/golden/pro variants with one, two, or three digital channels, one object per channel, frontend requirements, near object range possibility, analog IF output interfaces, and remote control interfaces [3]. | In production workflows, the radar echo generator provides repeatable object scenarios, while an oscilloscope is more likely used for setup/debug, interface validation, or troubleshooting of IF/baseband/electrical behavior rather than as the production echo-generation instrument [3][13][16]. |\n【推論】A practical automotive-radar workflow would place the oscilloscope early for PCB/interface/PDN bring-up, then alongside AREG800A and FSW-class RF instruments during IF/baseband debug and RF validation, because the passages separately identify scopes for interface/PDN testing, AREG800A for automotive radar echo generation, AREG IF interfaces, and FSW oscilloscope baseband inputs/RF coverage [6][13][16][36][42].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "R&S AREG800A › Automotive radar production configurations\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- [[R&S AREG-P1]] radar mini configuration / [[R&S AREG-DBP1]] base unit option：one digital channel，one object per channel，5 GHz instantaneous bandwidth，near object range possibility，analog IF output interfaces，remote control interfaces，[[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option one frontend per channel required。\n- [[R&S AREG-P2]] radar golden configuration / [[R&S AREG-DBP2]] base unit option：two digital channels。\n- [[R&S AREG-P3]] radar pro configuration / [[R&S AREG-DBP3]] base unit option：搭配 [[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option；frontend 支援 monostatic 或 bistatic；three digital channels；one object per channel。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 31,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 5.221941
+            },
+            {
+             "text": "R&S AREG800A\n[[R&S AREG800A]] 是 [[Rohde & Schwarz]] 的 Automotive Radar Echo Generator，用於 dynamic artificial object generation；本頁規格依 [[AREG800A_specs_en_3609-8015-22_v0900]]，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 5.093052
+            },
+            {
+             "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG800A]] — Automotive Radar Echo Generator；本來源主要產品實體。\n- [[Rohde & Schwarz]] — 製造商與文件發布者。\n- [[R&S AREG8-B9]] — Digital baseband，1 GHz IF bandwidth、1 IF path、1 individual artificial object；Order No. `1437.8011.02`。\n- [[R&S AREG8-B63]] — Analog stepped delay line，用於 short object generation；Order No. `1437.8205.02`。\n- [[R&S AREG8-K527]] — Baseband extension from 1 GHz to 2 GHz IF bandwidth；Order No. `1437.9882.02`。\n- [[R&S AREG8-K528]] — Baseband extension from 2 GHz to 5 GHz IF bandwidth；Order No. `1437.9799.02`。\n- [[R&S AREG8-K570]] — Activation of second IF path；Order No. `1437.9899.02`。\n- [[R&S AREG8-K812]] — One additional artificial object；Order No. `1437.9853.02`。\n- [[R&S AREG8-K813]] — Extended Doppler frequency shift up to 10 MHz；Order No. `1437.9901.02`。\n- [[R&S AREG8-K814]] — Near object range for FMCW；Order No. `1437.9776.02`。\n- [[R&S AREG8-K740]] — Analog IF output interfaces；Order No. `1437.9830.02`。\n- [[R&S AREG8-K741]] — Analog IF input interface；Order No. `1437.9847.02`。\n- [[R&S AREG8-K109]] — Hardware-in-the-loop control interface；Order No. `1437.9860.02`。\n- [[R&S AREG8-K549]] — Synchronization interface；Order No. `1437.9876.02`。\n- [[R&S AREG8-K986]] — Remote control GPIB；Order No. `1437.9818.02`。\n- [[R&S AREG8-B97]] — System alignment backend；Order No. `1437.9001.02`。\n- [[R&S AREG-P1]] / [[R&S AREG-DBP1]]、[[R&S AREG-P2]] / [[R&S AREG-DBP2]]、[[R&S AREG-P3]] / [[R&S AREG-DBP3]] — automotive radar production configurations / production base unit options。\n- [[R&S AREG8-24S]]、[[R&S AREG8-24D]]、[[R&S AREG8-81S]]、[[R&S AREG8-81D]]、[[R&S AREG8-81WS]]、[[R&S AREG8-81WD]]、[[R&S FE44S]] — 支援的 mmWave 或 external frontends。\n- [[R&S QAT100]]、[[R&S QAT-B2]]、[[R&S QAT-Z50]] — advanced antenna array 及其相關 option/accessory。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+             },
+             "score": 1.319078
+            },
+            {
+             "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n- Base unit instantaneous IF bandwidth 依 option 為 `1 GHz`、`2 GHz` 或 `5 GHz`；overrange 分別為 `1.2 GHz (meas.)`、`2.2 GHz (meas.)`、`5.2 GHz (meas.)`。\n- AREG800A base unit IF frequency range：[[R&S AREG8-B9]] 為 `1.1 GHz to 2.1 GHz`；[[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 2.7 GHz`；來源另列 [[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 5.7 GHz`，但 5 GHz bandwidth ordering information 顯示還涉及 [[R&S AREG8-K528]]，此處未自行推論修正。\n- RF frequency bands：[[R&S AREG8-24S]] / [[R&S AREG8-24D]] 為 `24 GHz to 24.25 GHz`；[[R&S AREG8-81S]] / [[R&S AREG8-81D]] 與 [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]]、[[R&S QAT100]] 為 `76 GHz to 81 GHz`；[[R&S FE44S]] 為 `24 GHz to 44 GHz`。\n- 每台 [[R&S AREG800A]] base unit 支援 conventional mmWave frontends 最多 4 個，[[R&S QAT100]] 最多 8 個，[[R&S FE44S]] 最多 8 個 external frontends（4 個 TX、4 個 RX，共 4 pairs）。\n- Artificial object distance 可依 option 涵蓋 `< 17 m to 3000 m (meas.)`、`< 4 m to 3000 m (meas.)`、`≥ air gap to 3000 m (meas.)`；production frontend 組合列為 FMCW `≥ air gap to 350 m (meas.)`，non FMCW `< 17 m to 350 m (meas.)`。\n- Radial velocity：每個 artificial object 支援 individual Doppler frequency shift；with [[R&S AREG8-B9]] and [[R&S AREG8-B63]] velocity setting range 為 `±500 km/h`，velocity step size 為 `0.001 km/h`。\n- Remote control interfaces 包含 Ethernet 與 [[R&S AREG8-K986]] GPIB；remote control command set 為 `SCPI`。\n- HiL interface option 為 [[R&S AREG8-K109]]；open-standard protocol support 為 open simulation interface（OSI）；time synchronization protocol 為 `gPTP`、`NTP`。\n- Base unit `AREG800A` Order No. `1437.4400.02`，包含 power cable 與 quick start guide。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+             },
+             "score": 0.835576
+            },
+            {
+             "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+             },
+             "score": 2.532468
+            },
+            {
+             "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+             },
+             "score": 2.087881
+            },
+            {
+             "text": "R&S FSW85 › 主要規格\n| 規格 | 數值與條件 |\n|---|---|\n| RF1 input standard, DC coupled | 2 Hz to 85 GHz |\n| RF1 input standard, AC coupled | 10 MHz to 85 GHz |\n| RF1 input with R&S FSW-B90G, YIG preselector off, DC coupled | 2 Hz to 90 GHz |\n| RF1 input with R&S FSW-B90G, YIG preselector off, AC coupled | 10 MHz to 90 GHz |\n| RF2 input, DC coupled | 2 Hz to 67 GHz |\n| RF2 input, AC coupled | 10 MHz to 67 GHz |\n| RF1 input connector | 1.00 mm male |\n| RF2 input connector | 1.85 mm male，compatible with 2.4 mm |\n| RF input impedance | 50 Ω |\n| Maximum DC voltage, AC coupled | 25 V |\n| Maximum DC voltage, DC coupled | 0 V |\n| RF attenuation | Mechanical RF attenuator 10 dB steps；Electronic IF attenuator 1 dB steps |\n| RF input VSWR | 70 GHz < f ≤ 85 GHz / 90 GHz：2.4 nominal；RF input 2 在上述 VSWR 數值上加 0.2 nominal |\n| Power consumption | 230 W without options；330 W with all options（meas.），all options 不含 B512R/B1200/B2001/B800R |\n| Dimensions | 462 mm × 240 mm × 610 mm nominal |\n| Net weight without options | 27.9 kg（61.5 lb）nominal |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSW85.md"
+             },
+             "score": 1.7998
+            },
+            {
+             "text": "FSW_specs_en_5215-6749-22_v1701 › 重要 options 條件\n- R&S FSW-B4 OCXO precision frequency reference：Order No. 1313.0703.02，user-retrofittable。\n- R&S FSW-B8E Resolution bandwidth up to 40 MHz：Order No. 1338.6911.02，適用 R&S FSW8/13/26/43/50/67/85；signal analysis bandwidth 不由 R&S FSW-B8E 定義。\n- R&S FSW-B8 Resolution bandwidth up to 80 MHz：Order No. 1313.2464.26 適用 R&S FSW8/13/26；Order No. 1313.2464.02 適用 R&S FSW43/50/67/85，且 export license required。\n- R&S FSW-B21 LO/IF connections for external mixers：不適用 [[R&S FSW8]]、[[R&S FSW13]]；[[R&S FSW26]]/43/50/67 用 Order No. 1313.1100.28，[[R&S FSW85]] 用 Order No. 1313.1100.86。\n- R&S FSW-B21 的 external mixer IF input frequency 會依 analysis bandwidth option 改變；R&S FSW-B800R/-B1200/-B2001/-B4001/-B6001/-B8001 options 不支援 2-port mixers。\n- R&S FSW-B24 RF preamplifier：來源列出適用 [[R&S FSW8]] 至 [[R&S FSW67]]；未列 [[R&S FSW85]] 的 B24 RF preamplifier 適用型號。\n- R&S FSW-B25 electronic attenuator：適用 [[R&S FSW8]]、[[R&S FSW13]]、[[R&S FSW26]]，Order No. 1313.0990.02。\n- R&S FSW-B71 analog baseband inputs：Order No. 1313.1651.13 適用 R&S FSW8/13；1313.1651.26 適用 R&S FSW26/43/50；1313.1651.67 適用 R&S FSW67；1313.1651.86 適用 R&S FSW85。\n- R&S FSW-B71E 80 MHz analysis bandwidth for analog baseband inputs：Order No. 1313.6547.02，需 R&S FSW-B71。\n- R&S FSW-B2071 oscilloscope baseband inputs：Order No. 1331.8302.02，適用所有 FSW models；需搭配特定 [[R&S RTO1000]]、[[R&S RTO2000]] 或 [[R&S RTO6]] configuration 才能達到指定 performance。\n- R&S FSW-B90G Frequency extension 90 GHz：Order No. 1331.7693.02，不可 retrofittable，僅適用 [[R&S FSW85]]；f > 85 GHz without preselection。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 13,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/FSW_specs_en_5215-6749-22_v1701.md"
+             },
+             "score": 2.948478
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/entities/R&S AREG800A.md",
+             "raw_refs": [
+              "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+             "raw_refs": [
+              "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S FSW85.md",
+             "raw_refs": [
+              "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/FSW_specs_en_5215-6749-22_v1701.md",
+             "raw_refs": [
+              "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}
