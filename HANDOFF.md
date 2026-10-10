@@ -43,10 +43,17 @@ answerable coverage 0.30 -> 0.40, FAIL and contradictions about flat, overreach
 items 35 -> 63. Kept under the owner's rule. To roll back, move 1.9.0 back from
 `disabled/`, move 1.10.0 out, and restart Agent Web.
 
-Open proposal: emit benchmark results (`benchmark_run` runs,
-`benchmark.case_completed` events linked to the AEP trace) into telemetry so
-the Atlas dashboard can show test progress live and replay it. The owner was
-asked whether to do it, and whether to build the Atlas consumer too.
+Benchmark telemetry (2026-10-10, d29ac63): every knowledge_v1, coding_v1 and
+business workflow lab run now writes a `benchmark_run` into
+`telemetry.sqlite`, and reference grading writes a `benchmark_grading` under
+it (contract v0.3 section 3a). Agent Web was restarted on this build. Smoke
+run `benchmarks/knowledge_v1/runs/tel-smoke-001` proved the path end to end.
+
+Atlas (`C:/Users/Chi_L/Documents/claude/atlas-analysis-dashboard`): Codex's
+AEP consumer plus Claude Code's benchmark views and "AEP Benchmarks"
+dashboard are in the working tree, **uncommitted**. Read Atlas
+`docs/HANDOFF.md` first. Next: browser acceptance, then agree a commit
+plan with the owner.
 
 ## Repository and runtime state
 

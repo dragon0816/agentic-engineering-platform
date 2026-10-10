@@ -2029,3 +2029,18 @@ Result (`runs/core-005`): coverage on the 22 answerable questions rose from 0.30
 
 Rejected alternatives:
 - Changing the guidance alone: 7 of 33 misses were synthesis omissions, while 26 were evidence never offered.
+
+## 2026-10-10: Benchmark progress and results go into Harness telemetry (contract v0.3)
+
+Decision (owner: watch test status and results live in the Atlas dashboard, with replay; build the Atlas side too where accessible): benchmark runners write `benchmark_run` runs, and knowledge_v1 reference grading writes `benchmark_grading` runs, into the Host's `telemetry.sqlite` through `src/telemetry/benchmark.py`.
+- Events are `benchmark.case_started`, `benchmark.case_completed` and `benchmark.case_graded`, with the verdict, tags, checks and the answering `aep_trace_ids`.
+- Agent Web's read API and stream carry them unchanged. `/runs` gains `trace_id` and `parent_run_id` filters for the drill-down.
+- Attributes are metadata only. `sanitize` also drops content keys.
+
+Reason: the runners are separate processes, and the stream already polls the store. Writing to the store directly needs no new channel and no Agent Web endpoint that accepts writes.
+
+Atlas side: Codex had already built the AEP consumer in the Atlas working tree, uncommitted. Claude Code added benchmark views and an "AEP Benchmarks" dashboard on top. That work is uncommitted for the same reason, and is handed off in Atlas `docs/HANDOFF.md`.
+
+Rejected alternatives:
+- A write endpoint on Agent Web: it widens a loopback API the owner chose to keep read-only.
+- Atlas reading benchmark files directly: it would miss the live view and the trace link.

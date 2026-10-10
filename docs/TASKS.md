@@ -1589,5 +1589,11 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   answerable coverage 0.30 -> 0.40, FAIL 3 -> 4, contradictions 4 -> 4,
   overreach items 35 -> 63 (runs/core-005/review.zh-TW.md). Kept.
 - [ ] Optional: reduce Knowledge overreach under Skill 1.10.0.
-- [ ] Benchmark results into telemetry for the Atlas dashboard (proposed,
-  waiting for the owner).
+- [x] Benchmark results into telemetry for Atlas (d29ac63, contract v0.3):
+  knowledge_v1 (+ reference grading), coding_v1 and the business workflow
+  lab emit benchmark runs; /runs filters by trace_id and parent_run_id.
+- [x] Atlas consumer for benchmark telemetry (uncommitted in the Atlas
+  working tree on top of Codex's uncommitted AEP integration; see Atlas
+  docs/HANDOFF.md). npm test 112 passed, build passed, live shell check passed.
+- [ ] Atlas browser acceptance and an owner-approved commit plan for the Atlas
+  working tree.
