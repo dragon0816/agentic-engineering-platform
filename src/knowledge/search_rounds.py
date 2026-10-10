@@ -76,7 +76,7 @@ def _plan(
 def search_rounds(
     snapshot: RetrievalSnapshot, model: ModelClient, alias: str, trace: TraceIdentifiers,
     question: str, first: tuple[Passage, ...], *, rounds: int,
-    k: int = 36, max_chars: int = 40000,
+    k: int = 36, max_chars: int = 40000, per_page: int = SECTIONS_PER_PAGE,
 ) -> tuple[Passage, ...]:
     """The evidence set: pages the model marked relevant lead, then the first
     retrieval's Wiki passages fill the budget, then its Raw passages."""
@@ -127,7 +127,7 @@ def search_rounds(
         chars += len(passage.text)
 
     for page in relevant[:MAX_RELEVANT]:
-        for passage in snapshot.wiki_page_sections(page, question, k=SECTIONS_PER_PAGE):
+        for passage in snapshot.wiki_page_sections(page, question, k=per_page):
             add(passage)
     for passage in first:
         if passage.citation.kind == "wiki":

@@ -128,3 +128,17 @@ def test_the_skill_round_budget_turns_the_rounds_on_in_the_capability(tmp_path: 
             pass
         assert sum(1 for r in model.requests
                    if r.messages[0].text == PLANNER_PROMPT) == planned
+
+
+def test_the_skill_sets_how_many_sections_of_a_relevant_page_are_read(tmp_path: Path) -> None:
+    snapshot = _snapshot(tmp_path)  # reads the Vault lazily
+    (tmp_path / "wiki" / "concepts" / "示波器量測.md").write_text(
+        "---\ntitle: 示波器量測\n---\n# 示波器量測\n\n示波器眼圖量測用於高速訊號完整性驗證，"
+        "包含抖動、上升時間與眼高眼寬的判讀。\n\n## 抖動\n\n示波器抖動分析拆解隨機抖動與"
+        "確定性抖動，用於高速串列介面的眼圖餘裕判讀。\n", encoding="utf-8")
+    for per_page, expected in ((1, 1), (3, 2)):
+        planner = _Planner({"relevant_pages": [], "queries": ["示波器 眼圖 抖動"]},
+                           {"relevant_pages": ["示波器量測"], "done": True})
+        evidence = search_rounds(snapshot, planner, "a", TRACE, "示波器 抖動",  # type: ignore[arg-type]
+                                 _first(snapshot), rounds=2, per_page=per_page)
+        assert sum(1 for p in evidence if p.citation.wiki_page == ZH_PAGE) == expected

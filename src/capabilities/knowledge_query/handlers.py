@@ -298,14 +298,16 @@ class KnowledgeQueryHandler:
         for facet in procedure.requested_facets(request.question):
             for search in (*facet.search_queries, *facet.discovery_queries)[:2]:
                 queries.append(f"{prefix} {search}".strip())
+        sections = procedure.evidence_sections or (36 if bilingual else 24)
+        chars = procedure.evidence_chars or 40000
         passages = snapshot.wiki_primary_passages(
-            tuple(dict.fromkeys(queries))[:12], k=36 if bilingual else 24,
+            tuple(dict.fromkeys(queries))[:12], k=sections, max_chars=chars,
             content_only=bilingual)
         if procedure.retrieval_rounds and passages:
             passages = search_rounds(
                 snapshot, self.model, self.alias, context.trace, request.question,
-                passages, rounds=procedure.retrieval_rounds,
-                k=36 if bilingual else 24)
+                passages, rounds=procedure.retrieval_rounds, k=sections, max_chars=chars,
+                per_page=procedure.evidence_sections_per_page)
         if not passages:
             raise CapabilityRefused("knowledge_insufficient_evidence")
         assessment = assess_wiki_primary(passages, request.question, procedure)
