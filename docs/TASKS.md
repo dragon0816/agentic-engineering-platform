@@ -1583,4 +1583,7 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   reference files offered to synthesis 22% -> 41%, cited 17% -> 26%;
   answerable coverage 0.28 -> 0.30, contradictions 7 -> 4, median latency
   137 -> 200 s (runs/core-004/review.zh-TW.md).
-- [ ] Owner: keep Skill 1.9.0, return to 1.8.0, or work on synthesis next.
+- [x] Owner kept Knowledge Skill 1.9.0 (2026-10-10): better grounding over
+  about 60 s more per answer.
+- [ ] Optional later: Knowledge synthesis coverage (answers use only part of
+  the retrieved reference pages); see runs/core-004/review.zh-TW.md.

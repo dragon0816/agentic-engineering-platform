@@ -35,9 +35,10 @@ Knowledge retrieval was changed after the first comparison.
   retrieval clearly better (reference files offered 22% -> 41%), answer
   coverage flat (0.30), contradictions down, median latency +60 s.
 
-Next action: owner chooses among keeping 1.9.0, returning to 1.8.0 (move the
-file back from `disabled/` and restart Agent Web), or working on synthesis.
-See `runs/core-004/review.zh-TW.md` section 5.
+Owner decision (2026-10-10): keep Knowledge Skill 1.9.0. Nothing is pending
+on this thread. A possible later step is synthesis coverage (answers use only
+part of the retrieved reference pages). To roll back, move 1.8.0 back from
+`disabled/`, move 1.9.0 out, and restart Agent Web.
 
 ## Repository and runtime state
 

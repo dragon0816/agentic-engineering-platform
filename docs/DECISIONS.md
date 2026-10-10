@@ -2013,7 +2013,7 @@ Decision (owner: "try it" after 1.8.0 left coverage flat): the wiki-primary Know
 - Citation and Host checks are unchanged.
 - A Skill opts in with `retrieval_rounds` (0-3, default 0). Skill 1.9.0 sets 2.
 
-Result (`runs/core-004`): reference files offered to synthesis rose from 22% to 41%, and those cited from 17% to 26%. Answer key-point coverage stayed flat (0.28 to 0.30). Contradictions fell from 7 to 4. Median latency rose from 137 to 200 s. The limit has moved from retrieval to synthesis. Whether to keep 1.9.0 is with the owner.
+Result (`runs/core-004`): reference files offered to synthesis rose from 22% to 41%, and those cited from 17% to 26%. Answer key-point coverage stayed flat (0.28 to 0.30). Contradictions fell from 7 to 4. Median latency rose from 137 to 200 s. The limit has moved from retrieval to synthesis. The owner kept 1.9.0 (2026-10-10): better grounding is worth about 60 s more per answer.
 
 Rejected alternatives:
 - Giving the model file-reading tools directly: the model would supply evidence text and step outside the Bridge capability's boundary.
