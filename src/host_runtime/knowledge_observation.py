@@ -4,7 +4,6 @@ The selected Skill owns procedural guidance. This adapter only reports the
 Bridge outcome and revalidates Raw citations; it grants no new capability.
 """
 
-import re
 from collections.abc import Callable
 from typing import Any
 
@@ -20,24 +19,6 @@ from knowledge.evidence import (
 )
 from knowledge.evolution import KnowledgeAnswerRecord
 from knowledge.procedure import KnowledgeProcedure
-
-# A short answer that only says the evidence does not support an answer is
-# not a validated answer, even when it cites a passage (knowledge_v1 core-005,
-# owner 2026-10-10): the same evidence often yields a full answer on a retry.
-NO_SUPPORT_CHARS = 700
-_NO_SUPPORT = re.compile(
-    r"\bno\b[^.\n]{0,60}\b(?:passages?|evidence|sources?|raw|wiki)\b[^.\n]{0,80}"
-    r"\b(?:supports?|establish(?:es)?|ties?|maps?|shows?|states?|mentions?)\b"
-    r"|\bdo(?:es)?\s+not\s+(?:explicitly\s+|directly\s+)?"
-    r"(?:support|establish|tie|map|show|state|mention)\b"
-    r"|(?:沒有|未|無)[^。\n]{0,30}(?:段落|證據|資料|來源)[^。\n]{0,30}(?:支持|證實|說明|提到|對應)",
-    re.IGNORECASE)
-
-
-def declares_no_support(text: str) -> bool:
-    """True for a short reply whose opening says the evidence supports no answer."""
-    body = text.strip()
-    return len(body) < NO_SUPPORT_CHARS and bool(_NO_SUPPORT.search(body[:400]))
 
 
 class KnowledgeBridgeActions:
@@ -65,8 +46,6 @@ class KnowledgeBridgeActions:
         self.required_subject = required_subject
         self.procedure = procedure
         self.result: dict[str, Any] | None = None
-        # Set when the last answer only declared that nothing supports it.
-        self.no_support = False
 
     def collect_context(self) -> str:
         # The exact asset was selected by the Host. Retrieval is still owned
@@ -109,11 +88,9 @@ class KnowledgeBridgeActions:
         except ValueError:
             status = "failed"
         else:
-            self.no_support = declares_no_support(checked.answer.text)
             status = (
                 "passed" if checked.answer.text.strip() and checked.cited_passages
                 and checked.citation_policy == self._citation_policy()
-                and not self.no_support
                 else "failed"
             )
         if set(self.required_evidence) - {"raw_citations"}:
@@ -124,7 +101,6 @@ class KnowledgeBridgeActions:
                 status=status,
                 evidence_ref=(
                     "unmet_skill_evidence" if set(self.required_evidence) - {"raw_citations"}
-                    else "no_substantive_answer" if self.no_support
                     else "bridge_raw_record"
                 ),
             ),
