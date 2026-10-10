@@ -64,6 +64,11 @@ ingest 與 query 都讓模型「讀總目錄 → 選分類 → 讀子目錄 → 
 - **綜合頁**：raw 觸及某市場 × 產品格時，同步更新該格的綜合頁（寫明來源）；好的 query 答案可經核准
   存回為綜合頁（Karpathy：answers filed back）。
 
+**既有資產（2026-10-11 發現）**：owner 的 `OneDrive - Rohde & Schwarz/RS_Knowledge/` 已是 Karpathy 模式：
+`CLAUDE.md` 就是 schema（整份作為 ingest 的 system prompt；敘述繁中、術語英文），`skills/` 已有
+`ingest-market`、`ingest-productions`、`ingest-competitor`、`ingest-knowledge`、`ask-*`、`quiz-build`。
+K3 以這些為起點轉成平台 Skill，不從零撰寫；雙語別名（4.2）需要在 schema 的語言慣例中加一條。
+
 ### 4.4 寫入安全
 
 - 由「整頁重寫」改為段落層級操作（新增段落、取代某標題下內容）。
