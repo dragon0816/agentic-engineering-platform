@@ -1,4 +1,4 @@
-# Knowledge 管線發布計畫：Convert → Ingest → Query → Lint/Conflict（草案，待 owner 審）
+# Knowledge 管線發布計畫：Convert → Ingest → Query → Lint/Conflict（owner 已核准方向，2026-10-11）
 
 2026-10-11。依 owner 需求與討論（對話 2026-10-10～11）整理。參考：Karpathy「LLM Wiki」
 （https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f）。
@@ -21,7 +21,7 @@ Personal Agent 是主要介面；領域知識放 Skill（已有安裝、版本�
 頁面：選 vault → 拖檔案到 drop 並預覽轉換 → 預覽 ingest 的頁面差異並核准 → 衝突報告與判斷。
 query 在對話中進行。瀏覽 wiki 沿用 Obsidian（Karpathy 建議），頁面連結可開 Obsidian。
 
-一致性（非權限）：同一 vault 同一時間只允許一個寫入者（vault 鎖），查詢不受影響。
+一致性（非權限）：不直接 ingest 到正式 vault；每人在自己的沙盒 ingest，再經合併發布（見 4.8）。合併時同一 vault 同一時間只允許一個寫入者（vault 鎖），查詢不受影響。
 
 ## 3. 現況對照
 
@@ -91,22 +91,41 @@ ingest 與 query 都讓模型「讀總目錄 → 選分類 → 讀子目錄 → 
 
 - 560 個 raw 可排隊、可中斷續跑；進度與結果寫入 telemetry，Atlas 可看 ingest 進度。
 
+### 4.8 沙盒與合併（避免多人 ingest 互相干擾）
+
+只有寫入鎖不夠：鎖防同時寫，防不了語意干擾（A 依示波器角度重寫共用的 EVM 概念頁，B 再依 VNA 角度改同一頁）。
+沿用平台既有的 Knowledge 治理流程（`knowledge_evolution`：在獨立本機 vault 建立候選 → 驗證 → 核准 → 發布版本），
+加上領域分工：
+
+| 概念 | 做法 |
+|---|---|
+| 正式 vault | 已發布版本；查詢用它；不允許直接 ingest |
+| 個人／領域沙盒 | 每人 ingest 到自己的候選 vault（正式版副本 + 自己的新 raw），在裡面測試、查詢、lint，不影響別人 |
+| 領域範圍 | domain matrix Skill 規定各領域可改的範圍（如 VNA 只能改 VNA 產品線那幾格）；共用頁（概念頁）的修改成為「提案」，需審核 |
+| 合併 | 與建立沙盒時的正式版做三方比較；同段被他人改過即為合併衝突。合併後跑 lint、衝突掃描與該領域題目驗證，通過且領域負責人核准後發布新版本 |
+| raw | 寫一次、內容雜湊身分，各沙盒新增的 raw 取聯集，不會衝突 |
+
+- 段落層級寫入（4.4）是自動合併的前提，所以合併放在 K3 之後。
+- 不在 OneDrive 共享資料夾上用 git：同步會損壞 `.git`；改用候選版本加摘要比對。
+- 「領域負責人核准」是工作流程，不是權限控制。
+
 ## 5. 分階段
 
 | 階段 | 內容 | 驗收 |
 |---|---|---|
-| K1 | 接上 Agent：convert、ingest、lint 成為 Bridge 能力；Agent Web「Knowledge」頁（選 vault、drop 預覽、ingest 差異核准）；vault 鎖 | 在獨立測試 vault 跑完 convert → ingest → lint（TASKS 既有待辦） |
+| K1 | 接上 Agent：convert、ingest、lint 成為 Bridge 能力；Agent Web「Knowledge」頁（選 vault、drop 預覽、ingest 差異核准）；ingest 一律進個人沙盒（候選 vault）；vault 鎖 | 在獨立測試 vault 跑完 convert → ingest → lint（TASKS 既有待辦） |
 | K2 | 分層 index + 雙語別名／摘要；ingest 挑頁與 query 改為循 index | 36 題 benchmark 涵蓋率不低於 0.40、目標 0.50；耗時不惡化 |
-| K3 | Karpathy 基礎 Skill + domain matrix Skill；段落層級寫入與刪除防護 | 測試 vault ingest 後無刪失；頁面符合範本 |
+| K3 | Karpathy 基礎 Skill + domain matrix Skill（含領域範圍）；段落層級寫入與刪除防護；沙盒合併（三方比較、合併衝突、合併後驗證、核准發布） | 測試 vault ingest 後無刪失；兩個沙盒改不同段可自動合併、改同段被列為衝突 |
 | K4 | Convert 補齊：Excel（表格、圖表 → 數字表 + 總結）、HTML、`.ppt`、圖片連結與 OCR | 各格式樣本轉換結果經 owner 檢視 |
 | K5 | 綜合頁與「答案存回」；全庫衝突掃描與過期偵測 | 衝突報告經 owner 抽查 |
 | K6 | 批次 ingest、telemetry、發布文件 | Atlas 上可看 ingest 進度 |
 
 每階段完成即 commit、更新 TASKS／HANDOFF；影響 query 的階段以 36 題 benchmark 驗證（參考答案沿用，不再花 Claude Code 額度）。
 
-## 6. 待 owner 決定
+## 6. Owner 決定（2026-10-11）
 
-1. 發布形式採 Agent Web「Knowledge」頁（建議）是否同意。
-2. 分階段順序是否同意；K1 用哪個測試 vault（建議另建小型測試 vault，不直接動市場 × 產品 vault）。
-3. 若公司端點不能看圖，圖片說明與 Excel 圖表分析改用哪個模型。
-4. `.ppt` 舊格式是否仍需支援（需在 Windows 上有可用的轉換工具，例如已安裝的 PowerPoint）。
+1. 發布形式：採用 Agent Web「Knowledge」頁。
+2. 分階段順序：同意；K1 先用另建的小型測試 vault，不動市場 × 產品 vault。
+3. 模型：公司可用 gpt-5.5、gpt-5.6 與 Copilot，圖片分析可用；實作時先以一張樣本圖確認端點的看圖能力。
+4. `.ppt` 舊格式：需要支援（K4 確認轉換工具，例如本機 PowerPoint）。
+5. 多人 ingest：採沙盒 + 合併（4.8）。

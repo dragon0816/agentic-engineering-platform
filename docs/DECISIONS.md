@@ -2062,3 +2062,18 @@ Measured by `runs/core-006` against core-005.
 - The 1.11.0 guidance left some answers not addressing the question.
 
 Code reverted in ca110b0. Skill 1.10.0 is live again (1.11.0 is in `disabled/`). Review: `runs/core-006/review.zh-TW.md`.
+
+## 2026-10-11: Knowledge pipeline release direction
+
+Decision (owner): Knowledge convert, ingest, query and lint/conflict are released inside Agent Web, as a "Knowledge" page plus conversation, not as a separate app. Everyone analyses data with the Karpathy LLM Wiki schema Skill plus their own domain Skill, and access to a vault is controlled by the vault itself. The first domain is the 5 market × 4 product-line vault, with a customised domain matrix Skill.
+
+Concurrent ingest does not write to the published vault. Each person ingests into a sandbox (a candidate vault, on the existing `knowledge_evolution` flow), scoped by the domain Skill, and merges back. The merge does a three-way comparison by section, then lint, a conflict scan and domain validation, then approval. Conversion covers Excel (tables kept as tables; charts become a number table plus an analysis summary), HTML and legacy `.ppt`. Images use gpt-5.5/5.6 or Copilot.
+
+Reason: the Personal Agent is the product's main interface. Skills, approvals, Harness validation, telemetry and Knowledge versioning already live there. A write lock alone prevents simultaneous writes but not semantic interference on shared pages.
+
+Rejected alternatives:
+- A standalone app: it would duplicate the Skill system, approvals and the model gateway.
+- Git on the OneDrive-synced vault: sync corrupts `.git`.
+- Two parallel language copies as authoritative pages: they drift, and translation errors would become evidence. Use bilingual aliases and summaries, and retrieval-only derived translations if needed.
+
+Plan: `docs/phases/KNOWLEDGE_PIPELINE_RELEASE.zh-TW.md` (K1-K6).
