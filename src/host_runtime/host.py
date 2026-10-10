@@ -77,6 +77,40 @@ from capabilities.excel_blocks.handlers import (
     UpsertResult,
 )
 from capabilities.files import READ_FILE_SPEC, ReadFileHandler, ReadFileInput, ReadFileOutput
+from capabilities.knowledge_pipeline.contracts import (
+    ConvertRequest,
+    DropAdded,
+    DropAddRequest,
+    IngestApplyRequest,
+    IngestPlanRequest,
+    LintRequest,
+    SandboxCreateRequest,
+    SandboxDiscarded,
+    SandboxList,
+    SandboxListRequest,
+    SandboxRecord,
+    SandboxRef,
+)
+from capabilities.knowledge_pipeline.handlers import (
+    CONVERT_SPEC,
+    DROP_ADD_SPEC,
+    INGEST_APPLY_SPEC,
+    INGEST_PLAN_SPEC,
+    LINT_SPEC,
+    SANDBOX_CONTENTS_SPEC,
+    SANDBOX_CREATE_SPEC,
+    SANDBOX_DISCARD_SPEC,
+    SANDBOX_LIST_SPEC,
+    ConvertHandler,
+    DropAddHandler,
+    IngestApplyHandler,
+    IngestPlanHandler,
+    LintHandler,
+    SandboxContentsHandler,
+    SandboxCreateHandler,
+    SandboxDiscardHandler,
+    SandboxListHandler,
+)
 from capabilities.knowledge_query.handlers import (
     KNOWLEDGE_QUERY_SPEC,
     MARKET_MATRIX_SPEC,
@@ -220,6 +254,7 @@ from integrations.jira import JiraClient
 from integrations.outlook_draft import DraftError, DraftWriter, OutlookComDraft
 from integrations.outlook_draft import require_com as require_outlook
 from integrations.web_script import WebScript, WebScriptResult
+from knowledge.describe import ImageDescriber
 from knowledge.evolution import (
     KnowledgeAnswerRecord,
     KnowledgeCatalog,
@@ -227,6 +262,16 @@ from knowledge.evolution import (
     KnowledgeQueryRequest,
 )
 from knowledge.market_matrix import MarketMatrixRecord, MarketMatrixRequest
+from knowledge.office import office_extractors
+from knowledge.pipeline import (
+    ConvertResult,
+    IngestApplyResult,
+    IngestPlanResult,
+    KnowledgePipeline,
+    LintSummary,
+    SandboxContents,
+)
+from knowledge.sandbox import Sandboxes
 from knowledge.vault import Vault, VaultError
 from models.approved import ApprovedModelClient
 from models.clients import ModelClients
@@ -953,6 +998,8 @@ def build_gateway(
                     KnowledgeAnswerRecord,
                     ExecutionDependencies(central_required=False),
                 )
+    if config.knowledge_pipeline is not None:
+        _register_knowledge_pipeline(installed, config, layout, drafting_model)
     # Derive policy only after every configured built-in capability is in the
     # registry. A selected Knowledge query or workflow-author capability must
     # not disappear merely because its handler is assembled from local model
@@ -1766,3 +1813,39 @@ def build_runtime(
 
     gateway.knowledge_harness = KnowledgeHarness(runtime, checked.namespace).for_tool
     return runtime
+
+
+def _register_knowledge_pipeline(
+    installed: InstalledCapabilities, config: CompanyHostConfiguration, layout: HostLayout,
+    model: ModelClient | None,
+) -> None:
+    """Sandboxed convert/ingest/lint (docs/phases/KNOWLEDGE_K1.md). Ingest
+    planning and image description use the routing model when there is one;
+    images are described only when its endpoint declares vision."""
+    assert config.knowledge_pipeline is not None
+    binding = config.models
+    alias = binding.routing_alias if binding is not None else None
+    endpoints = binding.catalog.endpoints if binding is not None else ()
+    endpoint = next((e for e in endpoints if e.alias == alias), None)
+    describer = (ImageDescriber(model, alias=alias)
+                 if model is not None and alias is not None and endpoint is not None
+                 and endpoint.capabilities.vision else None)
+    pipeline = KnowledgePipeline(
+        Sandboxes(layout.workspace_root),
+        {item.name: Path(item.root) for item in config.knowledge_pipeline.vaults},
+        extractors=office_extractors(), model=model, alias=alias, describer=describer)
+    local = ExecutionDependencies(central_required=False)
+    for spec, handler, request, response in (
+        (SANDBOX_CREATE_SPEC, SandboxCreateHandler(pipeline), SandboxCreateRequest, SandboxRecord),
+        (SANDBOX_LIST_SPEC, SandboxListHandler(pipeline), SandboxListRequest, SandboxList),
+        (CONVERT_SPEC, ConvertHandler(pipeline), ConvertRequest, ConvertResult),
+        (INGEST_PLAN_SPEC, IngestPlanHandler(pipeline), IngestPlanRequest, IngestPlanResult),
+        (INGEST_APPLY_SPEC, IngestApplyHandler(pipeline), IngestApplyRequest, IngestApplyResult),
+        (LINT_SPEC, LintHandler(pipeline), LintRequest, LintSummary),
+        (DROP_ADD_SPEC, DropAddHandler(pipeline), DropAddRequest, DropAdded),
+        (SANDBOX_CONTENTS_SPEC, SandboxContentsHandler(pipeline), SandboxRef,
+         SandboxContents),
+        (SANDBOX_DISCARD_SPEC, SandboxDiscardHandler(pipeline), SandboxRef,
+         SandboxDiscarded),
+    ):
+        installed.register(spec, handler, request, response, local)

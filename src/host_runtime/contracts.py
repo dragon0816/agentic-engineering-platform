@@ -18,6 +18,7 @@ from agent.decisions import DecisionAcceleratorConfig
 from capabilities.chipset_report.contracts import ChipsetReportSettings
 from capabilities.coding_change.contracts import CodingHostBinding
 from capabilities.desktop_session.handlers import DesktopHostBinding
+from capabilities.knowledge_pipeline.contracts import KnowledgePipelineHostBinding
 from capabilities.release_package.contracts import IsolatedApplySettings, ReleasePreviewSettings
 from capabilities.team_tickets.contracts import TeamTicketsSettings
 from capabilities.web.handlers import WebHostBinding
@@ -482,6 +483,9 @@ class CompanyHostConfiguration(Contract):
     # Coding on the Bridge (docs/phases/CODING_ON_BRIDGE.md): which
     # repositories may be changed and the restricted runner interpreter.
     coding: CodingHostBinding | None = None
+    # Sandboxed Knowledge convert/ingest/lint (docs/phases/KNOWLEDGE_K1.md):
+    # the base vaults people may copy into a personal sandbox.
+    knowledge_pipeline: KnowledgePipelineHostBinding | None = None
     # Web steps of generated Workflows (docs/phases/SOP_TO_WORKFLOW.md W2):
     # the origins they may open and the browser profile they use.
     web: WebHostBinding | None = None

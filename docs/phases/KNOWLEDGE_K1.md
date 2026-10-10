@@ -25,8 +25,9 @@ always inside a personal sandbox. No change to what ingest writes (K2/K3), no ne
 - No model or provider detail enters the contracts; ingest planning uses the configured
   Gateway model through `ModelClient`.
 - Side effects are classified (below). Sandbox writes are local, confined to the person's
-  sandbox folder and discardable, so they need no extra approval beyond the person's own
-  button press. Writing to a **base** vault is out of scope for K1 (merge is K3, and it will
+  sandbox folder and discardable. As the platform requires for every side-effecting
+  capability, the writing steps carry `approval_required` and need an approved grant
+  (`approval_ref` in `grants.json`); each call is then the person's own button press. Writing to a **base** vault is out of scope for K1 (merge is K3, and it will
   require approval).
 - n8n is not involved.
 

@@ -104,3 +104,23 @@ def test_lint_reports_on_the_sandbox(tmp_path: Path) -> None:
     assert summary.counts["dangling"] >= 1 and summary.counts["open_conflicts"] == 1
     assert any(f.startswith("open conflict: wiki/concepts/X.md") for f in summary.findings)
     assert not summary.clean
+
+
+def test_drop_add_contents_and_discard(tmp_path: Path) -> None:
+    pipeline, base = _pipeline(tmp_path, PlanningModel(answers()))
+    before = _snapshot(base)
+    sandbox = pipeline.create_sandbox("k-test", "files", "a").sandbox_id
+    assert pipeline.add_drop(sandbox, "Market/x.txt", b"hello\n") == "drop/Market/x.txt"
+    for name, code in (("../escape.txt", "outside_drop"), ("Market/x.txt", "drop_exists"),
+                       (" ", "outside_drop")):
+        with pytest.raises(PipelineError, match=code):
+            pipeline.add_drop(sandbox, name, b"x")
+    raw_ref = pipeline.convert(sandbox, mode="apply").items[0].raw_ref
+    assert raw_ref
+    plan_id = pipeline.plan_ingest(sandbox, raw_ref).plan_id
+    listed = pipeline.contents(sandbox)
+    assert "drop/Market/x.txt" in listed.drop and raw_ref in listed.raw
+    assert [(p.plan_id, p.raw_ref) for p in listed.plans] == [(plan_id, raw_ref)]
+    pipeline.discard_sandbox(sandbox)
+    assert pipeline.sandboxes.list() == ()
+    assert _snapshot(base) == before

@@ -38,6 +38,8 @@ from models.contracts import ModelClient
 SCHEMA_FILE = "CLAUDE.md"
 PLANS = ".plans"
 MAX_FINDINGS = 50
+# One dropped original; the Agent Web upload limit is smaller.
+MAX_DROP_BYTES = 50 * 1024 * 1024
 
 
 class PipelineError(Exception):
@@ -89,6 +91,18 @@ class IngestApplyResult(Contract):
     problems: tuple[str, ...] = ()
 
 
+class PlanRecord(Contract):
+    plan_id: str
+    raw_ref: str
+
+
+class SandboxContents(Contract):
+    sandbox_id: str
+    drop: tuple[str, ...] = ()
+    raw: tuple[str, ...] = ()
+    plans: tuple[PlanRecord, ...] = ()
+
+
 class LintSummary(Contract):
     sandbox_id: str
     pages: int
@@ -129,6 +143,36 @@ class KnowledgePipeline:
 
     def _open(self, sandbox_id: str) -> Vault:
         return self.sandboxes.open(sandbox_id)[1]
+
+    def discard_sandbox(self, sandbox_id: str) -> None:
+        self.sandboxes.discard(sandbox_id)
+
+    def add_drop(self, sandbox_id: str, name: str, data: bytes) -> str:
+        """Put one original into the sandbox's drop/; never replaces a file."""
+        vault = self._open(sandbox_id)
+        clean = normalize(f"drop/{name}")
+        target = (vault.root / clean).resolve()
+        drop = (vault.root / "drop").resolve()
+        if not name.strip() or drop not in target.parents:
+            raise PipelineError("outside_drop")
+        if len(data) > MAX_DROP_BYTES:
+            raise PipelineError("drop_too_large")
+        if target.exists():
+            raise PipelineError("drop_exists")
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
+        return clean
+
+    def contents(self, sandbox_id: str) -> SandboxContents:
+        vault = self._open(sandbox_id)
+        drop = tuple(p.relative_to(vault.root).as_posix()
+                     for p in sorted((vault.root / "drop").rglob("*")) if p.is_file())
+        raw = tuple(sorted(e.raw_ref for e in RawIndex.scan(vault).entries))
+        plans = []
+        for path in sorted((vault.root / PLANS).glob("plan-*.json")):
+            stored = json.loads(path.read_text(encoding="utf-8"))
+            plans.append(PlanRecord(plan_id=stored["plan_id"], raw_ref=stored["raw_ref"]))
+        return SandboxContents(sandbox_id=sandbox_id, drop=drop, raw=raw, plans=tuple(plans))
 
     # -- convert -------------------------------------------------------------
 
