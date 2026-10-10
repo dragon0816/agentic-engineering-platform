@@ -1,0 +1,652 @@
+[
+ {
+  "id": "Q0011",
+  "b_vs_a": {
+   "coverage": 0.562,
+   "points": [
+    {
+     "n": 1,
+     "point": "The Vault's Wi-Fi 7 workflow splits CMX500 (R&D signaling/interworking) from CMP180 (production non-signaling RF), i.e. signaling tester early, non-signaling tester at production.",
+     "verified": true,
+     "label": "covered",
+     "why": "states CMX500 signaling for R&D and CMP180 non-signaling for production"
+    },
+    {
+     "n": 2,
+     "point": "In the production phase all WLAN RF measurements are run in non-signaling mode to save test time, and the CMP180 is positioned as optimized for that stage.",
+     "verified": true,
+     "label": "covered",
+     "why": "states all production WLAN RF measurements are non-signaling to save time and CMP180 does them"
+    },
+    {
+     "n": 3,
+     "point": "Wi-Fi 7 R&D testing requires signaling mode with real-world conditions to measure RF TX/RX characteristics (MLO makes multiple RF chains important).",
+     "verified": true,
+     "label": "covered",
+     "why": "states signaling real-world RF TX/RX and MLO/multiple RF chains"
+    },
+    {
+     "n": 4,
+     "point": "For Wi-Fi 8 / IEEE 802.11bn, the first RF tests were implemented in CMX500 signaling mode before final IEEE standard ratification, on a Broadcom prototype WLAN device.",
+     "verified": true,
+     "label": "partial",
+     "why": "states first Wi-Fi 8 signaling RF tests on Broadcom prototype but omits pre-ratification/802.11bn context"
+    },
+    {
+     "n": 5,
+     "point": "Wi-Fi 8 signaling-mode tests target PHY features such as distributed resource units (dRU) and unequal modulation (UEQM), i.e. pre-standard PHY validation rather than production screening.",
+     "verified": true,
+     "label": "partial",
+     "why": "mentions dRU and UEQM in CMX500 signaling tests but not clearly as pre-standard PHY validation rather than production screening"
+    },
+    {
+     "n": 6,
+     "point": "The 5G device testing value chain note maps the same tool split generically: signaling/protocol/application layer = CMX500/CMW500/CMsquares; production/manufacturing = CMP180/CMP200/CMW100.",
+     "verified": true,
+     "label": "missing",
+     "why": "does not mention generic 5G value-chain mapping or CMW500/CMsquares/CMP200/CMW100"
+    },
+    {
+     "n": 7,
+     "point": "CMX500 Wi-Fi signaling coverage is licensed per Wi-Fi generation, e.g. WLAN Signaling 11be options for Wi-Fi 7 AP or station emulation, alongside WLAN TX measurement and ARB generator options.",
+     "verified": true,
+     "label": "missing",
+     "why": "does not mention per-generation CMX500 Wi-Fi signaling licensing or related options"
+    },
+    {
+     "n": 8,
+     "point": "CMP180's non-signaling production scope covers Wi-Fi 6E/Wi-Fi 7 and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz; its 480 MHz loopback waveform is only a potential Wi-Fi 8 candidate, not confirmed Wi-Fi 8 production support.",
+     "verified": true,
+     "label": "partial",
+     "why": "covers Wi-Fi 6E/7, 5G NR FR1 up to 8 GHz and 480 MHz candidate, but omits 500 MHz bandwidth and confirmed production-support caveat"
+    }
+   ],
+   "contradicted": 0,
+   "invented": []
+  },
+  "a_vs_b": {
+   "coverage": 1.0,
+   "points": [
+    {
+     "n": 1,
+     "point": "The CMX500 (signaling) covers R&D and the CMP180 (non-signaling) covers production RF testing",
+     "verified": true,
+     "label": "covered",
+     "why": "states CMX500 for R&D/signaling and CMP180 for production/non-signaling"
+    },
+    {
+     "n": 2,
+     "point": "Wi-Fi 7 R&D needs RF TX/RX measured in signaling mode under real-world conditions",
+     "verified": true,
+     "label": "covered",
+     "why": "says Wi-Fi 7 signaling mode under real-world conditions measures RF TX/RX"
+    },
+    {
+     "n": 3,
+     "point": "CMX500 R&D tests include MLO, multiple RF chains, 2x2 MIMO, 6 GHz out-of-band discovery, coexistence and E2E",
+     "verified": true,
+     "label": "covered",
+     "why": "lists MLO, multiple RF chains, 2x2 MIMO, 6 GHz OOB discovery, coexistence and E2E"
+    },
+    {
+     "n": 4,
+     "point": "In production, all WLAN RF measurements run in non-signaling mode to save time",
+     "verified": true,
+     "label": "covered",
+     "why": "states production WLAN RF measurements run non-signaling to save time"
+    },
+    {
+     "n": 5,
+     "point": "Two CMP180s can be combined to test 4x4 MIMO access points",
+     "verified": true,
+     "label": "covered",
+     "why": "says two CMP180 boxes scale to 4x4 MIMO APs"
+    },
+    {
+     "n": 6,
+     "point": "The CMX500 ran the first Wi-Fi 8 RF tests in signaling mode on a prototype Broadcom device",
+     "verified": true,
+     "label": "covered",
+     "why": "states CMX500 ran first Wi-Fi 8 RF tests in signaling mode on Broadcom prototype"
+    },
+    {
+     "n": 7,
+     "point": "The CMP180's 480 MHz loopback waveform is only a potential Wi-Fi 8 candidate, not a formal Wi-Fi 8 spec",
+     "verified": true,
+     "label": "covered",
+     "why": "states 480 MHz loopback waveform is only a potential candidate, not ratified/confirmed production support"
+    },
+    {
+     "n": 8,
+     "point": "The CMX500 also covers 5G/WLAN offloading and Voice over WLAN through its N3IWF gateway",
+     "verified": true,
+     "label": "covered",
+     "why": "mentions 5G/WLAN offloading and Voice over WLAN via N3IWF gateway and POLQA"
+    }
+   ],
+   "contradicted": 0,
+   "invented": [
+    "CMX500 Wi-Fi signaling coverage is licensed per Wi-Fi generation, e.g. WLAN Signaling 11be options for Wi-Fi 7 AP or station emulation, alongside WLAN TX measurement and ARB generator options",
+    "two analyzers/generators and eight-port sets for 2x2 MIMO"
+   ]
+  }
+ },
+ {
+  "id": "Q0039",
+  "b_vs_a": {
+   "coverage": 0.812,
+   "points": [
+    {
+     "n": 1,
+     "point": "The competitive comparison pages are sales positioning, not binding technical specifications.",
+     "verified": true,
+     "label": "covered",
+     "why": "says battle-card comparisons are sales positioning, not binding specifications"
+    },
+    {
+     "n": 2,
+     "point": "The comparison page cannot replace the formal specifications / features documents of the R&S testers being compared.",
+     "verified": true,
+     "label": "covered",
+     "why": "requires R&S capabilities to be checked against official datasheets/features, not comparison pages"
+    },
+    {
+     "n": 3,
+     "point": "Competitor claims come from a single R&S internal battle card, so customer-facing use requires the competitor's official data plus third-party evidence.",
+     "verified": true,
+     "label": "covered",
+     "why": "says competitor comparisons come from internal battle cards and need competitor official sources plus third-party evidence"
+    },
+    {
+     "n": 4,
+     "point": "Superlatives such as \"only platform\", \"first validated\", \"leadership\", \"lower TCO\", \"fewer boxes\" are sales language and must not be used as verifiable technical specifications.",
+     "verified": true,
+     "label": "covered",
+     "why": "identifies superlative sales phrases as not verifiable technical facts"
+    },
+    {
+     "n": 5,
+     "point": "Battle card numbers conflicting with the formal CMX500 specs may only be cited as a dated (2026-02-26) sales claim, not as binding specifications.",
+     "verified": true,
+     "label": "partial",
+     "why": "states battle-card numbers are not binding, but omits the dated 2026-02-26 sales-claim limitation for conflicting numbers"
+    },
+    {
+     "n": 6,
+     "point": "The non-signaling / production path platforms (CMP180, CMP200, CMW100 K06) must each be cited from their own official source pages.",
+     "verified": true,
+     "label": "covered",
+     "why": "says CMP180, CMP200 and CMW100 K06 each need their own formal spec/source page"
+    },
+    {
+     "n": 7,
+     "point": "Validated NTN / conformance leadership claims lack a validation report, test case list and PTCRB RFT version, which are the evidence still required.",
+     "verified": true,
+     "label": "partial",
+     "why": "mentions validation reports and test-case lists, but omits NTN specifically and PTCRB RFT version/date"
+    },
+    {
+     "n": 8,
+     "point": "A competitor's own official brochure can be used to describe that competitor's product but not to validate R&S advantage claims.",
+     "verified": true,
+     "label": "partial",
+     "why": "says competitor official sources are needed, but does not clearly say they can describe only the competitor product and cannot validate R&S advantage claims"
+    }
+   ],
+   "contradicted": 0,
+   "invented": []
+  },
+  "a_vs_b": {
+   "coverage": 0.875,
+   "points": [
+    {
+     "n": 1,
+     "point": "The battle-card comparison is sales positioning, not binding technical specifications",
+     "verified": true,
+     "label": "covered",
+     "why": "states comparison pages/battle cards are sales positioning, not binding specs"
+    },
+    {
+     "n": 2,
+     "point": "R&S capability claims (e.g., FR2 up to 50 GHz) must be checked against the formal CMX500 specifications",
+     "verified": true,
+     "label": "covered",
+     "why": "requires R&S capability claims to trace to formal CMX500 specs/features documents"
+    },
+    {
+     "n": 3,
+     "point": "Claims about competitors used in customer documents need the competitor's official data plus third-party evidence",
+     "verified": true,
+     "label": "covered",
+     "why": "says customer-facing competitor claims require competitor official data plus third-party evidence"
+    },
+    {
+     "n": 4,
+     "point": "Superlatives like 'Only R&S' and 'future-proof choice' are sales language, not verifiable specifications",
+     "verified": true,
+     "label": "covered",
+     "why": "identifies superlatives as sales language, not verifiable specifications"
+    },
+    {
+     "n": 5,
+     "point": "Validation and conformance claims need supporting evidence such as a validation report or test case list, which the source does not have",
+     "verified": true,
+     "label": "covered",
+     "why": "says validation/conformance claims need validation report and test case list, and that these are lacking"
+    },
+    {
+     "n": 6,
+     "point": "Quoting Anritsu MT8000A figures to customers requires an official Anritsu source",
+     "verified": true,
+     "label": "partial",
+     "why": "gives the general rule for Anritsu/competitor official data but does not specifically address MT8000A figures"
+    },
+    {
+     "n": 7,
+     "point": "Comparisons need document revision, order number, software version and test conditions, which are currently missing",
+     "verified": true,
+     "label": "partial",
+     "why": "mentions some document identifiers and test-condition details, but not the full required set of revision, order number, software version, and test conditions as currently missing"
+    },
+    {
+     "n": 8,
+     "point": "Non-signaling production platforms (CMP180, CMP200, CMW100 K06) must each be backed by their own formal spec pages",
+     "verified": true,
+     "label": "covered",
+     "why": "says CMP180, CMP200, and CMW100 K06 need their own official source pages"
+    }
+   ],
+   "contradicted": 0,
+   "invented": [
+    "competitor's official brochure (e.g. mx844030pc-j1200 for the Anritsu MX844030PC Virtual Signalling Tester)"
+   ]
+  }
+ },
+ {
+  "id": "Q0121",
+  "b_vs_a": {
+   "coverage": 0.375,
+   "points": [
+    {
+     "n": 1,
+     "point": "市場需求端：5G FWA operator 的 Rel.16 需求包含 mmWave 載波聚合由 4CC/8CC 擴到 10CC，以及吞吐由 7.9 Gbps 提升到 10 Gbps、FR1+FR2 ENDC 轉為 DC/CA",
+     "verified": true,
+     "label": "missing",
+     "why": "未提 5G FWA Rel.16、mmWave 10CC、7.9→10 Gbps、FR1+FR2 ENDC→DC/CA"
+    },
+    {
+     "n": 2,
+     "point": "市場需求被轉成 RF parametric 可量測參數：Output power、EVM、OBW、receiver sensitivity level BLER、band permutations and CAs（多為 operator 要求）",
+     "verified": true,
+     "label": "partial",
+     "why": "有提 output power、receiver sensitivity，但缺 EVM、OBW、BLER、band permutations/CAs 與 operator 要求脈絡"
+    },
+    {
+     "n": 3,
+     "point": "這些測試需求對應到的儀器類別明確包含 VSA（signal analyzer）與 VSG（signal generator），具體型號為 R&S FSW 與 R&S SMW200A",
+     "verified": true,
+     "label": "covered",
+     "why": "明確提到 signal generator/analyzer，型號含 R&S SMW200A 與 R&S FSW"
+    },
+    {
+     "n": 4,
+     "point": "基地台側的可量測參數清單來自 3GPP TS 38.141-1 chapter 6，含 Modulation quality、Occupied bandwidth、ACLR 等 transmitted signal quality 與 unwanted emissions 項目",
+     "verified": true,
+     "label": "partial",
+     "why": "有提 modulation quality、ACLR、output power 等，但標準來源改成 TS 38.108/38.181，未提 TS 38.141-1 chapter 6 與 OBW/unwanted emissions"
+    },
+    {
+     "n": 5,
+     "point": "參數 → signal analyzer 能力：ACLR（6.6.3）需要 FSW base unit 加 FSW-K144 5G NR option，並在 5G NR mode 以 Channel Power ACLR / EVM 量測功能執行；OBW 則用 spectrum analyzer mode 基本功能",
+     "verified": true,
+     "label": "partial",
+     "why": "只泛稱 FSW 可做 EVM/ACLR；未提 FSW-K144、5G NR mode、Channel Power ACLR/EVM 或 OBW 用 spectrum analyzer mode"
+    },
+    {
+     "n": 6,
+     "point": "參數 → signal generator 能力：receiver 類參數（Dynamic range、ACS、blocking、intermodulation）需要 SMW200A 配 2× baseband generator、baseband main module B13T/B13XT、兩條 RF path、AWGN option K62 與 2× K144",
+     "verified": true,
+     "label": "contradicted",
+     "why": "以 B14/B15 + K820 等 NTN fading emulator 配置取代所需的 2× baseband generator、B13T/B13XT、兩條 RF path、K62、2×K144"
+    },
+    {
+     "n": 7,
+     "point": "頻寬需求（FR2 test model 100/200/400 MHz 與寬頻 CA）決定硬體能力門檻：signal generator 需 wideband baseband（SMW-B13XT）提供 up to 2 GHz RF modulation bandwidth",
+     "verified": true,
+     "label": "missing",
+     "why": "未提 FR2 100/200/400 MHz 或寬頻 CA 導向 SMW-B13XT wideband baseband、up to 2 GHz RF modulation bandwidth"
+    },
+    {
+     "n": 8,
+     "point": "對應地 signal analyzer 需加購 analysis bandwidth 硬體選項（例如 FSW-B2001 提供 2 GHz analysis bandwidth）才能涵蓋寬頻訊號分析",
+     "verified": true,
+     "label": "partial",
+     "why": "有提 FSW analysis bandwidth，但未說需加購 analysis bandwidth 硬體選項或 FSW-B2001 2 GHz"
+    }
+   ],
+   "contradicted": 1,
+   "invented": []
+  },
+  "a_vs_b": {
+   "coverage": 0.25,
+   "points": [
+    {
+     "n": 1,
+     "point": "Market requirement: in NTN both the UE and the network entities move, but test conditions must stay reproducible, accurate and comparable",
+     "verified": true,
+     "label": "missing",
+     "why": "does not mention NTN mobility or reproducible/accurate/comparable tests"
+    },
+    {
+     "n": 2,
+     "point": "Measurable channel parameters the test setup must reproduce: path loss, Doppler shift, time delay, delay variance",
+     "verified": true,
+     "label": "missing",
+     "why": "omits path loss, Doppler, time delay and delay variance"
+    },
+    {
+     "n": 3,
+     "point": "Measured SAN conformance items include output power, frequency error, modulation quality and ACLR",
+     "verified": true,
+     "label": "partial",
+     "why": "mentions output power/modulation quality/ACLR and frequency error elsewhere, but not as SAN conformance items"
+    },
+    {
+     "n": 4,
+     "point": "Signal generator capability: the SMW200A fading emulator covers TDL/CDL, Doppler, delay and path loss",
+     "verified": true,
+     "label": "missing",
+     "why": "does not state SMW200A fading emulator supports TDL/CDL, Doppler, delay, path loss"
+    },
+    {
+     "n": 5,
+     "point": "Quantified SMW200A end-to-end emulation capability: up to 1073 ms delay and ±1 MHz Doppler",
+     "verified": true,
+     "label": "missing",
+     "why": "no 1073 ms delay or ±1 MHz Doppler figures"
+    },
+    {
+     "n": 6,
+     "point": "SMW200A component-test frequency and bandwidth capability",
+     "verified": true,
+     "label": "partial",
+     "why": "mentions SMW wideband modulation bandwidth, but misses component-test frequency/up to 67 GHz context"
+    },
+    {
+     "n": 7,
+     "point": "Signal analyzer capability: FSW frequency range and analysis bandwidth",
+     "verified": true,
+     "label": "partial",
+     "why": "mentions FSW analysis bandwidth options, but not up to 85 GHz or 8 GHz analysis bandwidth"
+    },
+    {
+     "n": 8,
+     "point": "FSW/FSWX analysis capabilities that match the measured parameters",
+     "verified": true,
+     "label": "partial",
+     "why": "covers EVM and ACLR analysis, but omits group delay and NTN matching context"
+    }
+   ],
+   "contradicted": 0,
+   "invented": [
+    "Vault 中可完整串起的鏈路是「市場需求 → 可量測參數 → SG/SA 必備能力」",
+    "Vault 僅提供此對應關係與 option 清單"
+   ]
+  }
+ },
+ {
+  "id": "Q0196",
+  "b_vs_a": {
+   "coverage": 0.375,
+   "points": [
+    {
+     "n": 1,
+     "point": "The strongest infrastructure opportunity is mmWave / higher-frequency and early-6G network analysis, where the MWC2025 network-infrastructure deck lists ZNA up to 67 GHz and ZNA67EXT up to 110 GHz.",
+     "verified": true,
+     "label": "contradicted",
+     "why": "says beamforming is best-supported; omits mmWave/early-6G ZNA 67 GHz and ZNA67EXT 110 GHz evidence"
+    },
+    {
+     "n": 2,
+     "point": "Beamforming / Massive MIMO component and accuracy verification is a named VNA opportunity, addressed by the R&S ZNBT multiport network analyzer up to 40 GHz with simultaneous measurement on up to 24 ports in one instrument.",
+     "verified": true,
+     "label": "covered",
+     "why": "states beamforming accuracy verification, ZNBT up to 40 GHz, 24 ports simultaneously"
+    },
+    {
+     "n": 3,
+     "point": "The ZNA's multi-source, multi-receiver architecture supports antenna array tests and antenna test systems with true parallel and coherent data acquisition, which underpins the active-antenna/array opportunity.",
+     "verified": true,
+     "label": "missing",
+     "why": "does not mention ZNA multi-source/multi-receiver true parallel coherent acquisition for antenna arrays"
+    },
+    {
+     "n": 4,
+     "point": "For satellite communication payloads and components, the ZNA is positioned for group delay of frequency converters without LO access using a two-tone technique, i.e. component-level testing.",
+     "verified": true,
+     "label": "missing",
+     "why": "omits payload/component group-delay testing of converters without LO access and two-tone technique"
+    },
+    {
+     "n": 5,
+     "point": "In the Taiwan satellite supply-chain mapping, VNAs (ZNA / ZNB3000) are mapped to antenna G/T measurement, and the ZNA also to ground stations, UT and communication-module players.",
+     "verified": true,
+     "label": "missing",
+     "why": "omits Taiwan satellite mapping to antenna G/T, ground stations, UT and communication modules"
+    },
+    {
+     "n": 6,
+     "point": "Satellite user-terminal test flows list a VNA for phased-array calibration, with the ZNA named alongside the incumbent Keysight PNA-X.",
+     "verified": true,
+     "label": "covered",
+     "why": "states Starlink flow names ZNA for array calibration alongside Keysight PNA-X"
+    },
+    {
+     "n": 7,
+     "point": "Antenna high-isolation measurement and OTA passive testing in the Taiwan UAV wireless chain is mapped to the R&S ZNB3000.",
+     "verified": true,
+     "label": "missing",
+     "why": "omits Taiwan UAV ZNB3000 antenna high-isolation and OTA passive testing"
+    },
+    {
+     "n": 8,
+     "point": "A weaker, model-less opportunity is calibration of 5G NR SAR test systems, where the source only states that a VNA and VSG assist calibration without naming instruments or procedure.",
+     "verified": true,
+     "label": "covered",
+     "why": "states VNA and VSG help calibrate 5G NR SAR system, without named model or procedure"
+    }
+   ],
+   "contradicted": 1,
+   "invented": [
+    "with no calibration needed"
+   ]
+  },
+  "a_vs_b": {
+   "coverage": 0.667,
+   "points": [
+    {
+     "n": 1,
+     "point": "Beamforming component and accuracy verification for mobile network infrastructure is matched to the R&S ZNBT multiport network analyzer (≤40 GHz)",
+     "verified": true,
+     "label": "covered",
+     "why": "states beamforming accuracy/components paired with R&S ZNBT <=40 GHz"
+    },
+    {
+     "n": 2,
+     "point": "The MWC 2025 beamforming solution offers simultaneous measurement on up to 24 ports in one instrument, with no calibration needed",
+     "verified": true,
+     "label": "partial",
+     "why": "includes up to 24 ports in one instrument but omits no-calibration-needed point"
+    },
+    {
+     "n": 3,
+     "point": "The Starlink user terminal test flow names R&S ZNA for array calibration, next to the competing Keysight PNA-X",
+     "verified": true,
+     "label": "covered",
+     "why": "states Starlink UT flow lists ZNA for array calibration next to Keysight PNA-X"
+    },
+    {
+     "n": 4,
+     "point": "The Kuiper user terminal test flow lists a VNA as core equipment with a chamber and a signal analyzer",
+     "verified": true,
+     "label": "partial",
+     "why": "mentions Kuiper VNA as core OTA/chamber equipment but omits signal analyzer"
+    },
+    {
+     "n": 5,
+     "point": "A VNA and a vector signal generator help calibrate the 5G NR SAR test system",
+     "verified": true,
+     "label": "covered",
+     "why": "states VNA and VSG help calibrate 5G NR SAR system"
+    },
+    {
+     "n": 6,
+     "point": "Network analyzers are among the main instruments of wireless regulatory test labs",
+     "verified": true,
+     "label": "missing",
+     "why": "does not state network analyzers are main instruments in wireless regulatory test labs"
+    }
+   ],
+   "contradicted": 0,
+   "invented": [
+    "strongest in four areas",
+    "strongest infrastructure opportunity is mmWave / higher-frequency and early-6G network analysis",
+    "multi-source, multi-receiver architecture supports antenna array tests",
+    "optional direct IF access for antenna measurement systems",
+    "incumbent Keysight PNA-X"
+   ]
+  }
+ },
+ {
+  "id": "Q1001",
+  "b_vs_a": {
+   "coverage": 0.5,
+   "points": [
+    {
+     "n": 1,
+     "point": "EVM stands for Error Vector Magnitude and is defined as a measurement of the difference between the reference waveform and the measured waveform (3GPP TS 38.521-1 test case 6.4.2.1).",
+     "verified": true,
+     "label": "covered",
+     "why": "states expansion, waveform-difference definition, and TS 38.521-1 test case"
+    },
+    {
+     "n": 2,
+     "point": "The EVM pass/fail limit depends on the chosen modulation scheme plus a Test Tolerance, so modulation/Test-ID selection directly changes the applicable limit (Pi/2-BPSK 30+TT%, QPSK 17.5+TT%, 16QAM 12.5+TT%, 64QAM 8+TT%, 256QAM 3.5+TT%).",
+     "verified": true,
+     "label": "partial",
+     "why": "states modulation-dependent limits and TT, but only gives QPSK and 256QAM examples, not the full listed limits"
+    },
+    {
+     "n": 3,
+     "point": "EVM must be measured at both DUT max power and min power; CMX sets max power automatically first, then the DUT is driven to min power with TPC closed-loop settings (and 256QAM Test IDs target Pmin + 10 dB).",
+     "verified": true,
+     "label": "partial",
+     "why": "covers max/min power and TPC sequence, but omits 256QAM Pmin + 10 dB target"
+    },
+    {
+     "n": 4,
+     "point": "An EVM measurement is only valid if the zero-forcing equalizer correction applied in the EVM measurement process meets the spectral flatness requirement (test cases 6.4.2.4 / 6.4.2.5).",
+     "verified": true,
+     "label": "covered",
+     "why": "states validity depends on zero-forcing equalizer correction meeting spectral flatness"
+    },
+    {
+     "n": 5,
+     "point": "Instrument option selection depends on EVM specs stated only under fixed conditions — e.g. the CMX500 R&S CMX-KM600 NR analyzer is EVM < 0.5 % only for FR1, SCS 30 kHz, 16QAM, +15 °C to +35 °C and a defined input level/bandwidth.",
+     "verified": true,
+     "label": "missing",
+     "why": "does not mention CMX-KM600 EVM <0.5% or the fixed FR1/SCS/modulation/level/temperature conditions"
+    },
+    {
+     "n": 6,
+     "point": "FR2 level-setting decisions are expressed as level ranges for best EVM on the R&S CMX-RF42E active RF frontend (TX/downlink and RX/uplink, per amplification setting).",
+     "verified": true,
+     "label": "partial",
+     "why": "mentions best-EVM level ranges per amplification setting, but omits FR2 and CMX-RF42E TX/RX context"
+    },
+    {
+     "n": 7,
+     "point": "EVM with an external local oscillator on CMXHEAD50/HEAD50-Evo requires an R&S SMA100B with an ultra-low-phase-noise option, and the Vault flags an unresolved option-code discrepancy (SMA-B711 vs SMAB-B711) to verify before configuring or quoting.",
+     "verified": true,
+     "label": "missing",
+     "why": "does not mention external LO, SMA100B ultra-low-phase-noise option, or option-code discrepancy"
+    },
+    {
+     "n": 8,
+     "point": "EVM is also a scoping item in product test plans and OTA/production setups: FWA CPE RF-parametric plans list EVM alongside output power, OBW and sensitivity BLER, and ATS1800C is described as supporting ACLR/EVM/EiRP/TRP/EiS measurements.",
+     "verified": true,
+     "label": "partial",
+     "why": "mentions some EVM scoping examples, but not FWA CPE RF-parametric plans or ATS1800C ACLR/EVM/EiRP/TRP/EiS support"
+    }
+   ],
+   "contradicted": 0,
+   "invented": []
+  },
+  "a_vs_b": {
+   "coverage": 0.625,
+   "points": [
+    {
+     "n": 1,
+     "point": "EVM = Error Vector Magnitude, a measure of the difference between a reference waveform and a measured waveform (TS 38.521-1 test case 6.4.2.1 PUCCH/PUSCH).",
+     "verified": true,
+     "label": "covered",
+     "why": "states expansion and waveform-difference definition with TS 38.521-1 6.4.2.1"
+    },
+    {
+     "n": 2,
+     "point": "Pass/fail limits depend on modulation, plus a Test Tolerance (e.g., QPSK 17.5+TT %, 256QAM 3.5+TT %).",
+     "verified": true,
+     "label": "covered",
+     "why": "states modulation-dependent limits plus Test Tolerance, including QPSK and 256QAM examples"
+    },
+    {
+     "n": 3,
+     "point": "EVM must be measured at both DUT max and min power; the CMX sets max power automatically, then the DUT goes to min power via TPC Closed Loop.",
+     "verified": true,
+     "label": "covered",
+     "why": "states max and min power measurement, CMX max-power setup, then TPC closed loop to min power"
+    },
+    {
+     "n": 4,
+     "point": "An EVM measurement is valid only if the zero-forcing equalizer correction meets the spectral flatness requirement.",
+     "verified": true,
+     "label": "covered",
+     "why": "states validity depends on zero-forcing equalizer correction meeting spectral flatness"
+    },
+    {
+     "n": 5,
+     "point": "CMX500 specs give output level ranges for best EVM for each amplification setting, which affects level and amplification choices.",
+     "verified": true,
+     "label": "covered",
+     "why": "mentions output level ranges for best EVM per amplification setting affecting level decisions"
+    },
+    {
+     "n": 6,
+     "point": "CMX500 SRS RF measurements include TX power and EVM.",
+     "verified": true,
+     "label": "missing",
+     "why": "does not say CMX500 SRS RF measurements include TX power and EVM"
+    },
+    {
+     "n": 7,
+     "point": "For base station type 1-C transmitter tests, the R&S setups link EVM to the R&S FSVA3000.",
+     "verified": true,
+     "label": "missing",
+     "why": "does not mention base station type 1-C or R&S FSVA3000 linkage"
+    },
+    {
+     "n": 8,
+     "point": "These selected NR FR1 SA UE limits must not be generalized to FR2, Wi-Fi, LTE, base station or production-line EVM limits.",
+     "verified": true,
+     "label": "missing",
+     "why": "does not warn against generalizing selected FR1 UE limits to FR2, Wi-Fi, LTE, base station, or production-line limits"
+    }
+   ],
+   "contradicted": 0,
+   "invented": [
+    "Instrument option selection depends on EVM specs",
+    "EVM with an external local oscillator on CMXHEAD50/HEAD50-Evo requires an R&S SMA100B with an ultra-low-phase-noise option"
+   ]
+  }
+ }
+]

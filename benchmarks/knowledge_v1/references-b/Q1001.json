@@ -1,0 +1,69 @@
+{
+  "id": "Q1001",
+  "question": "What is EVM, and which product-related measurement decisions depend on understanding it?",
+  "tags": {
+    "technical": "RF / Measurement Fundamentals",
+    "topic": "EVM",
+    "product_related": "true"
+  },
+  "answer": "In the Vault, EVM stands for Error Vector Magnitude. The 1C111 pre-conformance guides define it as a measure of the difference between a reference waveform and a measured waveform, under 3GPP TS 38.521-1 test case 6.4.2.1 (EVM PUCCH/PUSCH). The measured result must fall below a maximum percentage that depends on the modulation, plus a Test Tolerance: QPSK is 17.5+TT %, 256QAM is 3.5+TT %, and for 256QAM the TT depends on whether the UE is at max or min power. EVM has to be measured at both DUT max power and min power. The CMX sets max power automatically, and the DUT is then driven to min power with TPC Closed Loop settings. An EVM result only counts if the zero-forcing equalizer correction meets the spectral flatness requirement. EVM also shapes product choices. The CMX500 specs give output level ranges 'for best EVM' for each amplification setting. CMX500 SRS RF measurements include EVM. For base station type 1-C, the R&S setups link EVM, along with output power and frequency error, to the R&S FSVA3000. The Vault warns that these selected FR1 UE limits do not cover FR2, Wi-Fi, LTE, base station or production-line EVM limits.",
+  "sufficient": true,
+  "missing": "The Vault has no complete EVM formula, filtering, averaging, reference-waveform generation method or test-equipment uncertainty. Its limits are only selected NR FR1 SA UE values from TS 38.521-1. FR2 EVM (for example, the FWA CPE DVT item) has no limits or test conditions. There is no explicit guide for choosing a product based on EVM.",
+  "key_points": [
+    {
+      "point": "EVM = Error Vector Magnitude, a measure of the difference between a reference waveform and a measured waveform (TS 38.521-1 test case 6.4.2.1 PUCCH/PUSCH).",
+      "source": "wiki/concepts/EVM.md",
+      "quote": "Error Vector Magnitude（EVM）是 reference waveform 與 measured waveform 之間差異的量測。",
+      "verified": true
+    },
+    {
+      "point": "Pass/fail limits depend on modulation, plus a Test Tolerance (e.g., QPSK 17.5+TT %, 256QAM 3.5+TT %).",
+      "source": "wiki/concepts/EVM.md",
+      "quote": "| QPSK | 17.5 + TT % |",
+      "verified": true
+    },
+    {
+      "point": "EVM must be measured at both DUT max and min power; the CMX sets max power automatically, then the DUT goes to min power via TPC Closed Loop.",
+      "source": "wiki/concepts/EVM.md",
+      "quote": "CMX 會先自動設定 max power；完成 max power EVM verification 後，DUT 需使用 TPC Closed Loop settings 設定為 min power。",
+      "verified": true
+    },
+    {
+      "point": "An EVM measurement is valid only if the zero-forcing equalizer correction meets the spectral flatness requirement.",
+      "source": "wiki/sources/1C111_1e_3GPPPreConfGuide.md",
+      "quote": "EVM measurement process 中套用的 zero-forcing equalizer correction 必須符合 spectral flatness requirement，EVM measurement 才有效",
+      "verified": true
+    },
+    {
+      "point": "CMX500 specs give output level ranges for best EVM for each amplification setting, which affects level and amplification choices.",
+      "source": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md",
+      "quote": "TX/downlink output level range for best EVM：downlink amplification setting low **–84 dBm to +6 dBm RMS nom.**",
+      "verified": true
+    },
+    {
+      "point": "CMX500 SRS RF measurements include TX power and EVM.",
+      "source": "wiki/concepts/CMX500 SRS RF measurements.md",
+      "quote": "Specific SRS measurements 包含 TX Power、EVM and more。",
+      "verified": true
+    },
+    {
+      "point": "For base station type 1-C transmitter tests, the R&S setups link EVM to the R&S FSVA3000.",
+      "source": "wiki/concepts/5G NR Base Station Conformance Testing.md",
+      "quote": "BS type 1-C output power、output power dynamics、frequency error、EVM、unwanted emissions 的 R&S setup 圖中出現 [[R&S FSVA3000]]。",
+      "verified": true
+    },
+    {
+      "point": "These selected NR FR1 SA UE limits must not be generalized to FR2, Wi-Fi, LTE, base station or production-line EVM limits.",
+      "source": "wiki/concepts/EVM.md",
+      "quote": "不等同 FR2、Wi-Fi、LTE、base station 或 production-line EVM limits。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-10T09:27:12+00:00",
+  "seconds": 39.5,
+  "num_turns": 5,
+  "cost_usd_estimate": 0.2987249,
+  "error": null
+}

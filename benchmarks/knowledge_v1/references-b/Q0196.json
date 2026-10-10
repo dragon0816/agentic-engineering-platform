@@ -1,0 +1,58 @@
+{
+  "id": "Q0196",
+  "question": "Based on current vault evidence, what are the strongest opportunities for Vector Network Analyzer in Wireless Communication, and what evidence supports each opportunity?",
+  "tags": {
+    "market": "Wireless Communication",
+    "product": "Vector Network Analyzer",
+    "type": "strategic",
+    "difficulty": "L5"
+  },
+  "answer": "The Vault has no page that ranks Vector Network Analyzer (VNA) opportunities in wireless communication, so these opportunities are pieced together from scattered mentions. The best-supported one is checking beamforming parts and accuracy for mobile network infrastructure. The MWC 2025 material pairs this with the R&S ZNBT multiport network analyzer (up to 40 GHz), which measures up to 24 ports at once in one instrument. A second opportunity is satellite and LEO user terminals. The Starlink user terminal test flow lists R&S ZNA for array calibration, next to Keysight PNA-X. The Kuiper user terminal test flow names a VNA as core equipment along with an anechoic chamber and a signal analyzer. A third opportunity is regulatory and SAR test labs for wireless devices. In these sources, a VNA and a vector signal generator help calibrate the SAR test system, and network analyzers are listed among the main instruments of wireless regulatory test labs. In every case the evidence only lists the products. None of it gives configurations, calibration methods, deal sizes or market data.",
+  "sufficient": true,
+  "missing": "No market sizing, revenue, deal or competitive data specific to VNAs in wireless; no ranking of opportunities; no VNA configurations, options or calibration procedures for the beamforming, Starlink/Kuiper or SAR uses.",
+  "key_points": [
+    {
+      "point": "Beamforming component and accuracy verification for mobile network infrastructure is matched to the R&S ZNBT multiport network analyzer (≤40 GHz)",
+      "source": "wiki/concepts/Beamforming.md",
+      "quote": "對應產品語彙包括 [[R&S NRPM]]（ultra-wideband OTA power measurement solution，18 GHz–90 GHz）與 [[R&S ZNBT]]（multiport network analyzer ≤40 GHz）",
+      "verified": true
+    },
+    {
+      "point": "The MWC 2025 beamforming solution offers simultaneous measurement on up to 24 ports in one instrument, with no calibration needed",
+      "source": "wiki/sources/MWC2025---WIC-INFRA.md",
+      "quote": "fully integrated solution、no calibration needed、simultaneous measurement on ≤24 ports within one instrument",
+      "verified": true
+    },
+    {
+      "point": "The Starlink user terminal test flow names R&S ZNA for array calibration, next to the competing Keysight PNA-X",
+      "source": "wiki/entities/Starlink User Terminal.md",
+      "quote": "VNA：Keysight PNA-X（67 GHz）、[[R&S ZNA]] for array calibration。",
+      "verified": true
+    },
+    {
+      "point": "The Kuiper user terminal test flow lists a VNA as core equipment with a chamber and a signal analyzer",
+      "source": "wiki/concepts/Kuiper UT 測試流程.md",
+      "quote": "核心設備：3 × 3 × 3 m 暗室、多探頭陣列 48–192 個、VNA 與信號分析儀。",
+      "verified": true
+    },
+    {
+      "point": "A VNA and a vector signal generator help calibrate the 5G NR SAR test system",
+      "source": "wiki/concepts/5G NR SAR testing.md",
+      "quote": "VNA and VSG help the calibration of SAR test system",
+      "verified": true
+    },
+    {
+      "point": "Network analyzers are among the main instruments of wireless regulatory test labs",
+      "source": "wiki/sources/Regulatory test for wireless devices with cellular technology.md",
+      "quote": "primary test instruments for wireless regulatory test labs 分成 wireless communication tester、EMI test receiver、signal & spectrum analyzer、network analyzer",
+      "verified": true
+    }
+  ],
+  "verified_points": 6,
+  "author": "claude-code",
+  "written_at": "2026-10-10T09:26:32+00:00",
+  "seconds": 67.5,
+  "num_turns": 8,
+  "cost_usd_estimate": 0.4145777,
+  "error": null
+}

@@ -1,0 +1,70 @@
+{
+  "id": "Q0011",
+  "question": "For a Wireless Communication use case involving Wi-Fi 7/8, where would Signaling / Non-signaling Tester fit in the test workflow?",
+  "tags": {
+    "market": "Wireless Communication",
+    "product": "Signaling / Non-signaling Tester",
+    "type": "application",
+    "difficulty": "L2"
+  },
+  "answer": "In the Vault, the signaling and non-signaling testers cover two different stages of the Wi-Fi 7/8 workflow. In R&D, the R&S CMX500 is the multi-technology, multi-channel signaling tester. It measures RF TX/RX characteristics in signaling mode under real-world conditions and covers MLO with multiple RF chains, 2x2 MIMO, 6 GHz band with out-of-band discovery, coexistence and E2E tests. It also covers 5G/WLAN offloading and Voice over WLAN using its N3IWF gateway and POLQA. In production, all WLAN RF measurements run in non-signaling mode to save time, and the R&S CMP180 non-signaling tester does this work. It supports Wi-Fi 6E, Wi-Fi 7 and 5G NR FR1 up to 8 GHz, and two units can be combined to test 4x4 MIMO access points. For Wi-Fi 8, the CMX500 ran the first Wi-Fi 8 RF tests in signaling mode on a prototype Broadcom device, including dRU and UEQM. The CMP180 showed a 480 MHz WLAN waveform in loopback mode, which the source calls only a potential Wi-Fi 8 waveform candidate.",
+  "sufficient": true,
+  "missing": "The evidence is PR/demo material only. It gives no option codes, software versions, RF chain counts, test case lists or measurement uncertainty for Wi-Fi 7/8 on the CMX500 or CMP180. It does not name the IEEE 802.11bn draft version, says nothing about a Wi-Fi 8 production (non-signaling) workflow beyond the 480 MHz loopback demo, and does not describe certification or test-house steps.",
+  "key_points": [
+    {
+      "point": "The CMX500 (signaling) covers R&D and the CMP180 (non-signaling) covers production RF testing",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "以 [[R&S CMX500]] 覆蓋 R&D signaling / interworking 測試，以 [[R&S CMP180]] 覆蓋 production non-signaling RF 測試",
+      "verified": true
+    },
+    {
+      "point": "Wi-Fi 7 R&D needs RF TX/RX measured in signaling mode under real-world conditions",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "Wi-Fi 7 R&D 測試需在 signaling mode 與 real-world conditions 下量測 RF TX / RX characteristics",
+      "verified": true
+    },
+    {
+      "point": "CMX500 R&D tests include MLO, multiple RF chains, 2x2 MIMO, 6 GHz out-of-band discovery, coexistence and E2E",
+      "source": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+      "quote": "包含 signaling mode、real-world RF TX/RX characteristics、[[MLO]]、multiple RF chains、2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities",
+      "verified": true
+    },
+    {
+      "point": "In production, all WLAN RF measurements run in non-signaling mode to save time",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間",
+      "verified": true
+    },
+    {
+      "point": "Two CMP180s can be combined to test 4x4 MIMO access points",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points",
+      "verified": true
+    },
+    {
+      "point": "The CMX500 ran the first Wi-Fi 8 RF tests in signaling mode on a prototype Broadcom device",
+      "source": "wiki/concepts/Wi-Fi 8 RF signaling tests.md",
+      "quote": "已將 first [[Wi-Fi 8]] RF tests in signaling mode 實作到 [[R&S CMX500]] one-box signaling tester",
+      "verified": true
+    },
+    {
+      "point": "The CMP180's 480 MHz loopback waveform is only a potential Wi-Fi 8 candidate, not a formal Wi-Fi 8 spec",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格",
+      "verified": true
+    },
+    {
+      "point": "The CMX500 also covers 5G/WLAN offloading and Voice over WLAN through its N3IWF gateway",
+      "source": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+      "quote": "來源稱 [[R&S CMX500]] 內建 newly integrated [[N3IWF]] gateway，可測試 WLAN offloading with Voice over WLAN。",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-10T09:23:20+00:00",
+  "seconds": 61.2,
+  "num_turns": 9,
+  "cost_usd_estimate": 0.5539154000000001,
+  "error": null
+}

@@ -1,0 +1,70 @@
+{
+  "id": "Q0121",
+  "question": "Map the chain from a Wireless Communication market requirement to a measurable parameter and then to a required capability of Signal Generator / Signal Analyzer.",
+  "tags": {
+    "market": "Wireless Communication",
+    "product": "Signal Generator / Signal Analyzer",
+    "type": "solution_mapping",
+    "difficulty": "L3"
+  },
+  "answer": "The Vault has no single page that maps a generic Wireless Communication requirement to a parameter and then to an instrument capability. The best documented example of that chain is satellite (NTN) testing. Requirement: NTN breaks the old assumption that only the UE moves and the network stays fixed. Test conditions must still be reproducible, accurate and comparable. Measurable parameters: the test setup has to reproduce high path loss, Doppler shift, time delay, delay variance and atmospheric effects. For satellite access node (SAN) conformance under TS 38.108/38.181, the measured items include output power, frequency error, modulation quality, ACLR and receiver sensitivity. Signal generator capability: the R&S SMW200A fading emulator supports TDL/CDL, Doppler, delay and path loss. With B14/B15 plus SMW-K820 (firmware ≥ 5.30) it emulates up to 1073 ms delay and up to ±1 MHz Doppler, and for component testing it reaches up to 67 GHz. Signal analyzer capability: the R&S FSW offers up to 85 GHz with up to 8 GHz analysis bandwidth, plus EVM, ACLR and group delay analysis. These numbers come from a 2025 presentation summary and should be checked against the official spec sheets.",
+  "sufficient": true,
+  "missing": "No Vault page states an explicit general 'market requirement → measurable parameter → SG/SA capability' traceability for Wireless Communication; the chain is put together from NTN pages. The SG/SA figures come from a 2025 presentation summary, not official datasheets, and no threshold limits (for example EVM or ACLR pass values) are given.",
+  "key_points": [
+    {
+      "point": "Market requirement: in NTN both the UE and the network entities move, but test conditions must stay reproducible, accurate and comparable",
+      "source": "wiki/concepts/NTN test and measurement aspects.md",
+      "quote": "NTN 需考慮 UE 與 network entities 兩者 mobility",
+      "verified": true
+    },
+    {
+      "point": "Measurable channel parameters the test setup must reproduce: path loss, Doppler shift, time delay, delay variance",
+      "source": "wiki/concepts/NTN test and measurement aspects.md",
+      "quote": "setup 需加入 high path loss、Doppler shift、time delay、delay variance",
+      "verified": true
+    },
+    {
+      "point": "Measured SAN conformance items include output power, frequency error, modulation quality and ACLR",
+      "source": "wiki/concepts/NTN test and measurement aspects.md",
+      "quote": "測試重點包含 output power、power dynamics、frequency error、modulation quality、ACLR",
+      "verified": true
+    },
+    {
+      "point": "Signal generator capability: the SMW200A fading emulator covers TDL/CDL, Doppler, delay and path loss",
+      "source": "wiki/concepts/NTN test and measurement aspects.md",
+      "quote": "[[R&S SMW200A]] 可配備 fading emulator，支援 TDL / CDL、custom fading profile、Doppler、delay、path loss",
+      "verified": true
+    },
+    {
+      "point": "Quantified SMW200A end-to-end emulation capability: up to 1073 ms delay and ±1 MHz Doppler",
+      "source": "wiki/concepts/NTN signal generator solutions.md",
+      "quote": "up to ±1 MHz Doppler（pure Doppler）",
+      "verified": true
+    },
+    {
+      "point": "SMW200A component-test frequency and bandwidth capability",
+      "source": "wiki/concepts/NTN signal generator solutions.md",
+      "quote": "[[R&S SMW200A]]：frequency up to 67 GHz，overrange 72 GHz；RF modulation bandwidth up to 2 GHz",
+      "verified": true
+    },
+    {
+      "point": "Signal analyzer capability: FSW frequency range and analysis bandwidth",
+      "source": "wiki/concepts/NTN signal generator solutions.md",
+      "quote": "[[R&S FSW]]：frequency up to 85 GHz，overrange 90 GHz；analysis bandwidth up to 8 GHz。",
+      "verified": true
+    },
+    {
+      "point": "FSW/FSWX analysis capabilities that match the measured parameters",
+      "source": "wiki/concepts/NTN test and measurement aspects.md",
+      "quote": "[[R&S FSW]] / [[R&S FSWX]] 支援 satellite payload testing、EVM、ACLR、group delay",
+      "verified": true
+    }
+  ],
+  "verified_points": 8,
+  "author": "claude-code",
+  "written_at": "2026-10-10T09:25:24+00:00",
+  "seconds": 62.0,
+  "num_turns": 8,
+  "cost_usd_estimate": 0.3334258,
+  "error": null
+}
