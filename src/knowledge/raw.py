@@ -269,8 +269,12 @@ class StagedAssets:
 
 
 def assets_dir_for(raw_ref: str) -> str:
-    """`raw/notes/hello.md` keeps its images under `raw/notes/hello/assets/`."""
-    return normalize(raw_ref)[: -len(".md")] + "/assets"
+    """`raw/notes/hello.md` keeps its images under `raw/notes/hello/assets/`.
+
+    Whitespace becomes `_`: a section marker separates its fields with spaces,
+    so an image reference cannot hold one, and originals such as
+    `Logical Channels.pdf` would otherwise fail whole (k-test, 2026-10-11)."""
+    return re.sub(r"\s", "_", normalize(raw_ref)[: -len(".md")]) + "/assets"
 
 
 class Extractor(Protocol):

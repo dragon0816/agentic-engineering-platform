@@ -160,6 +160,9 @@ def test_extractors_decode_and_strip_only_what_they_must() -> None:
         and sink.put(b"\x89PNG...", ".png") == ref
     )
     assert assets_dir_for("raw/notes/hello--abcd1234.md") == "raw/notes/hello--abcd1234/assets"
+    # A space in a folder or file name must not reach an image reference.
+    spaced = assets_dir_for("raw/RS Base/Logical Channels.md")
+    assert spaced == "raw/RS_Base/Logical_Channels/assets"
 
 
 def test_intake_writes_once_and_reports_exactly_what_it_would(tmp_path: Path) -> None:
