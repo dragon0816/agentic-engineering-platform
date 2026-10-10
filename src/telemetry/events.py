@@ -23,7 +23,7 @@ EventStatus = Literal["started", "succeeded", "failed", "skipped", "cancelled"]
 
 # What `run_kind` names (contract v0.2 addition).
 RUN_KINDS = ("conversation_turn", "workflow_run", "knowledge_query", "coding_change",
-             "capability_call")
+             "capability_call", "benchmark_run", "benchmark_grading")
 
 # Recommended state names per harness (contract v0.2 addition), so state graphs
 # compare across runs; `state` stays an open string.

@@ -9,6 +9,7 @@ of every Agent Web route still applies.
 
     GET /api/v1/telemetry/health
     GET /api/v1/telemetry/runs?limit=50&cursor=…&kind=…&status=…&since=…&until=…
+                              &trace_id=…&parent_run_id=…
     GET /api/v1/telemetry/runs/{run_id}/events?after_sequence=N&limit=500
     GET /api/v1/telemetry/events?after_ingest_seq=N&limit=1000&since=…&until=…
     GET /api/v1/telemetry/stream?after_ingest_seq=N   (WebSocket; one event per message)
@@ -85,7 +86,9 @@ def handle(handler: Any, path: str, query_text: str) -> bool:
                           kind=query.get("kind", [None])[0],
                           status=query.get("status", [None])[0],
                           since=query.get("since", [None])[0],
-                          until=query.get("until", [None])[0])
+                          until=query.get("until", [None])[0],
+                          trace_id=query.get("trace_id", [None])[0],
+                          parent_run_id=query.get("parent_run_id", [None])[0])
         cursor = (f"{runs[-1]['started_at'] or ''}|{runs[-1]['run_id']}"
                   if len(runs) == limit else None)
         _reply(handler, 200, {"runs": runs, "next_cursor": cursor})

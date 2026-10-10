@@ -92,7 +92,7 @@ class TelemetryStore:
             return
         summary = {k: a.get(k) for k in ("duration_ms", "llm_calls", "tool_calls",
                                           "input_tokens", "output_tokens", "failure_code",
-                                          "outcome") if k in a}
+                                          "outcome", "cases", "status_counts") if k in a}
         self._conn.execute(
             "INSERT INTO runs (run_id, trace_id, ended_at, status, skill_id, summary,"
             " updated_at) VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(run_id) DO UPDATE SET"
@@ -138,7 +138,8 @@ class TelemetryStore:
 
     def runs(self, *, limit: int = 50, before: str | None = None, kind: str | None = None,
              status: str | None = None, since: str | None = None,
-             until: str | None = None) -> list[dict[str, Any]]:
+             until: str | None = None, trace_id: str | None = None,
+             parent_run_id: str | None = None) -> list[dict[str, Any]]:
         """Newest first; `before` is the previous page's last `started_at|run_id`."""
         clauses, args = ["1 = 1"], []
         if before:
@@ -146,7 +147,8 @@ class TelemetryStore:
             clauses.append("(COALESCE(started_at, '') < ? OR (COALESCE(started_at, '') = ?"
                            " AND run_id < ?))")
             args += [started, started, run_id]
-        for column, value in (("run_kind", kind), ("status", status)):
+        for column, value in (("run_kind", kind), ("status", status), ("trace_id", trace_id),
+                              ("parent_run_id", parent_run_id)):
             if value:
                 clauses.append(f"{column} = ?")
                 args.append(value)

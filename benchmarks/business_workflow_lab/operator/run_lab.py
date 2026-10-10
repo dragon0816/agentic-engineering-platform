@@ -35,6 +35,26 @@ from aep_web import AgentWebSession, agent_web, answer_text, model_turns, tools_
 from grade import GRADER_VERSION, TEMPLATE, find_workbook, grade_workbook, verdict  # noqa: E402
 from reset import events, reset  # noqa: E402
 
+sys.path.insert(0, str(REPO / "src"))
+from telemetry.benchmark import BenchmarkTelemetry, agent_strategy, trace_ids  # noqa: E402
+
+
+def case_attributes(record: dict[str, Any], folder: Path) -> dict[str, Any]:
+    """Telemetry attributes of one lab task result (metadata only)."""
+    checks = [*(record.get("checks") or []), *(record.get("rerun_checks") or [])]
+    try:
+        exchanges = json.loads((folder / "trace.json").read_text(encoding="utf-8"))["exchanges"]
+    except (OSError, ValueError, KeyError):
+        exchanges = []
+    seconds = record.get("elapsed_seconds")
+    return {"duration_ms": int(seconds * 1000) if isinstance(seconds, int | float) else None,
+            "blocked_layer": record.get("blocked_layer"),
+            "tool_calls": record.get("tool_calls") if isinstance(record.get("tool_calls"), int)
+            else None,
+            "human_interventions": record.get("human_interventions"),
+            "checks_total": len(checks), "checks_passed": sum(1 for c in checks if c.get("ok")),
+            "aep_trace_ids": trace_ids(exchanges)}
+
 SAP_PORT = 8810
 SAP_URL = f"http://127.0.0.1:{SAP_PORT}/"
 TASKS = ["W01", "W02", "W03", "W04", "D01", "D02", "D03", "D04", "C01", "C02", "C03", "C04", "X01", "X02", "X03"]
@@ -624,19 +644,27 @@ def main() -> int:
     meta = json.loads(meta_path.read_text(encoding="utf-8"))
     help_text = cli_help()
     sap = start_sap()
+    # Progress and verdicts go to the Host telemetry for the Atlas dashboard.
+    bench = BenchmarkTelemetry("business_workflow_lab", args.run_id)
+    bench.start(cases=len(tasks), strategy=agent_strategy(base), grader=GRADER_VERSION)
     try:
         for task in tasks:
             if task in results and results[task]["status"] != "NOT_RUN" and not args.force:
                 print(f"{task}: already recorded ({results[task]['status']}), skipped", flush=True)
+                bench.case_completed(task, results[task]["status"], reused=True,
+                                     **case_attributes(results[task], run_dir / task))
                 continue
             if task == "X03" and results.get("X01", {}).get("status") != "PASS":
                 results[task] = not_run(task, "X01 did not pass, so there is no workflow to reuse",
                                         "dependency: X01", status="BLOCKED")
                 print("X03: BLOCKED (dependency X01)", flush=True)
+                bench.case_completed(task, "BLOCKED", blocked_layer="dependency: X01")
             else:
                 print(f"{task}: submitting ...", flush=True)
+                bench.case_started(task)
                 results[task] = run_task(task, run_dir, base, token, help_text, results)
                 r = results[task]
+                bench.case_completed(task, r["status"], **case_attributes(r, run_dir / task))
                 print(f"{task}: {r['status']} ({r['elapsed_seconds']} s) {r.get('blocked_layer') or ''} "
                       f"{r['failure_reason'] or ''}", flush=True)
                 if task == "C04":
@@ -644,12 +672,15 @@ def main() -> int:
                     results["C04-force_exit2"] = run_task(task, run_dir, base, token, help_text, results,
                                                           "force_exit2")
                     r = results["C04-force_exit2"]
+                    bench.case_completed("C04-force_exit2", r["status"],
+                                         **case_attributes(r, run_dir / task))
                     print(f"C04-force_exit2: {r['status']} {r['failure_reason'] or ''}", flush=True)
             for other in TASKS:
                 results.setdefault(other, not_run(other))
             reset(label=f"{args.run_id}/after-{task}")
             report(run_dir, results, meta)
     finally:
+        bench.finish()
         if sap is not None:
             sap.terminate()
     return 0

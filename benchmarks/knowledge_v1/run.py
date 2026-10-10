@@ -38,6 +38,9 @@ from adapters.aep_web import AgentWebSession, agent_web  # noqa: E402
 from evidence import INSUFFICIENT, cited_passages, knowledge_use, verify  # noqa: E402
 from questions import SOURCE_SHA256, load, sample  # noqa: E402
 
+sys.path.insert(0, str(REPO / "src"))
+from telemetry.benchmark import BenchmarkTelemetry, agent_strategy, trace_ids  # noqa: E402
+
 # 1.1 (2026-10-07): a gap reply that still cites evidence (a partial answer
 # naming what is missing) is checked and reviewed like an answer; only a gap
 # reply with no citations is INSUFFICIENT_KNOWLEDGE.
@@ -109,6 +112,35 @@ def grade(question: dict[str, Any], exchange: dict[str, Any], vault: Path,
         return {**base, "status": "PASS", "gap": "", "why": ""}
     return {**base, "status": "FAIL", "gap": "REASONING_GAP",
             "why": "reviewer: " + str(review.get("reason") or "")[:300]}
+
+
+def tags(question: dict[str, Any]) -> dict[str, Any]:
+    """The question's bank tags (never its text)."""
+    return {"case_type": question.get("type", "foundation"), "market": question.get("market"),
+            "product": question.get("product"), "difficulty": question.get("difficulty"),
+            "technical": question.get("technical")}
+
+
+def case_attributes(question: dict[str, Any], result: dict[str, Any],
+                    exchange: dict[str, Any] | None) -> dict[str, Any]:
+    """Telemetry attributes of one graded question: tags, verdict details, links."""
+    review = result.get("review") if isinstance(result.get("review"), dict) else {}
+    citations = result.get("citations") or []
+    seconds = result.get("seconds")
+    return {
+        **tags(question), "gap": result.get("gap") or None, "route": result.get("route"),
+        "knowledge_status": result.get("knowledge_status"), "failure_code": result.get("failure"),
+        "phase": result.get("phase"), "partial": result.get("partial"),
+        "duration_ms": int(seconds * 1000) if isinstance(seconds, int | float) else None,
+        "citations_total": len(citations),
+        "citations_verified": sum(1 for c in citations if c.get("ok")),
+        "reviewer_supported": review.get("supported"),
+        "reviewer_reasonable": review.get("reasonable"),
+        "reviewer_confidence": review.get("confidence"),
+        "overreach_count": len(review.get("overreach") or []),
+        "aep_trace_ids": trace_ids(exchange) if exchange else None,
+        "grader": result.get("grader"),
+    }
 
 
 def ask(question: dict[str, Any], folder: Path, base: str, token: str) -> dict[str, Any]:
@@ -198,12 +230,22 @@ def main() -> int:
     if not args.regrade:
         base, token = agent_web()
     lock = threading.Lock()
+    # Progress and verdicts go to the Host telemetry for the Atlas dashboard.
+    bench = BenchmarkTelemetry("knowledge_v1", args.run_id)
+    bench.start(cases=len(chosen), strategy=agent_strategy(base or None), grader=GRADER_VERSION,
+                question_set=args.set if len(args.set) <= 40 else "custom", regrade=args.regrade)
+    meta.setdefault("telemetry_runs", []).append(bench.run_id)
+    meta_path.write_text(json.dumps(meta, indent=1) + "\n", encoding="utf-8")
 
     def one(question: dict[str, Any]) -> dict[str, Any] | None:
         folder = run_dir / question["id"]
         result_path = folder / "result.json"
         if result_path.exists() and not args.force and not args.regrade:
-            return json.loads(result_path.read_text(encoding="utf-8"))
+            kept = json.loads(result_path.read_text(encoding="utf-8"))
+            bench.case_completed(question["id"], kept["status"], reused=True,
+                                 **case_attributes(question, kept, None))
+            return kept
+        bench.case_started(question["id"], **tags(question))
         if args.regrade:
             if not (folder / "trace.json").exists():
                 return None
@@ -212,6 +254,8 @@ def main() -> int:
             exchange = ask(question, folder, base, token)
         result = grade(question, exchange, vault, judge)
         result_path.write_text(json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")
+        bench.case_completed(question["id"], result["status"],
+                             **case_attributes(question, result, exchange))
         with lock:
             print(f"{question['id']}: {result['status']} ({result.get('seconds')} s, {result['route']}) "
                   f"{result.get('why', '')[:120]}", flush=True)
@@ -221,6 +265,7 @@ def main() -> int:
     with ThreadPoolExecutor(max_workers=max(1, args.workers)) as pool:
         results = [r for r in pool.map(one, chosen) if r is not None]
     report(run_dir, results, by_id, meta)
+    bench.finish()
     print(f"done: {len(results)} graded in {round(time.monotonic() - started)} s; see {run_dir / 'report.md'}")
     return 0
 

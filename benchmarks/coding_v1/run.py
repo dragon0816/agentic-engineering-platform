@@ -32,6 +32,25 @@ from aep_web import AgentWebSession, agent_web, answer_text, model_turns, tools_
 from servers import FixtureServer  # noqa: E402
 from validators import VALIDATOR_VERSION, Ctx, hashes, validate  # noqa: E402
 
+sys.path.insert(0, str(HERE.parents[1] / "src"))
+from telemetry.benchmark import BenchmarkTelemetry, agent_strategy, trace_ids  # noqa: E402
+
+
+def case_attributes(record: dict[str, Any], folder: Path) -> dict[str, Any]:
+    """Telemetry attributes of one task result (metadata only)."""
+    checks = record.get("checks") or []
+    try:
+        exchanges = json.loads((folder / "trace.json").read_text(encoding="utf-8"))["exchanges"]
+    except (OSError, ValueError, KeyError):
+        exchanges = []
+    seconds = record.get("duration_seconds")
+    return {"duration_ms": int(seconds * 1000) if isinstance(seconds, int | float) else None,
+            "tool_calls": record.get("tool_calls"),
+            "failure_category": record.get("failure_category"),
+            "human_interventions": record.get("human_interventions"),
+            "checks_total": len(checks), "checks_passed": sum(1 for c in checks if c.get("passed")),
+            "aep_trace_ids": trace_ids(exchanges)}
+
 PILOT = ["T01", "T02", "T09", "T10", "T15", "T18", "T20"]
 ALL = [f"T{n:02d}" for n in range(1, 21)]
 TIME_LIMIT_S = 600
@@ -486,13 +505,21 @@ def main() -> int:
     results = load(run_dir)
     server = FixtureServer()
     server.start()
+    # Progress and verdicts go to the Host telemetry for the Atlas dashboard.
+    bench = BenchmarkTelemetry("coding_v1", args.run_id)
+    bench.start(cases=len(tasks), strategy=agent_strategy(base), validator=VALIDATOR_VERSION)
     try:
         for task in tasks:
             if task in results and results[task]["status"] != "NOT_RUN" and not args.force:
                 print(f"{task}: already recorded ({results[task]['status']}), skipped")
+                bench.case_completed(task, results[task]["status"], reused=True,
+                                     **case_attributes(results[task], run_dir / task))
                 continue
             print(f"{task}: submitting ...", flush=True)
+            bench.case_started(task)
             results[task] = run_task(task, args.run_id, run_dir, server, base, token, meta)
+            bench.case_completed(task, results[task]["status"],
+                                 **case_attributes(results[task], run_dir / task))
             print(f"{task}: {results[task]['status']} ({results[task]['duration_seconds']} s, "
                   f"{results[task]['tool_calls']} tool calls) {results[task]['failure_reason'] or ''}", flush=True)
             for other in ALL:
@@ -501,6 +528,7 @@ def main() -> int:
             report(run_dir, args.run_id, results, meta)
     finally:
         server.close()
+        bench.finish()
     return 0
 
 

@@ -242,6 +242,10 @@ def test_atlas_reads_runs_events_and_the_stream_without_the_token(
     assert status == 200
     assert headers.get("Access-Control-Allow-Origin") == "http://127.0.0.1:8127"
     (run,) = listed["runs"]
+    # A benchmark case links to the AEP runs that answered it by trace id.
+    assert get(url + "/api/v1/telemetry/runs?trace_id=trace-x")[2]["runs"][0]["run_id"] \
+        == run["run_id"]
+    assert get(url + "/api/v1/telemetry/runs?trace_id=trace-y")[2]["runs"] == []
     _, _, page = get(url + f"/api/v1/telemetry/runs/{run['run_id']}/events")
     assert [e["event_type"] for e in page["events"]] == [
         "run.started", "state.entered", "run.completed"]

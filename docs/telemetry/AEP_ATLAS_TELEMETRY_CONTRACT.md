@@ -1,6 +1,6 @@
-# AEP → Atlas Harness Telemetry Contract, v0.2
+# AEP → Atlas Harness Telemetry Contract, v0.3
 
-**Status:** the AEP side is implemented (2026-10-08). The Atlas side is not built yet. **Owner:** AEP. **Consumer:** Atlas.
+**Status:** the AEP side is implemented (2026-10-08; benchmark runs added 2026-10-10, **v0.3**). The Atlas side is not built yet. **Owner:** AEP. **Consumer:** Atlas.
 
 This version replaces the v0.1 draft (`AEP_ATLAS_TELEMETRY_CONTRACT_v0.1.md`, supplied by the owner). The event envelope is unchanged and stays `schema_version: "aep.telemetry.v1"`. Everything below that differs from v0.1 is marked **v0.2**.
 
@@ -38,6 +38,24 @@ The fields are `schema_version`, `event_id` (UUID hex), `run_id`, `trace_id`, `s
 
 Every model call the host makes produces an `llm.completed` event. That covers routing, Knowledge synthesis, coding authoring and conversation turns. The fields are `model_alias`, `duration_ms`, `input_tokens`, `output_tokens`, `max_output_tokens`, `tools_offered`, `tool_calls` and `failure_code`.
 
+## 3a. Benchmark runs (v0.3, 2026-10-10)
+
+The benchmark runners (`benchmarks/knowledge_v1/run.py`, `reference_grade.py`, `benchmarks/coding_v1/run.py` and `benchmarks/business_workflow_lab/operator/run_lab.py`) run in their own processes. They write straight to the same `telemetry.sqlite`, through `src/telemetry/benchmark.py`, so the read API and the stream carry their events with the Harness events.
+
+| run_kind | Events |
+|---|---|
+| benchmark_run | `run.started` (`suite`, `label` = the benchmark run id such as `core-006`, `cases`, Agent Web `strategy_id`, `aep_build`, `skills_digest`, `strategy_label`, plus suite fields such as `grader` or `validator`); `benchmark.case_started` (`case_id`, case tags); `benchmark.case_completed` (`case_id`, `verdict`, details below; `status` is `succeeded` only for `PASS`); `run.completed` (`cases`, `status_counts`, `duration_ms`) |
+| benchmark_grading | Its `parent_run_id` is the graded `benchmark_run`. Emits `benchmark.case_graded` (knowledge_v1 reference grading: `coverage`, `key_points`, `points_covered`, `points_partial`, `points_missing`, `points_contradicted`, `invented_count`, `reference_sufficient`, `run_verdict`) |
+
+- **Run ids** look like `bench-<suite>-<label>-<UTC stamp>-<6 hex>`, one per runner invocation. A resumed run label therefore gets a new run.
+- **Reused results.** A case already recorded and skipped is still emitted as `benchmark.case_completed` with `reused: true`, so status counts stay whole.
+- **Linking a case to the Harness.** `aep_trace_ids` lists the AEP traces that answered the case. `GET /api/v1/telemetry/runs?trace_id=<id>` returns those runs, and their events form the timeline.
+- **Case details by suite:**
+  - knowledge_v1: `case_type`, `market`, `product`, `difficulty`, `technical`, `gap`, `route`, `knowledge_status`, `failure_code`, `phase`, `partial`, `duration_ms`, `citations_total`, `citations_verified`, `reviewer_supported`, `reviewer_reasonable`, `reviewer_confidence`, `overreach_count`, `grader`;
+  - coding_v1: `duration_ms`, `tool_calls`, `failure_category`, `human_interventions`, `checks_total`, `checks_passed`;
+  - business_workflow_lab: `duration_ms`, `blocked_layer`, `tool_calls`, `human_interventions`, `checks_total`, `checks_passed`.
+- Question, prompt and answer text are never attributes; `sanitize` drops such keys as well.
+
 ## 4. Redaction
 
 `telemetry.events.sanitize` runs before an event is stored:
@@ -52,6 +70,7 @@ No prompt, answer, retrieved passage, file or tool payload is ever an attribute.
 ```
 GET /api/v1/telemetry/health
 GET /api/v1/telemetry/runs?limit=50&cursor=<started_at|run_id>&kind=&status=&since=&until=
+    &trace_id=&parent_run_id=                     # v0.3: find a case's AEP runs, or a run's children
     → {runs:[{run_id, run_kind, parent_run_id, trace_id, started_at, ended_at, status,
               strategy_id, skill_id, model_alias, duration_ms, llm_calls, tool_calls,
               input_tokens, output_tokens, failure_code, outcome, complete}], next_cursor}

@@ -31,6 +31,8 @@ sys.path.insert(0, str(HERE))
 from evidence import knowledge_use  # noqa: E402
 from run import HOST_JSON, credential  # noqa: E402
 
+from telemetry.benchmark import BenchmarkTelemetry  # noqa: E402  (run puts src on the path)
+
 GRADER_VERSION = "1.2"
 LABELS = ("covered", "partial", "missing", "contradicted")
 
@@ -117,6 +119,13 @@ def main() -> int:
     from judge import Judge  # needs the credential in the environment
     judge = Judge(HOST_JSON)
     rows = []
+    meta_path = run_dir / "metadata.json"
+    meta = json.loads(meta_path.read_text(encoding="utf-8")) if meta_path.exists() else {}
+    graded_runs = meta.get("telemetry_runs") or [None]
+    grading = BenchmarkTelemetry("knowledge_v1", args.run_id, kind="benchmark_grading",
+                                 parent_run_id=graded_runs[-1])
+    grading.start(cases=sum(1 for q in references if (run_dir / q / "trace.json").exists()),
+                  grader=GRADER_VERSION, judge="company")
     for qid, reference in references.items():
         trace_path = run_dir / qid / "trace.json"
         if not trace_path.exists():
@@ -131,6 +140,14 @@ def main() -> int:
         status = json.loads((run_dir / qid / "result.json").read_text(encoding="utf-8"))["status"] \
             if (run_dir / qid / "result.json").exists() else "-"
         rows.append((qid, status, result))
+        labels = {label: sum(1 for p in result.get("points") or [] if p["label"] == label)
+                  for label in LABELS}
+        grading.case_completed(
+            qid, "ERROR" if "error" in result else "GRADED", run_verdict=status,
+            coverage=result.get("coverage"), key_points=len(result.get("points") or []),
+            **{f"points_{label}": count for label, count in labels.items()},
+            invented_count=len(result.get("invented") or []),
+            reference_sufficient=reference.get("sufficient"), failure_code=result.get("error"))
         print(f"{qid}: coverage {result.get('coverage')}, contradicted "
               f"{result.get('contradicted')}, invented {len(result.get('invented') or [])} "
               f"({status}) {result.get('error') or ''}", flush=True)
@@ -145,6 +162,7 @@ def main() -> int:
                      f"{count['covered']} | {count['partial']} | {count['missing']} | "
                      f"{count['contradicted']} | {len(result.get('invented') or [])} |")
     (run_dir / "reference-report.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    grading.finish()
     print(f"done: {len(rows)} graded; see {run_dir / 'reference-report.md'}")
     return 0
 
