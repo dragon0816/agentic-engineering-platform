@@ -51,9 +51,9 @@ run `benchmarks/knowledge_v1/runs/tel-smoke-001` proved the path end to end.
 
 Atlas (`C:/Users/Chi_L/Documents/claude/atlas-analysis-dashboard`): Codex's
 AEP consumer plus Claude Code's benchmark views and "AEP Benchmarks"
-dashboard are in the working tree, **uncommitted**. Read Atlas
-`docs/HANDOFF.md` first. Next: browser acceptance, then agree a commit
-plan with the owner.
+dashboard are committed as Atlas `e59655d` (by Codex, not pushed). Read
+Atlas `docs/HANDOFF.md` first. Next: browser acceptance and Python 3.13+
+backend tests there.
 
 ## Repository and runtime state
 

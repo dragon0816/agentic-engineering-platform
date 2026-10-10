@@ -1595,5 +1595,6 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Atlas consumer for benchmark telemetry (uncommitted in the Atlas
   working tree on top of Codex's uncommitted AEP integration; see Atlas
   docs/HANDOFF.md). npm test 112 passed, build passed, live shell check passed.
-- [ ] Atlas browser acceptance and an owner-approved commit plan for the Atlas
-  working tree.
+- [x] Atlas commit: Codex committed its AEP integration with the benchmark
+  views as Atlas e59655d (not pushed); 6 benchmark tests re-run and passing.
+- [ ] Atlas browser acceptance and Python 3.13+ backend tests (Atlas HANDOFF).
