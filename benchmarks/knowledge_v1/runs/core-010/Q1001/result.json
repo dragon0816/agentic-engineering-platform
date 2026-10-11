@@ -1,0 +1,182 @@
+{
+ "id": "Q1001",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 62.344,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/concepts/EVM.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "wiki",
+   "ref": "wiki/concepts/EVM.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 36,
+   "kind": "wiki",
+   "ref": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/concepts/EVM.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 7,
+   "kind": "wiki",
+   "ref": "wiki/concepts/EVM.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 12,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 19,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 8,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 SRS RF measurements.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 9,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 SRS RF measurements.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 17,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 32,
+   "kind": "wiki",
+   "ref": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 49,
+   "kind": "wiki",
+   "ref": "wiki/sources/CMP200_Features_V8-14-22_en_09.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 44,
+   "kind": "wiki",
+   "ref": "wiki/sources/CMP200_Features_V8-14-22_en_09.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 21,
+   "kind": "wiki",
+   "ref": "wiki/concepts/FR2 OTA spatial test metrics.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 22,
+   "kind": "wiki",
+   "ref": "wiki/concepts/FR2 OTA spatial test metrics.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 52,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Small Cell WMT production demo.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 26,
+   "kind": "wiki",
+   "ref": "wiki/concepts/O-RAN Beamforming Measurements.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 27,
+   "kind": "wiki",
+   "ref": "wiki/concepts/O-RAN Beamforming Measurements.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/concepts/EVM.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": true,
+  "overreach": [
+   "O-RAN beamforming measurement material states that R&S VSE measures delta phase and/or EVM, and that best performance—EVM, power and SNR—is expected only with correct beam weights [26][27].",
+   "the passages explicitly warn not to infer all FR1, FR2, Wi‑Fi, LTE, NR or production-line EVM limits from the summarized EVM page [2]"
+  ],
+  "reason": "Most of the definition and product/test-decision rows are directly supported by the provided passages. However, the O-RAN beamforming row and the final warning rely on cited passages that were not provided here, so those claims cannot be verified against the evidence; overall the structure and answer to the question remain reasonable.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: Most of the definition and product/test-decision rows are directly supported by the provided passages. However, the O-RAN beamforming row and the final warning rely on cited passages that were not provided here, so those claims cannot be verified against the evidence; overall the structure and answe"
+}

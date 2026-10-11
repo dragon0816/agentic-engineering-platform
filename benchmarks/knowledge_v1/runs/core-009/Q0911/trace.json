@@ -1,0 +1,1273 @@
+{
+ "question": {
+  "id": "Q0911",
+  "text": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+  "market": "Semiconductor",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-717a36d39d4c42548d9675cec4f0b567",
+ "exchange": {
+  "sent": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 147.813,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-717a36d39d4c42548d9675cec4f0b567",
+    "actor": "leo.chi",
+    "title": "For a Semiconductor use case involving RFIC validation, where would Sign…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T19:24:12.755511Z",
+    "updated_at": "2026-10-11T19:26:40.418690Z",
+    "messages": [
+     {
+      "message_id": "message-d995a1444cb64518a75c7153fc847cf3",
+      "role": "user",
+      "text": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+      "created_at": "2026-10-11T19:24:12.770905Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-7992674c864c4dee9de3e4bb7fd0f784",
+      "role": "assistant",
+      "text": "No passage explicitly names an “RFIC validation” workflow, but the supported placement is: **Signal Generator / Signal Analyzer sit in the lab test-execution and validation-measurement part of the workflow, under automation/orchestration if used, not as the whole workflow by themselves.** A Virtual tester workflow spans **implementation → test → debug → validation** [13][15], and the workflow scope can include **end-to-end test execution** plus integration with **lab equipment interfaces, logs, and analysis pipelines** [17].\n| Workflow stage | Where Signal Generator / Signal Analyzer fit | Roles |\n|---|---|---|\n| Test setup / execution | The signal generator is the RF stimulus source connected to the DUT. In receiver-style tests, R&S SMW200A is used in the general receiver test setup and generates the NR uplink wanted signal; it can also generate an NR interferer or CW interferer through a second RF path [34]. In transmitter intermodulation testing, SMW200A is used as the interferer source [27]. |\n| Test setup / execution | The analyzer is the RF measurement receiver connected to the DUT output or emission port. A complete transmitter test setup uses an R&S FSW spectrum analyzer to execute measurements [27], and receiver spurious emissions test case 7.6 needs a signal and spectrum analyzer such as R&S FSW [33][34]. |\n| Validation measurement | The analyzer produces the measured evidence for pass/fail-style validation metrics. The covered transmitter measurements include output power, frequency error, modulation quality/EVM, time alignment error, occupied bandwidth, ACLR, SEM/OBUE, spurious emissions, and transmitter intermodulation [29]. 5G NR mode is used for output power, frequency error, modulation quality, TAE, transmit ON/OFF power, ACLR, and SEM, while spectrum mode is used for OBW and transmitter spurious emissions [31]. |\n| Automation / debug loop | These instruments can be remotely controlled as part of automated test execution. R&S SMW200A supports remote control via GPIB, Ethernet/LAN, USB, and RS-232, with SCPI or compatible command sets [7]. R&S instruments in the receiver-test application use SCPI command sequences over GPIB, RS-232, USB, or Ethernet [37]. Python packages and R&S QuickStep can automate 3GPP transmitter and receiver test cases into scripts or test plans [28][40]. |\n【推論】For an RFIC validation use case, the signal generator would normally sit before the DUT as the controlled RF stimulus/interferer source, while the signal analyzer would sit after the DUT as the measurement and evidence-capture instrument; this matches the supported R&S receiver, transmitter, and group-delay examples where SMW200A generates wanted/interfering or multicarrier stimulus and FSW measures DUT outputs or emissions [27][34][42].\n\n來源：\n[7] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[13] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[15] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[17] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[27] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[28] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[29] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[31] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[33] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[34] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[37] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[40] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[42] Wiki：衛星酬載群延遲量測（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）",
+      "created_at": "2026-10-11T19:26:40.418690Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-dd522b73a28f425c92363cdfd8456676",
+       "request_id": "request-dd522b73a28f425c92363cdfd8456676",
+       "span_id": "span-dd522b73a28f425c92363cdfd8456676",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "No passage explicitly names an “RFIC validation” workflow, but the supported placement is: **Signal Generator / Signal Analyzer sit in the lab test-execution and validation-measurement part of the workflow, under automation/orchestration if used, not as the whole workflow by themselves.** A Virtual tester workflow spans **implementation → test → debug → validation** [13][15], and the workflow scope can include **end-to-end test execution** plus integration with **lab equipment interfaces, logs, and analysis pipelines** [17].\n| Workflow stage | Where Signal Generator / Signal Analyzer fit | Roles |\n|---|---|---|\n| Test setup / execution | The signal generator is the RF stimulus source connected to the DUT. In receiver-style tests, R&S SMW200A is used in the general receiver test setup and generates the NR uplink wanted signal; it can also generate an NR interferer or CW interferer through a second RF path [34]. In transmitter intermodulation testing, SMW200A is used as the interferer source [27]. |\n| Test setup / execution | The analyzer is the RF measurement receiver connected to the DUT output or emission port. A complete transmitter test setup uses an R&S FSW spectrum analyzer to execute measurements [27], and receiver spurious emissions test case 7.6 needs a signal and spectrum analyzer such as R&S FSW [33][34]. |\n| Validation measurement | The analyzer produces the measured evidence for pass/fail-style validation metrics. The covered transmitter measurements include output power, frequency error, modulation quality/EVM, time alignment error, occupied bandwidth, ACLR, SEM/OBUE, spurious emissions, and transmitter intermodulation [29]. 5G NR mode is used for output power, frequency error, modulation quality, TAE, transmit ON/OFF power, ACLR, and SEM, while spectrum mode is used for OBW and transmitter spurious emissions [31]. |\n| Automation / debug loop | These instruments can be remotely controlled as part of automated test execution. R&S SMW200A supports remote control via GPIB, Ethernet/LAN, USB, and RS-232, with SCPI or compatible command sets [7]. R&S instruments in the receiver-test application use SCPI command sequences over GPIB, RS-232, USB, or Ethernet [37]. Python packages and R&S QuickStep can automate 3GPP transmitter and receiver test cases into scripts or test plans [28][40]. |\n【推論】For an RFIC validation use case, the signal generator would normally sit before the DUT as the controlled RF stimulus/interferer source, while the signal analyzer would sit after the DUT as the measurement and evidence-capture instrument; this matches the supported R&S receiver, transmitter, and group-delay examples where SMW200A generates wanted/interfering or multicarrier stimulus and FSW measures DUT outputs or emissions [27][34][42].\n\n來源：\n[7] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[13] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[15] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[17] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[27] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[28] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[29] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[31] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[33] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[34] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[37] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[40] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[42] Wiki：衛星酬載群延遲量測（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-dd522b73a28f425c92363cdfd8456676",
+      "request_id": "request-dd522b73a28f425c92363cdfd8456676",
+      "span_id": "span-dd522b73a28f425c92363cdfd8456676",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-dd522b73a28f425c92363cdfd8456676",
+       "request_id": "request-dd522b73a28f425c92363cdfd8456676",
+       "span_id": "span-dd522b73a28f425c92363cdfd8456676",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "No passage explicitly names an “RFIC validation” workflow, but the supported placement is: **Signal Generator / Signal Analyzer sit in the lab test-execution and validation-measurement part of the workflow, under automation/orchestration if used, not as the whole workflow by themselves.** A Virtual tester workflow spans **implementation → test → debug → validation** [13][15], and the workflow scope can include **end-to-end test execution** plus integration with **lab equipment interfaces, logs, and analysis pipelines** [17].\n| Workflow stage | Where Signal Generator / Signal Analyzer fit | Roles |\n|---|---|---|\n| Test setup / execution | The signal generator is the RF stimulus source connected to the DUT. In receiver-style tests, R&S SMW200A is used in the general receiver test setup and generates the NR uplink wanted signal; it can also generate an NR interferer or CW interferer through a second RF path [34]. In transmitter intermodulation testing, SMW200A is used as the interferer source [27]. |\n| Test setup / execution | The analyzer is the RF measurement receiver connected to the DUT output or emission port. A complete transmitter test setup uses an R&S FSW spectrum analyzer to execute measurements [27], and receiver spurious emissions test case 7.6 needs a signal and spectrum analyzer such as R&S FSW [33][34]. |\n| Validation measurement | The analyzer produces the measured evidence for pass/fail-style validation metrics. The covered transmitter measurements include output power, frequency error, modulation quality/EVM, time alignment error, occupied bandwidth, ACLR, SEM/OBUE, spurious emissions, and transmitter intermodulation [29]. 5G NR mode is used for output power, frequency error, modulation quality, TAE, transmit ON/OFF power, ACLR, and SEM, while spectrum mode is used for OBW and transmitter spurious emissions [31]. |\n| Automation / debug loop | These instruments can be remotely controlled as part of automated test execution. R&S SMW200A supports remote control via GPIB, Ethernet/LAN, USB, and RS-232, with SCPI or compatible command sets [7]. R&S instruments in the receiver-test application use SCPI command sequences over GPIB, RS-232, USB, or Ethernet [37]. Python packages and R&S QuickStep can automate 3GPP transmitter and receiver test cases into scripts or test plans [28][40]. |\n【推論】For an RFIC validation use case, the signal generator would normally sit before the DUT as the controlled RF stimulus/interferer source, while the signal analyzer would sit after the DUT as the measurement and evidence-capture instrument; this matches the supported R&S receiver, transmitter, and group-delay examples where SMW200A generates wanted/interfering or multicarrier stimulus and FSW measures DUT outputs or emissions [27][34][42].\n\n來源：\n[7] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[13] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[15] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[17] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[27] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[28] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[29] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[31] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[33] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[34] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[37] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[40] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[42] Wiki：衛星酬載群延遲量測（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_vHMOsM1so8ElCg6CTE8GTd5I",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "No passage explicitly names an “RFIC validation” workflow, but the supported placement is: **Signal Generator / Signal Analyzer sit in the lab test-execution and validation-measurement part of the workflow, under automation/orchestration if used, not as the whole workflow by themselves.** A Virtual tester workflow spans **implementation → test → debug → validation** [13][15], and the workflow scope can include **end-to-end test execution** plus integration with **lab equipment interfaces, logs, and analysis pipelines** [17].\n| Workflow stage | Where Signal Generator / Signal Analyzer fit | Roles |\n|---|---|---|\n| Test setup / execution | The signal generator is the RF stimulus source connected to the DUT. In receiver-style tests, R&S SMW200A is used in the general receiver test setup and generates the NR uplink wanted signal; it can also generate an NR interferer or CW interferer through a second RF path [34]. In transmitter intermodulation testing, SMW200A is used as the interferer source [27]. |\n| Test setup / execution | The analyzer is the RF measurement receiver connected to the DUT output or emission port. A complete transmitter test setup uses an R&S FSW spectrum analyzer to execute measurements [27], and receiver spurious emissions test case 7.6 needs a signal and spectrum analyzer such as R&S FSW [33][34]. |\n| Validation measurement | The analyzer produces the measured evidence for pass/fail-style validation metrics. The covered transmitter measurements include output power, frequency error, modulation quality/EVM, time alignment error, occupied bandwidth, ACLR, SEM/OBUE, spurious emissions, and transmitter intermodulation [29]. 5G NR mode is used for output power, frequency error, modulation quality, TAE, transmit ON/OFF power, ACLR, and SEM, while spectrum mode is used for OBW and transmitter spurious emissions [31]. |\n| Automation / debug loop | These instruments can be remotely controlled as part of automated test execution. R&S SMW200A supports remote control via GPIB, Ethernet/LAN, USB, and RS-232, with SCPI or compatible command sets [7]. R&S instruments in the receiver-test application use SCPI command sequences over GPIB, RS-232, USB, or Ethernet [37]. Python packages and R&S QuickStep can automate 3GPP transmitter and receiver test cases into scripts or test plans [28][40]. |\n【推論】For an RFIC validation use case, the signal generator would normally sit before the DUT as the controlled RF stimulus/interferer source, while the signal analyzer would sit after the DUT as the measurement and evidence-capture instrument; this matches the supported R&S receiver, transmitter, and group-delay examples where SMW200A generates wanted/interfering or multicarrier stimulus and FSW measures DUT outputs or emissions [27][34][42].\n\n來源：\n[7] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[13] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[15] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[17] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[27] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[28] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[29] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[31] Wiki：5G NR conducted base station transmitter tests（來源：`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`）\n[33] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[34] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[37] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[40] Wiki：5G NR conducted base station receiver tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）\n[42] Wiki：衛星酬載群延遲量測（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）",
+          "evidence": {
+           "raw_citations": 13,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-ed6060bc979141a7bdd1121d7c35c130",
+            "request_id": "request-ed6060bc979141a7bdd1121d7c35c130",
+            "span_id": "span-ed6060bc979141a7bdd1121d7c35c130",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow? Explain placement in workflow and roles.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "R&S SMW200A\n[[R&S SMW200A]] 是 Rohde & Schwarz 的 vector signal generator；依 `R&S®SMW200A Vector Signal Generator Specifications` `Version 31.00`（`May 2026`），RF path A 可覆蓋 `100 kHz to 67 GHz`，RF path B 可覆蓋至 `44 GHz`，並可由 single-path vector signal generator 擴充到 multichannel MIMO receiver tester（來源：[[SMW200A_specs_en_3606-8037-22_v3100]]）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 5.33223
+             },
+             {
+              "text": "R&S SMW200A › Signal routing and baseband main module\n| Code | Name / description | Order No. | 原文說明 / 限制 |\n|---|---|---:|---|\n| `R&S®SMW-B13` | Signal routing and baseband main module，one I/Q path to RF section | `1413.2807.02` | Standard baseband section；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13T` | Signal routing and baseband main module，two I/Q paths to RF section | `1413.3003.02` | Standard baseband section；若要安裝 RF path B 需 `B13T` 或 `B13XT`；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13XT` | Wideband baseband main module，two I/Q paths to RF section | `1413.8005.02` | Wideband baseband section；RF modulation bandwidth up to `2 GHz`。 |\n\n- Standard baseband section：`R&S®SMW-B13` 或 `R&S®SMW-B13T`；RF modulation bandwidth 最高 `160 MHz`；可安裝 `R&S®SMW-B10` standard baseband generator 與 `R&S®SMW-B14` fading simulator。\n- Wideband baseband section：`R&S®SMW-B13XT`；RF modulation bandwidth 最高 `2 GHz`；可安裝 `R&S®SMW-B9` / `R&S®SMW-B9F` wideband baseband generator 與 `R&S®SMW-B15` fading simulator and signal processor。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 4.495094
+             },
+             {
+              "text": "R&S SMW200A › Digital standards、R&S WinIQSIM2、Pulse Sequencer、MIMO 與 fading\n- Internal digital modulation systems 至少需安裝一個 `R&S®SMW-B10` 或 `R&S®SMW-B9`。\n- 來源列出 cellular、wireless connectivity、navigation、broadcast 與 other standards options；包含 `GSM/EDGE`、`3GPP FDD`、`LTE Release 8` 到 `Release 15`、`Cellular IoT`、`5G New Radio`、`5G NR Release 16/17`、`IEEE 802.11a/b/g/n/j/p/ac/ax/be/ad/ay`、`Bluetooth EDR/5.x/5.4`、`GNSS`、`DVB-S2/S2X`、`DVB-RCS2`、`LoRa`、`HRP UWB` 等。\n- 來源描述 digital standards 不需要 separate PC software；但 waveform packages for signals from [[R&S WinIQSIM2]] 另明列 [[R&S WinIQSIM2]] requires an external PC。判斷：前者指 instrument internal digital standards，後者指 WinIQSIM2 workflow，不合併為單一規則。\n- `R&S®SMW-K144`：5G New Radio，Order No. `1414.4990.02`。\n- `R&S®SMW-K145`：5G New Radio closed-loop BS test，Order No. `1414.6506.02`。\n- `R&S®SMW-K148`：5G NR Release 16，Order No. `1414.6664.02`。\n- `R&S®SMW-K170`：5G NR sidelink，Order No. `1413.8640.02`。\n- `R&S®SMW-K171`：5G NR Release 17，Order No. `1413.7280.02`。\n- [[R&S WinIQSIM2]] requires an external PC；`R&S®SMW-K200` waveform packages 可登錄 1、5 或 50 waveforms，每台 instrument 最多 `250 waveforms`。\n- [[R&S Pulse Sequencer]] 相關 options 包含 `R&S®SMW-K300`、`K301`、`K302`、`K304`、`K306`、`K307`、`K308`、`K315`、`K350`。\n- Multichannel、MIMO and fading 完整規格另見 `PD 3673.1276.22`；digital standards 完整規格另見 `PD 5213.9434.22`；GNSS/avionics 另見 `PD 3607.6896.22`；Pulse Sequencer 另見 `PD 3607.1388.22`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 21,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 4.321513
+             },
+             {
+              "text": "R&S SMW200A › 文件依據\n- 來源：[[SMW200A_config-guide_en_3606-8037-92_v0600]]。\n- 文件名稱：`R&S®SMW200A Vector Signal Generator – Configuration guide`。\n- 文件代碼：`PD 3606.8037.92`。\n- 文件版次：`Version 06.00`。\n- 文件日期：`May 2024`。\n- 文件性質：configuration guide；適合查 mandatory configuration、requires / not compatible / retrofitting notes、ordering information、recommended extras 與 service notes。\n\n- 來源：[[SMW200A_specs_en_3606-8037-22_v3100]]。\n- 文件名稱：`R&S®SMW200A Vector Signal Generator Specifications`。\n- 文件代碼：`PD 3606.8037.22`。\n- 文件版次：`Version 31.00`。\n- 文件日期：`May 2026`。\n- 文件性質：產品 specifications；記錄 RF/baseband performance、interfaces、environmental data、ordering information 與 options。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 4.1337
+             },
+             {
+              "text": "R&S SMW200A › 基本訂購限制\n依 [[SMW200A_config-guide_en_3606-8037-92_v0600]] 與 [[SMW200A_specs_en_3606-8037-22_v3100]]：\n\n- Base unit：`R&S®SMW200A`，Order No. `1412.0000.02`。\n- 原文說明：Vector signal generator；includes power cable and quick start guide。\n- Base unit can only be ordered with an `R&S®SMW-B10xx` frequency option and an `R&S®SMW-B13`、`R&S®SMW-B13T` or `R&S®SMW-B13XT` signal routing and baseband main module。\n- 最低配置必須包含 RF path A 的一個 frequency option，以及一個 signal routing and baseband main module。\n- Step 1 RF path A frequency options 不能 retrofitted。\n- Step 2 baseband main module options 可 factory retrofitted；`R&S®SMW-B13XT` retrofitting only for serial number `102700` or higher。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 4.085558
+             },
+             {
+              "text": "R&S SMW200A › 產品定位與架構\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]（Version 31.00，May 2026）與 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（Version 06.00，May 2024）：\n\n- [[R&S SMW200A]] 可從 single-path vector signal generator 擴充到 multichannel [[MIMO]] receiver tester。\n- 支援最多 `8` 個 signal sources 與最多 `64` 個 fading channels。\n- 可連接 [[R&S SGT100A]] signal generator modules，提供最多 `8` 條 RF paths。\n- 最多可在 `2` 個 internal baseband modules 上配置 `8` 個 baseband generators，具 real-time coder 與 ARB。\n- 單機可配置最多兩個 internal RF paths：RF path A 為 mandatory，RF path B 為 optional second RF path。\n- Baseband section 分成 standard baseband section 與 wideband baseband section；standard baseband 最高 `160 MHz` RF modulation bandwidth，wideband baseband 最高 `2 GHz` RF modulation bandwidth。\n- 可選 integrated fading section，channel emulation bandwidth 最高 `800 MHz`；最多可安裝 `4` 個 fading modules，提供最多 `64` 個 logical faders。\n- 單一儀器可實作 MIMO fading scenarios：`2x2`、`3x3`、`4x4`、`8x4`、`4x8`、`2x4x4`。\n- Path-specific、baseband-specific 與 fading/MIMO software options 採 floating license concept；若同一 feature 需同時在兩個 paths 或兩個 baseband generators 使用，通常需安裝兩份對應 option。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 3.757127
+             },
+             {
+              "text": "R&S SMW200A › Remote control、connectors 與一般資料\n- Remote control interfaces：IEC 60625 GPIB IEEE-488.2、Ethernet/LAN 10/100/1000BASE-T、USB 3.0 super speed、serial RS-232 via `R&S®TS-USB1`。\n- Remote command set：`SCPI 1999.5 or compatible command sets`。\n- Ethernet/LAN protocols and services：VISA VXI-11、Telnet/RawEthernet、VNC、FTP、SMB。\n- Front panel RF 50 Ω path A connector：3/6/7.5 GHz options 為 N female；12.75/20/31.8/40 GHz options 為 test port adapter PC 2.92 mm female；44 GHz options 為 PC 1.85 mm male with adapter；56/67 GHz options 為 1.85 mm female with wear and tear adapter。\n- Front panel RF 50 Ω path B connector：3/6/7.5 GHz options 為 N female；12.75/20/31.8 GHz options 為 test port adapter PC 2.92 mm female；44 GHz options 為 PC 1.85 mm male with adapter。\n- Rear panel 包含 REF IN/OUT、INST TRG A/B、USER 4/5/6、EFC、LO IN/OUT、IEEE 488、LAN、USB DEVICE、EXT 1/2、DIG I/Q OUT、HS DIG I/Q OUT 等。\n- Rated power when fully equipped：`550 W measured`；with `R&S®SMW-B94L` fully equipped：`750 W measured`。\n- Operating temperature range：`0 °C to +45 °C`；with `R&S®SMW-B1056`、`R&S®SMW-B1067`、`R&S®SMW-B1067N`、`R&S®SMW-B1067O` 為 `+5 °C to +45 °C`。\n- Dimensions：standard `435 mm × 192 mm × 460 mm`；with `R&S®SMW-B94L` 為 `435 mm × 192 mm × 560 mm`。\n- Weight：fully equipped `21 kg`；with `R&S®SMW-B94L` fully equipped `30 kg`。\n- Non-volatile memory：SSD，`512 Gbyte`。\n- Recommended calibration interval：`3 years`，條件 `40 h/week operation in the full range of the specified environmental conditions`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 22,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 3.153957
+             },
+             {
+              "text": "R&S SMW200A › Wideband baseband\n- `R&S®SMW-B9` arbitrary waveform mode：waveform length `1 sample to 256 Msample`；with `K515` 到 `2 Gsample`。\n- `R&S®SMW-B9` sample rate：`400 Hz to 600 MHz`；with `K525` 為 `400 Hz to 1200 MHz`；with `K527` 為 `400 Hz to 2400 MHz`。\n- `R&S®SMW-B9` RF bandwidth：`500 MHz`；with `K525` 為 `1000 MHz`；with `K527` 為 `2000 MHz`。\n- `R&S®SMW-B9F` 詳細 GNSS 規格見 `GNSS simulation for Rohde & Schwarz vector signal generators specifications`，文件 `PD 3607.6896.22`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 17,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 2.053416
+             },
+             {
+              "text": "R&S FSW\nR&S FSW 是 Rohde & Schwarz 的 high-end Signal and Spectrum Analyzer 系列，依 Version 17.01（September 2025）涵蓋 8 GHz 至 85 GHz 型號，[[R&S FSW85]] 搭配 R&S FSW-B90G 可延伸至 90 GHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 4.139259
+             },
+             {
+              "text": "R&S FSW › 其他硬體 options（摘錄）\n| Option code | 名稱 | Order No. | 原文說明 / 限制 |\n|---|---|---|---|\n| R&S FSW-B4 | OCXO precision frequency reference | 1313.0703.02 | user-retrofittable |\n| R&S FSW-B8E | Resolution bandwidth up to 40 MHz | 1338.6911.02 | 適用 [[R&S FSW8]]/13/26/43/50/67/85；signal analysis bandwidth 不由 B8E 定義 |\n| R&S FSW-B8 | Resolution bandwidth up to 80 MHz | 1313.2464.26 或 1313.2464.02 | 1313.2464.26 適用 [[R&S FSW8]]/13/26；1313.2464.02 適用 [[R&S FSW43]]/50/67/85 且 export license required |\n| R&S FSW-B10 | External generator control | 1313.1622.02 | contact service center |\n| R&S FSW-B13 | Highpass filter for harmonic measurements | 1313.0761.02 | user-retrofittable |\n| R&S FSW-B17 | Digital baseband Interface | 1313.0784.02 | user-retrofittable |\n| R&S FSW-B18 | Spare solid state drive | 1313.0790.21 | user-retrofittable |\n| R&S FSW-B21 | LO/IF connections for external mixers | 1313.1100.28 / 1313.1100.86 | 不適用 [[R&S FSW8]]、[[R&S FSW13]]；.28 適用 [[R&S FSW26]]/43/50/67；.86 適用 [[R&S FSW85]] |\n| R&S FSW-B24 | RF preamplifier | 1313.0832.13/.26/.43/.49/.51/.66/.67 | 適用範圍依型號與 order no.；來源未列 [[R&S FSW85]] 適用 B24 |\n| R&S FSW-B25 | Electronic attenuator, 1 dB steps | 1313.0990.02 | 適用 [[R&S FSW8]]/13/26 |\n| R&S FSW-B33 | USB mass memory write protection | 1313.3602.02 | 不可 retrofittable；factory pre-installed |\n| R&S FSW-B71 | Analog baseband inputs | 1313.1651.13/.26/.67/.86 | order no. 依型號範圍不同 |\n| R&S FSW-B71E | 80 MHz analysis bandwidth for analog baseband inputs | 1313.6547.02 | 需 R&S FSW-B71；user-retrofittable |\n| R&S FSW-B2071 | Oscilloscope baseband inputs | 1331.8302.02 | 適用所有 FSW models；user-retrofittable |\n| R&S FSW-B90G | Frequency extension 90 GHz | 1331.7693.02 | 不可 retrofittable；僅適用 [[R&S FSW85]]；f > 85 GHz without preselection |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 2.23847
+             },
+             {
+              "text": "R&S FSW › Analysis bandwidth options（硬體 options）\n| Option code | 名稱 | Order No. | 適用與限制 |\n|---|---|---|---|\n| R&S FSW-B40 | 40 MHz analysis bandwidth | 1313.0861.02 | user-retrofittable |\n| R&S FSW-B80 | 80 MHz analysis bandwidth | 1313.0878.02 | user-retrofittable |\n| R&S FSW-B160 | 160 MHz analysis bandwidth | 1325.4850.14 | contact service center |\n| R&S FSW-B320 | 320 MHz analysis bandwidth | 1325.4867.14 | includes 200 MHz IF filter |\n| R&S FSW-B512 | 512 MHz analysis bandwidth | 1331.7106.14 | includes 200 MHz IF filter |\n| R&S FSW-B512R | Real-time spectrum analyzer 512 MHz, POI ≤ 15 µs | 1331.7106.16 | contact service center；includes 512 MHz analysis bandwidth and 200 MHz IF filter |\n| R&S FSW-B1200 | 1.2 GHz analysis bandwidth | 1331.6400.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory；不適用 [[R&S FSW8]]、[[R&S FSW13]] |\n| R&S FSW-B2001 | 2 GHz analysis bandwidth | 1331.6916.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory |\n| R&S FSW-B4001 | 4.4 GHz analysis bandwidth | 1338.5215.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；contact service center |\n| R&S FSW-B6001 | 6.4 GHz analysis bandwidth | 1338.5221.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B8001 | 8.312 GHz analysis bandwidth | 1338.5238.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B800R | Real-time spectrum analyzer 800 MHz, POI ≤ 15 µs | 1331.6400.16 | 適用 [[R&S FSW26]]/43/50/67/85；export license required |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 1.926583
+             },
+             {
+              "text": "R&S FSW › Firmware / licence options（摘錄）\n- R&S FSW-K6 Pulse measurements，Order No. 1313.1322.02。\n- R&S FSW-K7 AM/FM/PM modulation analysis，Order No. 1313.1339.02。\n- R&S FSW-K8 Bluetooth BR/EDR/LE measurements，Order No. 1313.1351.02；R&S FSW-K8E Bluetooth 6.0 channel sounding，Order No. 1353.3284.02，需 R&S FSW-K8。\n- R&S FSW-K40 Phase noise measurements，Order No. 1313.1397.02。\n- R&S FSW-K54 EMI measurements，Order No. 1313.1400.02。\n- R&S FSW-K70 Vector signal analysis，Order No. 1313.1416.02。\n- WLAN options：R&S FSW-K91、K91N、K91AC、K91AX、K91BE、K91P、K91BN、K95、K97；其中 K95/K97 需 R&S FSW-B2001/-B800R/-B4001/-B6001/-B8001 option。\n- 5G NR options：R&S FSW-K144、K145、K147、K147C、K148、K171、K175、K184；requires 依原文列示，報價前需回查 [[FSW_specs_en_5215-6749-22_v1701]]。\n- Real-time application firmware：R&S FSW-K161R、K512RE、K800RE，各自有 bandwidth option requires/excludes。\n- R&S FSW-K553 External frontend control，Order No. 1350.6118.02；支援 [[R&S FE44S]]、[[R&S FE50DTR]]、[[R&S FE110SR]]、[[R&S FE170SR]]。\n- R&S FSW-K575 I/Q noise cancellation，Order No. 1353.2894.02。\n- R&S FSW-K980 Health and utilization monitoring service（HUMS），Order No. 1350.6718.02。\n- 標註 59 的 firmware 也可作為 floating license；order number 由 `.02` 改為 `.51`，並需 R&S FSW-FL hardware option。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 1.04339
+             },
+             {
+              "text": "Virtual tester\n[[Virtual tester]] 在 [[AIW_Products_Customer_Questionnaire]] 中被定義為跨 implementation → test → debug → validation 的 agentic workflow，而不是 single tool。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 1.808086
+             },
+             {
+              "text": "Virtual tester › 與 point tools 的區分\n問卷第 3b 題要求客戶說明他們是在尋找 point tools，或 broader [[Virtual tester]]：\n\n- point tools examples：better scripting、log analysis。\n- broader [[Virtual tester]]：spans implementation → test → debug → validation。\n\n這個區分表示 [[Virtual tester]] 的範圍比單一 scripting assistant 或 log analyzer 更寬，但來源未提供具體產品功能矩陣。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 1.609258
+             },
+             {
+              "text": "Virtual tester › 來源定義\n[[AIW_Products_Customer_Questionnaire]] 的 short definitions 寫道：\n\n> Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a single tool.\n\n因此本庫把 [[Virtual tester]] 記為工作流 / solution concept，而非單一軟體工具或儀器。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 1.413754
+             },
+             {
+              "text": "Virtual tester › 限制與未決事項\n- 來源未說明 [[Virtual tester]] 是否為正式產品名、solution architecture 名稱或 sales / discovery 用語。\n- 來源未列出支援的 test frameworks、instruments、CI systems 或 issue trackers。\n- 來源未定義 validation 自動化到何種程度，也未定義 minimal human intervention 的標準。\n- 來源未說明 [[Virtual tester]] 與 [[ScriptAssist]]、[[TechAssist]] 的產品對應。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 0.314114
+             },
+             {
+              "text": "Virtual tester › 可能涵蓋的流程\n依問卷上下文，[[Virtual tester]] 相關需求可能涉及：\n\n- test idea 到 running, [[Validated results]] 的流程理解；\n- test script generation 或 refactoring；\n- ambiguous logs / failure debugging；\n- documentation lookup；\n- end-to-end test execution；\n- toolchain integration：repos、CI/CD、test frameworks、lab equipment interfaces、log / analysis pipelines；\n- [[Orchestration layer]] 對 AI agents 的 rules、instructions、skills coordination。\n\n以上是問卷問題範圍，不是已確認產品功能。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 0.148919
+             },
+             {
+              "text": "Validated results › 與 Virtual tester 的關係\n[[Virtual tester]] 被定義為跨 implementation → test → debug → validation 的 agentic workflow。[[Validated results]] 可視為該 workflow 的目標結果之一，但來源未提供 validation criteria、test coverage threshold 或品質標準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Validated results.md"
+              },
+              "score": 3.48134
+             },
+             {
+              "text": "Validated results › 問卷中的角色\n問卷第 1a 題以 `new test idea to running, validated results` 描述客戶當前 workflow，並追問耗時環節，例如：\n\n- scripting；\n- environment setup；\n- debugging failures；\n- documentation。\n\n問卷第 4 段則要求客戶定義 success criteria，例如 time to first test、mean time to debug、regression coverage、reuse of tests、fewer expert escalations，以及 minimal human intervention 的邊界。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Validated results.md"
+              },
+              "score": 0.874266
+             },
+             {
+              "text": "Validated results › 來源定義\n[[AIW_Products_Customer_Questionnaire]] 的 short definitions 寫道：\n\n> Validated results: a test outcome you would trust enough to report, ship against, or close a ticket on.\n\n這裡的 validated 不只是 test has run，而是結果可信任到可支撐報告、出貨判斷或關閉 ticket。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Validated results.md"
+              },
+              "score": 0.124475
+             },
+             {
+              "text": "Validated results\n[[Validated results]] 在 [[AIW_Products_Customer_Questionnaire]] 中指可信任到足以 report、ship against 或 close a ticket 的 test outcome。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Validated results.md"
+              },
+              "score": 0.123273
+             },
+             {
+              "text": "Validated results › 限制與未決事項\n- 來源未定義 validated results 的技術驗證流程、審核人員、品質門檻或合規要求。\n- 來源未說明哪些 decisions must stay with engineers vs can be automated；問卷要求客戶自行回答。\n- 來源未提供具體 test framework、ticket system 或 reporting system integration。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Validated results.md"
+              },
+              "score": 0.072647
+             },
+             {
+              "text": "MediaTek M80 › 來源中的說法\n[[oneweb_ut_final_presentation]]（來源正式日期未標示；raw converted 2026-09-17）對 [[MediaTek M80]] 的描述包含：\n\n- 在 laboratory RF test 階段，modulation / coding analysis 寫 OneWeb proprietary 或 [[MediaTek M80]] 5G NTN modem。\n- 在 field link validation 階段，寫 5G NTN trial 啟動：[[Sharp]] + [[MediaTek M80]] modem。\n- 在 multi-OEM terminal ecosystem 中，[[Sharp]] 5G NTN LEO terminal 被描述為使用 [[MediaTek M80]] 5G modem，status 為 2025 trial stage。\n- RF components & semiconductor supplier tier 中寫 [[MediaTek M80]] 5G NTN 支援 [[3GPP Release 19]]，用於 Sharp trial，是 5G convergence key。\n- Taiwan strategy positioning 中將 [[MediaTek]] 描述為 5G NTN modem supplier with strategic position，並與 [[Sharp]]、[[工研院]] 合作同列。\n- 5G NTN strategic roadmap 中列出：[[3GPP Release 19]]、[[MediaTek M80]] 5G NR-NTN modem、ITRI satellite-board gNB、Ericsson / Nokia 3GPP certification。\n- Commercial milestones 中列出 `2025 H1: Sharp 5G NTN trial validation`、`2025 H2: MediaTek commercial modem mass production`、`2026+: global 5G NTN service coverage`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/MediaTek M80.md"
+              },
+              "score": 3.420321
+             },
+             {
+              "text": "MediaTek M80 › unresolved\n- 需要取得 [[MediaTek]] 官方 [[MediaTek M80]] datasheet、press release 或 product page。\n- 需要確認 [[MediaTek M80]] 是否正式支援 [[3GPP Release 19]] NTN，以及支援範圍是 modem、protocol stack、RF、NB-NTN、NR-NTN 或其他。\n- 需要確認 [[Sharp]] trial 的日期、終端型號、衛星 operator、frequency band、test setup 與結果。\n- 需要確認 `2025 H2` commercial modem mass production 是否為已發生事件、計畫或簡報假設。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/MediaTek M80.md"
+              },
+              "score": 0.847671
+             },
+             {
+              "text": "Qorvo › 來源中的說法\n[[oneweb_ut_final_presentation]]（來源正式日期未標示；raw converted 2026-09-17）對 [[Qorvo]] 的描述包含：\n\n- 在 laboratory RF test 階段，link equation validation 例子寫為 [[Qorvo]] PA + [[Analog Devices]] LNA。\n- RF metrics 的 Tx 指標寫 `EIRP: 35–45 dBW (Qorvo PA)`。\n- RF components & semiconductor supplier tier 中寫：[[Qorvo]] 是 industry leader；GaN-based Ku / Ka band `2W–100W+`；[[Qorvo QPA1722]] K-band latest，bandwidth increased 3x。\n- LNA generic supply 中列出 LNA `<1 dB NF @ 12 GHz` from [[Qorvo]]、[[ADI]]、[[Skyworks]]。\n- 採購與測試協調區將 [[Qorvo]] PA 列為 RF component supplier supply agreement 對象。\n- 後續行動建議 lock in [[Qorvo]] 與 [[Analog Devices]] component supply agreements。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Qorvo.md"
+              },
+              "score": 2.371834
+             },
+             {
+              "text": "Qorvo\n[[Qorvo]] 是 [[oneweb_ut_final_presentation]] 中列為 OneWeb user terminal RF component / semiconductor supply chain 的 PA / LNA 供應商，來源特別提到 GaN-based Ku / Ka band PA 與 [[Qorvo QPA1722]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Qorvo.md"
+              },
+              "score": 0.929806
+             },
+             {
+              "text": "5G NR conducted base station transmitter tests › R&S solution setup\n依 [[GFM313_3e_5G_NR_BaseStation_Tx_Tests]]（01.2021）：\n\n- 完整 Tx test setup 使用 [[R&S FSW]] spectrum analyzer 執行量測。\n- 6.7 transmitter intermodulation 使用 [[R&S SMW200A]] signal generator 作為 interferer。\n- 5G NR measurements 需 5G NR Downlink Measurements software option：R&S FSW-/FSV3-/FSV-/FPS-/VSE-K144。\n- 6.7 interferer 可由 [[R&S SMW200A]] 或 [[R&S SMBV100B]] 搭配 -K144 5G NR software option 產生。\n- [[R&S SMW200A]] 與 [[R&S SMBV100B]] 也可用於示範目的，模擬 5G NR base station；來源明示 vector signal generator 不能模擬所有 base station functions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR conducted base station transmitter tests.md"
+              },
+              "score": 7.10797
+             },
+             {
+              "text": "5G NR conducted base station transmitter tests › Automation tools\n依 [[GFM313_3e_5G_NR_BaseStation_Tx_Tests]]（01.2021）：\n\n- `GFM313_Tx_tests` Python package 提供 [[3GPP TS 38.141-1]] chapter 6 test cases 的 Python library。\n- Python package 建議使用 Python 3.8、PyCharm IDE、RsInstrument Python module version 1.8.2.45 or higher。\n- Python test case class 可 csv-export measurement results，也可將 connected spectrum analyzer screenshot 儲存為 PNG。\n- [[R&S QuickStep]] 可將 Rohde & Schwarz testmodules 組合成 test plans。\n- QuickStep 的 5G NR BS transmitter tests 位於 `NR_BS_TransmitterTests` block library。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR conducted base station transmitter tests.md"
+              },
+              "score": 4.370018
+             },
+             {
+              "text": "5G NR conducted base station transmitter tests › 涵蓋測項\n依 [[GFM313_3e_5G_NR_BaseStation_Tx_Tests]]（01.2021），[[3GPP TS 38.141-1]] chapter 6 測項如下：\n\n| Test case | 名稱 | 測試重點 |\n|---|---|---|\n| 6.2 | Base station output power | 驗證 maximum carrier output power 準確度。 |\n| 6.3.2 | RE power control dynamic range | RE power 與 average RE power 差值；來源說由 EVM test 提供足夠 coverage。 |\n| 6.3.3 | Total power dynamic range | OFDM symbol maximum transmit power 與 minimum transmit power 差值。 |\n| 6.3.4 | NB-IoT RB power dynamic range | NB-IoT power boosting；與 OBUE / SEM 一起測試。 |\n| 6.4 | Transmit ON/OFF power | TDD operation 的 transmitter OFF period mean power。 |\n| 6.5.2 | Frequency error | actual NR BS transmit frequency 與 assigned frequency 的差值。 |\n| 6.5.3 | Modulation quality | 以 EVM 表示 measured carrier signal 與 reference signal 的差異。 |\n| 6.5.4 | Time alignment error（TAE） | 多個 NR signals 之間最大 timing difference。 |\n| 6.6.2 | Occupied bandwidth（OBW） | 99% power bandwidth；測得 OBW 應小於 nominal bandwidth。 |\n| 6.6.3 | Adjacent channel leakage power ratio（ACLR） | assigned channel power 與 adjacent channel power 的 filtered mean power ratio。 |\n| 6.6.4 | Operating band unwanted emissions（OBUE / SEM） | Operating band unwanted emissions / spectrum emission mask。 |\n| 6.6.5 | Transmitter spurious emissions | 9 kHz 至 12.75 GHz 及部分 band 5th harmonic 上限的 spurious emission 測試。 |\n| 6.7 | Transmitter intermodulation | 需額外 interferer，評估 transmitter 抑制 intermodulation products 的能力。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR conducted base station transmitter tests.md"
+              },
+              "score": 3.095786
+             },
+             {
+              "text": "5G NR conducted base station transmitter tests › Test model 對應\n依 [[GFM313_3e_5G_NR_BaseStation_Tx_Tests]]（01.2021）：\n\n- NR test models 稱為 enhanced NR TMs。\n- TMs 以 predefined settings 形式儲存在 Rohde & Schwarz 儀器中。\n- 測試使用 Bottom / Middle / Top frequency position。\n- Rohde & Schwarz 儀器可在 supported range 內任意設定 frequency range，不受 operating bands 限制。\n\n主要對應：\n\n- 6.2 使用 TM1.1，B / M / T。\n- 6.3.2 使用 TM2、TM2a、TM3.1、TM3.1a、TM3.2、TM3.3，B / M / T。\n- 6.3.3 使用 TM2、TM2a，M。\n- 6.3.4 使用 TM1.1、TM1.2，B / M / T。\n- 6.4 使用 TM1.1，M，且只適用 TDD。\n- 6.5.2 與 6.5.3 使用 TM2，B / M / T。\n- 6.5.4 使用 TM1.1，M。\n- 6.6.2 使用 TM1.1，M。\n- 6.6.3 與 6.6.4 使用 TM1.1、TM1.2，B / M / T。\n- 6.6.5 使用 TM1.1，B / T。\n- 6.7 使用 TM1.1，M，SCS 15 kHz，需 interferer。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR conducted base station transmitter tests.md"
+              },
+              "score": 0.646826
+             },
+             {
+              "text": "5G NR conducted base station transmitter tests › Manual 與 remote-control operation\n來源同時提供 manual testing procedure 與 remote operation / user-defined test software 所需的 [[SCPI]] command sequence。\n\n共通原則：\n\n- 測試前建議按 PRESET，將儀器 reset 至 default state。\n- 某些量測需將 [[R&S FSW]] 透過 external reference 同步至 high precision time reference。\n- Spectrum mode 用於 OBW（6.6.2）與 transmitter spurious emissions（6.6.5）。\n- 5G NR mode 用於 output power、frequency error、modulation quality、TAE、Transmit ON/OFF Power、ACLR 與 SEM。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR conducted base station transmitter tests.md"
+              },
+              "score": 0.556867
+             },
+             {
+              "text": "5G NR conducted base station transmitter tests › 使用限制\n- 本頁來自 01.2021 application note，標準版本為 Release 16 V16.3.0；不可推論 Release 17 / Release 18 的最新 mandatory test scope。\n- 本頁只支撐 solution-level 與 application-note-level 的 R&S 測試流程，不取代 [[R&S FSW]]、[[R&S SMW200A]]、[[R&S SMBV100B]] 的正式 datasheet / configuration guide。\n- Software libraries / QuickStep testmodules 以 `as is` 形式提供；完整 license terms 未在本次來源中擷取。\n- 來源為分段萃取，不是完整 PDF；完整 screenshots、SCPI sequence、附檔與 table footnotes 仍需回查原 application note。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR conducted base station transmitter tests.md"
+              },
+              "score": 0.471102
+             },
+             {
+              "text": "5G NR conducted base station receiver tests › 適用範圍\n依 [[GFM314_3e_5G_NR_BaseStation_Rx_Tests]]（12.2020）：\n\n- Application Note [[GFM314]] 說明如何依 [[3GPP TS 38.141-1]] Release 15 V15.6.0 chapter 7 執行 mandatory RF receiver tests。\n- 來源僅涵蓋 [[single carrier]]（SC）tests。\n- 來源僅涵蓋 conducted measurements，不涵蓋 OTA 測量。\n- GFM314 以 Rohde & Schwarz signal generators 支援 manual operation 與 remote control approach。\n- 其中 receiver spurious emissions test case 7.6 不需要 signal generator，但需要 signal and spectrum analyzer。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR conducted base station receiver tests.md"
+              },
+              "score": 7.517541
+             },
+             {
+              "text": "5G NR conducted base station receiver tests › Instrument setup\n依 [[GFM314_3e_5G_NR_BaseStation_Rx_Tests]]（12.2020）：\n\n- 一般 receiver test setup 使用 [[R&S SMW200A]]（SMW）執行測試。\n- General Rx test setup 包含 base station DUT、SMW、[[R&S FSW]]、diplexer / notch filter / frequency filter。\n- [[R&S SMW200A]] 產生 NR uplink wanted signal，並可透過第二 RF path 產生 NR interferer 或 CW interferer。\n- 7.6 Receiver Spurious Emissions 使用 signal and spectrum analyzer，例如 [[R&S FSW]]、[[R&S FSV3000]]、[[R&S FSVA3000]]、[[R&S FSV]]、[[R&S FSVA]]、[[R&S FPS]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR conducted base station receiver tests.md"
+              },
+              "score": 4.540441
+             },
+             {
+              "text": "5G NR conducted base station receiver tests › Chapter 7 test cases\n依 [[GFM314_3e_5G_NR_BaseStation_Rx_Tests]]（12.2020），GFM314 覆蓋下列 [[3GPP TS 38.141-1]] chapter 7 receiver tests：\n\n| Test case | 名稱 | 來源摘要 |\n|---|---|---|\n| 7.2 | Reference Sensitivity Level | 測量 receiver 在 reference sensitivity power level `PREFSENS` 下是否滿足 reference measurement channel throughput requirement。 |\n| 7.3 | Dynamic Range | 測量 receiver 在 received channel bandwidth 內存在 [[AWGN]] interferer 時接收 wanted signal 的能力。 |\n| 7.4.1 | Adjacent Channel Selectivity（ACS） | 測量 receiver 在相鄰通道 5G NR interferer 存在時接收 assigned channel wanted signal 的能力。 |\n| 7.4.2a | In-band Blocking: General | 以 NR interferer center frequency 1 MHz step size 掃描，測量 in-band blocking。 |\n| 7.4.2b | In-band Blocking: Narrow-band blocking | 類似 ACS，但 interfering signal 只包含 1 resource block。 |\n| 7.5 | Out-of-band Blocking | 以 CW interferer 進行 out-of-band blocking 掃頻測試。 |\n| 7.6 | Receiver Spurious Emissions | 測量 receiver 產生或放大的 emissions 出現在 BS receiver antenna connector 的功率。 |\n| 7.7 | Receiver Intermodulation | 測量 two interfering signals（CW + QPSK NR signal）造成 intermodulation effect 時 receiver 接收 wanted signal 的能力。 |\n| 7.8 | In-channel selectivity | 測量較高 PSD interferer 存在下，receiver 在 assigned RB locations 接收 wanted signal 的能力。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR conducted base station receiver tests.md"
+              },
+              "score": 3.389184
+             },
+             {
+              "text": "5G NR conducted base station receiver tests › Test Case Wizard\n依 [[GFM314_3e_5G_NR_BaseStation_Rx_Tests]]（12.2020）：\n\n- SMW firmware version 4.70.026.51 and higher 提供 [[Test Case Wizard]]。\n- TCW 支援依 [[3GPP TS 38.141]] 進行 base station tests。\n- TCW 的 SMW firmware 以 [[3GPP TS 38.141-1]] Rel. 15 V15.6.0 為基礎實作。\n- TCW 參數包含 Base Station Class、Test Case、Trigger Configuration、Marker Configuration、RF frequency、channel bandwidth、subcarrier spacing、cell ID、UE ID、RB offset 等。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR conducted base station receiver tests.md"
+              },
+              "score": 2.728743
+             },
+             {
+              "text": "5G NR conducted base station receiver tests › SCPI remote control\n依 [[GFM314_3e_5G_NR_BaseStation_Rx_Tests]]（12.2020）：\n\n- Rohde & Schwarz instruments 使用 [[SCPI]] command sequences 進行 remote control operations。\n- SCPI command 是 ASCII textual strings，可透過 GPIB、RS-232、USB、Ethernet 傳送。\n- Rohde & Schwarz 使用的 SCPI format 稱為 canonical form。\n- 來源列出各 test case 的 TCW SCPI command，例如 `TS381411_TC72`、`TS381411_TC73`、`TS381411_TC741`、`TS381411_TC742A`、`TS381411_TC742B`、`TS381411_TC75`、`TS381411_TC77`、`TS381411_TC78`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR conducted base station receiver tests.md"
+              },
+              "score": 1.814599
+             },
+             {
+              "text": "5G NR conducted base station receiver tests › SMW option 線索\n依 [[GFM314_3e_5G_NR_BaseStation_Rx_Tests]]（12.2020），receiver characteristics tests 需要：\n\n- 2× baseband generator option：`R&S®SMW-B10` 或 `R&S®SMW-B9`。\n- 1× baseband main module option：`R&S®SMW-B13T` 或 `R&S®SMW-B13XT`。\n- 1× frequency option，例如 `R&S®SMW-B1007`。\n- 1× frequency option，例如 `R&S®SMW-B2007`。\n- 1× [[AWGN]] option：`R&S®SMW-K62`。\n- 2× 5G NR digital standard option：`R&S®SMW-K144`。\n\n此處是 application-specific 配置線索；正式可訂購性、相依關係與 firmware support 仍需回查 [[R&S SMW200A]] 最新 configuration guide / specifications。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR conducted base station receiver tests.md"
+              },
+              "score": 1.71522
+             },
+             {
+              "text": "5G NR conducted base station receiver tests › Base station type 與 test boundary\n依 [[GFM314_3e_5G_NR_BaseStation_Rx_Tests]]（12.2020）：\n\n- [[BS type 1-C]] 是 FR1 conducted base station；transceiver antenna connector（port A）可直接存取。\n- 若 BS type 1-C 使用 amplifier、filter 或兩者組合等 external equipment，test requirements 適用於整個系統的 far end antenna connector（port B）。\n- [[BS type 1-H]] 是 FR1 hybrid base station；具有 conducted 與 radiated reference points。\n- [[TAB]] 是 transceiver unit array 與 composite antenna 之間的 conducted interface，且配有 connectors 用於 conducted measurements。\n- GFM314 中所有 test cases 均適用於 TAB 的 conducted measurements。\n- [[RIB]] 是 radiated interface boundary；OTA specific requirements 與 test cases 定義於 [[3GPP TS 38.141-2]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR conducted base station receiver tests.md"
+              },
+              "score": 0.670747
+             },
+             {
+              "text": "5G NR conducted base station receiver tests › Automation\n依 [[GFM314_3e_5G_NR_BaseStation_Rx_Tests]]（12.2020）：\n\n- [[GFM314_Rx_tests Python package]] 提供 [[3GPP TS 38.141-1]] chapter 7 test cases 的 Python classes。\n- [[R&S QuickStep]] 可將 Rohde & Schwarz 提供的 testmodules 組合成 test plans。\n- Python package 與 QuickStep package 皆以 royalty free software terms / package download terms 提供；使用前需確認原始下載頁與授權條款。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR conducted base station receiver tests.md"
+              },
+              "score": 0.607167
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 使用限制\n- 本頁的 accuracy 數字與 method benefits 來自 2022 application brochure；實際性能需依 DUT、frequency range、bandwidth、SNR、option 與 calibration setup 確認。\n- 本頁不取代 [[R&S FSW]]、[[R&S SMW200A]]、[[R&S ZNA]] 的正式規格書。\n- 來源未提供完整 uncertainty budget、test limits、標準章節或 test case ID。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 4.838759
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 測量原理\n- [[R&S SMW200A]] 產生 multi-carrier continuous wave signal 作為 stimulus。\n- Multi-carrier stimulus 的 tones 數量與 spacing / aperture 可依 DUT 需求調整。\n- [[R&S FSW]] 的 group delay measurement 分兩步：\n  - Reference calibration：generator 直接連接 analyzer，analyzer 判定 individual carriers 的 reference phase 與 amplitude。\n  - Group delay and gain measurement：連接 DUT，analyzer 由 reference signal 與 DUT output multicarrier signal 的 phase difference 判定 carrier frequency range 的 group delay。\n- 來源列出使用 [[R&S SMW-K61]] 與 [[R&S FSW-K17]] multicarrier group delay measurement application。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 3.582052
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 方法一：R&S FSW + R&S SMW200A multi-carrier group delay measurement\n[[Satellite_payload_testing_app-bro_en_5215-2120-92_v0200]] 說 [[R&S FSW]] spectrum analyzer 與 [[R&S SMW200A]] signal generator 可用於快速、直接量測 satellite transponders、frequency converters 與 other components 的 absolute group delay 與 relative group delay。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 3.275069
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 方法選擇\n依 [[Satellite_payload_testing_app-bro_en_5215-2120-92_v0200]]：\n\n- [[R&S FSW]] + [[R&S SMW200A]] 建議用於 complete payload testing。\n- [[R&S ZNA]] 建議用於 component level testing。\n- Spectrum analyzer + signal generator 的 measuring principle 是產生 multi-carrier signal，量測 carriers 之間的 phase shift / difference，再計算 group delay。\n- VNA 的 measuring principle 是產生 two-tone signal，並在 reference 與 measurement receivers 中量測 carriers 之間的 phase。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 3.194195
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 方法二：R&S ZNA two-tone technique\n[[Satellite_payload_testing_app-bro_en_5215-2120-92_v0200]] 說 [[R&S ZNA]] vector network analyzer 可用於量測 frequency converters without LO access 的 group delay，特別是傳統方法受 DUT internal LO drift / noise 限制時。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 1.062832
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 來源列出的優點\n- 可在 milliseconds 內量測 wideband signals 的 absolute group delay 與 relative group delay。\n- Signal averaging 與 smoothing 可改善 carrier-to-noise ratio，在 cables 與 fixtures 導致 high signal path losses 時取得 valid results。\n- 可自動補償 in-orbit measurements 的 Doppler effects。\n- Frequency converters 的 relative group delay 可達 1 ns measurement accuracy，且不需要 reference mixer 或 golden device。\n- Non-frequency-translating measurements 的 relative group delay 可達 300 ps measurement accuracy。\n- [[R&S SMW200A]] 可內部彈性產生 MCCW signals 與 modulated signals，並可設定 carrier spacing 與 number of carriers。\n- Deembedding function 可修正 measurement setup 中 cables 與 fixtures 的 frequency response。\n- [[R&S FSW-K17S]] option 可量測 low SNR 的 wideband signals，透過分析 overall signal 的 subspans 改善 SNR 與 measurement speeds。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 0.977091
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 測量原理\n- [[R&S ZNA]] 使用 two-tone stimulus signal。\n- 儀器量測 DUT input 與 output 的兩個 signals 之 phase difference。\n- Group delay 由 phase difference 與 frequency offset 計算。\n- 兩個 signals 間的 frequency offset Δf 是 aperture。\n- [[R&S ZNA]] 具備用於量測不同 frequency signals 之 phase 的 frontend。\n- Calibration 只需要 unknown through mixer。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 0.735449
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › RF generator / analyzer 功能\nGeneral functions：\n\n- simultaneous receiver and transmitter testing。\n- RF generator/analyzer no. 1：**8 × SnapN**，RF input/output to DUT，RF 1.1 to RF 1.8。\n- RF generator/analyzer no. 2：**8 × SnapN**，RF input/output to DUT，RF 2.1 to RF 2.8；requires **R&S CMP-K102** or **R&S CMP-K105** software license key。\n\nReceiver test functions：\n\n- RF generator signal is split and forwarded to 8 output ports each。\n- every output can be switched off separately。\n- collective output level setting for RF 1.1 to RF 1.8 and RF 2.1 to RF 2.8。\n- frequency-dependent attenuation（FDA）table for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。\n\nTransmitter test functions：\n\n- 8 input signals multiplexed to RF analyzer no. 1。\n- 8 input signals multiplexed to RF analyzer no. 2。\n- frequency-dependent attenuation（FDA）tables for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。\n\nVSWR：\n\n| Port | Frequency | 規格 |\n|---|---|---|\n| RF x.1 to RF x.8 | 400 MHz to 4000 MHz | < 1.6 |\n| RF x.1 to RF x.8 | 4000 MHz to 8000 MHz | < 2.0 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 7.759052
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › RF analyzer 規格\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Frequency range | basic | 400 MHz to 8000 MHz（表格同時標示 R&S CMP-K168 applies to 6000 MHz to 8000 MHz） |\n| Extended range | requires R&S CMP-K168 | 6000 MHz to 8000 MHz |\n| Extended range with RF unit | requires R&S CMP-K168 and R&S CMP-B805I option | 6000 MHz to 8000 MHz |\n| Overrange | maximum center frequency 8250 MHz | 6000 MHz to 8500 MHz |\n| Frequency resolution |  | 0.1 Hz |\n| IF bandwidth | RF x.1 to RF x.8 | 250 MHz |\n| IF bandwidth | requires R&S CMP-K185 | 500 MHz |\n\nLevel range：\n\n| 條件 | RMS | PEP |\n|---|---|---|\n| reference level < +10 dBm | max. +20 dBm | max. +28 dBm |\n| reference level ≥ +10 dBm | max. +30 dBm | max. +38 dBm |\n\n其他 RF analyzer 規格：\n\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Maximum input DC level |  | 0 V DC |\n| Expected nominal power setting range | ADC full scale, 400 MHz to 8000 MHz | –47 dBm to +38 dBm |\n| Inherent spurious response | no input signal, reference level –20 dBm, 400 MHz to 8000 MHz | –85 dBFS typ. |\n| Inherent spurious response | no input signal, reference level –20 dBm, 3750 MHz | –75 dBFS typ. |\n| Level uncertainty | with R&S CMP-B802I or R&S CMP-B805I, 95% confidence level, +15 °C to +35 °C, 400 MHz to 5000 MHz | ±0.3 dB |\n| Level uncertainty | same, 5000 MHz to 8000 MHz | ±0.4 dB |\n| Level linearity | fixed expected nominal power setting, level range 0 dB to –40 dB | < 0.1 dB |\n| Port switching time | to within 0.1 dB | < 10 µs |\n| Level repeatability | typical after 1 h warm-up | < 0.01 dB |\n| RX DANL | +15 °C to +35 °C, 400 MHz to 6500 MHz | < –157 dBm（1 Hz） |\n| RX DANL | +15 °C to +35 °C, 6500 MHz to 7800 MHz | < –155 dBm（1 Hz） |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 3.050613
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › Measurement option 規格摘錄\n| Option | 功能 | 來源規格摘錄 |\n|---|---|---|\n| R&S CMP-KM600 | 5G NR analyzer | EVM FR1 bandwidth 100 MHz, SCS 30 kHz, 16QAM, level > –20 dBm：< 0.5% |\n| R&S CMP-KM305 | UWB production measurements | center frequency offset < 0.005 ppm；chip clock error < 0.02 ppm；NRMSE < 5%；relative AVG pulse level < 0.1 dB |\n| R&S CMP-KM351 | WLAN IEEE 802.11ax analyzer | bandwidth 160 MHz：< –46 dB meas.；with R&S CMP-KB805 option：< –49 dB meas. |\n| R&S CMP-KW351 | WLAN IEEE 802.11ax generator | bandwidth 160 MHz：< –45 dB |\n| R&S CMP-KM352 | WLAN IEEE 802.11be analyzer | 160 MHz < –46 dB meas.；160 MHz with R&S CMP-KB805 < –49 dB meas.；320 MHz < –46 dB meas.；320 MHz with R&S CMP-KB805 < –48 dB meas. |\n| R&S CMP-KW352 | WLAN IEEE 802.11be generator | 160 MHz < –45 dB；320 MHz < –43 dB |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 2.966947
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › 與既有知識的關係\n- [[CMP180 Features and Functions Version 09]] 已指出量測範圍與 tolerance limits 不在 Features and Functions 文件內，需參考 specifications document **PD 3609.7348.22**；本來源正是該 specifications 文件，補足 spec、general data 與 ordering information。\n- [[CMP180 Features and Functions Version 09]] 提到 [[R&S CMP180]] 的 RF unit 分為 **R&S CMP-B802x** 與 **R&S CMP-B805x**，且 **R&S CMP-K185** 可啟用 500 MHz bandwidth；本來源以具體 ordering item **R&S CMP-B802I**、**R&S CMP-B805I**、**R&S CMP-K185** 補足 order number 與 availability 條件。\n- [[CMP180 Features and Functions Version 09]] 提到未安裝 **R&S CMP-K168** 時 maximum 為 6 GHz；本來源在 ordering information 將 **R&S CMP-K168** 定義為 **Extended frequency range, from 6 GHz to 8 GHz**。\n- [[CMP180 Features and Functions Version 09]] 列出多個 option order number 後綴為 `.xx`；本來源多數對應項目給出 `.02` 或 `.10` / `.11` 版本的完整 order number。\n- 本來源與既有 [[R&S CMX500]]、[[R&S CMP200]]、[[R&S CMW100 K06]]、[[R&S CMW500]]、[[R&S CMW290]]、[[R&S CMW270]] 同屬 Rohde & Schwarz wireless / radio communication test 產品知識區，但 [[R&S CMP180]] 的本文件聚焦 production tester 類 RF generator/analyzer 規格與多埠 RF 測試。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 2.943984
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › 重點摘要\n這份來源是 [[R&S CMP180]] **Radio Communication Tester** 的 specifications 文件，文件識別碼 **PD 3609.7348.22**，**Version 08.00**，日期標示 **March 2026**；封面與頁尾皆標示 **Version 08.00**。來源頁尾標示 **© 2021–2026 Rohde & Schwarz**，並聲明 **Data without tolerance limits is not binding**、**Subject to change**。\n\n本規格書補足 [[CMP180 Features and Functions Version 09]] 所未提供的 binding specifications、base unit order number、RF unit order number、RF generator/analyzer 規格、general data、ordering information、warranty 與 service 資訊。\n\n主要重點：\n\n- [[R&S CMP180]] base unit order no.：**1201.0002K18**，包含 power cables 與 getting started guide。\n- 文件版次：**PD 3609.7348.22 | Version 08.00 | March 2026 (ch)**。\n- RF generator/analyzer 頻率範圍：基本 **400 MHz to 6000 MHz**；使用 **R&S CMP-K168** 可擴展到 **6000 MHz to 8000 MHz**。\n- 搭配 **R&S CMP-B805I** 與 **R&S CMP-K168** 時，generator overrange 為 **6000 MHz to 8250 MHz**，maximum center frequency **8000 MHz**；analyzer overrange 為 **6000 MHz to 8500 MHz**，maximum center frequency **8250 MHz**。\n- 每個 RF generator/analyzer connector bench 有 **8 × SnapN** RF input/output to DUT；第二組 TRX / RF 2.1 to RF 2.8 需 **R&S CMP-K102** 或 **R&S CMP-K105** software license key。\n- IF bandwidth：基本 **250 MHz**；使用 **R&S CMP-K185** 可達 **500 MHz**，且 ordering information 明示 only available if **R&S CMP-B805I or higher option** is installed。\n- ARB memory：**8 Gbyte/channel**；sample length up to **800 Msample**；maximum sample rate **312.5 MHz**，搭配 **R&S CMP-K185** 為 **625 MHz**。\n- Calibration interval：**24 months**；base unit warranty：**1 year**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 2.833653
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › Ordering information 摘要\n| Designation | Type | Order no. |\n|---|---|---|\n| Non-cellular measurements pack 1 | R&S CMP-PKM30 | 1212.3689.02 |\n| Cellular measurements pack 1 | R&S CMP-PKM40 | 1212.3695.02 |\n| Advanced path loss measurements（serial number ≥ 102160） | R&S CMP-KM115 | 1212.2201.02 |\n| Advanced path loss measurements（serial number < 102160） | R&S CMP-U115 | 1212.4291.02 |\n| Spectrum analyzer | R&S CMP-KM140 | 1212.4410.02 |\n| Signal analysis base software | R&S CMP-KM150 | 1212.3972.02 |\n| Signal analysis, digital | R&S CMP-KM152 | 1212.3989.02 |\n| NB-IoT measurements | R&S CMP-KM250 | 1212.2218.02 |\n| LP-IoT measurements, Zigbee | R&S CMP-KM280 | 1212.2224.02 |\n| Ultra-wideband production measurements | R&S CMP-KM305 | 1212.4304.02 |\n| UWB IEEE 802.15.4ab production measurements | R&S CMP-KM306 | 1212.4691.02 |\n| Bluetooth measurements, Classic / Low Energy up to Rel. 5.3 | R&S CMP-KM310 | 1212.2230.02 |\n| Bluetooth HDT measurements Rel. 7.0 | R&S CMP-KM317 | 1212.4591.02 |\n| WLAN IEEE 802.11a/b/g/n/ac SISO measurements | R&S CMP-KM350 | 1212.2247.02 |\n| WLAN IEEE 802.11ax SISO measurements | R&S CMP-KM351 | 1212.2253.02 |\n| WLAN IEEE 802.11be SISO measurements | R&S CMP-KM352 | 1212.2260.02 |\n| WLAN true MIMO 2x2 and 4x4 measurements | R&S CMP-KM360 | 1212.2276.02 |\n| WLAN true MIMO 5x5 and 6x6 measurements | R&S CMP-KM361 | 1212.4685.02 |\n| WLAN packet error rate acknowledgement measurements | R&S CMP-KM365 | 1212.4562.02 |\n| GSM measurements | R&S CMP-KM420 | 1212.2282.02 |\n| WCDMA measurements | R&S CMP-KM440 | 1212.2299.02 |\n| CDMA2000 1xRTT measurements | R&S CMP-KM480 | 1212.2730.02 |\n| LTE measurements | R&S CMP-KM500 | 1212.2301.02 |\n| LTE C-V2X measurements, PC5 | R&S CMP-KM570 | 1212.2318.02 |\n| NR FR1 measurements, single carrier | R&S CMP-KM600 | 1212.2101.02 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 2.758185
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › 原文未解的問題\n- 來源中的 RF generator / analyzer frequency range 表格 OCR 呈現方式不清，表格同時出現 **400 MHz to 8000 MHz** 與 requires **R&S CMP-K168** for **6000 MHz to 8000 MHz**；本頁依 ordering information 判讀為基本 6 GHz、K168 擴展到 8 GHz，但不自行推導更細的 SKU 行為。\n- 來源列出 **R&S CMP-PB18B**、**R&S CMP-PB18H**、**R&S CMP-B41H** 作為 interface / trigger 條件，但 ordering information 中列出的基本 assembly / interface 是 **R&S CMP-PB18I**、**R&S CMP-B40J**、**R&S CMP-B41J**；來源未說明 B/H/I/J variant 對應關係。\n- **R&S CMP-KB805** 被稱為 Performance uprating for RF unit 500，且 WLAN EVM 圖表 / 規格列出 with **R&S CMP-KB805 option** 的 measured values；來源未在文字中完整解釋 KB805 的技術內容。\n- 來源未提供 [[R&S CMP180]] 的 user manual 文件識別碼。\n- 來源未展開 SnapN connector 的機械規格。\n- 來源未提供 [[R&S CMPflexx system]] 的完整架構，只在 accessory 中列出 multi-instrument connection cable set。\n- 來源未提供 R&S NRPx power sensors 的可支援型號清單。\n- 來源頁首與頁尾皆為 Version 08.00 / March 2026，未見內部日期矛盾。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 1.293012
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › RF generator 規格\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Frequency range | basic | 400 MHz to 8000 MHz（表格同時標示 R&S CMP-K168 applies to 6000 MHz to 8000 MHz） |\n| Extended range | requires R&S CMP-K168 | 6000 MHz to 8000 MHz |\n| Extended range with RF unit | requires R&S CMP-K168 and R&S CMP-B805I option | 6000 MHz to 8000 MHz |\n| Overrange | maximum center frequency 8000 MHz | 6000 MHz to 8250 MHz |\n| Frequency resolution |  | 0.1 Hz |\n| Frequency uncertainty |  | same as timebase + frequency resolution |\n| Frequency settling time |  | < 400 µs |\n| IF bandwidth | RF x.1 to RF x.8 | 250 MHz |\n| IF bandwidth | requires R&S CMP-K185 | 500 MHz |\n\nOutput level range：\n\n| Frequency | CW | PEP |\n|---|---|---|\n| 400 MHz to 6000 MHz | –130 dBm to +8 dBm | up to +8 dBm |\n| 6000 MHz to 7375 MHz | –130 dBm to +6 dBm | up to +6 dBm |\n| 7375 MHz to 7900 MHz | –130 dBm to 0 dBm | up to 0 dBm |\n| 7900 MHz to 8000 MHz | –130 dBm to –3 dBm | up to –3 dBm |\n\n其他 RF generator 規格：\n\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Output level uncertainty | with R&S CMP-B802I or R&S CMP-B805I, 95% confidence level, output level > –120 dBm, +15 °C to +35 °C, 400 MHz to 8000 MHz | ±0.6 dB |\n| Output level linearity | fixed RF output attenuator setting, digital gain 0 dB to –20 dB, output level < 0 dBm | < 0.1 dB |\n| Output level settling time | to within 0.1 dB | < 10 µs |\n| Output level repeatability | typical after 1 h warm-up, same level/frequency, no temperature change | < 0.01 dB |\n| Attenuation of spurious | output power 0 dBm PEP, 2400 MHz to 2500 MHz | > 65 dBc |\n| Attenuation of spurious | output power 0 dBm PEP, 5150 MHz to 7125 MHz | > 65 dBc |\n| Second harmonic attenuation | 400 MHz to 8000 MHz, P < +3 dBm | > 20 dB |\n| Third harmonic attenuation | 400 MHz to 8000 MHz, P < +3 dBm | > 40 dB |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 1.19402
+             },
+             {
+              "text": "R&S CMP180 › Receiver test functions\n- RF generator signal is split and forwarded to 8 output ports each。\n- every output can be switched off separately。\n- collective output level setting for connectors RF 1.1 to RF 1.8 and RF 2.1 to RF 2.8。\n- frequency-dependent attenuation（FDA）table for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 5.823717
+             },
+             {
+              "text": "R&S CMP180 › Transmitter test functions\n- 8 input signals to be multiplexed to RF analyzer no. 1。\n- 8 input signals to be multiplexed to RF analyzer no. 2。\n- frequency-dependent attenuation（FDA）tables for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 4.357392
+             },
+             {
+              "text": "R&S CMP180 › R&S VSE integration\n依 [[CMP180 Features and Functions Version 09]]：\n\n- [[R&S VSE]] 是 high-performance analysis software，支援 [[R&S CMP180]] 作為 supported instrument。\n- 如果 VSE client license 由 CMP180 提供，需 **R&S CMP-KM150** signal analysis base software。\n- R&S CMP-KM152 提供 signal analysis digital。\n\n依 [[CMP180 Specifications Version 08.00]]：\n\n| Designation | Type | Order no. |\n|---|---|---|\n| Signal analysis base software | R&S CMP-KM150 | 1212.3972.02 |\n| Signal analysis, digital | R&S CMP-KM152 | 1212.3989.02 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 18,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 3.334586
+             },
+             {
+              "text": "R&S CMP180 › RF analyzer 主要規格\n依 [[CMP180 Specifications Version 08.00]]：\n\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Frequency resolution |  | 0.1 Hz |\n| IF bandwidth | RF x.1 to RF x.8 | 250 MHz；with R&S CMP-K185：500 MHz |\n| Maximum input DC level |  | 0 V DC |\n| Expected nominal power setting range | ADC full scale, 400 MHz to 8000 MHz | –47 dBm to +38 dBm |\n\nLevel range：\n\n| Reference level | RMS | PEP |\n|---|---|---|\n| < +10 dBm | max. +20 dBm | max. +28 dBm |\n| ≥ +10 dBm | max. +30 dBm | max. +38 dBm |\n\nOther RF analyzer data：\n\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Inherent spurious response | no input signal, reference level –20 dBm, 400 MHz to 8000 MHz | –85 dBFS typ. |\n| Inherent spurious response | no input signal, reference level –20 dBm, 3750 MHz | –75 dBFS typ. |\n| Level uncertainty | with R&S CMP-B802I or R&S CMP-B805I option, 95% confidence level, +15 °C to +35 °C, 400 MHz to 5000 MHz | ±0.3 dB |\n| Level uncertainty | same, 5000 MHz to 8000 MHz | ±0.4 dB |\n| Level linearity | fixed expected nominal power setting, level range 0 dB to –40 dB | < 0.1 dB |\n| Port switching time | to within 0.1 dB | < 10 µs |\n| Level repeatability | typical after 1 h warm-up time | < 0.01 dB |\n| RX DANL | +15 °C to +35 °C, 400 MHz to 6500 MHz | < –157 dBm（1 Hz） |\n| RX DANL | +15 °C to +35 °C, 6500 MHz to 7800 MHz | < –155 dBm（1 Hz） |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 3.009215
+             },
+             {
+              "text": "R&S CMP180 › 產品定位\n[[R&S CMP180]] 是 Radio Communication Tester。依 [[CMP180 Features and Functions Version 09]]，文件涵蓋 global options、Bluetooth、CDMA2000、GSM、LP-IoT、LTE、NB-IoT、NR、spectrum analysis、UWB、WCDMA、WLAN、[[R&S VSE]] options 與 ordering information。\n\n依 [[CMP180 Specifications Version 08.00]]，CMP180 支援 simultaneous receiver and transmitter testing，並提供 RF generator/analyzer no. 1 與可選 RF generator/analyzer no. 2 的多埠 RF 測試架構。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 2.970997
+             },
+             {
+              "text": "R&S CMP180 › Selected measurement performance\n依 [[CMP180 Specifications Version 08.00]]：\n\n| Option | 功能 | 規格摘錄 |\n|---|---|---|\n| R&S CMP-KM600 | 5G NR analyzer | EVM FR1 bandwidth 100 MHz, SCS 30 kHz, 16QAM, level > –20 dBm：< 0.5% |\n| R&S CMP-KM305 | UWB production measurements | center frequency offset < 0.005 ppm；chip clock error < 0.02 ppm；NRMSE < 5%；relative AVG pulse level < 0.1 dB |\n| R&S CMP-KM351 | WLAN IEEE 802.11ax analyzer | bandwidth 160 MHz < –46 dB meas.；with R&S CMP-KB805 < –49 dB meas. |\n| R&S CMP-KW351 | WLAN IEEE 802.11ax generator | bandwidth 160 MHz < –45 dB |\n| R&S CMP-KM352 | WLAN IEEE 802.11be analyzer | 160 MHz < –46 dB meas.；with R&S CMP-KB805 < –49 dB meas.；320 MHz < –46 dB meas.；320 MHz with R&S CMP-KB805 < –48 dB meas. |\n| R&S CMP-KW352 | WLAN IEEE 802.11be generator | 160 MHz < –45 dB；320 MHz < –43 dB |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 2.842064
+             },
+             {
+              "text": "R&S CMP180\n[[R&S CMP180]] 是 [[Rohde & Schwarz]] 的 **Radio Communication Tester**，用於 production / wireless communication device 測試，依文件可配置多埠 RF generator/analyzer、通訊標準 measurement options、waveform options 與 [[R&S VSE]] 分析能力。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 2.527838
+             },
+             {
+              "text": "R&S CMP180 › Measurement options\n| Designation | Type | Order no. |\n|---|---|---|\n| Non-cellular measurements pack 1 | R&S CMP-PKM30 | 1212.3689.02 |\n| Cellular measurements pack 1 | R&S CMP-PKM40 | 1212.3695.02 |\n| Advanced path loss measurements（serial number ≥ 102160） | R&S CMP-KM115 | 1212.2201.02 |\n| Advanced path loss measurements（serial number < 102160） | R&S CMP-U115 | 1212.4291.02 |\n| Spectrum analyzer | R&S CMP-KM140 | 1212.4410.02 |\n| Signal analysis base software | R&S CMP-KM150 | 1212.3972.02 |\n| Signal analysis, digital | R&S CMP-KM152 | 1212.3989.02 |\n| NB-IoT measurements | R&S CMP-KM250 | 1212.2218.02 |\n| LP-IoT measurements, Zigbee | R&S CMP-KM280 | 1212.2224.02 |\n| Ultra-wideband production measurements | R&S CMP-KM305 | 1212.4304.02 |\n| UWB IEEE 802.15.4ab production measurements | R&S CMP-KM306 | 1212.4691.02 |\n| Bluetooth measurements, Classic / Low Energy up to Rel. 5.3 | R&S CMP-KM310 | 1212.2230.02 |\n| Bluetooth HDT measurements Rel. 7.0 | R&S CMP-KM317 | 1212.4591.02 |\n| WLAN IEEE 802.11a/b/g/n/ac SISO measurements | R&S CMP-KM350 | 1212.2247.02 |\n| WLAN IEEE 802.11ax SISO measurements | R&S CMP-KM351 | 1212.2253.02 |\n| WLAN IEEE 802.11be SISO measurements | R&S CMP-KM352 | 1212.2260.02 |\n| WLAN true MIMO 2x2 and 4x4 measurements | R&S CMP-KM360 | 1212.2276.02 |\n| WLAN true MIMO 5x5 and 6x6 measurements | R&S CMP-KM361 | 1212.4685.02 |\n| WLAN packet error rate acknowledgement measurements | R&S CMP-KM365 | 1212.4562.02 |\n| GSM measurements | R&S CMP-KM420 | 1212.2282.02 |\n| WCDMA measurements | R&S CMP-KM440 | 1212.2299.02 |\n| CDMA2000 1xRTT measurements | R&S CMP-KM480 | 1212.2730.02 |\n| LTE measurements | R&S CMP-KM500 | 1212.2301.02 |\n| LTE C-V2X measurements, PC5 | R&S CMP-KM570 | 1212.2318.02 |\n| NR FR1 measurements, single carrier | R&S CMP-KM600 | 1212.2101.02 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 2.362755
+             },
+             {
+              "text": "oneweb_ut_final_presentation › 原文未解的問題\n- 來源正式發布日期、簡報版次、作者、部門正式名稱與適用客戶 / 專案未標示。\n- 原始檔為 HTML 轉 markdown 的 lossy derivative；需回查 `oneweb_ut_final_presentation.html` 原始內容、圖片與任何 speaker notes。\n- OneWeb constellation 數字、軌道高度、覆蓋範圍、頻段、throughput、latency 與 beam count 未附官方文件或測試條件。\n- [[Intellian OW11F]]、[[Hughes HL1120W]]、[[Kymeta Goshawk u8]]、[[Sharp]] 5G NTN terminal、[[Gilat ESR-2030Ku]]、[[ThinKom Ka2517]]、[[SatixFy ESMA]] 等產品規格需個別 datasheet 或 OEM 文件確認。\n- RF metrics（G/T、NF、EIRP、P1dB、path loss、rain margin、SNR）未標示量測 setup、環境條件、終端型號、頻點、校正狀態或測試不確定度。\n- [[Qorvo]] PA、[[Analog Devices]] LNA / receiver front-end、[[MediaTek M80]]、[[SatixFy Sx3099]] 與 [[Prime ASIC]] 供應鏈角色未附合約、採用或量產證據。\n- [[MediaTek M80]] 的 [[3GPP Release 19]] support、Sharp trial、2025 H2 commercial modem mass production 皆需官方 roadmap / datasheet / announcement 補證。\n- [[工研院]] ITRI satellite-board gNB / terrestrial gNB support 未提供專案名稱、標準版本、頻段、平台或合作單位證據。\n- `Rohde & Schwarz SMW6` 可能是型號簡寫或轉檔 / 原文錯誤；不可自行對應為 [[R&S SMW200A]] 或其他 signal generator。\n- 市場規模、CAGR 與 2035 forecast 未標示研究機構、報告日期、定義口徑或貨幣基準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+              },
+              "score": 2.609392
+             },
+             {
+              "text": "•  Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-c733beba88ba4b3a",
+                "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+                "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+                "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 24.580028
+             },
+             {
+              "text": "Signal Generator\nSignal Analyzer",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-c478cd76758e3230",
+                "original_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+                "sha256": "c478cd76758e32304c76f6cddcc468bbab6c09f305ddd986166116e13cef3c38",
+                "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+               "section": 37,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 22.699916
+             },
+             {
+              "text": "Network analyzer\nVector signal generator\nBroadband Amplifier",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-4a179a13677acd8f",
+                "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+                "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+               "section": 177,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.87828
+             },
+             {
+              "text": "1) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the second path of the SMW.\n2) An additional signal generator for the CW signal is optional. The CW interfering signal can also be\ngenerated by the AWGN B block in RF path B of the SMW. In this application note we will explain the second\noption in the respective test case chapter.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-0acf440ab126eca3",
+                "original_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+                "sha256": "0acf440ab126eca310015282ad6d053ccef29786e83252dc036802ddca3f67bd",
+                "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+               "section": 20,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.611999
+             }
+            ],
+            "text": "No passage explicitly names an “RFIC validation” workflow, but the supported placement is: **Signal Generator / Signal Analyzer sit in the lab test-execution and validation-measurement part of the workflow, under automation/orchestration if used, not as the whole workflow by themselves.** A Virtual tester workflow spans **implementation → test → debug → validation** [13][15], and the workflow scope can include **end-to-end test execution** plus integration with **lab equipment interfaces, logs, and analysis pipelines** [17].\n| Workflow stage | Where Signal Generator / Signal Analyzer fit | Roles |\n|---|---|---|\n| Test setup / execution | The signal generator is the RF stimulus source connected to the DUT. In receiver-style tests, R&S SMW200A is used in the general receiver test setup and generates the NR uplink wanted signal; it can also generate an NR interferer or CW interferer through a second RF path [34]. In transmitter intermodulation testing, SMW200A is used as the interferer source [27]. |\n| Test setup / execution | The analyzer is the RF measurement receiver connected to the DUT output or emission port. A complete transmitter test setup uses an R&S FSW spectrum analyzer to execute measurements [27], and receiver spurious emissions test case 7.6 needs a signal and spectrum analyzer such as R&S FSW [33][34]. |\n| Validation measurement | The analyzer produces the measured evidence for pass/fail-style validation metrics. The covered transmitter measurements include output power, frequency error, modulation quality/EVM, time alignment error, occupied bandwidth, ACLR, SEM/OBUE, spurious emissions, and transmitter intermodulation [29]. 5G NR mode is used for output power, frequency error, modulation quality, TAE, transmit ON/OFF power, ACLR, and SEM, while spectrum mode is used for OBW and transmitter spurious emissions [31]. |\n| Automation / debug loop | These instruments can be remotely controlled as part of automated test execution. R&S SMW200A supports remote control via GPIB, Ethernet/LAN, USB, and RS-232, with SCPI or compatible command sets [7]. R&S instruments in the receiver-test application use SCPI command sequences over GPIB, RS-232, USB, or Ethernet [37]. Python packages and R&S QuickStep can automate 3GPP transmitter and receiver test cases into scripts or test plans [28][40]. |\n【推論】For an RFIC validation use case, the signal generator would normally sit before the DUT as the controlled RF stimulus/interferer source, while the signal analyzer would sit after the DUT as the measurement and evidence-capture instrument; this matches the supported R&S receiver, transmitter, and group-delay examples where SMW200A generates wanted/interfering or multicarrier stimulus and FSW measures DUT outputs or emissions [27][34][42].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "R&S SMW200A › Remote control、connectors 與一般資料\n- Remote control interfaces：IEC 60625 GPIB IEEE-488.2、Ethernet/LAN 10/100/1000BASE-T、USB 3.0 super speed、serial RS-232 via `R&S®TS-USB1`。\n- Remote command set：`SCPI 1999.5 or compatible command sets`。\n- Ethernet/LAN protocols and services：VISA VXI-11、Telnet/RawEthernet、VNC、FTP、SMB。\n- Front panel RF 50 Ω path A connector：3/6/7.5 GHz options 為 N female；12.75/20/31.8/40 GHz options 為 test port adapter PC 2.92 mm female；44 GHz options 為 PC 1.85 mm male with adapter；56/67 GHz options 為 1.85 mm female with wear and tear adapter。\n- Front panel RF 50 Ω path B connector：3/6/7.5 GHz options 為 N female；12.75/20/31.8 GHz options 為 test port adapter PC 2.92 mm female；44 GHz options 為 PC 1.85 mm male with adapter。\n- Rear panel 包含 REF IN/OUT、INST TRG A/B、USER 4/5/6、EFC、LO IN/OUT、IEEE 488、LAN、USB DEVICE、EXT 1/2、DIG I/Q OUT、HS DIG I/Q OUT 等。\n- Rated power when fully equipped：`550 W measured`；with `R&S®SMW-B94L` fully equipped：`750 W measured`。\n- Operating temperature range：`0 °C to +45 °C`；with `R&S®SMW-B1056`、`R&S®SMW-B1067`、`R&S®SMW-B1067N`、`R&S®SMW-B1067O` 為 `+5 °C to +45 °C`。\n- Dimensions：standard `435 mm × 192 mm × 460 mm`；with `R&S®SMW-B94L` 為 `435 mm × 192 mm × 560 mm`。\n- Weight：fully equipped `21 kg`；with `R&S®SMW-B94L` fully equipped `30 kg`。\n- Non-volatile memory：SSD，`512 Gbyte`。\n- Recommended calibration interval：`3 years`，條件 `40 h/week operation in the full range of the specified environmental conditions`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 22,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SMW200A.md"
+             },
+             "score": 3.153957
+            },
+            {
+             "text": "Virtual tester\n[[Virtual tester]] 在 [[AIW_Products_Customer_Questionnaire]] 中被定義為跨 implementation → test → debug → validation 的 agentic workflow，而不是 single tool。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Virtual tester.md"
+             },
+             "score": 1.808086
+            },
+            {
+             "text": "Virtual tester › 來源定義\n[[AIW_Products_Customer_Questionnaire]] 的 short definitions 寫道：\n\n> Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a single tool.\n\n因此本庫把 [[Virtual tester]] 記為工作流 / solution concept，而非單一軟體工具或儀器。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Virtual tester.md"
+             },
+             "score": 1.413754
+            },
+            {
+             "text": "Virtual tester › 可能涵蓋的流程\n依問卷上下文，[[Virtual tester]] 相關需求可能涉及：\n\n- test idea 到 running, [[Validated results]] 的流程理解；\n- test script generation 或 refactoring；\n- ambiguous logs / failure debugging；\n- documentation lookup；\n- end-to-end test execution；\n- toolchain integration：repos、CI/CD、test frameworks、lab equipment interfaces、log / analysis pipelines；\n- [[Orchestration layer]] 對 AI agents 的 rules、instructions、skills coordination。\n\n以上是問卷問題範圍，不是已確認產品功能。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Virtual tester.md"
+             },
+             "score": 0.148919
+            },
+            {
+             "text": "5G NR conducted base station transmitter tests › R&S solution setup\n依 [[GFM313_3e_5G_NR_BaseStation_Tx_Tests]]（01.2021）：\n\n- 完整 Tx test setup 使用 [[R&S FSW]] spectrum analyzer 執行量測。\n- 6.7 transmitter intermodulation 使用 [[R&S SMW200A]] signal generator 作為 interferer。\n- 5G NR measurements 需 5G NR Downlink Measurements software option：R&S FSW-/FSV3-/FSV-/FPS-/VSE-K144。\n- 6.7 interferer 可由 [[R&S SMW200A]] 或 [[R&S SMBV100B]] 搭配 -K144 5G NR software option 產生。\n- [[R&S SMW200A]] 與 [[R&S SMBV100B]] 也可用於示範目的，模擬 5G NR base station；來源明示 vector signal generator 不能模擬所有 base station functions。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR conducted base station transmitter tests.md"
+             },
+             "score": 7.10797
+            },
+            {
+             "text": "5G NR conducted base station transmitter tests › Automation tools\n依 [[GFM313_3e_5G_NR_BaseStation_Tx_Tests]]（01.2021）：\n\n- `GFM313_Tx_tests` Python package 提供 [[3GPP TS 38.141-1]] chapter 6 test cases 的 Python library。\n- Python package 建議使用 Python 3.8、PyCharm IDE、RsInstrument Python module version 1.8.2.45 or higher。\n- Python test case class 可 csv-export measurement results，也可將 connected spectrum analyzer screenshot 儲存為 PNG。\n- [[R&S QuickStep]] 可將 Rohde & Schwarz testmodules 組合成 test plans。\n- QuickStep 的 5G NR BS transmitter tests 位於 `NR_BS_TransmitterTests` block library。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR conducted base station transmitter tests.md"
+             },
+             "score": 4.370018
+            },
+            {
+             "text": "5G NR conducted base station transmitter tests › 涵蓋測項\n依 [[GFM313_3e_5G_NR_BaseStation_Tx_Tests]]（01.2021），[[3GPP TS 38.141-1]] chapter 6 測項如下：\n\n| Test case | 名稱 | 測試重點 |\n|---|---|---|\n| 6.2 | Base station output power | 驗證 maximum carrier output power 準確度。 |\n| 6.3.2 | RE power control dynamic range | RE power 與 average RE power 差值；來源說由 EVM test 提供足夠 coverage。 |\n| 6.3.3 | Total power dynamic range | OFDM symbol maximum transmit power 與 minimum transmit power 差值。 |\n| 6.3.4 | NB-IoT RB power dynamic range | NB-IoT power boosting；與 OBUE / SEM 一起測試。 |\n| 6.4 | Transmit ON/OFF power | TDD operation 的 transmitter OFF period mean power。 |\n| 6.5.2 | Frequency error | actual NR BS transmit frequency 與 assigned frequency 的差值。 |\n| 6.5.3 | Modulation quality | 以 EVM 表示 measured carrier signal 與 reference signal 的差異。 |\n| 6.5.4 | Time alignment error（TAE） | 多個 NR signals 之間最大 timing difference。 |\n| 6.6.2 | Occupied bandwidth（OBW） | 99% power bandwidth；測得 OBW 應小於 nominal bandwidth。 |\n| 6.6.3 | Adjacent channel leakage power ratio（ACLR） | assigned channel power 與 adjacent channel power 的 filtered mean power ratio。 |\n| 6.6.4 | Operating band unwanted emissions（OBUE / SEM） | Operating band unwanted emissions / spectrum emission mask。 |\n| 6.6.5 | Transmitter spurious emissions | 9 kHz 至 12.75 GHz 及部分 band 5th harmonic 上限的 spurious emission 測試。 |\n| 6.7 | Transmitter intermodulation | 需額外 interferer，評估 transmitter 抑制 intermodulation products 的能力。 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR conducted base station transmitter tests.md"
+             },
+             "score": 3.095786
+            },
+            {
+             "text": "5G NR conducted base station transmitter tests › Manual 與 remote-control operation\n來源同時提供 manual testing procedure 與 remote operation / user-defined test software 所需的 [[SCPI]] command sequence。\n\n共通原則：\n\n- 測試前建議按 PRESET，將儀器 reset 至 default state。\n- 某些量測需將 [[R&S FSW]] 透過 external reference 同步至 high precision time reference。\n- Spectrum mode 用於 OBW（6.6.2）與 transmitter spurious emissions（6.6.5）。\n- 5G NR mode 用於 output power、frequency error、modulation quality、TAE、Transmit ON/OFF Power、ACLR 與 SEM。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR conducted base station transmitter tests.md"
+             },
+             "score": 0.556867
+            },
+            {
+             "text": "5G NR conducted base station receiver tests › 適用範圍\n依 [[GFM314_3e_5G_NR_BaseStation_Rx_Tests]]（12.2020）：\n\n- Application Note [[GFM314]] 說明如何依 [[3GPP TS 38.141-1]] Release 15 V15.6.0 chapter 7 執行 mandatory RF receiver tests。\n- 來源僅涵蓋 [[single carrier]]（SC）tests。\n- 來源僅涵蓋 conducted measurements，不涵蓋 OTA 測量。\n- GFM314 以 Rohde & Schwarz signal generators 支援 manual operation 與 remote control approach。\n- 其中 receiver spurious emissions test case 7.6 不需要 signal generator，但需要 signal and spectrum analyzer。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR conducted base station receiver tests.md"
+             },
+             "score": 7.517541
+            },
+            {
+             "text": "5G NR conducted base station receiver tests › Instrument setup\n依 [[GFM314_3e_5G_NR_BaseStation_Rx_Tests]]（12.2020）：\n\n- 一般 receiver test setup 使用 [[R&S SMW200A]]（SMW）執行測試。\n- General Rx test setup 包含 base station DUT、SMW、[[R&S FSW]]、diplexer / notch filter / frequency filter。\n- [[R&S SMW200A]] 產生 NR uplink wanted signal，並可透過第二 RF path 產生 NR interferer 或 CW interferer。\n- 7.6 Receiver Spurious Emissions 使用 signal and spectrum analyzer，例如 [[R&S FSW]]、[[R&S FSV3000]]、[[R&S FSVA3000]]、[[R&S FSV]]、[[R&S FSVA]]、[[R&S FPS]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR conducted base station receiver tests.md"
+             },
+             "score": 4.540441
+            },
+            {
+             "text": "5G NR conducted base station receiver tests › SCPI remote control\n依 [[GFM314_3e_5G_NR_BaseStation_Rx_Tests]]（12.2020）：\n\n- Rohde & Schwarz instruments 使用 [[SCPI]] command sequences 進行 remote control operations。\n- SCPI command 是 ASCII textual strings，可透過 GPIB、RS-232、USB、Ethernet 傳送。\n- Rohde & Schwarz 使用的 SCPI format 稱為 canonical form。\n- 來源列出各 test case 的 TCW SCPI command，例如 `TS381411_TC72`、`TS381411_TC73`、`TS381411_TC741`、`TS381411_TC742A`、`TS381411_TC742B`、`TS381411_TC75`、`TS381411_TC77`、`TS381411_TC78`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR conducted base station receiver tests.md"
+             },
+             "score": 1.814599
+            },
+            {
+             "text": "5G NR conducted base station receiver tests › Automation\n依 [[GFM314_3e_5G_NR_BaseStation_Rx_Tests]]（12.2020）：\n\n- [[GFM314_Rx_tests Python package]] 提供 [[3GPP TS 38.141-1]] chapter 7 test cases 的 Python classes。\n- [[R&S QuickStep]] 可將 Rohde & Schwarz 提供的 testmodules 組合成 test plans。\n- Python package 與 QuickStep package 皆以 royalty free software terms / package download terms 提供；使用前需確認原始下載頁與授權條款。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR conducted base station receiver tests.md"
+             },
+             "score": 0.607167
+            },
+            {
+             "text": "衛星酬載群延遲量測 › 測量原理\n- [[R&S SMW200A]] 產生 multi-carrier continuous wave signal 作為 stimulus。\n- Multi-carrier stimulus 的 tones 數量與 spacing / aperture 可依 DUT 需求調整。\n- [[R&S FSW]] 的 group delay measurement 分兩步：\n  - Reference calibration：generator 直接連接 analyzer，analyzer 判定 individual carriers 的 reference phase 與 amplitude。\n  - Group delay and gain measurement：連接 DUT，analyzer 由 reference signal 與 DUT output multicarrier signal 的 phase difference 判定 carrier frequency range 的 group delay。\n- 來源列出使用 [[R&S SMW-K61]] 與 [[R&S FSW-K17]] multicarrier group delay measurement application。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+             },
+             "score": 3.582052
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/entities/R&S SMW200A.md",
+             "raw_refs": [
+              "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+              "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Virtual tester.md",
+             "raw_refs": [
+              "raw/Productions/AIW_Products_Customer_Questionnaire.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/5G NR conducted base station transmitter tests.md",
+             "raw_refs": [
+              "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/5G NR conducted base station receiver tests.md",
+             "raw_refs": [
+              "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+              "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md",
+             "raw_refs": [
+              "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

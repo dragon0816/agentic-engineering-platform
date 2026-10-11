@@ -1,0 +1,68 @@
+{
+ "id": "Q0871",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 74.563,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 33,
+   "kind": "wiki",
+   "ref": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 35,
+   "kind": "wiki",
+   "ref": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 30,
+   "kind": "wiki",
+   "ref": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 29,
+   "kind": "wiki",
+   "ref": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "取樣率或 noise floor",
+   "示波器至少要能支援 interface test 並解析 15 ± 1.5 mV eye height 與 9.375 ± 0.5 ps eye width"
+  ],
+  "reason": "The answer’s main chain is backed by the passages: high-speed SerDes/PCIe context, PCIe Gen5 32 GT/s and loss/crosstalk concerns, eye-opening requirements, and scopes listed under interface test. It reasonably notes that the cited knowledge does not provide full oscilloscope specifications, though the wording about sampling rate/noise floor and the oscilloscope needing to “resolve” the eye numbers is an inference rather than directly stated.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

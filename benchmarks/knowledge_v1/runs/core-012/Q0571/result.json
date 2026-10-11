@@ -1,0 +1,101 @@
+{
+ "id": "Q0571",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 44.86,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 37,
+   "kind": "wiki",
+   "ref": "wiki/concepts/High speed SerDes eco-chain.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 17,
+   "kind": "wiki",
+   "ref": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 66,
+   "kind": "wiki",
+   "ref": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 55,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S ZNA.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 11,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S ZNA67.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 52,
+   "kind": "wiki",
+   "ref": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 8,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S ZNA.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 45,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 65,
+   "kind": "wiki",
+   "ref": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": true,
+  "overreach": [
+   "R&S ZNA software / measurement options 包含 ... R&S ZNA-K210 EaZy deembedding、R&S ZNA-K220 in-situ deembedding、R&S ZNA-K230 smart fixture deembedding、R&S ZNA-K231 Delta-L PCB characterization",
+   "VNA 需具備 ... deembedding、Delta-L PCB characterization 等功能",
+   "Performance capability relevant to loss / weak-signal measurement"
+  ],
+  "reason": "The automotive high-speed requirement, PCB/SI measurable items, ZNA frequency/specification data, and the caveat about lack of a complete formal PCB solution are supported. However, the cited passages shown do not support several specific ZNA deembedding/Delta-L option claims, and the answer infers required VNA capabilities from adjacent evidence rather than citing a direct automotive-to-VNA requirement chain.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The automotive high-speed requirement, PCB/SI measurable items, ZNA frequency/specification data, and the caveat about lack of a complete formal PCB solution are supported. However, the cited passages shown do not support several specific ZNA deembedding/Delta-L option claims, and the answer infers "
+}

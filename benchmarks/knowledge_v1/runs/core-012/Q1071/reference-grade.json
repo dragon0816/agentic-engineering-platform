@@ -1,0 +1,67 @@
+{
+ "id": "Q1071",
+ "grader": "1.2",
+ "coverage": 0.375,
+ "points": [
+  {
+   "n": 1,
+   "point": "A measurement method in the Vault is a defined procedure for obtaining a metric; GFM324 lists multiple TRP measurement procedures that are either accurate or a controlled overestimate.",
+   "verified": true,
+   "label": "partial",
+   "why": "defines it as a specified way to evaluate a quantity and lists TRP grids/procedures, but does not state accurate vs controlled-overestimate classification"
+  },
+  {
+   "n": 2,
+   "point": "The choice of measurement procedure depends on the available test setup, measurement equipment and measurement time.",
+   "verified": true,
+   "label": "covered",
+   "why": "explicitly says procedure selection depends on setup, equipment, and time"
+  },
+  {
+   "n": 3,
+   "point": "Which OTA antenna test solution (test system / chamber) can be used is method- and test-case-dependent — not every solution covers every conformance test.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions different systems/scopes, but not the key warning that not every OTA solution covers every conformance test"
+  },
+  {
+   "n": 4,
+   "point": "The metric prescribed by the method is explicit in test procedures, e.g. OTA emission measurement must use TRP with True RMS detection.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions TRP/EIRP as prescribed quantities, but not the specific OTA emission TRP with True RMS detection example"
+  },
+  {
+   "n": 5,
+   "point": "Instrument and option selection plus pre-test calibration (K544, attenuation/antenna-gain tables for cable, antenna and OTA losses) are part of the measurement-method decision.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions instrument choices, but omits K544 calibration and attenuation/antenna-gain tables for cable, antenna, and OTA losses"
+  },
+  {
+   "n": 6,
+   "point": "EEIRP is an example of a spatially defined measurement method/metric: the average of EIRP measurements over an upper hemisphere with elevation-specific limits.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention EEIRP or upper-hemisphere averaging with elevation-specific limits"
+  },
+  {
+   "n": 7,
+   "point": "The Vault treats a missing measurement method as a reason a product/performance claim cannot be validated or compared.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not say missing methods make performance claims unverifiable or non-comparable"
+  },
+  {
+   "n": 8,
+   "point": "Option-level product questions are explicitly deferred to official documents when the measurement method is unknown (e.g. CMX-KA401 latency measurement method).",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention deferral to official documents for unknown option-level methods such as CMX-KA401 latency"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "ETSI limits include -10 dBm / 100 MHz with smaller resolution bandwidth plus integration over measurement bandwidth allowed"
+ ]
+}

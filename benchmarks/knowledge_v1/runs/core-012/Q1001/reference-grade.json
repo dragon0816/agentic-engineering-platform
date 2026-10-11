@@ -1,0 +1,70 @@
+{
+ "id": "Q1001",
+ "grader": "1.2",
+ "coverage": 0.375,
+ "points": [
+  {
+   "n": 1,
+   "point": "EVM stands for Error Vector Magnitude and is defined as a measurement of the difference between the reference waveform and the measured waveform (3GPP TS 38.521-1 test case 6.4.2.1).",
+   "verified": true,
+   "label": "covered",
+   "why": "Expands EVM and gives reference vs measured waveform definition"
+  },
+  {
+   "n": 2,
+   "point": "The EVM pass/fail limit depends on the chosen modulation scheme plus a Test Tolerance, so modulation/Test-ID selection directly changes the applicable limit (Pi/2-BPSK 30+TT%, QPSK 17.5+TT%, 16QAM 12.5+TT%, 64QAM 8+TT%, 256QAM 3.5+TT%).",
+   "verified": true,
+   "label": "partial",
+   "why": "Says limit depends on modulation and tolerance, but omits numeric limits"
+  },
+  {
+   "n": 3,
+   "point": "EVM must be measured at both DUT max power and min power; CMX sets max power automatically first, then the DUT is driven to min power with TPC closed-loop settings (and 256QAM Test IDs target Pmin + 10 dB).",
+   "verified": true,
+   "label": "partial",
+   "why": "Mentions max/min points and 256QAM Pmin+10 dB, but not CMX max-first/TPC closed-loop process"
+  },
+  {
+   "n": 4,
+   "point": "An EVM measurement is only valid if the zero-forcing equalizer correction applied in the EVM measurement process meets the spectral flatness requirement (test cases 6.4.2.4 / 6.4.2.5).",
+   "verified": true,
+   "label": "missing",
+   "why": "No zero-forcing equalizer or spectral-flatness validity condition"
+  },
+  {
+   "n": 5,
+   "point": "Instrument option selection depends on EVM specs stated only under fixed conditions — e.g. the CMX500 R&S CMX-KM600 NR analyzer is EVM < 0.5 % only for FR1, SCS 30 kHz, 16QAM, +15 °C to +35 °C and a defined input level/bandwidth.",
+   "verified": true,
+   "label": "partial",
+   "why": "Mentions option planning, but not EVM <0.5% under specified CMX500 conditions"
+  },
+  {
+   "n": 6,
+   "point": "FR2 level-setting decisions are expressed as level ranges for best EVM on the R&S CMX-RF42E active RF frontend (TX/downlink and RX/uplink, per amplification setting).",
+   "verified": true,
+   "label": "missing",
+   "why": "No CMX-RF42E best-EVM level ranges"
+  },
+  {
+   "n": 7,
+   "point": "EVM with an external local oscillator on CMXHEAD50/HEAD50-Evo requires an R&S SMA100B with an ultra-low-phase-noise option, and the Vault flags an unresolved option-code discrepancy (SMA-B711 vs SMAB-B711) to verify before configuring or quoting.",
+   "verified": true,
+   "label": "missing",
+   "why": "No SMA100B ultra-low-phase-noise option or option-code discrepancy"
+  },
+  {
+   "n": 8,
+   "point": "EVM is also a scoping item in product test plans and OTA/production setups: FWA CPE RF-parametric plans list EVM alongside output power, OBW and sensitivity BLER, and ATS1800C is described as supporting ACLR/EVM/EiRP/TRP/EiS measurements.",
+   "verified": true,
+   "label": "partial",
+   "why": "Mentions production EVM, but omits FWA CPE RF-parametric list and ATS1800C support"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "For base-station modulation quality, EVM is the difference between equalized ideal symbols and measured symbols",
+  "For conducted BS testing, EVM is used for modulation quality test case 6.5.3",
+  "OTA modulation quality is classified as EVM and directional",
+  "The FR2 OTA metric overview lists 6.4.2.2 EVM at TX-BP"
+ ]
+}

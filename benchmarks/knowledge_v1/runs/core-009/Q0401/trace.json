@@ -1,0 +1,1353 @@
+{
+ "question": {
+  "id": "Q0401",
+  "text": "What are the most important signaling test capabilities for applications in Automotive?",
+  "market": "Automotive",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "basic",
+  "difficulty": "L1"
+ },
+ "session_id": "conversation-7d788721af2541c49dab5a57a5ceb146",
+ "exchange": {
+  "sent": "What are the most important signaling test capabilities for applications in Automotive?",
+  "http_status": 200,
+  "seconds": 168.657,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-7d788721af2541c49dab5a57a5ceb146",
+    "actor": "leo.chi",
+    "title": "What are the most important signaling test capabilities for applications…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T18:52:38.213682Z",
+    "updated_at": "2026-10-11T18:55:26.784657Z",
+    "messages": [
+     {
+      "message_id": "message-8fd85ef205eb4e2783ebe00d7b4eb60d",
+      "role": "user",
+      "text": "What are the most important signaling test capabilities for applications in Automotive?",
+      "created_at": "2026-10-11T18:52:38.224041Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-898feca900434c51a4d3166c8796f94c",
+      "role": "assistant",
+      "text": "【推論】The best-supported automotive priority is NG eCall over IMS/4G/5G, because the passages directly connect Snapdragon Auto, EN 17240:2024 NG eCall verification, PSAP simulation, and R&S CMX500 with CMX-KA098 under realistic network conditions [35].\nNG eCall testing is directly automotive-relevant because R&S and Qualcomm verified a Next Generation eCall implementation on the Snapdragon Auto 5G Modem-RF using the R&S CMX500 mobile radio tester [35].\nEN 17240:2024 is described as guidelines for testing eCall systems on IMS networks with 4G LTE and 5G NR technologies [35].\nR&S CMX500 is described as a comprehensive testing solution for NG eCall voice and data transmission [35].\nThe NG eCall verification simulated a PSAP and verified implementation at both ends against EN 17240:2024 [35].\nR&S CMX500 with the CMX-KA098 software option can be used for NG eCall testing under realistic network conditions [35].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KA098 as mandatory for 4G/5G NG eCall 17240:2024 [56].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KA110 as mandatory for IMS tests from EN 17240:2024 [56].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KA401 as mandatory for TS17240 In-Band Modem over IP tests [56].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KF671B as mandatory for 4G/5G NG eCall 17240:2024 end-to-end test scripts [56].\n【推論】Hybrid eCall fallback signaling is also a key automotive focus, because the passages describe vehicle emergency call reliability across NG eCall, classic CS eCall, fallback, degraded radio conditions, handovers, VoNR, and VoLTE [50][53][54].\nHybrid eCall testing verifies that a vehicle emergency call system can operate reliably between NG eCall and classic CS eCall transport paths [54].\nEN 18052 requires hybrid systems to combine different transmission paths and protocols so that eCall reliably reaches its destination [50].\nManufacturers need to validate call triggering, MSD transmission, GNSS positioning maintenance, and intelligible voice quality [50].\nHybrid eCall scenarios include VoNR, VoLTE, circuit-switched fallback, handovers, degraded radio conditions, real-world mobile network condition simulation, and various network scenario emulation [53].\nThe CMX500 hybrid minimum configuration includes CMX-KS600B as mandatory LTE/NR signaling enabler Rel.15 basic level [55].\nThe CMX500 hybrid minimum configuration includes CMX-KA098 as mandatory enabling test software for 4G/5G NGeCall [55].\nThe CMX500 hybrid minimum configuration includes CMX-KA099 as mandatory APPL NGECALL MULTI CELL [55].\nThe CMX500 hybrid minimum configuration includes CMX-KF672B as mandatory NGECALL TC EN18052 [55].\nImportant NGeCall signaling test topics include IVS manual eCall, automatic eCall, and test eCall initiation [60].\nImportant NGeCall signaling test topics include IMS eCall session establishment for automatic, manual, and test eCall service URNs [60].\nImportant NGeCall signaling test topics include MSD transfer, MSD update, PSAP request, negative acknowledgement, and missing acknowledgement scenarios [60].\nImportant NGeCall signaling test topics include valid SIM/USIM, forbidden PLMN, limited service condition, and roaming scenarios [60].\nImportant NGeCall signaling test topics include PSAP initiated callback, call clear-down, and IVS initiated clear-down not allowed [60].\nImportant NGeCall signaling test topics include voice link establishment and audio interface verification [60].\nImportant NGeCall signaling test topics include eCall only mode, T3444/T3445, and SRVCC handover to CS domain, UTRAN, or GERAN [60].\nCMX500 NGeCall sources add 5GS/NR-related 3GPP TS 34.229-5 and 3GPP TS 38.523-1 test contexts [60].\nCMX500 NGeCall sources add CEN EN 17240:2024 IPv4/IPv6 MSD transfer, MSD version 3, and additional data from Euro NCAP TB 040:2022 [60].\nAutomotive is listed as an application context for Virtual Signalling Tester post-silicon testing [25].\nVirtual Signalling Tester post-silicon testing supports basic protocol tests for IoT devices and communication modules [25].\nVirtual Signalling Tester post-silicon testing supports fast functional tests, regression tests, sample scenario parameterization, test procedures, and report/log display [25].\nVirtual Signalling Tester is a PC-based software protocol simulator for creating an NR/RedCap protocol test environment [26].\nVirtual Signalling Tester reproduces RRC-NAS, PDCP, RLC, and MAC protocol layers on a PC [28].\n【推論】For broader automotive connectivity beyond eCall, the supported signaling building blocks are LTE/NR, RedCap/eRedCap, NTN, and WLAN, but the passages do not directly tie each of these general CMX500 options to automotive use [1][47][48].\nR&S CMX500 supports LTE, NR FR1, NR FR2, NSA, SA, FDD, and TDD device testing [1].\nR&S CMX500 supports NR FR1/FR2 signaling and LTE signaling [1].\nThe NR signaling enabler CMX-KS600B/M/X includes 5G NR SA option 2, NSA option 3, DL 2x2 and 4x4 MIMO, one CC, and UL 256QAM [47].\nThe NR signaling extension CMX-KS610B/M/X includes UL 2x2 MIMO and carrier aggregation up to 9 CC [47].\nThe NR signaling extension CMX-KS612B/M/X provides carrier aggregation from 10 to 12 CC [47].\nRedCap is supported by CMX-KS617B/M/X, and eRedCap is supported by CMX-KS618B/X [47].\nNTN signaling extensions are supported by CMX-KS627B/M/X, CMX-KS628B/X, and CMX-KS629B/X [47].\nNB-NTN signaling Rel.17 is supported by CMX-KS527B/X [47].\nWLAN signaling supports 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn, AP testing, station testing, single-user 2x2 MIMO, and advanced encryption and authentication [48].\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[25] Wiki：Virtual Signalling Tester（來源：`AIW_Products_Customer_Questionnaire.md`、`mx844030pc-j1200.md`）\n[26] Wiki：Virtual Signalling Tester（來源：`AIW_Products_Customer_Questionnaire.md`、`mx844030pc-j1200.md`）\n[28] Wiki：Virtual Signalling Tester（來源：`AIW_Products_Customer_Questionnaire.md`、`mx844030pc-j1200.md`）\n[35] Wiki：Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[47] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[48] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[50] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[53] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[54] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[55] Wiki：CMX500 NGeCall configuration（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX_Configuration_Guide.md`）\n[56] Wiki：CMX500 NGeCall configuration（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX_Configuration_Guide.md`）\n[60] Wiki：NGeCall over LTE（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`）",
+      "created_at": "2026-10-11T18:55:26.784657Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-9fe2b5bcfeb24d7aa62b81955ff48c34",
+       "request_id": "request-9fe2b5bcfeb24d7aa62b81955ff48c34",
+       "span_id": "span-9fe2b5bcfeb24d7aa62b81955ff48c34",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "【推論】The best-supported automotive priority is NG eCall over IMS/4G/5G, because the passages directly connect Snapdragon Auto, EN 17240:2024 NG eCall verification, PSAP simulation, and R&S CMX500 with CMX-KA098 under realistic network conditions [35].\nNG eCall testing is directly automotive-relevant because R&S and Qualcomm verified a Next Generation eCall implementation on the Snapdragon Auto 5G Modem-RF using the R&S CMX500 mobile radio tester [35].\nEN 17240:2024 is described as guidelines for testing eCall systems on IMS networks with 4G LTE and 5G NR technologies [35].\nR&S CMX500 is described as a comprehensive testing solution for NG eCall voice and data transmission [35].\nThe NG eCall verification simulated a PSAP and verified implementation at both ends against EN 17240:2024 [35].\nR&S CMX500 with the CMX-KA098 software option can be used for NG eCall testing under realistic network conditions [35].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KA098 as mandatory for 4G/5G NG eCall 17240:2024 [56].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KA110 as mandatory for IMS tests from EN 17240:2024 [56].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KA401 as mandatory for TS17240 In-Band Modem over IP tests [56].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KF671B as mandatory for 4G/5G NG eCall 17240:2024 end-to-end test scripts [56].\n【推論】Hybrid eCall fallback signaling is also a key automotive focus, because the passages describe vehicle emergency call reliability across NG eCall, classic CS eCall, fallback, degraded radio conditions, handovers, VoNR, and VoLTE [50][53][54].\nHybrid eCall testing verifies that a vehicle emergency call system can operate reliably between NG eCall and classic CS eCall transport paths [54].\nEN 18052 requires hybrid systems to combine different transmission paths and protocols so that eCall reliably reaches its destination [50].\nManufacturers need to validate call triggering, MSD transmission, GNSS positioning maintenance, and intelligible voice quality [50].\nHybrid eCall scenarios include VoNR, VoLTE, circuit-switched fallback, handovers, degraded radio conditions, real-world mobile network condition simulation, and various network scenario emulation [53].\nThe CMX500 hybrid minimum configuration includes CMX-KS600B as mandatory LTE/NR signaling enabler Rel.15 basic level [55].\nThe CMX500 hybrid minimum configuration includes CMX-KA098 as mandatory enabling test software for 4G/5G NGeCall [55].\nThe CMX500 hybrid minimum configuration includes CMX-KA099 as mandatory APPL NGECALL MULTI CELL [55].\nThe CMX500 hybrid minimum configuration includes CMX-KF672B as mandatory NGECALL TC EN18052 [55].\nImportant NGeCall signaling test topics include IVS manual eCall, automatic eCall, and test eCall initiation [60].\nImportant NGeCall signaling test topics include IMS eCall session establishment for automatic, manual, and test eCall service URNs [60].\nImportant NGeCall signaling test topics include MSD transfer, MSD update, PSAP request, negative acknowledgement, and missing acknowledgement scenarios [60].\nImportant NGeCall signaling test topics include valid SIM/USIM, forbidden PLMN, limited service condition, and roaming scenarios [60].\nImportant NGeCall signaling test topics include PSAP initiated callback, call clear-down, and IVS initiated clear-down not allowed [60].\nImportant NGeCall signaling test topics include voice link establishment and audio interface verification [60].\nImportant NGeCall signaling test topics include eCall only mode, T3444/T3445, and SRVCC handover to CS domain, UTRAN, or GERAN [60].\nCMX500 NGeCall sources add 5GS/NR-related 3GPP TS 34.229-5 and 3GPP TS 38.523-1 test contexts [60].\nCMX500 NGeCall sources add CEN EN 17240:2024 IPv4/IPv6 MSD transfer, MSD version 3, and additional data from Euro NCAP TB 040:2022 [60].\nAutomotive is listed as an application context for Virtual Signalling Tester post-silicon testing [25].\nVirtual Signalling Tester post-silicon testing supports basic protocol tests for IoT devices and communication modules [25].\nVirtual Signalling Tester post-silicon testing supports fast functional tests, regression tests, sample scenario parameterization, test procedures, and report/log display [25].\nVirtual Signalling Tester is a PC-based software protocol simulator for creating an NR/RedCap protocol test environment [26].\nVirtual Signalling Tester reproduces RRC-NAS, PDCP, RLC, and MAC protocol layers on a PC [28].\n【推論】For broader automotive connectivity beyond eCall, the supported signaling building blocks are LTE/NR, RedCap/eRedCap, NTN, and WLAN, but the passages do not directly tie each of these general CMX500 options to automotive use [1][47][48].\nR&S CMX500 supports LTE, NR FR1, NR FR2, NSA, SA, FDD, and TDD device testing [1].\nR&S CMX500 supports NR FR1/FR2 signaling and LTE signaling [1].\nThe NR signaling enabler CMX-KS600B/M/X includes 5G NR SA option 2, NSA option 3, DL 2x2 and 4x4 MIMO, one CC, and UL 256QAM [47].\nThe NR signaling extension CMX-KS610B/M/X includes UL 2x2 MIMO and carrier aggregation up to 9 CC [47].\nThe NR signaling extension CMX-KS612B/M/X provides carrier aggregation from 10 to 12 CC [47].\nRedCap is supported by CMX-KS617B/M/X, and eRedCap is supported by CMX-KS618B/X [47].\nNTN signaling extensions are supported by CMX-KS627B/M/X, CMX-KS628B/X, and CMX-KS629B/X [47].\nNB-NTN signaling Rel.17 is supported by CMX-KS527B/X [47].\nWLAN signaling supports 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn, AP testing, station testing, single-user 2x2 MIMO, and advanced encryption and authentication [48].\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[25] Wiki：Virtual Signalling Tester（來源：`AIW_Products_Customer_Questionnaire.md`、`mx844030pc-j1200.md`）\n[26] Wiki：Virtual Signalling Tester（來源：`AIW_Products_Customer_Questionnaire.md`、`mx844030pc-j1200.md`）\n[28] Wiki：Virtual Signalling Tester（來源：`AIW_Products_Customer_Questionnaire.md`、`mx844030pc-j1200.md`）\n[35] Wiki：Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[47] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[48] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[50] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[53] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[54] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[55] Wiki：CMX500 NGeCall configuration（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX_Configuration_Guide.md`）\n[56] Wiki：CMX500 NGeCall configuration（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX_Configuration_Guide.md`）\n[60] Wiki：NGeCall over LTE（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-9fe2b5bcfeb24d7aa62b81955ff48c34",
+      "request_id": "request-9fe2b5bcfeb24d7aa62b81955ff48c34",
+      "span_id": "span-9fe2b5bcfeb24d7aa62b81955ff48c34",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-9fe2b5bcfeb24d7aa62b81955ff48c34",
+       "request_id": "request-9fe2b5bcfeb24d7aa62b81955ff48c34",
+       "span_id": "span-9fe2b5bcfeb24d7aa62b81955ff48c34",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "【推論】The best-supported automotive priority is NG eCall over IMS/4G/5G, because the passages directly connect Snapdragon Auto, EN 17240:2024 NG eCall verification, PSAP simulation, and R&S CMX500 with CMX-KA098 under realistic network conditions [35].\nNG eCall testing is directly automotive-relevant because R&S and Qualcomm verified a Next Generation eCall implementation on the Snapdragon Auto 5G Modem-RF using the R&S CMX500 mobile radio tester [35].\nEN 17240:2024 is described as guidelines for testing eCall systems on IMS networks with 4G LTE and 5G NR technologies [35].\nR&S CMX500 is described as a comprehensive testing solution for NG eCall voice and data transmission [35].\nThe NG eCall verification simulated a PSAP and verified implementation at both ends against EN 17240:2024 [35].\nR&S CMX500 with the CMX-KA098 software option can be used for NG eCall testing under realistic network conditions [35].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KA098 as mandatory for 4G/5G NG eCall 17240:2024 [56].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KA110 as mandatory for IMS tests from EN 17240:2024 [56].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KA401 as mandatory for TS17240 In-Band Modem over IP tests [56].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KF671B as mandatory for 4G/5G NG eCall 17240:2024 end-to-end test scripts [56].\n【推論】Hybrid eCall fallback signaling is also a key automotive focus, because the passages describe vehicle emergency call reliability across NG eCall, classic CS eCall, fallback, degraded radio conditions, handovers, VoNR, and VoLTE [50][53][54].\nHybrid eCall testing verifies that a vehicle emergency call system can operate reliably between NG eCall and classic CS eCall transport paths [54].\nEN 18052 requires hybrid systems to combine different transmission paths and protocols so that eCall reliably reaches its destination [50].\nManufacturers need to validate call triggering, MSD transmission, GNSS positioning maintenance, and intelligible voice quality [50].\nHybrid eCall scenarios include VoNR, VoLTE, circuit-switched fallback, handovers, degraded radio conditions, real-world mobile network condition simulation, and various network scenario emulation [53].\nThe CMX500 hybrid minimum configuration includes CMX-KS600B as mandatory LTE/NR signaling enabler Rel.15 basic level [55].\nThe CMX500 hybrid minimum configuration includes CMX-KA098 as mandatory enabling test software for 4G/5G NGeCall [55].\nThe CMX500 hybrid minimum configuration includes CMX-KA099 as mandatory APPL NGECALL MULTI CELL [55].\nThe CMX500 hybrid minimum configuration includes CMX-KF672B as mandatory NGECALL TC EN18052 [55].\nImportant NGeCall signaling test topics include IVS manual eCall, automatic eCall, and test eCall initiation [60].\nImportant NGeCall signaling test topics include IMS eCall session establishment for automatic, manual, and test eCall service URNs [60].\nImportant NGeCall signaling test topics include MSD transfer, MSD update, PSAP request, negative acknowledgement, and missing acknowledgement scenarios [60].\nImportant NGeCall signaling test topics include valid SIM/USIM, forbidden PLMN, limited service condition, and roaming scenarios [60].\nImportant NGeCall signaling test topics include PSAP initiated callback, call clear-down, and IVS initiated clear-down not allowed [60].\nImportant NGeCall signaling test topics include voice link establishment and audio interface verification [60].\nImportant NGeCall signaling test topics include eCall only mode, T3444/T3445, and SRVCC handover to CS domain, UTRAN, or GERAN [60].\nCMX500 NGeCall sources add 5GS/NR-related 3GPP TS 34.229-5 and 3GPP TS 38.523-1 test contexts [60].\nCMX500 NGeCall sources add CEN EN 17240:2024 IPv4/IPv6 MSD transfer, MSD version 3, and additional data from Euro NCAP TB 040:2022 [60].\nAutomotive is listed as an application context for Virtual Signalling Tester post-silicon testing [25].\nVirtual Signalling Tester post-silicon testing supports basic protocol tests for IoT devices and communication modules [25].\nVirtual Signalling Tester post-silicon testing supports fast functional tests, regression tests, sample scenario parameterization, test procedures, and report/log display [25].\nVirtual Signalling Tester is a PC-based software protocol simulator for creating an NR/RedCap protocol test environment [26].\nVirtual Signalling Tester reproduces RRC-NAS, PDCP, RLC, and MAC protocol layers on a PC [28].\n【推論】For broader automotive connectivity beyond eCall, the supported signaling building blocks are LTE/NR, RedCap/eRedCap, NTN, and WLAN, but the passages do not directly tie each of these general CMX500 options to automotive use [1][47][48].\nR&S CMX500 supports LTE, NR FR1, NR FR2, NSA, SA, FDD, and TDD device testing [1].\nR&S CMX500 supports NR FR1/FR2 signaling and LTE signaling [1].\nThe NR signaling enabler CMX-KS600B/M/X includes 5G NR SA option 2, NSA option 3, DL 2x2 and 4x4 MIMO, one CC, and UL 256QAM [47].\nThe NR signaling extension CMX-KS610B/M/X includes UL 2x2 MIMO and carrier aggregation up to 9 CC [47].\nThe NR signaling extension CMX-KS612B/M/X provides carrier aggregation from 10 to 12 CC [47].\nRedCap is supported by CMX-KS617B/M/X, and eRedCap is supported by CMX-KS618B/X [47].\nNTN signaling extensions are supported by CMX-KS627B/M/X, CMX-KS628B/X, and CMX-KS629B/X [47].\nNB-NTN signaling Rel.17 is supported by CMX-KS527B/X [47].\nWLAN signaling supports 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn, AP testing, station testing, single-user 2x2 MIMO, and advanced encryption and authentication [48].\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[25] Wiki：Virtual Signalling Tester（來源：`AIW_Products_Customer_Questionnaire.md`、`mx844030pc-j1200.md`）\n[26] Wiki：Virtual Signalling Tester（來源：`AIW_Products_Customer_Questionnaire.md`、`mx844030pc-j1200.md`）\n[28] Wiki：Virtual Signalling Tester（來源：`AIW_Products_Customer_Questionnaire.md`、`mx844030pc-j1200.md`）\n[35] Wiki：Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[47] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[48] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[50] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[53] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[54] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[55] Wiki：CMX500 NGeCall configuration（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX_Configuration_Guide.md`）\n[56] Wiki：CMX500 NGeCall configuration（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX_Configuration_Guide.md`）\n[60] Wiki：NGeCall over LTE（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_V7slBAjVlvetuuqWdD6LBfSR",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "【推論】The best-supported automotive priority is NG eCall over IMS/4G/5G, because the passages directly connect Snapdragon Auto, EN 17240:2024 NG eCall verification, PSAP simulation, and R&S CMX500 with CMX-KA098 under realistic network conditions [35].\nNG eCall testing is directly automotive-relevant because R&S and Qualcomm verified a Next Generation eCall implementation on the Snapdragon Auto 5G Modem-RF using the R&S CMX500 mobile radio tester [35].\nEN 17240:2024 is described as guidelines for testing eCall systems on IMS networks with 4G LTE and 5G NR technologies [35].\nR&S CMX500 is described as a comprehensive testing solution for NG eCall voice and data transmission [35].\nThe NG eCall verification simulated a PSAP and verified implementation at both ends against EN 17240:2024 [35].\nR&S CMX500 with the CMX-KA098 software option can be used for NG eCall testing under realistic network conditions [35].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KA098 as mandatory for 4G/5G NG eCall 17240:2024 [56].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KA110 as mandatory for IMS tests from EN 17240:2024 [56].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KA401 as mandatory for TS17240 In-Band Modem over IP tests [56].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KF671B as mandatory for 4G/5G NG eCall 17240:2024 end-to-end test scripts [56].\n【推論】Hybrid eCall fallback signaling is also a key automotive focus, because the passages describe vehicle emergency call reliability across NG eCall, classic CS eCall, fallback, degraded radio conditions, handovers, VoNR, and VoLTE [50][53][54].\nHybrid eCall testing verifies that a vehicle emergency call system can operate reliably between NG eCall and classic CS eCall transport paths [54].\nEN 18052 requires hybrid systems to combine different transmission paths and protocols so that eCall reliably reaches its destination [50].\nManufacturers need to validate call triggering, MSD transmission, GNSS positioning maintenance, and intelligible voice quality [50].\nHybrid eCall scenarios include VoNR, VoLTE, circuit-switched fallback, handovers, degraded radio conditions, real-world mobile network condition simulation, and various network scenario emulation [53].\nThe CMX500 hybrid minimum configuration includes CMX-KS600B as mandatory LTE/NR signaling enabler Rel.15 basic level [55].\nThe CMX500 hybrid minimum configuration includes CMX-KA098 as mandatory enabling test software for 4G/5G NGeCall [55].\nThe CMX500 hybrid minimum configuration includes CMX-KA099 as mandatory APPL NGECALL MULTI CELL [55].\nThe CMX500 hybrid minimum configuration includes CMX-KF672B as mandatory NGECALL TC EN18052 [55].\nImportant NGeCall signaling test topics include IVS manual eCall, automatic eCall, and test eCall initiation [60].\nImportant NGeCall signaling test topics include IMS eCall session establishment for automatic, manual, and test eCall service URNs [60].\nImportant NGeCall signaling test topics include MSD transfer, MSD update, PSAP request, negative acknowledgement, and missing acknowledgement scenarios [60].\nImportant NGeCall signaling test topics include valid SIM/USIM, forbidden PLMN, limited service condition, and roaming scenarios [60].\nImportant NGeCall signaling test topics include PSAP initiated callback, call clear-down, and IVS initiated clear-down not allowed [60].\nImportant NGeCall signaling test topics include voice link establishment and audio interface verification [60].\nImportant NGeCall signaling test topics include eCall only mode, T3444/T3445, and SRVCC handover to CS domain, UTRAN, or GERAN [60].\nCMX500 NGeCall sources add 5GS/NR-related 3GPP TS 34.229-5 and 3GPP TS 38.523-1 test contexts [60].\nCMX500 NGeCall sources add CEN EN 17240:2024 IPv4/IPv6 MSD transfer, MSD version 3, and additional data from Euro NCAP TB 040:2022 [60].\nAutomotive is listed as an application context for Virtual Signalling Tester post-silicon testing [25].\nVirtual Signalling Tester post-silicon testing supports basic protocol tests for IoT devices and communication modules [25].\nVirtual Signalling Tester post-silicon testing supports fast functional tests, regression tests, sample scenario parameterization, test procedures, and report/log display [25].\nVirtual Signalling Tester is a PC-based software protocol simulator for creating an NR/RedCap protocol test environment [26].\nVirtual Signalling Tester reproduces RRC-NAS, PDCP, RLC, and MAC protocol layers on a PC [28].\n【推論】For broader automotive connectivity beyond eCall, the supported signaling building blocks are LTE/NR, RedCap/eRedCap, NTN, and WLAN, but the passages do not directly tie each of these general CMX500 options to automotive use [1][47][48].\nR&S CMX500 supports LTE, NR FR1, NR FR2, NSA, SA, FDD, and TDD device testing [1].\nR&S CMX500 supports NR FR1/FR2 signaling and LTE signaling [1].\nThe NR signaling enabler CMX-KS600B/M/X includes 5G NR SA option 2, NSA option 3, DL 2x2 and 4x4 MIMO, one CC, and UL 256QAM [47].\nThe NR signaling extension CMX-KS610B/M/X includes UL 2x2 MIMO and carrier aggregation up to 9 CC [47].\nThe NR signaling extension CMX-KS612B/M/X provides carrier aggregation from 10 to 12 CC [47].\nRedCap is supported by CMX-KS617B/M/X, and eRedCap is supported by CMX-KS618B/X [47].\nNTN signaling extensions are supported by CMX-KS627B/M/X, CMX-KS628B/X, and CMX-KS629B/X [47].\nNB-NTN signaling Rel.17 is supported by CMX-KS527B/X [47].\nWLAN signaling supports 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn, AP testing, station testing, single-user 2x2 MIMO, and advanced encryption and authentication [48].\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[25] Wiki：Virtual Signalling Tester（來源：`AIW_Products_Customer_Questionnaire.md`、`mx844030pc-j1200.md`）\n[26] Wiki：Virtual Signalling Tester（來源：`AIW_Products_Customer_Questionnaire.md`、`mx844030pc-j1200.md`）\n[28] Wiki：Virtual Signalling Tester（來源：`AIW_Products_Customer_Questionnaire.md`、`mx844030pc-j1200.md`）\n[35] Wiki：Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[47] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[48] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[50] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[53] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[54] Wiki：Hybrid eCall testing（來源：`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[55] Wiki：CMX500 NGeCall configuration（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX_Configuration_Guide.md`）\n[56] Wiki：CMX500 NGeCall configuration（來源：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`、`CMX_Configuration_Guide.md`）\n[60] Wiki：NGeCall over LTE（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`）",
+          "evidence": {
+           "raw_citations": 13,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-f06741a9519e4f7ab4081aa0ac25178b",
+            "request_id": "request-f06741a9519e4f7ab4081aa0ac25178b",
+            "span_id": "span-f06741a9519e4f7ab4081aa0ac25178b",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "What are the most important signaling test capabilities for applications in Automotive? Please answer with emphasis on signaling test capabilities relevant to automotive applications.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 5.963112
+             },
+             {
+              "text": "R&S CMX500 › Application tests 與 audio\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n- 未啟用 R&S CMX-KA100 等 application test license 時，IP application test functionality 降到最低；只能使用 standalone mode，不能連接 external servers，也不支援 IP based measurements 或 tools。\n- R&S CMX-KA100 提供 internal IP services 與 IP connection to DUT 測試 applications，包含 DNS、IMS、Message Center、FTP、HTTP、DNS monitor、IP logging、iPerf、Ping、throughput、Max Throughput Wizard、web server。\n- R&S CMX-KA110 增強 KA100，加入 QoS、ePDG、N3IWF、delay measurement、IP tune tool、SMPP / MT SMS advanced settings。\n- R&S CMX-KA150 提供 IP analysis tool，用於監控與分析 DUT uplink / downlink IP traffic。\n- R&S CMX-KA180 提供 audio codecs for 4G and 5G IMS voice call，支援 AMR-NB、AMR-WB、EVS，並包含 [[R&S CMX-ZG180A]] external sound card drivers and configuration settings。\n- R&S CMX-KA181 加入 [[POLQA]]，用於 measuring perceived speech quality；measurement version 為 3，mode 為 full-band 或 narrowband。\n- R&S CMX-KA401 支援 WAV player / recorder、upload/download WAV files、file-based POLQA measurements 與 end-to-end audio delay。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 35,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.619172
+             },
+             {
+              "text": "R&S CMX500 › RF generator\nOutput level uncertainties 適用於 continuous wave，不適用於 overrange；wideband applications 可能產生 additional uncertainties。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 19,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.474673
+             },
+             {
+              "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx | WLAN SISO signaling |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx | 802.11ax station testing |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx | 802.11be station testing |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx | 802.11bn station testing |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx | 802.11ax AP testing |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx | 802.11be AP testing |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx | 802.11bn AP testing |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx | 2x2 MIMO support |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx | Enterprise security support |\n| R&S CMX-KS500B / M / X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx | 僅 LTE standalone 需要；NR NSA LTE anchor cells 包含於 NR signaling options |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx | D2C fixed / variable delay |\n| R&S CMX-KS600B / M / X | NR signaling enabler, Rel. 15 | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx | 包含 5G NR SA option 2、NSA option 3、DL 2x2/4x4 MIMO、one CC、UL 256QAM |\n| R&S CMX-KS610B / M / X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx | UL 2x2 MIMO、CA up to 9 CC |\n| R&S CMX-KS611B / M / X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx | SUL / Rel. 16 features |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.813784
+             },
+             {
+              "text": "R&S CMX500 › 使用介面與 automation\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n| 介面 | 原文定位 |\n|---|---|\n| [[CMsquares]] | 單一 graphical user interface，web-based、responsive，支援 RF tests、functional tests、advanced signaling tests、protocol tests |\n| [[R&S CMXmars]] | Message log analysis，可離線分析或在線監控 instrument messaging |\n| [[R&S CMsequencer]] | Graphical scripting interface，可在 CMX500 或 Windows PC 上建立、設定與執行 test scripts |\n| [[XLAPI]] | Python-based scripting interface，適合 complex scripting use cases |\n| [[SCPI]] | Remote control interface，適合 simple、standardized scripting use cases |\n\nXLAPI scripting environment：Python 3.10；script development computer 可為 Windows PC 或 CMX500；XLAPI installation package 為 **CMX-KF600X**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 36,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.754322
+             },
+             {
+              "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS612B / M / X | NR signaling extension, CA 10 to 12 CC | 1222.6574.xx / 1222.6580.xx / 1222.6597.xx | CA 10 to 12 CC |\n| R&S CMX-KS613B / X | Multi-SIM enabler | 1222.9580.xx / 1222.9596.xx | Basic / expert |\n| R&S CMX-KS617B / M / X | NR signaling extension, Rel. 17, RedCap | 1222.6600.xx / 1222.6616.xx / 1222.6622.xx | RedCap |\n| R&S CMX-KS618B / X | NR signaling extension, Rel. 18, eRedCap | 1222.9609.xx / 1222.9621.xx | eRedCap |\n| R&S CMX-KS627B / M / X | NR signaling extension, Rel. 17, NTN | 1222.8690.xx / 1222.8702.xx / 1222.8719.xx | NTN |\n| R&S CMX-KS628B / X | NR signaling extension, Rel. 18, NTN | 1222.9638.xx / 1222.9650.xx | NTN |\n| R&S CMX-KS629B / X | NR signaling extension, Rel. 19, NTN | 1223.0086.xx / 1223.0092.xx | NTN |\n| R&S CMX-KS637B / M / X | NR signaling extension, Rel. 17 w/o RedCap & NTN | 1222.8777.xx / 1222.8783.xx / 1222.8790.xx | Rel. 17 without RedCap & NTN |\n| R&S CMX-KS638B / X | NR signaling extension w/o eRedCap & NTN Rel. 18 | 1222.9667.xx / 1222.9680.xx | Rel. 18 without eRedCap & NTN |\n| R&S CMX-KS527B / X | NB-NTN signaling, Rel. 17 | 1222.9738.xx / 1222.9744.xx | NB-IoT options set 中 basic / expert |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 26,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.732181
+             },
+             {
+              "text": "R&S CMX500 › Fading / test scenario / application options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. |\n|---|---|---|\n| R&S CMX-KE500 | LTE fading according to 3GPP TS 36.101 | 1222.6674.xx |\n| R&S CMX-KE501 | LTE fading profiles higher order MIMO | 1222.8131.xx |\n| R&S CMX-KE600 | NR fading according to 3GPP TS 38.101 | 1222.2985.xx |\n| R&S CMX-KE601 | NR fading profiles higher order MIMO | 1222.6980.xx |\n| R&S CMX-KE611 | NR NTN fading profiles according to 3GPP TS 38.101 | 1222.8148.xx |\n| R&S CMX-KE620 | User defined fading profiles for LTE, NR and NTN | 1222.9950.xx |\n| R&S CMX-KE621 | User defined UE antenna pattern import | 1222.9996.xx |\n| R&S CMX-KT600 | ASN.1 import for NR | 1222.8183.xx |\n| R&S CMX-KT620 | DL IQ recorder | 1222.9715.xx |\n| R&S CMX-KC550B | LTE 3GPP RF test scenarios | 1222.9067.xx |\n| R&S CMX-KC660B | NR NSA FR1 3GPP RF test scenarios | 1222.4507.xx |\n| R&S CMX-KC661B | NR SA FR1 3GPP RF test scenarios | 1222.4513.xx |\n| R&S CMX-KC665B | NR-NTN 3GPP RF test scenarios | 1222.8748.xx |\n| R&S CMX-KA100 | CMX application test, feature set 1 | 1222.1595.xx |\n| R&S CMX-KA110 | CMX application test, feature set 2 | 1222.4142.xx |\n| R&S CMX-KA150 | CMX IP traffic analysis | 1222.4159.xx |\n| R&S CMX-KA180 | CMX audio enabler | 1222.4165.xx |\n| R&S CMX-KA181 | CMX audio POLQA measurement | 1222.4936.xx |\n| R&S CMX-KA401 | CMX application test audio, feature set 2 | 1222.8125.xx |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 28,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.532402
+             },
+             {
+              "text": "R&S CMX500 › R&S CMX-B200A accelerator unit\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX-B200A]] 提供 accelerated digital signal processing capabilities，並包含 two high-speed digital I/Q interfaces：\n\n| 項目 | 規格 |\n|---|---|\n| Ports | DIG. IQ HS 1、DIG. IQ HS 2 |\n| Direction | full duplex |\n| Connector | QSFP+ |\n| Level | CML |\n| Data rate | 40 Gbps |\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，每個 accelerator unit 可 fading 的最大 cells 數包含：1 NR cell 8x8 MIMO；1 NR cell 16x4 MIMO, 50 MHz bandwidth；2 NR cells 4x4 MIMO；4 NR cells 2x2 MIMO；2 LTE cells 8x4 MIMO；4 LTE cells 2x2 或 4x4 MIMO。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.326332
+             },
+             {
+              "text": "Signaling test solution › CMX500 Wi‑Fi test configuration\n| Item | Type | Material Number | Description | Comment |\n|---|---|---:|---|---|\n| [[R&S CMX500]] | HW | 1201.0002K70 | Radio Communication Tester | mandatory |\n| [[R&S CMX-PB70H]] | HW | 1222.0676.09 | CMX500 Basic Assembly | mandatory |\n| [[R&S CMX-B200A]] | HW | 1222.0747.02 | Accelerator Unit | mandatory 1 |\n| [[R&S CMX-B300C]] | HW | 1222.0801.04 | CMX Processing Unit | mandatory |\n| [[R&S CMX-B600B]] | HW | 1222.0953.03 | RF Unit | mandatory 1 - recommended 2 or more depending on use case |\n| [[R&S CMX-KS350B]] | SW | 1222.7064.02 | WLAN Signaling 11 a / b / g / n / ac | mandatory, required for WiFi AP or Station emulation up to WiFi5 |\n| [[R&S CMX-KS351B]] | SW | 1222.7070.02 | WLAN Signaling 11 ax Station Testing | required for WiFi6/6E AP emulation |\n| [[R&S CMX-KS352B]] | SW | 1222.7087.02 | WLAN Signaling 11 be Station Testing | required for WiFi7 AP emulation |\n| [[R&S CMX-KS355B]] | SW | 1222.7093.02 | WLAN Signaling 11 ax AP Testing | required for WiFi6/6E Station emulation |\n| [[R&S CMX-KS356B]] | SW | 1222.7106.02 | WLAN Signaling 11 be AP Testing | required for WiFi7 Station emulation |\n| [[R&S CMX-KS360B]] | SW | 1222.7112.02 | WLAN Signaling 2x2 MIMO | required for 2x2 MIMO signaling |\n| [[R&S CMX-KM350]] | SW | 1222.7135.02 | WLAN Tx Meas 11 a / b / g / n / ac | mandatory, required for WLAN TX measurements on Station or AP up to WiFi5 |\n| [[R&S CMX-KM351]] | SW | 1222.7141.02 | WLAN TX Meas 11 ax | required for WLAN TX measurements on WiFi6/6E Station or AP |\n| [[R&S CMX-KM352]] | SW | 1222.7158.02 | WLAN Tx Meas 11 be | required for WLAN TX measurements on WiFi7 Station or AP |\n| [[R&S CMX-KM360]] | SW | 1222.7164.02 | WLAN Tx Meas 2x2 TrueMIMO | required for 2x2 MIMO TX measurements |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Signaling test solution.md"
+              },
+              "score": 0.150763
+             },
+             {
+              "text": "Signaling test solution › UAV 與通訊技術\n- [[UAV 通訊]] — 本來源補充 UAV 產品使用 Radio、Wi‑Fi、LTE、5G、SATCOM、RTK 與 proprietary radio 的例子。\n- [[UAV 通訊頻段]] — 本來源新增 DJI O4 / O3+ 專有影像傳輸使用 2.4 / 5.8 GHz 的例子；頻段合規仍需回到地區法規與產品文件確認。\n- [[UAV signaling test solution]] — 本次建立的概念頁，整理本來源對 [[R&S CMX500]] 在 UAV signaling test / De-sense validation 的配置與使用限制。\n- [[UAV 多技術 De-sense 驗證]] — 來源中的多技術整合驗證線索；目前只有概念性配置原則，未提供 test case、limits 或量測結果。\n- [[Radio communication]]、[[Wi-Fi]]、[[LTE]]、[[5G]]、[[SATCOM]]、[[RTK]]、[[MIMO]]、[[EVM]]、[[PER]]、[[BLER]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Signaling test solution.md"
+              },
+              "score": 0.149733
+             },
+             {
+              "text": "Signaling test solution › CMX500 5G test configuration\n| Item | Type | Material Number | Description | Comment |\n|---|---|---:|---|---|\n| [[R&S CMX-PB70H]] | HW | 1222.0676.09 | CMX500 Basic Assembly | mandatory |\n| [[R&S CMX-B200A]] | HW | 1222.0747.02 | Accelerator Unit | mandatory, 1 to 3 |\n| [[R&S CMX-B300C]] | HW | 1222.0801.04 | CMX Processing Unit | mandatory |\n| [[R&S CMX-B600B]] | HW | 1222.0953.03 | RF Unit | mandatory, 1 to 3 |\n| [[R&S CMX-KA100]] | SW | 1222.1595.02 | CMX Application Test Feature Set 1 | if functional testing is required |\n| [[R&S CMX-KM600]] | SW | 1222.4013.02 | NR FR1 Measurements, single carrier | mandatory |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Signaling test solution.md"
+              },
+              "score": 0.146466
+             },
+             {
+              "text": "Signaling test solution › CMX500 Wi‑Fi test configuration\n| Item | Type | Material Number | Description | Comment |\n|---|---|---:|---|---|\n| [[R&S CMX-KW350]] | SW | 1222.7287.02 | WLAN ARB Generator Feature Set 0 | required for ARB generator up to WiFi5 |\n| [[R&S CMX-KW351]] | SW | 1222.7293.02 | WLAN ARB Generator Feature Set 1 | required for ARB generator WiFi6/6E |\n| [[R&S CMX-KW352]] | SW | 1222.7306.02 | WLAN ARB Generator Feature Set 2 | required for ARB generator WiFi7 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Signaling test solution.md"
+              },
+              "score": 0.144716
+             },
+             {
+              "text": "Signaling test solution › 重點摘要\n- 本來源是 OneNote 複製出的 [[UAV]] signaling test solution 筆記，raw 轉檔日期為 2026-09-17；正文未標示正式發布日期、作者、文件版次或適用客戶 / 專案。\n- 來源指出無人機常使用多種通信技術，例子包含 proprietary radio / image transmission、Wi‑Fi、[[LTE]]、未來 [[5G]]、[[RTK]]、[[SATCOM]] 與 encrypted frequency-hopping radio。\n- 來源以多款無人機 / UAV 產品為例整理核心通訊技術：[[DJI Mini 4 Pro]]、[[DJI Mavic 3]]、[[DJI Mavic 3 Enterprise]]、[[Parrot ANAFI Ai]]、[[XAG P100]]、[[Skydio X2E]]、[[RQ-4 Global Hawk]] 與 [[Switchblade]]。\n- 來源稱 [[R&S CMX500]] RF frequency range 為 **400 MHz 至 8 GHz**，可提供 [[LTE]]、[[5G]] 與 [[Wi-Fi]] UE 的單一技術 signaling test。\n- 來源列出 signaling test 可包含基本 RF 量測、application layer tests 與 protocol test；基本 RF 量測項目包含 Power、Frequency、Spectrum、[[EVM]]、[[PER]] / [[BLER]]、[[MIMO]]。\n- 來源列出一組 [[R&S CMX500]] 5G test configuration，包含 [[R&S CMX-PB70H]]、[[R&S CMX-B200A]]、[[R&S CMX-B300C]]、[[R&S CMX-B600B]]、[[R&S CMX-KA100]] 與 [[R&S CMX-KM600]]。\n- 來源列出一組 [[R&S CMX500]] Wi‑Fi test configuration，包含 WLAN signaling、WLAN TX measurement 與 WLAN ARB generator options，例如 [[R&S CMX-KS350B]]、[[R&S CMX-KS351B]]、[[R&S CMX-KS352B]]、[[R&S CMX-KS355B]]、[[R&S CMX-KS356B]]、[[R&S CMX-KS360B]]、[[R&S CMX-KM350]]、[[R&S CMX-KM351]]、[[R&S CMX-KM352]]、[[R&S CMX-KM360]]、[[R&S CMX-KW350]]、[[R&S CMX-KW351]]、[[R&S CMX-KW352]]。\n- 來源指出如果 UAV 使用兩種以上通訊技術，通訊技術之間可能造成相互干擾；基於 [[R&S CMX500]] 支援多種通訊技術，可進行 De-sense validation。\n- 來源對多技術整合驗證的配置原則是：software options 合併上述 5G 與 Wi‑Fi 表格，hardware 以滿足兩者中最大的 carrier aggregation 或 [[MIMO]] 作為配置。\n- 來源末尾列出兩個待讀材料：本機 PDF `5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.pdf`，以及 SharePoint 上 `Making Deployed 5G Private Networks more Resilient.pptx`；正文未擷取。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Signaling test solution.md"
+              },
+              "score": 0.142513
+             },
+             {
+              "text": "Signaling test solution › 與既有知識的關係\n- [[Communication of UAVs]] 已整理 UAV communication 的功能、鏈路、協定、硬體與頻段摘錄；本來源補充具體 UAV 產品例子與 [[R&S CMX500]] signaling test 配置線索。\n- [[Communications on UAVs]] 只是 UAV communication / SDR link hub；本來源比該 link hub 多出可抽取的 CMX500 5G / Wi‑Fi 配置表。\n- [[R&S CMX500]]、[[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]] 已有正式產品規格與 features 來源；本來源屬於 Market 類 OneNote solution note，適合用於 UAV use-case / configuration discussion，不應取代正式 specifications 或 configuration tool。\n- [[R&S CMX500]] 正式 specifications 已支撐 RF unit 400 MHz to 8000 MHz、CMX500 base unit 1201.0002K70、CMX-PB70H 1222.0676.09、CMX-B200A 1222.0747.02、CMX-B300C 1222.0801.04、CMX-B600B 1222.0953.03、CMX-KM600 1222.4013.02 等資料；本來源與這些資料一致，但用途是 UAV signaling solution 摘要。\n- [[4G 5G NR WLAN OTA MIMO stress testing]] 已整理 CMX500 OBT 與 Bluetest 的 4G / 5G NR / WLAN OTA MIMO stress testing；本來源較偏向 conducted / signaling configuration 與多技術 De-sense 驗證概念，未提到 OTA chamber。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Signaling test solution.md"
+              },
+              "score": 0.130312
+             },
+             {
+              "text": "Signaling test solution › R&S CMX500 配置線索\n- [[R&S CMX500]] — 來源稱其 RF range 為 400 MHz 至 8 GHz，提供 LTE、5G、Wi‑Fi UE signaling test。\n- [[R&S CMX-PB70H]] — 來源 5G 與 Wi‑Fi 表格列為 mandatory basic assembly，material number 1222.0676.09。\n- [[R&S CMX-B200A]] — 來源 5G 表格列為 mandatory 1 to 3；Wi‑Fi 表格列為 mandatory 1；material number 1222.0747.02。\n- [[R&S CMX-B300C]] — 來源 5G 與 Wi‑Fi 表格列為 mandatory processing unit，material number 1222.0801.04。\n- [[R&S CMX-B600B]] — 來源 5G 表格列為 mandatory 1 to 3；Wi‑Fi 表格列為 mandatory 1、recommended 2 or more depending on use case；material number 1222.0953.03。\n- [[R&S CMX-KA100]] — 來源 5G 表格列為 if functional testing is required，material number 1222.1595.02。\n- [[R&S CMX-KM600]] — 來源 5G 表格列為 NR FR1 Measurements, single carrier mandatory，material number 1222.4013.02。\n- [[R&S CMX-KS350B]]、[[R&S CMX-KS351B]]、[[R&S CMX-KS352B]]、[[R&S CMX-KS355B]]、[[R&S CMX-KS356B]]、[[R&S CMX-KS360B]] — 來源 Wi‑Fi 表格列出的 WLAN signaling options。\n- [[R&S CMX-KM350]]、[[R&S CMX-KM351]]、[[R&S CMX-KM352]]、[[R&S CMX-KM360]] — 來源 Wi‑Fi 表格列出的 WLAN TX measurement options。\n- [[R&S CMX-KW350]]、[[R&S CMX-KW351]]、[[R&S CMX-KW352]] — 來源 Wi‑Fi 表格列出的 WLAN ARB generator options。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Signaling test solution.md"
+              },
+              "score": 0.127158
+             },
+             {
+              "text": "Signaling test solution › UAV / drone 產品例子\n- [[DJI Mini 4 Pro]]、[[DJI Mavic 3]] — 來源列為使用 O4 / O3+ proprietary image transmission（2.4 / 5.8 GHz）的例子。\n- [[DJI Mavic 3 Enterprise]] — 來源列為使用 O3 proprietary radio + 4G LTE module 的例子。\n- [[Parrot ANAFI Ai]] — 來源列為內建 4G LTE mobile network 的例子。\n- [[XAG P100]] — 來源列為使用 RTK positioning communication + proprietary radio 的例子。\n- [[Skydio X2E]] — 來源列為使用 Wi‑Fi / proprietary radio + 4G LTE 的例子。\n- [[RQ-4 Global Hawk]]、[[Switchblade]] — 來源列為使用 military SATCOM + encrypted frequency-hopping radio 的例子。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Signaling test solution.md"
+              },
+              "score": 0.103801
+             },
+             {
+              "text": "NG eCall EN 17240 2024 verification › 使用限制\n- 本頁目前只由新聞稿支撐，不是 EN 17240:2024 標準摘要、conformance test plan 或 certification report。\n- 來源未列 test case IDs、test conditions、network parameters、IMS setup、GNSS setup、software versions 或 pass/fail details。\n- 來源未說 whether verification equals formal certification；因此本頁使用 verification，不改寫為 certification。\n- 來源未提供 European Commission regulation 的正式文件編號；2026-01-01 obligation date 只能追溯到本新聞稿說法。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              },
+              "score": 1.10715
+             },
+             {
+              "text": "NG eCall EN 17240 2024 verification › unresolved\n- [[EN 17240]]:2024 的完整標準題名、發布組織、publication date 與 clause mapping 未由本來源提供。\n- [[European Commission]] most recent regulation 的正式名稱、編號、發布日期與條文未標示。\n- [[R&S CMX-KA098]] 的 software version、license dependencies 與 test package versions 未標示。\n- [[Snapdragon Auto 5G Modem-RF]] 的 exact product / chipset / firmware configuration 未標示。\n- PSAP simulation 的 scenario IDs、acceptance criteria 與完整 test matrix 未標示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              },
+              "score": 0.987653
+             },
+             {
+              "text": "NG eCall EN 17240 2024 verification › 與既有 NGeCall / hybrid eCall 頁面的關係\n- [[NGeCall over LTE]] 整理 CMW500 與 CMX500 capability lists，本頁只整理 PR 中的 Qualcomm / Snapdragon verification event。\n- [[CMX500 NGeCall configuration]] 整理 configuration guide 的 mandatory / optional items，本頁不取代正式 configuration 或 quote。\n- [[Hybrid eCall testing]] 以 EN 18052:2025 與 hybrid fallback 為核心；本頁聚焦 EN 17240:2024 NG eCall verification，不描述 classic CS fallback 或 EN 18052 test scope。\n- [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 提到 EN 17240:2024+A1:2026 與 cetecom advanced certification testing；本頁來源只提 EN 17240:2024，且未說第三方 certification report。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              },
+              "score": 0.912886
+             },
+             {
+              "text": "EEI labeling test solution › 組成\n依 [[Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation]]：\n\n- Core test instrument：[[R&S CMX500]] radio communication tester / wireless communication tester。\n- Automation application：[[SmartViser viSer]] test automation application，available for Android and iOS。\n- Device-side behavior：pilot application 在 smartphones / tablets 上執行 calling、browsing、streaming 等 user actions。\n- Wireless technologies：[[R&S CMX500]] 支援 LTE、5G NR 與 WLAN。\n- Measurement context：[[R&S CMX500]] energy efficiency test solution offers seamless power consumption measurements in parallel to RF measurements、protocol tests or application tests。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EEI labeling test solution.md"
+              },
+              "score": 0.165726
+             },
+             {
+              "text": "EEI labeling test solution\n[[EEI labeling test solution]] 是 [[Rohde & Schwarz]] 與 [[SmartViser]] 在 PR 中描述的 joint solution，用於協助測試 smartphones 與 tablets 是否符合 EU [[Energy Efficiency Index labeling for smartphones and tablets]] 要求。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EEI labeling test solution.md"
+              },
+              "score": 0.141539
+             },
+             {
+              "text": "EEI labeling test solution › 展示場景\n- Event：[[Mobile World Congress 2024]]。\n- Location：Fira Gran Via in Barcelona。\n- Rohde & Schwarz booth：hall 5, booth 5A80。\n- SmartViser booth：hall 5 booth 5B41-4 French Tech Pavilion。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EEI labeling test solution.md"
+              },
+              "score": 0.118168
+             },
+             {
+              "text": "EEI labeling test solution › 使用限制\n- 來源未列完整 bill of materials、CMX500 hardware configuration、software license、order number、power measurement accessory、SmartViser license 或 Android / iOS app version。\n- 來源未提供 EEI Annex IV 的完整測試步驟與 calculation method。\n- 來源未提供 accuracy、uncertainty、repeatability 數字或認證報告。\n- 本頁不能用作報價或合規聲明；需回查正式 configuration guide、application note、regulation text 與 test lab guidance。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EEI labeling test solution.md"
+              },
+              "score": 0.106148
+             },
+             {
+              "text": "EEI labeling test solution › 與既有 CMX500 知識的關係\n- [[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]] 已確認 [[R&S CMX500]] 支援 LTE、5G NR、WLAN、RF measurements、protocol / application testing 等能力。\n- 本 PR 將這些能力連到 smartphone / tablet EEI compliance testing，但未提供新的 binding technical specifications。\n- 因此本頁將該方案視為 solution-level / PR-level claim，而非正式 configuration 或規格表。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EEI labeling test solution.md"
+              },
+              "score": 0.074396
+             },
+             {
+              "text": "Virtual Signalling Tester › Post-silicon testing\n- 適用 [[IoT]] device 與 communication module 的 basic protocol test。\n- 支援快速 functional test、regression test、sample scenario parameterization、test procedure 與 report / log display。\n- 來源列出 [[5G RedCap]]、Automotive、Healthcare、Industrial IoT、Smart Cities 等應用語境。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 2.720499
+             },
+             {
+              "text": "Virtual Signalling Tester\n[[Virtual Signalling Tester]] 是 [[mx844030pc-j1200]] 中 Anritsu 對 virtualized protocol stack test solution 的產品 / 解決方案語彙，核心是用 PC-based software protocol simulator 建立 NR / RedCap protocol test environment。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 0.467512
+             },
+             {
+              "text": "Virtual Signalling Tester › 與 Virtual tester 的區分\n[[Virtual tester]] 在 [[AIW_Products_Customer_Questionnaire]] 中是 R&S AI Workplace questionnaire 的 agentic workflow concept，跨 implementation、test、debug、validation。\n\n[[Virtual Signalling Tester]] 則是 [[mx844030pc-j1200]] 中 Anritsu NR / RedCap protocol simulation and test product / solution 語彙。兩者名稱相近，但目前沒有來源支持它們是同一產品、同一架構或同一市場分類。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 0.370847
+             },
+             {
+              "text": "Virtual Signalling Tester › 來源定義\n[[mx844030pc-j1200]] 將 [[Virtual Signalling Tester]] 描述為 software protocol simulator / Virtual Signalling Test Solution，透過虛擬化 protocol stack，在 PC 上重現多個 protocol layers：\n\n- [[RRC-NAS]]\n- [[PDCP]]\n- [[RLC]]\n- [[MAC]]\n\n來源主張它可不使用一般硬體測試儀而在 PC 上快速建立 protocol test environment；但 RF-IF configuration 仍使用 [[Anritsu MD8190A]] Universal RF Unit 與 [[MX819020A]] RF Platform。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 0.359241
+             },
+             {
+              "text": "Virtual Signalling Tester › Pre-silicon testing\n- 對 chipset development 的 [[Shift-Left]] 有效。\n- 在實體 chipset 製造前，用 virtual terminal 執行 protocol test。\n- 用於早期發現問題、降低 rework、提高 development efficiency。\n- 來源圖中列出 SW Simulation、EDA Emulation、FPGA Prototype、Chipset Integration / Regression。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 0.299352
+             },
+             {
+              "text": "Virtual Signalling Tester › 與 RTD 的關係\n來源說明 common [[RTD]] GUI 可讓 Post-Silicon phase 的 NR protocol test cases 移植到 Pre-silicon phase。\n\n這使 [[Virtual Signalling Tester]] 在本來源中不只是 standalone simulator，也與 Anritsu 既有 [[RTD]] GUI / [[Anritsu MT8000A]] catalog 語境相連；但來源未提供 RTD catalog 內容或 RTD version。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 0.263605
+             },
+             {
+              "text": "Virtual Signalling Tester › 限制與未決事項\n- 來源未提供 full test case list、scenario library、3GPP release coverage、conformance status 或 throughput metrics。\n- 來源未說明 virtual environment 對 host PC、EDA emulator、DUT、SDR 或 shield box 的完整 timing / synchronization requirement。\n- 來源未提供 [[RTD]] version 或 [[Anritsu MT8000A]] catalog 版次。\n- 來源中的表格轉檔有錯位風險；interface、license 與 support service 應以原 PDF 核對。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 0.237433
+             },
+             {
+              "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 關鍵實體與概念\n- [[Rohde & Schwarz]] — 新聞稿發布公司，提供 test and measurement solutions 與 automotive testing solution。\n- [[Rohde & Schwarz GmbH & Co KG]] — raw frontmatter author 與 R&S registered trademark owner 名稱。\n- [[Qualcomm Technologies]] — 與 [[Rohde & Schwarz]] 共同進行 NG eCall implementation verification 的公司實體。\n- [[Snapdragon Auto 5G Modem-RF]] — 本來源中的 Qualcomm Technologies automotive-grade platform / modem-RF platform。\n- [[R&S CMX500]] — 用於 verification process 的 mobile radio tester / comprehensive testing solution。\n- [[R&S CMX-KA098]] — 本來源稱 CMX500 with CMX-KA098 software option 可用於 NG eCall testing under realistic network conditions。\n- [[Juergen Meyer]] — [[Rohde & Schwarz]] Vice President Market Segment Automotive，引述人物。\n- [[Patrizia Muehlbauer]] — press and media contact。\n- [[NG eCall EN 17240 2024 verification]] — 本來源的主要 verification 主題。\n- [[NGeCall over LTE]]、[[NGeCall over NR-LTE]]、[[IMS eCall]]、[[EN 17240]]、[[PSAP]]、[[GNSS]]、[[V2X]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+              },
+              "score": 1.58382
+             },
+             {
+              "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 與既有知識的關係\n- 既有 [[R&S CMX-KA098]] 頁已記錄 CMX-KA098 是 [[R&S CMX500]] 的 NGeCall / IMS eCall application test software option，並由 capability list 與 software maintenance mapping 支撐。本來源補充其在 PR 中與 [[Snapdragon Auto 5G Modem-RF]]、[[Qualcomm Technologies]] 和 EN 17240:2024 verification 的語境。\n- 既有 [[NGeCall over LTE]] 頁已記錄 CMW500 與 CMX500 capability list。本來源不是 test case matrix，但補充 vendor-to-vendor verification 與 2026-01-01 regulatory transition 的 PR 層級說法。\n- 既有 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 說 [[R&S CMX-KA098]] completed PSAP test scenarios according to EN 17240:2024+A1:2026。本來源較早或不同語境地說 Qualcomm Technologies 的 Snapdragon Auto 5G Modem-RF NG eCall implementation 已依 EN 17240:2024 驗證；兩者標準版本不同，但來源未標示發布日期，不能判斷時間序列。\n- 既有 [[Hybrid eCall testing]] 關注 EN 18052:2025 與 fallback / hybrid paths。本來源聚焦 EN 17240:2024 NG eCall，未描述 EN 18052 hybrid fallback 測試。\n- 既有 [[Qualcomm Technologies]] 頁記錄其與 [[Rohde & Schwarz]] 在 AI-enhanced CSI feedback、FR3、FR1-FR3 carrier aggregation 與 SSSG early verification 等 PR 語境中的合作。本來源新增 automotive NG eCall / Snapdragon Auto 5G Modem-RF cooperation context。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+              },
+              "score": 1.403883
+             },
+             {
+              "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 原文未解的問題\n- unresolved：新聞稿 frontmatter 的 published 欄位為空，正文也未標示正式發布日期；raw created 為 2026-09-11，但不可等同正式發布日。\n- unresolved：來源未標示 document version、press release ID 或 revision。\n- unresolved：來源未提供 European Commission regulation 的正式文件編號、標題或 publication date，只說 NG eCall will be obligatory starting January 1, 2026。\n- unresolved：來源未提供 EN 17240:2024 的完整標準標題、發布組織、章節或 test case IDs。\n- unresolved：來源未提供 [[Snapdragon Auto 5G Modem-RF]] 的完整型號、chipset generation、firmware、software build、module supplier 或 commercial availability。\n- unresolved：來源未提供 [[R&S CMX500]] configuration、[[R&S CMX-KA098]] version、license dependencies、test setup、radio conditions、IMS configuration、voice codec、GNSS simulation setup 或 pass/fail details。\n- unresolved：來源只說 simulating a [[PSAP]]，未列 PSAP scenario IDs、acceptance criteria 或是否涵蓋所有 EN 17240:2024 requirements。\n- unresolved：來源未說 mutual customers 的產業範圍、客戶名稱或 adoption status。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+              },
+              "score": 0.742043
+             },
+             {
+              "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 重點摘要\n- [[Rohde & Schwarz]] 宣稱其與 [[Qualcomm Technologies]] 合作，驗證 [[Snapdragon Auto 5G Modem-RF]] 上 [[Next Generation eCall]]（NG eCall）的 implementation，並稱其符合 [[EN 17240]]:2024。\n- 來源說 [[eCall]] 於 2015 年導入，且自 2018 年起成為歐盟境內所有新車銷售的 mandatory requirement。\n- 來源指出，隨著 2G / 3G circuit-switched cellular networks 逐漸 obsolete，emergency call systems 需要適配到 4G / 5G packet-switched cellular networks。\n- 來源稱 [[European Commission]] 在其 most recent regulation 中定義 NG eCall 將自 **2026-01-01** 起成為 obligatory。\n- 來源稱 EN 17240:2024 建立在 IP Multimedia Subsystem（[[IMS]]）networks 上測試 eCall systems 的 guidelines，涵蓋 advanced 4G LTE 與 5G NR technologies。\n- [[Snapdragon Auto 5G Modem-RF]] 被描述為 5G automotive-grade platform，支援 high-speed connectivity、advanced positioning、Vehicle-to-Everything（[[V2X]]）、multi-band [[GNSS]] navigation 與 enhanced safety。\n- 來源稱驗證流程使用 [[R&S CMX500]] mobile radio tester，作為 NG eCall voice and data transmission 的 comprehensive testing solution。\n- 來源稱測試模擬 [[PSAP]]，並驗證 implementation at both ends with the [[EN 17240]]:2024 standard。\n- 來源說 [[R&S CMX500]] 支援 4G 與 5G technologies，目標是讓方案 future-proof。\n- [[Juergen Meyer]] 以 [[Rohde & Schwarz]] Vice President Market Segment Automotive 身分在新聞稿中引述，稱此次 collaboration 為 future emergency call services 建立 new benchmark。\n- 來源稱 [[R&S CMX500]] 搭配 [[R&S CMX-KA098]] software option 可在 realistic network conditions 下用於 NG eCall testing。\n- 來源將合作定位為 mutually validating solutions、reducing effort、accelerating time to market for mutual customers。\n- Press and media contact 為 [[Patrizia Muehlbauer]]，職稱 PR Manager Products & Standard Systems。\n- 公司資訊段落稱 [[Rohde & Schwarz]] 2024/2025 fiscal year net revenue 為 EUR 3.16 billion，2025-06-30 worldwide employees more than 15,000。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+              },
+              "score": 0.633394
+             },
+             {
+              "text": "MVG CMX500 OBT OTA signaling testing › 與其他 OTA partner integrations 的關係\n- [[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 描述 [[R&S CMX500 OBT]] 與 [[Bluetest Flow]] v1.18 / [[Bluetest]] RTS 的 4G、[[5G NR]] 與 [[WLAN]] OTA workflow。\n- [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 描述 [[R&S CMX500]] 與 [[EMITE]] OTA chambers 的 [[Wi-Fi 7]] 與 [[5G RedCap]] OTA measurements。\n- [[MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes]] 描述 [[R&S CMX500 OBT]] 與 [[MVG]] [[WaveStudio Software Suite]] / multi-probe measurement systems 的 5G NR / RedCap / LTE OTA signaling workflow。\n- [[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]] 則補充同一 [[MVG]] workflow 現在包含 full WLAN / Wi‑Fi 7 OTA signaling testing 與 5G NR NSA EN-DC support。\n\n這些來源都是 PR / solution-level statements；不可替代正式 datasheet、configuration guide、test case database、conformance document 或 certification documentation。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/MVG CMX500 OBT OTA signaling testing.md"
+              },
+              "score": 0.68353
+             },
+             {
+              "text": "MVG CMX500 OBT OTA signaling testing › 測試架構\n依 [[MVG integrates CMX500 OBT into WaveStudio Software Suite, simplifying 5G OTA signaling test processes]]：\n\n- [[R&S CMX500 OBT]] 被整合到 [[WaveStudio Software Suite]]。\n- [[WaveStudio Software Suite]] 控制 / 串接 [[MVG]] antenna measurement systems。\n- 與 [[MVG]] multi-probe measurement systems 搭配時，來源稱可進行 precise OTA testing under real-world conditions。\n- 目標是 streamlining test environment，簡化 next-generation wireless devices 的 OTA signaling testing processes。\n\n依 [[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]]：\n\n- [[MVG]] 已將 full [[WLAN]] signaling test functionality including [[Wi-Fi 7]] of the [[R&S CMX500 OBT]] 整合進 [[WaveStudio Software Suite]]。\n- Manufacturers 可在 single antenna measurement system 內執行 comprehensive 4G、5G 與 [[WLAN]] [[OTA testing]]。\n- [[WaveStudio Software Suite]] 整合 full Wi‑Fi（[[IEEE 802.11]] a/b/g/n/ac/ax/be）access point and station testing functionality。\n- Software now supports [[5G NR Non-Standalone]]（[[EN-DC]]）testing with the [[R&S CMX500]]。\n- [[MVG]] multiprobe measurement systems 被描述為 fully support Wi‑Fi and cellular standards within a single tester。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/MVG CMX500 OBT OTA signaling testing.md"
+              },
+              "score": 0.676926
+             },
+             {
+              "text": "MVG CMX500 OBT OTA signaling testing\n[[MVG CMX500 OBT OTA signaling testing]] 是 [[MVG]] 與 [[Rohde & Schwarz]] 新聞稿中描述的整合測試情境：將 [[R&S CMX500 OBT]] 整合進 [[MVG]] 的 [[WaveStudio Software Suite]]，讓 [[MVG]] antenna / multiprobe measurement systems 可直接執行 [[5G NR]]、[[RedCap]]、[[LTE]] 與 [[WLAN]] OTA signaling tests。[[MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz]] 將此情境擴充到 full [[WLAN]] signaling test functionality including [[Wi-Fi 7]] / [[IEEE 802.11be]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/MVG CMX500 OBT OTA signaling testing.md"
+              },
+              "score": 0.653164
+             },
+             {
+              "text": "MVG CMX500 OBT OTA signaling testing › 使用限制\n- 兩份 MVG / R&S 來源都未標示新聞稿發布日期與文件版次。\n- 來源未標示 [[WaveStudio Software Suite]] 版本、integration module 名稱、license、release notes 或 API 條件。\n- 來源未標示 [[R&S CMX500 OBT]] 的正式 hardware BOM、RF chains、IF / RF / AU 組合、CSW version、software option code 或 order number。\n- `CMX Lite` 與 `CMX Pro` 的正式產品定位未在來源中定義；不可自行對應到 [[R&S CMX500]] 頁中既有的 OBT lite / OBT plus / OBT FR1 specialist / OBT FR2 specialist。\n- 來源未標示 [[MVG]] antenna measurement systems / multi-probe systems 的型號、chamber 規格、frequency range、DUT 尺寸、calibration procedure 或 measurement uncertainty。\n- 來源未列完整 5G NR / RedCap / LTE / WLAN / Wi‑Fi 7 test case list、band combinations、AP / STA role matrix、MIMO / antenna configuration、MLO combinations、throughput target、latency target、pass/fail metric 或 conformance applicability。\n- 新來源說 full WLAN signaling test functionality including Wi‑Fi 7 已整合；這是 PR statement，不等於確認所有 [[IEEE 802.11be]] feature combinations 在所有 [[MVG]] systems / [[R&S CMX500 OBT]] configurations 中皆可測。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/MVG CMX500 OBT OTA signaling testing.md"
+              },
+              "score": 0.453561
+             },
+             {
+              "text": "MVG CMX500 OBT OTA signaling testing › 來源列出的測試能力\n目前兩份 MVG / R&S PR 明確列出的能力包含：\n\n- [[5G NR]] OTA signaling testing。\n- [[5G NR Standalone]]（SA）mode。\n- [[5G NR FR1]] SA。\n- [[5G NR Non-Standalone]]（[[EN-DC]]）。\n- [[RedCap]]。\n- [[LTE]] OTA signaling testing。\n- [[LTE]] FDD & TDD signaling testing。\n- Full Wi‑Fi / [[WLAN]] access point and station testing functionality。\n- [[IEEE 802.11]] a/b/g/n/ac/ax/be。\n- [[Wi-Fi 7]] / [[IEEE 802.11be]]。\n- multiple hardware configurations of [[R&S CMX500 OBT]]，包括 `CMX Lite` 與 `CMX Pro`（僅前一份來源列名，未定義正式 BOM）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/MVG CMX500 OBT OTA signaling testing.md"
+              },
+              "score": 0.168689
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › Fading、test scenario 與 application test options\n| Code | 原文名稱 / 用途 | Order no. |\n|---|---|---|\n| R&S CMX-KE500 | LTE fading according to 3GPP TS 36.101 | 1222.6674.xx |\n| R&S CMX-KE501 | LTE fading profiles higher order MIMO | 1222.8131.xx |\n| R&S CMX-KE600 | NR fading according to 3GPP TS 38.101 | 1222.2985.xx |\n| R&S CMX-KE601 | NR fading profiles higher order MIMO | 1222.6980.xx |\n| R&S CMX-KE611 | NR NTN fading profiles according to 3GPP TS 38.101 | 1222.8148.xx |\n| R&S CMX-KE620 | User defined fading profiles for LTE, NR and NTN | 1222.9950.xx |\n| R&S CMX-KE621 | User defined UE antenna pattern import | 1222.9996.xx |\n| R&S CMX-KT600 | ASN.1 import for NR | 1222.8183.xx |\n| R&S CMX-KT620 | DL IQ recorder | 1222.9715.xx |\n| R&S CMX-KC550B | LTE 3GPP RF test scenarios | 1222.9067.xx |\n| R&S CMX-KC660B | NR NSA FR1 3GPP RF test scenarios | 1222.4507.xx |\n| R&S CMX-KC661B | NR SA FR1 3GPP RF test scenarios | 1222.4513.xx |\n| R&S CMX-KC665B | NR-NTN 3GPP RF test scenarios | 1222.8748.xx |\n| R&S CMX-KA100 | CMX application test, feature set 1 | 1222.1595.xx |\n| R&S CMX-KA110 | CMX application test, feature set 2 | 1222.4142.xx |\n| R&S CMX-KA150 | CMX IP traffic analysis | 1222.4159.xx |\n| R&S CMX-KA180 | CMX audio enabler | 1222.4165.xx |\n| R&S CMX-KA181 | CMX audio POLQA measurement | 1222.4936.xx |\n| R&S CMX-KA401 | CMX application test audio, feature set 2 | 1222.8125.xx |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 2.873223
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › User interface 與 scripting 摘要\n- [[CMsquares]] 是 web-based 且 responsive；在 browser 顯示，不需要 special client software 或 specific operating system，支援 tablet 到 large screen、多 workspaces、light/dark theme、parameter search 與 favorites。\n- GUI 可用於 manual interactive operation，也可用於 selecting and executing scripts；可在 interactive operation 與 scripting 間切換而不遺失 settings。\n- [[R&S CMXmars]] 可分析 message progression、message structures、message elements；Message Table 顯示 time stamp、protocol、layer、SAP 等基本屬性，MSC 顯示 message sequence chart，Message Tree 顯示 message components。\n- [[R&S CMsequencer]] 可用 function blocks 建立 scripts，涵蓋 network configuration、RF tests、functional tests、signaling tests、performance tests、application tests、protocol tests；支援 YAML、JSON、CSV data、ASN.1 data、variables、loops、conditional statements、test plans、snippets 與 command-line interface。\n- [[XLAPI]] 使用 Python code，適合 complex scripting；支援 asynchronous event handling、signaling events evaluation、received messages evaluation、peer messages modification。\n- [[SCPI]] 不需額外安裝，適合 simple、standardized scripting；採 polling interface。\n- XLAPI scripting environment：Python 3.10；script development computer 可為 Windows PC 或 CMX500；XLAPI installation package 為 **CMX-KF600X**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 2.48772
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › 與既有知識的關係\n- 本來源與 [[CMP180_Features_V11-9_en_09]]、[[CMP200_Features_V8-14-22_en_09]] 同屬 Rohde & Schwarz radio communication tester 的 Features and Functions 文件，但 [[R&S CMX500]] 聚焦於 5G/LTE/WLAN signaling、protocol/application tests、FR1/FR2 measurements、fading/AWGN 與可擴充 OBT hardware architecture。\n- [[R&S CMP180]] 的 Features and Functions 文件涵蓋 Bluetooth、WLAN、LTE、NR FR1、NB-IoT、UWB、GSM、WCDMA、CDMA2000 等 production / nonsignaling / TX/RX options；本來源未把 [[R&S CMX500]] 描述為 CMP180 的替代品，不應合併產品頁。\n- [[R&S CMP200]] 的 Features and Functions 文件主要聚焦 NR FR2、UWB、LP-IoT 與 UWB test plans；本來源的 [[R&S CMX500]] 也有 NR FR2 measurement options，但同時涵蓋 broader signaling、application 與 hardware deployment。\n- 本來源是 Features and Functions，不是 specifications datasheet；報價或規格保證仍需查 [[R&S CMX500]] specifications document / product brochure 與正式 ordering data。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 20,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 2.471115
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › 使用介面與軟體\n- [[CMsquares]] — [[R&S CMX500]] 單一 graphical user interface，支援 RF tests、functional tests、advanced signaling tests、protocol tests。\n- [[R&S CMXmars]] — message log analysis 工具，可離線分析或在線監控 instrument messaging。\n- [[R&S CMsequencer]] — graphical scripting interface，可在 CMX500 或 Windows PC 上建立、設定與執行 test scripts。\n- [[XLAPI]] — Python-based scripting interface；script language 為 Python 3.10，安裝 package 為 CMX-KF600X。\n- [[SCPI]] — remote control interface；適合 simple、standardized scripting use cases。\n- [[R&S VSE]] — 來源未列為本文件主要 ordering table 的焦點，但與既有 CMP 文件中的 analysis software 脈絡相鄰。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 2.434366
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › Signaling options\n| Code | 原文名稱 / 用途 | Order no. |\n|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx |\n| R&S CMX-KS500B / KS500M / KS500X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx |\n| R&S CMX-KS527B / KS527X | NB-NTN signaling, Rel. 17, basic / expert | 1222.9738.xx / 1222.9744.xx |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx |\n| R&S CMX-KS600B / KS600M / KS600X | NR signaling enabler, Rel. 15, basic / medium / expert | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx |\n| R&S CMX-KS610B / KS610M / KS610X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx |\n| R&S CMX-KS611B / KS611M / KS611X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx |\n| R&S CMX-KS612B / KS612M / KS612X | NR signaling extension, CA 10 to 12 CC | 1222.6574.xx / 1222.6580.xx / 1222.6597.xx |\n| R&S CMX-KS613B / KS613X | Multi-SIM enabler, basic / expert | 1222.9580.xx / 1222.9596.xx |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 2.0941
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › Signaling options\n| Code | 原文名稱 / 用途 | Order no. |\n|---|---|---|\n| R&S CMX-KS617B / KS617M / KS617X | NR signaling extension, Rel. 17, RedCap | 1222.6600.xx / 1222.6616.xx / 1222.6622.xx |\n| R&S CMX-KS618B / KS618X | NR signaling extension, Rel. 18, eRedCap | 1222.9609.xx / 1222.9621.xx |\n| R&S CMX-KS627B / KS627M / KS627X | NR signaling extension, Rel. 17, NTN | 1222.8690.xx / 1222.8702.xx / 1222.8719.xx |\n| R&S CMX-KS628B / KS628X | NR signaling extension, Rel. 18, NTN | 1222.9638.xx / 1222.9650.xx |\n| R&S CMX-KS629B / KS629X | NR signaling extension, Rel. 19, NTN | 1223.0086.xx / 1223.0092.xx |\n| R&S CMX-KS637B / KS637M / KS637X | NR signaling extension, Rel. 17 w/o RedCap & NTN | 1222.8777.xx / 1222.8783.xx / 1222.8790.xx |\n| R&S CMX-KS638B / KS638X | NR signaling extension w/o eRedCap & NTN Rel. 18 | 1222.9667.xx / 1222.9680.xx |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 2.062571
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › NR / LTE signaling\n- CMX-KS... software options 用於 NR 與 LTE；options 分為 basic（B）、medium（M）、expert（X）sets。\n- R&S CMX-KS600B/M/X 是 NR signaling enabler Rel. 15，包含 5G NR SA option 2、NSA option 3、DL 2x2 and 4x4 MIMO、one CC、UL 256QAM。\n- R&S CMX-KS610B/M/X 提供 NR signaling extension Rel. 15 feature set 3，包含 UL 2x2 MIMO、CA up to 9 CC。\n- R&S CMX-KS612B/M/X 提供 CA 10 to 12 CC。\n- RedCap：R&S CMX-KS617B/M/X；eRedCap：R&S CMX-KS618B/X。\n- NTN：R&S CMX-KS627B/M/X（Rel. 17）、R&S CMX-KS628B/X（Rel. 18）、R&S CMX-KS629B/X（Rel. 19）。\n- NB-IoT signaling option：R&S CMX-KS527B/X（NB-NTN signaling，Rel. 17）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 1.919103
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › WLAN signaling 與 measurement\n- WLAN signaling 支援 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn、AP testing、station testing、single user 2x2 MIMO、advanced encryption and authentication。\n- 若相關 options 都可用，[[R&S CMX500]] 支援 simultaneous WLAN AP and station emulation。\n- WLAN measurement options 支援 WLAN TX measurements：802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 True MIMO。\n- WLAN measurement RF frequency 依 hardware 而定，涵蓋 2.4 GHz、4 GHz、5 GHz、6 GHz operating bands，也支援 out-of-band frequencies；802.11ax SISO input signal settings 明示 RF frequency 為 all WLAN frequency bands up to 7.125 GHz。\n- WLAN measurement bandwidth 依 standard 支援 5 MHz、10 MHz、20 MHz、40 MHz、80 MHz、160 MHz、320 MHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 1.463764
+             },
+             {
+              "text": "Hybrid eCall testing › R&S solution context\n依 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]]：\n\n- 測試方案基於 [[R&S CMX500]] radio communication tester。\n- [[R&S CMX-KA09x]] updated eCall evaluation solution 支援 [[EN 18052]]:2025 與 [[EN 17240]]:2024+A1:2026 compliance。\n- [[R&S CMX-KA099]] completed [[PSAP]] test scenarios according to [[EN 18052]]:2025。\n- [[R&S CMX-KA098]] completed [[PSAP]] test scenarios according to [[EN 17240]]:2024+A1:2026。\n- [[cetecom advanced]] conducted certification testing。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+              },
+              "score": 0.363952
+             },
+             {
+              "text": "Hybrid eCall testing › 測試目的\n依 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]]，hybrid eCall test specification [[EN 18052]] 要求 hybrid system combine different transmission paths and protocols，確保 eCall reliably reaches its destination。\n\n來源描述的實務語境：\n\n- 車輛使用 NG eCall functions，即 IP/IMS-based voice and data over 4G/5G。\n- 當 coverage 或 service quality degrades 時，車輛可 automatically fall back to available classic CS eCall 2G/3G transport paths。\n- Manufacturers 需要 validate hybrid implementations，以確保能 trigger calls、transmit [[MSD]]、maintain [[GNSS]] positioning，並提供 intelligible voice quality。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+              },
+              "score": 0.274739
+             },
+             {
+              "text": "Hybrid eCall testing › 使用限制\n- 本頁目前只由新聞稿支撐，不是 [[EN 18052]] 或 [[EN 17240]] 標準文本摘要。\n- 來源未提供正式 certification report、certificate number、測試日期或完整 test matrix。\n- 來源未列 national requirements 的國家名稱或版本。\n- 不可從新聞稿推論 [[R&S CMX500]] / [[R&S CMX-KA09x]] 已涵蓋所有 possible hybrid eCall test cases。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+              },
+              "score": 0.271288
+             },
+             {
+              "text": "Hybrid eCall testing › unresolved\n- [[EN 18052]] 的完整標準標題、發布組織與正式版本細節尚未由本來源提供。\n- [[EN 17240]]:2024+A1:2026 的 amendment A1 細節與發布狀態尚未由本來源提供。\n- completed PSAP test scenarios 的 coverage、test IDs、結果細節與 certification scope 未標示。\n- 來源未提供 degraded radio conditions、handover 與 voice quality 測試的具體設定。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+              },
+              "score": 0.269931
+             },
+             {
+              "text": "Hybrid eCall testing › 測試情境\n來源明示或列出的 network scenarios 包含：\n\n- [[VoNR]]。\n- [[VoLTE]]。\n- circuit-switched fallback。\n- handovers。\n- degraded radio conditions。\n- real-world mobile network conditions simulation。\n- various network scenarios emulation。\n\n來源沒有提供各 scenario 的 test case IDs、channel model、radio profile 或 pass/fail criteria。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+              },
+              "score": 0.244282
+             },
+             {
+              "text": "Hybrid eCall testing\n[[Hybrid eCall testing]] 是驗證車輛 emergency call system 能在 NG eCall 與 classic CS eCall transport paths 之間可靠運作與 fallback 的測試主題；[[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 將其連到 [[EN 18052]]:2025、[[EN 17240]]:2024+A1:2026、[[R&S CMX500]] 與 [[R&S CMX-KA09x]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+              },
+              "score": 0.228755
+             },
+             {
+              "text": "CMX500 NGeCall configuration › CMW500 & CMX500 eCall CS/PS Hybrid EN18052:2025\n[[CMX_Configuration_Guide]] 的 hybrid minimum configuration 區段同時列出 CMW500 與 CMX500 items。CMX500 端列出：\n\n| Item | Type | Material Number | Description | Comment |\n|---|---|---:|---|---|\n| [[R&S CMX-B600B]] | HW | 1222.0953.03 | RF Unit | mandatory, 1；B600A allowed as well |\n| [[R&S CMX-ZG180]] | HW | 1222.4313.02 | External media endpoint audio | mandatory for real E2E Communication |\n| [[R&S CMX-KS600B]] | SW | 1222.1672.02 | LTE/NR Signaling Enabler Rel.15, Basic Level | mandatory |\n| [[R&S CMX-KA180]] | SW | 1222.4165.02 | CMX Audio Enabler (Codecs) | mandatory |\n| [[R&S CMX-KA110]] | SW | 1222.4142.02 | CMX Application Test Feature Set 2 | mandatory；for test IMS Tests from EN17240:2024 |\n| [[R&S CMX-KA401]] | SW | 1222.8125.02 | CMX Audio Test Test Feature Set 2 | mandatory for In-Band Modem over IP Tests |\n| [[R&S CM-Z1MF]] | HW | 1212.3072.02 | Adapter set XLR/BNC, 2 male, 2 female | optional；Adapter to connect CMW-Z50 |\n| [[R&S CMX-KA094]] | SW | 1208.4703.02 | Enabling test software for eCall | mandatory |\n| [[R&S CMX-KA098]] | SW | 1222.6639.02 | Enabling test software for 4G/5G NGeCall | mandatory |\n| [[R&S CMX-KA099]] | SW | 1222.9209.02 | APPL NGECALL MULTI CELL | mandatory |\n| [[R&S CMX-KF672B]] | SW | 1222.9215.02 | CMX-KF672B NGECALL TC EN18052 | mandatory |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 NGeCall configuration.md"
+              },
+              "score": 1.792069
+             },
+             {
+              "text": "CMX500 NGeCall configuration › CMX500 NGeCall 4G/5G configuration\n[[CMX_Configuration_Guide]] 的 CMX500 NGeCall 4G/5G 區段 contact 為 [[Pabiola Dushi]]，列出下列 items：\n\n| Item | Type | Material Number | Description | Comment |\n|---|---|---:|---|---|\n| CMX500 | HW | 1201.0002K70 | Radio Communication Tester | mandatory |\n| [[R&S CMX-PB70I]] | HW | 1222.0676.10 | CMX500 Basic Assembly | mandatory |\n| [[R&S CMX-B40A]] | HW | 1222.9838.02 | CMX System Controller | mandatory |\n| [[R&S CMX-B200A]] | HW | 1222.0747.02 | Accelerator Unit | mandatory, 1 |\n| [[R&S CMX-B300C]] | HW | 1222.0801.04 | CMX Processing Unit | mandatory；B300B allowed as well |\n| [[R&S CMX-B600B]] | HW | 1222.0953.03 | RF Unit | mandatory, 1 |\n| [[R&S CMX-ZG180]] | HW | 1222.4313.02 | External media endpoint audio | mandatory for real E2E Communication |\n| [[R&S CM-Z1MF]] | HW | 1212.3072.02 | Adapter set XLR/BNC, 2 male, 2 female | optional；Adapter to connect CMW-Z50 |\n| [[R&S CMX-KS600B]] | SW | 1222.1672.02 | LTE/NR Signaling Enabler Rel.15, Basic Level | mandatory |\n| [[R&S CMX-KA100]] | SW | 1222.1595.02 | CMX Application Test Feature Set 1 | mandatory |\n| [[R&S CMX-KA180]] | SW | 1222.4165.02 | CMX Audio Enabler (Codecs) | mandatory |\n| [[R&S CMX-KA110]] | SW | 1222.4142.02 | CMX Application Test Feature Set 2 | mandatory；for test IMS Tests from EN17240:2024 |\n| [[R&S CMX-KA401]] | SW | 1222.8125.02 | CMX Audio Test Test Feature Set 2 | mandatory；Audio player/recorder with ZG180A；mandatory for TS17240 In-Band Modem over IP Tests |\n| [[R&S CMX-KA098]] | SW | 1222.6639.02 | Enabling test software for 4G/5G NGeCall | mandatory；for 4G/5G NG eCall 17240:2024 |\n| [[R&S CMX-KF671B]] | SW | 1222.8348.02 | NGECALL E2E TEST SCRIPTS | mandatory；for 4G/5G NG eCall 17240:2024 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 NGeCall configuration.md"
+              },
+              "score": 1.718883
+             },
+             {
+              "text": "CMX500 NGeCall configuration › CMX500 PCT NGeCall configuration\n[[CMX_Configuration_Guide]] 的 CMX500 PCT NGeCall 區段 contact 為 [[Harald Gsödl]]，列出：\n\n| Item | Type | Material Number | Description | Comment |\n|---|---|---:|---|---|\n| [[R&S CMX-B200A]] | HW | 1222.0747.02 | Accelerator Unit | mandatory |\n| [[R&S CMX-B600B]] | HW | 1222.0953.03 | RF Unit | mandatory |\n| [[R&S CMX-KS600B]] | SW | 1222.1672.02 | NR Signaling Enabler Rel.15, Basic Level | mandatory |\n| [[R&S CMX-KS600M]] | SW | 1222.1650.02 | NR SIG MEDIUM FSET1 | mandatory |\n| [[R&S CMX-KS600X]] | SW | 1222.1695.02 | NR SIG XPERT FSET1 | mandatory |\n\nR&S Contest System Software 區段另列 CONTEST、CONTEST smart card、TS8-KT100、TS8-KT500、CMX-PCT5-KC625、PCT5-KT600、TSCTRLPC1、CMW-KT025 與 CMW-KT029。來源未提供 PCT NGeCall 的完整 standard version 或 test case list。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 NGeCall configuration.md"
+              },
+              "score": 1.346482
+             },
+             {
+              "text": "CMX500 NGeCall configuration › CMW500 到 CMX500 的 NGeCall 轉換脈絡\n[[CMX_Configuration_Guide]] 在 CMWPC / CMW500 區段列出：\n\n- [[R&S CMW-KA096]]（1211.2450.02）：Enabling test software for NGeCall，optional for 4G NG eCall 17240:2018。\n- [[R&S CMWrun KT111]] / CMW-KT111（1211.3733.02）：CMW500 – NgeCall Test Scripts for CMWrun (17240:2018)，optional for 4G NG eCall 17240:2018。\n\n同一來源明示：CMW supports the 2018 specification；new specifications are published and not compatible with the CMW500；therefore recommend switching to the CMX500。它也明示 license transfer for LTE、DAU and KA096 from [[R&S CMW500]] to [[R&S CMX500]] is allowed。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 NGeCall configuration.md"
+              },
+              "score": 1.013372
+             },
+             {
+              "text": "CMX500 NGeCall configuration › eCall ITU-P1140 audio testing\n[[CMX_Configuration_Guide]] 的 `eCall ITU-P1140 - CMX500 + HEAD acoustics labCORE Audio Testing` 區段 contact 欄寫 `Chrsitian Hof`，列出：\n\n| Item | Type | Material Number | Description | Comment |\n|---|---|---:|---|---|\n| [[R&S CMX-B600B]] | HW | 1222.0953.03 | RF Unit | mandatory, 1 |\n| [[R&S CMX-KS600B]] | SW | 1222.1672.02 | NR Signaling Enabler, Basic Level | mandatory |\n\n來源明示 requires HEAD acoustics labCore system，更多資訊需聯絡 HEAD acoustics。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 NGeCall configuration.md"
+              },
+              "score": 0.817285
+             },
+             {
+              "text": "NGeCall over LTE › 來源中的測試主題\n兩份 capability lists 中反覆出現的測試主題包含：\n\n- IVS manual eCall、automatic eCall、test eCall initiation。\n- IMS eCall session establishment，包含 `urn:service:sos:ecall:automatic`、`urn:service:sos:ecall:manual`、`urn:service:test.sos.ecall` 等語彙。\n- MSD transfer、MSD update、PSAP request、negative acknowledgement / missing acknowledgement 情境。\n- Valid SIM/USIM、forbidden PLMN、limited service condition、roaming scenario。\n- PSAP initiated callback、call clear-down、IVS initiated clear-down not allowed。\n- Voice link established 與 audio interface verification。\n- eCall only mode、T3444 / T3445、SRVCC handover to CS domain / UTRAN / GERAN。\n- Time-Warping Conformance Test / No Time-Warping Conformance Test。\n- CMX500 來源新增 5GS / NR 相關 3GPP TS 34.229-5 與 3GPP TS 38.523-1 測試脈絡。\n- CMX500 來源新增 CEN EN 17240:2024 中 IPv4 / IPv6 MSD transfer、MSD version 3、additional data from Euro NCAP TB 040:2022 等項目。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NGeCall over LTE.md"
+              },
+              "score": 0.582104
+             },
+             {
+              "text": "NGeCall over LTE › CMW500 / CMW-KA096 配置\n| 組件 | 來源標示 |\n|---|---|\n| 測試平台 | [[R&S CMW500]] standalone setup |\n| CMW500 軟體版本 | >= V4.0.110 |\n| Test software | [[R&S CMW-KA096]] >= V4.0.0；來源亦泛稱 CMW-KA09x test software |\n| CMWrun application | [[R&S CMWrun KT111]] >= V1.9.11 |\n| capability list 狀態 | Oct. 2024 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NGeCall over LTE.md"
+              },
+              "score": 0.570942
+             },
+             {
+              "text": "NGeCall over LTE › unresolved\n- [[CMW-KA096_PanEUNGeCall_TC_Status]] 未標示文件版次，只有 Oct. 2024 的狀態標示。\n- [[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 未標示文件版次，且多個區段日期並存。\n- 兩份來源皆為 lossy derivative，部分表格欄位不完整；每個 test case 的 exact availability 需回原始 PDF / Excel 核對。\n- [[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 標題聚焦 [[R&S CMX-KA098]]，但正文仍寫 CMW-KA09x test software；需回原始文件確認。\n- [[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 中 `CEN EN 17420:2024` 疑似 OCR / 原文錯字；尚未裁決。\n- 來源未列 EU commission 對 legacy eCall / NGeCall transition 的決策日期或後續更新計畫。\n- 來源未完整定義 [[IVS]]、[[PSAP]]、[[MSD]]、[[VoIMS]]、[[SRVCC]] 等縮寫；本頁不自行補定義。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NGeCall over LTE.md"
+              },
+              "score": 0.413466
+             },
+             {
+              "text": "NGeCall over LTE › CMX500 / CMX-KA098 配置\n| 組件 | 來源標示 |\n|---|---|\n| 測試平台 | [[R&S CMX500]] standalone setup |\n| Application / test software | [[R&S CMX-KA098]] |\n| CEN TS 17240:2018 版本基準 | [[R&S CMX500]] >= CSW 7.40 / CMX-KA098 >= V4.1.0；另列 CSW 7.80 / CMX-KA098 >= V4.2.0 |\n| CEN EN 17240:2024 版本基準 | [[R&S CMX500]] >= CSW 2025.0.0.1850 / CMX-KA098 >= V4.3.0-RC8 |\n| CMWrun | [[R&S CMX-KF671B]] / CMWrun >= 1.9.15.37 |\n| capability list 狀態 | Dec. 2024、May. 2025 與 June 2025 標註並存 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NGeCall over LTE.md"
+              },
+              "score": 0.385585
+             },
+             {
+              "text": "NGeCall over LTE › 與既有知識的關係\n- [[CMW-KA096_PanEUNGeCall_TC_Status]] 是 [[R&S CMW500]] / [[R&S CMW-KA096]] / [[R&S CMWrun KT111]] 的 Oct. 2024 NGeCall over LTE capability list。\n- [[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 是 [[R&S CMX500]] / [[R&S CMX-KA098]] / [[R&S CMX-KF671B]] 的 NGeCall over NR/LTE capability list，並補入 CEN EN 17240:2024、3GPP TS 34.229-5 與 3GPP TS 38.523-1。\n- [[R&S CMX-KA098]] 先前只由 license swap 文件確認為 Application test IMS NGeCALL；新來源提供 capability list 與版本基準，因此應作為 CMX500 NGeCall 測試能力的主要可追溯來源之一。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NGeCall over LTE.md"
+              },
+              "score": 0.344922
+             },
+             {
+              "text": "Please note that not all questions may be relevant to your situation. You don’t have to answer all of them.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-3b343d1990f39b17",
+                "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+                "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+                "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 24.359991
+             },
+             {
+              "text": "Table 11-2: Test scenario options relevant for signaling features",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-bc47a8ad4da77a6a",
+                "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+                "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+                "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "section": 5067,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 20.43445
+             },
+             {
+              "text": "### MAIN APPLICATIONS\n- Automotive\n- Home Appliances\n- MCU / Analog IC",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-5fd5ac08d6e70f1e",
+                "original_ref": "raw/Market/IC Carrier 載板 image 5.md",
+                "sha256": "5fd5ac08d6e70f1e4aefb23dce14736f48bccede1a778272d6eb20fcf0b0df98",
+                "raw_ref": "raw/Market/IC Carrier 載板 image 5.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/IC Carrier 載板 image 5.md",
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 17.630906
+             },
+             {
+              "text": "[Space Capabilities Catalogue - Satellite Applications Catapult](https://sa.catapult.org.uk/space-capabilities-catalogue/)",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-6ae422456b68416f",
+                "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+                "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.788606
+             }
+            ],
+            "text": "【推論】The best-supported automotive priority is NG eCall over IMS/4G/5G, because the passages directly connect Snapdragon Auto, EN 17240:2024 NG eCall verification, PSAP simulation, and R&S CMX500 with CMX-KA098 under realistic network conditions [35].\nNG eCall testing is directly automotive-relevant because R&S and Qualcomm verified a Next Generation eCall implementation on the Snapdragon Auto 5G Modem-RF using the R&S CMX500 mobile radio tester [35].\nEN 17240:2024 is described as guidelines for testing eCall systems on IMS networks with 4G LTE and 5G NR technologies [35].\nR&S CMX500 is described as a comprehensive testing solution for NG eCall voice and data transmission [35].\nThe NG eCall verification simulated a PSAP and verified implementation at both ends against EN 17240:2024 [35].\nR&S CMX500 with the CMX-KA098 software option can be used for NG eCall testing under realistic network conditions [35].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KA098 as mandatory for 4G/5G NG eCall 17240:2024 [56].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KA110 as mandatory for IMS tests from EN 17240:2024 [56].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KA401 as mandatory for TS17240 In-Band Modem over IP tests [56].\nThe CMX500 NGeCall 4G/5G configuration marks CMX-KF671B as mandatory for 4G/5G NG eCall 17240:2024 end-to-end test scripts [56].\n【推論】Hybrid eCall fallback signaling is also a key automotive focus, because the passages describe vehicle emergency call reliability across NG eCall, classic CS eCall, fallback, degraded radio conditions, handovers, VoNR, and VoLTE [50][53][54].\nHybrid eCall testing verifies that a vehicle emergency call system can operate reliably between NG eCall and classic CS eCall transport paths [54].\nEN 18052 requires hybrid systems to combine different transmission paths and protocols so that eCall reliably reaches its destination [50].\nManufacturers need to validate call triggering, MSD transmission, GNSS positioning maintenance, and intelligible voice quality [50].\nHybrid eCall scenarios include VoNR, VoLTE, circuit-switched fallback, handovers, degraded radio conditions, real-world mobile network condition simulation, and various network scenario emulation [53].\nThe CMX500 hybrid minimum configuration includes CMX-KS600B as mandatory LTE/NR signaling enabler Rel.15 basic level [55].\nThe CMX500 hybrid minimum configuration includes CMX-KA098 as mandatory enabling test software for 4G/5G NGeCall [55].\nThe CMX500 hybrid minimum configuration includes CMX-KA099 as mandatory APPL NGECALL MULTI CELL [55].\nThe CMX500 hybrid minimum configuration includes CMX-KF672B as mandatory NGECALL TC EN18052 [55].\nImportant NGeCall signaling test topics include IVS manual eCall, automatic eCall, and test eCall initiation [60].\nImportant NGeCall signaling test topics include IMS eCall session establishment for automatic, manual, and test eCall service URNs [60].\nImportant NGeCall signaling test topics include MSD transfer, MSD update, PSAP request, negative acknowledgement, and missing acknowledgement scenarios [60].\nImportant NGeCall signaling test topics include valid SIM/USIM, forbidden PLMN, limited service condition, and roaming scenarios [60].\nImportant NGeCall signaling test topics include PSAP initiated callback, call clear-down, and IVS initiated clear-down not allowed [60].\nImportant NGeCall signaling test topics include voice link establishment and audio interface verification [60].\nImportant NGeCall signaling test topics include eCall only mode, T3444/T3445, and SRVCC handover to CS domain, UTRAN, or GERAN [60].\nCMX500 NGeCall sources add 5GS/NR-related 3GPP TS 34.229-5 and 3GPP TS 38.523-1 test contexts [60].\nCMX500 NGeCall sources add CEN EN 17240:2024 IPv4/IPv6 MSD transfer, MSD version 3, and additional data from Euro NCAP TB 040:2022 [60].\nAutomotive is listed as an application context for Virtual Signalling Tester post-silicon testing [25].\nVirtual Signalling Tester post-silicon testing supports basic protocol tests for IoT devices and communication modules [25].\nVirtual Signalling Tester post-silicon testing supports fast functional tests, regression tests, sample scenario parameterization, test procedures, and report/log display [25].\nVirtual Signalling Tester is a PC-based software protocol simulator for creating an NR/RedCap protocol test environment [26].\nVirtual Signalling Tester reproduces RRC-NAS, PDCP, RLC, and MAC protocol layers on a PC [28].\n【推論】For broader automotive connectivity beyond eCall, the supported signaling building blocks are LTE/NR, RedCap/eRedCap, NTN, and WLAN, but the passages do not directly tie each of these general CMX500 options to automotive use [1][47][48].\nR&S CMX500 supports LTE, NR FR1, NR FR2, NSA, SA, FDD, and TDD device testing [1].\nR&S CMX500 supports NR FR1/FR2 signaling and LTE signaling [1].\nThe NR signaling enabler CMX-KS600B/M/X includes 5G NR SA option 2, NSA option 3, DL 2x2 and 4x4 MIMO, one CC, and UL 256QAM [47].\nThe NR signaling extension CMX-KS610B/M/X includes UL 2x2 MIMO and carrier aggregation up to 9 CC [47].\nThe NR signaling extension CMX-KS612B/M/X provides carrier aggregation from 10 to 12 CC [47].\nRedCap is supported by CMX-KS617B/M/X, and eRedCap is supported by CMX-KS618B/X [47].\nNTN signaling extensions are supported by CMX-KS627B/M/X, CMX-KS628B/X, and CMX-KS629B/X [47].\nNB-NTN signaling Rel.17 is supported by CMX-KS527B/X [47].\nWLAN signaling supports 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn, AP testing, station testing, single-user 2x2 MIMO, and advanced encryption and authentication [48].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 5.963112
+            },
+            {
+             "text": "Virtual Signalling Tester › Post-silicon testing\n- 適用 [[IoT]] device 與 communication module 的 basic protocol test。\n- 支援快速 functional test、regression test、sample scenario parameterization、test procedure 與 report / log display。\n- 來源列出 [[5G RedCap]]、Automotive、Healthcare、Industrial IoT、Smart Cities 等應用語境。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+             },
+             "score": 2.720499
+            },
+            {
+             "text": "Virtual Signalling Tester\n[[Virtual Signalling Tester]] 是 [[mx844030pc-j1200]] 中 Anritsu 對 virtualized protocol stack test solution 的產品 / 解決方案語彙，核心是用 PC-based software protocol simulator 建立 NR / RedCap protocol test environment。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+             },
+             "score": 0.467512
+            },
+            {
+             "text": "Virtual Signalling Tester › 來源定義\n[[mx844030pc-j1200]] 將 [[Virtual Signalling Tester]] 描述為 software protocol simulator / Virtual Signalling Test Solution，透過虛擬化 protocol stack，在 PC 上重現多個 protocol layers：\n\n- [[RRC-NAS]]\n- [[PDCP]]\n- [[RLC]]\n- [[MAC]]\n\n來源主張它可不使用一般硬體測試儀而在 PC 上快速建立 protocol test environment；但 RF-IF configuration 仍使用 [[Anritsu MD8190A]] Universal RF Unit 與 [[MX819020A]] RF Platform。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+             },
+             "score": 0.359241
+            },
+            {
+             "text": "Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard › 重點摘要\n- [[Rohde & Schwarz]] 宣稱其與 [[Qualcomm Technologies]] 合作，驗證 [[Snapdragon Auto 5G Modem-RF]] 上 [[Next Generation eCall]]（NG eCall）的 implementation，並稱其符合 [[EN 17240]]:2024。\n- 來源說 [[eCall]] 於 2015 年導入，且自 2018 年起成為歐盟境內所有新車銷售的 mandatory requirement。\n- 來源指出，隨著 2G / 3G circuit-switched cellular networks 逐漸 obsolete，emergency call systems 需要適配到 4G / 5G packet-switched cellular networks。\n- 來源稱 [[European Commission]] 在其 most recent regulation 中定義 NG eCall 將自 **2026-01-01** 起成為 obligatory。\n- 來源稱 EN 17240:2024 建立在 IP Multimedia Subsystem（[[IMS]]）networks 上測試 eCall systems 的 guidelines，涵蓋 advanced 4G LTE 與 5G NR technologies。\n- [[Snapdragon Auto 5G Modem-RF]] 被描述為 5G automotive-grade platform，支援 high-speed connectivity、advanced positioning、Vehicle-to-Everything（[[V2X]]）、multi-band [[GNSS]] navigation 與 enhanced safety。\n- 來源稱驗證流程使用 [[R&S CMX500]] mobile radio tester，作為 NG eCall voice and data transmission 的 comprehensive testing solution。\n- 來源稱測試模擬 [[PSAP]]，並驗證 implementation at both ends with the [[EN 17240]]:2024 standard。\n- 來源說 [[R&S CMX500]] 支援 4G 與 5G technologies，目標是讓方案 future-proof。\n- [[Juergen Meyer]] 以 [[Rohde & Schwarz]] Vice President Market Segment Automotive 身分在新聞稿中引述，稱此次 collaboration 為 future emergency call services 建立 new benchmark。\n- 來源稱 [[R&S CMX500]] 搭配 [[R&S CMX-KA098]] software option 可在 realistic network conditions 下用於 NG eCall testing。\n- 來源將合作定位為 mutually validating solutions、reducing effort、accelerating time to market for mutual customers。\n- Press and media contact 為 [[Patrizia Muehlbauer]]，職稱 PR Manager Products & Standard Systems。\n- 公司資訊段落稱 [[Rohde & Schwarz]] 2024/2025 fiscal year net revenue 為 EUR 3.16 billion，2025-06-30 worldwide employees more than 15,000。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+             },
+             "score": 0.633394
+            },
+            {
+             "text": "CMX500_Features_CSW9-20-0_en_32 › NR / LTE signaling\n- CMX-KS... software options 用於 NR 與 LTE；options 分為 basic（B）、medium（M）、expert（X）sets。\n- R&S CMX-KS600B/M/X 是 NR signaling enabler Rel. 15，包含 5G NR SA option 2、NSA option 3、DL 2x2 and 4x4 MIMO、one CC、UL 256QAM。\n- R&S CMX-KS610B/M/X 提供 NR signaling extension Rel. 15 feature set 3，包含 UL 2x2 MIMO、CA up to 9 CC。\n- R&S CMX-KS612B/M/X 提供 CA 10 to 12 CC。\n- RedCap：R&S CMX-KS617B/M/X；eRedCap：R&S CMX-KS618B/X。\n- NTN：R&S CMX-KS627B/M/X（Rel. 17）、R&S CMX-KS628B/X（Rel. 18）、R&S CMX-KS629B/X（Rel. 19）。\n- NB-IoT signaling option：R&S CMX-KS527B/X（NB-NTN signaling，Rel. 17）。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 13,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+             },
+             "score": 1.919103
+            },
+            {
+             "text": "CMX500_Features_CSW9-20-0_en_32 › WLAN signaling 與 measurement\n- WLAN signaling 支援 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn、AP testing、station testing、single user 2x2 MIMO、advanced encryption and authentication。\n- 若相關 options 都可用，[[R&S CMX500]] 支援 simultaneous WLAN AP and station emulation。\n- WLAN measurement options 支援 WLAN TX measurements：802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 True MIMO。\n- WLAN measurement RF frequency 依 hardware 而定，涵蓋 2.4 GHz、4 GHz、5 GHz、6 GHz operating bands，也支援 out-of-band frequencies；802.11ax SISO input signal settings 明示 RF frequency 為 all WLAN frequency bands up to 7.125 GHz。\n- WLAN measurement bandwidth 依 standard 支援 5 MHz、10 MHz、20 MHz、40 MHz、80 MHz、160 MHz、320 MHz。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 14,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+             },
+             "score": 1.463764
+            },
+            {
+             "text": "Hybrid eCall testing › 測試目的\n依 [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]]，hybrid eCall test specification [[EN 18052]] 要求 hybrid system combine different transmission paths and protocols，確保 eCall reliably reaches its destination。\n\n來源描述的實務語境：\n\n- 車輛使用 NG eCall functions，即 IP/IMS-based voice and data over 4G/5G。\n- 當 coverage 或 service quality degrades 時，車輛可 automatically fall back to available classic CS eCall 2G/3G transport paths。\n- Manufacturers 需要 validate hybrid implementations，以確保能 trigger calls、transmit [[MSD]]、maintain [[GNSS]] positioning，並提供 intelligible voice quality。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+             },
+             "score": 0.274739
+            },
+            {
+             "text": "Hybrid eCall testing › 測試情境\n來源明示或列出的 network scenarios 包含：\n\n- [[VoNR]]。\n- [[VoLTE]]。\n- circuit-switched fallback。\n- handovers。\n- degraded radio conditions。\n- real-world mobile network conditions simulation。\n- various network scenarios emulation。\n\n來源沒有提供各 scenario 的 test case IDs、channel model、radio profile 或 pass/fail criteria。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+             },
+             "score": 0.244282
+            },
+            {
+             "text": "Hybrid eCall testing\n[[Hybrid eCall testing]] 是驗證車輛 emergency call system 能在 NG eCall 與 classic CS eCall transport paths 之間可靠運作與 fallback 的測試主題；[[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 將其連到 [[EN 18052]]:2025、[[EN 17240]]:2024+A1:2026、[[R&S CMX500]] 與 [[R&S CMX-KA09x]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Hybrid eCall testing.md"
+             },
+             "score": 0.228755
+            },
+            {
+             "text": "CMX500 NGeCall configuration › CMW500 & CMX500 eCall CS/PS Hybrid EN18052:2025\n[[CMX_Configuration_Guide]] 的 hybrid minimum configuration 區段同時列出 CMW500 與 CMX500 items。CMX500 端列出：\n\n| Item | Type | Material Number | Description | Comment |\n|---|---|---:|---|---|\n| [[R&S CMX-B600B]] | HW | 1222.0953.03 | RF Unit | mandatory, 1；B600A allowed as well |\n| [[R&S CMX-ZG180]] | HW | 1222.4313.02 | External media endpoint audio | mandatory for real E2E Communication |\n| [[R&S CMX-KS600B]] | SW | 1222.1672.02 | LTE/NR Signaling Enabler Rel.15, Basic Level | mandatory |\n| [[R&S CMX-KA180]] | SW | 1222.4165.02 | CMX Audio Enabler (Codecs) | mandatory |\n| [[R&S CMX-KA110]] | SW | 1222.4142.02 | CMX Application Test Feature Set 2 | mandatory；for test IMS Tests from EN17240:2024 |\n| [[R&S CMX-KA401]] | SW | 1222.8125.02 | CMX Audio Test Test Feature Set 2 | mandatory for In-Band Modem over IP Tests |\n| [[R&S CM-Z1MF]] | HW | 1212.3072.02 | Adapter set XLR/BNC, 2 male, 2 female | optional；Adapter to connect CMW-Z50 |\n| [[R&S CMX-KA094]] | SW | 1208.4703.02 | Enabling test software for eCall | mandatory |\n| [[R&S CMX-KA098]] | SW | 1222.6639.02 | Enabling test software for 4G/5G NGeCall | mandatory |\n| [[R&S CMX-KA099]] | SW | 1222.9209.02 | APPL NGECALL MULTI CELL | mandatory |\n| [[R&S CMX-KF672B]] | SW | 1222.9215.02 | CMX-KF672B NGECALL TC EN18052 | mandatory |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 NGeCall configuration.md"
+             },
+             "score": 1.792069
+            },
+            {
+             "text": "CMX500 NGeCall configuration › CMX500 NGeCall 4G/5G configuration\n[[CMX_Configuration_Guide]] 的 CMX500 NGeCall 4G/5G 區段 contact 為 [[Pabiola Dushi]]，列出下列 items：\n\n| Item | Type | Material Number | Description | Comment |\n|---|---|---:|---|---|\n| CMX500 | HW | 1201.0002K70 | Radio Communication Tester | mandatory |\n| [[R&S CMX-PB70I]] | HW | 1222.0676.10 | CMX500 Basic Assembly | mandatory |\n| [[R&S CMX-B40A]] | HW | 1222.9838.02 | CMX System Controller | mandatory |\n| [[R&S CMX-B200A]] | HW | 1222.0747.02 | Accelerator Unit | mandatory, 1 |\n| [[R&S CMX-B300C]] | HW | 1222.0801.04 | CMX Processing Unit | mandatory；B300B allowed as well |\n| [[R&S CMX-B600B]] | HW | 1222.0953.03 | RF Unit | mandatory, 1 |\n| [[R&S CMX-ZG180]] | HW | 1222.4313.02 | External media endpoint audio | mandatory for real E2E Communication |\n| [[R&S CM-Z1MF]] | HW | 1212.3072.02 | Adapter set XLR/BNC, 2 male, 2 female | optional；Adapter to connect CMW-Z50 |\n| [[R&S CMX-KS600B]] | SW | 1222.1672.02 | LTE/NR Signaling Enabler Rel.15, Basic Level | mandatory |\n| [[R&S CMX-KA100]] | SW | 1222.1595.02 | CMX Application Test Feature Set 1 | mandatory |\n| [[R&S CMX-KA180]] | SW | 1222.4165.02 | CMX Audio Enabler (Codecs) | mandatory |\n| [[R&S CMX-KA110]] | SW | 1222.4142.02 | CMX Application Test Feature Set 2 | mandatory；for test IMS Tests from EN17240:2024 |\n| [[R&S CMX-KA401]] | SW | 1222.8125.02 | CMX Audio Test Test Feature Set 2 | mandatory；Audio player/recorder with ZG180A；mandatory for TS17240 In-Band Modem over IP Tests |\n| [[R&S CMX-KA098]] | SW | 1222.6639.02 | Enabling test software for 4G/5G NGeCall | mandatory；for 4G/5G NG eCall 17240:2024 |\n| [[R&S CMX-KF671B]] | SW | 1222.8348.02 | NGECALL E2E TEST SCRIPTS | mandatory；for 4G/5G NG eCall 17240:2024 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 NGeCall configuration.md"
+             },
+             "score": 1.718883
+            },
+            {
+             "text": "NGeCall over LTE › 來源中的測試主題\n兩份 capability lists 中反覆出現的測試主題包含：\n\n- IVS manual eCall、automatic eCall、test eCall initiation。\n- IMS eCall session establishment，包含 `urn:service:sos:ecall:automatic`、`urn:service:sos:ecall:manual`、`urn:service:test.sos.ecall` 等語彙。\n- MSD transfer、MSD update、PSAP request、negative acknowledgement / missing acknowledgement 情境。\n- Valid SIM/USIM、forbidden PLMN、limited service condition、roaming scenario。\n- PSAP initiated callback、call clear-down、IVS initiated clear-down not allowed。\n- Voice link established 與 audio interface verification。\n- eCall only mode、T3444 / T3445、SRVCC handover to CS domain / UTRAN / GERAN。\n- Time-Warping Conformance Test / No Time-Warping Conformance Test。\n- CMX500 來源新增 5GS / NR 相關 3GPP TS 34.229-5 與 3GPP TS 38.523-1 測試脈絡。\n- CMX500 來源新增 CEN EN 17240:2024 中 IPv4 / IPv6 MSD transfer、MSD version 3、additional data from Euro NCAP TB 040:2022 等項目。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NGeCall over LTE.md"
+             },
+             "score": 0.582104
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "technical_knowledge",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 35,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 25,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 36,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 26,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 28,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Virtual Signalling Tester.md",
+             "raw_refs": [
+              "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "raw/Productions/mx844030pc-j1200.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+             "raw_refs": [
+              "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+              "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Hybrid eCall testing.md",
+             "raw_refs": [
+              "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/CMX500 NGeCall configuration.md",
+             "raw_refs": [
+              "raw/Productions/CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md",
+              "raw/Productions/CMX_Configuration_Guide.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/NGeCall over LTE.md",
+             "raw_refs": [
+              "raw/Productions/CMW-KA096_PanEUNGeCall_TC_Status.md",
+              "raw/Productions/CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

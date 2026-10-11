@@ -1,0 +1,126 @@
+{
+ "id": "Q1021",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 99.0,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 20,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR frame structure.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 29,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR numerology.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 27,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NR sample rate.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 81,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR frame structure.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 73,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 74,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 13,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 SRS RF measurements.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 75,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 SRS RF measurements.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 78,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 SRS RF measurements.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 79,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 SRS RF measurements.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 52,
+   "kind": "wiki",
+   "ref": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 53,
+   "kind": "wiki",
+   "ref": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "For base-station Tx tests, Spectrum mode is used for OBW and transmitter spurious emissions, while 5G NR mode is used for EVM/Frequency Err/Power, TAE, Transmit ON/OFF Power, ACLR, and SEM",
+   "Applicable products for those tests include R&S FSW, FSV3000, FSVA3000, FSV, FSVA, FPS, SMW200A and SMBV100B"
+  ],
+  "reason": "The answer’s technical description of OFDM-related NR structure, numerology, sample rate, CP symbols, CMX500 option/spec conditions, ARB limits, and SRS switching constraints is supported by the cited passages, and the marked inferences are fair connections to measurement setup/spec interpretation. The base-station mode/product list is supported as a product-test fact, but the passages do not clearly connect those particular choices to understanding OFDM.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

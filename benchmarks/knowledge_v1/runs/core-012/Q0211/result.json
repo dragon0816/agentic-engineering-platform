@@ -1,0 +1,95 @@
+{
+ "id": "Q0211",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 46.844,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 28,
+   "kind": "wiki",
+   "ref": "wiki/concepts/UAV UAS Drones T&M Solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 38,
+   "kind": "wiki",
+   "ref": "wiki/concepts/UAV signaling test solution.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 16,
+   "kind": "wiki",
+   "ref": "wiki/concepts/DO-160 airborne equipment EMC testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 43,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 GPRF Generator.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 44,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 GPRF Generator.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 45,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 GPRF Generator.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 19,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 21,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "military / aviation drone testing",
+   "Before / beside radar EMC-EME testing",
+   "During radar/EME susceptibility scenario"
+  ],
+  "reason": "The answer's main placement is supported: CMX500 signaling is limited to LTE/5G/Wi-Fi UE signaling and de-sense, EMC/EME is separate, GPRF is a non-signaling waveform replay/TX-measurement use case, and AREG800A is the cited radar echo generator. It reasonably flags that the cited radar echo product is automotive and that the passages do not establish a dedicated Aerospace/Defense radar signaling-tester workflow.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

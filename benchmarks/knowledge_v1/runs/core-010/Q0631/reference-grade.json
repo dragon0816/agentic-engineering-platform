@@ -1,0 +1,68 @@
+{
+ "id": "Q0631",
+ "grader": "1.2",
+ "coverage": 0.375,
+ "points": [
+  {
+   "n": 1,
+   "point": "The AI data center technology change documented in the Vault is the move from the 48 V ecosystem to 800 V / ±400 Vdc HVDC as rack power reaches MW class",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention 48 V to 800 V / ±400 Vdc HVDC or MW-class rack power"
+  },
+  {
+   "n": 2,
+   "point": "The Vault's AI server ecosystem → R&S solution mapping assigns VNA, oscilloscope and phase-noise instruments (ZNL/MXO/FSWP/ZNA/ZNB) to these needs, not signaling or non-signaling radio communication testers",
+   "verified": true,
+   "label": "partial",
+   "why": "says SI/PCB measurements rather than direct signaling-tester requirement, but does not state the VNA/MXO/FSWP/ZNA/ZNB mapping"
+  },
+  {
+   "n": 3,
+   "point": "Even data center power-electronics topics (800V HVDC) are mapped in the Vault to MXO / FSWP / ZISO / BMS test, with no signaling tester involvement",
+   "verified": true,
+   "label": "missing",
+   "why": "no 800 V HVDC power-electronics mapping to MXO/FSWP/ZISO/BMS"
+  },
+  {
+   "n": 4,
+   "point": "That mapping page is only a sales/test clue from an Excel conversion and is not a formal configuration or validated requirement",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention the Excel sales clue / non-formal configuration warning"
+  },
+  {
+   "n": 5,
+   "point": "In the Vault, signaling vs non-signaling tester roles are defined for wireless device testing: CMX500 for R&D signaling, CMP180 for production non-signaling RF",
+   "verified": true,
+   "label": "partial",
+   "why": "identifies CMX500 signaling and CMP180 production non-signaling RF, but not clearly the R&D signaling role"
+  },
+  {
+   "n": 6,
+   "point": "Non-signaling mode is tied to WLAN/cellular device production RF measurement speed, i.e. a device-test driver rather than a data center driver",
+   "verified": true,
+   "label": "partial",
+   "why": "ties CMP180 to WLAN/cellular production RF, but not measurement speed or device-test driver versus data-center driver"
+  },
+  {
+   "n": 7,
+   "point": "The documented driver of new signaling-tester measurement capability is new wireless standards such as Wi-Fi 8 / IEEE 802.11bn",
+   "verified": true,
+   "label": "covered",
+   "why": "states Wi-Fi 8 / IEEE 802.11bn and other wireless standards as signaling capability context"
+  },
+  {
+   "n": 8,
+   "point": "Signaling test content in the Vault is scoped to LTE / 5G / Wi-Fi UE RF, application-layer and protocol measurements within 400 MHz–8 GHz, with no data center scope",
+   "verified": true,
+   "label": "partial",
+   "why": "lists LTE/NR/WLAN signaling measurements and up to 8 GHz, but not full 400 MHz–8 GHz UE RF/application/protocol scope or explicit no data-center scope"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "If the Signaling Tester is used for WLAN/cellular functions associated with data-center equipment",
+  "If the Non-signaling Tester is used for production RF checks, the relevant capability direction is up to 8 GHz coverage, up to 500 MHz bandwidth, multi-port analyzer/generator resources, and 2x2 to 4x4 MIMO scalability"
+ ]
+}

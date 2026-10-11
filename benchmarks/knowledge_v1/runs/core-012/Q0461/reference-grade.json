@@ -1,0 +1,68 @@
+{
+ "id": "Q0461",
+ "grader": "1.2",
+ "coverage": 0.125,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's automotive radar anchor product is the R&S AREG800A Automotive Radar Echo Generator, used for dynamic artificial object generation (echo generation toward the radar under test).",
+   "verified": true,
+   "label": "covered",
+   "why": "Identifies AREG800A as echo-generation instrument generating dynamic artificial objects"
+  },
+  {
+   "n": 2,
+   "point": "An oscilloscope is connected to the AREG800A's auxiliary receive-signal IF output at the base unit for optional signal analysis (alternative to a spectrum analyzer).",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Places scope in board-level/interface validation instead of AREG800A AUX IF output"
+  },
+  {
+   "n": 3,
+   "point": "This auxiliary IF output path requires the R&S AREG8-K740 option (Analog IF output interfaces).",
+   "verified": true,
+   "label": "missing",
+   "why": "No mention of AREG8-K740 option"
+  },
+  {
+   "n": 4,
+   "point": "The documented purpose of the AUX IF output port is radar signal analysis and EIRP measurements.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Gives interface/PDN debug purpose, not radar signal analysis/EIRP at AUX IF"
+  },
+  {
+   "n": 5,
+   "point": "Level/gain limits at the tap point: the AUX IF output measurement port is max. 0 dBm with 0 dB (nom.) gain from RX IF input to AUX IF output at the base unit.",
+   "verified": true,
+   "label": "missing",
+   "why": "No 0 dBm or 0 dB gain limits"
+  },
+  {
+   "n": 6,
+   "point": "The scope only has to cover the IF band, whose range depends on frontend/option (e.g. 0.7 GHz to 4.7 GHz with AREG8-K740 at the 77/79 GHz frontends).",
+   "verified": true,
+   "label": "missing",
+   "why": "No IF-band bandwidth/range requirement"
+  },
+  {
+   "n": 7,
+   "point": "Power and EIRP measurement at the frontend RX power connector is a separate path that uses a power sensor, not an oscilloscope.",
+   "verified": true,
+   "label": "missing",
+   "why": "No separate frontend RX power connector/power sensor path"
+  },
+  {
+   "n": 8,
+   "point": "Other workflow-level interfaces documented for the AREG800A include a dedicated hardware-in-the-loop control interface (AREG8-K109).",
+   "verified": true,
+   "label": "missing",
+   "why": "No AREG8-K109 HiL control interface"
+  }
+ ],
+ "contradicted": 2,
+ "invented": [
+  "placing the oscilloscope in the electrical interface / board-level validation part of the workflow",
+  "in an automotive radar workflow, an oscilloscope would fit around radar ECU/module electrical validation and debug—e.g., interface signal checks or PDN checks"
+ ]
+}

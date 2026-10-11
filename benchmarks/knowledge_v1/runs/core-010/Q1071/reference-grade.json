@@ -1,0 +1,67 @@
+{
+ "id": "Q1071",
+ "grader": "1.2",
+ "coverage": 0.312,
+ "points": [
+  {
+   "n": 1,
+   "point": "A measurement method in the Vault is a defined procedure for obtaining a metric; GFM324 lists multiple TRP measurement procedures that are either accurate or a controlled overestimate.",
+   "verified": true,
+   "label": "partial",
+   "why": "gives examples of methods/procedures but not the Vault sense or accurate/overestimate TRP procedures"
+  },
+  {
+   "n": 2,
+   "point": "The choice of measurement procedure depends on the available test setup, measurement equipment and measurement time.",
+   "verified": true,
+   "label": "covered",
+   "why": "states procedure choice depends on setup, equipment, and time"
+  },
+  {
+   "n": 3,
+   "point": "Which OTA antenna test solution (test system / chamber) can be used is method- and test-case-dependent — not every solution covers every conformance test.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not state OTA chamber/test-system coverage varies by test case"
+  },
+  {
+   "n": 4,
+   "point": "The metric prescribed by the method is explicit in test procedures, e.g. OTA emission measurement must use TRP with True RMS detection.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions TRP/EIRP workflow and RMS detectors, but not the explicit OTA emission TRP with True RMS requirement"
+  },
+  {
+   "n": 5,
+   "point": "Instrument and option selection plus pre-test calibration (K544, attenuation/antenna-gain tables for cable, antenna and OTA losses) are part of the measurement-method decision.",
+   "verified": true,
+   "label": "partial",
+   "why": "covers instrument/option choices, but not K544 attenuation/antenna-gain calibration for cable/antenna/OTA losses"
+  },
+  {
+   "n": 6,
+   "point": "EEIRP is an example of a spatially defined measurement method/metric: the average of EIRP measurements over an upper hemisphere with elevation-specific limits.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention EEIRP upper-hemisphere average of EIRP"
+  },
+  {
+   "n": 7,
+   "point": "The Vault treats a missing measurement method as a reason a product/performance claim cannot be validated or compared.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not say missing method makes claims unverifiable or non-comparable"
+  },
+  {
+   "n": 8,
+   "point": "Option-level product questions are explicitly deferred to official documents when the measurement method is unknown (e.g. CMX-KA401 latency measurement method).",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention deferral to official docs for unknown option-level methods such as CMX-KA401 latency"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "ETSI-style workflow can first use EIRP coarse-grid scanning to find spurious frequencies and then apply TRP fine-grid measurement"
+ ]
+}

@@ -1,0 +1,1167 @@
+{
+ "question": {
+  "id": "Q0461",
+  "text": "For a Automotive use case involving automotive radar, where would Oscilloscope fit in the test workflow?",
+  "market": "Automotive",
+  "product": "Oscilloscope",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-3bb093ac5b7345d9841827ca363ea4d0",
+ "exchange": {
+  "sent": "For a Automotive use case involving automotive radar, where would Oscilloscope fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 135.25,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-3bb093ac5b7345d9841827ca363ea4d0",
+    "actor": "leo.chi",
+    "title": "For a Automotive use case involving automotive radar, where would Oscill…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T18:55:40.126321Z",
+    "updated_at": "2026-10-11T18:57:55.206063Z",
+    "messages": [
+     {
+      "message_id": "message-7a06aa0abda540478862cdbceb9d52f7",
+      "role": "user",
+      "text": "For a Automotive use case involving automotive radar, where would Oscilloscope fit in the test workflow?",
+      "created_at": "2026-10-11T18:55:40.145227Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-b478a3747bbd46468ff2fc40de9f6e85",
+      "role": "assistant",
+      "text": "The automotive-radar-specific instrument in the passages is the R&S AREG800A, an Automotive Radar Echo Generator used for dynamic artificial object generation [6]; its echo generation can be hybrid or digital, including FMCW radar use with generated distances up to 3000 m [1].\nThe passages only explicitly place oscilloscopes in electrical interface and power-distribution validation: “Interface Test” maps to scopes, BERTs, AWGs, and switch matrices, and “Power Distribution Network” maps to scopes and network analyzers [19][20].\nThe AREG800A production configuration also exposes radar-test interfaces such as analog IF output interfaces and remote-control interfaces [3], and the option list includes analog IF output, analog IF input, hardware-in-the-loop control, synchronization, and remote-control GPIB interfaces [13].\n【推論】So, in an automotive radar workflow, the oscilloscope would sit alongside the AREG800A-based radar echo test as an electrical bring-up, interface-check, PDN, and debug instrument, while the AREG800A provides the radar echo / artificial-object stimulus for the radar under test [1][3][6][13][19][20].\n\n來源：\n[1] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[3] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[6] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[13] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[19] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[20] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）",
+      "created_at": "2026-10-11T18:57:55.206063Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-cc5c6139bff644fcb681c7cbb28f8bf2",
+       "request_id": "request-cc5c6139bff644fcb681c7cbb28f8bf2",
+       "span_id": "span-cc5c6139bff644fcb681c7cbb28f8bf2",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "The automotive-radar-specific instrument in the passages is the R&S AREG800A, an Automotive Radar Echo Generator used for dynamic artificial object generation [6]; its echo generation can be hybrid or digital, including FMCW radar use with generated distances up to 3000 m [1].\nThe passages only explicitly place oscilloscopes in electrical interface and power-distribution validation: “Interface Test” maps to scopes, BERTs, AWGs, and switch matrices, and “Power Distribution Network” maps to scopes and network analyzers [19][20].\nThe AREG800A production configuration also exposes radar-test interfaces such as analog IF output interfaces and remote-control interfaces [3], and the option list includes analog IF output, analog IF input, hardware-in-the-loop control, synchronization, and remote-control GPIB interfaces [13].\n【推論】So, in an automotive radar workflow, the oscilloscope would sit alongside the AREG800A-based radar echo test as an electrical bring-up, interface-check, PDN, and debug instrument, while the AREG800A provides the radar echo / artificial-object stimulus for the radar under test [1][3][6][13][19][20].\n\n來源：\n[1] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[3] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[6] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[13] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[19] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[20] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-cc5c6139bff644fcb681c7cbb28f8bf2",
+      "request_id": "request-cc5c6139bff644fcb681c7cbb28f8bf2",
+      "span_id": "span-cc5c6139bff644fcb681c7cbb28f8bf2",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-cc5c6139bff644fcb681c7cbb28f8bf2",
+       "request_id": "request-cc5c6139bff644fcb681c7cbb28f8bf2",
+       "span_id": "span-cc5c6139bff644fcb681c7cbb28f8bf2",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The automotive-radar-specific instrument in the passages is the R&S AREG800A, an Automotive Radar Echo Generator used for dynamic artificial object generation [6]; its echo generation can be hybrid or digital, including FMCW radar use with generated distances up to 3000 m [1].\nThe passages only explicitly place oscilloscopes in electrical interface and power-distribution validation: “Interface Test” maps to scopes, BERTs, AWGs, and switch matrices, and “Power Distribution Network” maps to scopes and network analyzers [19][20].\nThe AREG800A production configuration also exposes radar-test interfaces such as analog IF output interfaces and remote-control interfaces [3], and the option list includes analog IF output, analog IF input, hardware-in-the-loop control, synchronization, and remote-control GPIB interfaces [13].\n【推論】So, in an automotive radar workflow, the oscilloscope would sit alongside the AREG800A-based radar echo test as an electrical bring-up, interface-check, PDN, and debug instrument, while the AREG800A provides the radar echo / artificial-object stimulus for the radar under test [1][3][6][13][19][20].\n\n來源：\n[1] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[3] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[6] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[13] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[19] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[20] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_7yf6cszVrDCg6QXbUJ1GfO55",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "The automotive-radar-specific instrument in the passages is the R&S AREG800A, an Automotive Radar Echo Generator used for dynamic artificial object generation [6]; its echo generation can be hybrid or digital, including FMCW radar use with generated distances up to 3000 m [1].\nThe passages only explicitly place oscilloscopes in electrical interface and power-distribution validation: “Interface Test” maps to scopes, BERTs, AWGs, and switch matrices, and “Power Distribution Network” maps to scopes and network analyzers [19][20].\nThe AREG800A production configuration also exposes radar-test interfaces such as analog IF output interfaces and remote-control interfaces [3], and the option list includes analog IF output, analog IF input, hardware-in-the-loop control, synchronization, and remote-control GPIB interfaces [13].\n【推論】So, in an automotive radar workflow, the oscilloscope would sit alongside the AREG800A-based radar echo test as an electrical bring-up, interface-check, PDN, and debug instrument, while the AREG800A provides the radar echo / artificial-object stimulus for the radar under test [1][3][6][13][19][20].\n\n來源：\n[1] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[3] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[6] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[13] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[19] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[20] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）",
+          "evidence": {
+           "raw_citations": 6,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-947358483f1843a3b559b88f13602ba1",
+            "request_id": "request-947358483f1843a3b559b88f13602ba1",
+            "span_id": "span-947358483f1843a3b559b88f13602ba1",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "For an automotive use case involving automotive radar, where would an oscilloscope fit in the test workflow? Please explain its role in the workflow.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 6.421744
+             },
+             {
+              "text": "R&S AREG800A › 相關來源\n- [[AREG800A_specs_en_3609-8015-22_v0900]] — R&S AREG800A Automotive Radar Echo Generator Specifications，Version 09.00，September 2025。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 50,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 5.811304
+             },
+             {
+              "text": "R&S AREG800A › Automotive radar production configurations\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- [[R&S AREG-P1]] radar mini configuration / [[R&S AREG-DBP1]] base unit option：one digital channel，one object per channel，5 GHz instantaneous bandwidth，near object range possibility，analog IF output interfaces，remote control interfaces，[[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option one frontend per channel required。\n- [[R&S AREG-P2]] radar golden configuration / [[R&S AREG-DBP2]] base unit option：two digital channels。\n- [[R&S AREG-P3]] radar pro configuration / [[R&S AREG-DBP3]] base unit option：搭配 [[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option；frontend 支援 monostatic 或 bistatic；three digital channels；one object per channel。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 31,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 5.221941
+             },
+             {
+              "text": "R&S AREG800A › 讀圖補充\n以下內容來自 [[AREG800A_specs_en_3609-8015-22_v0900]] 的讀圖補充，可信度低於正文，不用於推翻正文。本次提供的 raw 摘要未附圖片 wikilink，因此未嵌入圖片。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 48,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 5.217013
+             },
+             {
+              "text": "R&S AREG800A › 基本訂購資訊\n| 類別 | 型號 / 代碼 | 名稱 | Order No. | 原文說明 |\n|---|---|---|---|---|\n| Base unit | `AREG800A` | Automotive radar echo generator | `1437.4400.02` | Includes power cable and quick start guide |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 5.136838
+             },
+             {
+              "text": "R&S AREG800A\n[[R&S AREG800A]] 是 [[Rohde & Schwarz]] 的 Automotive Radar Echo Generator，用於 dynamic artificial object generation；本頁規格依 [[AREG800A_specs_en_3609-8015-22_v0900]]，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 5.093052
+             },
+             {
+              "text": "R&S AREG800A › Artificial objects\n| Frontend 組合 | Distance condition | Maximum artificial objects |\n|---|---|---:|\n| with [[R&S QAT100]] | `< 4 m to 3000 m + air gap` | 最多 8 個；4 m 至 17 m 最多 4 個，17 m 至 3000 m 最多 4 個 |\n| with [[R&S QAT100]] | `> 17 m to 3000 m + air gap` | 最多 8 個 |\n| with [[R&S QAT100]] | `≥ air gap to 3000 m` | 最多 8 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `< 4 m to 3000 m + air gap` | 最多 32 個，每 frontend 最多 8 個；4 m 至 17 m 最多 4 個，17 m 至 3000 m 最多 28 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `> 17 m to 3000 m + air gap` | 最多 32 個，每 frontend 最多 8 個 |\n| with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] / [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] or [[R&S FE44S]] | `≥ air gap to 3000 m` | 最多 32 個，每 frontend 最多 8 個 |\n\n其他 artificial object 規格：\n\n- Object distance accuracy with [[R&S AREG8-B9]] option：`±5 cm (meas.)`。\n- Object distance step size with [[R&S AREG8-B9]] option：`1 cm`。\n- Air gap：object distances 與 resulting object radar cross-sections 會依 frontend reference plane 與 DUT 之間距離改變；來源建議 air gap 足夠大以符合 radar under test 的 far-field condition。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 3.546526
+             },
+             {
+              "text": "R&S AREG800A › Production base units\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n| 代碼 | 名稱 | Order No. | 原文的一句說明 |\n|---|---|---|---|\n| [[R&S AREG-DBP1]] | [[R&S AREG-P1]] radar mini | `1437.9676P02` | Production base unit option / radar mini configuration |\n| [[R&S AREG-DBP2]] | [[R&S AREG-P2]] radar golden | `1437.9682P02` | Production base unit option / radar golden configuration |\n| [[R&S AREG-DBP3]] | [[R&S AREG-P3]] radar pro | `1437.9699P02` | Production base unit option / radar pro configuration |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 41,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 3.3807
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 2.449444
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n這份來源是 [[R&S AREG800A]] Automotive Radar Echo Generator 的 specifications，文件編號 `PD 3609.8015.22`，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`，文件標題為 `AREG800A Automotive Radar Echo Generator`，Copyright `© 2021–2025 Rohde & Schwarz`。\n\n[[R&S AREG800A]] 的 echo generator type 為 `dynamic artificial object generation`。Echo generation concept 分為：\n\n- `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n- `digital`：針對 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 `air gap value`；maximum generated distance 為 `3000 m`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 在環境溫度下儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格資料定義：\n\n- `Specifications with limits`：代表保證的產品效能，以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 的方式指定與測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：代表保證的產品效能，通常為 dimensions 或 setting parameter resolution 等無偏差或偏差可忽略的值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依據 GUM 計算，納入 environmental conditions、aging、wear and tear。\n- `Data without tolerance limits is not binding`；文件 `subject to change`。\n\n主要能力與限制：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 2.401593
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 讀圖補充\n以下內容來自讀圖補充，可信度低於正文，不用於推翻正文。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.79307
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG-MFP]]、[[R&S AREG-BFP]] — production frontend options，支援 monostatic 或 bistatic。\n- [[Automotive radar echo generation]]、[[FMCW radar]]、[[Radar cross-section]]、[[Doppler frequency shift]]、[[Hardware-in-the-loop]]、[[Open Simulation Interface]]、[[SCPI]]、[[Air gap]] — 本來源涉及的技術概念。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.754071
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG800A]] — Automotive Radar Echo Generator；本來源主要產品實體。\n- [[Rohde & Schwarz]] — 製造商與文件發布者。\n- [[R&S AREG8-B9]] — Digital baseband，1 GHz IF bandwidth、1 IF path、1 individual artificial object；Order No. `1437.8011.02`。\n- [[R&S AREG8-B63]] — Analog stepped delay line，用於 short object generation；Order No. `1437.8205.02`。\n- [[R&S AREG8-K527]] — Baseband extension from 1 GHz to 2 GHz IF bandwidth；Order No. `1437.9882.02`。\n- [[R&S AREG8-K528]] — Baseband extension from 2 GHz to 5 GHz IF bandwidth；Order No. `1437.9799.02`。\n- [[R&S AREG8-K570]] — Activation of second IF path；Order No. `1437.9899.02`。\n- [[R&S AREG8-K812]] — One additional artificial object；Order No. `1437.9853.02`。\n- [[R&S AREG8-K813]] — Extended Doppler frequency shift up to 10 MHz；Order No. `1437.9901.02`。\n- [[R&S AREG8-K814]] — Near object range for FMCW；Order No. `1437.9776.02`。\n- [[R&S AREG8-K740]] — Analog IF output interfaces；Order No. `1437.9830.02`。\n- [[R&S AREG8-K741]] — Analog IF input interface；Order No. `1437.9847.02`。\n- [[R&S AREG8-K109]] — Hardware-in-the-loop control interface；Order No. `1437.9860.02`。\n- [[R&S AREG8-K549]] — Synchronization interface；Order No. `1437.9876.02`。\n- [[R&S AREG8-K986]] — Remote control GPIB；Order No. `1437.9818.02`。\n- [[R&S AREG8-B97]] — System alignment backend；Order No. `1437.9001.02`。\n- [[R&S AREG-P1]] / [[R&S AREG-DBP1]]、[[R&S AREG-P2]] / [[R&S AREG-DBP2]]、[[R&S AREG-P3]] / [[R&S AREG-DBP3]] — automotive radar production configurations / production base unit options。\n- [[R&S AREG8-24S]]、[[R&S AREG8-24D]]、[[R&S AREG8-81S]]、[[R&S AREG8-81D]]、[[R&S AREG8-81WS]]、[[R&S AREG8-81WD]]、[[R&S FE44S]] — 支援的 mmWave 或 external frontends。\n- [[R&S QAT100]]、[[R&S QAT-B2]]、[[R&S QAT-Z50]] — advanced antenna array 及其相關 option/accessory。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.319078
+             },
+             {
+              "text": "Virtual tester\n[[Virtual tester]] 在 [[AIW_Products_Customer_Questionnaire]] 中被定義為跨 implementation → test → debug → validation 的 agentic workflow，而不是 single tool。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 1.392017
+             },
+             {
+              "text": "Virtual tester › 來源定義\n[[AIW_Products_Customer_Questionnaire]] 的 short definitions 寫道：\n\n> Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a single tool.\n\n因此本庫把 [[Virtual tester]] 記為工作流 / solution concept，而非單一軟體工具或儀器。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 1.088427
+             },
+             {
+              "text": "Virtual tester › 可能涵蓋的流程\n依問卷上下文，[[Virtual tester]] 相關需求可能涉及：\n\n- test idea 到 running, [[Validated results]] 的流程理解；\n- test script generation 或 refactoring；\n- ambiguous logs / failure debugging；\n- documentation lookup；\n- end-to-end test execution；\n- toolchain integration：repos、CI/CD、test frameworks、lab equipment interfaces、log / analysis pipelines；\n- [[Orchestration layer]] 對 AI agents 的 rules、instructions、skills coordination。\n\n以上是問卷問題範圍，不是已確認產品功能。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 0.148919
+             },
+             {
+              "text": "Virtual tester › 與 point tools 的區分\n問卷第 3b 題要求客戶說明他們是在尋找 point tools，或 broader [[Virtual tester]]：\n\n- point tools examples：better scripting、log analysis。\n- broader [[Virtual tester]]：spans implementation → test → debug → validation。\n\n這個區分表示 [[Virtual tester]] 的範圍比單一 scripting assistant 或 log analyzer 更寬，但來源未提供具體產品功能矩陣。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 0.079514
+             },
+             {
+              "text": "Virtual tester › 限制與未決事項\n- 來源未說明 [[Virtual tester]] 是否為正式產品名、solution architecture 名稱或 sales / discovery 用語。\n- 來源未列出支援的 test frameworks、instruments、CI systems 或 issue trackers。\n- 來源未定義 validation 自動化到何種程度，也未定義 minimal human intervention 的標準。\n- 來源未說明 [[Virtual tester]] 與 [[ScriptAssist]]、[[TechAssist]] 的產品對應。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 0.072944
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 2.532468
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 0.636799
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 0.561905
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽\n[[SerDes 與 SI PI 測試概覽]] 是依 [[0 Digital Test - What are SIPI and Serdes]] 建立的 high-speed digital 測試主題頁，用來連接 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]]、[[PCB]] / [[PCBA]] 與相關驗證儀器類型。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 0.507563
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 與既有知識的關係\n- [[SerDes]] 已記錄 die-to-die、SoC IP 與封裝示意圖中的 SerDes 語彙；本頁補充 R&S 簡報中 SerDes 與 SI / PI / validation challenges 的測試場景。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]] 與 [[TDR 阻抗測量]] 可承接 Slide 20–21 中對 high speed PCB / PCBA signal integrity flow 與 PCB test solutions 的列名。\n- [[Power Integrity 外部資料清單]] 保存既有 OneNote link hub 中的 PDN impedance 待讀資料；本頁只加入 Slide 11 明示的 [[Power Distribution Network]] 測試區塊。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 0.362916
+             },
+             {
+              "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.116092
+             },
+             {
+              "text": "R&S PCB test solutions › 圖上工具 / 合作方文字\n| 圖上文字 | 可能角色 | 來源 | 限制 |\n|---|---|---|---|\n| [[SPEAG]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未說明是合作夥伴、工具、方法或範例 |\n| [[SWISSTO12]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[QWED]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[KEYCOM]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[RSTW]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開完整單位名稱 |\n| TDR | 測 impedance | [[0 Digital Test - What are SIPI and Serdes]] | 未提供 TDR option 或探頭型號 |\n| Delta-L | 損耗量測相關 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供方法定義、標準或軟體名稱 |\n| ISD/ADK | 圖上方法 / 工具文字 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開縮寫，未說明與 Delta-L 的關係 |\n| w/ cable / connector testing | cable / connector testing | [[0 Digital Test - What are SIPI and Serdes]] | 未提供連接器類型、線纜規格或測試項目 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.113566
+             },
+             {
+              "text": "R&S PCB test solutions › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.108922
+             },
+             {
+              "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.100767
+             },
+             {
+              "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.100278
+             },
+             {
+              "text": "R&S PCB test solutions › 未決事項\n- Slide 21 未標示 R&S PCB test solutions 的正式文件版次與產品 portfolio 對應。\n- Slide 21 未標示 [[TDR]]、[[Delta-L]]、ISD/ADK、DK/DF extraction 的標準版本、演算法、測試條件或工具型號。\n- Slide 21 未展開 PL、ISD、ADK、RSTW、SWISSTO12、QWED、KEYCOM。\n- 需回看原始 PPTX 圖像確認各圖示、商標、箭頭與工具對應關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.088553
+             },
+             {
+              "text": "R&S PCB test solutions › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 既有內容來自 Keysight 圖像，流程是原材料表徵、材料選擇、電路板抽樣測試、大批量監控；本頁保存 R&S 簡報中的類似但不完全相同的流程詞。\n- [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 均已有既有頁面；本來源增加 2026.3.4 R&S 簡報的追溯來源，但沒有新增可量化規格。\n- [[SerDes 與 SI PI 測試概覽]] 連接 Slide 11 和 Slide 20 的 validation challenges / SI flow；本頁聚焦 Slide 21 的 PCB test solutions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.07586
+             },
+             {
+              "text": "R&S PCB test solutions › 可追溯限制\n- 本來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。\n- 本頁不把 Slide 21 的圖上列名解讀為正式解決方案型錄或完整採購配置。\n- [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]] 的角色未明，僅保留圖上列名。\n- [[ISD-ADK]] 與 PL 未展開縮寫，需後續來源補證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.061523
+             },
+             {
+              "text": "Digital design test success stories › 相關來源\n- [[DDT SuccessStories_202607]] — 2026.7 的 Digital design test success stories 來源摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Digital design test success stories.md"
+              },
+              "score": 0.127173
+             },
+             {
+              "text": "Digital design test success stories\n[[Digital design test success stories]] 是 [[DDT SuccessStories_202607]] 中對 2026.7 digital design test 應用案例的簡報層級 mapping，將部分測試應用連到 [[R&S FSWP]]、[[R&S SMA100B]] 與 [[R&S ZNA67]]，但未提供細部配置或測試結果。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Digital design test success stories.md"
+              },
+              "score": 0.125155
+             },
+             {
+              "text": "Digital design test success stories › 與既有測試概念的關係\n- [[SerDes 與 SI PI 測試概覽]] 與 [[R&S PCB test solutions]] 提供 high-speed digital、SI/PI 與 PCB 測試流程脈絡；本頁只保存 success-story 簡報中的應用 / 儀器對應關係。\n- [[高頻高速 PCB 測試解決方案]] 主要來自 Keysight 圖像來源，描述原材料表徵、材料選擇、抽樣測試與量產監控；本頁的 ATE PCB testing 只指出 [[R&S ZNA67]] 被列名，不能推論完整流程。\n- [[HSD Cable test 外部資料清單]] 保存 cable / connector / signal integrity 外部待讀材料；本頁的 High speed Cable testing slide 未提供可採用的 cable test 主張。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Digital design test success stories.md"
+              },
+              "score": 0.110176
+             },
+             {
+              "text": "Digital design test success stories › 來源中的 mapping\n| 投影片 | 來源標題 | 明示對應儀器 | 可連到的主題 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Slide 2–3 | DAC/ADC testing => FSWP, SMA100B | [[R&S FSWP]]、[[R&S SMA100B]] | [[DAC ADC testing]] | 2026.7 | 只 OCR 出標題與儀器名稱；圖片內容未解讀 |\n| Slide 4–5 | SOC testing => FSWP, SMA100B, ZNA67 | [[R&S FSWP]]、[[R&S SMA100B]]、[[R&S ZNA67]] | [[SoC testing]] | 2026.7 | 未提供 DUT、介面、頻率、量測結果或 option |\n| Slide 6 | SOC testing=> ZNA67 | [[R&S ZNA67]] | [[SoC testing]] | 2026.7 | 圖片內容未 OCR；不可推論 ZNA67 的完整配置 |\n| Slide 7 | ATE PCB testing=> ZNA67 | [[R&S ZNA67]] | [[ATE PCB testing]]、[[R&S PCB test solutions]] | 2026.7 | 未標示 ATE 平台、fixture、頻率、PCB 板材或 pass/fail 條件 |\n| Slide 8 | O/E, E/O, TIA testing | 來源未標示 | [[O-E E-O TIA testing]]、[[TIA testing]] | 2026.7 | 未標示儀器、光電轉換器、資料率或標準 |\n| Slide 9–10 | High speed Cable testing | 來源未標示 | [[High speed Cable testing]]、[[HSD Cable test 外部資料清單]] | 2026.7 | 未標示 cable 類型、資料率、連接器或量測方法 |\n| Slide 11–12 | Digital Power Test | 來源未標示 | [[Digital Power Test]]、[[Power Integrity]] | 2026.7 | 未標示測試項目、電壓 / 電流、負載或儀器 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Digital design test success stories.md"
+              },
+              "score": 0.105978
+             },
+             {
+              "text": "Digital design test success stories › 未決事項\n- unresolved: Slide 2–7 圖片未 OCR，無法確認每個 success story 的客戶、DUT、測試配置、結果或導入狀態。\n- unresolved: Slide 8–12 未標示儀器 mapping，需回看原始 PPTX 或後續 OCR。\n- unresolved: 來源未標示是否所有案例都屬於同一期間、同一地區或同一業務單位。\n- unresolved: 來源未標示 [[DAC ADC testing]]、[[SoC testing]]、[[ATE PCB testing]]、[[O-E E-O TIA testing]]、[[High speed Cable testing]]、[[Digital Power Test]] 的正式定義或測試標準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Digital design test success stories.md"
+              },
+              "score": 0.092713
+             },
+             {
+              "text": "Digital design test success stories › 與 R&S 儀器頁的關係\n- [[R&S FSWP]] 在既有 Productions 頁中被定義為 Phase Noise Analyzer and VCO Tester；[[DDT SuccessStories_202607]] 只說它出現在 DAC/ADC testing 與 SOC testing 的 success-story mapping 中，未新增規格。\n- [[R&S SMA100B]] 在既有 Productions 頁中被定義為 RF and Microwave Signal Generator；[[DDT SuccessStories_202607]] 只說它出現在 DAC/ADC testing 與 SOC testing 的 success-story mapping 中，未新增規格。\n- [[R&S ZNA67]] 在既有 Productions 頁中被定義為 67 GHz Vector Network Analyzer；[[DDT SuccessStories_202607]] 只說它出現在 SOC testing 與 ATE PCB testing 的 success-story mapping 中，未新增規格。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Digital design test success stories.md"
+              },
+              "score": 0.065599
+             },
+             {
+              "text": "Digital design test success stories › 可追溯限制\n- [[DDT SuccessStories_202607]] 是 PowerPoint 轉出的 lossy markdown；除標題與少量文字外，大部分成功案例細節在圖片中，尚未 OCR。\n- 本頁不把 success-story mapping 解讀為正式 solution bundle、報價配置、必選 option、客戶背書或量產導入證據。\n- 本頁不推論 [[R&S FSWP]]、[[R&S SMA100B]]、[[R&S ZNA67]] 在各應用中的角色分工；例如 stimulus、analysis、phase noise、VNA 或 automation 角色都需後續來源補證。\n- Market 類資料會隨時間變動；本頁的時間點只限於來源標示的 2026.7。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Digital design test success stories.md"
+              },
+              "score": 0.060094
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 與既有知識的關係\n- [[R&S PCB test solutions]] — 保存 R&S high-speed digital 簡報中的 PCB test flow；本頁補入 case-sharing 中的 customer / partner / competitor context。\n- [[SerDes 與 SI PI 測試概覽]] — 本頁提供 PCB / interconnect probing 的實務案例語境。\n- [[Keysight ENA]] — 在 LSmtron case 中作為 competitor。\n- [[R&S ZNB3044]]、[[R&S ZNA43]]、[[R&S FSWP50]]、[[R&S SMW200A]] — 本來源提供 Market 應用案例，不改寫 Productions 規格。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 1.372944
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 來源中的案例\n| 案例 | 日期 / 期間 | Customer / 對象 | DUT / application | 來源明示方案 | 限制 |\n|---|---|---|---|---|---|\n| TRI case | 來源未標示正式日期；raw converted 2026-09-18 | [[TRI]] | dual-side ATE inline measurement，test sides A/B each measure two DUTs | 4-port VNA [[R&S ZNB3044]]、[[R&S OSP320]]、flying probe module、interposer board | TRI 未展開；DUT、頻率、fixture、calibration 未標示 |\n| AMD case | 來源未標示正式日期；raw converted 2026-09-18 | [[AMD]] / [[AMD EPYC 9965]] case | validation optimization、socket–socket interconnection test | default setup 與 optimized setup 比較；SDD12 100 cycles stability proof | 67 GHz claim 未標示完整儀器組合，不能改寫單機儀器規格 |\n| LSmtron success story | Slide 8 頁尾 28/04/2020 | [[LSmtron]] | Board to Board Connector | ZNB40、probe、mount-kit、de-embedding tool、local partner [[TeraBit Solutions]] / [[AtaiTec]] | ZNB40 正式型號、probe 型號、de-embedding tool 名稱未標示 |\n| Bare Board for SoCs | 來源未標示正式日期；raw converted 2026-09-18 | [[Advantest]]、[[Meritech]] | PCB test with probing；impedance、insertion loss、return loss | ZNB40、probe、mount-kit、de-embedding tool | ATS / ZVA67 / ZNA43 欄位分層不明 |\n| Samsung Foundry RF/Analog Enablement | 來源未標示正式日期；raw converted 2026-09-18 | [[Samsung Electronics]] | 5G SoC including VCO | [[R&S FSWP50]]、[[R&S SMW200A]] 44GHz、SGS100A、automated VCO Tuning S/W | SGS100A 需補證；software 版本、scope 與交付方式未標示 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 1.184419
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 可學到的 sales / solution pattern\n- 來源明示的 win factor 不是單一儀器規格，而是 total solution：probe、mount-kit、de-embedding tool 與 local partner。這與 [[R&S PCB test solutions]] 中 material measurement / sampling testing / process monitoring 的流程視角互補。\n- Bare board for SoCs、socket / transmission line evaluation 與 board-to-board connector DUT 都落在 [[Signal Integrity]]、[[Insertion Loss]]、[[Return Loss]]、[[Impedance]] 與 de-embedding 的交界。\n- Samsung 5G SoC including VCO case 顯示 [[R&S FSWP50]]、[[R&S SMW200A]] 與 automated VCO tuning software 可以被包裝成 RF / analog enablement 測試方案，但來源未提供正式 software product name 或 version。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 0.89222
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 相關來源\n- [[TRI_AMD_RSKR Sharing1]] — company confidential case sharing，來源正式日期未標示，raw converted 2026-09-18。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 0.349363
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 未決事項\n- TRI、RSKR、ICR、WIC、ADT、AUT、ATS、ZVA67、SGS100A 等縮寫 / 型號需補證。\n- ZNB40 是否對應既有 R&S ZNB 系列正式型號與 40 GHz configuration 未確認。\n- AMD optimized setup up to 67 GHz 的完整 topology、extender、probe、calibration 與 de-embedding method 未標示。\n- Samsung case 中 automated VCO Tuning S/W 的名稱、版本、license、交付形式與支援範圍未標示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 0.254857
+             },
+             {
+              "text": "HSD PCB image 4 與 14 重複來源\n[[HSD PCB image 4 與 14 重複來源]] 比對兩份「電解銅箔HVLP」圖像 OCR / 讀圖來源，避免把高度重疊圖卡誤當成兩份獨立市場驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/syntheses/HSD PCB image 4 與 14 重複來源.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "HSD PCB image 4 與 14 重複來源 › 判斷摘要\n- [[HSD PCB image 4]] 與 [[HSD PCB image 14]] 在標題、主題、銅箔等級、箔品種、粗糙度趨勢、HVLP 條列、公司列名與頁尾帳號上高度重疊。\n- 兩者都未標示內容日期；[[HSD PCB image 4]] raw frontmatter 只標示 converted: 2026-09-04，[[HSD PCB image 14]] 既有摘要標示取得於 2026-09-04。\n- 兩者都不應被當作獨立市場驗證；比較時應視為同一或高度相近圖卡的不同 OCR / 轉檔版本。\n- 主要差異集中在用途示例讀圖：[[HSD PCB image 4]] 抄錄為「支持5G消費」與「高端服務器」，既有 [[HVLP銅箔]] 頁中 [[HSD PCB image 14]] 抄錄為「支持5G設備」與「高頻服務器」。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/syntheses/HSD PCB image 4 與 14 重複來源.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "HSD PCB image 4 與 14 重複來源 › 高度重疊內容\n| 項目 | [[HSD PCB image 4]] | [[HSD PCB image 14]] 既有整理 | 判斷 |\n|---|---|---|---|\n| 標題 | 電解銅箔HVLP | 電解銅箔HVLP | 高度一致 |\n| 銅箔等級 | H-VLP2、H-VLP、VLP、RTF、通用 | H-VLP2、H-VLP、VLP、RTF、通用 | 高度一致 |\n| 箔品種 | FZ-WS、FV-WS、FT1-UP、F-WS、FT2-UP、DGTSEU2-MP、GTS-STD、GTS-MP | FZ-WS、FV-WS、FT1-UP、F-WS、FT2-UP、DGTSEU2-MP、GTS-STD、GTS-MP | 高度一致 |\n| 趨勢文字 | 低粗度、低傳輸損失、粗糙度越来越低 | 低粗度、低傳輸損失、粗糙度越來越低 | 高度一致，簡繁 / OCR 差異不影響主張 |\n| HVLP 說明 | 極低輪廓銅箔、低損耗、高穩定性、高頻高速電路基板核心材料 | 極低輪廓銅箔、低損耗、高穩定性、高頻高速電路基板核心材料 | 高度一致 |\n| 市場升級說法 | 從 VLP → HVLP，AI 帶動規格升級，加工費越貴，市場已到 HVLP4 | 從 VLP → HVLP，AI 帶動規格升級，加工費越貴，市場已到 HVLP4 | 高度一致；兩者都未定義 HVLP4 |\n| 廠商列名 | 日本三井、福田、古河、金居 | 日本三井、福田、古河、金居 | 高度一致 |\n| 頁尾帳號 | [[@shwaiwang2022]]、[[@beta.finance]] | [[@shwaiwang2022]]、[[@beta.finance]] | 高度一致 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/syntheses/HSD PCB image 4 與 14 重複來源.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "HSD PCB image 4 與 14 重複來源 › OCR / 讀圖差異\n| 欄位 | [[HSD PCB image 4]] | [[HSD PCB image 14]] 既有整理 | 狀態 |\n|---|---|---|---|\n| H-VLP2 用途示例 | 支持5G消費、毫米波雷達 | 支持5G設備、毫米波雷達 | 未決差異 |\n| H-VLP 用途示例 | 高端服務器、高端路由器 | 高頻服務器、高端路由器 | 未決差異 |\n| HVLP 條列尾端 | 傳用核心材料 | 核心材料 | [[HSD PCB image 4]] 的「傳用」疑似 OCR / 讀圖不穩，未裁決 |\n| 金居描述 | 金居為使數通過認真的台廠 | 金居為使數通過認真的台廠 | 兩者同樣無法可靠解讀 |\n\n⚠️ [[HSD PCB image 4]]（來源未標示日期；轉換於 2026-09-04）說 H-VLP2 用途示例為「支持5G消費、毫米波雷達」，H-VLP 用途示例為「高端服務器、高端路由器」，但既有頁面 [[HVLP銅箔]] 說 [[HSD PCB image 14]] 抄錄為「支持5G設備、毫米波雷達」以及「高頻服務器、高端路由器」。判斷為兩份高度重疊圖像的 OCR / 讀圖差異，未裁決前並列保留，不合併改寫。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/syntheses/HSD PCB image 4 與 14 重複來源.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "HSD PCB image 4 與 14 重複來源 › 使用限制\n- 不可把 [[HSD PCB image 4]] 與 [[HSD PCB image 14]] 視為兩份獨立證據來提高 [[HVLP銅箔]] 市場導入、供應商列名或 [[HVLP4]] 標準的可信度。\n- 不可用 `@shwaiwang2022` 中的 `2022` 作為內容日期。\n- 不可因兩份圖都列出 [[三井]]、[[福田]]、[[古河]]、[[金居]]，就推論其供應合約、出貨量、市占率、產品規格或客戶驗證。\n- 不可把 [[古河]] 自動併入 [[古河電工]]；兩份圖都只寫「古河」。\n- 不可把「金居為使數通過認真的台廠」解讀為通過任何特定認證，該句需回看原圖或取得更清楚來源。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/syntheses/HSD PCB image 4 與 14 重複來源.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "HSD PCB image 4 與 14 重複來源 › 相關來源\n- [[HSD PCB image 4]] — 未標示內容日期、轉換於 2026-09-04 的「電解銅箔HVLP」圖像 OCR 來源。\n- [[HSD PCB image 14]] — 未標示日期、取得於 2026-09-04 的「電解銅箔HVLP」分級示意圖來源摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/syntheses/HSD PCB image 4 與 14 重複來源.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › Shuffler\n來源描述 [[Shuffler]]：\n\n- RF / T-put test on all supported UE band combos in one go。\n- All Shuffler tests part of [[R&S CMX-KF612M]] test package。\n- Loop blocks provide flexibility to loop through bands、bandwidth、channels。\n- one test script with one test report can test RF TX / RX measurement、RX sensitivity measurement、throughput、VoLTE / VoNR。\n- Band combinations input via UE capabilities or user-defined Excel sheet。\n- Shuffler implemented in [[R&S CMsequencer]]。\n\n此處仍需正式 [[R&S CMX-KF612M]] 文件補證。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 1.714356
+             },
+             {
+              "text": "Gatehouse Satcom › 與 Rohde & Schwarz 的合作\n依 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]]：\n\n- [[Gatehouse Satcom]] 與 [[Rohde & Schwarz]] formalized collaboration，以 strengthening validation and testing of [[5G IoT-NTN]] and [[NR-NTN]] technologies。\n- 合作目標是將 [[Gatehouse Satcom]] 的 5G [[NTN]] software expertise 與 [[Rohde & Schwarz]] test and measurement capabilities 結合。\n- [[Gatehouse Satcom]] gains access to the [[R&S CMX500]] platform，作為共同 further develop advanced orbit and channel emulation capabilities for NTN use cases 的一部分。\n- [[Gatehouse Satcom]] contributes end-to-end NTN test results、technical insight and engineering feedback，協助 [[Rohde & Schwarz]] 強化 NTN-focused test capabilities。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Gatehouse Satcom.md"
+              },
+              "score": 0.674002
+             },
+             {
+              "text": "台灣 AI 半專用型晶片 › 來源中的分類\n[[Edge AI Chips image 2]]（來源未標示日期；取得於 2026-09-04）把「台灣 AI 晶片－半專用型」分成四個公司 / 技術區塊。[[Edge AI Chips image 28]]（來源未標示日期；raw 轉檔於 2026-09-04）呈現相同四宮格主題，應視為高度重疊的 OCR / 讀圖補充來源。[[Edge AI Chips image 5]]（來源未標示日期；raw 轉檔於 2026-09-04）單獨聚焦在 [[Egis]] / 神盾的光學指紋辨識內容。[[Edge AI Chips image 4]]（來源未標示日期；raw 轉檔於 2026-09-04）單獨聚焦在 [[Elan]] / 義隆電智慧晶片 / 解決方案內容，且與 [[Edge AI Chips image 30]] 高度重疊。\n\n| 區塊 | 公司 / 品牌 | 圖上產品 / 技術 | 圖上應用 / 文字 | 限制 |\n|---|---|---|---|---|\n| 盛群(Holtek)－智慧健康 HT32系列 | [[Holtek]] / 盛群 | [[HT32系列]]、[[Arm Cortex-M4]] 系列 | [[Edge AI]] 智慧健康、BPNN 手勢辨識、CNN+BPNN 血壓與心率預測、2D IR 手勢辨識、卡片式血壓計、CGM健康量測、體成份分析 | 來源未提供 datasheet、完整型號、量產、出貨或客戶；[[Edge AI Chips image 28]] 與既有頁面在流程第 3 階段與健康小字 OCR 上有差異。 |\n| 義隆電 (Elan)－智慧晶片 | [[Elan]] / 義隆電 | 智慧晶片、Yolov4 / v7 / v9 | 智慧交通 ITS、汽車 Automotive、無人機 Drone、智慧穿戴 Wearable；[[Edge AI Chips image 4]] / [[Edge AI Chips image 30]] 讀圖包含闖紅燈預測、360度避障、眼鏡 / 耳機 / 手錶 | 圖上寫和 [[中研院]] 合作推出 Yolov4 / v7 / v9，但未提供合作文件、模型版本或部署案例；交通、無人機與穿戴小字有 OCR / 讀圖差異。 |\n| 神盾(Egis)－光學指紋辨識 | [[Egis]] / 神盾 | 可重組類比 AI 晶片、[[光學屏下指紋]] | 屏下大面積光學指紋辨識系統、OLED 顯示面板下的獨特光學設計、指紋感測與驗證功能、演算法學習與記憶指紋圖像 | 內文部分不完整；未提供晶片型號、量產、採用客戶或性能數據；URL 有「通過 / 頒 / 補助」OCR / 讀圖差異。 |\n| 鈺立微(EYS3D)－eCV4 / eCV5 | [[eYs3D]] / 鈺立微；圖上同時出現 [[Etron]] | [[XINK Nano]]、[[eCV5]] / eCV-5、[[eCV4]] / eCV-4、eSP、eAI、eNLP | 邊緣 AI 即時運算感測融合、3D 立體 RGB 影像、ToF 深度感測器、YOLOv8、Pose Estimation | 未說明產品版次、eYs3D 與 Etron 關係、TOPS 測試條件或上市狀態；eNLP / eNIP、eSP / eSP870 等 OCR 差異未決。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/台灣 AI 半專用型晶片.md"
+              },
+              "score": 3.715731
+             },
+             {
+              "text": "Egis › 來源中的說法\n- [[Edge AI Chips image 2]]（來源未標示日期；取得於 2026-09-04）左下區塊標題為「神盾(Egis)－光學指紋辨識」。\n- [[Edge AI Chips image 2]] 圖上列出「神盾 (Egis)」與「egis Technology」。\n- [[Edge AI Chips image 2]] 圖上內文可辨識為：可重組類比 AI 晶片，應用於屏下大面積光學指紋辨識系統。\n- [[Edge AI Chips image 2]] 圖上另可辨識「光學屏下指紋」、「手指接觸屏幕時，屏幕底下的光學技術」、「利用演算法學習以及記憶指紋的圖像」等文字；部分句子因圖片解析度不足而不完整。\n- [[Edge AI Chips image 2]] 圖上可辨識網址片段為 `https://www.egistec.com/zh-hant/神盾獲行政院通過AI-on-Chip計畫第一案`，尾端是否完整未確認。\n- [[Edge AI Chips image 28]]（來源未標示日期；raw 轉檔於 2026-09-04）同樣列出「神盾(Egis)－光學指紋辨識」、「神盾 (Egis)」與「egis technology」。\n- [[Edge AI Chips image 28]] 右側內文 OCR 包含：可重組類比 AI 晶片，應用於屏下大面積光學指紋辨識系統；手指接觸屏幕時，屏幕底下的光學技術；佈置照射指紋的凹凸紋路(波峰波谷)；後的圖片去做較體的判別，利用演算法學習以及記憶指紋的圖像。\n- [[Edge AI Chips image 28]] 左側大圖可辨識文字為「光學屏下指紋」。\n- [[Edge AI Chips image 5]]（來源未標示日期；raw 轉檔於 2026-09-04）是 Egis 光學指紋辨識的聚焦圖，標題為「神盾(Egis)－光學指紋辨識」，右上區塊列出「神盾 (Egis)」、「egis」與「Technology」。\n- [[Edge AI Chips image 5]] 右側內文寫明：可重組類比 AI 晶片，應用於屏下大面積光學指紋辨識系統；手指接觸屏幕時，屏幕底下的光學技術會照射指紋的凹凸紋路（波峰波谷）後的圖片去做軟體的判別，利用演算法學習以及記憶指紋的圖像。\n- [[Edge AI Chips image 5]] 左下圖片文字寫明：「光學屏下指紋」、「神盾屏下光學指紋辨識的方案採用 OLED 顯示面板下的獨特光學設計，提供最新的指紋感測及驗證功能。」\n- [[Edge AI Chips image 5]] 下方 URL 讀作 `https://www.egistec.com/zh-hant/神盾獲行政院補助AI-on-Chip計畫第一案`。\n- [[Edge AI Chips image 31]]（來源未標示日期；raw 轉檔於 2026-09-04）同樣是 Egis / 神盾光學指紋辨識技術介紹圖，標題為「神盾(Egis)－光學指紋辨識」。\n- [[Edge AI Chips image 31]] 右上區塊列出「神盾 (Egis)」、「egis」與「Technology」。\n- [[Edge AI Chips image 31]] 右側說明文字寫明：可重組類比 AI 晶片，應用於屏下大面積光學指紋辨識系統；手指接觸螢幕時，螢幕底下的光學技術照射指紋凹凸紋路（波峰波谷）後的圖片，再做軟體判別，並利用演算法學習與記憶指紋圖像。\n- [[Edge AI Chips image 31]] 左下圖片文字寫明「光學屏下指紋」，並說神盾屏下光學指紋辨識方案採用 OLED 顯示面板下的獨特光學設計，提供指紋感測及驗證功能。\n- [[Edge AI Chips image 31]] 底部 URL 讀作 `https://www.egistec.com/zh-hant/神盾獲行政院補助AI-on-Chip計畫第一案`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Egis.md"
+              },
+              "score": 2.987584
+             },
+             {
+              "text": "Sharp › unresolved\n- 需要擷取 Sharp 5G NTN / LEO terminal 官方新聞稿或技術文件。\n- 需要確認 [[MediaTek M80]] 是否實際用於 Sharp trial，以及 trial 的 3GPP release、frequency bands、orbit / satellite operator 與測試結果。\n- 需要確認 `2025 H1` trial validation 是否已完成或只是 roadmap。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Sharp.md"
+              },
+              "score": 2.551111
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › TTC 毫米波測試量能線索\n[[低軌衛星通信終端設備技術規範與相關檢測]]（來源標示 111年08月）介紹[[電信技術中心]]毫米波頻段測試量能：\n\n- 5G FR2 毫米波天線縮距量測場 CATR。\n- 來源稱該 chamber 依據 3GPP 技術規範標準，已通過 TAF 認證。\n- 可支援主波發射頻段 3–40 GHz。\n- 不必要發射至 90 GHz。\n- 可量測 TRP、TIS、EVM。\n- Quiet Zone 可達 90 cm。\n\n同一來源另描述[[電信技術中心]]提供電信設備審驗認證服務，並協助研擬電信技術標準規範。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 2.321737
+             },
+             {
+              "text": "電信技術中心 › 來源中的機構描述\n[[低軌衛星通信終端設備技術規範與相關檢測]]（來源標示 111年08月）在「電信技術中心之發展簡介與願景」中說：\n\n- 財團法人電信技術中心之設立，緣於前電信監理機關（交通部電信總局）為因應數位科技匯流，掌握資訊、通訊與產業發展動向，確保我國資通訊監理政策及法令符合國際發展趨勢，於 93年2月成立本中心。\n- 設立宗旨為配合電信政策，支援電信監理、相關電信技術與產業研究，提供電信設備審驗認證服務，協助研擬電信技術標準規範，以提升電信技術。\n- 來源亦稱其協助促進國際電信組織間交流與合作、保護消費者權益，以健全電信事業發展及市場交易安全。\n- 來源列出官方網站 `https://www.ttc.org.tw/`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/電信技術中心.md"
+              },
+              "score": 3.109663
+             },
+             {
+              "text": "NG eCall EN 17240 2024 verification › 與既有 NGeCall / hybrid eCall 頁面的關係\n- [[NGeCall over LTE]] 整理 CMW500 與 CMX500 capability lists，本頁只整理 PR 中的 Qualcomm / Snapdragon verification event。\n- [[CMX500 NGeCall configuration]] 整理 configuration guide 的 mandatory / optional items，本頁不取代正式 configuration 或 quote。\n- [[Hybrid eCall testing]] 以 EN 18052:2025 與 hybrid fallback 為核心；本頁聚焦 EN 17240:2024 NG eCall verification，不描述 classic CS fallback 或 EN 18052 test scope。\n- [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 提到 EN 17240:2024+A1:2026 與 cetecom advanced certification testing；本頁來源只提 EN 17240:2024，且未說第三方 certification report。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              },
+              "score": 1.588172
+             },
+             {
+              "text": "欣銓 › 來源中的說法\n- [[Power IC - Power Management IC]] 在功率半導體封測區塊將 [[欣銓]] 寫為「車用與功率IC測試核心廠」。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/欣銓.md"
+              },
+              "score": 2.8079
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › CMX500 platform overview\n來源對 [[R&S CMX500]] 的 platform overview 說法包含：\n\n- Future proof 5G signaling test platform。\n- Running on Linux：faster and more robust。\n- Single web-based GUI for RF、protocol、application testing。\n- Modular and scalable HW architecture。\n- LTE & FR1：up to 8 GHz。\n- FR2：24–50 GHz。\n- Ready for up to 20 Gbps and more E2E IP performance。\n- Extensive IP and Application Test feature set onboard。\n\n此處屬 presentation claim；不能取代 formal frequency range、hardware configuration、software option 或 guaranteed performance 規格。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 1.228523
+             },
+             {
+              "text": "R&S CMX500 › Base unit 與主要訂購資訊\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n| 項目 | Type / code | Order No. | 原文說明 |\n|---|---|---|---|\n| CMX500 Radio communication tester | CMX500 | 1201.0002K70 | accessories 包含 power cords、operating manual (getting started)、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters |\n| CMX500 basic assembly | R&S CMX-PB70H | 1222.0676.09 | basic assembly |\n| R&S CMX accelerator unit | R&S CMX-B200A | 1222.0747.02 | accelerated digital signal processing capabilities |\n| R&S CMX processing unit | R&S CMX-B300C | 1222.0801.04 | generic high-performance computing platform for advanced data processing |\n| R&S CMX IF unit | R&S CMX-B500A | 1222.0924.02 | IF frequency range vector signal analysis and ARB based generator |\n| R&S CMX RF unit | R&S CMX-B600B | 1222.0953.03 | FR1 frequency range vector signal analysis and ARB based generator |\n\n[[CMX500_Features_CSW9-20-0_en_32]] 使用 generic code [[R&S CMX-B500x]] 與 [[R&S CMX-B600x]]；[[CMX500_specs_en_5216-4127-22_v1100]] 在 ordering information 中列出具體 orderable unit 為 [[R&S CMX-B500A]] 與 [[R&S CMX-B600B]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 2.845056
+             },
+             {
+              "text": "台灣 AI 半專用型晶片\n[[台灣 AI 半專用型晶片]] 是 [[Edge AI Chips image 2]] 與 [[Edge AI Chips image 28]] 用來整理台灣廠商在特定應用導向 AI 晶片 / 平台上的四宮格分類，涵蓋智慧健康、智慧交通 / 汽車 / 無人機 / 穿戴、光學指紋辨識與邊緣 AI 感測融合；[[Edge AI Chips image 5]] 是其中 [[Egis]] / 神盾光學指紋辨識區塊的聚焦圖，[[Edge AI Chips image 4]] 與 [[Edge AI Chips image 30]] 則是其中 [[Elan]] / 義隆電智慧晶片區塊的聚焦或高度重疊圖卡來源。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/台灣 AI 半專用型晶片.md"
+              },
+              "score": 3.384996
+             },
+             {
+              "text": "Elan › 來源中的說法\n- [[Edge AI Chips image 2]]（來源未標示日期；取得於 2026-09-04）右上區塊標題為「義隆電 (Elan)－智慧晶片」。\n- [[Edge AI Chips image 2]] 圖上列出「和中研院合作推出 Yolov4 / v7 / v9」。\n- [[Edge AI Chips image 2]] 圖上應用分類包含：智慧交通 ITS、汽車 Automotive、無人機 Drone、智慧穿戴 Wearable。\n- [[Edge AI Chips image 2]] 左側圖片下方標註包含：影像辨識、號誌控制、國道T型預測、先進駕駛輔助系統、智慧座艙顯示、調光、影像辨識、目標追蹤、360度建車、智慧穿戴、觸控、耳機、手錶。\n- [[Edge AI Chips image 2]] 圖上網址為 `https://www.emc.com.tw/emc/tw/Products`。\n- [[Edge AI Chips image 28]]（來源未標示日期；raw 轉檔於 2026-09-04）右上區塊同樣標題為「義隆電 (Elan)－智慧晶片」，並列出「義隆電 (Elan)」、「ELAN」、「和中研院合作推出 Yolov4 / v7 / v9」、智慧交通(ITS)、汽車(Automotive)、無人機(Drone)、智慧穿戴(Wearable)。\n- [[Edge AI Chips image 28]] 左側圖片說明 OCR 包含：影像辨識、號誌控制、闖紅燈偵測；先進駕駛輔助系統、智慧座艙顯示、調光；影像辨識、目標追蹤、360度建車；智慧穿戴；娛樂、耳機、手錶。\n- [[Edge AI Chips image 30]]（來源未標示日期；raw 轉檔於 2026-09-04）標題為「義隆電 (Elan) – 智慧晶片」，右側列出「義隆電 (Elan)」、「和中研院合作推出 Yolov4 / v7 / v9」、智慧交通(ITS)、汽車(Automotive)、無人機(Drone)、智慧穿戴(Wearable)。\n- [[Edge AI Chips image 30]] 左側應用小字包含：影像辨識、號誌控制、闖紅燈預測；先進駕駛輔助系統、智慧座艙顯示、調光；影像辨識、目標追蹤、360度避障；智慧穿戴、眼鏡、耳機、手錶。\n- [[Edge AI Chips image 30]] 右下產品 / 方案示意圖列出：Biometric Solutions、Pen & Touch Input Solutions、Touchpad Solutions、Pointstick Solutions、Microcontrollers，並有「產品 & 方案」字樣。\n- [[Edge AI Chips image 4]]（來源未標示日期；raw 轉檔於 2026-09-04）主標題為「義隆電 (Elan) – 智慧晶片」，右側標題區為「義隆電 (Elan)」，Logo 文字為「ELAN」。\n- [[Edge AI Chips image 4]] 右側說明文字寫有「和中研院合作推出 Yolov4 / v7 / v9」，並列出智慧交通(ITS)、汽車(Automotive)、無人機(Drone)、智慧穿戴(Wearable)。\n- [[Edge AI Chips image 4]] 左側 / 圖中應用文字包含：影像辨識、號誌控制、闖紅燈預測；先進駕駛輔助系統、智慧座艙顯示、調光；影像辨識、目標追蹤、360度避障；智慧穿戴、眼鏡、耳機、手錶。\n- [[Edge AI Chips image 4]] 圖中 solution 類別包含 AI ITS Solutions、Automotive Solutions、AI-Drone Solutions、Smart Wearables Solutions、Biometric Solutions、Pen & Touch Input Solutions、Touchpad Solutions、Pointstick Solutions、Smart Wearables Solutions 與 Microcontrollers。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Elan.md"
+              },
+              "score": 4.718017
+             },
+             {
+              "text": "MediaTek M80 › unresolved\n- 需要取得 [[MediaTek]] 官方 [[MediaTek M80]] datasheet、press release 或 product page。\n- 需要確認 [[MediaTek M80]] 是否正式支援 [[3GPP Release 19]] NTN，以及支援範圍是 modem、protocol stack、RF、NB-NTN、NR-NTN 或其他。\n- 需要確認 [[Sharp]] trial 的日期、終端型號、衛星 operator、frequency band、test setup 與結果。\n- 需要確認 `2025 H2` commercial modem mass production 是否為已發生事件、計畫或簡報假設。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/MediaTek M80.md"
+              },
+              "score": 0.847671
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › 已擷取的無線通訊認證實驗室簡報內容\n依 [[無線通訊認證實驗室]]：\n\n- [[無線通訊認證實驗室]]用於測試與驗證無線設備符合法規、安全與性能標準，涵蓋 [[RF 測試]]、[[EMC]]、安規及一致性認證。\n- 來源稱其可經 [[NCC]]、[[TAF]]、[[FCC]] 等機構認可，並支援 [[Global Market Access]] 與上市加速。\n- 主要測試項目包含：頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試、[[PTCRB]] / [[GCF]] 認證。\n- 認證必要性包含防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端、6G 等需求。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 2.048391
+             },
+             {
+              "text": "AREG800A\nAUTOMOTIVE RADAR ECHO GENERATOR",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ef4aac4d3faf4e63",
+                "original_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+                "sha256": "ef4aac4d3faf4e63bdb175a0db3d7498612f2a12568d5de9fb4e9095cd4a8787",
+                "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 21.005088
+             },
+             {
+              "text": "AREG800A configurations for automotive radar production",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ef4aac4d3faf4e63",
+                "original_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+                "sha256": "ef4aac4d3faf4e63bdb175a0db3d7498612f2a12568d5de9fb4e9095cd4a8787",
+                "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+               "section": 309,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 20.472372
+             },
+             {
+              "text": "Rohde & Schwarz AREG800A Automotive Radar Echo Generator",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ef4aac4d3faf4e63",
+                "original_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+                "sha256": "ef4aac4d3faf4e63bdb175a0db3d7498612f2a12568d5de9fb4e9095cd4a8787",
+                "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md",
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.966007
+             },
+             {
+              "text": "agents in the IDE, CLI agents, chat assistants)? Please\nname products and typical use cases (coding, review, test generation, docs).",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-c733beba88ba4b3a",
+                "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+                "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+                "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "section": 47,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 17.118312
+             }
+            ],
+            "text": "The automotive-radar-specific instrument in the passages is the R&S AREG800A, an Automotive Radar Echo Generator used for dynamic artificial object generation [6]; its echo generation can be hybrid or digital, including FMCW radar use with generated distances up to 3000 m [1].\nThe passages only explicitly place oscilloscopes in electrical interface and power-distribution validation: “Interface Test” maps to scopes, BERTs, AWGs, and switch matrices, and “Power Distribution Network” maps to scopes and network analyzers [19][20].\nThe AREG800A production configuration also exposes radar-test interfaces such as analog IF output interfaces and remote-control interfaces [3], and the option list includes analog IF output, analog IF input, hardware-in-the-loop control, synchronization, and remote-control GPIB interfaces [13].\n【推論】So, in an automotive radar workflow, the oscilloscope would sit alongside the AREG800A-based radar echo test as an electrical bring-up, interface-check, PDN, and debug instrument, while the AREG800A provides the radar echo / artificial-object stimulus for the radar under test [1][3][6][13][19][20].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 6.421744
+            },
+            {
+             "text": "R&S AREG800A › Automotive radar production configurations\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- [[R&S AREG-P1]] radar mini configuration / [[R&S AREG-DBP1]] base unit option：one digital channel，one object per channel，5 GHz instantaneous bandwidth，near object range possibility，analog IF output interfaces，remote control interfaces，[[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option one frontend per channel required。\n- [[R&S AREG-P2]] radar golden configuration / [[R&S AREG-DBP2]] base unit option：two digital channels。\n- [[R&S AREG-P3]] radar pro configuration / [[R&S AREG-DBP3]] base unit option：搭配 [[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option；frontend 支援 monostatic 或 bistatic；three digital channels；one object per channel。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 31,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 5.221941
+            },
+            {
+             "text": "R&S AREG800A\n[[R&S AREG800A]] 是 [[Rohde & Schwarz]] 的 Automotive Radar Echo Generator，用於 dynamic artificial object generation；本頁規格依 [[AREG800A_specs_en_3609-8015-22_v0900]]，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 5.093052
+            },
+            {
+             "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG800A]] — Automotive Radar Echo Generator；本來源主要產品實體。\n- [[Rohde & Schwarz]] — 製造商與文件發布者。\n- [[R&S AREG8-B9]] — Digital baseband，1 GHz IF bandwidth、1 IF path、1 individual artificial object；Order No. `1437.8011.02`。\n- [[R&S AREG8-B63]] — Analog stepped delay line，用於 short object generation；Order No. `1437.8205.02`。\n- [[R&S AREG8-K527]] — Baseband extension from 1 GHz to 2 GHz IF bandwidth；Order No. `1437.9882.02`。\n- [[R&S AREG8-K528]] — Baseband extension from 2 GHz to 5 GHz IF bandwidth；Order No. `1437.9799.02`。\n- [[R&S AREG8-K570]] — Activation of second IF path；Order No. `1437.9899.02`。\n- [[R&S AREG8-K812]] — One additional artificial object；Order No. `1437.9853.02`。\n- [[R&S AREG8-K813]] — Extended Doppler frequency shift up to 10 MHz；Order No. `1437.9901.02`。\n- [[R&S AREG8-K814]] — Near object range for FMCW；Order No. `1437.9776.02`。\n- [[R&S AREG8-K740]] — Analog IF output interfaces；Order No. `1437.9830.02`。\n- [[R&S AREG8-K741]] — Analog IF input interface；Order No. `1437.9847.02`。\n- [[R&S AREG8-K109]] — Hardware-in-the-loop control interface；Order No. `1437.9860.02`。\n- [[R&S AREG8-K549]] — Synchronization interface；Order No. `1437.9876.02`。\n- [[R&S AREG8-K986]] — Remote control GPIB；Order No. `1437.9818.02`。\n- [[R&S AREG8-B97]] — System alignment backend；Order No. `1437.9001.02`。\n- [[R&S AREG-P1]] / [[R&S AREG-DBP1]]、[[R&S AREG-P2]] / [[R&S AREG-DBP2]]、[[R&S AREG-P3]] / [[R&S AREG-DBP3]] — automotive radar production configurations / production base unit options。\n- [[R&S AREG8-24S]]、[[R&S AREG8-24D]]、[[R&S AREG8-81S]]、[[R&S AREG8-81D]]、[[R&S AREG8-81WS]]、[[R&S AREG8-81WD]]、[[R&S FE44S]] — 支援的 mmWave 或 external frontends。\n- [[R&S QAT100]]、[[R&S QAT-B2]]、[[R&S QAT-Z50]] — advanced antenna array 及其相關 option/accessory。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+             },
+             "score": 1.319078
+            },
+            {
+             "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+             },
+             "score": 2.532468
+            },
+            {
+             "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+             },
+             "score": 0.636799
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/entities/R&S AREG800A.md",
+             "raw_refs": [
+              "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+             "raw_refs": [
+              "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,1949 @@
+{
+ "question": {
+  "id": "Q0989",
+  "text": "What evidence is required to compare our Vector Network Analyzer solution with a competitor for Semiconductor without making unsupported claims?",
+  "market": "Semiconductor",
+  "product": "Vector Network Analyzer",
+  "type": "competitive",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-4d6f803819264b5789e6b436e356094b",
+ "exchange": {
+  "sent": "What evidence is required to compare our Vector Network Analyzer solution with a competitor for Semiconductor without making unsupported claims?",
+  "http_status": 200,
+  "seconds": 89.375,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-4d6f803819264b5789e6b436e356094b",
+    "actor": "leo.chi",
+    "title": "What evidence is required to compare our Vector Network Analyzer solutio…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T22:05:47.610490Z",
+    "updated_at": "2026-10-11T22:07:16.017708Z",
+    "messages": [
+     {
+      "message_id": "message-b278bce8249742668413e48139aad407",
+      "role": "user",
+      "text": "What evidence is required to compare our Vector Network Analyzer solution with a competitor for Semiconductor without making unsupported claims?",
+      "created_at": "2026-10-11T22:05:47.643379Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-ce30ce2f25c04c4eb93ec3e793b90dd1",
+      "role": "assistant",
+      "text": "### Short answer\nThe current passages do not provide enough evidence to compare an R&S Vector Network Analyzer solution with a competitor specifically for Semiconductor; they provide R&S VNA specifications, semiconductor-adjacent IC solution clues, and limited Keysight ENA/PNA mentions without model-level specifications or test conditions [32][39][42][96].\n### Evidence required\n| Required evidence | Why it is required | Current support / gap |\n|---|---|---|\n| A direct Semiconductor use-case source tying the application to VNA measurements | The ICs sheet lists GPU, CPU, DRAM, IC/IP/process, wafer foundry, packaging test, test interface, networking, BMC, and high-speed transmission IC categories, and it lists R&S ZNA, R&S ZNA67EXT, and R&S FSWP only as solution clues [96]. | The mapping page says these are sales/test solution clues, not formal product configurations, customer relationships, or verified opportunities [32]. |\n| Exact R&S VNA configuration | R&S ZNA covers ZNA26, ZNA43, ZNA50, and ZNA67 from 10 MHz to 67 GHz [4]. | R&S ZNA67EXT is a 1.0 mm VNA system from 10 MHz to 110 GHz and is valid only in the specified system configuration [13][15]. |\n| Exact competitor VNA configuration | Keysight ENA and PNA are only identified as platforms in PCB test images for materials measurement, Delta-L, TDR, and Dk/Df extraction [37][40]. | The current ENA/PNA pages do not provide specific model, frequency range, option code, calibration kit, TDR option, performance metrics, or test conditions [39][42]. |\n| Competitor official or third-party validated documents | The Keysight page states that R&S battle-card competitor descriptions need Keysight official data or third-party data verification [34]. | The current Keysight sources do not provide formal datasheets, document versions, order numbers, option codes, release status, or test conditions for the cited competitor material [34]. |\n| Matching measurement conditions | ZNB3000 specification data is valid at +18 °C to +28 °C, and measurement accuracy requires calibration temperature variation within 1 °C, identical measurement and calibration frequency points, bandwidth, and sweep time, with no interpolation [8]. | ZNB3000 dynamic range specifications are defined at 10 Hz measurement bandwidth without user correction applied [10]. |\n| Proper treatment of warranted vs non-warranted values | R&S specifications with limits and specifications without limits represent warranted product performance [1]. | R&S typical data, nominal values, measured values, and non-traceable specifications with limits are not guaranteed [1]. |\n| Like-for-like R&S performance metrics | R&S ZNA key data includes dynamic range, sensitivity, power sweep range, source power linearity, receiver compression, trace noise, and a sweep-speed example with stated conditions [6]. | R&S ZNA measurement speed data also specifies firmware version, Windows version, bandwidth, point count, and data-transfer conditions [57]. |\n| Like-for-like option evidence | R&S ZNA-K2 is Time domain analysis, R&S ZNA-K20 is extended time domain including eye diagram, R&S ZNA-K8 is mmWave converter support, and R&S ZNA-K17 is increased IF bandwidth 30 MHz [60]. | The competitor side lacks equivalent option names, option codes, and comparable specifications in the current passages [39][42]. |\n| No unsupported market-share, adoption, or customer claims | The Keysight page states it does not infer Keysight market share, customers, shipments, or adoption status [35]. | The AISeverEcosystem source does not clarify whether company lists are a market list, prospect list, customer list, investment watchlist, or internal sales focus [29]. |\n| No unsupported customer-success claim | The LSmtron passage lists Customer: LSmtron, Product: ZNB40, Competitor: Keysight ENA, and a board-to-board connector DUT [49]. | The LSmtron limitation says the source does not state whether LSmtron purchased, evaluated, ran a PoC, or was only a sales-success-story target [50]. |\n### Bottom line\nA defensible comparison needs a Semiconductor-specific source, exact R&S and competitor VNA configurations, official or third-party competitor specifications, identical test conditions, and clear separation of warranted specifications from typical, nominal, measured, or non-traceable values [1][8][32][34][39][42][96].\n\n來源：\n[1] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[4] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[6] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[8] Wiki：ZNB3000_specs_en_3647-5184-22_v0900（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[10] Wiki：R&S ZNB3000（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[13] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[15] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[29] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n[32] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[34] Wiki：Keysight（來源：`AI Server PCB test image 24.md`、`AI Server PCB test image 50.md`、`2026_02_CMX500_Keysight_Sales_Battle_Card.md`）\n[35] Wiki：Keysight（來源：`AI Server PCB test image 24.md`、`AI Server PCB test image 50.md`、`2026_02_CMX500_Keysight_Sales_Battle_Card.md`）\n[37] Wiki：Keysight ENA（來源：`AI Server PCB test image 24.md`）\n[39] Wiki：Keysight ENA（來源：`AI Server PCB test image 24.md`）\n[40] Wiki：Keysight PNA（來源：`AI Server PCB test image 24.md`）\n[42] Wiki：Keysight PNA（來源：`AI Server PCB test image 24.md`）\n[49] Wiki：LSmtron（來源：`TRI_AMD_RSKR Sharing1.md`）\n[50] Wiki：LSmtron（來源：`TRI_AMD_RSKR Sharing1.md`）\n[57] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[60] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[96] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+      "created_at": "2026-10-11T22:07:16.017708Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-396a494764ca4650a19262fc7d2ae6a4",
+       "request_id": "request-396a494764ca4650a19262fc7d2ae6a4",
+       "span_id": "span-396a494764ca4650a19262fc7d2ae6a4",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": true,
+    "answer": "### Short answer\nThe current passages do not provide enough evidence to compare an R&S Vector Network Analyzer solution with a competitor specifically for Semiconductor; they provide R&S VNA specifications, semiconductor-adjacent IC solution clues, and limited Keysight ENA/PNA mentions without model-level specifications or test conditions [32][39][42][96].\n### Evidence required\n| Required evidence | Why it is required | Current support / gap |\n|---|---|---|\n| A direct Semiconductor use-case source tying the application to VNA measurements | The ICs sheet lists GPU, CPU, DRAM, IC/IP/process, wafer foundry, packaging test, test interface, networking, BMC, and high-speed transmission IC categories, and it lists R&S ZNA, R&S ZNA67EXT, and R&S FSWP only as solution clues [96]. | The mapping page says these are sales/test solution clues, not formal product configurations, customer relationships, or verified opportunities [32]. |\n| Exact R&S VNA configuration | R&S ZNA covers ZNA26, ZNA43, ZNA50, and ZNA67 from 10 MHz to 67 GHz [4]. | R&S ZNA67EXT is a 1.0 mm VNA system from 10 MHz to 110 GHz and is valid only in the specified system configuration [13][15]. |\n| Exact competitor VNA configuration | Keysight ENA and PNA are only identified as platforms in PCB test images for materials measurement, Delta-L, TDR, and Dk/Df extraction [37][40]. | The current ENA/PNA pages do not provide specific model, frequency range, option code, calibration kit, TDR option, performance metrics, or test conditions [39][42]. |\n| Competitor official or third-party validated documents | The Keysight page states that R&S battle-card competitor descriptions need Keysight official data or third-party data verification [34]. | The current Keysight sources do not provide formal datasheets, document versions, order numbers, option codes, release status, or test conditions for the cited competitor material [34]. |\n| Matching measurement conditions | ZNB3000 specification data is valid at +18 °C to +28 °C, and measurement accuracy requires calibration temperature variation within 1 °C, identical measurement and calibration frequency points, bandwidth, and sweep time, with no interpolation [8]. | ZNB3000 dynamic range specifications are defined at 10 Hz measurement bandwidth without user correction applied [10]. |\n| Proper treatment of warranted vs non-warranted values | R&S specifications with limits and specifications without limits represent warranted product performance [1]. | R&S typical data, nominal values, measured values, and non-traceable specifications with limits are not guaranteed [1]. |\n| Like-for-like R&S performance metrics | R&S ZNA key data includes dynamic range, sensitivity, power sweep range, source power linearity, receiver compression, trace noise, and a sweep-speed example with stated conditions [6]. | R&S ZNA measurement speed data also specifies firmware version, Windows version, bandwidth, point count, and data-transfer conditions [57]. |\n| Like-for-like option evidence | R&S ZNA-K2 is Time domain analysis, R&S ZNA-K20 is extended time domain including eye diagram, R&S ZNA-K8 is mmWave converter support, and R&S ZNA-K17 is increased IF bandwidth 30 MHz [60]. | The competitor side lacks equivalent option names, option codes, and comparable specifications in the current passages [39][42]. |\n| No unsupported market-share, adoption, or customer claims | The Keysight page states it does not infer Keysight market share, customers, shipments, or adoption status [35]. | The AISeverEcosystem source does not clarify whether company lists are a market list, prospect list, customer list, investment watchlist, or internal sales focus [29]. |\n| No unsupported customer-success claim | The LSmtron passage lists Customer: LSmtron, Product: ZNB40, Competitor: Keysight ENA, and a board-to-board connector DUT [49]. | The LSmtron limitation says the source does not state whether LSmtron purchased, evaluated, ran a PoC, or was only a sales-success-story target [50]. |\n### Bottom line\nA defensible comparison needs a Semiconductor-specific source, exact R&S and competitor VNA configurations, official or third-party competitor specifications, identical test conditions, and clear separation of warranted specifications from typical, nominal, measured, or non-traceable values [1][8][32][34][39][42][96].\n\n來源：\n[1] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[4] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[6] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[8] Wiki：ZNB3000_specs_en_3647-5184-22_v0900（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[10] Wiki：R&S ZNB3000（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[13] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[15] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[29] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n[32] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[34] Wiki：Keysight（來源：`AI Server PCB test image 24.md`、`AI Server PCB test image 50.md`、`2026_02_CMX500_Keysight_Sales_Battle_Card.md`）\n[35] Wiki：Keysight（來源：`AI Server PCB test image 24.md`、`AI Server PCB test image 50.md`、`2026_02_CMX500_Keysight_Sales_Battle_Card.md`）\n[37] Wiki：Keysight ENA（來源：`AI Server PCB test image 24.md`）\n[39] Wiki：Keysight ENA（來源：`AI Server PCB test image 24.md`）\n[40] Wiki：Keysight PNA（來源：`AI Server PCB test image 24.md`）\n[42] Wiki：Keysight PNA（來源：`AI Server PCB test image 24.md`）\n[49] Wiki：LSmtron（來源：`TRI_AMD_RSKR Sharing1.md`）\n[50] Wiki：LSmtron（來源：`TRI_AMD_RSKR Sharing1.md`）\n[57] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[60] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[96] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-396a494764ca4650a19262fc7d2ae6a4",
+      "request_id": "request-396a494764ca4650a19262fc7d2ae6a4",
+      "span_id": "span-396a494764ca4650a19262fc7d2ae6a4",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-396a494764ca4650a19262fc7d2ae6a4",
+       "request_id": "request-396a494764ca4650a19262fc7d2ae6a4",
+       "span_id": "span-396a494764ca4650a19262fc7d2ae6a4",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.2"
+       },
+       "trace": {
+        "trace_id": "trace-396a494764ca4650a19262fc7d2ae6a4",
+        "request_id": "request-396a494764ca4650a19262fc7d2ae6a4",
+        "span_id": "span-396a494764ca4650a19262fc7d2ae6a4",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "What evidence is required to compare our Vector Network Analyzer solution with a competitor for Semiconductor without making unsupported claims?",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › 規格條件與資料定義\n- Specifications with limits：表示 warranted product performance；以 <、≤、>、≥、±、maximum、limit of、minimum 等符號標示；compliance 由 testing 確保或由 design 推導。\n- Non-traceable specifications with limits（n. trc.）：依 specifications with limits 指定與測試，但因缺乏可追溯至 national metrology standards 的 measuring equipment，product performance 不保證。\n- Specifications without limits：表示 warranted product performance；未特別標記時表示數值沒有或只有可忽略偏差。\n- Typical data（typ.）：representative information；若標示 <、> 或 range，代表約 80% instruments 在 production time 可達成的 performance，其他情況代表 mean value。\n- Nominal values（nom.）：representative value；production 期間不測試該 parameter。\n- Measured values（meas.）：individual samples 的 measurement results。\n- Uncertainties：coverage factor 2，依 Guide to the Expression of Uncertainty in Measurement（GUM），並考量 environmental conditions、aging、wear and tear。\n- 來源明確說明：non-traceable specifications with limits、typical data、nominal values、measured values 不由 Rohde & Schwarz 保證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 27.219823
+         },
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › 與既有知識的關係\n- 本來源補齊 [[R&S ZNA]] 主系列，與既有 [[R&S ZNA67EXT]] 形成關聯：[[R&S ZNA67EXT]] 是 1.0 mm Vector Network Analyzer System，量測範圍 10 MHz to 110 GHz；本來源的 [[R&S ZNA67]] 是 67 GHz base VNA 型號，並可透過 [[mmWave converter support]] 與 accessories 延伸應用。\n- 本來源與既有 [[R&S FSW]]、[[R&S FSWP]]、[[R&S FSWX]] 等 spectrum / phase-noise analyzer 頁面在 [[Spectrum analyzer mode]]、[[Phase noise]]、[[Noise figure measurement]] 等功能上有橫向關聯，但本來源屬於 VNA 產品規格，不應與市場或技術背景合併。\n- [[R&S ZNA-K980]] HUMS 與既有其他產品頁的 [[Health and utilization monitoring service]] 有橫向關聯；本來源列出 SNMP、REST JSON、SCPI、device web 等 readout/display protocols。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 18.795443
+         },
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › 原文未解的問題\n- 來源有列出大量 options、accessories 與相依關係；本次 wiki 摘要保留主要可報價項目的 code、order no.、名稱與原文相依關係，但未逐字展開所有 calibration accessories、test cables、switch matrix extensions 的完整規格表。\n- 部分表格同時出現 spec.、typ.、meas. 或 nom. 數值；本摘要依原文標示保留，不自行調和。\n- 來源註明 Internal PC is subject to change without notice；因此 internal PC 規格需以此 Version 24.00（April 2026）為準。\n- [[R&S ZNA-K121]] RF off boot up 在本次來源摘錄中列出名稱，但未提供 Order No.；頁面標示為來源未標示。\n- 讀圖補充 p050 的尺寸數值旁單位無法辨識；不得推論為 mm 或其他單位。\n- 本次輸入摘錄未提供讀圖頁面的圖片嵌入 wikilink，故 wiki 無法帶入原圖供核對。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 9.245717
+         },
+         {
+          "text": "R&S ZNA\n[[R&S ZNA]] 是 Rohde & Schwarz 的 Vector Network Analyzer 系列，依 Version 24.00（April 2026）規格書涵蓋 [[R&S ZNA26]]、[[R&S ZNA43]]、[[R&S ZNA50]]、[[R&S ZNA67]]，頻率範圍從 10 MHz 延伸到最高 67 GHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 13.429982
+         },
+         {
+          "text": "R&S ZNA › 文件依據\n- 來源：[[ZNA_specs_en_5215-4652-22_v2400]]。\n- 文件：R&S®ZNA Vector Network Analyzer Specifications。\n- 文件編號：PD 5215.4652.22。\n- 文件版本：Version 24.00。\n- 發布時間：April 2026。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 10.808726
+         },
+         {
+          "text": "R&S ZNA › Key performance（Version 24.00）\n- Dynamic range：> 129 dB specification without options；147 dB typical with options；maximum attainable range up to 170 dB allowing full 2-port correction。\n- Sensitivity：> –120 dBm，1 Hz IF bandwidth，specification without options；–162 dBm，1 Hz IF bandwidth，measured with options。來源註明 –162 dBm 是以 1 kHz measurement bandwidth 量測後 normalized to 1 Hz。\n- Power sweep range：100 dB typical continuous electronic sweep range；可使用 mechanical step attenuators 位移 sweep range。\n- Source power linearity：0.2 dB typical，範圍 –40 dBm to +10 dBm。\n- Receiver compression：0.05 dB typical，up to +8 dBm at test port，referenced to –10 dBm。\n- Trace noise：0.005 dB specification RMS、0.002 dB typical RMS，條件為 10 GHz、100 kHz measurement bandwidth、0 dB reflection。\n- Speed example：10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 9.816335
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › p001（讀圖）\n- 可見文字：R&S®ZNB3000、VECTOR NETWORK ANALYZER、Specifications、Version 09.00、ROHDE&SCHWARZ、Make ideas real、ZNB Vector Network Analyzer。\n- 頁面為文件封面樣式，主體是 R&S ZNB3000 VECTOR NETWORK ANALYZER 儀器照片。\n- 儀器正面有大螢幕、右側實體按鍵與旋鈕、左右把手、前面板下方多個射頻連接埠。\n- 螢幕顯示多個網路分析儀量測圖窗；圖表細部標示、座標數值與按鍵文字多數無法辨識。\n- 可清楚辨識的數值只有 Version 09.00。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 30.881212
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › 重點摘要\n- Product data 適用條件：ambient temperature 儲存 3 小時後 warm-up operation 30 分鐘、符合 specified environmental conditions、遵守 recommended calibration interval，且已執行所有 applicable internal automatic adjustments。\n- 所有 specification data 在 **+18 °C to +28 °C** 有效；measurement accuracy 另要求 calibration 後 temperature variation 不得超過 **1 °C**，且 measurement 與 calibration 的 frequency points、measurement bandwidth、sweep time 必須相同，不允許 interpolation。\n- Measurement range：impedance 50 Ω；frequency resolution 1 Hz；number of measurement points per trace 1 to 100001。\n- Measurement bandwidth：base unit **1 Hz to 1 MHz**；搭配 [[R&S ZNB3-K17]] 10 MHz receiver bandwidth option 時為 **1 Hz to 10 MHz**。\n- 型號與頻率範圍：[[R&S ZNB3004]] 為 9 kHz to 4.5 GHz，搭配 [[R&S ZNB3-B082]] 或 [[R&S ZNB3-B084]] 可到 9.0 GHz；[[R&S ZNB3020]] 為 9 kHz to 20.0 GHz，搭配 [[R&S ZNB3-B262]] 或 [[R&S ZNB3-B264]] 可到 26.5 GHz；[[R&S ZNB3032]] 為 9 kHz to 32.0 GHz，搭配 [[R&S ZNB3-B442]] 或 [[R&S ZNB3-B444]] 可到 43.5 GHz；[[R&S ZNB3044]] 為 9 kHz to 43.5 GHz，搭配 [[R&S ZNB3-B542]] 或 [[R&S ZNB3-B544]] 可到 54.0 GHz。\n- Dynamic range 規格以 10 Hz measurement bandwidth、without user correction applied 為條件；使用 1 Hz measurement bandwidth 可增加 dynamic range；crosstalk does not limit dynamic range。\n- Measurement speed 以 firmware version 4.12 與 Windows 11 測得；來源註明 sweep time 應理解為 cycle time。\n- General data：operating temperature +5 °C to +40 °C；storage temperature –20 °C to +60 °C；calibration interval 1 year；power supply 100 V to 240 V ±10 %，50 Hz to 60 Hz and 400 Hz，max. 3.5 A。\n- Ordering information 列出 base units、frequency upgrade options、extended power range、receiver step attenuators、extended dynamic range、hardware options、software / measurement options、calibration accessories、power sensors、attenuators、switch matrices、test cables、hardware add-ons、warranty and service options。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 10.390223
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › 原文未解的問題\n- 來源萃取文字中，[[R&S ZNB3032]] dynamic range 小節標題寫作「with or without R&S®ZNB3-B322 / -B324」，但 ordering information 與 frequency range 小節列出 [[R&S ZNB3-B442]] / [[R&S ZNB3-B444]] 才是 ZNB3032 upgrade to 43.5 GHz。暫視為來源萃取或表頭錯位，報價與規格頁以 ordering information 明列代碼為準。\n- 來源萃取文字中，[[R&S ZNB3044]] dynamic range 小節標題寫作「with or without R&S®ZNB3-B442 / -B444」，但 ordering information 與 frequency range 小節列出 [[R&S ZNB3-B542]] / [[R&S ZNB3-B544]] 才是 ZNB3044 upgrade to 54 GHz。暫視為來源萃取或表頭錯位，報價與規格頁以 ordering information 明列代碼為準。\n- Power consumption 表格中有一組 2 ports max. 450 W, 145 W typ. / 4 ports max. 450 W, 200 W typ.，但型號在萃取文字中未清楚對應；本次不自行指派型號。\n- 讀圖 p035 的尺寸圖可見多個數值，但圖上未清楚顯示尺寸單位；不將其覆蓋正文 dimensions。\n- 來源未提供價格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 13,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 9.160791
+         },
+         {
+          "text": "R&S ZNB3000 › Dynamic range 條件\n- Receiver noise floor 定義為 transmission magnitude data trace 的 RMS 值，該 trace 由 noise 與 crosstalk 產生，test ports short-circuited。\n- Specifications 適用於 10 Hz measurement bandwidth，without user correction applied。\n- 使用 1 Hz measurement bandwidth 可增加 dynamic range。\n- Crosstalk does not limit dynamic range。\n- Dynamic range performance 規格化於 port 1 與 port 2 之間，以及 4-port model 的 port 3 與 port 4 之間；其他 dynamic range performance 為 typical。\n- Without enhanced dynamic range mode 時，above 100 kHz 的 nominal system dynamic range 會降低 15 dB to 20 dB；below 100 kHz 的影響可能更高。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 13.022496
+         },
+         {
+          "text": "R&S ZNB3000 › Base units 與 ordering information\n| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3004 2-port | Vector network analyzer，9 kHz to 4.5 GHz，N connector | 1351.5050.02 |\n| R&S®ZNB3004 4-port | Vector network analyzer，9 kHz to 4.5 GHz，N connector | 1351.5050.04 |\n| R&S®ZNB3020 2-port | Vector network analyzer，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.22 |\n| R&S®ZNB3020 4-port | Vector network analyzer，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.24 |\n| R&S®ZNB3032 2-port | Vector network analyzer，9 kHz to 32 GHz，2.92 mm connector | 1351.5050.32 |\n| R&S®ZNB3032 4-port | Vector network analyzer，9 kHz to 32 GHz，2.92 mm connector | 1351.5050.34 |\n| R&S®ZNB3044 2-port | Vector network analyzer，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.42 |\n| R&S®ZNB3044 4-port | Vector network analyzer，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.44 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 9.621664
+         },
+         {
+          "text": "R&S ZNB3000 › 文件依據\n- 來源：[[ZNB3000_specs_en_3647-5184-22_v0900]]。\n- 文件：R&S®ZNB3000 Vector Network Analyzer Specifications。\n- 文件編號：PD 3647.5184.22。\n- 文件版本：Version 09.00。\n- 發布時間：July 2026。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 9.489133
+         },
+         {
+          "text": "R&S ZNA67EXT › 系統構成與適用條件\n依 [[ZNA67EXT_specs_en_5216-3743-22_v0900]]，[[R&S ZNA67EXT]] system consists of one [[R&S ZNA67]] vector network analyzer and up to four external test sets。\n\n來源明確限制：規格只適用於作為 **1.0 mm vector network analyzer system** 操作，且 system configuration 必須與 [[R&S ZNA67]] rear panel designation scheme 中的 type、serial numbers 及正確 port position 完全一致。\n\nProduct data 適用條件：\n\n- Three hours of storage at ambient temperature followed by 90 minutes of warm-up operation。\n- Specified environmental conditions met。\n- Recommended calibration interval adhered to。\n- All internal automatic adjustments performed, if applicable。\n\n資料定義依來源：specifications with limits 表示 warranted product performance；typical data、nominal values、measured values 與 non-traceable specifications with limits 不由 Rohde & Schwarz 保證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+          },
+          "score": 21.040308
+         },
+         {
+          "text": "R&S ZNA67EXT › 文件依據\n- 來源：[[ZNA67EXT_specs_en_5216-3743-22_v0900]]\n- 文件：**PD 5216.3743.22 | Version 09.00 | July 2025 (ja)**\n- 頁首版本：**Version 09.00, July 2025**\n- 產品名稱：**R&S®ZNA67EXT Vector Network Analyzer System**",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+          },
+          "score": 13.254255
+         },
+         {
+          "text": "R&S ZNA67EXT › 核心規格\n以下規格皆來自 [[ZNA67EXT_specs_en_5216-3743-22_v0900]] Version 09.00（July 2025）。\n\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Impedance | measurement range | 50 Ω |\n| Test port connector | measurement range | 1.0 mm, male |\n| Number of test ports | models .12/.13/.15/.16 | 2 |\n| Number of test ports | models .14/.17 | 4 |\n| Frequency range | measurement range | 10 MHz to 110 GHz |\n| Frequency resolution | measurement range | 1 Hz |\n| Number of measurement points | user-selectable | 1 to 100001 |\n| Measurement bandwidths | 1/1.5/2/3/5/7 steps | 1 Hz to 1.5 MHz |\n| Calibration interval | general data | 1 year |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+          },
+          "score": 11.669731
+         },
+         {
+          "text": "R&S ZNB3004 › 基本規格\n- Frequency range：9 kHz to 4.5 GHz。\n- Frequency range with [[R&S ZNB3-B082]] / [[R&S ZNB3-B084]]：9 kHz to 9.0 GHz。\n- Test port connector：type N, female。\n- Number of test ports：2 or 4。\n- Impedance：50 Ω。\n- Frequency resolution：1 Hz。\n- Number of measurement points per trace：1 to 100001。\n- Measurement bandwidth：base unit 1 Hz to 1 MHz；with [[R&S ZNB3-K17]] option 1 Hz to 10 MHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3004.md"
+          },
+          "score": 10.572081
+         },
+         {
+          "text": "R&S ZNB3004 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3004 2-port | Vector network analyzer，2-port，9 kHz to 4.5 GHz，N connector | 1351.5050.02 |\n| R&S®ZNB3004 4-port | Vector network analyzer，4-port，9 kHz to 4.5 GHz，N connector | 1351.5050.04 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3004.md"
+          },
+          "score": 9.108327
+         },
+         {
+          "text": "R&S ZNB3004 › Measurement accuracy 摘錄\n資料有效條件：+18 °C to +28 °C；calibration 後溫度變化不超過 1 °C；使用 R&S®ZV-Z270 calibration kit 時資料有效性為 conditional；measurement 與 calibration 的 frequency points、measurement bandwidth、sweep time 必須相同；不允許 interpolation。\n\nTransmission uncertainty 條件：matched DUT、measurement bandwidth 10 Hz、nominal source power –10 dBm、calibration power –10 dBm、measurement power –10 dBm、analysis conditions S11 = S22 = 0。\n\n| Frequency range | Transmission level | Magnitude / phase uncertainty |\n|---|---:|---|\n| 9 kHz to 100 kHz | +0 dB to –20 dB | 0.05 dB、0.5° |\n| 9 kHz to 100 kHz | –50 dB to –60 dB | 0.21 dB、1.4° |\n| >100 kHz to 4 GHz | +0 dB to –20 dB | 0.05 dB、0.5° |\n| >100 kHz to 4 GHz | –50 dB to –60 dB | 0.20 dB、1.4° |\n| >4 GHz to 6.5 GHz | +0 dB to –20 dB | 0.05 dB、0.5° |\n| >4 GHz to 6.5 GHz | –50 dB to –60 dB | 0.25 dB、1.7° |\n| >6.5 GHz to 9.0 GHz | +0 dB to –20 dB | 0.05 dB、0.6° |\n| >6.5 GHz to 9.0 GHz | –50 dB to –60 dB | 0.60 dB、4.1° |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3004.md"
+          },
+          "score": 8.641333
+         },
+         {
+          "text": "R&S ZNB3020 › 基本規格\n- Frequency range：9 kHz to 20.0 GHz。\n- Frequency range with [[R&S ZNB3-B262]] / [[R&S ZNB3-B264]]：9 kHz to 26.5 GHz。\n- Test port connector：3.5 mm, male, ruggedized。\n- Number of test ports：2 or 4。\n- Impedance：50 Ω。\n- Frequency resolution：1 Hz。\n- Number of measurement points per trace：1 to 100001。\n- Measurement bandwidth：base unit 1 Hz to 1 MHz；with [[R&S ZNB3-K17]] option 1 Hz to 10 MHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3020.md"
+          },
+          "score": 9.422601
+         },
+         {
+          "text": "R&S ZNB3020 › Measurement accuracy 摘錄\n資料有效條件：+18 °C to +28 °C；calibration 後溫度變化不超過 1 °C；使用 R&S®ZN-Z235（with 3.5 mm test port adapter connector）或 R&S®ZN-Z229 calibration kit 時資料有效性為 conditional；measurement 與 calibration 的 frequency points、measurement bandwidth、sweep time 必須相同；不允許 interpolation。\n\nTransmission uncertainty 條件：matched DUT、measurement bandwidth 10 Hz、nominal source power –10 dBm、enhanced dynamic range mode on。\n\n| Frequency range | Transmission level | Magnitude / phase uncertainty |\n|---|---:|---|\n| 9 kHz to 300 kHz | 0 dB to –20 dB | 0.05 dB、0.3° |\n| >300 kHz to 1 MHz | 0 dB to –20 dB | 0.04 dB、0.3° |\n| >1 MHz to 4 GHz | 0 dB to –20 dB | 0.04 dB、0.3° |\n| >1 MHz to 4 GHz | –50 dB to –60 dB | 0.10 dB、0.7° |\n| >4 GHz to 9 GHz | 0 dB to –20 dB | 0.05 dB、0.4° |\n| >9 GHz to 26.5 GHz | 0 dB to –20 dB | 0.06 dB、0.7° |\n| >9 GHz to 26.5 GHz | –50 dB to –60 dB | 0.12 dB、1.0° |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3020.md"
+          },
+          "score": 8.552614
+         },
+         {
+          "text": "R&S ZNB3020 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3020 2-port | Vector network analyzer，2-port，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.22 |\n| R&S®ZNB3020 4-port | Vector network analyzer，4-port，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.24 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3020.md"
+          },
+          "score": 8.530171
+         },
+         {
+          "text": "R&S ZNB3032 › Measurement accuracy 摘錄\n資料有效條件：+18 °C to +28 °C；calibration 後溫度變化不超過 1 °C；使用 R&S®ZN-Z229（with 2.92 mm test port adapter connector）calibration kit 時資料有效性為 conditional；measurement 與 calibration 的 frequency points、measurement bandwidth、sweep time 必須相同；不允許 interpolation。\n\nTransmission uncertainty 條件：EDR mode on；matched DUT、measurement bandwidth 10 Hz、nominal source power –10 dBm。\n\n| Frequency range | Transmission level | Magnitude / phase uncertainty |\n|---|---:|---|\n| 9 kHz to 300 kHz | 0 dB to –20 dB | 0.05 dB、0.4° |\n| >300 kHz to 1 MHz | 0 dB to –20 dB | 0.04 dB、0.4° |\n| >1 MHz to 4 GHz | 0 dB to –20 dB | 0.04 dB、0.4° |\n| >4 GHz to 9 GHz | 0 dB to –20 dB | 0.04 dB、0.4° |\n| >9 GHz to 26.5 GHz | 0 dB to –20 dB | 0.06 dB、0.7° |\n| >26.5 GHz to 40 GHz | 0 dB to –20 dB | 0.08 dB、0.9° |\n| >40 GHz to 43.5 GHz (measured) | 0 dB to –20 dB | 0.08 dB、1.0° |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3032.md"
+          },
+          "score": 9.098383
+         },
+         {
+          "text": "R&S ZNB3032 › 基本規格\n- Frequency range：9 kHz to 32.0 GHz。\n- Frequency range with [[R&S ZNB3-B442]] / [[R&S ZNB3-B444]]：9 kHz to 43.5 GHz。\n- Test port connector：2.92 mm, male, ruggedized。\n- Number of test ports：2 or 4。\n- Impedance：50 Ω。\n- Frequency resolution：1 Hz。\n- Number of measurement points per trace：1 to 100001。\n- Measurement bandwidth：base unit 1 Hz to 1 MHz；with [[R&S ZNB3-K17]] option 1 Hz to 10 MHz。\n\n⚠️ [[ZNB3000_specs_en_3647-5184-22_v0900]]（July 2026）萃取文字的 dynamic range 小節標題說 [[R&S ZNB3032]] 為「with or without R&S®ZNB3-B322 / -B324」，但既有頁面 [[R&S ZNB3032]] 說 frequency upgrade option 是 [[R&S ZNB3-B442]] / [[R&S ZNB3-B444]]。判斷：同一來源的 frequency range 與 ordering information 明列 [[R&S ZNB3-B442]] / [[R&S ZNB3-B444]]，暫視 dynamic range 小節標題為來源萃取或表頭錯位；報價時仍需回查原 PDF。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3032.md"
+          },
+          "score": 8.643825
+         },
+         {
+          "text": "R&S ZNB3032 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3032 2-port | Vector network analyzer，2-port，9 kHz to 32 GHz，2.92 mm connector | 1351.5050.32 |\n| R&S®ZNB3032 4-port | Vector network analyzer，4-port，9 kHz to 32 GHz，2.92 mm connector | 1351.5050.34 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3032.md"
+          },
+          "score": 8.213272
+         },
+         {
+          "text": "R&S ZNB3044 › Measurement accuracy 摘錄\n資料有效條件：+18 °C to +28 °C；calibration 後溫度變化不超過 1 °C；使用 R&S®ZN-Z218（with 1.85 mm test port adapter connector）calibration kit 時資料有效性為 conditional；measurement 與 calibration 的 frequency points、measurement bandwidth、sweep time 必須相同；不允許 interpolation。\n\nTransmission uncertainty 條件：EDR mode on；matched DUT、measurement bandwidth 10 Hz、nominal source power –10 dBm。\n\n| Frequency range | Transmission level | Magnitude / phase uncertainty |\n|---|---:|---|\n| 9 kHz to 300 kHz | 0 dB to –20 dB | 0.05 dB、0.4° |\n| >300 kHz to 1 MHz | 0 dB to –20 dB | 0.04 dB、0.4° |\n| >1 MHz to 4 GHz | 0 dB to –20 dB | 0.04 dB、0.4° |\n| >4 GHz to 9 GHz | 0 dB to –20 dB | 0.04 dB、0.6° |\n| >9 GHz to 26.5 GHz | 0 dB to –20 dB | 0.05 dB、1.3° |\n| >26.5 GHz to 40 GHz | 0 dB to –20 dB | 0.07 dB、1.7° |\n| >40 GHz to 54 GHz | 0 dB to –20 dB | 0.07 dB、2.4° |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3044.md"
+          },
+          "score": 9.212659
+         },
+         {
+          "text": "R&S ZNB3044 › 基本規格\n- Frequency range：9 kHz to 43.5 GHz。\n- Frequency range with [[R&S ZNB3-B542]] / [[R&S ZNB3-B544]]：9 kHz to 54.0 GHz。\n- Test port connector：1.85 mm, male, ruggedized。\n- Number of test ports：2 or 4。\n- Impedance：50 Ω。\n- Frequency resolution：1 Hz。\n- Number of measurement points per trace：1 to 100001。\n- Measurement bandwidth：base unit 1 Hz to 1 MHz；with [[R&S ZNB3-K17]] option 1 Hz to 10 MHz。\n\n⚠️ [[ZNB3000_specs_en_3647-5184-22_v0900]]（July 2026）萃取文字的 dynamic range 小節標題說 [[R&S ZNB3044]] 為「with or without R&S®ZNB3-B442 / -B444」，但既有頁面 [[R&S ZNB3044]] 說 frequency upgrade option 是 [[R&S ZNB3-B542]] / [[R&S ZNB3-B544]]。判斷：同一來源的 frequency range 與 ordering information 明列 [[R&S ZNB3-B542]] / [[R&S ZNB3-B544]]，暫視 dynamic range 小節標題為來源萃取或表頭錯位；報價時仍需回查原 PDF。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3044.md"
+          },
+          "score": 8.740302
+         },
+         {
+          "text": "R&S ZNB3044 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3044 2-port | Vector network analyzer，2-port，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.42 |\n| R&S®ZNB3044 4-port | Vector network analyzer，4-port，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.44 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3044.md"
+          },
+          "score": 7.651642
+         },
+         {
+          "text": "AISeverEcosystem › 與既有知識的關係\n- [[AI Server 供應鏈總覽]] 已整理 AI server 從 demand、compute、ODM、networking、PCB/interconnect、power、cooling 到 infrastructure 的八段式供應鏈；本來源新增更偏台股 / customer targeting / R&S solution mapping 的 Excel 表格視角。\n- [[AI 資料中心生態系]] 已整理多張 AI data center ecosystem / industrial chain 圖；本來源提供更細的 server rack 零組件與 IC 分類，但來源未標示日期，不能直接更新為市場現況。\n- [[臺灣 AI 伺服器供應鏈]] 依 TAITRA 2024/4 圖整理上中下游；本來源與其在 [[台光電]]、[[台燿]]、[[聯茂]]、[[欣興]]、[[南電]]、[[景碩]]、[[鴻海]]、[[廣達]]、[[緯創]]、[[英業達]]、[[台達電]]、[[光寶科]]、[[康舒]]、[[建準]]、[[川湖]]、[[勤誠]]等列名上高度相鄰，但本來源另加入 R&S solution 欄。\n- [[AI 伺服器 ODM]] 已整理台系 ODM 比較表與組裝代工列名；本來源在 [[伺服器整合／ODM]] 欄再次列出 [[鴻海]]、[[廣達]]、[[緯創]]、[[緯穎]]、[[英業達]]、[[華碩]]、[[神達]]、[[技嘉]]，但沒有營收、出貨或期間資料。\n- [[AI 伺服器 PCB 供應鏈升級]] 已記錄 GB200 / GB300 / VR200 與 PCB 材料升級；本來源只以 `GB200/NVL72帶動層數、材料等級暴衝` 和 `20+層UBB、高階ABF、低Dk CCL` 補充銷售 / solution mapping 脈絡，沒有新增可量化規格。\n- [[AI 伺服器液冷散熱]] 已整理液冷 / Microchannel lid 與 VR200 散熱估算；本來源新增 [[GPU]] TDP 700 W → 1200 W 與液冷 / 滑軌升級的表格說法，但未標示平台、年份或測試條件。\n- [[資料中心電力電子生態系]] 與 [[NVIDIA 800V HVDC 架構]] 已整理 HVDC、PSU、BBU、PDU 等 power electronics 脈絡；本來源補充電源供應器分類中的 HVDC、5–10 kW PSU、液冷電源櫃、BBU 與 Blackwell 平台功耗翻倍說法，但未提供引用文件或期間。\n- [[R&S PCB test solutions]] 已整理 R&S 2026.3.4 high-speed digital 簡報中的 material measurement、stackup selection、SI testing 與 sampling / process monitoring；本來源把部分 R&S solution 對應到特定市場分類，例如 [[R&S ZNA]] / [[R&S ZNB]] 的 IL / TDR、[[R&S FSWP]] 的 jitter / phase noise / LDO NSD test、[[MXO]] 的 power rail / motor driver analysis。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AISeverEcosystem.md"
+          },
+          "score": 16.697417
+         },
+         {
+          "text": "AISeverEcosystem › 原文未解的問題\n- `unresolved`: 來源正文未標示正式發布日期、資料期間、Excel 版本、作者、部門或更新紀錄；raw 只標示 converted: 2026-09-17。\n- `unresolved`: 原檔名為 `AISeverEcosystem.xlsx`，`AISever` 是否為 `AI Server` 拼字錯誤不得自行更正。\n- `unresolved`: 大量欄位為 `NaN`；不可推論成無資料、無 solution、不適用或空白代表否定。\n- `unresolved`: 表內公司列名是否為完整市場名單、R&S prospect list、客戶名單、投資觀察名單或內部 sales focus，來源未說明。\n- `unresolved`: `R&S Solution` 欄的 [[ZISO]]、[[MXO]]、[[OSP]]、PSA、[[ThinkLands]]、[[GOCA]]、[[Newkey]]、BMS test 未提供正式產品全名、版本、配置、option code 或 sales kit 正文。\n- `unresolved`: SharePoint sales kits 只保存連結，未擷取簡報正文；不可把連結內容當成已知主張。\n- `unresolved`: [[嘉澤]] / [[嘉基]] 被寫在同一企業欄，代號 3533.0；來源未說明是二者合併、讀圖錯位或表格寫法。\n- `unresolved`: [[散熱器]] 角色亮點中的 `GPU TDP由700 W升至1200 W` 未標示 GPU 型號、平台、年份、來源或是否為單顆 GPU。\n- `unresolved`: [[電源供應器]] 角色亮點中的 `Blackwell平台功耗翻倍` 未標示基準平台、功耗口徑或來源。\n- `unresolved`: [[伺服器機殼]] 角色亮點中的 `AI機櫃重2–3噸` 未標示機櫃配置、平台、液冷 / 風冷條件或來源。\n- `unresolved`: [[ICs]] sheet 的股票代號欄混用美股 ticker、台股代號與韓股數字；不可跨市場比較。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AISeverEcosystem.md"
+          },
+          "score": 11.897177
+         },
+         {
+          "text": "AISeverEcosystem › 重點摘要\n- [[AISeverEcosystem]] 是一份 AI server ecosystem / server rack / ICs Excel 轉檔來源，主要把 AI server 供應鏈分成 [[GPU模組]]、[[ABF載板]]、[[伺服器主機板]]、[[PCB]]、[[CCL]]、[[連接器]] / 線纜、[[網通交換機]]、[[矽光子]]、[[散熱器]]、[[電源供應器]]、[[伺服器機殼]]、[[伺服器 ODM]]、[[EMC Lab]] 與 IC 相關分類。\n- 來源同時列出部分公司、台股代號、角色亮點、[[R&S Solution]] 與 sales kits 連結；多數欄位為 `NaN`，因此不可推論未填欄位代表不適用、無需求或無 R&S solution。\n- [[ServerRack]] sheet 中，[[伺服器主機板]] / PCBA 的 [[R&S Solution]] 欄列出 [[R&S ZNL]] 用於 PDN Target Z、[[MXO]] 用於 power rail / multiphase DC / PI、[[ZISO]]、[[R&S FSWP]] 用於 LDO NSD test / clock jitter test、[[R&S ZNA]] 用於 high speed trace test。\n- [[伺服器電路板]] / PCB 分類列出關鍵元件為 `20+層UBB、高階ABF、低Dk CCL`，並在 [[博智]] 列寫 `GB200/NVL72帶動層數、材料等級暴衝。`；[[R&S Solution]] 欄列 [[R&S ZNA]] / [[R&S ZNB]]：IL、TDR。\n- [[連接器]] / 線纜分類列出 `CPU/GPU Socket、UQD水冷快接、800 G AOC`，角色亮點稱 [[PCIe 6]] / [[PCIe 7]]、[[InfiniBand]] 800 Gbe 提升 connector ASP；[[R&S Solution]] 欄列 [[R&S ZNA]] / [[R&S ZNB]] + [[OSP]]：high speed cable。\n- [[網通交換機]] 分類列出 [[智邦]]、[[神準]]、[[明泰]]、[[鴻海]]、[[達創]]、[[鈺登]]，[[R&S Solution]] 欄在 [[智邦]] 列出 [[R&S FSWP]]：jitter / phase noise test、VNA（[[R&S ZNA]] / [[R&S ZNB]]）、EMI pretest，並有一個 SharePoint sales kit 連結。\n- [[矽光子]] 分類列出關鍵元件 `40G/100G/400G/800G光收發模組, CPO/NEO（Near-packaged optics) &（pluggable）`；角色亮點稱 [[CPO]] 對有源 / 無源 SiPh、先進封裝、測試需求提升，且提到 [[前鼎]] 提供高速載板、[[光聖]] 提供 ELS 外部雷射源；[[R&S Solution]] 欄列 optical VNA：[[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]，以及 [[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]]。\n- [[散熱器]] 分類列出關鍵元件 `滑軌、液冷板、CDU、風扇`，在 [[建準]] 角色亮點稱 `GPU TDP由700 W升至1200 W，液冷與滑軌結構同步升級。`；[[R&S Solution]] 欄列 [[MXO]]：motor driver analysis。\n- [[電源供應器]] 分類列出關鍵元件 `HVDC、5–10 kW PSU、液冷電源櫃、BBU`，在 [[光寶科]] 角色亮點稱 `Blackwell平台功耗翻倍，推升高密度電源需求`；[[R&S Solution]] 欄列 [[MXO]]：power rail / multiphase DC / PI、[[ZISO]]、[[R&S FSWP]]：LDO NSD test、BMS test，並有一個 SharePoint sales kit 連結。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AISeverEcosystem.md"
+          },
+          "score": 8.447754
+         },
+         {
+          "text": "AISeverEcosystem R&S solution mapping › 與既有知識的關係\n- [[R&S PCB test solutions]] 提供 2026.3.4 R&S high-speed digital 簡報中的 PCB fabricator / system house 測試流程；本頁則來自市場 Excel，將 R&S 儀器與 AI server supply-chain 類別做銷售 mapping。\n- [[高頻高速 PCB 測試解決方案]] 與 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 已有 Keysight / PCB test 圖像來源；本頁新增 R&S 方案對應，但未提供可替代正式規格的量測條件。\n- [[AI 伺服器 PCB 供應鏈升級]] 記錄材料與板層升級；本頁只補充對應測試入口，例如 IL、TDR、high speed trace、PDN Target Z。\n- [[資料中心電力電子生態系]]、[[NVIDIA 800V HVDC 架構]] 與 [[AI 資料中心高壓直流供電]] 記錄 data center power electronics；本頁補充 [[MXO]]、[[R&S FSWP]]、[[ZISO]] 與 BMS test 的 sales mapping 線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+          },
+          "score": 18.088331
+         },
+         {
+          "text": "AISeverEcosystem R&S solution mapping\n[[AISeverEcosystem R&S solution mapping]] 是用來保存 [[AISeverEcosystem]] 中 AI server ecosystem 分類與 [[R&S Solution]] 欄位對應關係的概念頁；它只表示該 Excel 表中的銷售 / 測試方案線索，不代表正式產品配置、客戶關係或已驗證商機。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+          },
+          "score": 12.71977
+         },
+         {
+          "text": "AISeverEcosystem R&S solution mapping › 來源中的 mapping\n| 分類 | 對象 / 企業欄 | 來源中的 R&S Solution | 來源日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| [[伺服器主機板]] / PCBA | [[鴻海]] | [[R&S ZNL]]: PDN Target Z；[[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test、clock jitter test；[[R&S ZNA]]: high speed trace test | 來源未標示正式日期；raw converted 2026-09-17 | 未提供正式 test setup、option、fixture、頻率或 sales kit |\n| [[伺服器電路板]] / [[PCB]] | [[博智]] | [[R&S ZNA]] / [[R&S ZNB]]: IL、TDR | 來源未標示正式日期；raw converted 2026-09-17 | 只對應表內 [[博智]]列，不能推論其他 PCB 廠同樣適用 |\n| [[連接器]] / 線纜 | [[嘉澤]] / [[嘉基]] | [[R&S ZNA]] / [[R&S ZNB]] + [[OSP]]: high speed cable | 來源未標示正式日期；raw converted 2026-09-17 | [[嘉澤]] / [[嘉基]] 同格寫法未決；未提供 cable type、connector type 或 calibration method |\n| [[網通交換機]] | [[智邦]] | [[R&S FSWP]]: jitter / phase noise test；VNA（[[R&S ZNA]] / [[R&S ZNB]]）；EMI pretest | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；不可推論完整 switching test portfolio |\n| [[矽光子]] | [[上詮]] | optical VNA：[[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]；[[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]] | 來源未標示正式日期；raw converted 2026-09-17 | ThinkLands、GOCA、Newkey 與 PSA 未展開；未提供 optical VNA setup 或 module type |\n| [[散熱器]] | [[建準]] | [[MXO]]: motor driver analysis | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 motor driver type、fan / pump 類型或量測條件 |\n| [[電源供應器]] | [[光寶科]] | [[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test；BMS test | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；未提供 HVDC / PSU / BBU 測試配置 |\n| [[GPU]] | [[輝達]] | [[R&S ZNA]]: TDR、[[OSP]] | 來源未標示正式日期；raw converted 2026-09-17 | 不代表 R&S 與 NVIDIA 合作或採購關係；僅是表內 solution mapping |\n| [[CPU]] | [[超微]] | [[R&S ZNA]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 TDR、SI、PI 或其他測項 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+          },
+          "score": 8.190143
+         },
+         {
+          "text": "Keysight › 未決事項\n- [[AI Server PCB test image 24]] 未標示內容日期、年份、季度或資料期間。\n- [[AI Server PCB test image 50]] 未標示內容日期、年份、季度或資料期間。\n- [[AI Server PCB test image 24]] 與 [[AI Server PCB test image 50]] 未標示 Keysight 相關方案的文件版次、產品規格、型號細節、option code 或價格。\n- [[AI Server PCB test image 24]] 未標示圖中合作夥伴名稱。\n- [[AI Server PCB test image 50]] 的 `Delta-L 测量软件（来自台作伙伴）` 與 `Delta-L 探头（来自台作伙伴）` 中「台作伙伴」前一字可能不清楚，來源明示無法完全辨識。\n- [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 是 R&S battle card，對 Keysight 的競品描述需要 Keysight 官方資料或第三方資料驗證。\n- [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 未提供 Keysight UXM 各 SKU 的正式 datasheet、文件版次、order number、option code、release status 或測試條件。\n- [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 中 ecosystem partnerships、market dominance、NTN / RedCap / FR3 / 6G path 等說法未附可追溯外部證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight.md"
+          },
+          "score": 23.993329
+         },
+         {
+          "text": "Keysight › 可追溯範圍\n- PCB 測試相關內容只記錄 [[AI Server PCB test image 24]] 與 [[AI Server PCB test image 50]] 圖上出現的 Keysight / 是德科技名稱與相關工具組合。\n- Wireless testing / UXM portfolio 相關內容只記錄 [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 的 R&S battle card 觀點；它不是 Keysight 官方資料。\n- 本頁不推論 Keysight 在 AI server、資料中心、PCB 測試、wireless device testing 或 UXM 市場的市占率、客戶、出貨量或導入狀態。\n- 本頁不把 [[Delta-L 測量軟體]]、[[Delta-L 探頭]] 的合作夥伴自行補成任何公司名稱，因來源未標示具體名稱。\n- [[AI Server PCB test image 50]] 對 `Delta-L 测量软件（来自台作伙伴）` 與 `Delta-L 探头（来自台作伙伴）` 的「台作伙伴」字樣標示為無法完全辨識；本頁保留該未決事項，不把它當作確定公司或正式名稱。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight.md"
+          },
+          "score": 10.86586
+         },
+         {
+          "text": "Keysight\n[[Keysight]]（圖中亦寫作 [[是德科技]]）是在既有 PCB 測試圖像來源中被列為高頻高速 [[PCB]] 測試解決方案相關公司的測試量測廠商名稱；在 [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 中，Keysight 也被描述為大型美國 test & measurement vendor 與 [[R&S CMX500]] 的 wireless device testing 競品供應商。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight.md"
+          },
+          "score": 10.055718
+         },
+         {
+          "text": "Keysight ENA\n[[Keysight ENA]] 是 [[AI Server PCB test image 24]] 圖中列為 ENA / PNA 量測平台之一的 Keysight 產品系列名稱，用於該圖描述的材料量測、[[Delta-L]] 損耗、[[TDR 阻抗測量]] 與 [[Dk-Df]] 提取語境。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight ENA.md"
+          },
+          "score": 3.793615
+         },
+         {
+          "text": "Keysight ENA › 未決事項\n- [[AI Server PCB test image 24]] 未標示 [[Keysight ENA]] 的具體型號與 option code。\n- [[AI Server PCB test image 24]] 未標示 ENA 對 [[Delta-L]]、[[TDR 阻抗測量]]、[[Dk-Df]] 提取的測試條件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight ENA.md"
+          },
+          "score": 3.544496
+         },
+         {
+          "text": "Keysight ENA › 可追溯限制\n- 來源未列出 ENA 的具體型號、頻率範圍、option code、校準件型號或 TDR option 名稱。\n- 來源未標示 ENA 與 PNA 在圖中流程的分工差異；本頁不自行推論哪些測試必須使用 ENA 或 PNA。\n- 來源未提供性能指標，因此本頁不記錄量測精度、動態範圍或頻寬。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight ENA.md"
+          },
+          "score": 3.27329
+         },
+         {
+          "text": "Keysight PNA\n[[Keysight PNA]] 是 [[AI Server PCB test image 24]] 圖中列為 ENA / PNA 量測平台之一的 Keysight 產品系列名稱，用於該圖描述的材料量測、[[Delta-L]] 損耗、[[TDR 阻抗測量]] 與 [[Dk-Df]] 提取語境。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight PNA.md"
+          },
+          "score": 3.793615
+         },
+         {
+          "text": "Keysight PNA › 未決事項\n- [[AI Server PCB test image 24]] 未標示 [[Keysight PNA]] 的具體型號與 option code。\n- [[AI Server PCB test image 24]] 未標示 PNA 對 [[Delta-L]]、[[TDR 阻抗測量]]、[[Dk-Df]] 提取的測試條件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight PNA.md"
+          },
+          "score": 3.544496
+         },
+         {
+          "text": "Keysight PNA › 可追溯限制\n- 來源未列出 PNA 的具體型號、頻率範圍、option code、校準件型號或 TDR option 名稱。\n- 來源未標示 ENA 與 PNA 在圖中流程的分工差異；本頁不自行推論哪些測試必須使用 ENA 或 PNA。\n- 來源未提供性能指標，因此本頁不記錄量測精度、動態範圍或頻寬。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight PNA.md"
+          },
+          "score": 3.27329
+         },
+         {
+          "text": "AI Server PCB test image 24 › 重點摘要\n- 來源圖說為 **圖 4：Keysight高频高速PCB测试解决方案**。\n- 來源未標示內容日期、年份或季度；raw frontmatter 的 `converted: 2026-09-04` 是轉檔日，本頁只作為取得日記錄，不作為資料日期。\n- 圖中把流程分成兩大角色：**原材料供应商** 與 **PCB制造商**。\n- 圖中流程為 **原材料表征 → 材料选择 → 电路板抽样测试 → 大批量监控**。\n- 來源未標示座標軸、單位刻度或數據，因此本頁不把它解讀為趨勢圖、比較圖或市場占比圖。\n- 來源列出 [[Keysight N1500A]]、[[Keysight ENA]]、[[Keysight PNA]]、[[Keysight PathWave ADS]]、[[Materials Measurement Suite]]、[[Delta-L 測量軟體]]、[[Delta-L 探頭]]、[[TDR 探頭]] 等工具 / 軟體 / 探頭。\n- 雖然檔名含 `AI Server PCB test`，圖上文字本身沒有明確標示 [[AI伺服器]]、[[資料中心]]、[[NVIDIA H100]]、[[GB200]] 或任何特定 AI server 平台，因此本頁不把它作為 AI server 供應鏈或導入證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AI Server PCB test image 24.md"
+          },
+          "score": 18.461062
+         },
+         {
+          "text": "AI Server PCB test image 24 › 與既有知識的關係\n- [[CCL 產品規格分級]] 已記錄 [[AI Server PCB test image 19]] 與 [[AI Server PCB test image 21]] 中的 CCL loss / M 等級 / [[Df]] 分級與公司狀態；本來源提供的是 Keysight 測試解決方案流程，不提供 CCL 產品型號、M 等級、公司產品狀態或市場比較。\n- [[AI 伺服器升級 PCB 材料貢獻]] 記錄 PCB、ABF 載板、CCL 相關材料貢獻金額柱狀圖；本來源沒有金額、單位、平台或材料成本數字，不能與該頁的材料貢獻金額混用。\n- [[臺灣 PCB 產業鏈]] 記錄 PCB 板廠、設備廠與材料廠列名；本來源是測試解決方案流程圖，不列出臺灣 PCB 供應鏈公司、排名或客戶。\n- [[PCB 模組]] 記錄 PCB / 電子模組照片特徵；本來源是測試流程與工具圖，不提供可辨識 PCB 模組型號或板卡硬體歸屬。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AI Server PCB test image 24.md"
+          },
+          "score": 11.656597
+         },
+         {
+          "text": "AI Server PCB test image 24 › 原文未解的問題\n- unresolved: 來源未標示內容日期、年份、季度或資料期間。\n- unresolved: 來源未標示原始報告名稱、頁碼、發布者、文件版次或原始網址。\n- unresolved: 來源未標示圖中設備 / 軟體 / 探頭的完整型號、option code、版本或訂購資訊。\n- unresolved: 來源未標示 [[Dk-Df]]、[[插入損耗]]、[[阻抗變化]]、[[表面粗糙度]]、[[Delta-L]]、[[TDR]] 的測試頻率、測試條件、標準版本或校準程序。\n- unresolved: 來源未標示 [[Delta-L 測量軟體]] 與 [[Delta-L 探頭]] 的合作夥伴名稱。\n- unresolved: 來源未說明此圖是否來自產品簡報、應用說明、銷售材料、技術白皮書或其他文件。\n- unresolved: 圖中部分照片 / 截圖細節因解析度有限，設備型號細節無法辨識。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AI Server PCB test image 24.md"
+          },
+          "score": 11.371576
+         },
+         {
+          "text": "AI Server PCB test image 50 › 原文未解的問題\n- unresolved：來源未標示內容日期、年份、季度或資料期間。\n- unresolved：來源只標示取得 / 轉檔日期 `2026-09-04`，不可當作內容日期。\n- unresolved：`Delta-L 测量软件（来自台作伙伴）` 與 `Delta-L 探头（来自台作伙伴）` 中「台作伙伴」前一字可能不清楚，來源明示 **無法完全辨識**；不可自行改寫為合作夥伴或補上公司名稱。\n- unresolved：其餘小圖中的介面細節文字因解析度不足，來源標示 **無法辨識**。\n- unresolved：來源未標示 [[Keysight N1500A]]、[[Keysight ENA]]、[[Keysight PNA]]、[[Keysight PathWave ADS]]、[[Materials Measurement Suite]]、[[Delta-L 測量軟體]]、[[Delta-L 探頭]] 或 [[TDR 探頭]] 的完整型號、版本、option code 或規格。\n- unresolved：來源未標示圖中流程是否對應特定產業標準、客戶驗證流程或量產導入案例。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AI Server PCB test image 50.md"
+          },
+          "score": 15.90634
+         },
+         {
+          "text": "AI Server PCB test image 50 › 與既有知識的關係\n- [[AI Server PCB test image 50]] 與既有 [[AI Server PCB test image 24]] 描述高度相似，兩者都指向 [[Keysight]] 高頻高速 [[PCB]] 測試流程、[[Keysight N1500A]]、[[Keysight ENA]]、[[Keysight PNA]]、[[Keysight PathWave ADS]]、[[Delta-L]]、[[TDR 阻抗測量]] 與 [[Dk-Df]]。\n- 本來源可作為 [[高頻高速 PCB 測試解決方案]] 的另一份圖像來源，但因來源未標示日期，不可將它解讀為任何特定年度的產品狀態、市場導入狀態或客戶採用證據。\n- 本來源沒有提供量測頻率、標準版本、校準方式、fixture、探頭型號、option code 或軟體版本，因此不能補足 [[Dk-Df]]、[[Delta-L]] 或 [[TDR 阻抗測量]] 既有頁面的技術條件缺口。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AI Server PCB test image 50.md"
+          },
+          "score": 9.48388
+         },
+         {
+          "text": "AI Server PCB test image 50 › 重點摘要\n- 來源圖上沒有日期、年份或季度；本頁所有市場性描述皆標示為「來源未標示日期」。\n- [[AI Server PCB test image 50]]（來源未標示日期；取得於 2026-09-04）頁尾標題為 **图 4：Keysight高频高速PCB测试解决方案**。\n- 圖上流程由左到右為：**原材料表征 → 材料选择 → 电路板抽样测试 → 大批量监控**，並區分 **原材料供应商** 與 **PCB制造商** 兩類角色。\n- 原材料表徵階段的圖上說明為：**测量原材料（如基材或层压板）的 Dk/Df**，對應 **N1500A + ENA/PNA 先进材料测量解决方案** 與 **N1500A Materials Measurement Suite**。\n- 材料選擇階段的圖上說明為：**测量插入损耗、表面粗糙度和材料特性（Dk/Df）**，並列出 **PathWave高级设计系统（ADS）用于 PCB建模**。\n- 電路板抽樣測試階段的圖上說明為：**测量插入损耗、阻抗变化和材料特性（Dk/Df）**，並列出 **基于 ENA/PNA 的 Delta-L 损耗、TDR 阻抗测量和 Dk/Df 提取**。\n- 大批量監控階段的圖上說明為：**测量阻抗变化和插入损耗**。\n- 圖中工具 / 項目包含 [[Keysight N1500A]]、[[Keysight ENA]]、[[Keysight PNA]]、[[Materials Measurement Suite]]、[[Keysight PathWave ADS]]、[[Delta-L]]、[[TDR 阻抗測量]]、[[Dk-Df]]、[[插入損耗]]、[[阻抗變化]] 與 [[PCB建模]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AI Server PCB test image 50.md"
+          },
+          "score": 6.940619
+         },
+         {
+          "text": "LSmtron › 來源中的說法\n- [[TRI_AMD_RSKR Sharing1]]（Slide 8 頁尾 28/04/2020）列出 Customer: LSmtron，括號說明 manufacturer of FPCB and connector。\n- 同一 slide 列出 Products: ZNB40；Competitor: [[Keysight ENA]]。\n- Strength 欄寫 total solution including probe, mount-kit, and de-embedding tool with local partner。\n- Local partner 欄寫 [[TeraBit Solutions]]，並說其為 [[AtaiTec]] in Korea 的 agency。\n- DUT 欄為 Board to Board Connector。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/LSmtron.md"
+          },
+          "score": 2.682176
+         },
+         {
+          "text": "LSmtron › 可追溯限制\n- 來源未提供 LSmtron 的正式法律名稱、所在地、網站、部門、採購日期或專案名稱。\n- 來源未提供 ZNB40 的正式型號頁、order number、frequency range 或配置。\n- 來源未說明 LSmtron 是否採購、評估、PoC 或僅為 sales success story 對象。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/LSmtron.md"
+          },
+          "score": 1.375855
+         },
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › 讀圖補充\n來源包含「【讀圖補充】原文這幾頁沒有文字層」；以下內容可信度低於正文，引用時應標示「[[ZNA_specs_en_5215-4652-22_v2400]]（讀圖）」。本次輸入的來源摘錄未提供圖片嵌入 wikilink，因此無法在 wiki 頁帶入原圖附件。\n\n- p001（讀圖）：封面可辨識 R&S®ZNA、VECTOR NETWORK ANALYZER、Specifications、Version 24.00、ROHDE&SCHWARZ、Make ideas real、ZNA - Vector Network Analyzer、R&S；背景有類似 Smith chart 的大型圓形網格圖；設備螢幕顯示多個黑底網格曲線圖視窗；前面板可辨識 Port 1、Port 3、Port 2；可辨識數值只有 Version 24.00。\n- p044（讀圖）：頁首 Version 24.00, April 2026；圖說為 Test set configuration for R&S®ZNAXx-B501 low power spurious reduction port 1。可辨識 Source、–20 dB、R&S®ZNAXx-B21 source step attenuator 0 dB to 70 dB / 10 dB、R&S®ZNAXx-B161 direct source monitor access、R&S®ZNAXx-B501 low-power spurious reduction 30 dB、R&S®ZNAXx-B31 receiver step attenuators 0 dB to 35 dB / 5 dB、Meas receiver、Ref receiver、Port 1、Source Out、Source In、Meas Out、Meas In、Ref Out、Ref In、Src Mon Out、10 dB。\n- p050（讀圖）：頁首 Version 24.00, April 2026；圖說為 Side view of the R&S®ZNA；可辨識尺寸數值 452.1、407.6、131、272.43、272.43、116.1、161.95、56.3、110.5；尺寸數值旁單位無法辨識。\n- p059（讀圖）：頁面幾乎空白，無實質內容；可辨識 Version 24.00, April 2026；Rohde & Schwarz R&S®ZNA Vector Network Analyzer；59。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 8.105746
+         },
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › 關鍵實體與概念\n- [[R&S ZNA]] — Vector Network Analyzer 系列，涵蓋 26.5 GHz、43.5 GHz、50 GHz、67 GHz 型號。\n- [[R&S ZNA26]] — 26.5 GHz 型號，3.5 mm ruggedized male connector。\n- [[R&S ZNA43]] — 43.5 GHz 型號，2.92 mm 或 2.4 mm ruggedized male connector。\n- [[R&S ZNA50]] — 50 GHz 型號，2.4 mm ruggedized male connector。\n- [[R&S ZNA67]] — 67 GHz 型號，1.85 mm ruggedized male connector。\n- [[Vector Network Analyzer]]、[[Dynamic range]]、[[Measurement bandwidth]]、[[Direct source and receiver access]]、[[Noise figure measurement]]、[[mmWave converter support]]、[[Phase-coherent source control]]、[[Health and utilization monitoring service]]、[[Time domain analysis]]、[[Deembedding]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 7.948432
+         },
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › 重點摘要\n- 型號頻率範圍：\n  - [[R&S ZNA26]]：10 MHz to 26.5 GHz。\n  - [[R&S ZNA43]]：10 MHz to 43.5 GHz，可為 2.92 mm 或 2.4 mm ruggedized male test port connector。\n  - [[R&S ZNA50]]：10 MHz to 50 GHz。\n  - [[R&S ZNA67]]：10 MHz to 67 GHz。\n- 各型號提供 2 ports 或 4 ports base unit；test port impedance 為 50 Ω，DC block 為 standard。\n- Key performance 包含：dynamic range > 129 dB specification without options、147 dB typical with options、maximum attainable range up to 170 dB allowing full 2-port correction；sensitivity > –120 dBm at 1 Hz IF bandwidth specification without options，並有 –162 dBm measured with options（1 kHz measurement bandwidth normalized to 1 Hz）。\n- Measurement bandwidth：base unit 1 Hz to 1.5 MHz；搭配 [[R&S ZNA-K17]] increased IF bandwidth 30 MHz option 時為 1 Hz to 30 MHz。\n- Measurement speed 條件包含 firmware version 3.20、Windows 11 (64 bit)；例：10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。\n- 4-port instruments：最多 4 sources，independently configurable、phase coherent、phase controlled；另有第 5 source 可作為 LO supply；每 port 有 2 true receivers，4-port model 總計 8 true receivers，無 multiplexing。\n- 2-port instruments：最多 2 sources，independently configurable、phase coherent、phase controlled；另有第 3 source 可作為 LO supply；每 port 有 2 true receivers，2-port model 總計 4 true receivers，無 multiplexing。\n- Optional rear panel LO out 可支援 mmWave converters；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters，無需 external signal generator；rear panel LO out typ. +25 dBm，最高 26.5 GHz。\n- [[R&S ZNA-K28]] continuous data recording 支援 infinite data point capture、circular buffer，並可透過 LAN 或 USB 連續資料傳輸。\n- [[R&S ZNA-B26]] direct IF access：IF input 可用於 mmWave converter 與 antenna measurement systems，bandwidth 1 GHz；IF output up to 2 GHz bandwidth 可用於 external pulse analysis。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 7.604651
+         },
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › Option 與 licence 摘要\n來源列出大量 hardware options、software options、service upgrades 與 accessories。依 Productions 規則，option 不另開頁，依附在 [[R&S ZNA]] 與各型號頁下；本來源摘要只列主軸，完整 code、order no. 與相依關係需回查對應實體頁與原始來源。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 4.910938
+         },
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › 重點摘要\n這份來源是 **R&S®ZNA Vector Network Analyzer Specifications**，文件編號 **PD 5215.4652.22**，**Version 24.00**，發布時間 **April 2026**，涵蓋 [[R&S ZNA]] 系列與 [[R&S ZNA26]]、[[R&S ZNA43]]、[[R&S ZNA50]]、[[R&S ZNA67]] 四個型號。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 3.977407
+         },
+         {
+          "text": "R&S ZNA › R&S®ZNA-B15 RFFE GPIO interface 規格摘錄\n- Models .02 and .03 提供 two independent MIPI RFFE busses。\n- Connector type：25-pin D-Sub，female。\n- RFFE port 1 / 2 的 VIO、DATA、CLK 電壓範圍為 0 V to +2 V，1 mV step，maximum current 20 mA。\n- CLK configurable clock rate：31.25 kHz to 26 MHz。\n- GPIO 1 to GPIO 8：voltage range –5 V to +10 V；typ. –6 V to +12 V；voltage step size 5 mV；maximum current 20 mA。\n- GPIO 9 and 10：voltage range –5 V to +10 V；typ. –6 V to +12 V；voltage step size 5 mV；maximum current 100 mA。\n- Model .03 提供 voltage and current measurement with switchable source resistance；32 internal ADC channels 可同時量測每個 RFFE 與 GPIO pin 的 voltage and current。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 9.784214
+         },
+         {
+          "text": "R&S ZNA › Measurement speed\n- Measurement speed 測試條件：firmware version 3.20、Windows 11 (64 bit)。\n- Acquisition time per point：1 MHz measurement bandwidth、IF filter analog wideband 時 1 µs；30 MHz measurement bandwidth 時 32 ns。\n- Linear frequency sweep 條件 201 points、10 GHz center frequency、200 MHz span：1 MHz measurement bandwidth、IF filter analog normal 時 time per sweep < 3.9 ms；sweep cycle time < 4.9 ms。\n- IEC/IEEE VXI11 over 1 Gbit/s LAN：201 measurement points、800 MHz start frequency、1 GHz stop frequency、1 MHz measurement bandwidth 的 measurement and data transfer time 為 14 ms / 13 ms；201 measurement points magnitude 的 data transfer time 為 1.7 ms / 0.9 ms。\n- Switching time between channels with a maximum of 2001 points：< 2 ms。\n- Continuous mode 不需要額外 data transfer time，因為 data transfer 與 measurement 同時進行。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 8.735796
+         },
+         {
+          "text": "R&S ZNA › R&S®ZNA-B26 direct IF access 規格摘錄\n- Connector type：SMA, female。\n- Impedance：50 Ω nom.。\n- Frequency range：input（125 MHz ADC clock）100 kHz to 1 GHz nom.；output，RF ≤ 5 GHz 為 100 kHz to 60 MHz nom.；output，RF > 5 GHz 為 100 kHz to 2 GHz nom.。\n- Damage level：+20 dBm，10 V DC。\n- IF Reference / IF Meas interfaces：ports 1 and 2 為 input/output；ports 3 and 4 僅 4-port model。\n- Input 0.1 dB compression：30 MHz，IF gain 0 dB，–4 dBm meas.。\n- Input noise floor：30 MHz，IF gain 10 dB，1 kHz measurement bandwidth normalized to 1 Hz，–165 dBm meas.。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 12,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 6.325504
+         },
+         {
+          "text": "R&S ZNA › R&S®ZNA-B8 mmWave converter LO 規格摘錄\n- Data valid temperature range：+18 °C to +28 °C。\n- Connector type：2.92 mm, female。\n- Power range，30 MHz to 26.5 GHz：spec. –10 dBm to +20 dBm；typ. +25 dBm。\n- Power accuracy，–10 dBm source power，30 MHz to 26.5 GHz：spec. < 2.0 dB。\n- Power linearity referenced to 0 dBm，no power calibration，30 MHz to 26.5 GHz，–10 dBm to +20 dBm：spec. < 2 dB；typ. 0.2 dB。\n- Power resolution：spec. 0.01 dB。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 6.049667
+         },
+         {
+          "text": "R&S ZNA › Software / measurement options（摘錄）\n| Code | 名稱 / 原文說明 | 重要相依關係或限制 |\n|---|---|---|\n| R&S®ZNA-K1 | Spectrum analyzer mode | Order No. 1332.5320.02；cannot be combined with R&S®ZNA50-B312、R&S®ZNA67-B312、R&S®ZNA50-B511、R&S®ZNA67-B511 |\n| R&S®ZNA-K2 | Time domain analysis (TDR) | Order No. 1332.5336.02 |\n| R&S®ZNA-K20 | Extended time domain analysis including eye diagram | requires R&S®ZNA-K2；Order No. 1332.4746.02 |\n| R&S®ZNA-K4 | Scalar mixer measurements / arbitrary frequency-converting measurements | Order No. 1332.5342.02 |\n| R&S®ZNA-K5 | Vector mixer measurements | requires recommended setup in Options section；Order No. 1332.5359.02 |\n| R&S®ZNA-K6 | Phase coherent source control | Order No. 1332.5413.02 |\n| R&S®ZNA-K61 | True differential mode | requires R&S®ZNA-K6；Order No. 1332.5442.02 |\n| R&S®ZNA-K7 | Measurements on pulsed signals | requires R&S®ZNA-K17 together with pulse modulator；R&S®ZNA-B7 recommended；Order No. 1332.5371.02 |\n| R&S®ZNA-K17 | Increased IF bandwidth 30 MHz | Order No. 1332.5459.02 |\n| R&S®ZNA-K8 | mmWave converter support | requires recommended setup in Options section；Order No. 1332.5388.02 |\n| R&S®ZNA-K9 | Group delay measurements on frequency converters without LO access | requires recommended setup in Options section；Order No. 1332.5394.02 |\n| R&S®ZNA-K19 | 1 mHz frequency resolution | Order No. 1332.5513.02 |\n| R&S®ZNA-K28 | Continuous data recording | Order No. 1332.5613.02 |\n| R&S®ZNA-K30 | Noise figure measurement | requires recommended setup in Options section；Order No. 1332.5465.02 |\n| R&S®ZNA-K50 | Uncertainty analysis | Order No. 1332.5542.02 |\n| R&S®ZNA-K50P | Uncertainty analysis, pre-installed | Order No. 1332.5594.02 |\n| R&S®ZNA-K51 | Security write protection | Order No. 1332.5559.02 |\n| R&S®ZNA-K66 | Speed improvement | Order No. 1332.5820.02 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 13,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 4.94119
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › Base units\n| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3004 2-port | Vector network analyzer，9 kHz to 4.5 GHz (N) | 1351.5050.02 |\n| R&S®ZNB3004 4-port | Vector network analyzer，9 kHz to 4.5 GHz (N) | 1351.5050.04 |\n| R&S®ZNB3020 2-port | Vector network analyzer，9 kHz to 20 GHz (3.5 mm) | 1351.5050.22 |\n| R&S®ZNB3020 4-port | Vector network analyzer，9 kHz to 20 GHz (3.5 mm) | 1351.5050.24 |\n| R&S®ZNB3032 2-port | Vector network analyzer，9 kHz to 32 GHz (2.92 mm) | 1351.5050.32 |\n| R&S®ZNB3032 4-port | Vector network analyzer，9 kHz to 32 GHz (2.92 mm) | 1351.5050.34 |\n| R&S®ZNB3044 2-port | Vector network analyzer，9 kHz to 43.5 GHz (1.85 mm) | 1351.5050.42 |\n| R&S®ZNB3044 4-port | Vector network analyzer，9 kHz to 43.5 GHz (1.85 mm) | 1351.5050.44 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 8.603511
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › 關鍵實體與概念\n- [[R&S ZNB3000]] — Vector Network Analyzer 系列入口，涵蓋 4.5 GHz、20 GHz、32 GHz、43.5 GHz base models 與 frequency upgrade options。\n- [[R&S ZNB3004]] — type N female connector，9 kHz to 4.5 GHz；with [[R&S ZNB3-B082]] / [[R&S ZNB3-B084]] 為 9 kHz to 9.0 GHz。\n- [[R&S ZNB3020]] — 3.5 mm ruggedized male connector，9 kHz to 20.0 GHz；with [[R&S ZNB3-B262]] / [[R&S ZNB3-B264]] 為 9 kHz to 26.5 GHz。\n- [[R&S ZNB3032]] — 2.92 mm ruggedized male connector，9 kHz to 32.0 GHz；with [[R&S ZNB3-B442]] / [[R&S ZNB3-B444]] 為 9 kHz to 43.5 GHz。\n- [[R&S ZNB3044]] — 1.85 mm ruggedized male connector，9 kHz to 43.5 GHz；with [[R&S ZNB3-B542]] / [[R&S ZNB3-B544]] 為 9 kHz to 54.0 GHz。\n- [[Vector Network Analyzer]]、[[Dynamic range]]、[[Measurement bandwidth]]、[[Effective system data]]、[[Noise figure measurement]]、[[mmWave converter support]]、[[Health and utilization monitoring service]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 8.100058
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › 與既有知識的關係\n- 本來源更新既有 [[R&S ZNB3000]] 系列頁面，補齊 extended power range order no.、manual / automatic calibration units、inline calibration units、switch matrices、test cables、hardware add-ons 與讀圖補充。\n- [[R&S ZNB3044]] 可透過 frequency upgrade option 達 54.0 GHz；既有 [[R&S ZNA67]] 依 Version 24.00 達 67 GHz，[[R&S ZNA67EXT]] 依 Version 09.00 達 110 GHz。這是不同產品線與不同文件，不合併。\n- 本來源列出 [[R&S ZNB3-K30]] noise figure measurement、[[R&S ZNB3-K8]] mmWave converter support、[[R&S ZNB3-K980]] HUMS 等功能，與既有 ZNA 系列頁面有功能層面的橫向連結，但 option code 與 order no. 不可互用。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 7.032698
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › 重點摘要\n這份來源是 **R&S®ZNB3000 Vector Network Analyzer Specifications**，文件識別 **PD 3647.5184.22**，**Version 09.00**，日期 **July 2026**，涵蓋 [[R&S ZNB3000]] 系列與 [[R&S ZNB3004]]、[[R&S ZNB3020]]、[[R&S ZNB3032]]、[[R&S ZNB3044]] 四個型號。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 4.911298
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › 讀圖補充\n以下資訊來自來源的「讀圖補充」，可信度低於正文，寫入 wiki 時應標明「讀圖」。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 4.465038
+         },
+         {
+          "text": "R&S ZNB3000 › 讀圖補充\n- [[ZNB3000_specs_en_3647-5184-22_v0900]]（讀圖）p001 為封面，顯示 R&S®ZNB3000、VECTOR NETWORK ANALYZER、Specifications、Version 09.00 與儀器正面照片；螢幕圖表細節多數無法辨識。\n- [[ZNB3000_specs_en_3647-5184-22_v0900]]（讀圖）p006 顯示 Measurement speed 圖解，條件為 firmware version 4.12 and Windows 11，並定義 TPREP、TSAMPLE、TPOST、TACO、TSWEEP、TRETRACE、TCYCLE；本頁未標出具體時間數值或單位。\n- [[ZNB3000_specs_en_3647-5184-22_v0900]]（讀圖）p035 為 Side view of the R&S®ZNB3000，可辨識 361.5、162.5、217、0、75.5、251.5 等尺寸數值，但圖上未清楚顯示尺寸單位；不覆蓋正文 dimensions。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 15,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 8.626076
+         },
+         {
+          "text": "R&S ZNB3000 › 型號總覽\n| 型號 | Base frequency range | With frequency upgrade | Test port connector | Ports |\n|---|---:|---:|---|---|\n| [[R&S ZNB3004]] | 9 kHz to 4.5 GHz | 9 kHz to 9.0 GHz with [[R&S ZNB3-B082]] / [[R&S ZNB3-B084]] | type N, female | 2 or 4 |\n| [[R&S ZNB3020]] | 9 kHz to 20.0 GHz | 9 kHz to 26.5 GHz with [[R&S ZNB3-B262]] / [[R&S ZNB3-B264]] | 3.5 mm, male, ruggedized | 2 or 4 |\n| [[R&S ZNB3032]] | 9 kHz to 32.0 GHz | 9 kHz to 43.5 GHz with [[R&S ZNB3-B442]] / [[R&S ZNB3-B444]] | 2.92 mm, male, ruggedized | 2 or 4 |\n| [[R&S ZNB3044]] | 9 kHz to 43.5 GHz | 9 kHz to 54.0 GHz with [[R&S ZNB3-B542]] / [[R&S ZNB3-B544]] | 1.85 mm, male, ruggedized | 2 or 4 |\n\n共通規格：impedance 50 Ω、frequency resolution 1 Hz、number of measurement points per trace 1 to 100001。\n\n⚠️ [[ZNB3000_specs_en_3647-5184-22_v0900]]（July 2026）萃取文字的 dynamic range 小節標題說 [[R&S ZNB3032]] 使用 R&S®ZNB3-B322 / -B324、[[R&S ZNB3044]] 使用 R&S®ZNB3-B442 / -B444，但既有頁面 [[R&S ZNB3000]] 說 [[R&S ZNB3032]] 使用 [[R&S ZNB3-B442]] / [[R&S ZNB3-B444]]、[[R&S ZNB3044]] 使用 [[R&S ZNB3-B542]] / [[R&S ZNB3-B544]]。判斷：同一來源的 ordering information 與 frequency range 小節明列後者，暫視 dynamic range 小節標題為來源萃取或表頭錯位；報價時仍需回查原 PDF。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 6.587762
+         },
+         {
+          "text": "R&S ZNB3000\n[[R&S ZNB3000]] 是 Rohde & Schwarz 的 [[Vector Network Analyzer]] 系列，依 [[ZNB3000_specs_en_3647-5184-22_v0900]] Version 09.00（July 2026）涵蓋 [[R&S ZNB3004]]、[[R&S ZNB3020]]、[[R&S ZNB3032]]、[[R&S ZNB3044]]，base frequency range 從 9 kHz 延伸到 43.5 GHz，搭配 frequency upgrade option 最高到 54.0 GHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 5.735032
+         },
+         {
+          "text": "R&S ZNB3000 › Product data 適用條件\n- Ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘。\n- 符合 specified environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有 applicable internal automatic adjustments。\n- 所有 specification data 在 +18 °C to +28 °C 有效。\n\nNon-traceable specifications with limits、typical data、nominal values、measured values 不由 Rohde & Schwarz 保證；來源定義依 [[ZNB3000_specs_en_3647-5184-22_v0900]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 5.50319
+         },
+         {
+          "text": "R&S ZNB3000 › 共通硬體 options（摘錄）\n| Code | 名稱 / 原文說明 | Order No. | 相依關係 / 限制 |\n|---|---|---:|---|\n| R&S®ZNB-B4 | Precision frequency reference (OCXO) | 1316.1769.02 | Retrofit |\n| R&S®ZNB3-B8 | mmWave converter LO/IF，2-port model | 1351.5109.02 | 適用 [[R&S ZNB3020]] only with R&S®ZNB3-B26x option、[[R&S ZNB3032]]、[[R&S ZNB3044]] |\n| R&S®ZNB3-B8 | mmWave converter LO/IF，4-port model | 1351.5109.04 | 適用 [[R&S ZNB3020]] only with R&S®ZNB3-B26x option、[[R&S ZNB3032]]、[[R&S ZNB3044]] |\n| R&S®ZNB-B10 | GPIB interface | 1311.5995.04 | remote control interface in line with IEEE 488、IEC 60625；Retrofit / On site |\n| R&S®ZNB-B12 | Device control | 1319.5088.02 | Direct control bus output；Retrofit / On site |\n| R&S®ZN-B121 | Direct control cable | 1323.9290.00 | Retrofit / On site |\n| R&S®ZN-B14 | Handler I/O | 1316.2459.05 | Keysight handler interface compatibility type 3；Retrofit / On site |\n| R&S®ZN-Z15 | RFFE GPIO interface external | 1325.5905.02 | Retrofit / On site |\n| R&S®ZN-Z15 | RFFE GPIO interface external with voltage/current measurement | 1325.5905.03 | Retrofit / On site |\n| R&S®ZNB-B81 | DC inputs | 1316.0004.02 | 4 DC inputs；maximum measurement bandwidth 10 kHz；Retrofit |\n| R&S®ZNB3-B19 | Additional removable SSD，512 Gbyte | 1351.5821.02 | Retrofit / On site |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 3.514507
+         },
+         {
+          "text": "R&S ZNA67EXT › 型號與 base units\n來源列出同一 type `R&S®ZNA67EXT` 的 6 個 order no. / model suffix variants：\n\n| 說明 | Type | Order No. | Port / power 摘要 |\n|---|---|---:|---|\n| Vector network analyzer system, 110 GHz, 2 test ports, complete system based on R&S®ZNA67, 2-port model, two millimeterwave converter heads, standard power | R&S®ZNA67EXT | 1352.1888K12 | models .12；2 test ports；standard power |\n| Vector network analyzer system, 110 GHz, 2 test ports, complete system based on R&S®ZNA67, 4-port model, two millimeterwave converter heads, standard power | R&S®ZNA67EXT | 1352.1888K13 | models .13；2 test ports；standard power |\n| Vector network analyzer system, 110 GHz, 4 test ports, four millimeterwave converter heads, standard power | R&S®ZNA67EXT | 1352.1888K14 | models .14；4 test ports；standard power |\n| Vector network analyzer system, 110 GHz, 2 test ports, complete system based on R&S®ZNA67, 2-port model, two millimeterwave converter heads, high power | R&S®ZNA67EXT | 1352.1888K15 | models .15；2 test ports；high power |\n| Vector network analyzer system, 110 GHz, 2 test ports, two millimeterwave converter heads, high power | R&S®ZNA67EXT | 1352.1888K16 | models .16；2 test ports；high power |\n| Vector network analyzer system, 110 GHz, 4 test ports, four millimeterwave converter heads, high power | R&S®ZNA67EXT | 1352.1888K17 | models .17；4 test ports；high power |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+          },
+          "score": 11.658026
+         },
+         {
+          "text": "R&S ZNA67EXT › Dynamic range\n條件：receiver noise floor 為 transmission magnitude data trace RMS，test ports short-circuited；規格適用於 **10 Hz measurement bandwidth**，without user correction applied。來源說明 dynamic range 可用 **1 Hz measurement bandwidth** 增加；crosstalk does not limit the dynamic range。Dynamic range performance specified between port 1 and port 2 and between port 3 and port 4（4-port model）；otherwise typical。\n\n| Frequency range | Dynamic range |\n|---|---:|\n| 10 MHz to 30 MHz | > 85 dB (spec.) |\n| 30 MHz to 100 MHz | > 100 dB (spec.) |\n| 100 MHz to 500 MHz | > 120 dB (spec.) |\n| 500 MHz to 10 GHz | > 130 dB (spec.) |\n| 10 GHz to 20 GHz | > 125 dB (spec.) |\n| 20 GHz to 30 GHz | > 115 dB (spec.) |\n| 30 GHz to 40 GHz | > 120 dB (spec.) |\n| 40 GHz to 50 GHz | > 100 dB (spec.) |\n| 50 GHz to 65 GHz | > 95 dB (spec.) |\n| 65 GHz to 75 GHz | > 90 dB (spec.) |\n| 75 GHz to 80 GHz | > 100 dB (spec.) |\n| 80 GHz to 90 GHz | > 105 dB (spec.) |\n| 90 GHz to 100 GHz | > 95 dB (spec.) for models .12/.13/.14；> 100 dB (spec.) for models .15/.16/.17 |\n| 100 GHz to 110 GHz | > 90 dB (spec.) for models .12/.13/.14；> 95 dB (spec.) for models .15/.16/.17 |\n\n註：來源 footnote 2 說若 [[R&S ZNA]] base unit 存在下列 options，68 GHz 以下 dynamic range 最多 reduced up to 18 dB：R&S®ZNA-B161, R&S®ZNA-B163, R&S®ZNA-B212, R&S®ZNA-B213, R&S®ZNA-B302, R&S®ZNA-B312, R&S®ZNA-B501 or R&S®ZNA-B511。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+          },
+          "score": 7.988644
+         },
+         {
+          "text": "R&S ZNA67EXT › Unresolved\n- 來源未提供價格。\n- 來源未完整列出 [[R&S ZNA67]] interfaces，並指向 R&S ZNA specifications document **PD 5215.4652.22**。\n- Cable set `R&S®ZN-ZCASGO` 在轉換文字中有四個 order no.，但 `.02/.03/.04/.05` 的完整差異只部分可見；報價或配置前需回查原 PDF 表格。\n- Options 表格的 Service center upgrade / On-site upgrade 欄位在轉換文字中對齊不完整；本頁未據此推論升級方式。\n- 多個 option 的 `Requires` 欄位為空白；本頁以「來源未標示」記錄，未自行推論相依關係。\n- 讀圖 p001 的設備螢幕細小文字無法辨識。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 25,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+          },
+          "score": 7.984905
+         },
+         {
+          "text": "R&S ZNA67EXT › Uncorrected system data\n資料有效條件：valid between **+18 °C and +28 °C**。\n\nTrace noise magnitude 條件：**1 kHz measurement bandwidth, 0 dB reflection (meas.)**。\n\n| Frequency range | Trace noise magnitude RMS |\n|---|---:|\n| 10 MHz to 20 MHz | < 0.2 dB (spec.) |\n| 20 MHz to 50 MHz | < 0.04 dB (spec.) |\n| 50 MHz to 150 MHz | < 0.015 dB (spec.) |\n| 150 MHz to 500 MHz | < 0.005 dB (spec.) |\n| 500 MHz to 20 GHz | < 0.003 dB (spec.) |\n| 20 GHz to 40 GHz | < 0.005 dB (spec.) |\n| 40 GHz to 68 GHz | < 0.01 dB (spec.) |\n| 68 GHz to 75 GHz | < 0.015 dB (spec.) |\n| 75 GHz to 100 GHz | < 0.01 dB (spec.) |\n| 100 GHz to 110 GHz | < 0.02 dB (spec.) |\n\nTrace noise phase 條件：**1 kHz measurement bandwidth, 0 dB reflection (meas.)**。\n\n| Frequency range | Trace noise phase RMS |\n|---|---:|\n| 10 MHz to 20 MHz | < 1° (spec.) |\n| 20 MHz to 50 MHz | < 0.2° (spec.) |\n| 50 MHz to 150 MHz | < 0.08° (spec.) |\n| 150 MHz to 500 MHz | < 0.03° (spec.) |\n| 500 MHz to 20 GHz | < 0.02° (spec.) |\n| 20 GHz to 40 GHz | < 0.04° (spec.) |\n| 40 GHz to 68 GHz | < 0.08° (spec.) |\n| 68 GHz to 75 GHz | < 0.08° (spec.) |\n| 75 GHz to 100 GHz | < 0.06° (spec.) |\n| 100 GHz to 110 GHz | < 0.1° (spec.) |\n\nTemperature dependence 條件：**at 0 dB transmission or reflection (typ.)**。\n\n| Frequency range | Temperature dependence |\n|---|---|\n| 10 MHz to 5 GHz | 0.01 dB/K, 0.1°/K |\n| 5 GHz to 40 GHz | 0.02 dB/K, 0.4°/K |\n| 40 GHz to 68 GHz | 0.04 dB/K, 0.8°/K |\n| 68 GHz to 110 GHz | 0.06 dB/K, 1.0°/K |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+          },
+          "score": 7.220221
+         },
+         {
+          "text": "R&S ZNA67EXT › General data\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Weight | R&S®ZNA67 | 29 kg (63.9 lb) |\n| Weight | each external test set consisting of R&S®ZVA-Z110D | 3.5 kg (7.7 lb) |\n| Shipping weight | R&S®ZNA67 | 35 kg (77.2 lb) |\n| Shipping weight | each external test set consisting of R&S®ZVA-Z110D | 5.5 kg (12.1 lb) |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 14,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+          },
+          "score": 7.039181
+         },
+         {
+          "text": "R&S ZNB3004 › 文件依據\n- 來源：[[ZNB3000_specs_en_3647-5184-22_v0900]]。\n- 文件：R&S®ZNB3000 Vector Network Analyzer Specifications。\n- 文件編號：PD 3647.5184.22。\n- 文件版本：Version 09.00。\n- 發布時間：July 2026。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3004.md"
+          },
+          "score": 8.1334
+         },
+         {
+          "text": "R&S ZNB3004\n[[R&S ZNB3004]] 是 [[R&S ZNB3000]] 系列的 type N connector Vector Network Analyzer 型號，依 Version 09.00（July 2026）base frequency range 為 9 kHz to 4.5 GHz，搭配 frequency upgrade option 可到 9 kHz to 9.0 GHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3004.md"
+          },
+          "score": 5.347083
+         },
+         {
+          "text": "R&S ZNB3004 › Dynamic range（with or without R&S®ZNB3-B082/-B084，without additional options）\n條件：10 Hz measurement bandwidth，without user correction applied；receiver noise floor 為 transmission magnitude data trace RMS，test ports short-circuited。\n\n| Frequency range | System dynamic range |\n|---|---:|\n| 9 kHz to 100 kHz | specification ≥110 dB；typical 122 dB |\n| 100 kHz to 50 MHz | specification ≥125 dB；typical 138 dB |\n| 50 MHz to 7 GHz | specification ≥130 dB；typical 140 dB |\n| 7 GHz to 8.5 GHz | specification ≥120 dB；typical 130 dB |\n| 8.5 GHz to 9.0 GHz | specification ≥115 dB；typical 125 dB |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3004.md"
+          },
+          "score": 3.808085
+         },
+         {
+          "text": "R&S ZNB3004 › Test port input 摘錄\n- Match：9 kHz to 50 kHz > 10 dB；50 kHz to 9.0 GHz > 20 dB。\n- Maximum nominal input level：+13 dBm。\n- Damage level：+27 dBm。\n- Damage DC voltage：30 V。\n- Noise level at 1 kHz measurement bandwidth，normalized to 1 Hz：9 kHz to 100 kHz < –120 dBm、typical –130 dBm；100 kHz to 4 GHz < –130 dBm、typical –140 dBm；4 GHz to 7 GHz < –125 dBm、typical –138 dBm；7 GHz to 9.0 GHz < –120 dBm、typical –132 dBm。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3004.md"
+          },
+          "score": 2.010024
+         },
+         {
+          "text": "R&S ZNB3004 › Extended dynamic range options（R&S®ZNB3-B52 / R&S®ZNB3-B54）\n- Options 僅適用 [[R&S ZNB3004]]。\n- 不可與 R&S®ZNB3-B1 或 R&S®ZNB3-B31 / B32 / B33 / B34 組合使用。\n- System dynamic range：9 kHz to 50 MHz specification ≥130 dB、typical 140 dB；50 MHz to 6.5 GHz specification ≥140 dB、typical 150 dB；6.5 GHz to 8.5 GHz specification ≥130 dB、typical 138 dB；8.5 GHz to 9.0 GHz specification ≥125 dB。\n- Power range without optional extended power range：9 kHz to 100 kHz –55 dBm to +8 dBm；100 kHz to 6.5 GHz –55 dBm to +10 dBm；6.5 GHz to 7.5 GHz –55 dBm to +8 dBm；7.5 GHz to 8.5 GHz –55 dBm to +6 dBm；8.5 GHz to 9.0 GHz –55 dBm to +2 dBm。\n- Minimum power level using optional extended power range：9 kHz to 9.0 GHz，–85 dBm。\n- Test port input maximum nominal input level：+10 dBm。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 12,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3004.md"
+          },
+          "score": 1.630172
+         },
+         {
+          "text": "R&S ZNB3020 › 文件依據\n- 來源：[[ZNB3000_specs_en_3647-5184-22_v0900]]。\n- 文件：R&S®ZNB3000 Vector Network Analyzer Specifications。\n- 文件編號：PD 3647.5184.22。\n- 文件版本：Version 09.00。\n- 發布時間：July 2026。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3020.md"
+          },
+          "score": 7.713555
+         },
+         {
+          "text": "R&S ZNB3020\n[[R&S ZNB3020]] 是 [[R&S ZNB3000]] 系列的 20 GHz Vector Network Analyzer 型號，依 Version 09.00（July 2026）base frequency range 為 9 kHz to 20.0 GHz，搭配 frequency upgrade option 可到 26.5 GHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3020.md"
+          },
+          "score": 5.117661
+         },
+         {
+          "text": "R&S ZNB3020 › Dynamic range（with or without R&S®ZNB3-B262/-B264）\n條件：10 Hz measurement bandwidth，without user correction applied；receiver noise floor 為 transmission magnitude data trace RMS，test ports short-circuited。\n\n| Frequency range | System dynamic range |\n|---|---:|\n| 9 kHz to 300 kHz | specification ≥115 dB；typical 125 dB |\n| 300 kHz to 1 MHz | specification ≥135 dB；typical 145 dB |\n| 1 MHz to 10 MHz | specification ≥140 dB；typical 150 dB；2 MHz 可能 typically degraded |\n| 10 MHz to 100 MHz | specification ≥145 dB；typical 155 dB |\n| 100 MHz to 24 GHz | specification ≥140 dB；typical 150 dB |\n| 24 GHz to 26.5 GHz | specification ≥135 dB；typical 145 dB |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3020.md"
+          },
+          "score": 3.663537
+         },
+         {
+          "text": "R&S ZNB3020 › Software options 注意事項\n- [[R&S ZNB3-K8]] mmWave converter support 支援 [[R&S ZNB3020]] including R&S®ZNB3-B26x option。\n- [[R&S ZNB3-K50]] / [[R&S ZNB3-K50P]] real-time measurement uncertainty analysis 不支援 [[R&S ZNB3020]] 的 EDR mode。\n- [[R&S ZNB3-K30]] noise figure measurement 的 recommended setup 包含 R&S®ZNB3000 with 2 or 4 ports、diode power sensor、step attenuator、external LNA、test cables、fixed attenuators 等。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3020.md"
+          },
+          "score": 1.705224
+         },
+         {
+          "text": "R&S ZNB3020 › Hardware options（R&S®ZNB3020）\n| Code | 名稱 / 原文說明 | Order No. | 相依關係 / 限制 |\n|---|---|---:|---|\n| R&S®ZNB3-B262 | R&S®ZNB3020 2-port upgrade to 26.5 GHz | 1351.5073.02 | 2-port model；Retrofit |\n| R&S®ZNB3-B264 | R&S®ZNB3020 4-port upgrade to 26.5 GHz | 1351.5073.04 | 4-port model；Retrofit |\n| R&S®ZNB3-B2 | Second internal generator for 4-port R&S®ZNB3020 | 1351.5144.02 | 4-port model；Retrofit |\n| R&S®ZNB3-B8 | mmWave converter LO/IF，2-port model | 1351.5109.02 | only with R&S®ZNB3-B26x option |\n| R&S®ZNB3-B8 | mmWave converter LO/IF，4-port model | 1351.5109.04 | only with R&S®ZNB3-B26x option |\n| R&S®ZNB3-B22 | Extended power range for 2-port R&S®ZNB3020 base unit | 1351.5196.02 | Retrofit |\n| R&S®ZNB3-B24 | Extended power range for 4-port R&S®ZNB3020 base unit | 1351.5209.02 | Retrofit |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3020.md"
+          },
+          "score": 1.388378
+         },
+         {
+          "text": "R&S ZNB3032 › 文件依據\n- 來源：[[ZNB3000_specs_en_3647-5184-22_v0900]]。\n- 文件：R&S®ZNB3000 Vector Network Analyzer Specifications。\n- 文件編號：PD 3647.5184.22。\n- 文件版本：Version 09.00。\n- 發布時間：July 2026。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3032.md"
+          },
+          "score": 7.889492
+         },
+         {
+          "text": "R&S ZNB3032\n[[R&S ZNB3032]] 是 [[R&S ZNB3000]] 系列的 32 GHz Vector Network Analyzer 型號，依 Version 09.00（July 2026）base frequency range 為 9 kHz to 32.0 GHz，搭配 frequency upgrade option 可到 43.5 GHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3032.md"
+          },
+          "score": 5.222295
+         },
+         {
+          "text": "R&S ZNB3032 › Dynamic range（with or without frequency upgrade option）\n條件：10 Hz measurement bandwidth，without user correction applied；receiver noise floor 為 transmission magnitude data trace RMS，test ports short-circuited。\n\n| Frequency range | System dynamic range |\n|---|---:|\n| 9 kHz to 300 kHz | specification ≥115 dB；typical 125 dB |\n| 300 kHz to 1 MHz | specification ≥135 dB；typical 145 dB |\n| 1 MHz to 10 MHz | specification ≥140 dB；typical 150 dB；2 MHz 可能 typically degraded |\n| 10 MHz to 100 MHz | specification ≥143 dB；typical 153 dB |\n| 100 MHz to 20 GHz | specification ≥140 dB；typical 150 dB |\n| 20 GHz to 24 GHz | specification ≥135 dB；typical 145 dB |\n| 24 GHz to 40 GHz | specification ≥133 dB；typical 143 dB |\n| 40 GHz to 43.5 GHz | measured 145 dB |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3032.md"
+          },
+          "score": 3.281461
+         },
+         {
+          "text": "R&S ZNB3032 › Test port output 與 input 摘錄\n- Minimum power level using optional extended power range：9 kHz to 54 GHz，–60 dBm。\n- Test port input match：9 kHz to 50 kHz ≥ 5 dB；50 kHz to 1 MHz ≥ 15 dB；1 MHz to 100 MHz ≥ 25 dB；100 MHz to 10 GHz ≥ 12 dB；10 GHz to 26.5 GHz ≥ 10 dB；26.5 GHz to 32 GHz ≥ 8 dB；32 GHz to 40 GHz ≥ 5 dB；40 GHz to 43.5 GHz measured 12 dB。\n- Maximum nominal input level：+13 dBm。\n- Damage level：+27 dBm；damage DC voltage 30 V。\n- Noise level at 1 kHz measurement bandwidth，normalized to 1 Hz：9 kHz to 300 kHz < –125 dBm typ. –135 dBm；300 kHz to 1 MHz < –130 dBm typ. –142 dBm；1 MHz to 10 MHz < –135 dBm typ. –145 dBm；10 MHz to 100 MHz < –140 dBm typ. –148 dBm；100 MHz to 2 GHz < –140 dBm typ. –147 dBm；2 GHz to 40 GHz < –138 dBm typ. –145 dBm；40 GHz to 43.5 GHz measured –145 dBm。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3032.md"
+          },
+          "score": 1.583939
+         },
+         {
+          "text": "R&S ZNB3032 › Test port output 與 input 摘錄\nPower range without optional extended power range：\n\n| Frequency range | Power range | Typical upper level |\n|---|---|---|\n| 9 kHz to 100 kHz | –30 dBm to +4 dBm | typ. up to +10 dBm |\n| 100 kHz to 1 MHz | –30 dBm to +8 dBm | typ. up to +12 dBm |\n| 1 MHz to 18 GHz | –30 dBm to +10 dBm | typ. up to +13 dBm |\n| 18 GHz to 20 GHz | –30 dBm to +8 dBm | typ. up to +13 dBm |\n| 20 GHz to 26.5 GHz | –30 dBm to +6 dBm | typ. up to +8 dBm |\n| 26.5 GHz to 40 GHz | –30 dBm to +5 dBm | typ. up to +8 dBm |\n| 40 GHz to 43.5 GHz | measured –30 dBm to +8 dBm | 來源未標示 typical |\n\nPower range with optional extended power range [[R&S ZNB3-B22]] / [[R&S ZNB3-B24]]：\n\n| Frequency range | Power range | Typical upper level |\n|---|---|---|\n| 9 kHz to 100 kHz | –60 dBm to +4 dBm | typ. up to +10 dBm |\n| 1 MHz to 18 GHz | –60 dBm to +10 dBm | typ. up to +13 dBm |\n| 18 GHz to 20 GHz | –60 dBm to +8 dBm | typ. up to +13 dBm |\n| 20 GHz to 26.5 GHz | –60 dBm to +6 dBm | typ. up to +8 dBm |\n| 26.5 GHz to 40 GHz | –60 dBm to +5 dBm | typ. up to +8 dBm |\n| 40 GHz to 43.5 GHz | measured –60 dBm to +8 dBm | 來源未標示 typical |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3032.md"
+          },
+          "score": 1.495962
+         },
+         {
+          "text": "R&S ZNB3044 › 文件依據\n- 來源：[[ZNB3000_specs_en_3647-5184-22_v0900]]。\n- 文件：R&S®ZNB3000 Vector Network Analyzer Specifications。\n- 文件編號：PD 3647.5184.22。\n- 文件版本：Version 09.00。\n- 發布時間：July 2026。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3044.md"
+          },
+          "score": 7.498479
+         },
+         {
+          "text": "R&S ZNB3044\n[[R&S ZNB3044]] 是 [[R&S ZNB3000]] 系列的 43.5 GHz Vector Network Analyzer 型號，依 Version 09.00（July 2026）base frequency range 為 9 kHz to 43.5 GHz，搭配 frequency upgrade option 可到 54.0 GHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3044.md"
+          },
+          "score": 4.882782
+         },
+         {
+          "text": "R&S ZNB3044 › Dynamic range（with or without frequency upgrade option）\n條件：10 Hz measurement bandwidth，without user correction applied；receiver noise floor 為 transmission magnitude data trace RMS，test ports short-circuited。\n\n| Frequency range | System dynamic range |\n|---|---:|\n| 9 kHz to 300 kHz | specification ≥115 dB；typical 125 dB |\n| 300 kHz to 1 MHz | specification ≥135 dB；typical 145 dB |\n| 1 MHz to 10 MHz | specification ≥140 dB；typical 150 dB；2 MHz 可能 typically degraded |\n| 10 MHz to 100 MHz | specification ≥143 dB；typical 153 dB |\n| 100 MHz to 20 GHz | specification ≥140 dB；typical 150 dB |\n| 20 GHz to 24 GHz | specification ≥135 dB；typical 145 dB |\n| 24 GHz to 45 GHz | specification ≥133 dB；typical 143 dB |\n| 45 GHz to 54 GHz | specification ≥130 dB；typical 138 dB |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3044.md"
+          },
+          "score": 3.393798
+         },
+         {
+          "text": "R&S ZNB3044 › Test port output 與 input 摘錄\nPower range without optional extended power range：\n\n| Frequency range | Power range | Typical upper level |\n|---|---|---|\n| 9 kHz to 100 kHz | –30 dBm to +4 dBm | typ. up to +10 dBm |\n| 100 kHz to 1 MHz | –30 dBm to +8 dBm | typ. up to +12 dBm |\n| 1 MHz to 18 GHz | –30 dBm to +10 dBm | typ. up to +13 dBm |\n| 18 GHz to 20 GHz | –30 dBm to +8 dBm | typ. up to +13 dBm |\n| 20 GHz to 26.5 GHz | –30 dBm to +6 dBm | typ. up to +8 dBm |\n| 26.5 GHz to 43.5 GHz | –30 dBm to +5 dBm | typ. up to +8 dBm |\n| 43.5 GHz to 48 GHz | –30 dBm to +4 dBm | typ. up to +7 dBm |\n| 48 GHz to 54 GHz | –30 dBm to 0 dBm | typ. up to +3 dBm |\n\nPower range with optional extended power range [[R&S ZNB3-B22]] / [[R&S ZNB3-B24]]：\n\n| Frequency range | Power range | Typical upper level |\n|---|---|---|\n| 9 kHz to 100 kHz | –60 dBm to +4 dBm | typ. up to +10 dBm |\n| 1 MHz to 18 GHz | –60 dBm to +10 dBm | typ. up to +13 dBm |\n| 18 GHz to 20 GHz | –60 dBm to +8 dBm | typ. up to +13 dBm |\n| 20 GHz to 26.5 GHz | –60 dBm to +6 dBm | typ. up to +8 dBm |\n| 26.5 GHz to 43.5 GHz | –60 dBm to +5 dBm | typ. up to +8 dBm |\n| 43.5 GHz to 48 GHz | –60 dBm to +4 dBm | typ. up to +7 dBm |\n| 48 GHz to 54 GHz | –60 dBm to 0 dBm | typ. up to +3 dBm |\n\n- Minimum power level using optional extended power range：9 kHz to 54 GHz，–60 dBm。\n- Test port input match：9 kHz to 50 kHz ≥ 5 dB；50 kHz to 1 MHz ≥ 15 dB；1 MHz to 100 MHz ≥ 25 dB；100 MHz to 10 GHz ≥ 12 dB；10 GHz to 26.5 GHz ≥ 10 dB；26.5 GHz to 32 GHz ≥ 8 dB；32 GHz to 40 GHz ≥ 5 dB；40 GHz to 54 GHz ≥ 8 dB。\n- Maximum nominal input level：+13 dBm。\n- Damage level：+27 dBm；damage DC voltage 30 V。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3044.md"
+          },
+          "score": 1.58495
+         },
+         {
+          "text": "R&S ZNB3044 › Effective system data（R&S®ZN-Z218 calibration kit）\n條件：+18 °C to +28 °C；calibration 後溫度變化不超過 1 °C；measurement 與 calibration 的 frequency points、measurement bandwidth、sweep time 相同；no interpolation；measurement bandwidth 10 Hz。\n\n| Frequency range | Directivity | Source match | Load match | Reflection tracking | Transmission tracking |\n|---|---:|---:|---:|---:|---:|\n| 9 kHz to 10 GHz | ≥46 dB | ≥43 dB | ≥45 dB | ≤0.04 dB | ≤0.03 dB |\n| 10 GHz to 20 GHz | ≥44 dB | ≥40 dB | ≥43 dB | ≤0.05 dB | ≤0.03 dB |\n| 20 GHz to 40 GHz | ≥42 dB | ≥38 dB | ≥41 dB | ≤0.06 dB | ≤0.04 dB |\n| 40 GHz to 50 GHz | ≥39 dB | ≥36 dB | ≥39 dB | ≤0.08 dB | ≤0.06 dB |\n| 50 GHz to 54 GHz | ≥37 dB | ≥34 dB | ≥37 dB | ≤0.09 dB | ≤0.06 dB |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3044.md"
+          },
+          "score": 1.157668
+         },
+         {
+          "text": "AISeverEcosystem › 重點摘要\n- [[伺服器機殼]] / 機櫃分類列出關鍵元件 `高承載機櫃、散熱背板、EMI結構`，在 [[晟銘電]] 角色亮點稱 `AI機櫃重2–3噸，需重新設計載重與屏蔽結構。`\n- [[ICs]] sheet 將伺服器晶片設計 / 生產分成 [[GPU]]、[[CPU]]、[[DRAM]]、[[IC]] / 矽智財 / 製程、[[晶圓代工]]、[[封裝測試]]、[[測試介面]]、[[網通]]、[[BMC]] 與高速傳輸 IC，並為部分分類列出 [[R&S ZNA]]、[[R&S ZNA67EXT]]、[[R&S FSWP]] 等 solution 線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/AISeverEcosystem.md"
+          },
+          "score": 4.857419
+         },
+         {
+          "text": "R&S®ZNA\nVECTOR NETWORK ANALYZER",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-f1351a1b7fda64ad",
+            "original_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+            "sha256": "f1351a1b7fda64ad785212c8f7a8d8b142ebc59d7ba52185cda0819016cc0533",
+            "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 22.833339
+         },
+         {
+          "text": "R&S®ZNL\nVECTOR NETWORK ANALYZER",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-9b0b29b71d0a06d2",
+            "original_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+            "sha256": "9b0b29b71d0a06d220ca923e588ced6eceab3b355fca18cedd1f7092c8cb29f0",
+            "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 22.833339
+         },
+         {
+          "text": "Ordering information\nDesignation\nBase units\nVector network analyzer, 2-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 4-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 2-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 4-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 2-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 4-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 2-port 9 kHz to 43.5 GHz (1.85 mm)\nVector network analyzer, 4-port 9 kHz to 43.5 GHz (1.85 mm)\nOptions\nFrequency upgrade",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-eca8f030d797ca58",
+            "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+            "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+            "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+           "section": 596,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 22.8204
+         },
+         {
+          "text": "Network analyzer\nVector signal generator\nBroadband Amplifier",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-4a179a13677acd8f",
+            "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+            "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "section": 177,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 22.268578
+         }
+        ],
+        "text": "### Short answer\nThe current passages do not provide enough evidence to compare an R&S Vector Network Analyzer solution with a competitor specifically for Semiconductor; they provide R&S VNA specifications, semiconductor-adjacent IC solution clues, and limited Keysight ENA/PNA mentions without model-level specifications or test conditions [32][39][42][96].\n### Evidence required\n| Required evidence | Why it is required | Current support / gap |\n|---|---|---|\n| A direct Semiconductor use-case source tying the application to VNA measurements | The ICs sheet lists GPU, CPU, DRAM, IC/IP/process, wafer foundry, packaging test, test interface, networking, BMC, and high-speed transmission IC categories, and it lists R&S ZNA, R&S ZNA67EXT, and R&S FSWP only as solution clues [96]. | The mapping page says these are sales/test solution clues, not formal product configurations, customer relationships, or verified opportunities [32]. |\n| Exact R&S VNA configuration | R&S ZNA covers ZNA26, ZNA43, ZNA50, and ZNA67 from 10 MHz to 67 GHz [4]. | R&S ZNA67EXT is a 1.0 mm VNA system from 10 MHz to 110 GHz and is valid only in the specified system configuration [13][15]. |\n| Exact competitor VNA configuration | Keysight ENA and PNA are only identified as platforms in PCB test images for materials measurement, Delta-L, TDR, and Dk/Df extraction [37][40]. | The current ENA/PNA pages do not provide specific model, frequency range, option code, calibration kit, TDR option, performance metrics, or test conditions [39][42]. |\n| Competitor official or third-party validated documents | The Keysight page states that R&S battle-card competitor descriptions need Keysight official data or third-party data verification [34]. | The current Keysight sources do not provide formal datasheets, document versions, order numbers, option codes, release status, or test conditions for the cited competitor material [34]. |\n| Matching measurement conditions | ZNB3000 specification data is valid at +18 °C to +28 °C, and measurement accuracy requires calibration temperature variation within 1 °C, identical measurement and calibration frequency points, bandwidth, and sweep time, with no interpolation [8]. | ZNB3000 dynamic range specifications are defined at 10 Hz measurement bandwidth without user correction applied [10]. |\n| Proper treatment of warranted vs non-warranted values | R&S specifications with limits and specifications without limits represent warranted product performance [1]. | R&S typical data, nominal values, measured values, and non-traceable specifications with limits are not guaranteed [1]. |\n| Like-for-like R&S performance metrics | R&S ZNA key data includes dynamic range, sensitivity, power sweep range, source power linearity, receiver compression, trace noise, and a sweep-speed example with stated conditions [6]. | R&S ZNA measurement speed data also specifies firmware version, Windows version, bandwidth, point count, and data-transfer conditions [57]. |\n| Like-for-like option evidence | R&S ZNA-K2 is Time domain analysis, R&S ZNA-K20 is extended time domain including eye diagram, R&S ZNA-K8 is mmWave converter support, and R&S ZNA-K17 is increased IF bandwidth 30 MHz [60]. | The competitor side lacks equivalent option names, option codes, and comparable specifications in the current passages [39][42]. |\n| No unsupported market-share, adoption, or customer claims | The Keysight page states it does not infer Keysight market share, customers, shipments, or adoption status [35]. | The AISeverEcosystem source does not clarify whether company lists are a market list, prospect list, customer list, investment watchlist, or internal sales focus [29]. |\n| No unsupported customer-success claim | The LSmtron passage lists Customer: LSmtron, Product: ZNB40, Competitor: Keysight ENA, and a board-to-board connector DUT [49]. | The LSmtron limitation says the source does not state whether LSmtron purchased, evaluated, ran a PoC, or was only a sales-success-story target [50]. |\n### Bottom line\nA defensible comparison needs a Semiconductor-specific source, exact R&S and competitor VNA configurations, official or third-party competitor specifications, identical test conditions, and clear separation of warranted specifications from typical, nominal, measured, or non-traceable values [1][8][32][34][39][42][96].",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "ZNA_specs_en_5215-4652-22_v2400 › 規格條件與資料定義\n- Specifications with limits：表示 warranted product performance；以 <、≤、>、≥、±、maximum、limit of、minimum 等符號標示；compliance 由 testing 確保或由 design 推導。\n- Non-traceable specifications with limits（n. trc.）：依 specifications with limits 指定與測試，但因缺乏可追溯至 national metrology standards 的 measuring equipment，product performance 不保證。\n- Specifications without limits：表示 warranted product performance；未特別標記時表示數值沒有或只有可忽略偏差。\n- Typical data（typ.）：representative information；若標示 <、> 或 range，代表約 80% instruments 在 production time 可達成的 performance，其他情況代表 mean value。\n- Nominal values（nom.）：representative value；production 期間不測試該 parameter。\n- Measured values（meas.）：individual samples 的 measurement results。\n- Uncertainties：coverage factor 2，依 Guide to the Expression of Uncertainty in Measurement（GUM），並考量 environmental conditions、aging、wear and tear。\n- 來源明確說明：non-traceable specifications with limits、typical data、nominal values、measured values 不由 Rohde & Schwarz 保證。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 8,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+         },
+         "score": 27.219823
+        },
+        {
+         "text": "R&S ZNA\n[[R&S ZNA]] 是 Rohde & Schwarz 的 Vector Network Analyzer 系列，依 Version 24.00（April 2026）規格書涵蓋 [[R&S ZNA26]]、[[R&S ZNA43]]、[[R&S ZNA50]]、[[R&S ZNA67]]，頻率範圍從 10 MHz 延伸到最高 67 GHz。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S ZNA.md"
+         },
+         "score": 13.429982
+        },
+        {
+         "text": "R&S ZNA › Key performance（Version 24.00）\n- Dynamic range：> 129 dB specification without options；147 dB typical with options；maximum attainable range up to 170 dB allowing full 2-port correction。\n- Sensitivity：> –120 dBm，1 Hz IF bandwidth，specification without options；–162 dBm，1 Hz IF bandwidth，measured with options。來源註明 –162 dBm 是以 1 kHz measurement bandwidth 量測後 normalized to 1 Hz。\n- Power sweep range：100 dB typical continuous electronic sweep range；可使用 mechanical step attenuators 位移 sweep range。\n- Source power linearity：0.2 dB typical，範圍 –40 dBm to +10 dBm。\n- Receiver compression：0.05 dB typical，up to +8 dBm at test port，referenced to –10 dBm。\n- Trace noise：0.005 dB specification RMS、0.002 dB typical RMS，條件為 10 GHz、100 kHz measurement bandwidth、0 dB reflection。\n- Speed example：10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 4,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S ZNA.md"
+         },
+         "score": 9.816335
+        },
+        {
+         "text": "ZNB3000_specs_en_3647-5184-22_v0900 › 重點摘要\n- Product data 適用條件：ambient temperature 儲存 3 小時後 warm-up operation 30 分鐘、符合 specified environmental conditions、遵守 recommended calibration interval，且已執行所有 applicable internal automatic adjustments。\n- 所有 specification data 在 **+18 °C to +28 °C** 有效；measurement accuracy 另要求 calibration 後 temperature variation 不得超過 **1 °C**，且 measurement 與 calibration 的 frequency points、measurement bandwidth、sweep time 必須相同，不允許 interpolation。\n- Measurement range：impedance 50 Ω；frequency resolution 1 Hz；number of measurement points per trace 1 to 100001。\n- Measurement bandwidth：base unit **1 Hz to 1 MHz**；搭配 [[R&S ZNB3-K17]] 10 MHz receiver bandwidth option 時為 **1 Hz to 10 MHz**。\n- 型號與頻率範圍：[[R&S ZNB3004]] 為 9 kHz to 4.5 GHz，搭配 [[R&S ZNB3-B082]] 或 [[R&S ZNB3-B084]] 可到 9.0 GHz；[[R&S ZNB3020]] 為 9 kHz to 20.0 GHz，搭配 [[R&S ZNB3-B262]] 或 [[R&S ZNB3-B264]] 可到 26.5 GHz；[[R&S ZNB3032]] 為 9 kHz to 32.0 GHz，搭配 [[R&S ZNB3-B442]] 或 [[R&S ZNB3-B444]] 可到 43.5 GHz；[[R&S ZNB3044]] 為 9 kHz to 43.5 GHz，搭配 [[R&S ZNB3-B542]] 或 [[R&S ZNB3-B544]] 可到 54.0 GHz。\n- Dynamic range 規格以 10 Hz measurement bandwidth、without user correction applied 為條件；使用 1 Hz measurement bandwidth 可增加 dynamic range；crosstalk does not limit dynamic range。\n- Measurement speed 以 firmware version 4.12 與 Windows 11 測得；來源註明 sweep time 應理解為 cycle time。\n- General data：operating temperature +5 °C to +40 °C；storage temperature –20 °C to +60 °C；calibration interval 1 year；power supply 100 V to 240 V ±10 %，50 Hz to 60 Hz and 400 Hz，max. 3.5 A。\n- Ordering information 列出 base units、frequency upgrade options、extended power range、receiver step attenuators、extended dynamic range、hardware options、software / measurement options、calibration accessories、power sensors、attenuators、switch matrices、test cables、hardware add-ons、warranty and service options。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+         },
+         "score": 10.390223
+        },
+        {
+         "text": "R&S ZNB3000 › Dynamic range 條件\n- Receiver noise floor 定義為 transmission magnitude data trace 的 RMS 值，該 trace 由 noise 與 crosstalk 產生，test ports short-circuited。\n- Specifications 適用於 10 Hz measurement bandwidth，without user correction applied。\n- 使用 1 Hz measurement bandwidth 可增加 dynamic range。\n- Crosstalk does not limit dynamic range。\n- Dynamic range performance 規格化於 port 1 與 port 2 之間，以及 4-port model 的 port 3 與 port 4 之間；其他 dynamic range performance 為 typical。\n- Without enhanced dynamic range mode 時，above 100 kHz 的 nominal system dynamic range 會降低 15 dB to 20 dB；below 100 kHz 的影響可能更高。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S ZNB3000.md"
+         },
+         "score": 13.022496
+        },
+        {
+         "text": "R&S ZNA67EXT › 系統構成與適用條件\n依 [[ZNA67EXT_specs_en_5216-3743-22_v0900]]，[[R&S ZNA67EXT]] system consists of one [[R&S ZNA67]] vector network analyzer and up to four external test sets。\n\n來源明確限制：規格只適用於作為 **1.0 mm vector network analyzer system** 操作，且 system configuration 必須與 [[R&S ZNA67]] rear panel designation scheme 中的 type、serial numbers 及正確 port position 完全一致。\n\nProduct data 適用條件：\n\n- Three hours of storage at ambient temperature followed by 90 minutes of warm-up operation。\n- Specified environmental conditions met。\n- Recommended calibration interval adhered to。\n- All internal automatic adjustments performed, if applicable。\n\n資料定義依來源：specifications with limits 表示 warranted product performance；typical data、nominal values、measured values 與 non-traceable specifications with limits 不由 Rohde & Schwarz 保證。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+         },
+         "score": 21.040308
+        },
+        {
+         "text": "R&S ZNA67EXT › 核心規格\n以下規格皆來自 [[ZNA67EXT_specs_en_5216-3743-22_v0900]] Version 09.00（July 2025）。\n\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Impedance | measurement range | 50 Ω |\n| Test port connector | measurement range | 1.0 mm, male |\n| Number of test ports | models .12/.13/.15/.16 | 2 |\n| Number of test ports | models .14/.17 | 4 |\n| Frequency range | measurement range | 10 MHz to 110 GHz |\n| Frequency resolution | measurement range | 1 Hz |\n| Number of measurement points | user-selectable | 1 to 100001 |\n| Measurement bandwidths | 1/1.5/2/3/5/7 steps | 1 Hz to 1.5 MHz |\n| Calibration interval | general data | 1 year |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+         },
+         "score": 11.669731
+        },
+        {
+         "text": "AISeverEcosystem › 原文未解的問題\n- `unresolved`: 來源正文未標示正式發布日期、資料期間、Excel 版本、作者、部門或更新紀錄；raw 只標示 converted: 2026-09-17。\n- `unresolved`: 原檔名為 `AISeverEcosystem.xlsx`，`AISever` 是否為 `AI Server` 拼字錯誤不得自行更正。\n- `unresolved`: 大量欄位為 `NaN`；不可推論成無資料、無 solution、不適用或空白代表否定。\n- `unresolved`: 表內公司列名是否為完整市場名單、R&S prospect list、客戶名單、投資觀察名單或內部 sales focus，來源未說明。\n- `unresolved`: `R&S Solution` 欄的 [[ZISO]]、[[MXO]]、[[OSP]]、PSA、[[ThinkLands]]、[[GOCA]]、[[Newkey]]、BMS test 未提供正式產品全名、版本、配置、option code 或 sales kit 正文。\n- `unresolved`: SharePoint sales kits 只保存連結，未擷取簡報正文；不可把連結內容當成已知主張。\n- `unresolved`: [[嘉澤]] / [[嘉基]] 被寫在同一企業欄，代號 3533.0；來源未說明是二者合併、讀圖錯位或表格寫法。\n- `unresolved`: [[散熱器]] 角色亮點中的 `GPU TDP由700 W升至1200 W` 未標示 GPU 型號、平台、年份、來源或是否為單顆 GPU。\n- `unresolved`: [[電源供應器]] 角色亮點中的 `Blackwell平台功耗翻倍` 未標示基準平台、功耗口徑或來源。\n- `unresolved`: [[伺服器機殼]] 角色亮點中的 `AI機櫃重2–3噸` 未標示機櫃配置、平台、液冷 / 風冷條件或來源。\n- `unresolved`: [[ICs]] sheet 的股票代號欄混用美股 ticker、台股代號與韓股數字；不可跨市場比較。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 7,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/AISeverEcosystem.md"
+         },
+         "score": 11.897177
+        },
+        {
+         "text": "AISeverEcosystem R&S solution mapping\n[[AISeverEcosystem R&S solution mapping]] 是用來保存 [[AISeverEcosystem]] 中 AI server ecosystem 分類與 [[R&S Solution]] 欄位對應關係的概念頁；它只表示該 Excel 表中的銷售 / 測試方案線索，不代表正式產品配置、客戶關係或已驗證商機。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+         },
+         "score": 12.71977
+        },
+        {
+         "text": "Keysight › 未決事項\n- [[AI Server PCB test image 24]] 未標示內容日期、年份、季度或資料期間。\n- [[AI Server PCB test image 50]] 未標示內容日期、年份、季度或資料期間。\n- [[AI Server PCB test image 24]] 與 [[AI Server PCB test image 50]] 未標示 Keysight 相關方案的文件版次、產品規格、型號細節、option code 或價格。\n- [[AI Server PCB test image 24]] 未標示圖中合作夥伴名稱。\n- [[AI Server PCB test image 50]] 的 `Delta-L 测量软件（来自台作伙伴）` 與 `Delta-L 探头（来自台作伙伴）` 中「台作伙伴」前一字可能不清楚，來源明示無法完全辨識。\n- [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 是 R&S battle card，對 Keysight 的競品描述需要 Keysight 官方資料或第三方資料驗證。\n- [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 未提供 Keysight UXM 各 SKU 的正式 datasheet、文件版次、order number、option code、release status 或測試條件。\n- [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 中 ecosystem partnerships、market dominance、NTN / RedCap / FR3 / 6G path 等說法未附可追溯外部證據。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 8,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/Keysight.md"
+         },
+         "score": 23.993329
+        },
+        {
+         "text": "Keysight › 可追溯範圍\n- PCB 測試相關內容只記錄 [[AI Server PCB test image 24]] 與 [[AI Server PCB test image 50]] 圖上出現的 Keysight / 是德科技名稱與相關工具組合。\n- Wireless testing / UXM portfolio 相關內容只記錄 [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 的 R&S battle card 觀點；它不是 Keysight 官方資料。\n- 本頁不推論 Keysight 在 AI server、資料中心、PCB 測試、wireless device testing 或 UXM 市場的市占率、客戶、出貨量或導入狀態。\n- 本頁不把 [[Delta-L 測量軟體]]、[[Delta-L 探頭]] 的合作夥伴自行補成任何公司名稱，因來源未標示具體名稱。\n- [[AI Server PCB test image 50]] 對 `Delta-L 测量软件（来自台作伙伴）` 與 `Delta-L 探头（来自台作伙伴）` 的「台作伙伴」字樣標示為無法完全辨識；本頁保留該未決事項，不把它當作確定公司或正式名稱。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/Keysight.md"
+         },
+         "score": 10.86586
+        },
+        {
+         "text": "Keysight ENA\n[[Keysight ENA]] 是 [[AI Server PCB test image 24]] 圖中列為 ENA / PNA 量測平台之一的 Keysight 產品系列名稱，用於該圖描述的材料量測、[[Delta-L]] 損耗、[[TDR 阻抗測量]] 與 [[Dk-Df]] 提取語境。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/Keysight ENA.md"
+         },
+         "score": 3.793615
+        },
+        {
+         "text": "Keysight ENA › 可追溯限制\n- 來源未列出 ENA 的具體型號、頻率範圍、option code、校準件型號或 TDR option 名稱。\n- 來源未標示 ENA 與 PNA 在圖中流程的分工差異；本頁不自行推論哪些測試必須使用 ENA 或 PNA。\n- 來源未提供性能指標，因此本頁不記錄量測精度、動態範圍或頻寬。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/Keysight ENA.md"
+         },
+         "score": 3.27329
+        },
+        {
+         "text": "Keysight PNA\n[[Keysight PNA]] 是 [[AI Server PCB test image 24]] 圖中列為 ENA / PNA 量測平台之一的 Keysight 產品系列名稱，用於該圖描述的材料量測、[[Delta-L]] 損耗、[[TDR 阻抗測量]] 與 [[Dk-Df]] 提取語境。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/Keysight PNA.md"
+         },
+         "score": 3.793615
+        },
+        {
+         "text": "Keysight PNA › 可追溯限制\n- 來源未列出 PNA 的具體型號、頻率範圍、option code、校準件型號或 TDR option 名稱。\n- 來源未標示 ENA 與 PNA 在圖中流程的分工差異；本頁不自行推論哪些測試必須使用 ENA 或 PNA。\n- 來源未提供性能指標，因此本頁不記錄量測精度、動態範圍或頻寬。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/Keysight PNA.md"
+         },
+         "score": 3.27329
+        },
+        {
+         "text": "LSmtron › 來源中的說法\n- [[TRI_AMD_RSKR Sharing1]]（Slide 8 頁尾 28/04/2020）列出 Customer: LSmtron，括號說明 manufacturer of FPCB and connector。\n- 同一 slide 列出 Products: ZNB40；Competitor: [[Keysight ENA]]。\n- Strength 欄寫 total solution including probe, mount-kit, and de-embedding tool with local partner。\n- Local partner 欄寫 [[TeraBit Solutions]]，並說其為 [[AtaiTec]] in Korea 的 agency。\n- DUT 欄為 Board to Board Connector。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/LSmtron.md"
+         },
+         "score": 2.682176
+        },
+        {
+         "text": "LSmtron › 可追溯限制\n- 來源未提供 LSmtron 的正式法律名稱、所在地、網站、部門、採購日期或專案名稱。\n- 來源未提供 ZNB40 的正式型號頁、order number、frequency range 或配置。\n- 來源未說明 LSmtron 是否採購、評估、PoC 或僅為 sales success story 對象。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/LSmtron.md"
+         },
+         "score": 1.375855
+        },
+        {
+         "text": "R&S ZNA › Measurement speed\n- Measurement speed 測試條件：firmware version 3.20、Windows 11 (64 bit)。\n- Acquisition time per point：1 MHz measurement bandwidth、IF filter analog wideband 時 1 µs；30 MHz measurement bandwidth 時 32 ns。\n- Linear frequency sweep 條件 201 points、10 GHz center frequency、200 MHz span：1 MHz measurement bandwidth、IF filter analog normal 時 time per sweep < 3.9 ms；sweep cycle time < 4.9 ms。\n- IEC/IEEE VXI11 over 1 Gbit/s LAN：201 measurement points、800 MHz start frequency、1 GHz stop frequency、1 MHz measurement bandwidth 的 measurement and data transfer time 為 14 ms / 13 ms；201 measurement points magnitude 的 data transfer time 為 1.7 ms / 0.9 ms。\n- Switching time between channels with a maximum of 2001 points：< 2 ms。\n- Continuous mode 不需要額外 data transfer time，因為 data transfer 與 measurement 同時進行。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 8,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S ZNA.md"
+         },
+         "score": 8.735796
+        },
+        {
+         "text": "R&S ZNA › Software / measurement options（摘錄）\n| Code | 名稱 / 原文說明 | 重要相依關係或限制 |\n|---|---|---|\n| R&S®ZNA-K1 | Spectrum analyzer mode | Order No. 1332.5320.02；cannot be combined with R&S®ZNA50-B312、R&S®ZNA67-B312、R&S®ZNA50-B511、R&S®ZNA67-B511 |\n| R&S®ZNA-K2 | Time domain analysis (TDR) | Order No. 1332.5336.02 |\n| R&S®ZNA-K20 | Extended time domain analysis including eye diagram | requires R&S®ZNA-K2；Order No. 1332.4746.02 |\n| R&S®ZNA-K4 | Scalar mixer measurements / arbitrary frequency-converting measurements | Order No. 1332.5342.02 |\n| R&S®ZNA-K5 | Vector mixer measurements | requires recommended setup in Options section；Order No. 1332.5359.02 |\n| R&S®ZNA-K6 | Phase coherent source control | Order No. 1332.5413.02 |\n| R&S®ZNA-K61 | True differential mode | requires R&S®ZNA-K6；Order No. 1332.5442.02 |\n| R&S®ZNA-K7 | Measurements on pulsed signals | requires R&S®ZNA-K17 together with pulse modulator；R&S®ZNA-B7 recommended；Order No. 1332.5371.02 |\n| R&S®ZNA-K17 | Increased IF bandwidth 30 MHz | Order No. 1332.5459.02 |\n| R&S®ZNA-K8 | mmWave converter support | requires recommended setup in Options section；Order No. 1332.5388.02 |\n| R&S®ZNA-K9 | Group delay measurements on frequency converters without LO access | requires recommended setup in Options section；Order No. 1332.5394.02 |\n| R&S®ZNA-K19 | 1 mHz frequency resolution | Order No. 1332.5513.02 |\n| R&S®ZNA-K28 | Continuous data recording | Order No. 1332.5613.02 |\n| R&S®ZNA-K30 | Noise figure measurement | requires recommended setup in Options section；Order No. 1332.5465.02 |\n| R&S®ZNA-K50 | Uncertainty analysis | Order No. 1332.5542.02 |\n| R&S®ZNA-K50P | Uncertainty analysis, pre-installed | Order No. 1332.5594.02 |\n| R&S®ZNA-K51 | Security write protection | Order No. 1332.5559.02 |\n| R&S®ZNA-K66 | Speed improvement | Order No. 1332.5820.02 |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 13,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S ZNA.md"
+         },
+         "score": 4.94119
+        },
+        {
+         "text": "AISeverEcosystem › 重點摘要\n- [[伺服器機殼]] / 機櫃分類列出關鍵元件 `高承載機櫃、散熱背板、EMI結構`，在 [[晟銘電]] 角色亮點稱 `AI機櫃重2–3噸，需重新設計載重與屏蔽結構。`\n- [[ICs]] sheet 將伺服器晶片設計 / 生產分成 [[GPU]]、[[CPU]]、[[DRAM]]、[[IC]] / 矽智財 / 製程、[[晶圓代工]]、[[封裝測試]]、[[測試介面]]、[[網通]]、[[BMC]] 與高速傳輸 IC，並為部分分類列出 [[R&S ZNA]]、[[R&S ZNA67EXT]]、[[R&S FSWP]] 等 solution 線索。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/AISeverEcosystem.md"
+         },
+         "score": 4.857419
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [
+         {
+          "name": "competitor",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 8,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 8,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Keysight.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 6,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Keysight.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Keysight.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Keysight ENA.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Keysight ENA.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md",
+         "raw_refs": [
+          "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S ZNA.md",
+         "raw_refs": [
+          "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md",
+         "raw_refs": [
+          "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S ZNB3000.md",
+         "raw_refs": [
+          "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S ZNA67EXT.md",
+         "raw_refs": [
+          "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+          "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/AISeverEcosystem.md",
+         "raw_refs": [
+          "raw/Market/OneNote/AISeverEcosystem.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+         "raw_refs": [
+          "raw/Market/OneNote/AISeverEcosystem.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/Keysight.md",
+         "raw_refs": [
+          "raw/Market/AI Server PCB test image 24.md",
+          "raw/Market/AI Server PCB test image 50.md",
+          "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/Keysight ENA.md",
+         "raw_refs": [
+          "raw/Market/AI Server PCB test image 24.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/Keysight PNA.md",
+         "raw_refs": [
+          "raw/Market/AI Server PCB test image 24.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/LSmtron.md",
+         "raw_refs": [
+          "raw/Market/OneNote/TRI_AMD_RSKR Sharing1.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-9a0b652f71ee4c10a727fc53af76b0a8",
+      "task_sha256": "a4fb4e516201b0710f6616bbd1ffa0dcab4d722a50e121f5dd9eca7bf87c1eb4",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.12.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "validated",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validated",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "passed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": null
+    },
+    "evidence": {
+     "raw_citations": 20,
+     "facet_status": "covered",
+     "missing_facets": [],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {
+      "competitor": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

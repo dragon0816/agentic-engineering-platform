@@ -1,0 +1,1365 @@
+{
+ "question": {
+  "id": "Q0296",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+  "market": "Aerospace / Defense",
+  "product": "Oscilloscope",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-12cd3ecc670c452c9044b88788bd1875",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 125.109,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-12cd3ecc670c452c9044b88788bd1875",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T19:58:50.055508Z",
+    "updated_at": "2026-10-11T20:00:55.008249Z",
+    "messages": [
+     {
+      "message_id": "message-220fe78ef6da4ab6baec6a45af4ad5fe",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+      "created_at": "2026-10-11T19:58:50.095728Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-4d80c44ca561411fa65c4840be10cb06",
+      "role": "assistant",
+      "text": "### 推薦先賣\nAirborne / drone EMC transient 與 immunity debug 是最明確的技術需求線索，因為 DO-160 來源列出 voltage spike、RF susceptibility、RF emissions、lightning induced transients 與 ESD 等 airborne equipment 測試 sections [7]。\nDrone EMC 來源列出 battery、BMS、ESC、flight control module、communication module、antennas and sensors 等待測風險元件線索 [42]。\nDrone EMC 來源列出 conducted layout、radiated layout、80 MHz–6 GHz、horizontal / vertical mounting、idle / active mode 等測試配置線索 [43]。\nMilitary EME / HIRF / EMP 是第二個強線索，因為 MIL-STD-464 被描述為 system-level testing standard，並列出 external RF EME、High Power Microwave、lightning、EMP、RADHAZ、E3 hardness 與 system radiated emission 等項目 [4]。\nComplex EME emulation 是客製化測試線索，來源列出 emulate complex EME signals、evaluate military system level effects under EM interferences、simulate different operational scenarios [56]。\n高頻高速 PCB / SI 是第三個較接近 Oscilloscope 的線索，因為 R&S PCB test solutions 來源列出 impedance TDR、DK/DF extraction、stackup selection、crosstalk、TL modeling、eye diagram、sampling testing 與 process monitoring [19]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| Oscilloscope | Airborne / drone voltage spike、lightning induced transient、ESD、power / signal susceptibility 的除錯與波形觀察需求 | 知識庫未標示 | 知識庫只支持這些 airborne / drone EMC 測試需求，未直接支持 Oscilloscope 對接 | DO-160 sections 包含 voltage spike、RF susceptibility、RF emissions、lightning induced transient susceptibility、ESD。[7] Section 22 測試確認 equipment can withstand fast transients representing induced effects of lightning。[11] Section 25 測試確認 equipment able to withstand air discharged electromagnetic pulse。[12] | 知識庫未提供 Oscilloscope 型號、頻寬、取樣率、探棒、trigger、isolation、compliance 軟體或 DO-160 測試配置。 |\n| Oscilloscope | Drone power electronics / control electronics 的 pre-compliance debug | 知識庫未標示 | 知識庫只支持 drone EUT / AUT 元件與 EMC 風險，未直接支持 Oscilloscope 對接 | Drone 風險元件包含 Battery、BMS、ESC、FCM、CM、antennas and sensors。[42] Drone 測試配置包含 conducted layout、radiated layout、80 MHz–6 GHz、horizontal / vertical mounting、idle / active mode。[43] Commercial drone EMC failure 可能導致 malfunction、crash、property damage、injury 與 consumer confidence decline。[44] | 來源沒有 EUT 型號、BOM、電壓、介面或測試 setup。[42] |\n| Oscilloscope | Military system-level EME / HIRF / EMP / lightning 測試中的時域除錯與事件捕捉 | 知識庫未標示 | 知識庫只支持 system-level EME 測試與客製化測試方向，未直接支持 Oscilloscope 對接 | MIL-STD-464 來源列出 external RF EME、HPM sources、lightning、EMP、RADHAZ、life cycle / E3 hardness 與 system radiated emission。[4] Complex EME 來源列出 emulate complex EME signals、evaluate military system level effects under EM interferences、simulate different operational scenarios。[56] UAV / UAS customised solution 線索包含 Electromagnetic Environment Emulation 與 High-Intensity RF。[39] | 來源未提供 signal library、scenario definition、threat emitter model、功率、頻段、同步或安全條件。[56] |\n| Oscilloscope | PCB / high-speed digital / SI debug，尤其 TDR impedance 與 eye diagram 周邊 | 知識庫未標示 | 知識庫支持 R&S PCB test solutions 的 TDR、impedance、DK/DF、eye diagram 與 process monitoring 需求，但未說明使用 Oscilloscope | R&S PCB test solutions 涵蓋 material measurement、stackup selection、signal integrity modeling / testing、sampling testing 與 process monitoring。[18] Slide 21 列出 Impedance TDR、DK/DF extraction、IL、roughness、impedance、Xtalk、TL modeling 與 Eye diagram。[19] 流程表列出 Material Measurement、Material / Stackup selection、Signal Integrity modeling / testing、Sampling testing 與 PL / Process Monitoring。[20] | 來源未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。[23] |\n| R&S TS9975 EMI Test System | UAV / UAS drones 與 wireless devices regulatory / EMC testing 的已知 R&S 系統線索 | 知識庫未標示與 Oscilloscope 關聯 | 這是已被 vault 連到 UAV / UAS drones 的 R&S EMC 系統，但不是 Oscilloscope 證據 | TS9975 被列為 UAV / UAS drones T&M solutions 的 standard system。[49] TS9975 目前只支持作為 UAV / UAS drones 與 wireless devices regulatory / EMC testing 的 solution mapping 名稱。[48] | TS9975 來源未提供 frequency range、receiver、antenna、chamber、software、accessories、supported standards、order number 或 configuration。[49] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Drone / eVTOL / airborne electronics EMC lab | Oscilloscope 作為待驗證 debug 補位，搭配已知 EMC 測試需求討論 | 從 DO-160 Section 17 voltage spike、Section 22 lightning induced transients、Section 25 ESD、Section 20 RF susceptibility 與 Section 21 RF emissions 切入。[7] | 知識庫未證實 Oscilloscope 型號、option 或 DO-160 compliance workflow。 |\n| Military UAV / UAS EME resilience lab | Oscilloscope 作為待驗證 time-domain debug 補位，搭配 Electromagnetic Environment Emulation / High-Intensity RF 討論 | 從 MIL-STD-464 system-level EME、external RF EME、HPM、lightning、EMP、RADHAZ 與 E3 hardness 切入。[4] | 來源未提供 threat waveform、frequency plan、power、chamber / antenna setup、pass / fail criteria 或 safety condition。[39] |\n| PCB fabricator / system house serving A&D electronics | Oscilloscope 作為待驗證 TDR / eye diagram / SI debug 補位 | 從 impedance TDR、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram 與 process monitoring 切入。[19] | 來源未提供 fixture、頻率、標準、儀器型號、S-parameter、模型格式或驗證流程。[20] |\n| Tactical 5G / smart-jamming A&D lab | 不建議把 Oscilloscope 作為已證實主賣點；可作為待驗證的系統除錯配套 | A&D 需求由 smart-jamming、EW、contested spectrum、tactical edge connectivity、private 5G adoption、secure command-and-control networks 支撐。[15] | 知識庫直接點名的測試平台是 CMX500 network emulator，不是 Oscilloscope。[17] |\n### 可提出的機會判斷\n【推論】Airborne / drone transient immunity debug 是 Oscilloscope 的優先開發機會，因為 vault 同時列出 DO-160 voltage spike、lightning induced transient、ESD sections 與 drone power / control / communication EUT 線索。[7][11][12][42]\n【推論】Military EME / HIRF / EMP 測試是 Oscilloscope 的客製化系統機會，因為 vault 同時列出 MIL-STD-464 system-level EME、HPM、lightning、EMP 與 Electromagnetic Environment Emulation / High-Intensity RF 客製化方向。[4][39][56]\n【推論】高頻高速 PCB / SI 是 Oscilloscope 的相鄰機會，因為 vault 的 R&S PCB test solutions 已列出 TDR impedance 與 Eye diagram，但尚未把這些需求連到任何 Oscilloscope 型號。[19][23]\n### 限制\nDO-160 來源未提供正式版次、section limit table、category matrix 或適用 drone 類型 [6]。\nDO-160 頁面不是正式標準摘要，且不得推論完整 category、limit、waveform、test setup 或 pass / fail criteria [61]。\nUAV customised solution 來源未提供測試方法、設備清單、頻段、功率、threat waveform、chamber / open area setup、pass / fail criteria、案例或客戶 [39]。\nR&S PCB test solutions 來源未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method [23]。\n\n來源：\n[4] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[6] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[7] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[11] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[12] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[15] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[17] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[18] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[19] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[20] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[23] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[39] Wiki：UAV UAS Drones T&M Solutions（來源：`2025RS Drone Solution.md`、`Signaling test solution.md`）\n[42] Wiki：Drone EMC 測試（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`、`Signaling test solution.md`）\n[43] Wiki：Drone EMC 測試（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`、`Signaling test solution.md`）\n[44] Wiki：Drone EMC 測試（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`、`Signaling test solution.md`）\n[48] Wiki：R&S TS9975 EMI Test System（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[49] Wiki：R&S TS9975 EMI Test System（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[56] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[61] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）",
+      "created_at": "2026-10-11T20:00:55.008249Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-eef6c07fbdfd45abbec642d957143c5e",
+       "request_id": "request-eef6c07fbdfd45abbec642d957143c5e",
+       "span_id": "span-eef6c07fbdfd45abbec642d957143c5e",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "### 推薦先賣\nAirborne / drone EMC transient 與 immunity debug 是最明確的技術需求線索，因為 DO-160 來源列出 voltage spike、RF susceptibility、RF emissions、lightning induced transients 與 ESD 等 airborne equipment 測試 sections [7]。\nDrone EMC 來源列出 battery、BMS、ESC、flight control module、communication module、antennas and sensors 等待測風險元件線索 [42]。\nDrone EMC 來源列出 conducted layout、radiated layout、80 MHz–6 GHz、horizontal / vertical mounting、idle / active mode 等測試配置線索 [43]。\nMilitary EME / HIRF / EMP 是第二個強線索，因為 MIL-STD-464 被描述為 system-level testing standard，並列出 external RF EME、High Power Microwave、lightning、EMP、RADHAZ、E3 hardness 與 system radiated emission 等項目 [4]。\nComplex EME emulation 是客製化測試線索，來源列出 emulate complex EME signals、evaluate military system level effects under EM interferences、simulate different operational scenarios [56]。\n高頻高速 PCB / SI 是第三個較接近 Oscilloscope 的線索，因為 R&S PCB test solutions 來源列出 impedance TDR、DK/DF extraction、stackup selection、crosstalk、TL modeling、eye diagram、sampling testing 與 process monitoring [19]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| Oscilloscope | Airborne / drone voltage spike、lightning induced transient、ESD、power / signal susceptibility 的除錯與波形觀察需求 | 知識庫未標示 | 知識庫只支持這些 airborne / drone EMC 測試需求，未直接支持 Oscilloscope 對接 | DO-160 sections 包含 voltage spike、RF susceptibility、RF emissions、lightning induced transient susceptibility、ESD。[7] Section 22 測試確認 equipment can withstand fast transients representing induced effects of lightning。[11] Section 25 測試確認 equipment able to withstand air discharged electromagnetic pulse。[12] | 知識庫未提供 Oscilloscope 型號、頻寬、取樣率、探棒、trigger、isolation、compliance 軟體或 DO-160 測試配置。 |\n| Oscilloscope | Drone power electronics / control electronics 的 pre-compliance debug | 知識庫未標示 | 知識庫只支持 drone EUT / AUT 元件與 EMC 風險，未直接支持 Oscilloscope 對接 | Drone 風險元件包含 Battery、BMS、ESC、FCM、CM、antennas and sensors。[42] Drone 測試配置包含 conducted layout、radiated layout、80 MHz–6 GHz、horizontal / vertical mounting、idle / active mode。[43] Commercial drone EMC failure 可能導致 malfunction、crash、property damage、injury 與 consumer confidence decline。[44] | 來源沒有 EUT 型號、BOM、電壓、介面或測試 setup。[42] |\n| Oscilloscope | Military system-level EME / HIRF / EMP / lightning 測試中的時域除錯與事件捕捉 | 知識庫未標示 | 知識庫只支持 system-level EME 測試與客製化測試方向，未直接支持 Oscilloscope 對接 | MIL-STD-464 來源列出 external RF EME、HPM sources、lightning、EMP、RADHAZ、life cycle / E3 hardness 與 system radiated emission。[4] Complex EME 來源列出 emulate complex EME signals、evaluate military system level effects under EM interferences、simulate different operational scenarios。[56] UAV / UAS customised solution 線索包含 Electromagnetic Environment Emulation 與 High-Intensity RF。[39] | 來源未提供 signal library、scenario definition、threat emitter model、功率、頻段、同步或安全條件。[56] |\n| Oscilloscope | PCB / high-speed digital / SI debug，尤其 TDR impedance 與 eye diagram 周邊 | 知識庫未標示 | 知識庫支持 R&S PCB test solutions 的 TDR、impedance、DK/DF、eye diagram 與 process monitoring 需求，但未說明使用 Oscilloscope | R&S PCB test solutions 涵蓋 material measurement、stackup selection、signal integrity modeling / testing、sampling testing 與 process monitoring。[18] Slide 21 列出 Impedance TDR、DK/DF extraction、IL、roughness、impedance、Xtalk、TL modeling 與 Eye diagram。[19] 流程表列出 Material Measurement、Material / Stackup selection、Signal Integrity modeling / testing、Sampling testing 與 PL / Process Monitoring。[20] | 來源未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。[23] |\n| R&S TS9975 EMI Test System | UAV / UAS drones 與 wireless devices regulatory / EMC testing 的已知 R&S 系統線索 | 知識庫未標示與 Oscilloscope 關聯 | 這是已被 vault 連到 UAV / UAS drones 的 R&S EMC 系統，但不是 Oscilloscope 證據 | TS9975 被列為 UAV / UAS drones T&M solutions 的 standard system。[49] TS9975 目前只支持作為 UAV / UAS drones 與 wireless devices regulatory / EMC testing 的 solution mapping 名稱。[48] | TS9975 來源未提供 frequency range、receiver、antenna、chamber、software、accessories、supported standards、order number 或 configuration。[49] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Drone / eVTOL / airborne electronics EMC lab | Oscilloscope 作為待驗證 debug 補位，搭配已知 EMC 測試需求討論 | 從 DO-160 Section 17 voltage spike、Section 22 lightning induced transients、Section 25 ESD、Section 20 RF susceptibility 與 Section 21 RF emissions 切入。[7] | 知識庫未證實 Oscilloscope 型號、option 或 DO-160 compliance workflow。 |\n| Military UAV / UAS EME resilience lab | Oscilloscope 作為待驗證 time-domain debug 補位，搭配 Electromagnetic Environment Emulation / High-Intensity RF 討論 | 從 MIL-STD-464 system-level EME、external RF EME、HPM、lightning、EMP、RADHAZ 與 E3 hardness 切入。[4] | 來源未提供 threat waveform、frequency plan、power、chamber / antenna setup、pass / fail criteria 或 safety condition。[39] |\n| PCB fabricator / system house serving A&D electronics | Oscilloscope 作為待驗證 TDR / eye diagram / SI debug 補位 | 從 impedance TDR、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram 與 process monitoring 切入。[19] | 來源未提供 fixture、頻率、標準、儀器型號、S-parameter、模型格式或驗證流程。[20] |\n| Tactical 5G / smart-jamming A&D lab | 不建議把 Oscilloscope 作為已證實主賣點；可作為待驗證的系統除錯配套 | A&D 需求由 smart-jamming、EW、contested spectrum、tactical edge connectivity、private 5G adoption、secure command-and-control networks 支撐。[15] | 知識庫直接點名的測試平台是 CMX500 network emulator，不是 Oscilloscope。[17] |\n### 可提出的機會判斷\n【推論】Airborne / drone transient immunity debug 是 Oscilloscope 的優先開發機會，因為 vault 同時列出 DO-160 voltage spike、lightning induced transient、ESD sections 與 drone power / control / communication EUT 線索。[7][11][12][42]\n【推論】Military EME / HIRF / EMP 測試是 Oscilloscope 的客製化系統機會，因為 vault 同時列出 MIL-STD-464 system-level EME、HPM、lightning、EMP 與 Electromagnetic Environment Emulation / High-Intensity RF 客製化方向。[4][39][56]\n【推論】高頻高速 PCB / SI 是 Oscilloscope 的相鄰機會，因為 vault 的 R&S PCB test solutions 已列出 TDR impedance 與 Eye diagram，但尚未把這些需求連到任何 Oscilloscope 型號。[19][23]\n### 限制\nDO-160 來源未提供正式版次、section limit table、category matrix 或適用 drone 類型 [6]。\nDO-160 頁面不是正式標準摘要，且不得推論完整 category、limit、waveform、test setup 或 pass / fail criteria [61]。\nUAV customised solution 來源未提供測試方法、設備清單、頻段、功率、threat waveform、chamber / open area setup、pass / fail criteria、案例或客戶 [39]。\nR&S PCB test solutions 來源未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method [23]。\n\n來源：\n[4] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[6] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[7] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[11] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[12] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[15] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[17] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[18] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[19] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[20] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[23] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[39] Wiki：UAV UAS Drones T&M Solutions（來源：`2025RS Drone Solution.md`、`Signaling test solution.md`）\n[42] Wiki：Drone EMC 測試（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`、`Signaling test solution.md`）\n[43] Wiki：Drone EMC 測試（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`、`Signaling test solution.md`）\n[44] Wiki：Drone EMC 測試（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`、`Signaling test solution.md`）\n[48] Wiki：R&S TS9975 EMI Test System（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[49] Wiki：R&S TS9975 EMI Test System（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[56] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[61] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-eef6c07fbdfd45abbec642d957143c5e",
+      "request_id": "request-eef6c07fbdfd45abbec642d957143c5e",
+      "span_id": "span-eef6c07fbdfd45abbec642d957143c5e",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-eef6c07fbdfd45abbec642d957143c5e",
+       "request_id": "request-eef6c07fbdfd45abbec642d957143c5e",
+       "span_id": "span-eef6c07fbdfd45abbec642d957143c5e",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "### 推薦先賣\nAirborne / drone EMC transient 與 immunity debug 是最明確的技術需求線索，因為 DO-160 來源列出 voltage spike、RF susceptibility、RF emissions、lightning induced transients 與 ESD 等 airborne equipment 測試 sections [7]。\nDrone EMC 來源列出 battery、BMS、ESC、flight control module、communication module、antennas and sensors 等待測風險元件線索 [42]。\nDrone EMC 來源列出 conducted layout、radiated layout、80 MHz–6 GHz、horizontal / vertical mounting、idle / active mode 等測試配置線索 [43]。\nMilitary EME / HIRF / EMP 是第二個強線索，因為 MIL-STD-464 被描述為 system-level testing standard，並列出 external RF EME、High Power Microwave、lightning、EMP、RADHAZ、E3 hardness 與 system radiated emission 等項目 [4]。\nComplex EME emulation 是客製化測試線索，來源列出 emulate complex EME signals、evaluate military system level effects under EM interferences、simulate different operational scenarios [56]。\n高頻高速 PCB / SI 是第三個較接近 Oscilloscope 的線索，因為 R&S PCB test solutions 來源列出 impedance TDR、DK/DF extraction、stackup selection、crosstalk、TL modeling、eye diagram、sampling testing 與 process monitoring [19]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| Oscilloscope | Airborne / drone voltage spike、lightning induced transient、ESD、power / signal susceptibility 的除錯與波形觀察需求 | 知識庫未標示 | 知識庫只支持這些 airborne / drone EMC 測試需求，未直接支持 Oscilloscope 對接 | DO-160 sections 包含 voltage spike、RF susceptibility、RF emissions、lightning induced transient susceptibility、ESD。[7] Section 22 測試確認 equipment can withstand fast transients representing induced effects of lightning。[11] Section 25 測試確認 equipment able to withstand air discharged electromagnetic pulse。[12] | 知識庫未提供 Oscilloscope 型號、頻寬、取樣率、探棒、trigger、isolation、compliance 軟體或 DO-160 測試配置。 |\n| Oscilloscope | Drone power electronics / control electronics 的 pre-compliance debug | 知識庫未標示 | 知識庫只支持 drone EUT / AUT 元件與 EMC 風險，未直接支持 Oscilloscope 對接 | Drone 風險元件包含 Battery、BMS、ESC、FCM、CM、antennas and sensors。[42] Drone 測試配置包含 conducted layout、radiated layout、80 MHz–6 GHz、horizontal / vertical mounting、idle / active mode。[43] Commercial drone EMC failure 可能導致 malfunction、crash、property damage、injury 與 consumer confidence decline。[44] | 來源沒有 EUT 型號、BOM、電壓、介面或測試 setup。[42] |\n| Oscilloscope | Military system-level EME / HIRF / EMP / lightning 測試中的時域除錯與事件捕捉 | 知識庫未標示 | 知識庫只支持 system-level EME 測試與客製化測試方向，未直接支持 Oscilloscope 對接 | MIL-STD-464 來源列出 external RF EME、HPM sources、lightning、EMP、RADHAZ、life cycle / E3 hardness 與 system radiated emission。[4] Complex EME 來源列出 emulate complex EME signals、evaluate military system level effects under EM interferences、simulate different operational scenarios。[56] UAV / UAS customised solution 線索包含 Electromagnetic Environment Emulation 與 High-Intensity RF。[39] | 來源未提供 signal library、scenario definition、threat emitter model、功率、頻段、同步或安全條件。[56] |\n| Oscilloscope | PCB / high-speed digital / SI debug，尤其 TDR impedance 與 eye diagram 周邊 | 知識庫未標示 | 知識庫支持 R&S PCB test solutions 的 TDR、impedance、DK/DF、eye diagram 與 process monitoring 需求，但未說明使用 Oscilloscope | R&S PCB test solutions 涵蓋 material measurement、stackup selection、signal integrity modeling / testing、sampling testing 與 process monitoring。[18] Slide 21 列出 Impedance TDR、DK/DF extraction、IL、roughness、impedance、Xtalk、TL modeling 與 Eye diagram。[19] 流程表列出 Material Measurement、Material / Stackup selection、Signal Integrity modeling / testing、Sampling testing 與 PL / Process Monitoring。[20] | 來源未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。[23] |\n| R&S TS9975 EMI Test System | UAV / UAS drones 與 wireless devices regulatory / EMC testing 的已知 R&S 系統線索 | 知識庫未標示與 Oscilloscope 關聯 | 這是已被 vault 連到 UAV / UAS drones 的 R&S EMC 系統，但不是 Oscilloscope 證據 | TS9975 被列為 UAV / UAS drones T&M solutions 的 standard system。[49] TS9975 目前只支持作為 UAV / UAS drones 與 wireless devices regulatory / EMC testing 的 solution mapping 名稱。[48] | TS9975 來源未提供 frequency range、receiver、antenna、chamber、software、accessories、supported standards、order number 或 configuration。[49] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Drone / eVTOL / airborne electronics EMC lab | Oscilloscope 作為待驗證 debug 補位，搭配已知 EMC 測試需求討論 | 從 DO-160 Section 17 voltage spike、Section 22 lightning induced transients、Section 25 ESD、Section 20 RF susceptibility 與 Section 21 RF emissions 切入。[7] | 知識庫未證實 Oscilloscope 型號、option 或 DO-160 compliance workflow。 |\n| Military UAV / UAS EME resilience lab | Oscilloscope 作為待驗證 time-domain debug 補位，搭配 Electromagnetic Environment Emulation / High-Intensity RF 討論 | 從 MIL-STD-464 system-level EME、external RF EME、HPM、lightning、EMP、RADHAZ 與 E3 hardness 切入。[4] | 來源未提供 threat waveform、frequency plan、power、chamber / antenna setup、pass / fail criteria 或 safety condition。[39] |\n| PCB fabricator / system house serving A&D electronics | Oscilloscope 作為待驗證 TDR / eye diagram / SI debug 補位 | 從 impedance TDR、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram 與 process monitoring 切入。[19] | 來源未提供 fixture、頻率、標準、儀器型號、S-parameter、模型格式或驗證流程。[20] |\n| Tactical 5G / smart-jamming A&D lab | 不建議把 Oscilloscope 作為已證實主賣點；可作為待驗證的系統除錯配套 | A&D 需求由 smart-jamming、EW、contested spectrum、tactical edge connectivity、private 5G adoption、secure command-and-control networks 支撐。[15] | 知識庫直接點名的測試平台是 CMX500 network emulator，不是 Oscilloscope。[17] |\n### 可提出的機會判斷\n【推論】Airborne / drone transient immunity debug 是 Oscilloscope 的優先開發機會，因為 vault 同時列出 DO-160 voltage spike、lightning induced transient、ESD sections 與 drone power / control / communication EUT 線索。[7][11][12][42]\n【推論】Military EME / HIRF / EMP 測試是 Oscilloscope 的客製化系統機會，因為 vault 同時列出 MIL-STD-464 system-level EME、HPM、lightning、EMP 與 Electromagnetic Environment Emulation / High-Intensity RF 客製化方向。[4][39][56]\n【推論】高頻高速 PCB / SI 是 Oscilloscope 的相鄰機會，因為 vault 的 R&S PCB test solutions 已列出 TDR impedance 與 Eye diagram，但尚未把這些需求連到任何 Oscilloscope 型號。[19][23]\n### 限制\nDO-160 來源未提供正式版次、section limit table、category matrix 或適用 drone 類型 [6]。\nDO-160 頁面不是正式標準摘要，且不得推論完整 category、limit、waveform、test setup 或 pass / fail criteria [61]。\nUAV customised solution 來源未提供測試方法、設備清單、頻段、功率、threat waveform、chamber / open area setup、pass / fail criteria、案例或客戶 [39]。\nR&S PCB test solutions 來源未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method [23]。\n\n來源：\n[4] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[6] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[7] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[11] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[12] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[15] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[17] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[18] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[19] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[20] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[23] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[39] Wiki：UAV UAS Drones T&M Solutions（來源：`2025RS Drone Solution.md`、`Signaling test solution.md`）\n[42] Wiki：Drone EMC 測試（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`、`Signaling test solution.md`）\n[43] Wiki：Drone EMC 測試（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`、`Signaling test solution.md`）\n[44] Wiki：Drone EMC 測試（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`、`Signaling test solution.md`）\n[48] Wiki：R&S TS9975 EMI Test System（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[49] Wiki：R&S TS9975 EMI Test System（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[56] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[61] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_dyti9jimUMlr7KLoOJ3UDjcH",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "### 推薦先賣\nAirborne / drone EMC transient 與 immunity debug 是最明確的技術需求線索，因為 DO-160 來源列出 voltage spike、RF susceptibility、RF emissions、lightning induced transients 與 ESD 等 airborne equipment 測試 sections [7]。\nDrone EMC 來源列出 battery、BMS、ESC、flight control module、communication module、antennas and sensors 等待測風險元件線索 [42]。\nDrone EMC 來源列出 conducted layout、radiated layout、80 MHz–6 GHz、horizontal / vertical mounting、idle / active mode 等測試配置線索 [43]。\nMilitary EME / HIRF / EMP 是第二個強線索，因為 MIL-STD-464 被描述為 system-level testing standard，並列出 external RF EME、High Power Microwave、lightning、EMP、RADHAZ、E3 hardness 與 system radiated emission 等項目 [4]。\nComplex EME emulation 是客製化測試線索，來源列出 emulate complex EME signals、evaluate military system level effects under EM interferences、simulate different operational scenarios [56]。\n高頻高速 PCB / SI 是第三個較接近 Oscilloscope 的線索，因為 R&S PCB test solutions 來源列出 impedance TDR、DK/DF extraction、stackup selection、crosstalk、TL modeling、eye diagram、sampling testing 與 process monitoring [19]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| Oscilloscope | Airborne / drone voltage spike、lightning induced transient、ESD、power / signal susceptibility 的除錯與波形觀察需求 | 知識庫未標示 | 知識庫只支持這些 airborne / drone EMC 測試需求，未直接支持 Oscilloscope 對接 | DO-160 sections 包含 voltage spike、RF susceptibility、RF emissions、lightning induced transient susceptibility、ESD。[7] Section 22 測試確認 equipment can withstand fast transients representing induced effects of lightning。[11] Section 25 測試確認 equipment able to withstand air discharged electromagnetic pulse。[12] | 知識庫未提供 Oscilloscope 型號、頻寬、取樣率、探棒、trigger、isolation、compliance 軟體或 DO-160 測試配置。 |\n| Oscilloscope | Drone power electronics / control electronics 的 pre-compliance debug | 知識庫未標示 | 知識庫只支持 drone EUT / AUT 元件與 EMC 風險，未直接支持 Oscilloscope 對接 | Drone 風險元件包含 Battery、BMS、ESC、FCM、CM、antennas and sensors。[42] Drone 測試配置包含 conducted layout、radiated layout、80 MHz–6 GHz、horizontal / vertical mounting、idle / active mode。[43] Commercial drone EMC failure 可能導致 malfunction、crash、property damage、injury 與 consumer confidence decline。[44] | 來源沒有 EUT 型號、BOM、電壓、介面或測試 setup。[42] |\n| Oscilloscope | Military system-level EME / HIRF / EMP / lightning 測試中的時域除錯與事件捕捉 | 知識庫未標示 | 知識庫只支持 system-level EME 測試與客製化測試方向，未直接支持 Oscilloscope 對接 | MIL-STD-464 來源列出 external RF EME、HPM sources、lightning、EMP、RADHAZ、life cycle / E3 hardness 與 system radiated emission。[4] Complex EME 來源列出 emulate complex EME signals、evaluate military system level effects under EM interferences、simulate different operational scenarios。[56] UAV / UAS customised solution 線索包含 Electromagnetic Environment Emulation 與 High-Intensity RF。[39] | 來源未提供 signal library、scenario definition、threat emitter model、功率、頻段、同步或安全條件。[56] |\n| Oscilloscope | PCB / high-speed digital / SI debug，尤其 TDR impedance 與 eye diagram 周邊 | 知識庫未標示 | 知識庫支持 R&S PCB test solutions 的 TDR、impedance、DK/DF、eye diagram 與 process monitoring 需求，但未說明使用 Oscilloscope | R&S PCB test solutions 涵蓋 material measurement、stackup selection、signal integrity modeling / testing、sampling testing 與 process monitoring。[18] Slide 21 列出 Impedance TDR、DK/DF extraction、IL、roughness、impedance、Xtalk、TL modeling 與 Eye diagram。[19] 流程表列出 Material Measurement、Material / Stackup selection、Signal Integrity modeling / testing、Sampling testing 與 PL / Process Monitoring。[20] | 來源未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。[23] |\n| R&S TS9975 EMI Test System | UAV / UAS drones 與 wireless devices regulatory / EMC testing 的已知 R&S 系統線索 | 知識庫未標示與 Oscilloscope 關聯 | 這是已被 vault 連到 UAV / UAS drones 的 R&S EMC 系統，但不是 Oscilloscope 證據 | TS9975 被列為 UAV / UAS drones T&M solutions 的 standard system。[49] TS9975 目前只支持作為 UAV / UAS drones 與 wireless devices regulatory / EMC testing 的 solution mapping 名稱。[48] | TS9975 來源未提供 frequency range、receiver、antenna、chamber、software、accessories、supported standards、order number 或 configuration。[49] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Drone / eVTOL / airborne electronics EMC lab | Oscilloscope 作為待驗證 debug 補位，搭配已知 EMC 測試需求討論 | 從 DO-160 Section 17 voltage spike、Section 22 lightning induced transients、Section 25 ESD、Section 20 RF susceptibility 與 Section 21 RF emissions 切入。[7] | 知識庫未證實 Oscilloscope 型號、option 或 DO-160 compliance workflow。 |\n| Military UAV / UAS EME resilience lab | Oscilloscope 作為待驗證 time-domain debug 補位，搭配 Electromagnetic Environment Emulation / High-Intensity RF 討論 | 從 MIL-STD-464 system-level EME、external RF EME、HPM、lightning、EMP、RADHAZ 與 E3 hardness 切入。[4] | 來源未提供 threat waveform、frequency plan、power、chamber / antenna setup、pass / fail criteria 或 safety condition。[39] |\n| PCB fabricator / system house serving A&D electronics | Oscilloscope 作為待驗證 TDR / eye diagram / SI debug 補位 | 從 impedance TDR、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram 與 process monitoring 切入。[19] | 來源未提供 fixture、頻率、標準、儀器型號、S-parameter、模型格式或驗證流程。[20] |\n| Tactical 5G / smart-jamming A&D lab | 不建議把 Oscilloscope 作為已證實主賣點；可作為待驗證的系統除錯配套 | A&D 需求由 smart-jamming、EW、contested spectrum、tactical edge connectivity、private 5G adoption、secure command-and-control networks 支撐。[15] | 知識庫直接點名的測試平台是 CMX500 network emulator，不是 Oscilloscope。[17] |\n### 可提出的機會判斷\n【推論】Airborne / drone transient immunity debug 是 Oscilloscope 的優先開發機會，因為 vault 同時列出 DO-160 voltage spike、lightning induced transient、ESD sections 與 drone power / control / communication EUT 線索。[7][11][12][42]\n【推論】Military EME / HIRF / EMP 測試是 Oscilloscope 的客製化系統機會，因為 vault 同時列出 MIL-STD-464 system-level EME、HPM、lightning、EMP 與 Electromagnetic Environment Emulation / High-Intensity RF 客製化方向。[4][39][56]\n【推論】高頻高速 PCB / SI 是 Oscilloscope 的相鄰機會，因為 vault 的 R&S PCB test solutions 已列出 TDR impedance 與 Eye diagram，但尚未把這些需求連到任何 Oscilloscope 型號。[19][23]\n### 限制\nDO-160 來源未提供正式版次、section limit table、category matrix 或適用 drone 類型 [6]。\nDO-160 頁面不是正式標準摘要，且不得推論完整 category、limit、waveform、test setup 或 pass / fail criteria [61]。\nUAV customised solution 來源未提供測試方法、設備清單、頻段、功率、threat waveform、chamber / open area setup、pass / fail criteria、案例或客戶 [39]。\nR&S PCB test solutions 來源未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method [23]。\n\n來源：\n[4] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[6] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[7] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[11] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[12] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[15] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[17] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[18] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[19] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[20] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[23] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[39] Wiki：UAV UAS Drones T&M Solutions（來源：`2025RS Drone Solution.md`、`Signaling test solution.md`）\n[42] Wiki：Drone EMC 測試（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`、`Signaling test solution.md`）\n[43] Wiki：Drone EMC 測試（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`、`Signaling test solution.md`）\n[44] Wiki：Drone EMC 測試（來源：`2025RS Drone Solution.md`、`6. UAV Technologies.md`、`Signaling test solution.md`）\n[48] Wiki：R&S TS9975 EMI Test System（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[49] Wiki：R&S TS9975 EMI Test System（來源：`2025RS Drone Solution.md`、`Regulatory test for wireless devices with cellular technology.md`）\n[56] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[61] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）",
+          "evidence": {
+           "raw_citations": 19,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-4b1afb6f57de4ff7a838ca5ed1bf984f",
+            "request_id": "request-4b1afb6f57de4ff7a838ca5ed1bf984f",
+            "span_id": "span-4b1afb6f57de4ff7a838ca5ed1bf984f",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "Based on current vault evidence, what are the strongest opportunities for Oscilloscope in Aerospace / Defense, and what evidence supports each opportunity?",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "2025RS Drone Solution › Drone / UAV / UAS 概念\n- [[UAV]] — 來源定義為 platform vehicle。\n- [[UAS]] — 來源定義為 entire system that supports drone operation，包含 UAV、controller、datalink、sensors 等。\n- [[Drone EMC 測試]] — 來源核心議題，涵蓋 emissions、immunity、conducted layout、radiated layout、mounting mode、idle / active mode 與 EUT / AUT 環境。\n- [[商用無人機 EMC standards]] — 來源整理 commercial drones 的 regulatory compliance、emission / immunity standards、Class A / Class B 與 application-dependent immunity level。\n- [[軍用無人機 EMC 與 EME testing]] — 來源整理 [[MIL-STD-461]]、[[MIL-STD-464]]、[[RTCA DO-160]] 與系統層 EME effects testing。\n- [[DO-160 airborne equipment EMC testing]] — 來源摘要 [[RTCA DO-160]] Section 15、16、17、18、19、20、21、22、25，並將 Section 20 對應 RF susceptibility、Section 21 對應 RF emissions、Section 22 對應 lightning induced transients、Section 25 對應 ESD。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 2.060939
+             },
+             {
+              "text": "2025RS Drone Solution › Commercial drone standards / tests\n- [[ETSI EN 301 489]] — 來源列出 EN 301 489-1 common、EN 301 489-3 SRD、EN 301 489-17 WLAN / BT、EN 301 489-19 GNSS receivers、EN 301 489-52 Cellular UE，以及 EN 301 489-…。\n- [[ETSI EN 300 328]] — 來源列為 2.4 GHz wideband transmission systems。\n- [[ETSI EN 301 893]] — 來源列為 5 GHz WAS / RLAN。\n- [[ETSI 4709-x]] — 來源列為 network testing、indoor and outdoor testing、ID / built 等，但文字不完整，需後續核對正式標準名稱。\n- [[CISPR 32]] / [[EN 55032]] — 來源用於 multimedia equipment emission，並說 Class B emission limits more stringent than Class A。\n- [[CISPR 35]] — 來源在 international standards for drone testing 與 commercial drone standards 中列名。\n- [[EN 61000-4-3]] — radiated RF immunity。\n- [[EN 61000-4-6]] — conducted RF immunity。\n- [[EN 61000-4-2]] — electrostatic discharge。\n- [[EN 61000-4-4]] — electrical fast transient。\n- [[EN 61000-4-5]] — surges。\n- [[EN 61000-4-11]] — voltage dips and interruption。\n- [[EN 61000-3-2]] — harmonic current emission。\n- [[EN 61000-3-3]] — voltage fluctuations and flicker。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 1.978708
+             },
+             {
+              "text": "2025RS Drone Solution › 原文未解的問題\n- 來源未標示正式發布日期、版本、作者、客戶、適用國家 / 地區或簡報完整頁數；只能以 raw 轉檔日期 2026-09-17 與檔名 `2025RS` 追溯。\n- 轉檔為 lossy derivative；多個表格與標準列名存在 OCR / 排版斷裂，例如 standards based on EUT、R&S test system list、ETSI 4709-x 描述與 MIL / satellite standards 表。\n- [[R&S TS8997]] 只出現代碼；來源未說明完整產品名稱或用途。\n- [[MIL-STD-464]] 在來源中同時出現 464C 與 464D，未說明版本差異或適用情境。\n- `Lighting` / `Lightning` 在來源中皆出現，需回 PDF 判斷是 illumination 還是 lightning / EMP 語境。\n- `DAV-B` 可能為 `DVB` 或其他 broadcast emission 文字；未決。\n- [[ETSI 4709-x]] 的正式標準名稱、版本與 drone network testing 關係未由來源清楚標示。\n- 來源列出的 standard applicability 不等於任一 drone product 必須全部測試；測試項目需依 EUT、intended environment、regulatory domain、application 與 manufacturer requirement 定義。\n- 來源列 [[B-RID Environment Performance]]、[[CUAS System Performance Verification]]、[[Electromagnetic Environment Emulation]] 與 [[High-Intensity RF]]，但未提供 test method、frequency plan、chamber / antenna setup、pass / fail criteria、threat waveform 或 safety condition。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2025RS Drone Solution.md"
+              },
+              "score": 1.473198
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing › MIL-STD-464 system-level testing\n[[2025RS Drone Solution]] 說 [[MIL-STD-464]] provides the basis of environment testing for vehicles that have to work in the most unforgiving condition，並將其描述為 system level testing standard。\n\n來源列出的 main chapter / sub-items 包含：\n\n- margins，6 dB margins。\n- intra-system EMC。\n- hull generated intermodulation interference / IMI。\n- shipboard internal EME。\n- multipaction。\n- induced levels at antenna ports of antenna-connected receivers。\n- external RF EME。\n- [[High Power Microwave]] / HPM sources。\n- lightning。\n- [[Electromagnetic Pulse]] / EMP。\n- subsystems and equipment electromagnetic interference / EMI。\n- portable electronics devices and carry-on equipment requirements。\n- non-developmental items / NDI and commercial items。\n- electrostatic environments。\n- radiation hazards / RADHAZ：HERP、HERF、HERO。\n- life cycle / E3 hardness。\n- electrical bonding、power current return path、antenna installations、mechanical interfaces、shock / fault / ignitable vapour protection。\n- external grounds。\n- TEMPEST。\n- system radiated emission、EMCON、platform radiated emission。\n- EM spectrum supportability。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 1.546243
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing\n[[DO-160 airborne equipment EMC testing]] 是 [[2025RS Drone Solution]] 中引用 [[RTCA DO-160]] 作為 airborne equipment environmental conditions and test procedures 的測試線索，用於 military / aviation drone EMC proposal context。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › 來源中的 DO-160 定位\n[[2025RS Drone Solution]] 說 [[RTCA DO-160]] is important because it provides the minimum operational performance standards for electronic systems and equipment that support aviation to pursue increased safety, system capacity and efficiency。\n\n來源另說其 purpose 是提供 means of determining performance characteristics of airborne equipment in environmental conditions which may be encountered in airborne operation of the equipment，並可與 applicable standards 一起作為 minimum specification。\n\n使用限制：來源未提供 DO-160 的正式版次文件、section limit table、category matrix 或適用 drone 類型。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › 來源列出的 sections\n| Section | 來源描述 |\n|---:|---|\n| 15 | Magnetic field / magnetic effect。 |\n| 16 | Power input（electrical testing, non-EMC）。 |\n| 17 | Voltage spike（AC / DC）。 |\n| 18 | Audio frequency conducted susceptibility - power inputs。 |\n| 19 | Induced signal susceptibility。 |\n| 20 | Radio frequency susceptibility（radiated and conducted）。 |\n| 21 | Emission of radio frequency energy。 |\n| 22 | Lightning induced transient susceptibility。 |\n| 25 | Electrostatic discharge。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › Section 15 — Magnetic Effect\n來源說 Section 15 concern 為 equipment magnetic effect，目標是 finding or proving the closest distance to compasses or compass sensors（flux gates）at which that unit is allowed to be installed。\n\n來源列出 classification：Cat Y、Cat Z、Cat A、Cat B、Class C，其中 Cat Y 被描述為 equipment next to navigation compass，Class C 被描述為 equipment >3.0 m from navigation compass。來源未提供完整 category definition。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › Section 20 — Radio Frequency Susceptibility\n來源說此測試確保 EUT exposed to a level of RF modulated power 時不受影響，並分為：\n\n- Conducted Susceptibility（low freq）。\n- Radiated Susceptibility（high freq）。\n\n來源說 emissions can come from equipment installed inside aircraft as well as external radiators such as radar stations；Conducted Susceptibility similar to [[CS114]] test，Radiated Susceptibility similar to [[RS103]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › Section 21 — Emission of RF Energy\n來源說此測試確保 equipment does not emit excessive RF noise，以 protect aircraft sensors and receivers。來源分為：\n\n- Conducted Emissions（low freq）。\n- Radiated Emissions（high freq）。\n\n標題中同列 [[RE102]] / CE，但未提供 limit table 或 exact mapping。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › Section 22 — Lightning Induced Transients\n來源說此測試確保 equipment can withstand a selection of fast transients intended to represent induced effects of lightning，並在頁面標題中列 [[CS117]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › Section 25 — Electrostatic Discharge\n來源說此測試確保 equipment able to withstand an air discharged electromagnetic pulse，並指出 static electricity charges can result from human contact；contributing factors include low humidity、low temperature、low conductivity、carpets、vinyl seats and plastic structures。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "5G private network resilience against smart jamming › 問題定義\n依 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]]（檔名 / raw title 含 2025-12-19；raw converted 2026-09-17），簡報的 problem statement 是：\n\n- current vulnerability of 5G [[DUT]] connections under smart-jamming；\n- can legacy [[Frequency hopping for 5G resilience]] / [[FHSS]] techniques enhance 5G resilience；\n- can the connection to an unmodified 5G DUT be hardened against [[Smart Jamming]] by using legacy FH capabilities。\n\n來源特別強調 constraint：不修改 [[DUT]]；策略應放在 network / infrastructure / orchestration around it。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]]（Version 01.00，August 2025）補充：public safety agencies、critical infrastructure industries 與 military purposes 依賴 reliable、fast、secure communications；TETRA 等傳統系統 maximum data bit rate below 30 kbit/s，無法滿足 real-time video stream 至少 2 Mbit/s 與 extended reality 至少 30 Mbit/s 的需求。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+              },
+              "score": 1.819661
+             },
+             {
+              "text": "5G private network resilience against smart jamming › Program / roadmap 脈絡\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 把 private 5G resilience 放入 defense / Future-G roadmap：\n\n| 期間 | 來源說法 |\n|---|---|\n| 2025–2028 | widespread deployment of 5G tactical networks；mmWave phased arrays available for field testing；hybrid commercial / military networks such as 5G.MIL-style architectures |\n| 2028–2032 | 5G/6G-capable software-defined radios replacing multi-radio tactical stacks；early [[ISAC]] deployment for drone detection and perimeter defense；[[URLLC]] services for autonomy |\n| 2032–2035+ | full 6G networks with integrated sensing；AI-native battlefield connectivity；high-precision location sensing and spectrum-aware autonomy |\n\n來源也列出 [[5G.MIL]]、[[Raytheon OXYGEN]]、[[L3Harris Tactical Network Demo]]、[[DoD EMS Superiority Strategy]] 與 [[FutureG ISAC]] / spectrum sharing programs，作為 FHSS 與 5G convergence 的 program examples。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+              },
+              "score": 1.215318
+             },
+             {
+              "text": "5G private network resilience against smart jamming › Mission context 與 industry drivers\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 列出的 mission / market drivers 包含：\n\n- tactical edge connectivity needs；\n- rise of smart jamming and improved [[EW]] tactics；\n- complex RF environment 與 contested spectrum；\n- growing adoption of private 5G networks；\n- autonomous systems and drones requiring low latency；\n- expansion of tactical private 5G networks on military bases；\n- demand for secure command-and-control networks；\n- strategic partnerships，例如來源提到 Nokia + L3Harris in 2024；\n- multi-year contracts，例如來源提到 Northrop Grumman 5G battlefield networking in 2024。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 另稱 United States Department of Defense has recently embarked on a strategy leveraging both public and private 5G networks，並說 5G could become the de-facto communications network between NATO members。此為 white paper statement；來源未附完整 DoD / NATO 文件引用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+              },
+              "score": 0.793056
+             },
+             {
+              "text": "5G private network resilience against smart jamming › unresolved\n- [[3GPP TS 38.300]] 的引用版本與 handover interruption interval 章節未標示。\n- [[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 沒有 modem A / B 型號、chipset 或 firmware。\n- 白皮書沒有實體 smart jammer 測試條件；jammer waveform、jammer power、tracking delay、hop prediction capability 與 attack success rate 未標示。\n- Defense Prime Investment 與 program examples 缺少完整外部文件與資料口徑。\n- 來源引用 [[3GPP TS 23.501]] V15.4.0（2018-12）做 QoS table，但是否需用 newer release 做正式 mission-critical assessment 未裁決。\n- Future work 包含 MOS、more random frequencies、dual connectivity、multi-connectivity 與 [[DAPS]] handovers；本來源尚未提供結果。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+              },
+              "score": 0.755558
+             },
+             {
+              "text": "5G private network resilience against smart jamming › 與既有頁面的關係\n- [[DUT]]：本概念的限制條件是 unmodified 5G DUT。\n- [[Handover frequency hopping]]：白皮書中最具體的 implementation。\n- [[Frequency hopping for 5G resilience]]：本概念的主要技術方向。\n- [[Smart Jamming]]：本概念要處理的 threat model。\n- [[R&S CMX500]]：白皮書明示測試使用 CMX500 作為 network emulator；但該 Market source 不是 CMX500 binding specifications。\n- [[Counter-UAV 技術]]：簡報 mid-term roadmap 提到 drone detection 與 perimeter defense，但不是 counter-UAV 系統評估來源。\n- [[Beamforming]]：簡報短期 roadmap 提到 mmWave phased arrays field testing，但沒有 beamforming 定義或測試方法。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+              },
+              "score": 0.737297
+             },
+             {
+              "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S PCB test solutions › 圖上工具 / 合作方文字\n| 圖上文字 | 可能角色 | 來源 | 限制 |\n|---|---|---|---|\n| [[SPEAG]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未說明是合作夥伴、工具、方法或範例 |\n| [[SWISSTO12]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[QWED]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[KEYCOM]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[RSTW]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開完整單位名稱 |\n| TDR | 測 impedance | [[0 Digital Test - What are SIPI and Serdes]] | 未提供 TDR option 或探頭型號 |\n| Delta-L | 損耗量測相關 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供方法定義、標準或軟體名稱 |\n| ISD/ADK | 圖上方法 / 工具文字 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開縮寫，未說明與 Delta-L 的關係 |\n| w/ cable / connector testing | cable / connector testing | [[0 Digital Test - What are SIPI and Serdes]] | 未提供連接器類型、線纜規格或測試項目 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S PCB test solutions › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 既有內容來自 Keysight 圖像，流程是原材料表徵、材料選擇、電路板抽樣測試、大批量監控；本頁保存 R&S 簡報中的類似但不完全相同的流程詞。\n- [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 均已有既有頁面；本來源增加 2026.3.4 R&S 簡報的追溯來源，但沒有新增可量化規格。\n- [[SerDes 與 SI PI 測試概覽]] 連接 Slide 11 和 Slide 20 的 validation challenges / SI flow；本頁聚焦 Slide 21 的 PCB test solutions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S PCB test solutions › 可追溯限制\n- 本來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。\n- 本頁不把 Slide 21 的圖上列名解讀為正式解決方案型錄或完整採購配置。\n- [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]] 的角色未明，僅保留圖上列名。\n- [[ISD-ADK]] 與 PL 未展開縮寫，需後續來源補證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S PCB test solutions › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S PCB test solutions › 未決事項\n- Slide 21 未標示 R&S PCB test solutions 的正式文件版次與產品 portfolio 對應。\n- Slide 21 未標示 [[TDR]]、[[Delta-L]]、ISD/ADK、DK/DF extraction 的標準版本、演算法、測試條件或工具型號。\n- Slide 21 未展開 PL、ISD、ADK、RSTW、SWISSTO12、QWED、KEYCOM。\n- 需回看原始 PPTX 圖像確認各圖示、商標、箭頭與工具對應關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "NTN test and measurement aspects\n[[NTN test and measurement aspects]] 是 [[5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100]] 對 NTN device、satellite、SAN、payload、phased array antenna、network 與 production testing 的總覽，涵蓋 RF、protocol、RRM、LBS、conformance、OTA、field testing 與 software-assisted testing。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "NTN test and measurement aspects › NTN 對 T&M 的 paradigm change\n來源指出 [[NTN]] 改變傳統 wireless T&M 假設：\n\n- 傳統假設 UE mobile、network entities stationary。\n- NTN 需考慮 UE 與 network entities 兩者 mobility。\n- 測試條件需 reproducible、accurate、comparable，但 setup 需加入 high path loss、Doppler shift、time delay、delay variance、atmospheric effects、Faraday effect、scintillation、weather influences。\n- satellite 入軌後 maintenance / replacement 困難，使 simulation、software-assisted testing、digital twin、in-orbit monitoring 更重要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "NTN test and measurement aspects › Fading profiles and test channels\n來源整理 [[TR 38.811]]、[[TR 38.901]] 與 [[TS 38.181]] 的 NTN channel model / test condition：\n\n- [[CDL]]：clustered delay line，適用於 S-band / Ka-band，含 elevation / azimuth 的 3D model。\n- [[TDL]]：tapped delay line，用於 multipath power-delay profile。\n- TR 38.811 定義 NTN-CDL 與 NTN-TDL profiles，各有 LOS / NLOS profiles。\n- TS 38.181 為 SAN testing 定義 NTN-TDLA100、NTN-TDLC5、moving propagation condition。\n- Rel. 19 導入 NGSO time-varying Doppler shift and propagation delay channel model，用於更 realistic demodulation / RRM tests。\n\n來源內有一項需保留的讀法限制：同段中 `NTN-TDLA100-200` 被文字描述為 100 ms delay spread，但表格對 NTN-TDLA100 列 100 ns delay spread。此處需回查原 PDF / TS 38.181。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "NTN test and measurement aspects › SAN / base station in the sky testing\n來源以 [[TS 38.108]]、[[TS 38.181]] 描述 satellite / [[Satellite Access Node]]（SAN）testing：\n\n- TS 38.108 定義 SAN radio transmission and reception。\n- TS 38.181 定義 SAN conformance testing tolerances 與 test cases。\n- SAN type 包含 type 1-H、type 1-O、type 2-O。\n- FR1 hybrid setup 可 conducted 或 radiated；FR2 only OTA / radiated。\n- TS 38.181 chapters 包含 conducted transmitter、conducted receiver、conducted performance、radiated transmitter、radiated receiver、radiated performance。\n- 測試重點包含 output power、power dynamics、frequency error、modulation quality、ACLR、OBUE、receiver sensitivity、blocking、PUSCH / PUCCH / PRACH performance。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "NTN test and measurement aspects › UE NTN testing\nUE NTN testing categories：\n\n- RF testing。\n- protocol testing。\n- performance testing。\n- carrier acceptance testing。\n- interoperability testing。\n\n相關規格：\n\n- [[TS 38.101-5]]：satellite NR UE RF and performance requirements。\n- [[TS 38.521-5]]：NR UE satellite access RF / performance conformance procedures。\n- [[TS 38.523]]：protocol conformance。\n- [[TS 38.533]]：RRM conformance。\n- [[TS 38.133]]：RRM requirements。\n\n目前 RF tests 多聚焦 FR1；來源預期未來會擴展到 FR2、Ka-band、Ku-band 與 moving satellite conditions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "NTN test and measurement aspects › R&S CMX500 與 TS8980\n來源將 [[R&S CMX500]] 描述為 5G NTN 測試平台：\n\n- 可作 one-box testing setup。\n- 可整合進 [[R&S TS8980 Conformance Test Platform]]。\n- 支援 NR-NTN、NB-NTN、DTC。\n- 可執行 RF、protocol、signaling、E2E application、mobility、application testing。\n- 支援 FR1、FR2 與 future FR3 regions 的 white paper level 描述；正式 frequency coverage 需回查產品 specs / heads / RF frontends。\n- 支援 Constellation Insight tool，可 load、configure、visualize、deploy satellites。\n- CMX500 hardware 同時可啟動 cells 數量有限；來源說目前一台 box 最多 six cells。\n\n[[R&S TS8980 Conformance Test Platform]]：\n\n- 補充並擴展 CMX500。\n- 支援 full type approval functionality。\n- 支援 multiple cells、out-of-band emission、spurious emission、interfering / blocking performance tests。\n- 作為 accredited / validated test platform 用於 conformance / certification。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "NTN test and measurement aspects › Conformance / certification testing\n來源描述 certification ecosystem 包含 certification organization、neutral test house、test equipment vendor、network operator / equipment vendor。\n\n- NTN NB-IoT certification program 已於 late 2024 launched，聚焦 n255 / n256。\n- conformance tests 在 [[GCF]] [[WI-555]] 與 [[PTCRB]] [[RFT 555]] umbrella 下定義。\n- 來源說 GCF WI-555 描述 124 個 NTN conformance testing 相關 test cases。\n- early 2026 狀態：IoT_NTN test cases 約 174；GSO RF TRX / Performance / RRM 為 58 / 6 / 46，NGSO RF TRX / Performance / RRM 為 56 / 8 / 0。\n- 目前狀態另列 NR-NTN testing 約 RRM 93、RF 38、protocol 22 test cases。\n- 2025 年 GCF 擴展 certification program，納入 NR-NTN 與 DTC certification testing。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "NTN test and measurement aspects › OTA / phased array / PAAM testing\nNTN UE、VSAT、SAN、satellite 可能使用 directive antennas / phased array antennas，因此 OTA testing 重要。\n\n來源整理：\n\n- OTA methods：far field、near field、CATR、plane wave conversion、anechoic chamber、reverberation chamber。\n- PAAM metrics：radiation pattern、scan loss、pointing error、HPBW、sidelobe levels、EIRP、G/T、noise density、EVM、beam switching。\n- NTN beam metrics：beam center、beam peak、beam pair、beam pointing accuracy、beam stability、beam squint、OSDD、beam shape capability。\n- Rohde & Schwarz setups 使用 [[R&S ZNA]]、[[R&S SMW200A]]、[[R&S FSW]]、[[R&S FSWX]]、[[R&S ATS1800C]]、[[R&S ATS800B]]、[[R&S ATS800R]]、[[R&S ATS1800M]] 等。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "Space Supply Chain\n這份 OneNote 來源是 space / satellite supply chain 的外部資料與圖片 link hub，列出 [[Satellite Applications Catapult]] 的 Space Capabilities Catalogue、Yahoo 股市文章連結、[[PARPRO]] aerospace & defense solution 連結，以及多張未 OCR 圖片；本次 ingest 未擷取外部網頁正文，也未擷取圖片文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Space Supply Chain.md"
+              },
+              "score": 0.703468
+             },
+             {
+              "text": "Space Supply Chain › References（來源原文列出但未擷取正文）\n- `https://sa.catapult.org.uk/space-capabilities-catalogue/` — [[Satellite Applications Catapult]] Space Capabilities Catalogue。\n- `![[Space Supply Chain image.png]]`\n- `202507:` + `![[Space Supply Chain image 1.png]]`\n- `2022:` + `![[Space Supply Chain image.jpg]]`\n- `2021:` + `![[Space Supply Chain image 2.png]]`\n- Yahoo 股市連結：連結文字包含「低軌衛星黑馬出列！它『拿下 AST 訂單』在手訂單突破 1.3 億美元 股價勁揚逾 8%（事欣科）」。\n- `https://www.parpro.com.tw/solutions/aerospace-defense/`\n- `![[Space Supply Chain image 1.jpg]]`\n- `![[Space Supply Chain image 2.jpg]]`\n- `![[Space Supply Chain image 3.png]]`\n- `![[Space Supply Chain image 4.png]]`\n- `https://teams.microsoft.com/v2/`\n- `![[Space Supply Chain image 5.png]]`\n- `![[Space Supply Chain image 6.png]]`\n- `![[Space Supply Chain image 7.png]]`\n- `![[Space Supply Chain image 8.png]]`\n- `![[Space Supply Chain image 9.png]]`\n- `![[Space Supply Chain image 10.png]]`",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Space Supply Chain.md"
+              },
+              "score": 0.597406
+             },
+             {
+              "text": "Space Supply Chain › 重點摘要\n- 來源 frontmatter 顯示 raw converted 日期為 2026-09-17；來源正文未標示正式發布日期、作者、版本或完整資料期間。\n- 來源列出 [[Satellite Applications Catapult]] 的 `Space Capabilities Catalogue` 連結；本次 ingest 未擷取該外部網頁正文、catalogue 版本、公司名單、分類欄位或更新日期。\n- 來源嵌入 `Space Supply Chain image.png`，但 raw 未提供 OCR 或圖說。\n- 來源以文字標示 `202507:`，其後嵌入 `Space Supply Chain image 1.png`；目前只能記錄為圖像前的日期 / 期間標示，無法判定是否為圖片日期、資料期間或筆記標註。\n- 來源以文字標示 `2022:`，其後嵌入 `Space Supply Chain image.jpg`；目前無法判定該年份的資料口徑或圖片內容。\n- 來源以文字標示 `2021:`，其後嵌入 `Space Supply Chain image 2.png`；目前無法判定該年份的資料口徑或圖片內容。\n- 來源列出 Yahoo 股市文章連結，連結文字包含「低軌衛星黑馬出列！它『拿下 AST 訂單』在手訂單突破 1.3 億美元 股價勁揚逾 8%（事欣科）」；本次 ingest 未擷取 Yahoo 文章正文，因此只能保留為待讀新聞線索，不能視為已驗證的訂單、金額或股價主張。\n- 來源列出 `https://www.parpro.com.tw/solutions/aerospace-defense/`，指向 [[PARPRO]] aerospace & defense solution；本次 ingest 未擷取該網頁正文、產品、客戶、認證或供應鏈內容。\n- 來源後段有 `來自 <https://teams.microsoft.com/v2/>` 與多張圖片嵌入；本次 raw 未提供 Teams 內容、圖片 OCR 或附件來源。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Space Supply Chain.md"
+              },
+              "score": 0.544046
+             },
+             {
+              "text": "Space Supply Chain › 關鍵實體與概念\n- [[Satellite Applications Catapult]] — 外部連結 `Space Capabilities Catalogue` 的發布 / 網站主體線索；本來源未擷取 catalogue 內容。\n- [[PARPRO]] — 外部連結 `aerospace-defense` solution 的網站主體線索；本來源未擷取正文。\n- [[事欣科]] — Yahoo 股市連結標題括號中的公司名稱；本來源未擷取新聞正文，因此不可用來確認 AST 訂單、在手訂單金額或股價變動。\n- [[Space Supply Chain 外部資料清單]] — 保存本來源中的外部連結、年份標示與未 OCR 圖片索引。\n- [[台灣衛星產業鏈外部資料清單]]、[[台灣太空產業]]、[[低軌衛星零組件與地面終端供應鏈]] — 既有相關主題；本來源目前只提供待讀資料索引，尚不足以更新供應鏈表格或市場數字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Space Supply Chain.md"
+              },
+              "score": 0.474711
+             },
+             {
+              "text": "Space Supply Chain › 原文未解的問題\n- [[Satellite Applications Catapult]] `Space Capabilities Catalogue` 的內容、更新日期、版本、分類規則、公司名單與資料來源未擷取。\n- `Space Supply Chain image.png`、`Space Supply Chain image 1.png`、`Space Supply Chain image.jpg`、`Space Supply Chain image 2.png`、`Space Supply Chain image 1.jpg`、`Space Supply Chain image 2.jpg`、`Space Supply Chain image 3.png` 到 `Space Supply Chain image 10.png` 均未 OCR；不能知道圖片中的公司、分類、日期、來源、供應鏈階層或市場數字。\n- `202507`、`2022`、`2021` 三個標示的意義未說明；不能判定為發布日期、資料期間、圖片日期或筆記標註。\n- Yahoo 股市文章正文未擷取；不能確認 [[事欣科]] 是否取得 AST 訂單、訂單金額是否為 1.3 億美元、AST 指稱是否為 [[AST SpaceMobile]]、股價漲幅期間或新聞發布日期。\n- [[PARPRO]] aerospace & defense 頁面正文未擷取；不能確認其太空、航太、國防產品、認證、客戶、供應鏈位置或量產狀態。\n- Teams 來源只保留 `https://teams.microsoft.com/v2/` 字樣與圖片嵌入；不能確認 Teams 訊息作者、日期、上下文或圖片來源。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Space Supply Chain.md"
+              },
+              "score": 0.436373
+             },
+             {
+              "text": "UAV UAS Drones T&M Solutions › 客製化 solution 線索\n來源列出的 customised solution 包含：\n\n- [[B-RID Environment Performance]]。\n- [[CUAS System Performance Verification]]。\n- [[Electromagnetic Environment Emulation]]。\n- [[High-Intensity RF]]。\n\n來源宣稱可提供 `Proven solutions that meet current testing requirements, along with flexibility to provide customized systems based on specific requirements`。但它沒有提供測試方法、設備清單、頻段、功率、threat waveform、chamber / open area setup、pass / fail criteria、案例或客戶。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV UAS Drones T&M Solutions.md"
+              },
+              "score": 2.923126
+             },
+             {
+              "text": "Drone EMC 測試\n[[Drone EMC 測試]] 是針對 drone / [[UAV]] / [[UAS]] 在預期操作環境中對 electromagnetic emissions 與 electromagnetic immunity 的符合性與可靠性驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Drone EMC 測試.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "Drone EMC 測試 › 定義與範圍\n依 [[2025RS Drone Solution]]，drone 可在 residential、outdoor AUT、commercial / industrial、security / emergency 與 military battle environment 中運作；不同環境有不同干擾強度與干擾型態，因此 EMC 測試需要依 intended environment and usage 定義。\n\n來源列出的環境與干擾線索包含：\n\n- residential environment：lighting、TV and sound systems、mobile devices、computers。\n- AUT outdoor environment：navigation / GPS emissions、lightning or other EMP、mobile radio（GSM、UMTS、CDMA 2000、WCDMA）、communication equipment（GPS、radio）、broadcast emissions（DAB、VHF、DAV-B / 未決）、UHF、data communications、power supply、WiMax。\n- MIL battle environment：multi-domain operations 與 complex electromagnetic environment。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Drone EMC 測試.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "Drone EMC 測試 › Drone components 與 EUT\n[[2025RS Drone Solution]] 在 drone issue 頁列出 safety / EMC 關聯元件：\n\n- [[Battery]]。\n- [[Battery Management System]] / [[BMS]]。\n- [[Electric Steering Controller]] / [[ESC]]。\n- [[Flight Control Module]] / [[FCM]]。\n- [[Communication Module]] / [[CM]]。\n- antennas and sensors。\n\n來源沒有提供具體 EUT 型號、BOM、電壓、介面或測試 setup；因此本頁只記錄這些是測試風險與待測元件線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Drone EMC 測試.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "Drone EMC 測試 › 測試配置線索\n[[2025RS Drone Solution]] 提到：\n\n- conducted layout：ground plane、EUT。\n- radiated layout：frequency range 80 MHz – 6 GHz。\n- drone mounting for radiated RF emission / immunity test：horizontal mounting 與 vertical mounting。\n- mode of operation：idle mode 與 active mode。\n\n來源指出 photo credit to Alex Bergdahl EMC of Unmanned AC，但未提供正式 citation、圖片內容 OCR 或測試方法細節。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Drone EMC 測試.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "Drone EMC 測試 › Commercial drone EMC 風險\n依 [[2025RS Drone Solution]]，commercial drones heavy reliance on electronic components；failure result 可能包含 drone malfunction、drone crash、property damage、injury、consumer confidence decline 及其他 implications。\n\n來源將 commercial drone EMC 與 regulatory compliance、safety、reliability 相連，並連到 [[European EMC Directive]] 2014/30/EU 與 [[Radio Equipment Directive]] 2014/53/EU。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Drone EMC 測試.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "Drone EMC 測試 › Class A / Class B emission limit\n[[2025RS Drone Solution]] 以 [[CISPR 32]] equipment classification 說明：\n\n- Class A：other than residential。\n- Class B：residential。\n- Class B emission limits are more stringent than Class A。\n- Class B intended to be used in close vicinity to other devices。\n\n來源用 DJI Phantom 與 Ring Always Home Cam 作為 photo credit / image context，但未提供其測試結果或產品符合性文件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Drone EMC 測試.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "Drone EMC 測試 › Immunity level 與 application-dependent test level\n[[2025RS Drone Solution]] 引用 [[EN 301 489-1]] immunity requirements：\n\n- default test level：3 V/m。\n- frequency range：80 MHz to 6 GHz。\n\n來源同時提出問題：`Is this test level adequate for all environment?`，並以 recreational / photography、delivery / mapping / surveying、powerline / infrastructure inspection 對應 default test level、higher test level（10 V/m）與 specialized test level。\n\n使用限制：來源沒有把這些 application 與固定測試等級一一正式規範化；它明示 test level needs to be defined by drone manufacturer according to applications。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Drone EMC 測試.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "商用無人機 EMC standards › Emissions standards\n[[2025RS Drone Solution]] 對 commercial drone emissions 列出：\n\n- [[EN 55032]] / [[CISPR 32]] — multimedia equipment emission。\n- radiated emission（enclosure）。\n- conducted emission。\n- [[EN 61000-3-2]] — harmonic current emission。\n- [[EN 61000-3-3]] — voltage fluctuations and flicker。\n- AC mains port、DC power port、wired network port 等 port 類別。\n\n同頁列出 [[ETSI EN 301 489-1]] common、[[ETSI EN 301 489-3]] SRD、[[ETSI EN 301 489-17]] WLAN / BT、[[ETSI EN 301 489-19]] GNSS receivers、[[ETSI EN 301 489-52]] Cellular UE 與 EN 301 489-…。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/商用無人機 EMC standards.md"
+              },
+              "score": 1.826156
+             },
+             {
+              "text": "R&S TS9975 EMI Test System\n[[R&S TS9975 EMI Test System]] 是 R&S Market 類簡報中列出的 EMI test system；目前來源只支持其作為 UAV / UAS drones 與 wireless devices regulatory / EMC testing 的 solution mapping 名稱，尚未有正式 datasheet、規格、order number 或 supported standard list。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS9975 EMI Test System.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S TS9975 EMI Test System › 來源中的角色\n依 [[2025RS Drone Solution]]：\n\n- [[R&S TS9975 EMI Test System]] 被列於 UAV/UAS drones T&M solutions 的 standard system。\n- 同頁上下文包含 [[EMC Conformance]]、[[Commercial Drones]]、[[Military Drones]] 與 [[E-VTOL]]。\n- 來源未提供 TS9975 的 frequency range、receiver、antenna、chamber、software、accessories、supported standards、order number 或 configuration。\n\n依 [[Regulatory test for wireless devices with cellular technology]]：\n\n- [[R&S TS9975 EMI Test System]] 與 [[R&S TS9982 EMS Test System]] 同列於 Traditional EMC Art 3.1b tests 的 solution mapping。\n- 上下文是 [[CE RED 無線設備法規測試]] Art 3.1b [[EMC]] requirements、5G NR radio enabled / disabled conditions 與 mobile phone [[Audio Breakthrough]] test。\n- 來源稱 R&S EMC Systems cover 5G NR functionality, powered by latest [[R&S CMX500]]。\n- 來源未提供 TS9975 是否直接包含 [[R&S CMX500]]、或只是與 CMX500 搭配的系統配置。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS9975 EMI Test System.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S TS9975 EMI Test System › 使用限制\n- 本頁只記錄 Market 類簡報中的系統列名；不是 Productions 類 datasheet。\n- 不可由 [[2025RS Drone Solution]] 推論 [[R&S TS9975 EMI Test System]] 可覆蓋所有 drone standards 或所有 frequency ranges。\n- 不可由 [[Regulatory test for wireless devices with cellular technology]] 推論 TS9975 可覆蓋所有 CE RED Art 3.1b EMC tests、所有 5G NR bands、所有 [[Audio Breakthrough]] configurations 或所有 mobile phone categories。\n- 正式規格、可報價配置、標準 coverage、receiver / chamber / antenna / software / CMX500 option stack 需由產品手冊或 R&S configuration source 補證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS9975 EMI Test System.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S TS9975 EMI Test System › unresolved\n- 正式產品文件、產品版次、order number 與 supported standards 未取得。\n- 是否有固定搭配 [[R&S CMX500]] 或 [[R&S CMW500]] 的 standard configuration 未標示。\n- [[Audio Breakthrough]] application note link 未擷取正文。\n- [[R&S TS9975 EMI Test System]]與 [[R&S TS9982 EMS Test System]] 的 EMI / EMS 分工、共用硬體與軟體關係未標示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS9975 EMI Test System.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "4. UAV Eco-chain in Taiwan › 與既有知識的關係\n- [[0. UAV產業分析報告架構]] 已建立台灣無人機供應鏈上游 / 中游 / 下游三層分類；本來源改以 System Integrator 與 Key component/technology 兩大區塊整理公司，因此補充的是不同 taxonomy，不直接取代既有分類。\n- [[台灣無人機供應鏈]] 已有 [[漢翔]]、[[中光電]]、[[雷虎科技]]、[[經緯航太]]、[[長榮航太]]、[[聯發科]]、[[新唐科技]]、[[圓剛]]、[[聰泰]]、[[亞光]] 等列名；本來源新增更多公司 / URL 線索，並補出若干角色描述。\n- [[聯發科]] 既有頁已記錄其在 [[0. UAV產業分析報告架構]] 中被列為 AI晶片與通訊模組；本來源補充說其晶片可作為無人機核心處理器，負責運算與通訊。\n- [[漢翔]]、[[雷虎科技]]、[[中光電]]、[[經緯航太]]、[[長榮航太]] 既有頁主要來自 [[0. UAV產業分析報告架構]]；本來源把它們列在 System Integrator 區段，提供另一個分類視角。\n- [[事欣科]] 既有頁原本只保存 [[Space Supply Chain]] 中 Yahoo 股市連結標題線索；本來源新增其與 PARPRO aerospace / defense URL 同列的 UAV key component/technology 線索，但仍未擷取該外部頁正文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/4. UAV Eco-chain in Taiwan.md"
+              },
+              "score": 2.475361
+             },
+             {
+              "text": "Randy Schnell\n[[Randy Schnell]] 是 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 封面列名的 Business Development Manager，Aerospace & Defense Test。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Randy Schnell.md"
+              },
+              "score": 1.393525
+             },
+             {
+              "text": "Satellite Applications Catapult\n[[Satellite Applications Catapult]]是 [[Space Supply Chain]] 中 `Space Capabilities Catalogue` 外部連結 URL 所指向的組織 / 網站名稱線索；本 vault 目前尚未擷取該 catalogue 正文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Satellite Applications Catapult.md"
+              },
+              "score": 1.553513
+             },
+             {
+              "text": "PARPRO › unresolved\n- 需要擷取 `https://www.parpro.com.tw/solutions/aerospace-defense/` 正文。\n- 需要確認 [[PARPRO]] 的正式公司名稱、所在地、產品線、產業分類與認證。\n- 需要 OCR 來源中與該 URL 相鄰的圖片，確認是否為 PARPRO aerospace & defense 內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/PARPRO.md"
+              },
+              "score": 0.328054
+             },
+             {
+              "text": "軍用無人機 EMC 與 EME testing › Complex EME emulation\n來源的 RF electromagnetic environment 章節列出：\n\n- emulate complex EME signals。\n- enable the military electromagnetic spectrum operation。\n- emulating different electromagnetic environment。\n- evaluating military system level effects under EM interferences。\n- simulating different operational scenarios。\n\n這支持 [[Electromagnetic Environment Emulation]] 與 [[UAV UAS Drones T&M Solutions]] 的客製化測試方向，但來源未提供 signal library、scenario definition、threat emitter model、功率、頻段、同步或安全條件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+              },
+              "score": 1.293922
+             },
+             {
+              "text": "R&S VSE\n[[R&S VSE]]（Vector Signal Explorer）是 Rohde & Schwarz 的 PC signal analysis software；在 [[R&S portfolio for O-RU testing]] 中用於 5G NR、LTE、O-RAN U-Plane / PCAP analysis 與 beamforming measurements 的分析端。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S VSE.md"
+              },
+              "score": 2.519495
+             },
+             {
+              "text": "經緯航太 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[經緯航太]] 列在台灣無人機產業供應鏈下游，分類為整機製造與應用服務，描述為智慧農業與多用途無人機。\n- [[4. UAV Eco-chain in Taiwan]]（來源未標示正式日期；raw 轉檔 2026-09-17）在 System Integrator 區段列出經緯航太，但未附 URL 或補充文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/經緯航太.md"
+              },
+              "score": 1.29681
+             },
+             {
+              "text": "長榮航太 › 來源中的說法\n- [[0. UAV產業分析報告架構]]（2025 年版；raw 轉檔 2026-09-17）將 [[長榮航太]]（2645）列在台灣無人機產業供應鏈下游，分類為整機製造與應用服務，描述為艦載型監偵無人機。\n- [[4. UAV Eco-chain in Taiwan]]（來源未標示正式日期；raw 轉檔 2026-09-17）在 System Integrator 區段列出 EVERGREEN AVIATION TECHNOLOGIES CORP. 長榮航太，並提供 egat.com.tw 連結。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/長榮航太.md"
+              },
+              "score": 2.680575
+             },
+             {
+              "text": "葉嘉靖 › 相關主題\n- [[02160280]] 內容聚焦 [[FORMOSAT-5]] 的[[衛星電力次系統]]、[[PCDU]]、電池、太陽能板、控制軟體演算法與電能平衡分析。\n- 本頁只記錄作者與任職資訊，不推論其後續職務、其他著作或專案角色。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/葉嘉靖.md"
+              },
+              "score": 5.363678
+             },
+             {
+              "text": "DO-160 airborne equipment EMC testing › 使用限制\n- 本頁不是 [[RTCA DO-160]] 正式標準摘要；只保存 [[2025RS Drone Solution]] 的簡報文字。\n- 不得由本頁推論 DO-160G / DO-160 任何 section 的完整 category、limit、waveform、test setup 或 pass / fail criteria。\n- 來源把 DO-160 放在 military / aviation drone example 中，但未說明特定 drone、eVTOL 或 avionics equipment 的 qualification plan。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+              },
+              "score": 3.075113
+             },
+             {
+              "text": "衛星地面設備 › Satellite Ground Station / Operation and Control Center 線索\n- [[Satellite Ground Station]]（raw converted 2026-09-17；來源正文未標示正式發布日期）列出 TASA | Satellite Operation and Control Center 外部連結。\n- 該連結指向 TASA 網站的 `space-facilities/satellite/satellite-operation-and-control-center` URL。\n- 本來源只提供 link hub 與未 OCR 圖片，尚未提供 [[Satellite Operation and Control Center]] 的正文內容。\n- 因此，這筆資料只可作為後續查證 [[TASA]] / [[國家太空中心]] 衛星地面站或操作控制中心的入口，不可視為設施規格或能力證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星地面設備.md"
+              },
+              "score": 5.317672
+             },
+             {
+              "text": "Satellite Operation and Control Center › 可追溯限制\n- [[Satellite Ground Station]] 尚未擷取 TASA 外部頁正文，因此不能確認 [[Satellite Operation and Control Center]] 的中文正式名稱、法律 / 組織歸屬、地址、設備、任務、操作衛星、天線規格或服務能力。\n- 不得把外部連結標題改寫為 TASA 已公開某項地面站技術規格。\n- 不得從檔名或圖片嵌入推論設施照片內容、天線數量、frequency band、tracking capability、mission control workflow 或客戶 / 任務關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Satellite Operation and Control Center.md"
+              },
+              "score": 3.261989
+             },
+             {
+              "text": "Randy Schnell › 來源中的列名\n依 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]]（檔名 / raw title 含 2025-12-19；raw converted 2026-09-17）：\n\n- 封面列名：Randy Schnell。\n- 職稱 / 角色列名：Business Development Manager。\n- 組織 / 業務領域列名：Aerospace & Defense Test。\n- 簡報主題為 deployed [[5G]] private networks 在 [[Smart Jamming]] / [[EW]] 環境下的 resilience，以及 legacy [[Frequency hopping for 5G resilience]] 能否在不修改 [[DUT]] 的前提下提升連線韌性。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Randy Schnell.md"
+              },
+              "score": 0.815498
+             },
+             {
+              "text": "https://www.parpro.com.tw/solutions/aerospace-defense/",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-6ae422456b68416f",
+                "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+                "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 23.758653
+             },
+             {
+              "text": "<!-- Slide number: 1 -->\n# Making Deployed 5G Private Networks more Resilient\nRandy Schnell\nBusiness Development Manager\nAerospace & Defense Test",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ee03d2faf62e9553",
+                "original_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "sha256": "ee03d2faf62e95530401e678c264a927c21cc58e47bb7aadc133b34233fc6940",
+                "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.139055
+             },
+             {
+              "text": "**事欣科** [航太與國防製造](https://www.parpro.com.tw/solutions/aerospace-defense/) - PARPRO Taiwan",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-3af86141ff1801c0",
+                "original_ref": "raw/Market/OneNote/UAV/4. UAV Eco-chain in Taiwan.md",
+                "sha256": "3af86141ff1801c06e7337e81bb83a54b53a878ea095f9c9ba7971ac695a5c87",
+                "raw_ref": "raw/Market/OneNote/UAV/4. UAV Eco-chain in Taiwan.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/UAV/4. UAV Eco-chain in Taiwan.md",
+               "section": 37,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 15.518242
+             },
+             {
+              "text": "Mission Context & Industry Drivers\nProblem statement\nTechnical Mapping\nTest setup\nOutcome\nCurrent FHSS Use in Defense\nCall to Action",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ee03d2faf62e9553",
+                "original_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "sha256": "ee03d2faf62e95530401e678c264a927c21cc58e47bb7aadc133b34233fc6940",
+                "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 14.892335
+             }
+            ],
+            "text": "### 推薦先賣\nAirborne / drone EMC transient 與 immunity debug 是最明確的技術需求線索，因為 DO-160 來源列出 voltage spike、RF susceptibility、RF emissions、lightning induced transients 與 ESD 等 airborne equipment 測試 sections [7]。\nDrone EMC 來源列出 battery、BMS、ESC、flight control module、communication module、antennas and sensors 等待測風險元件線索 [42]。\nDrone EMC 來源列出 conducted layout、radiated layout、80 MHz–6 GHz、horizontal / vertical mounting、idle / active mode 等測試配置線索 [43]。\nMilitary EME / HIRF / EMP 是第二個強線索，因為 MIL-STD-464 被描述為 system-level testing standard，並列出 external RF EME、High Power Microwave、lightning、EMP、RADHAZ、E3 hardness 與 system radiated emission 等項目 [4]。\nComplex EME emulation 是客製化測試線索，來源列出 emulate complex EME signals、evaluate military system level effects under EM interferences、simulate different operational scenarios [56]。\n高頻高速 PCB / SI 是第三個較接近 Oscilloscope 的線索，因為 R&S PCB test solutions 來源列出 impedance TDR、DK/DF extraction、stackup selection、crosstalk、TL modeling、eye diagram、sampling testing 與 process monitoring [19]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| Oscilloscope | Airborne / drone voltage spike、lightning induced transient、ESD、power / signal susceptibility 的除錯與波形觀察需求 | 知識庫未標示 | 知識庫只支持這些 airborne / drone EMC 測試需求，未直接支持 Oscilloscope 對接 | DO-160 sections 包含 voltage spike、RF susceptibility、RF emissions、lightning induced transient susceptibility、ESD。[7] Section 22 測試確認 equipment can withstand fast transients representing induced effects of lightning。[11] Section 25 測試確認 equipment able to withstand air discharged electromagnetic pulse。[12] | 知識庫未提供 Oscilloscope 型號、頻寬、取樣率、探棒、trigger、isolation、compliance 軟體或 DO-160 測試配置。 |\n| Oscilloscope | Drone power electronics / control electronics 的 pre-compliance debug | 知識庫未標示 | 知識庫只支持 drone EUT / AUT 元件與 EMC 風險，未直接支持 Oscilloscope 對接 | Drone 風險元件包含 Battery、BMS、ESC、FCM、CM、antennas and sensors。[42] Drone 測試配置包含 conducted layout、radiated layout、80 MHz–6 GHz、horizontal / vertical mounting、idle / active mode。[43] Commercial drone EMC failure 可能導致 malfunction、crash、property damage、injury 與 consumer confidence decline。[44] | 來源沒有 EUT 型號、BOM、電壓、介面或測試 setup。[42] |\n| Oscilloscope | Military system-level EME / HIRF / EMP / lightning 測試中的時域除錯與事件捕捉 | 知識庫未標示 | 知識庫只支持 system-level EME 測試與客製化測試方向，未直接支持 Oscilloscope 對接 | MIL-STD-464 來源列出 external RF EME、HPM sources、lightning、EMP、RADHAZ、life cycle / E3 hardness 與 system radiated emission。[4] Complex EME 來源列出 emulate complex EME signals、evaluate military system level effects under EM interferences、simulate different operational scenarios。[56] UAV / UAS customised solution 線索包含 Electromagnetic Environment Emulation 與 High-Intensity RF。[39] | 來源未提供 signal library、scenario definition、threat emitter model、功率、頻段、同步或安全條件。[56] |\n| Oscilloscope | PCB / high-speed digital / SI debug，尤其 TDR impedance 與 eye diagram 周邊 | 知識庫未標示 | 知識庫支持 R&S PCB test solutions 的 TDR、impedance、DK/DF、eye diagram 與 process monitoring 需求，但未說明使用 Oscilloscope | R&S PCB test solutions 涵蓋 material measurement、stackup selection、signal integrity modeling / testing、sampling testing 與 process monitoring。[18] Slide 21 列出 Impedance TDR、DK/DF extraction、IL、roughness、impedance、Xtalk、TL modeling 與 Eye diagram。[19] 流程表列出 Material Measurement、Material / Stackup selection、Signal Integrity modeling / testing、Sampling testing 與 PL / Process Monitoring。[20] | 來源未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。[23] |\n| R&S TS9975 EMI Test System | UAV / UAS drones 與 wireless devices regulatory / EMC testing 的已知 R&S 系統線索 | 知識庫未標示與 Oscilloscope 關聯 | 這是已被 vault 連到 UAV / UAS drones 的 R&S EMC 系統，但不是 Oscilloscope 證據 | TS9975 被列為 UAV / UAS drones T&M solutions 的 standard system。[49] TS9975 目前只支持作為 UAV / UAS drones 與 wireless devices regulatory / EMC testing 的 solution mapping 名稱。[48] | TS9975 來源未提供 frequency range、receiver、antenna、chamber、software、accessories、supported standards、order number 或 configuration。[49] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Drone / eVTOL / airborne electronics EMC lab | Oscilloscope 作為待驗證 debug 補位，搭配已知 EMC 測試需求討論 | 從 DO-160 Section 17 voltage spike、Section 22 lightning induced transients、Section 25 ESD、Section 20 RF susceptibility 與 Section 21 RF emissions 切入。[7] | 知識庫未證實 Oscilloscope 型號、option 或 DO-160 compliance workflow。 |\n| Military UAV / UAS EME resilience lab | Oscilloscope 作為待驗證 time-domain debug 補位，搭配 Electromagnetic Environment Emulation / High-Intensity RF 討論 | 從 MIL-STD-464 system-level EME、external RF EME、HPM、lightning、EMP、RADHAZ 與 E3 hardness 切入。[4] | 來源未提供 threat waveform、frequency plan、power、chamber / antenna setup、pass / fail criteria 或 safety condition。[39] |\n| PCB fabricator / system house serving A&D electronics | Oscilloscope 作為待驗證 TDR / eye diagram / SI debug 補位 | 從 impedance TDR、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram 與 process monitoring 切入。[19] | 來源未提供 fixture、頻率、標準、儀器型號、S-parameter、模型格式或驗證流程。[20] |\n| Tactical 5G / smart-jamming A&D lab | 不建議把 Oscilloscope 作為已證實主賣點；可作為待驗證的系統除錯配套 | A&D 需求由 smart-jamming、EW、contested spectrum、tactical edge connectivity、private 5G adoption、secure command-and-control networks 支撐。[15] | 知識庫直接點名的測試平台是 CMX500 network emulator，不是 Oscilloscope。[17] |\n### 可提出的機會判斷\n【推論】Airborne / drone transient immunity debug 是 Oscilloscope 的優先開發機會，因為 vault 同時列出 DO-160 voltage spike、lightning induced transient、ESD sections 與 drone power / control / communication EUT 線索。[7][11][12][42]\n【推論】Military EME / HIRF / EMP 測試是 Oscilloscope 的客製化系統機會，因為 vault 同時列出 MIL-STD-464 system-level EME、HPM、lightning、EMP 與 Electromagnetic Environment Emulation / High-Intensity RF 客製化方向。[4][39][56]\n【推論】高頻高速 PCB / SI 是 Oscilloscope 的相鄰機會，因為 vault 的 R&S PCB test solutions 已列出 TDR impedance 與 Eye diagram，但尚未把這些需求連到任何 Oscilloscope 型號。[19][23]\n### 限制\nDO-160 來源未提供正式版次、section limit table、category matrix 或適用 drone 類型 [6]。\nDO-160 頁面不是正式標準摘要，且不得推論完整 category、limit、waveform、test setup 或 pass / fail criteria [61]。\nUAV customised solution 來源未提供測試方法、設備清單、頻段、功率、threat waveform、chamber / open area setup、pass / fail criteria、案例或客戶 [39]。\nR&S PCB test solutions 來源未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method [23]。",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "軍用無人機 EMC 與 EME testing › MIL-STD-464 system-level testing\n[[2025RS Drone Solution]] 說 [[MIL-STD-464]] provides the basis of environment testing for vehicles that have to work in the most unforgiving condition，並將其描述為 system level testing standard。\n\n來源列出的 main chapter / sub-items 包含：\n\n- margins，6 dB margins。\n- intra-system EMC。\n- hull generated intermodulation interference / IMI。\n- shipboard internal EME。\n- multipaction。\n- induced levels at antenna ports of antenna-connected receivers。\n- external RF EME。\n- [[High Power Microwave]] / HPM sources。\n- lightning。\n- [[Electromagnetic Pulse]] / EMP。\n- subsystems and equipment electromagnetic interference / EMI。\n- portable electronics devices and carry-on equipment requirements。\n- non-developmental items / NDI and commercial items。\n- electrostatic environments。\n- radiation hazards / RADHAZ：HERP、HERF、HERO。\n- life cycle / E3 hardness。\n- electrical bonding、power current return path、antenna installations、mechanical interfaces、shock / fault / ignitable vapour protection。\n- external grounds。\n- TEMPEST。\n- system radiated emission、EMCON、platform radiated emission。\n- EM spectrum supportability。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+             },
+             "score": 1.546243
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing › 來源中的 DO-160 定位\n[[2025RS Drone Solution]] 說 [[RTCA DO-160]] is important because it provides the minimum operational performance standards for electronic systems and equipment that support aviation to pursue increased safety, system capacity and efficiency。\n\n來源另說其 purpose 是提供 means of determining performance characteristics of airborne equipment in environmental conditions which may be encountered in airborne operation of the equipment，並可與 applicable standards 一起作為 minimum specification。\n\n使用限制：來源未提供 DO-160 的正式版次文件、section limit table、category matrix 或適用 drone 類型。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing › 來源列出的 sections\n| Section | 來源描述 |\n|---:|---|\n| 15 | Magnetic field / magnetic effect。 |\n| 16 | Power input（electrical testing, non-EMC）。 |\n| 17 | Voltage spike（AC / DC）。 |\n| 18 | Audio frequency conducted susceptibility - power inputs。 |\n| 19 | Induced signal susceptibility。 |\n| 20 | Radio frequency susceptibility（radiated and conducted）。 |\n| 21 | Emission of radio frequency energy。 |\n| 22 | Lightning induced transient susceptibility。 |\n| 25 | Electrostatic discharge。 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing › Section 22 — Lightning Induced Transients\n來源說此測試確保 equipment can withstand a selection of fast transients intended to represent induced effects of lightning，並在頁面標題中列 [[CS117]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing › Section 25 — Electrostatic Discharge\n來源說此測試確保 equipment able to withstand an air discharged electromagnetic pulse，並指出 static electricity charges can result from human contact；contributing factors include low humidity、low temperature、low conductivity、carpets、vinyl seats and plastic structures。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "5G private network resilience against smart jamming › Mission context 與 industry drivers\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 列出的 mission / market drivers 包含：\n\n- tactical edge connectivity needs；\n- rise of smart jamming and improved [[EW]] tactics；\n- complex RF environment 與 contested spectrum；\n- growing adoption of private 5G networks；\n- autonomous systems and drones requiring low latency；\n- expansion of tactical private 5G networks on military bases；\n- demand for secure command-and-control networks；\n- strategic partnerships，例如來源提到 Nokia + L3Harris in 2024；\n- multi-year contracts，例如來源提到 Northrop Grumman 5G battlefield networking in 2024。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 另稱 United States Department of Defense has recently embarked on a strategy leveraging both public and private 5G networks，並說 5G could become the de-facto communications network between NATO members。此為 white paper statement；來源未附完整 DoD / NATO 文件引用。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+             },
+             "score": 0.793056
+            },
+            {
+             "text": "5G private network resilience against smart jamming › 與既有頁面的關係\n- [[DUT]]：本概念的限制條件是 unmodified 5G DUT。\n- [[Handover frequency hopping]]：白皮書中最具體的 implementation。\n- [[Frequency hopping for 5G resilience]]：本概念的主要技術方向。\n- [[Smart Jamming]]：本概念要處理的 threat model。\n- [[R&S CMX500]]：白皮書明示測試使用 CMX500 作為 network emulator；但該 Market source 不是 CMX500 binding specifications。\n- [[Counter-UAV 技術]]：簡報 mid-term roadmap 提到 drone detection 與 perimeter defense，但不是 counter-UAV 系統評估來源。\n- [[Beamforming]]：簡報短期 roadmap 提到 mmWave phased arrays field testing，但沒有 beamforming 定義或測試方法。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+             },
+             "score": 0.737297
+            },
+            {
+             "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "R&S PCB test solutions › 可追溯限制\n- 本來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。\n- 本頁不把 Slide 21 的圖上列名解讀為正式解決方案型錄或完整採購配置。\n- [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]] 的角色未明，僅保留圖上列名。\n- [[ISD-ADK]] 與 PL 未展開縮寫，需後續來源補證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "UAV UAS Drones T&M Solutions › 客製化 solution 線索\n來源列出的 customised solution 包含：\n\n- [[B-RID Environment Performance]]。\n- [[CUAS System Performance Verification]]。\n- [[Electromagnetic Environment Emulation]]。\n- [[High-Intensity RF]]。\n\n來源宣稱可提供 `Proven solutions that meet current testing requirements, along with flexibility to provide customized systems based on specific requirements`。但它沒有提供測試方法、設備清單、頻段、功率、threat waveform、chamber / open area setup、pass / fail criteria、案例或客戶。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/UAV UAS Drones T&M Solutions.md"
+             },
+             "score": 2.923126
+            },
+            {
+             "text": "Drone EMC 測試 › Drone components 與 EUT\n[[2025RS Drone Solution]] 在 drone issue 頁列出 safety / EMC 關聯元件：\n\n- [[Battery]]。\n- [[Battery Management System]] / [[BMS]]。\n- [[Electric Steering Controller]] / [[ESC]]。\n- [[Flight Control Module]] / [[FCM]]。\n- [[Communication Module]] / [[CM]]。\n- antennas and sensors。\n\n來源沒有提供具體 EUT 型號、BOM、電壓、介面或測試 setup；因此本頁只記錄這些是測試風險與待測元件線索。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Drone EMC 測試.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "Drone EMC 測試 › 測試配置線索\n[[2025RS Drone Solution]] 提到：\n\n- conducted layout：ground plane、EUT。\n- radiated layout：frequency range 80 MHz – 6 GHz。\n- drone mounting for radiated RF emission / immunity test：horizontal mounting 與 vertical mounting。\n- mode of operation：idle mode 與 active mode。\n\n來源指出 photo credit to Alex Bergdahl EMC of Unmanned AC，但未提供正式 citation、圖片內容 OCR 或測試方法細節。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Drone EMC 測試.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "Drone EMC 測試 › Commercial drone EMC 風險\n依 [[2025RS Drone Solution]]，commercial drones heavy reliance on electronic components；failure result 可能包含 drone malfunction、drone crash、property damage、injury、consumer confidence decline 及其他 implications。\n\n來源將 commercial drone EMC 與 regulatory compliance、safety、reliability 相連，並連到 [[European EMC Directive]] 2014/30/EU 與 [[Radio Equipment Directive]] 2014/53/EU。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Drone EMC 測試.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "R&S TS9975 EMI Test System\n[[R&S TS9975 EMI Test System]] 是 R&S Market 類簡報中列出的 EMI test system；目前來源只支持其作為 UAV / UAS drones 與 wireless devices regulatory / EMC testing 的 solution mapping 名稱，尚未有正式 datasheet、規格、order number 或 supported standard list。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS9975 EMI Test System.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "R&S TS9975 EMI Test System › 來源中的角色\n依 [[2025RS Drone Solution]]：\n\n- [[R&S TS9975 EMI Test System]] 被列於 UAV/UAS drones T&M solutions 的 standard system。\n- 同頁上下文包含 [[EMC Conformance]]、[[Commercial Drones]]、[[Military Drones]] 與 [[E-VTOL]]。\n- 來源未提供 TS9975 的 frequency range、receiver、antenna、chamber、software、accessories、supported standards、order number 或 configuration。\n\n依 [[Regulatory test for wireless devices with cellular technology]]：\n\n- [[R&S TS9975 EMI Test System]] 與 [[R&S TS9982 EMS Test System]] 同列於 Traditional EMC Art 3.1b tests 的 solution mapping。\n- 上下文是 [[CE RED 無線設備法規測試]] Art 3.1b [[EMC]] requirements、5G NR radio enabled / disabled conditions 與 mobile phone [[Audio Breakthrough]] test。\n- 來源稱 R&S EMC Systems cover 5G NR functionality, powered by latest [[R&S CMX500]]。\n- 來源未提供 TS9975 是否直接包含 [[R&S CMX500]]、或只是與 CMX500 搭配的系統配置。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS9975 EMI Test System.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "軍用無人機 EMC 與 EME testing › Complex EME emulation\n來源的 RF electromagnetic environment 章節列出：\n\n- emulate complex EME signals。\n- enable the military electromagnetic spectrum operation。\n- emulating different electromagnetic environment。\n- evaluating military system level effects under EM interferences。\n- simulating different operational scenarios。\n\n這支持 [[Electromagnetic Environment Emulation]] 與 [[UAV UAS Drones T&M Solutions]] 的客製化測試方向，但來源未提供 signal library、scenario definition、threat emitter model、功率、頻段、同步或安全條件。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+             },
+             "score": 1.293922
+            },
+            {
+             "text": "DO-160 airborne equipment EMC testing › 使用限制\n- 本頁不是 [[RTCA DO-160]] 正式標準摘要；只保存 [[2025RS Drone Solution]] 的簡報文字。\n- 不得由本頁推論 DO-160G / DO-160 任何 section 的完整 category、limit、waveform、test setup 或 pass / fail criteria。\n- 來源把 DO-160 放在 military / aviation drone example 中，但未說明特定 drone、eVTOL 或 avionics equipment 的 qualification plan。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+             },
+             "score": 3.075113
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md",
+             "raw_refs": [
+              "raw/Market/OneNote/2025RS Drone Solution.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md",
+             "raw_refs": [
+              "raw/Market/OneNote/2025RS Drone Solution.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md",
+             "raw_refs": [
+              "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+              "raw/Market/OneNote/5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/R&S PCB test solutions.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/UAV UAS Drones T&M Solutions.md",
+             "raw_refs": [
+              "raw/Market/OneNote/2025RS Drone Solution.md",
+              "raw/Market/OneNote/UAV_Communication/Signaling test solution.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Drone EMC 測試.md",
+             "raw_refs": [
+              "raw/Market/OneNote/2025RS Drone Solution.md",
+              "raw/Market/OneNote/UAV/6. UAV Technologies.md",
+              "raw/Market/OneNote/UAV_Communication/Signaling test solution.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S TS9975 EMI Test System.md",
+             "raw_refs": [
+              "raw/Market/OneNote/2025RS Drone Solution.md",
+              "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

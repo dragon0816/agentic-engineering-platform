@@ -1,0 +1,65 @@
+{
+ "id": "Q0989",
+ "grader": "1.2",
+ "coverage": 0.625,
+ "points": [
+  {
+   "n": 1,
+   "point": "R&S VNA 的每條規格必須標示型號與文件版次，且數字要連測試條件一起抄，不可自行補齊原文沒有的 option code 或料號",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions exact model and document version/options, but not copying each number with test conditions or avoiding unsupported option/part numbers"
+  },
+  {
+   "n": 2,
+   "point": "比較時必須區分 specification / typical / nominal / measured 等級，因為來源明示 R&S 不保證 non-traceable specifications、typical、nominal、measured 值",
+   "verified": true,
+   "label": "covered",
+   "why": "explicitly distinguishes specifications from typical/nominal/measured/non-traceable data and says they are not guaranteed"
+  },
+  {
+   "n": 3,
+   "point": "性能數字（如 dynamic range）必須附上量測條件，例如 measurement bandwidth 與是否套用 user correction",
+   "verified": true,
+   "label": "partial",
+   "why": "requires test conditions/method setup generally, but does not specify measurement bandwidth or user correction for dynamic range"
+  },
+  {
+   "n": 4,
+   "point": "Vault 對競品 VNA（Keysight PNA）的唯一來源未列型號、頻率範圍、option code 或校準件，且未提供任何性能指標，不足以支撐規格對比",
+   "verified": true,
+   "label": "covered",
+   "why": "states current Keysight ENA/PNA evidence lacks model, frequency range, option codes, calibration kits and performance metrics"
+  },
+  {
+   "n": 5,
+   "point": "R&S 內部 battle card 對競品的描述屬單一來源，用於客戶文件前需以競品官方資料或第三方資料驗證",
+   "verified": true,
+   "label": "covered",
+   "why": "says R&S battle-card competitor descriptions need Keysight official or third-party verification"
+  },
+  {
+   "n": 6,
+   "point": "only platform、leadership、lower TCO 等 sales language 不可當作可驗證技術規格，且 TCO 主張沒有算式或實證資料",
+   "verified": true,
+   "label": "missing",
+   "why": "does not address only platform, leadership, lower TCO sales language or lack of TCO calculation/evidence"
+  },
+  {
+   "n": 7,
+   "point": "半導體相關的 ZNA / ZNA67EXT 對應只來自 Excel solution mapping，該欄不是正式 datasheet / application note / configuration guide，不得據此報價或建立測試配置，也未提供 option / fixture / calibration 條件",
+   "verified": true,
+   "label": "partial",
+   "why": "requires semiconductor-use evidence and setup details, but omits the Excel solution mapping source, ZNA/ZNA67EXT mapping, and non-formal-document limitation"
+  },
+  {
+   "n": 8,
+   "point": "半導體客戶與 R&S solution 同列不代表已購買、評估、合作或導入，不能作為客戶實證",
+   "verified": true,
+   "label": "partial",
+   "why": "says adoption/deployment claims need evidence, but does not specifically address co-listed semiconductor customers not proving purchase, evaluation, cooperation or deployment"
+  }
+ ],
+ "contradicted": 0,
+ "invented": []
+}

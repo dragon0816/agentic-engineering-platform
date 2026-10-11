@@ -1702,3 +1702,19 @@ s-k-20261011T102952` (not published).
   (`model_output_truncated`); default 1,500 with one 4,000 retry, all eleven
   described (b293aeb).
 - [ ] K4-K6 per the plan.
+
+## Knowledge answer quality, 2026-10-12 (owner: "see whether the harness can be improved further")
+
+- [x] Fresh baseline core-009 (HEAD 0be2b14, Skill 1.10.0): answerable coverage 0.372,
+  21/6/8 of 36 (+1 system error), median 185 s, p90 329 s (runs/core-009/review.zh-TW.md).
+- [x] Offline analysis: tool-route questions rewritten by the conversation model (25 of 26),
+  retrieval rebuilt the corpus every question (~20 s), ~55-60% of missed key points on pages
+  never offered to synthesis.
+- [x] C1 kept (204dcfa, 9d0d74c, engineering/knowledge-query@1.0.1): coverage 0.423, 26/2/8,
+  contradicted 27 -> 12, median 72 s (runs/core-010/review.zh-TW.md).
+- [x] C2 kept (43dcd76, company-agent/knowledge-query@1.12.0): coverage 0.466, invented
+  67 -> 54, median 84 s (runs/core-011/review.zh-TW.md).
+- [x] C3 kept (425c5f6): coverage 0.477, 28/2/6, median 74 s, p90 115 s
+  (runs/core-012/review.zh-TW.md). Live: Skill 1.12.0 + engineering 1.0.1 on 425c5f6.
+- [ ] Owner: decide on the structural proposals in HANDOFF.md (retrieval recall, preflight
+  label lines, run.py reviewer window); invented claims rose to 67 and need watching.

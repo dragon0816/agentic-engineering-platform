@@ -1,0 +1,1890 @@
+{
+ "question": {
+  "id": "Q0631",
+  "text": "How do changes in AI data centers technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "market": "AI",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-b8de514d6c2148abbbc1d27d516bb068",
+ "exchange": {
+  "sent": "How do changes in AI data centers technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "http_status": 200,
+  "seconds": 73.266,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-b8de514d6c2148abbbc1d27d516bb068",
+    "actor": "leo.chi",
+    "title": "How do changes in AI data centers technology affect the measurement capa…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T21:57:20.571141Z",
+    "updated_at": "2026-10-11T21:58:33.707339Z",
+    "messages": [
+     {
+      "message_id": "message-6e01589432504817b97edb5af9615406",
+      "role": "user",
+      "text": "How do changes in AI data centers technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+      "created_at": "2026-10-11T21:57:20.583398Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-cb08757e3887406d80933019d35f24ff",
+      "role": "assistant",
+      "text": "### Short answer\nAI data center technology shifts the tester requirement toward broader connectivity validation—network emulation, RF/WLAN signaling, throughput/PER/BLER, IP/application analysis, latency/jitter impairment control, generative-AI user-experience KPIs, multi-radio desense, and non-signaling waveform/TX validation—while core AI server PCB, cable, optical, power-rail, and cooling-related measurements are mapped in the passages to VNA/phase-noise/oscilloscope/power tools rather than to a signaling tester [22][23][32][43][55][58][63].\n### Technology change → required measurement capability\n| AI data center / AI infrastructure change | Measurement capability impact for Signaling / Non-signaling Tester |\n|---|---|\n| AI data center infrastructure is framed around Connectivity, Power, and Resilience, and full-spectrum data center connectivity includes high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection [8][92]. | The signaling tester portion is most relevant where “connectivity” becomes wireless/network/application validation, while the passages map PCB, cable, optical, power-rail, and related hardware measurements to tools such as R&S ZNA/ZNB, R&S FSWP, MXO, and ZISO rather than to CMX500 [22][23][43][63]. |\n| AI server boards and interconnects are moving toward 20+ layer UBB, high-end ABF, low-Dk CCL, 800G AOC, PCIe 6/7, InfiniBand 800Gbe, SiPh/CPO, higher GPU TDP, liquid cooling, HVDC, 5–10 kW PSU, liquid-cooled power cabinets, and BBU [5]. | These changes increase the need for IL, TDR, high-speed cable, optical VNA, jitter/phase-noise, LDO NSD, power-rail, multiphase DC, PI, and BMS-related measurements, but the cited mapping assigns those needs to ZNA/ZNB, FSWP, MXO, and ZISO rather than to a signaling/non-signaling tester [5][61][62][63]. |\n| Wi‑Fi is moving toward Wi‑Fi 8 / IEEE 802.11bn, where the cited source says the focus shifts from sheer speed to ultra-high reliability and introduces testing hurdles such as distributed resource units and unequal modulation [36]. | A signaling tester therefore needs next-generation WLAN RF signaling capability and PHY-feature validation such as dRU measurements and UEQM analysis; the cited source says Wi‑Fi 8 RF signaling tests were implemented on the R&S CMX500 one-box signaling tester and showcased with a Broadcom prototype WLAN device [36][37]. |\n| Generative AI applications introduce user-experience metrics rather than only RF metrics, and the cited testbed uses CMX500 to configure network parameters, channel fading models, latency, jitter, and RF impairments while measuring Time to First Token and Tokens Per Second [41][43]. | A signaling tester used for AI application scenarios needs controlled network-condition emulation plus application-layer KPI measurement, including TTFT and TPS, not only RF parametric testing [41][42][43]. |\n| Multi-technology devices can experience mutual interference when using more than one communication technology, and the cited UAV signaling note says CMX500 can support multi-technology de-sense validation across technologies such as LTE, 5G, and Wi‑Fi [28]. | The tester needs multi-technology, multi-channel signaling and desense capability to observe WLAN/LTE/NR interference effects under real connections [28][58]. |\n| CMX500 features include NR FR1/FR2 signaling and TX measurements, LTE signaling and measurements, WLAN signaling and TX measurements, fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, application tests, IP traffic analysis, IMS/audio/POLQA, and remote-control interfaces [22]. | The required signaling capability expands from “connect the DUT” to RF + protocol + traffic + application validation across cellular and WLAN technologies [22][23][32]. |\n| The CMX500 non-signaling GPRF Generator use case supports ARB, CW, dual tone, replay `.wv` files, up to four GPRF Generator instances in parallel, waveform replay/creation, and standalone TX measurement workflows [55][56]. | The non-signaling side needs flexible waveform generation/replay and standalone TX measurement for R&D validation, while license and release-status caveats must be checked because the GPRF page is based on a callbox presentation rather than formal specifications [55][56][57]. |\n### Bottom line\n【推論】As AI data centers push higher-speed interconnect, optical connectivity, denser power, and liquid cooling, the tester portfolio must cover both infrastructure hardware measurements and wireless/application connectivity measurements, but the passages support CMX500-type signaling/non-signaling testers mainly for cellular/WLAN signaling, traffic/application testing, desense, Wi‑Fi 8 signaling, and GPRF waveform/TX workflows, not for the PCB/optical/power measurements mapped to ZNA/ZNB, FSWP, MXO, and ZISO [5][22][23][36][43][55][58][63].\n\n來源：\n[5] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n[8] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[22] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[23] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[28] Wiki：Signaling test solution（來源：`Communication of UAVs.md`、`Communications on UAVs.md`、`Signaling test solution.md`…）\n[32] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[36] Wiki：Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[37] Wiki：Wi-Fi 8 RF signaling tests（來源：`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[41] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[42] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[43] Wiki：Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[55] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[56] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[57] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[58] Wiki：CMX500 Desense Testing（來源：`CMX500_Callbox.md`）\n[61] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[62] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[63] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[92] Wiki：AI 資料中心基礎設施（來源：`0. AI Data Center image 1.md`、`0. AI Data Center image 2.md`、`0. AI Data Center image 3.md`…）",
+      "created_at": "2026-10-11T21:58:33.707339Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-afb45c6757b841bc9a12c2568f80dc14",
+       "request_id": "request-afb45c6757b841bc9a12c2568f80dc14",
+       "span_id": "span-afb45c6757b841bc9a12c2568f80dc14",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "### Short answer\nAI data center technology shifts the tester requirement toward broader connectivity validation—network emulation, RF/WLAN signaling, throughput/PER/BLER, IP/application analysis, latency/jitter impairment control, generative-AI user-experience KPIs, multi-radio desense, and non-signaling waveform/TX validation—while core AI server PCB, cable, optical, power-rail, and cooling-related measurements are mapped in the passages to VNA/phase-noise/oscilloscope/power tools rather than to a signaling tester [22][23][32][43][55][58][63].\n### Technology change → required measurement capability\n| AI data center / AI infrastructure change | Measurement capability impact for Signaling / Non-signaling Tester |\n|---|---|\n| AI data center infrastructure is framed around Connectivity, Power, and Resilience, and full-spectrum data center connectivity includes high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection [8][92]. | The signaling tester portion is most relevant where “connectivity” becomes wireless/network/application validation, while the passages map PCB, cable, optical, power-rail, and related hardware measurements to tools such as R&S ZNA/ZNB, R&S FSWP, MXO, and ZISO rather than to CMX500 [22][23][43][63]. |\n| AI server boards and interconnects are moving toward 20+ layer UBB, high-end ABF, low-Dk CCL, 800G AOC, PCIe 6/7, InfiniBand 800Gbe, SiPh/CPO, higher GPU TDP, liquid cooling, HVDC, 5–10 kW PSU, liquid-cooled power cabinets, and BBU [5]. | These changes increase the need for IL, TDR, high-speed cable, optical VNA, jitter/phase-noise, LDO NSD, power-rail, multiphase DC, PI, and BMS-related measurements, but the cited mapping assigns those needs to ZNA/ZNB, FSWP, MXO, and ZISO rather than to a signaling/non-signaling tester [5][61][62][63]. |\n| Wi‑Fi is moving toward Wi‑Fi 8 / IEEE 802.11bn, where the cited source says the focus shifts from sheer speed to ultra-high reliability and introduces testing hurdles such as distributed resource units and unequal modulation [36]. | A signaling tester therefore needs next-generation WLAN RF signaling capability and PHY-feature validation such as dRU measurements and UEQM analysis; the cited source says Wi‑Fi 8 RF signaling tests were implemented on the R&S CMX500 one-box signaling tester and showcased with a Broadcom prototype WLAN device [36][37]. |\n| Generative AI applications introduce user-experience metrics rather than only RF metrics, and the cited testbed uses CMX500 to configure network parameters, channel fading models, latency, jitter, and RF impairments while measuring Time to First Token and Tokens Per Second [41][43]. | A signaling tester used for AI application scenarios needs controlled network-condition emulation plus application-layer KPI measurement, including TTFT and TPS, not only RF parametric testing [41][42][43]. |\n| Multi-technology devices can experience mutual interference when using more than one communication technology, and the cited UAV signaling note says CMX500 can support multi-technology de-sense validation across technologies such as LTE, 5G, and Wi‑Fi [28]. | The tester needs multi-technology, multi-channel signaling and desense capability to observe WLAN/LTE/NR interference effects under real connections [28][58]. |\n| CMX500 features include NR FR1/FR2 signaling and TX measurements, LTE signaling and measurements, WLAN signaling and TX measurements, fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, application tests, IP traffic analysis, IMS/audio/POLQA, and remote-control interfaces [22]. | The required signaling capability expands from “connect the DUT” to RF + protocol + traffic + application validation across cellular and WLAN technologies [22][23][32]. |\n| The CMX500 non-signaling GPRF Generator use case supports ARB, CW, dual tone, replay `.wv` files, up to four GPRF Generator instances in parallel, waveform replay/creation, and standalone TX measurement workflows [55][56]. | The non-signaling side needs flexible waveform generation/replay and standalone TX measurement for R&D validation, while license and release-status caveats must be checked because the GPRF page is based on a callbox presentation rather than formal specifications [55][56][57]. |\n### Bottom line\n【推論】As AI data centers push higher-speed interconnect, optical connectivity, denser power, and liquid cooling, the tester portfolio must cover both infrastructure hardware measurements and wireless/application connectivity measurements, but the passages support CMX500-type signaling/non-signaling testers mainly for cellular/WLAN signaling, traffic/application testing, desense, Wi‑Fi 8 signaling, and GPRF waveform/TX workflows, not for the PCB/optical/power measurements mapped to ZNA/ZNB, FSWP, MXO, and ZISO [5][22][23][36][43][55][58][63].\n\n來源：\n[5] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n[8] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[22] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[23] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[28] Wiki：Signaling test solution（來源：`Communication of UAVs.md`、`Communications on UAVs.md`、`Signaling test solution.md`…）\n[32] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[36] Wiki：Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[37] Wiki：Wi-Fi 8 RF signaling tests（來源：`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[41] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[42] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[43] Wiki：Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[55] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[56] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[57] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[58] Wiki：CMX500 Desense Testing（來源：`CMX500_Callbox.md`）\n[61] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[62] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[63] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[92] Wiki：AI 資料中心基礎設施（來源：`0. AI Data Center image 1.md`、`0. AI Data Center image 2.md`、`0. AI Data Center image 3.md`…）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-afb45c6757b841bc9a12c2568f80dc14",
+      "request_id": "request-afb45c6757b841bc9a12c2568f80dc14",
+      "span_id": "span-afb45c6757b841bc9a12c2568f80dc14",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-afb45c6757b841bc9a12c2568f80dc14",
+       "request_id": "request-afb45c6757b841bc9a12c2568f80dc14",
+       "span_id": "span-afb45c6757b841bc9a12c2568f80dc14",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "### Short answer\nAI data center technology shifts the tester requirement toward broader connectivity validation—network emulation, RF/WLAN signaling, throughput/PER/BLER, IP/application analysis, latency/jitter impairment control, generative-AI user-experience KPIs, multi-radio desense, and non-signaling waveform/TX validation—while core AI server PCB, cable, optical, power-rail, and cooling-related measurements are mapped in the passages to VNA/phase-noise/oscilloscope/power tools rather than to a signaling tester [22][23][32][43][55][58][63].\n### Technology change → required measurement capability\n| AI data center / AI infrastructure change | Measurement capability impact for Signaling / Non-signaling Tester |\n|---|---|\n| AI data center infrastructure is framed around Connectivity, Power, and Resilience, and full-spectrum data center connectivity includes high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection [8][92]. | The signaling tester portion is most relevant where “connectivity” becomes wireless/network/application validation, while the passages map PCB, cable, optical, power-rail, and related hardware measurements to tools such as R&S ZNA/ZNB, R&S FSWP, MXO, and ZISO rather than to CMX500 [22][23][43][63]. |\n| AI server boards and interconnects are moving toward 20+ layer UBB, high-end ABF, low-Dk CCL, 800G AOC, PCIe 6/7, InfiniBand 800Gbe, SiPh/CPO, higher GPU TDP, liquid cooling, HVDC, 5–10 kW PSU, liquid-cooled power cabinets, and BBU [5]. | These changes increase the need for IL, TDR, high-speed cable, optical VNA, jitter/phase-noise, LDO NSD, power-rail, multiphase DC, PI, and BMS-related measurements, but the cited mapping assigns those needs to ZNA/ZNB, FSWP, MXO, and ZISO rather than to a signaling/non-signaling tester [5][61][62][63]. |\n| Wi‑Fi is moving toward Wi‑Fi 8 / IEEE 802.11bn, where the cited source says the focus shifts from sheer speed to ultra-high reliability and introduces testing hurdles such as distributed resource units and unequal modulation [36]. | A signaling tester therefore needs next-generation WLAN RF signaling capability and PHY-feature validation such as dRU measurements and UEQM analysis; the cited source says Wi‑Fi 8 RF signaling tests were implemented on the R&S CMX500 one-box signaling tester and showcased with a Broadcom prototype WLAN device [36][37]. |\n| Generative AI applications introduce user-experience metrics rather than only RF metrics, and the cited testbed uses CMX500 to configure network parameters, channel fading models, latency, jitter, and RF impairments while measuring Time to First Token and Tokens Per Second [41][43]. | A signaling tester used for AI application scenarios needs controlled network-condition emulation plus application-layer KPI measurement, including TTFT and TPS, not only RF parametric testing [41][42][43]. |\n| Multi-technology devices can experience mutual interference when using more than one communication technology, and the cited UAV signaling note says CMX500 can support multi-technology de-sense validation across technologies such as LTE, 5G, and Wi‑Fi [28]. | The tester needs multi-technology, multi-channel signaling and desense capability to observe WLAN/LTE/NR interference effects under real connections [28][58]. |\n| CMX500 features include NR FR1/FR2 signaling and TX measurements, LTE signaling and measurements, WLAN signaling and TX measurements, fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, application tests, IP traffic analysis, IMS/audio/POLQA, and remote-control interfaces [22]. | The required signaling capability expands from “connect the DUT” to RF + protocol + traffic + application validation across cellular and WLAN technologies [22][23][32]. |\n| The CMX500 non-signaling GPRF Generator use case supports ARB, CW, dual tone, replay `.wv` files, up to four GPRF Generator instances in parallel, waveform replay/creation, and standalone TX measurement workflows [55][56]. | The non-signaling side needs flexible waveform generation/replay and standalone TX measurement for R&D validation, while license and release-status caveats must be checked because the GPRF page is based on a callbox presentation rather than formal specifications [55][56][57]. |\n### Bottom line\n【推論】As AI data centers push higher-speed interconnect, optical connectivity, denser power, and liquid cooling, the tester portfolio must cover both infrastructure hardware measurements and wireless/application connectivity measurements, but the passages support CMX500-type signaling/non-signaling testers mainly for cellular/WLAN signaling, traffic/application testing, desense, Wi‑Fi 8 signaling, and GPRF waveform/TX workflows, not for the PCB/optical/power measurements mapped to ZNA/ZNB, FSWP, MXO, and ZISO [5][22][23][36][43][55][58][63].\n\n來源：\n[5] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n[8] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[22] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[23] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[28] Wiki：Signaling test solution（來源：`Communication of UAVs.md`、`Communications on UAVs.md`、`Signaling test solution.md`…）\n[32] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[36] Wiki：Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[37] Wiki：Wi-Fi 8 RF signaling tests（來源：`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[41] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[42] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[43] Wiki：Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[55] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[56] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[57] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[58] Wiki：CMX500 Desense Testing（來源：`CMX500_Callbox.md`）\n[61] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[62] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[63] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[92] Wiki：AI 資料中心基礎設施（來源：`0. AI Data Center image 1.md`、`0. AI Data Center image 2.md`、`0. AI Data Center image 3.md`…）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_O46uWkypNlmISzmOmGY9JNiX",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "### Short answer\nAI data center technology shifts the tester requirement toward broader connectivity validation—network emulation, RF/WLAN signaling, throughput/PER/BLER, IP/application analysis, latency/jitter impairment control, generative-AI user-experience KPIs, multi-radio desense, and non-signaling waveform/TX validation—while core AI server PCB, cable, optical, power-rail, and cooling-related measurements are mapped in the passages to VNA/phase-noise/oscilloscope/power tools rather than to a signaling tester [22][23][32][43][55][58][63].\n### Technology change → required measurement capability\n| AI data center / AI infrastructure change | Measurement capability impact for Signaling / Non-signaling Tester |\n|---|---|\n| AI data center infrastructure is framed around Connectivity, Power, and Resilience, and full-spectrum data center connectivity includes high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection [8][92]. | The signaling tester portion is most relevant where “connectivity” becomes wireless/network/application validation, while the passages map PCB, cable, optical, power-rail, and related hardware measurements to tools such as R&S ZNA/ZNB, R&S FSWP, MXO, and ZISO rather than to CMX500 [22][23][43][63]. |\n| AI server boards and interconnects are moving toward 20+ layer UBB, high-end ABF, low-Dk CCL, 800G AOC, PCIe 6/7, InfiniBand 800Gbe, SiPh/CPO, higher GPU TDP, liquid cooling, HVDC, 5–10 kW PSU, liquid-cooled power cabinets, and BBU [5]. | These changes increase the need for IL, TDR, high-speed cable, optical VNA, jitter/phase-noise, LDO NSD, power-rail, multiphase DC, PI, and BMS-related measurements, but the cited mapping assigns those needs to ZNA/ZNB, FSWP, MXO, and ZISO rather than to a signaling/non-signaling tester [5][61][62][63]. |\n| Wi‑Fi is moving toward Wi‑Fi 8 / IEEE 802.11bn, where the cited source says the focus shifts from sheer speed to ultra-high reliability and introduces testing hurdles such as distributed resource units and unequal modulation [36]. | A signaling tester therefore needs next-generation WLAN RF signaling capability and PHY-feature validation such as dRU measurements and UEQM analysis; the cited source says Wi‑Fi 8 RF signaling tests were implemented on the R&S CMX500 one-box signaling tester and showcased with a Broadcom prototype WLAN device [36][37]. |\n| Generative AI applications introduce user-experience metrics rather than only RF metrics, and the cited testbed uses CMX500 to configure network parameters, channel fading models, latency, jitter, and RF impairments while measuring Time to First Token and Tokens Per Second [41][43]. | A signaling tester used for AI application scenarios needs controlled network-condition emulation plus application-layer KPI measurement, including TTFT and TPS, not only RF parametric testing [41][42][43]. |\n| Multi-technology devices can experience mutual interference when using more than one communication technology, and the cited UAV signaling note says CMX500 can support multi-technology de-sense validation across technologies such as LTE, 5G, and Wi‑Fi [28]. | The tester needs multi-technology, multi-channel signaling and desense capability to observe WLAN/LTE/NR interference effects under real connections [28][58]. |\n| CMX500 features include NR FR1/FR2 signaling and TX measurements, LTE signaling and measurements, WLAN signaling and TX measurements, fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, application tests, IP traffic analysis, IMS/audio/POLQA, and remote-control interfaces [22]. | The required signaling capability expands from “connect the DUT” to RF + protocol + traffic + application validation across cellular and WLAN technologies [22][23][32]. |\n| The CMX500 non-signaling GPRF Generator use case supports ARB, CW, dual tone, replay `.wv` files, up to four GPRF Generator instances in parallel, waveform replay/creation, and standalone TX measurement workflows [55][56]. | The non-signaling side needs flexible waveform generation/replay and standalone TX measurement for R&D validation, while license and release-status caveats must be checked because the GPRF page is based on a callbox presentation rather than formal specifications [55][56][57]. |\n### Bottom line\n【推論】As AI data centers push higher-speed interconnect, optical connectivity, denser power, and liquid cooling, the tester portfolio must cover both infrastructure hardware measurements and wireless/application connectivity measurements, but the passages support CMX500-type signaling/non-signaling testers mainly for cellular/WLAN signaling, traffic/application testing, desense, Wi‑Fi 8 signaling, and GPRF waveform/TX workflows, not for the PCB/optical/power measurements mapped to ZNA/ZNB, FSWP, MXO, and ZISO [5][22][23][36][43][55][58][63].\n\n來源：\n[5] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n[8] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[22] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[23] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[28] Wiki：Signaling test solution（來源：`Communication of UAVs.md`、`Communications on UAVs.md`、`Signaling test solution.md`…）\n[32] Wiki：CMX500_Features_CSW9-20-0_en_32（來源：`CMX500_Features_CSW9-20-0_en_32.md`）\n[36] Wiki：Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[37] Wiki：Wi-Fi 8 RF signaling tests（來源：`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[41] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[42] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[43] Wiki：Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[55] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[56] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[57] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[58] Wiki：CMX500 Desense Testing（來源：`CMX500_Callbox.md`）\n[61] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[62] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[63] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[92] Wiki：AI 資料中心基礎設施（來源：`0. AI Data Center image 1.md`、`0. AI Data Center image 2.md`、`0. AI Data Center image 3.md`…）",
+          "evidence": {
+           "raw_citations": 19,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-d4d8f48d0c9d4c0683673b1a9183fb43",
+            "request_id": "request-d4d8f48d0c9d4c0683673b1a9183fb43",
+            "span_id": "span-d4d8f48d0c9d4c0683673b1a9183fb43",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "How do changes in AI data centers technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "AISeverEcosystem R&S solution mapping › 與既有知識的關係\n- [[R&S PCB test solutions]] 提供 2026.3.4 R&S high-speed digital 簡報中的 PCB fabricator / system house 測試流程；本頁則來自市場 Excel，將 R&S 儀器與 AI server supply-chain 類別做銷售 mapping。\n- [[高頻高速 PCB 測試解決方案]] 與 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 已有 Keysight / PCB test 圖像來源；本頁新增 R&S 方案對應，但未提供可替代正式規格的量測條件。\n- [[AI 伺服器 PCB 供應鏈升級]] 記錄材料與板層升級；本頁只補充對應測試入口，例如 IL、TDR、high speed trace、PDN Target Z。\n- [[資料中心電力電子生態系]]、[[NVIDIA 800V HVDC 架構]] 與 [[AI 資料中心高壓直流供電]] 記錄 data center power electronics；本頁補充 [[MXO]]、[[R&S FSWP]]、[[ZISO]] 與 BMS test 的 sales mapping 線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 34.750851
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › SI / high-speed channel / interconnect\n- [[R&S ZNA]] 與 [[R&S ZNB]] 在來源中被放入 [[伺服器電路板]] / [[PCB]] 的 IL、TDR，以及 [[連接器]] / 線纜的 high speed cable 測試。\n- [[R&S ZNA]] 也出現在 [[伺服器主機板]] / PCBA 的 high speed trace test、[[GPU]] 的 TDR、[[CPU]]、[[智原]]、[[譜瑞-KY]]等 IC / high-speed transmission context。\n- [[R&S ZNA67EXT]] 出現在 [[智原]] 與 [[旺矽]] 的 solution 欄，但來源未提供實際 frequency range 或 fixture。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 10.043289
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › 來源中的 mapping\n| 分類 | 對象 / 企業欄 | 來源中的 R&S Solution | 來源日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| [[IC]] / 矽智財 / 製程 | [[智原]] | [[R&S ZNA]] + [[R&S ZNA67EXT]]、[[R&S FSWP]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明量測對象是 SerDes、jitter、phase noise、probe station 或 wafer / package |\n| [[測試介面]] | [[旺矽]] | [[R&S ZNA67EXT]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 probe card / socket / fixture / frequency range |\n| 高速傳輸 IC | [[譜瑞-KY]] | [[R&S ZNA]] + [[R&S FSWP]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明高速傳輸 IC 類型、SerDes 速率或測試項目 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 9.715624
+             },
+             {
+              "text": "AISeverEcosystem › 與既有知識的關係\n- [[AI Server 供應鏈總覽]] 已整理 AI server 從 demand、compute、ODM、networking、PCB/interconnect、power、cooling 到 infrastructure 的八段式供應鏈；本來源新增更偏台股 / customer targeting / R&S solution mapping 的 Excel 表格視角。\n- [[AI 資料中心生態系]] 已整理多張 AI data center ecosystem / industrial chain 圖；本來源提供更細的 server rack 零組件與 IC 分類，但來源未標示日期，不能直接更新為市場現況。\n- [[臺灣 AI 伺服器供應鏈]] 依 TAITRA 2024/4 圖整理上中下游；本來源與其在 [[台光電]]、[[台燿]]、[[聯茂]]、[[欣興]]、[[南電]]、[[景碩]]、[[鴻海]]、[[廣達]]、[[緯創]]、[[英業達]]、[[台達電]]、[[光寶科]]、[[康舒]]、[[建準]]、[[川湖]]、[[勤誠]]等列名上高度相鄰，但本來源另加入 R&S solution 欄。\n- [[AI 伺服器 ODM]] 已整理台系 ODM 比較表與組裝代工列名；本來源在 [[伺服器整合／ODM]] 欄再次列出 [[鴻海]]、[[廣達]]、[[緯創]]、[[緯穎]]、[[英業達]]、[[華碩]]、[[神達]]、[[技嘉]]，但沒有營收、出貨或期間資料。\n- [[AI 伺服器 PCB 供應鏈升級]] 已記錄 GB200 / GB300 / VR200 與 PCB 材料升級；本來源只以 `GB200/NVL72帶動層數、材料等級暴衝` 和 `20+層UBB、高階ABF、低Dk CCL` 補充銷售 / solution mapping 脈絡，沒有新增可量化規格。\n- [[AI 伺服器液冷散熱]] 已整理液冷 / Microchannel lid 與 VR200 散熱估算；本來源新增 [[GPU]] TDP 700 W → 1200 W 與液冷 / 滑軌升級的表格說法，但未標示平台、年份或測試條件。\n- [[資料中心電力電子生態系]] 與 [[NVIDIA 800V HVDC 架構]] 已整理 HVDC、PSU、BBU、PDU 等 power electronics 脈絡；本來源補充電源供應器分類中的 HVDC、5–10 kW PSU、液冷電源櫃、BBU 與 Blackwell 平台功耗翻倍說法，但未提供引用文件或期間。\n- [[R&S PCB test solutions]] 已整理 R&S 2026.3.4 high-speed digital 簡報中的 material measurement、stackup selection、SI testing 與 sampling / process monitoring；本來源把部分 R&S solution 對應到特定市場分類，例如 [[R&S ZNA]] / [[R&S ZNB]] 的 IL / TDR、[[R&S FSWP]] 的 jitter / phase noise / LDO NSD test、[[MXO]] 的 power rail / motor driver analysis。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AISeverEcosystem.md"
+              },
+              "score": 22.871174
+             },
+             {
+              "text": "AISeverEcosystem › 重點摘要\n- [[AISeverEcosystem]] 是一份 AI server ecosystem / server rack / ICs Excel 轉檔來源，主要把 AI server 供應鏈分成 [[GPU模組]]、[[ABF載板]]、[[伺服器主機板]]、[[PCB]]、[[CCL]]、[[連接器]] / 線纜、[[網通交換機]]、[[矽光子]]、[[散熱器]]、[[電源供應器]]、[[伺服器機殼]]、[[伺服器 ODM]]、[[EMC Lab]] 與 IC 相關分類。\n- 來源同時列出部分公司、台股代號、角色亮點、[[R&S Solution]] 與 sales kits 連結；多數欄位為 `NaN`，因此不可推論未填欄位代表不適用、無需求或無 R&S solution。\n- [[ServerRack]] sheet 中，[[伺服器主機板]] / PCBA 的 [[R&S Solution]] 欄列出 [[R&S ZNL]] 用於 PDN Target Z、[[MXO]] 用於 power rail / multiphase DC / PI、[[ZISO]]、[[R&S FSWP]] 用於 LDO NSD test / clock jitter test、[[R&S ZNA]] 用於 high speed trace test。\n- [[伺服器電路板]] / PCB 分類列出關鍵元件為 `20+層UBB、高階ABF、低Dk CCL`，並在 [[博智]] 列寫 `GB200/NVL72帶動層數、材料等級暴衝。`；[[R&S Solution]] 欄列 [[R&S ZNA]] / [[R&S ZNB]]：IL、TDR。\n- [[連接器]] / 線纜分類列出 `CPU/GPU Socket、UQD水冷快接、800 G AOC`，角色亮點稱 [[PCIe 6]] / [[PCIe 7]]、[[InfiniBand]] 800 Gbe 提升 connector ASP；[[R&S Solution]] 欄列 [[R&S ZNA]] / [[R&S ZNB]] + [[OSP]]：high speed cable。\n- [[網通交換機]] 分類列出 [[智邦]]、[[神準]]、[[明泰]]、[[鴻海]]、[[達創]]、[[鈺登]]，[[R&S Solution]] 欄在 [[智邦]] 列出 [[R&S FSWP]]：jitter / phase noise test、VNA（[[R&S ZNA]] / [[R&S ZNB]]）、EMI pretest，並有一個 SharePoint sales kit 連結。\n- [[矽光子]] 分類列出關鍵元件 `40G/100G/400G/800G光收發模組, CPO/NEO（Near-packaged optics) &（pluggable）`；角色亮點稱 [[CPO]] 對有源 / 無源 SiPh、先進封裝、測試需求提升，且提到 [[前鼎]] 提供高速載板、[[光聖]] 提供 ELS 外部雷射源；[[R&S Solution]] 欄列 optical VNA：[[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]，以及 [[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]]。\n- [[散熱器]] 分類列出關鍵元件 `滑軌、液冷板、CDU、風扇`，在 [[建準]] 角色亮點稱 `GPU TDP由700 W升至1200 W，液冷與滑軌結構同步升級。`；[[R&S Solution]] 欄列 [[MXO]]：motor driver analysis。\n- [[電源供應器]] 分類列出關鍵元件 `HVDC、5–10 kW PSU、液冷電源櫃、BBU`，在 [[光寶科]] 角色亮點稱 `Blackwell平台功耗翻倍，推升高密度電源需求`；[[R&S Solution]] 欄列 [[MXO]]：power rail / multiphase DC / PI、[[ZISO]]、[[R&S FSWP]]：LDO NSD test、BMS test，並有一個 SharePoint sales kit 連結。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AISeverEcosystem.md"
+              },
+              "score": 10.15722
+             },
+             {
+              "text": "AISeverEcosystem › ICs 分類\n- [[GPU]]：列名 [[輝達]]（NVDA）、[[超微]]（AMD）、[[英特爾]]（INTC）；[[輝達]] 的 R&S solution 欄列 [[R&S ZNA]]：TDR、[[OSP]]。\n- [[CPU]]：列名 [[超微]]（AMD）、[[英特爾]]（INTC）；[[超微]] 的 R&S solution 欄列 [[R&S ZNA]]。\n- [[DRAM]]：列名 [[三星]]、[[海力士]]、[[美光]]。\n- [[IC]] / 矽智財 / 製程：列名 [[智原]]、[[創意]]、[[世芯-KY]]；[[智原]] 的 R&S solution 欄列 [[R&S ZNA]] + [[R&S ZNA67EXT]]、[[R&S FSWP]]。\n- [[晶圓代工]]：列名 [[台積電]]。\n- [[封裝測試]]：列名 [[日月光]]、[[力成]]。\n- [[測試介面]]：列名 [[旺矽]]、[[穎崴]]、[[中華精測]]；[[旺矽]] 的 R&S solution 欄列 [[R&S ZNA67EXT]]。\n- [[網通]]：列名 [[聯發科]]、[[達發]]。\n- [[BMC]]：列名 [[新唐]]、[[信驊]]。\n- 高速傳輸 IC：列名 [[譜瑞-KY]]、[[祥碩]]；[[譜瑞-KY]] 的 R&S solution 欄列 [[R&S ZNA]] + [[R&S FSWP]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AISeverEcosystem.md"
+              },
+              "score": 7.907773
+             },
+             {
+              "text": "Data center full-spectrum connectivity › 與既有概念的關係\n- [[Data center server 高速互連產品組合]] 偏向 data center server interconnect portfolio 的分類表；[[Data center full-spectrum connectivity]] 更強調 full-spectrum：electrical interconnect + optical + fiber + power + cooling。\n- [[Compute tray component solutions]] 偏向 compute tray connectors、cables、power connector、busbar 與 backplane interconnect；本頁納入 optical transceiver、CPO、fiber deployment 與 liquid cooling。\n- [[高速伺服器儲存互連]] 可連接本頁中的 [[Mini Cool Edge IO]]、[[Cool Express Link]]、[[Direct Attached Copper Cables]]、[[PCIe CEM 7 Connectors]] 與 storage / EDSFF 類產品。\n- [[CPO]]、[[Optical I-O]]、[[Near-Packaged Optics]] 可連接本頁的 [[Amphenol Co-packaged Optics]] 與 [[LEAP On-Board Transceiver]]，但本來源不是技術標準或市場採用證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 18.570732
+             },
+             {
+              "text": "Data center full-spectrum connectivity\n[[Data center full-spectrum connectivity]] 是 [[full-spectrum-data-center-connectivity-brochure]] 呈現的 portfolio 視角：把 AI / data center 的 high-speed electrical interconnect、optical interconnect、fiber deployment、rack power distribution、busbar、liquid cooling 與 leak detection 放在同一張 data center connectivity brochure 中。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 8.14467
+             },
+             {
+              "text": "Data center full-spectrum connectivity › 使用限制\n- [[full-spectrum-data-center-connectivity-brochure]] 未標示正式日期；所有產品能力、規格數字與 marketing claim 需標示來源日期缺口。\n- 來源是供應商 brochure，不是第三方市場報告；不可用來推論市占率、排名、客戶導入、採購關係或出貨量。\n- 來源未提供 datasheet 版次、order number、合規證書或測試條件；224G、448G、1.6T、300G、60A、+54V、60 contacts、0.6mm pitch 等數字只能作為來源文字摘錄。\n- PDF 轉檔為 lossy derivative；欄位串接與 OCR 風險需回看原始 PDF。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 5.780243
+             },
+             {
+              "text": "Data center server 高速互連產品組合 › Mezzanine board-to-board connectors\n來源列出 mezzanine / board-to-board 類別，包含：\n\n- [[BergStak HS 0.50mm]]\n- [[Lynx QD 56Gb-s]]\n- [[BergStak HS 0.80mm]]\n- [[Mini Cool Edge 0.60mm Connectors]]\n- [[SK Series Chip-to-Board Socket]]\n- [[cLGA Chip-to-Board Socket]]\n- [[DensiStak 1034 pin Open-Pin-Field]]\n- [[BergStak Secure Connector]]\n- [[InfinX 25G+ High Density BGA]]\n- [[ComboStak 0.80mm & PowerStak]]\n\n相關語彙包含 PCIe Gen 5、PAM4 / PCIe Gen 5 capability、SAS 4、compression mount contact、Telcordia GR-1217-CORE qualified socket、PCIe Gen 4、EMI shields、USCAR-2 V2 shock and vibration 等；來源未提供測試條件或正式標準版本。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center server 高速互連產品組合.md"
+              },
+              "score": 7.064575
+             },
+             {
+              "text": "Data center server 高速互連產品組合 › 來源脈絡\n- [[data-center-server-solutions-guide]]（來源未標示正式日期；raw converted 2026-09-17）標題為 `DATA CENTER SERVER SOLUTIONS`，副標為 `Fueling Servers with High-Speed Interconnect Solutions for Scalable Performance`。\n- 該來源稱 [[Amphenol]] 的 connectors、cables 與 high-speed components 用於 data centers、complex data processing 與 high-performance computing，但未提供市占率、出貨量、客戶導入或可訂購狀態。\n- 該來源是 PDF 轉檔文字，且 frontmatter 明示 converted derivative 是 lossy；產品對應與速率標籤需回查原始 PDF。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center server 高速互連產品組合.md"
+              },
+              "score": 7.013474
+             },
+             {
+              "text": "Data center server 高速互連產品組合 › 使用限制\n- 這是一份 Market 類產品 / solution guide 來源，但缺正式日期；所有主張需標示 `來源未標示正式日期`。\n- 來源未提供文件版次；不得把內容視為最新產品狀態。\n- 來源未提供 order number 或 datasheet 版次；產品名稱應作為 guide 中的圖上列名，而不是正式可訂購料號。\n- 來源未提供測試條件；速率、current rating、stack height、impedance、pin count 與 compliance 語彙只能視為來源文字宣稱。\n- 來源未提供市占率、出貨量或客戶名單；不可用來支持供應商 ranking、導入狀態或商業關係。\n- 來源與多個既有 Amphenol image / flyer 來源高度重疊；重複來源不可視為獨立市場驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center server 高速互連產品組合.md"
+              },
+              "score": 5.995247
+             },
+             {
+              "text": "R&S PCB test solutions › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 既有內容來自 Keysight 圖像，流程是原材料表徵、材料選擇、電路板抽樣測試、大批量監控；本頁保存 R&S 簡報中的類似但不完全相同的流程詞。\n- [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 均已有既有頁面；本來源增加 2026.3.4 R&S 簡報的追溯來源，但沒有新增可量化規格。\n- [[SerDes 與 SI PI 測試概覽]] 連接 Slide 11 和 Slide 20 的 validation challenges / SI flow；本頁聚焦 Slide 21 的 PCB test solutions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 10.480294
+             },
+             {
+              "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 9.716508
+             },
+             {
+              "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 7.389824
+             },
+             {
+              "text": "AI 伺服器 PCB 供應鏈升級 › 可追溯限制\n- [[AI Server PCB test image 4]] 是一張表格整理圖，不是統計圖表；沒有座標軸、圖例、樣本數、營收、出貨量、市占率、ASP 或產能資料。\n- [[AI Server PCB test image 4]] 的頁尾只標示「資料來源：採訪整理」與「製表：楊絡懸」，未提供完整資料來源。\n- 本頁不能把 [[AWS Trainium 2 Max]]、[[Google TPU V6]]、[[Meta MTIA 2]] 的「量產」改寫成客觀市場事實；只能寫成 [[AI Server PCB test image 4]]（來源未標示日期）的表格說法。\n- [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 都是來源發布日期未標示的規格比較表；圖中雖有 25Q1、25Q2、25H2、2026、26H2、2027 等平台時間，但不能替代來源發布日期。\n- [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 的試產、量產、樣機、放量、供應商占比、價格與交期說法都缺少定義、樣本、資料來源與驗證文件；不得改寫成客觀已發生事實。\n- [[HSD PCB image 11]] 與 [[HSD PCB image 1]] 高度重疊，不能把兩者當作相互獨立的市場驗證來源。\n- 公司列名不可推論為完整供應鏈、市場排名、採購名單、供應合約、R&S 往來對象或投資建議。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+              },
+              "score": 9.023509
+             },
+             {
+              "text": "AI 伺服器 PCB 供應鏈升級 › 升級面向整理\n| 面向 | 來源文字 | 可追溯數字 / 時間 | 限制 |\n|---|---|---|---|\n| AI伺服器趨勢 | 推升 PCB 邁向高層數、大面積與高速傳輸，供應鏈全面翻新 | [[AI Server PCB test image 4]] 來源未標示日期 | 未提供出貨量、平台樣本、PCB 面積或層數分布 |\n| ASIC平台進展 | AWS Trainium 2 Max、Google TPU V6、Meta MTIA 2量產，2026年新平台將陸續推出 | 2026年；量產時間未標示 | 未定義量產、未列出出貨量、客戶或供應鏈 |\n| 材料升級方向 | HVLP銅箔進入第4、5代，CCL以M8為主，導入低介電、低損耗與高散熱設計 | 第4、5代；來源未標示日期 | 未定義 HVLP 世代、M8、低介電、低損耗或高散熱設計的測試條件 |\n| 製程挑戰 | 主板層數達30～40層，縱深比需達12～14倍，需應對厚銅、雷射鑽孔等高階製程 | 30～40層；12～14倍；來源未標示日期 | 未說明板種、平台、線寬線距、孔徑、板厚或良率 |\n| TPCA Show焦點 | 聚焦玻纖布、HVLP銅箔、CCL發展與高縱深比設備 | 來源未標示日期 | 未標示 TPCA Show 年份、場次、展會期間或參展廠商 |\n| GB200 / GB300 / VR200 板件升級比較 | [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 將 ComputeTray 從 GB200 / GB300 的 5層22L列到 VR200 的 6層26L，NVSwitch Tray 從 24L HLC 列到 32L (N+N HLC)，並列出 VR200 Midplane 44L(N+N HLC) | GB200：25Q1試產、25Q2量產；GB300：25H2樣機/2026放量；VR200：26H2樣機/2027放量；來源發布日期未標示 | 未定義試產、量產、樣機、放量；未提供板厚、孔徑、線寬線距、良率、出貨量或平台驗證證據 |\n| VR200 材料升級與供應商列名 | [[HSD PCB image 11]] 列出 VR200 計算板斗山(M8+LDK+HVLP4)+M4、交換板M8(LDK2+HVLP4) 生益科技/台光電/南亞(交期最快)、HVLP4銅箔三井/古河/盧森堡/金居/福田 | VR200：26H2樣機/2027放量；來源發布日期未標示 | 與 [[HSD PCB image 1]] 既有抄錄「南亞(交期最長)」矛盾；未說明南亞完整公司名稱、交期數字、材料型號、認證狀態或供應關係 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+              },
+              "score": 8.68428
+             },
+             {
+              "text": "AI 伺服器 PCB 供應鏈升級 › 來源中的說法\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）標題為「PCB供應鏈升級重點」。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 AI伺服器趨勢推升 [[PCB]] 邁向高層數、大面積與高速傳輸，供應鏈全面翻新。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 [[AWS Trainium 2 Max]]、[[Google TPU V6]]、[[Meta MTIA 2]] 量產，並稱 2026年新平台將陸續推出。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 [[HVLP銅箔]] 進入第4、5代，[[CCL]] 以 [[M8]] 為主，導入低介電、低損耗與高散熱設計。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱主板層數達 30～40 層，縱深比需達 12～14 倍，並需應對厚銅、雷射鑽孔等高階製程。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 TPCA Show 焦點聚焦玻纖布、HVLP銅箔、CCL 發展與高縱深比設備，反映材料與製程全面升級。\n- [[HSD PCB image 1]]（來源發布日期未標示；取得於 2026-09-04）以「GB200/GB300/VR200規格：南亞和臻鼎為亮點」為標題，比較 [[GB200]] NVL72(72GPU)、[[GB300]] NVL72(72GPU) 與 [[VR200]] NVL144(72GPU) 的時間、製程、功耗、載板、CCL 材料、上游材料、ComputeTray、NVSwitch Tray、CPX 與 Midplane。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）與 [[HSD PCB image 1]] 高度重疊，同樣以「GB200/GB300/VR200規格：南亞和臻鼎為亮點」為標題，右上角標示「資料來源：產業調研、福邦投顧整理」。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[GB200]] / [[GB300]] ComputeTray 為 **5層22L**，[[VR200]] ComputeTray 為 **6層26L**；[[GB200]] / [[GB300]] NVSwitch Tray 為 **24L HLC**，[[VR200]] NVSwitch Tray 為 **32L (N+N HLC)**，[[VR200]] Midplane 為 **44L(N+N HLC)**。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[GB300]] 使用 **HVLP3銅箔**，[[VR200]] 使用 **HVLP4銅箔**，並將 [[VR200]] 交換板 CCL 材料列為 **M8(LDK2+HVLP4) 生益科技/台光電/南亞(交期最快)**。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[VR200]] ComputeTray PCB 供應商 / 占比為 **欣興35~40% > 臻鼎25~30% = 勝宏25~30%**。\n\n⚠️ [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）說 [[VR200]] 交換板 CCL 材料供應為「生益科技/台光電/南亞(交期最快)」，但既有頁面 [[AI 伺服器 PCB 供應鏈升級]] 說 [[HSD PCB image 1]] 的對應欄位為「生益科技/台光電/南亞(交期最長)」。判斷：最快 / 最長方向相反，影響對 [[南亞]] 供應鏈定位的解讀；在回看原圖前不得擇一。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+              },
+              "score": 5.646514
+             },
+             {
+              "text": "AI 資料中心基礎設施 › 來源中的說法\n- [[4 AI Data Center Eco-Chain image 1]]（12/10/2025，日期格式未標示）在 [[Peripheral]] 下列出 [[HDD]]、[[SSD]]、[[Power]]、[[PMIC]]、[[PCB]]、[[HS connection]]、[[Optical Module]]、[[Switch]]。\n- [[4 AI Data Center Eco-Chain image 1]]（12/10/2025，日期格式未標示）沒有箭頭或明確連線，因此此頁不推論圖中公司之間存在供應、採購、合作、投資、競爭或客戶關係。\n- [[4 AI Data Center Eco-Chain image 1]]（12/10/2025，日期格式未標示）沒有提供座標軸、單位、時間序列、占比、出貨量、營收、成長率或排名，因此此頁不將其解讀為市場規模、份額、成長率、出貨量或排序證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+              },
+              "score": 5.350274
+             },
+             {
+              "text": "AI 資料中心基礎設施 › 未決事項\n- [[0. AI Data Center image 1]] 來源未標示日期；不得將圖中敘事寫成特定時間點的市場現況。\n- [[0. AI Data Center image 2]] 來源未標示日期；不得將圖中列出的 solution components 寫成特定時間點的市場現況、導入狀態或供應鏈狀態。\n- [[0. AI Data Center image 3]] 來源未標示日期；不得將圖中敘事寫成特定時間點的市場現況。\n- [[0. AI Data Center image]] 來源未標示日期；不得將圖中列出的 solution components 寫成特定時間點的市場現況、導入狀態或供應鏈狀態。\n- [[4 AI Data Center Eco-Chain image 1]] 頁尾日期為 12/10/2025，但日期格式未標示；不得推論為 2025-12-10 或 2025-10-12。\n- [[0. AI Data Center image 1]] 來源未標示發布者或公司；不得推論此圖代表某特定廠商觀點。\n- [[0. AI Data Center image 2]] 來源未標示公司名稱、發布者、品牌或可辨識 logo；不得推論 InfraSuite Manager、EnviroStation、EnviroProbe、RowCool 等名稱的供應商歸屬。\n- [[0. AI Data Center image 3]] 來源未標示公司名稱、發布者、品牌或可辨識 logo；不得推論此圖代表某特定廠商觀點。\n- [[0. AI Data Center image]] 來源未標示公司名稱、發布者、品牌或可辨識 logo；不得推論 InfraSuite Manager、EnviroStation、EnviroProbe、RowCool 等名稱的供應商歸屬。\n- [[4 AI Data Center Eco-Chain image 1]] 未標示圖中公司是否為 R&S 往來對象、外部市場參與者、範例名單或內部關注名單。\n- [[0. AI Data Center image 1]] 來源未標示產品或型號；不得推論圖中設備為特定產品線。\n- [[0. AI Data Center image 2]] 來源未標示產品型號或文件版次；不得推論圖中設備為特定型號。\n- [[0. AI Data Center image 3]] 來源未標示具體產品名稱或型號；不得推論圖中設備為特定產品線或型號。\n- [[0. AI Data Center image]] 來源未標示產品型號或文件版次；不得推論圖中設備為特定型號。\n- [[4 AI Data Center Eco-Chain image 1]] 未標示任何產品型號或文件版次；不得把圖中品牌名稱推論成特定產品型號。\n- [[0. AI Data Center image 2]] 中編號 2 or 3 在圖中以同一指示區域呈現，來源未能清楚區分 [[Power Distribution Unit]] 與 [[Rack-Mount Remote Power Panel]] 在圖上的個別位置。\n- [[0. AI Data Center image]] 中編號 2 or 3 在圖中以同一指示區域呈現，來源未能清楚區分 [[Power Distribution Unit]] 與 [[Rack-Mount Remote Power Panel]] 在圖上的個別位置。\n- [[0. AI Data Center image 3]] 中建築外側線路與鎖頭圖示是否代表 cybersecurity、network security、physical security 或其他安全概念，來源未明示。\n- [[0. AI Data Center image 3]] 中上方小型建築群代表資料中心園區、外部設施群、城市、客戶端基礎設施或其他場景，來源未明示。\n- [[0. AI Data Center image 3]] 中右上設備機箱代表運算、網路、硬體設備或特定測試 / 供電設備，來源未明示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+              },
+              "score": 5.250117
+             },
+             {
+              "text": "AI 資料中心基礎設施 › 來源中的說法\n- [[0. AI Data Center image 1]]（來源未標示日期）以 **Enabling AI** 為主題，使用資料中心 / 機房插圖表達 AI 基礎設施與資料中心場景的關聯。\n- [[0. AI Data Center image 1]]（來源未標示日期）右側列出三個重點標籤：[[Connectivity]]、[[Power]]、[[Resilience]]。\n- [[0. AI Data Center image 1]]（來源未標示日期）沒有提供數值資料、座標軸、單位、趨勢線或比較柱狀，因此此頁不將其解讀為市場規模、出貨量、占比或成長趨勢證據。\n- [[0. AI Data Center image 1]]（來源未標示日期）沒有標示公司、產品或型號，因此此頁不把圖中的資料中心、機櫃或電路板機箱視為特定產品。\n- [[0. AI Data Center image 2]]（來源未標示日期）以資料中心 / 機房解決方案的 3D 示意圖呈現一套整合基礎設施組成，分類包含 [[Power Management]]、[[Rack & Accessories]]、[[Management System]]、[[Precision Cooling]] 與 [[Service]]。\n- [[0. AI Data Center image 2]]（來源未標示日期）在 [[Power Management]] 下列出 [[UPS]]、[[Power Distribution Unit]]、[[Rack-Mount Remote Power Panel]]、[[Rack Power Distribution Unit]]、[[Rack-Mount Static Transfer Switch]]。\n- [[0. AI Data Center image 2]]（來源未標示日期）在 [[Rack & Accessories]] 下列出 [[Modular Rack]] 與 [[Rack Accessories]]。\n- [[0. AI Data Center image 2]]（來源未標示日期）在 [[Management System]] 下列出 [[InfraSuite Manager]]、[[EnviroStation]]、[[EnviroProbe]]。\n- [[0. AI Data Center image 2]]（來源未標示日期）在 [[Precision Cooling]] 下列出 [[RowCool]]。\n- [[0. AI Data Center image 2]]（來源未標示日期）在 [[Service]] 下列出 [[System Design and Planning]] 與 [[Rapid and Comprehensive Services]]。\n- [[0. AI Data Center image 2]]（來源未標示日期）沒有提供座標軸、單位、時間序列、數值比較或趨勢線，因此此頁不將其解讀為市場規模、出貨量、占比、成長率或產品性能數值證據。\n- [[0. AI Data Center image 2]]（來源未標示日期）沒有標示公司名稱、可辨識品牌標誌或型號，因此此頁不將 InfraSuite Manager、EnviroStation、EnviroProbe、RowCool 等名稱歸屬於特定供應商或產品線。\n- [[0. AI Data Center image 3]]（來源未標示日期）以 **Enabling AI** 為主題，從資料中心 / 機房 / 基礎設施視角表達支援 AI 運算所需的底層能力。\n- [[0. AI Data Center image 3]]（來源未標示日期）圖上可辨識文字包含 **Enabling AI**、[[Connectivity]]、[[Power]]、[[Resilience]]。\n- [[0. AI Data Center image 3]]（來源未標示日期）描述的畫面組成包含中央資料中心或機房、多排機櫃 / 伺服器機架、冷卻或管線配置、左側電塔、上方小型建築群、右上電子設備 / 機箱、通訊 / 連線線路、鎖頭圖示與人員。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+              },
+              "score": 3.998468
+             },
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 17.436427
+             },
+             {
+              "text": "R&S CMX500 › Application tests 與 audio\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n- 未啟用 R&S CMX-KA100 等 application test license 時，IP application test functionality 降到最低；只能使用 standalone mode，不能連接 external servers，也不支援 IP based measurements 或 tools。\n- R&S CMX-KA100 提供 internal IP services 與 IP connection to DUT 測試 applications，包含 DNS、IMS、Message Center、FTP、HTTP、DNS monitor、IP logging、iPerf、Ping、throughput、Max Throughput Wizard、web server。\n- R&S CMX-KA110 增強 KA100，加入 QoS、ePDG、N3IWF、delay measurement、IP tune tool、SMPP / MT SMS advanced settings。\n- R&S CMX-KA150 提供 IP analysis tool，用於監控與分析 DUT uplink / downlink IP traffic。\n- R&S CMX-KA180 提供 audio codecs for 4G and 5G IMS voice call，支援 AMR-NB、AMR-WB、EVS，並包含 [[R&S CMX-ZG180A]] external sound card drivers and configuration settings。\n- R&S CMX-KA181 加入 [[POLQA]]，用於 measuring perceived speech quality；measurement version 為 3，mode 為 full-band 或 narrowband。\n- R&S CMX-KA401 支援 WAV player / recorder、upload/download WAV files、file-based POLQA measurements 與 end-to-end audio delay。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 35,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 17.102445
+             },
+             {
+              "text": "R&S CMX500 › mmWave extension 與 remote radio heads\n[[CMX500_specs_en_5216-4127-22_v1100]] 指出 3GPP FR2 frequency range 測試可由 [[R&S CMX500]] 搭配 [[R&S CMXHEAD30]]、[[R&S CMXHEAD50]] 或 [[R&S CMXHEAD50-Evo]] 執行。Remote radio head 是獨立 compact unit，在 IF 與 5G NR FR2 frequency ranges 間執行 upconversion / downconversion。CMX500 與 remote radio head 的 split concept 可在 5G NR FR2 frequency range 使用短 RF cable lengths，以最佳化 radiated chamber test environments 的 link budget。\n\n適用 radiated chamber test environments：[[R&S CMQ500]] shielding cube 與 [[R&S ATS800R]] CATR rack based antenna test system。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 21,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 12.763353
+             },
+             {
+              "text": "CMX500 Callbox › Callbox 定位\n依 [[CMX500_Callbox]]，callbox 的核心敘事是：\n\n- Easy to set up。\n- Easy to get in a call。\n- Easy to test with。\n- Focus on [[RF Testing]]，including [[3GPP pre-conformance]]。\n\n來源以 [[Device Under Test]]、cell tower 與 smartphone 圖示描述 [[R&S CMX500]] 作為 DUT 連線與測試環境的中心。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 11.346211
+             },
+             {
+              "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 6.920683
+             },
+             {
+              "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 5.609816
+             },
+             {
+              "text": "Signaling test solution › 重點摘要\n- 本來源是 OneNote 複製出的 [[UAV]] signaling test solution 筆記，raw 轉檔日期為 2026-09-17；正文未標示正式發布日期、作者、文件版次或適用客戶 / 專案。\n- 來源指出無人機常使用多種通信技術，例子包含 proprietary radio / image transmission、Wi‑Fi、[[LTE]]、未來 [[5G]]、[[RTK]]、[[SATCOM]] 與 encrypted frequency-hopping radio。\n- 來源以多款無人機 / UAV 產品為例整理核心通訊技術：[[DJI Mini 4 Pro]]、[[DJI Mavic 3]]、[[DJI Mavic 3 Enterprise]]、[[Parrot ANAFI Ai]]、[[XAG P100]]、[[Skydio X2E]]、[[RQ-4 Global Hawk]] 與 [[Switchblade]]。\n- 來源稱 [[R&S CMX500]] RF frequency range 為 **400 MHz 至 8 GHz**，可提供 [[LTE]]、[[5G]] 與 [[Wi-Fi]] UE 的單一技術 signaling test。\n- 來源列出 signaling test 可包含基本 RF 量測、application layer tests 與 protocol test；基本 RF 量測項目包含 Power、Frequency、Spectrum、[[EVM]]、[[PER]] / [[BLER]]、[[MIMO]]。\n- 來源列出一組 [[R&S CMX500]] 5G test configuration，包含 [[R&S CMX-PB70H]]、[[R&S CMX-B200A]]、[[R&S CMX-B300C]]、[[R&S CMX-B600B]]、[[R&S CMX-KA100]] 與 [[R&S CMX-KM600]]。\n- 來源列出一組 [[R&S CMX500]] Wi‑Fi test configuration，包含 WLAN signaling、WLAN TX measurement 與 WLAN ARB generator options，例如 [[R&S CMX-KS350B]]、[[R&S CMX-KS351B]]、[[R&S CMX-KS352B]]、[[R&S CMX-KS355B]]、[[R&S CMX-KS356B]]、[[R&S CMX-KS360B]]、[[R&S CMX-KM350]]、[[R&S CMX-KM351]]、[[R&S CMX-KM352]]、[[R&S CMX-KM360]]、[[R&S CMX-KW350]]、[[R&S CMX-KW351]]、[[R&S CMX-KW352]]。\n- 來源指出如果 UAV 使用兩種以上通訊技術，通訊技術之間可能造成相互干擾；基於 [[R&S CMX500]] 支援多種通訊技術，可進行 De-sense validation。\n- 來源對多技術整合驗證的配置原則是：software options 合併上述 5G 與 Wi‑Fi 表格，hardware 以滿足兩者中最大的 carrier aggregation 或 [[MIMO]] 作為配置。\n- 來源末尾列出兩個待讀材料：本機 PDF `5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.pdf`，以及 SharePoint 上 `Making Deployed 5G Private Networks more Resilient.pptx`；正文未擷取。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Signaling test solution.md"
+              },
+              "score": 11.852984
+             },
+             {
+              "text": "Signaling test solution › 與既有知識的關係\n- [[Communication of UAVs]] 已整理 UAV communication 的功能、鏈路、協定、硬體與頻段摘錄；本來源補充具體 UAV 產品例子與 [[R&S CMX500]] signaling test 配置線索。\n- [[Communications on UAVs]] 只是 UAV communication / SDR link hub；本來源比該 link hub 多出可抽取的 CMX500 5G / Wi‑Fi 配置表。\n- [[R&S CMX500]]、[[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]] 已有正式產品規格與 features 來源；本來源屬於 Market 類 OneNote solution note，適合用於 UAV use-case / configuration discussion，不應取代正式 specifications 或 configuration tool。\n- [[R&S CMX500]] 正式 specifications 已支撐 RF unit 400 MHz to 8000 MHz、CMX500 base unit 1201.0002K70、CMX-PB70H 1222.0676.09、CMX-B200A 1222.0747.02、CMX-B300C 1222.0801.04、CMX-B600B 1222.0953.03、CMX-KM600 1222.4013.02 等資料；本來源與這些資料一致，但用途是 UAV signaling solution 摘要。\n- [[4G 5G NR WLAN OTA MIMO stress testing]] 已整理 CMX500 OBT 與 Bluetest 的 4G / 5G NR / WLAN OTA MIMO stress testing；本來源較偏向 conducted / signaling configuration 與多技術 De-sense 驗證概念，未提到 OTA chamber。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Signaling test solution.md"
+              },
+              "score": 9.036366
+             },
+             {
+              "text": "Signaling test solution › 原文未解的問題\n- 來源未標示正式發布日期、作者、整理單位、客戶、專案、版本或適用地區。\n- UAV 產品表未提供各產品官方 datasheet、文件版次、通訊模組型號、頻段地區限制、發射功率、頻寬、加密 / 跳頻細節或測試條件。\n- [[R&S CMX500]] 5G / Wi‑Fi 配置表未標示依據的正式 configuration guide、軟體版本、license bundle、報價工具版本或 release date。\n- 來源寫「配置如有疑問請與 1C PM 確認」，表示表格不應被視為最終報價或完整配置。\n- 多技術 De-sense validation 只提供概念與配置合併原則，未提供測試案例、干擾模型、pass / fail limits、setup diagram、synchronization、shielding / chamber 條件或 automation flow。\n- `5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.pdf` 未擷取正文；不可引用其 anti-jamming 主張。\n- `Making Deployed 5G Private Networks more Resilient.pptx` 未擷取正文；不可引用其 5G private network resilience 主張。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Signaling test solution.md"
+              },
+              "score": 6.930968
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › 產品、硬體與附件\n- [[R&S CMX500]] — Radio Communication Tester，modular and scalable hardware architecture。\n- [[R&S CMX-B500x]] — IF unit；NR FR2 連接使用，來源未列完整 order no.。\n- [[R&S CMX-B500A]] — IF unit；remote radio heads 連接到 [[R&S CMX500]] 的 IF units 時列名，來源未列完整 order no.。\n- [[R&S CMX-B600x]] — RF unit；最高 8 GHz 連接使用，來源未列完整 order no.。\n- [[R&S CMXHEAD30]] — remote radio head，搭配 IF unit 時 RF frequencies 最高 43.5 GHz。\n- [[R&S CMXHEAD50]] — remote radio head，搭配 IF unit 時 RF frequencies 最高 50.2 GHz。\n- [[R&S CMQ500]]、[[R&S ATS800R]]、[[R&S ATS1800C]] — 建議用於 mmWave OTA 量測的 RF shield chambers。\n- [[R&S CMX-ZG180A]] — external sound card；R&S CMX-KA180 / KA401 audio use cases 中列名。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 16.519245
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › 無線技術與測試主題\n- [[NR FR1]]、[[NR FR2]]、[[LTE]]、[[NB-IoT]]、[[WLAN]]、[[LTE C-V2X]]、[[NR C-V2X]]、[[RedCap]]、[[eRedCap]]、[[NTN]]、[[Direct-to-cell communication]]。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]、[[Spectrum analysis]]。\n- [[POLQA]]、[[IMS]]、[[iPerf]]、[[QoS]]、[[ePDG]]、[[N3IWF]]、[[IP traffic analysis]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 12.285574
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › LTE measurements\n- R&S CMX-KM500 提供 LTE uplink measurements，支援含 PUCCH/PUSCH signals、random access preambles、sounding reference signals。\n- LTE uplink multi-evaluation 支援 FDD / TDD signals、channel bandwidth 1.4 MHz、3 MHz、5 MHz、10 MHz、15 MHz、20 MHz、normal 或 extended cyclic prefix、arbitrary resource block allocation，以及 QPSK、16QAM、64QAM。\n- Carrier aggregation 支援 intraband contiguous UL CA signals；可量測 two、three 或 four carriers depending on bandwidth class。\n- LTE sidelink measurements 由 R&S CMX-KM570 提供，RF operating band 為 band 47。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 17,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 7.06151
+             },
+             {
+              "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 與既有知識的關係\n- 既有 [[R&S CMX500]] 頁已依 [[CMX500_Features_CSW9-20-0_en_32]] 記錄 WLAN signaling 802.11bn options 與 WLAN TX measurement option family；本新聞稿提供 PR / demonstration 層級的 [[Wi-Fi 8]] RF signaling tests 與 Broadcom prototype device 展示語境。\n- 既有 [[Wi-Fi 7 OTA MIMO stress testing]]、[[Wi-Fi 7 and 5G RedCap OTA measurements]] 與 [[4G 5G NR WLAN OTA MIMO stress testing]] 聚焦 Wi‑Fi 7 / IEEE 802.11be、OTA chamber integration 與 Bluetest / EMITE；本來源轉向 [[Wi-Fi 8]] / [[IEEE 802.11bn]] RF signaling tests，不是 OTA chamber 測試。\n- 既有 [[Broadcom]] 頁主要收錄 Broadcom 在 switch、PCIe switch 與 TPU roadmap 圖表中的列名；本來源新增 Broadcom 作為 prototype Wi-Fi 8 device 提供方 / 展示合作方的 PR 語境。\n- 本來源屬於 [[Productions]] 資料，但不是 datasheet / configuration guide；不可用來取代 [[CMX500_specs_en_5216-4127-22_v1100]] 或 [[CMX500_Features_CSW9-20-0_en_32]] 的正式規格與 option ordering data。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+              },
+              "score": 8.660942
+             },
+             {
+              "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 關鍵實體與概念\n- [[Rohde & Schwarz]] — 新聞稿發布者與 [[R&S CMX500]] 供應商。\n- [[R&S CMX500]] — multi-technology multi-channel one-box signaling tester；本來源新增 [[Wi-Fi 8]] / [[IEEE 802.11bn]] RF signaling mode 測試語境。\n- [[Broadcom]] — 提供 prototype next-generation WLAN / [[Wi-Fi 8]] device 供展示驗證。\n- [[Wi-Fi 8]] — 對應 [[IEEE 802.11bn]] amendment，來源稱其聚焦 [[UHR]]。\n- [[Wi-Fi 8 RF signaling tests]] — 本來源的核心測試能力宣稱。\n- [[IEEE 802.11bn]] — Wi-Fi 8 amendment；來源未標示標準版次或 ratification 狀態細節，只說 ahead of final ratification。\n- [[UHR]] — Ultra-high reliability；來源稱為 Wi-Fi 8 的性能焦點。\n- [[distributed resource units]] — Wi-Fi 8 PHY feature；來源寫作 dRU。\n- [[unequal modulation]] — Wi-Fi 8 technology；來源寫作 UEQM。\n- [[MLO]] — Wi-Fi 7 / Wi-Fi 8 延續的 Multi-Link-Operation。\n- [[MWC Barcelona 2026]] — 展示場域。\n- [[Christian Mokry]] — Press & media contact。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+              },
+              "score": 6.370148
+             },
+             {
+              "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 重點摘要\n- 來源未標示發布日期；raw frontmatter `created: 2026-09-11`，本文 ingest 日期為 2026-09-15。\n- [[Rohde & Schwarz]] 宣稱在最終 IEEE standard ratification 之前，已將 first [[Wi-Fi 8 RF signaling tests]] 實作到 [[R&S CMX500]] one-box signaling tester。\n- 展示情境：[[MWC Barcelona 2026]]，[[Rohde & Schwarz]] booth 5A80，Fira Gran Via Barcelona，hall 5。\n- 測試對象：[[Broadcom]] prototype next-generation WLAN device / prototype [[Wi-Fi 8]] device。\n- [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的焦點被描述為從 sheer speed 轉向 ultra-high reliability（[[UHR]]）performance。\n- 來源稱 [[Wi-Fi 8]] 延續 [[Wi-Fi 7]] 的 core PHY parameters：supported frequencies up to 7.125 GHz、channel bandwidths up to 320 MHz、4096QAM modulation、[[MLO]]。\n- 來源列出 [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的新 testing hurdles，包括 [[distributed resource units]]（dRU）與 [[unequal modulation]]（UEQM）。\n- dRU measurements 被描述為可驗證 device boosting uplink transmit power 與 improving connection reliability 的 effectiveness。\n- UEQM analysis 被描述為可評估 test device 是否能依 specified modulation coding scheme（MCS）combinations 正確 adapt modulation。\n- [[R&S CMX500]] 被定位為 modular、powerful one-box signaling tester，支援 [[LTE]]、[[NR]] SA/NSA、[[NR-NTN]]、[[NB-NTN]]、Direct-to-Cell（[[D2C]] / [[DTC]]）與 WLAN including [[Wi‑Fi 7]] and [[Wi‑Fi 8]]。\n- Press & media contact：[[Christian Mokry]]，PR Manager Test & measurement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+              },
+              "score": 5.393617
+             },
+             {
+              "text": "Wi-Fi 8 RF signaling tests › 來源中的測試情境\n依 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]：\n\n- [[Rohde & Schwarz]] 在 final IEEE standard ratification 前，已將 first [[Wi-Fi 8]] RF tests in signaling mode 實作到 [[R&S CMX500]] one-box signaling tester。\n- 測試展示使用 [[Broadcom]] prototype next-generation WLAN device。\n- 展示地點為 [[MWC Barcelona 2026]]，[[Rohde & Schwarz]] booth 5A80。\n- 來源稱 [[R&S CMX500]] 可 showcase physical layer features unique to [[Wi-Fi 8]]。\n- 來源將 [[R&S CMX500]] 定位為 multi-technology multi-channel signaling tester，以及 future-ready platform for cellular and non-cellular standards。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md"
+              },
+              "score": 6.541202
+             },
+             {
+              "text": "Wi-Fi 8 RF signaling tests › 使用限制\n- 本頁目前只由 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]] 支撐。\n- 來源是 PR / demonstration statement，不是 datasheet、configuration guide、IEEE standard text 或 certification document。\n- 不可從本來源推論 [[R&S CMX500]] 的 Wi‑Fi 8 option code、license、software version、hardware configuration、RF chain count、test case list 或 measurement uncertainty。\n- 不可從本來源推論 [[Broadcom]] prototype device 的正式產品名稱、量產狀態、客戶、driver version、chipset SKU 或商用 availability。\n- 來源未標示 [[IEEE 802.11bn]] draft version、final ratification date 或正式標準版本。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md"
+              },
+              "score": 3.810566
+             },
+             {
+              "text": "Wi-Fi 8 RF signaling tests › 與 Wi-Fi 7 OTA 測試的區分\n本頁不同於 [[Wi-Fi 7 OTA MIMO stress testing]]：\n\n- [[Wi-Fi 7 OTA MIMO stress testing]] 目前由 Bluetest / EMITE OTA chamber PR 支撐，聚焦 [[Wi-Fi 7]] / [[IEEE 802.11be]] over-the-air chamber workflow。\n- [[Wi-Fi 8 RF signaling tests]] 目前由 [[Rohde & Schwarz]] / [[Broadcom]] PR 支撐，聚焦 [[R&S CMX500]] signaling mode、[[Wi-Fi 8]] PHY features 與 prototype Broadcom WLAN device。\n- 本來源未說明 OTA chamber、reverberation chamber、anechoic chamber、antenna performance 或 MIMO stress testing setup。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md"
+              },
+              "score": 3.433663
+             },
+             {
+              "text": "Generative AI user experience testing › 使用限制\n- 本頁是 PR / demonstration-level evidence，不是正式 test specification、standardized benchmark 或 product datasheet。\n- 來源未提供 measurement methodology、test case definition、LLM model、terminal model、server / cloud environment、network scenario profiles、statistical confidence 或 result tables。\n- 來源未標示 [[R&S CMX500]] software version、licenses、hardware configuration、extension boards 或 order numbers。\n- 來源未說明 host PC software 的產品名稱、版本、license 或資料輸出格式。\n- 來源未說明 [[3GPP]] 或 [[GTI]] 是否已採納本 testbed 的 metrics 或 framework。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Generative AI user experience testing.md"
+              },
+              "score": 6.561771
+             },
+             {
+              "text": "Generative AI user experience testing\n[[Generative AI user experience testing]] 是 [[Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing]] 中描述的測試方法：在可控制的 wireless network conditions 下，以 [[Time to First Token]]、[[Tokens Per Second]] 等指標量化 generative AI application 的 end-user experience。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Generative AI user experience testing.md"
+              },
+              "score": 5.41152
+             },
+             {
+              "text": "Generative AI user experience testing › 測試目的\n依 [[Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing]]，industry still lacks mature metrics and standardized test frameworks for evaluating user experience of generative AI applications；[[3GPP]] 與 [[GTI]] 等組織正在進行 related research。\n\n本來源中的 testbed 目標是：\n\n- 在 diverse wireless environments 下量化 end-user experience。\n- 比較不同 network conditions 對 generative AI application response 的影響。\n- 支援 on-device generative AI application design optimization。\n- 為 future network optimization 提供 reference points。\n- 支援 [[6G-enabled AI technologies]] 的 evolution、validation and standardization。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Generative AI user experience testing.md"
+              },
+              "score": 4.839366
+             },
+             {
+              "text": "Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing › 重點摘要\n- [[Rohde & Schwarz]] 與 [[China Mobile Research Institute]] 在 [[MWC Shanghai 2026]] 展示一套 generative AI applications 測試 solution。\n- 來源稱此 solution based on the [[R&S CMX500]] 5G one-box signaling tester，可在 diverse network conditions 下首次量化 measurement end-user experience of generative AI applications。\n- 測試架構中：\n  - [[Large language model]] 部署在 server side 或 cloud。\n  - [[R&S CMX500]] 與執行 client-side test application 的 smart terminal 建立 radio connection。\n  - [[R&S CMX500]] 可配置 network parameters、channel fading models、latency、jitter、RF impairments 等 variables。\n  - 使用者透過 terminal-side application 輸入 prompts，接收 LLM inference responses。\n  - Host PC software 收集與分析 data，並產生 charts。\n- 來源列出的 key performance indicators 包含 [[Time to First Token]]（TTFT）與 [[Tokens Per Second]]（TPS）。\n- 來源稱此方法可支援 optimization of on-device generative AI application design，並提供 future network optimization 的 reference points。\n- 來源把 [[R&S CMX500]] 描述為 all-in-one test platform，支援 SA / NSA architectures、FR1 to FR3（up to 18 GHz）、built-in IMS server、RF conformance、protocol validation、VoNR acoustics 與 carrier aggregation。\n- [[Liu Guangyi]] 的引述把此 testbed 連到 6G-enabled ubiquitous intelligent connectivity、native network computing capabilities、new AI service metrics 與 testing methodologies。\n- [[Jin Hailiang]] 的引述把此 testbed 描述為 generative AI user experience testing 的 benchmark，並指向 future test scenarios、industry use cases 與 standardization。\n- 展示地點：China Mobile’s 6G Zone，Hall 3，N3E60。\n- Press & media contact：[[Christian Mokry]]，PR Manager Test & measurement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md"
+              },
+              "score": 10.437505
+             },
+             {
+              "text": "Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing › 概念\n- [[Generative AI user experience testing]]：本來源核心測試方法，量化不同 wireless network conditions 下 generative AI application 的 end-user experience。\n- [[Time to First Token]]：本來源列為 key performance indicator，縮寫 TTFT。\n- [[Tokens Per Second]]：本來源列為 key performance indicator，縮寫 TPS。\n- [[Large language model]]：testbed 中部署於 server side 或 cloud 的 generative AI model。\n- [[On-device generative AI applications]]：來源稱可透過此 testbed 在不同 network conditions 下評估與最佳化。\n- [[6G-enabled AI technologies]]：來源引述中的 standardization / validation 目標語彙。\n- [[FR3 測試與 RFU18 battle card 主張]]：本來源延續 CMX500 / FR3 / up to 18 GHz 的 PR 層級說法，但未明示 [[RFU18]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md"
+              },
+              "score": 8.73933
+             },
+             {
+              "text": "Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing › 原文未解的問題\n- 來源未標示發布日期；raw frontmatter created 為 2026-09-11，但不可等同 PR 發布日期。\n- 來源未標示 PR 文件版次、內部文件號、solution order number、software version 或 [[R&S CMX500]] hardware configuration。\n- 來源稱 [[R&S CMX500]] covers frequency ranges from FR1 to FR3（up to 18 GHz），但未說明是否需要 [[RFU18]] 或其他 extension hardware。\n- 來源未提供 TTFT / TPS 的 measurement methodology、prompt set、LLM model name、server / cloud configuration、terminal model、radio scenario table、statistical treatment 或 reproducibility data。\n- 來源未提供 host PC software 名稱、版本、order number 或資料格式。\n- 來源未說明 test framework 是否已被 [[3GPP]]、[[GTI]] 或其他組織採納；僅說相關研究正在進行。\n- 來源未提供 [[MWC Shanghai 2026]] demo 的實測數據、benchmark charts 或公開報告。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md"
+              },
+              "score": 7.241787
+             },
+             {
+              "text": "full-spectrum-data-center-connectivity-brochure › 與既有知識的關係\n- 本來源延伸既有 [[Amphenol Communications Solutions]]、[[Data center server 高速互連產品組合]]、[[高速伺服器儲存互連]] 與 [[Compute tray component solutions]]，但比 [[compute-tray-flyer]] 與 [[data-center-server-solutions-guide]] 更強調 full-spectrum coverage：high-speed I/O、backplane、mezzanine、optical、fiber、power 與 cooling 同頁並列。\n- 本來源與 [[HSD Cable test image 1]]、[[HSD Cable test image 2]]、[[HSD Cable test image 3]]、[[HSD Cable test image 4]]、[[HSD Cable test image 6]]、[[HSD Cable test image 7]]、[[HSD Cable test image]]、[[compute-tray-flyer]] 與 [[data-center-server-solutions-guide]] 都屬 Amphenol 型錄 / brochure 類資料；不可把多個型錄 / 轉檔重疊內容視為獨立市場驗證。\n- 本來源補充 [[BarKlip Busbar Connectors]] 的 high-current power distribution 應用描述，但未提供比既有來源更精確的 current rating 表、測試條件或 order number。\n- 本來源新增 optical 與 fiber deployment 相關線索，例如 [[Amphenol XPO-LPO]]、[[1.6T OSFP Transceivers]]、[[Amphenol Co-packaged Optics]]、[[LEAP On-Board Transceiver]]、[[300G CXP2 Active Optical Cable]] 與 [[CommScope Rapid Fiber Connect Platform]]；這些在既有 Amphenol compute tray / server guide 頁面中尚未完整展開。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/full-spectrum-data-center-connectivity-brochure.md"
+              },
+              "score": 21.417572
+             },
+             {
+              "text": "full-spectrum-data-center-connectivity-brochure › 原文未解的問題\n- 來源未標示正式發布日期、文件版次、brochure 編號或產品資料表版本。\n- 來源未說明 PDF 原始發布頁、QR code 目標頁、各 featured product 的 order number、料號、可訂購狀態或量產狀態。\n- 來源未提供 224 Gb/s PAM4、448G、32DP–128DP、1.6T、300G、60 contacts per port、0.6 mm pitch、60 A、+54V、high-current、very low energy loss、leak detection 或 quick disconnect 等數字 / 能力的測試條件、合規文件或第三方驗證。\n- 來源未提供客戶、導入案例、市占率、營收、出貨量或排名；所有產品能力只能視為 brochure claim。\n- 來源中的文字由 PDF 轉檔而來，版面欄位有串接風險，例如 `System with Integrated Liquid Cage Systems Cooling`、`XtremePass™448G`、`L C P A C M A M M 2 M` 等需回看原 PDF 圖像確認。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/full-spectrum-data-center-connectivity-brochure.md"
+              },
+              "score": 8.033654
+             },
+             {
+              "text": "full-spectrum-data-center-connectivity-brochure › 關鍵實體與概念\n- [[Amphenol Communications Solutions]] — 來源頁面與頁尾社群帳號皆以 amphenol-cs.com / Amphenol CS 呈現，支撐其 data center connectivity portfolio 語境。\n- [[Amphenol OverPass Cable Systems]] — 來源稱其提供 broad range of next gen capabilities，讓 high-speed signal 從 ASIC packages 到 system endpoints 傳輸。\n- [[ExtremePort OSFP Connectors]] — 來源稱 ExtremePort OSFP connectors and cages have 60 contacts per port and a 0.6 mm pitch form factor，optimized for signal integrity、thermal management and multi-lane pluggable architecture。\n- [[Amphenol XtremePass]] — 來源稱 XtremePass 448G connector solution 提供 best-in-class SI performance、maximize substrate density，支援 32DP 到 128DP form factors，並跨 Ethernet、NVLink、PCIe 與 InfiniBand systems。\n- [[Sentry HD High-Speed Backplane Connector]] — 來源稱 Sentry HD 是 Amphenol next-generation high-speed backplane connector platform，purpose-built to power future AI data center architectures。\n- [[Celerity 224 Gb-s BGA Mezzanine Connectors]] — 來源稱 Celerity / Celerity LP 224 Gb/s BGA mezzanine connectors support up to 224 Gb/s PAM4，並有 hermaphroditic mating interfaces。\n- [[Amphenol XPO-LPO]] — 來源稱 XPO-LPO addresses the power and density wall of traditional OSFP form factors，224 Gb/s per lane across 64 channels，面向 AI scale-up deployments。\n- [[Amphenol Co-packaged Optics]] — 來源稱 Amphenol CPO extends end-to-end ownership to the chip，從 high-density electrical interposer 到 optical conversion module 再到 fiber plant。\n- [[BarKlip Busbar Connectors]] — 來源補充 BarKlip I/O products 用於 busbars、cables 與 circuit boards 間 high-current power distribution，且 direct pluggable connection to an uninsulated busbar generates very low energy loss。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/full-spectrum-data-center-connectivity-brochure.md"
+              },
+              "score": 3.537975
+             },
+             {
+              "text": "Compute tray component solutions › 未決事項\n- compute tray 在此來源中沒有結構圖、尺寸、系統邊界或標準定義。\n- thermal solutions 只有總述提及，未列出產品。\n- `CXL 3x` 是否應讀為 [[CXL 3.x]] 需回看原始 PDF 圖像或官方產品資料。\n- 各產品的料號、datasheet、測試條件、合規狀態與可購買狀態均未標示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Compute tray component solutions.md"
+              },
+              "score": 10.150773
+             },
+             {
+              "text": "Compute tray component solutions › 使用限制\n- [[compute-tray-flyer]] 未標示正式日期、型錄版本、文件編號或產品 datasheet 版次；本頁不可用來判定特定日期的量產、出貨或客戶導入狀態。\n- 來源中的 tooled and mass production ready、available、targeted 等字樣缺少日期與證據文件；只能記錄為 flyer 上的產品狀態宣稱。\n- [[compute-tray-flyer]] 與 [[HSD Cable test image 2]]、[[HSD Cable test image 3]]、[[HSD Cable test image 6]]、[[HSD Cable test image 7]] 高度重疊；不可把它們當作多份獨立市場驗證。\n- 來源未提供 signal integrity、power efficiency 或 reliability 的測試條件、測試數據或比較對象。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Compute tray component solutions.md"
+              },
+              "score": 9.888899
+             },
+             {
+              "text": "Compute tray component solutions › 高速 cable / connector\n- [[Mini Cool Edge IO]] — 來源列出 128 Gb/s PAM4、PCIe Gen 4/5/6/7 over 1.0 m transmission distance、0.60 mm pitch vertical and right-angle configurations、cable and card applications with one identical connector、92Ω / 85Ω / 95Ω impedance options。\n- [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]] — 來源列出 64 GT/s PAM4 PCIe Gen 6、112 GT/s PAM4 85/92Ohm for Ethernet applications、EDSFF、SFF-TA-1002、OCP NIC 3.0、DC-SCM、JEDEC、4 power pins at 27A per power pin。\n- [[Direct Attached Copper Cables]] — 來源列出 200G / 400G / 800G / 1.6T，並描述為 112G and 224G high-speed I/O PCIe Gen 5/6 passive and active cables for data centers、networking、HPC、telecom、server and storage solutions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Compute tray component solutions.md"
+              },
+              "score": 9.580542
+             },
+             {
+              "text": "Virtual Signalling Tester › 來源定義\n[[mx844030pc-j1200]] 將 [[Virtual Signalling Tester]] 描述為 software protocol simulator / Virtual Signalling Test Solution，透過虛擬化 protocol stack，在 PC 上重現多個 protocol layers：\n\n- [[RRC-NAS]]\n- [[PDCP]]\n- [[RLC]]\n- [[MAC]]\n\n來源主張它可不使用一般硬體測試儀而在 PC 上快速建立 protocol test environment；但 RF-IF configuration 仍使用 [[Anritsu MD8190A]] Universal RF Unit 與 [[MX819020A]] RF Platform。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 9.471075
+             },
+             {
+              "text": "Virtual Signalling Tester › Pre-silicon testing\n- 對 chipset development 的 [[Shift-Left]] 有效。\n- 在實體 chipset 製造前，用 virtual terminal 執行 protocol test。\n- 用於早期發現問題、降低 rework、提高 development efficiency。\n- 來源圖中列出 SW Simulation、EDA Emulation、FPGA Prototype、Chipset Integration / Regression。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 4.391427
+             },
+             {
+              "text": "Virtual Signalling Tester › Post-silicon testing\n- 適用 [[IoT]] device 與 communication module 的 basic protocol test。\n- 支援快速 functional test、regression test、sample scenario parameterization、test procedure 與 report / log display。\n- 來源列出 [[5G RedCap]]、Automotive、Healthcare、Industrial IoT、Smart Cities 等應用語境。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 3.778682
+             },
+             {
+              "text": "CMX500 GPRF Generator\n[[CMX500 GPRF Generator]] 是 [[CMX500_Callbox]] 中的 [[R&S CMX500]] non-signaling use case：在 CMX500 上產生 ARB、CW、dual tone 或 replay `.wv` waveform，支援 R&D waveform replay / creation 與 standalone TX measurement 工作流。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 6.917317
+             },
+             {
+              "text": "CMX500 GPRF Generator › Signal types\n依 [[CMX500_Callbox]]，GPRF Generator signal types 包含：\n\n- ARB。\n- CW。\n- Dual Tone。\n- Replay `.wv` files。\n- Up to 4 GPRF Generator instances in parallel。\n- ARB Sequencer。\n- Upload directly in the configuration sidebar。\n\n來源 slide 標示 **No License required**，但該說法需與 technology-specific ARB / WinIQSim2 licensing 分開理解。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 1.880986
+             },
+             {
+              "text": "CMX500 GPRF Generator › 使用限制\n- [[CMX500_Callbox]] 是簡報來源，不是 formal feature list 或 specifications。\n- `No License required` 只可先記為 GPRF Generator slide claim；technology-specific ARB replay / WinIQSim2 waveform 明確需要 KWxxx licenses。\n- Planned for CSW 9.00 / coming with CSW 9.10 需以 release note 驗證。\n- 本頁未補推 KW option 的 order number；需回正式 CMX500 features、pricing 或 configurator。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 1.556994
+             },
+             {
+              "text": "CMX500 Desense Testing\n[[CMX500 Desense Testing]] 是 [[CMX500_Callbox]] 中描述的 WLAN + cellular one-box interference / desense use case：以 [[R&S CMX500]] 在真實連線下同時處理 WLAN、LTE 與 NR 測試，觀察互相干擾或 desense 影響。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Desense Testing.md"
+              },
+              "score": 7.784464
+             },
+             {
+              "text": "CMX500 Desense Testing › Wi-Fi 7 線索\n來源在 desense 相關 slide 中列出：\n\n- Modulations：4096QAM。\n- 320 MHz BW in 6GHz Band。\n\n此處只可視為簡報中的 Wi-Fi 7 / WLAN test capability 線索；實際 channel、band plan、MCS、EVM limit、DUT 條件與 test setup 需回正式文件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Desense Testing.md"
+              },
+              "score": 3.245
+             },
+             {
+              "text": "CMX500 Desense Testing › 與既有頁面的關係\n- [[WLAN offloading with Voice over WLAN]] 記錄 [[R&S CMX500]] 在 cellular 5G 與 WLAN interworking / offloading 的 PR use case。\n- 本頁聚焦 interference / desense 與 parallel measurements，不等同 offloading / voice continuity。\n- [[Wi-Fi 7 R&D and production testing]] 提供 Wi-Fi 7 R&D signaling / production non-signaling 的更大脈絡。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Desense Testing.md"
+              },
+              "score": 3.229772
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › Optical / SiPh / CPO\n- [[矽光子]]欄將 optical VNA 對應到 [[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]，以及 [[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]]。\n- 來源角色亮點稱 [[CPO]] 對有源 / 無源 [[SiPh]]、先進封裝與測試需求大幅提升，並稱 [[前鼎]]提供高速載板給矽光子模組與 CPO 元件、[[光聖]]提供 ELS 外部雷射源。\n- 這些說法都只追溯到 [[AISeverEcosystem]]，不等同於量產、採購、出貨或 R&S formal application note。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 6.195224
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › Jitter / phase noise / clock / LDO noise\n- [[R&S FSWP]] 在 [[伺服器主機板]]分類中被列為 LDO NSD test、clock jitter test。\n- [[R&S FSWP]] 在 [[網通交換機]]分類中被列為 jitter / phase noise test。\n- [[R&S FSWP]] 也出現在 [[電源供應器]]的 LDO NSD test、[[智原]]與[[譜瑞-KY]]的 IC / high-speed transmission solution 欄，但未提供測試條件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 5.880963
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › 來源中的 mapping\n| 分類 | 對象 / 企業欄 | 來源中的 R&S Solution | 來源日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| [[伺服器主機板]] / PCBA | [[鴻海]] | [[R&S ZNL]]: PDN Target Z；[[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test、clock jitter test；[[R&S ZNA]]: high speed trace test | 來源未標示正式日期；raw converted 2026-09-17 | 未提供正式 test setup、option、fixture、頻率或 sales kit |\n| [[伺服器電路板]] / [[PCB]] | [[博智]] | [[R&S ZNA]] / [[R&S ZNB]]: IL、TDR | 來源未標示正式日期；raw converted 2026-09-17 | 只對應表內 [[博智]]列，不能推論其他 PCB 廠同樣適用 |\n| [[連接器]] / 線纜 | [[嘉澤]] / [[嘉基]] | [[R&S ZNA]] / [[R&S ZNB]] + [[OSP]]: high speed cable | 來源未標示正式日期；raw converted 2026-09-17 | [[嘉澤]] / [[嘉基]] 同格寫法未決；未提供 cable type、connector type 或 calibration method |\n| [[網通交換機]] | [[智邦]] | [[R&S FSWP]]: jitter / phase noise test；VNA（[[R&S ZNA]] / [[R&S ZNB]]）；EMI pretest | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；不可推論完整 switching test portfolio |\n| [[矽光子]] | [[上詮]] | optical VNA：[[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]；[[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]] | 來源未標示正式日期；raw converted 2026-09-17 | ThinkLands、GOCA、Newkey 與 PSA 未展開；未提供 optical VNA setup 或 module type |\n| [[散熱器]] | [[建準]] | [[MXO]]: motor driver analysis | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 motor driver type、fan / pump 類型或量測條件 |\n| [[電源供應器]] | [[光寶科]] | [[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test；BMS test | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；未提供 HVDC / PSU / BBU 測試配置 |\n| [[GPU]] | [[輝達]] | [[R&S ZNA]]: TDR、[[OSP]] | 來源未標示正式日期；raw converted 2026-09-17 | 不代表 R&S 與 NVIDIA 合作或採購關係；僅是表內 solution mapping |\n| [[CPU]] | [[超微]] | [[R&S ZNA]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 TDR、SI、PI 或其他測項 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 5.719044
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping\n[[AISeverEcosystem R&S solution mapping]] 是用來保存 [[AISeverEcosystem]] 中 AI server ecosystem 分類與 [[R&S Solution]] 欄位對應關係的概念頁；它只表示該 Excel 表中的銷售 / 測試方案線索，不代表正式產品配置、客戶關係或已驗證商機。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 3.881958
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › 可追溯限制\n- 本頁只追溯到 [[AISeverEcosystem]] 的 Excel 轉檔內容。\n- 來源未標示正式日期，因此本頁不可用來判斷 2026-09-18 當下市場狀態或客戶優先順序。\n- [[R&S Solution]] 欄不是 formal datasheet、application note、configuration guide 或 ordering guide；不得據此報價或建立正式測試配置。\n- 表內 SharePoint sales kit 連結未擷取正文；目前只可作為待讀材料索引。\n- 公司列名與 solution 同列不代表該公司已購買、正在評估、已合作、已導入、已被拜訪或為 R&S 客戶。\n- 表內 `NaN` 不代表無 solution 或無商機，只代表轉檔來源該欄未提供可讀文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 3.088549
+             },
+             {
+              "text": "AISeverEcosystem › 原文未解的問題\n- `unresolved`: 來源正文未標示正式發布日期、資料期間、Excel 版本、作者、部門或更新紀錄；raw 只標示 converted: 2026-09-17。\n- `unresolved`: 原檔名為 `AISeverEcosystem.xlsx`，`AISever` 是否為 `AI Server` 拼字錯誤不得自行更正。\n- `unresolved`: 大量欄位為 `NaN`；不可推論成無資料、無 solution、不適用或空白代表否定。\n- `unresolved`: 表內公司列名是否為完整市場名單、R&S prospect list、客戶名單、投資觀察名單或內部 sales focus，來源未說明。\n- `unresolved`: `R&S Solution` 欄的 [[ZISO]]、[[MXO]]、[[OSP]]、PSA、[[ThinkLands]]、[[GOCA]]、[[Newkey]]、BMS test 未提供正式產品全名、版本、配置、option code 或 sales kit 正文。\n- `unresolved`: SharePoint sales kits 只保存連結，未擷取簡報正文；不可把連結內容當成已知主張。\n- `unresolved`: [[嘉澤]] / [[嘉基]] 被寫在同一企業欄，代號 3533.0；來源未說明是二者合併、讀圖錯位或表格寫法。\n- `unresolved`: [[散熱器]] 角色亮點中的 `GPU TDP由700 W升至1200 W` 未標示 GPU 型號、平台、年份、來源或是否為單顆 GPU。\n- `unresolved`: [[電源供應器]] 角色亮點中的 `Blackwell平台功耗翻倍` 未標示基準平台、功耗口徑或來源。\n- `unresolved`: [[伺服器機殼]] 角色亮點中的 `AI機櫃重2–3噸` 未標示機櫃配置、平台、液冷 / 風冷條件或來源。\n- `unresolved`: [[ICs]] sheet 的股票代號欄混用美股 ticker、台股代號與韓股數字；不可跨市場比較。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AISeverEcosystem.md"
+              },
+              "score": 7.64288
+             },
+             {
+              "text": "AISeverEcosystem › 重點摘要\n- [[伺服器機殼]] / 機櫃分類列出關鍵元件 `高承載機櫃、散熱背板、EMI結構`，在 [[晟銘電]] 角色亮點稱 `AI機櫃重2–3噸，需重新設計載重與屏蔽結構。`\n- [[ICs]] sheet 將伺服器晶片設計 / 生產分成 [[GPU]]、[[CPU]]、[[DRAM]]、[[IC]] / 矽智財 / 製程、[[晶圓代工]]、[[封裝測試]]、[[測試介面]]、[[網通]]、[[BMC]] 與高速傳輸 IC，並為部分分類列出 [[R&S ZNA]]、[[R&S ZNA67EXT]]、[[R&S FSWP]] 等 solution 線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AISeverEcosystem.md"
+              },
+              "score": 6.694949
+             },
+             {
+              "text": "AISeverEcosystem\n> 來源為 `AISeverEcosystem.xlsx` 經 markitdown 轉出的 lossy derivative；原始 Excel 才是 source of truth。來源正文未標示正式發布日期或資料期間，raw frontmatter 僅標示 converted: 2026-09-17。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AISeverEcosystem.md"
+              },
+              "score": 3.614438
+             },
+             {
+              "text": "AISeverEcosystem › ServerRack 分類\n- [[GPU模組]]：關鍵元件為 [[OAM]]、[[UBB底板]] board；列名 [[鴻海]]、[[緯創]]。\n- [[ABF載板]]：列名 [[欣興]]、[[景碩]]、[[南電]]。\n- [[伺服器主機板]] / PCBA：列名 [[鴻海]]、[[廣達]]、[[緯創]]、[[英業達]]；R&S solution 欄對 [[鴻海]]列出 [[R&S ZNL]]、[[MXO]]、[[ZISO]]、[[R&S FSWP]]、[[R&S ZNA]]。\n- [[伺服器電路板]] / [[PCB]]：關鍵元件為 `20+層UBB、高階ABF、低Dk CCL`；列名 [[博智]]、[[高技]]、[[精成科]]、[[欣興]]、[[臻鼎]]、[[健鼎]]、[[金像電]]；R&S solution 欄在 [[博智]]列出 [[R&S ZNA]] / [[R&S ZNB]]：IL、TDR。\n- [[銅箔基板]] / [[CCL]]：關鍵元件同為 `20+層UBB、高階ABF、低Dk CCL`；列名 [[台光電]]、[[聯茂]]、[[台燿]]。\n- [[連接器]] / 線纜：關鍵元件為 `CPU/GPU Socket、UQD水冷快接、800 G AOC`；列名 [[嘉澤]] / [[嘉基]]、[[凡甲]]、[[佳必琪]]、[[優群]]、[[正崴]]、[[宏致]]、[[貿聯]]、[[信邦]]、[[Amphenol]]、[[Molex]]。\n- [[網通交換機]]：列名 [[智邦]]、[[神準]]、[[明泰]]、[[鴻海]]、[[達創]]、[[鈺登]]。\n- [[矽光子]]：列名 [[上詮]]、[[華星光]]、[[波若威]]、[[眾達-KY]]、[[聯鈞]]、[[光聖]]、[[訊芯-KY]]、[[光環]]、[[前鼎]]。\n- [[散熱器]]：關鍵元件為滑軌、液冷板、[[CDU]]、風扇；列名 [[建準]]、[[廣運]]、[[奇鋐]]、[[川湖]]、[[雙鴻]]、[[超眾]]、[[健策]]。\n- [[電源供應器]]：關鍵元件為 [[HVDC]]、5–10 kW [[PSU]]、液冷電源櫃、[[BBU]]；列名 [[光寶科]]、[[台達電]]、[[系統電]]、[[康舒]]、[[全漢]]、[[群光]]。\n- [[伺服器機殼]] / 機櫃：關鍵元件為高承載機櫃、散熱背板、EMI結構；列名 [[晟銘電]]、[[偉訓]]、[[營邦]]、[[富驊]]、[[勤誠]]。\n- [[伺服器整合／ODM]]：列名 [[鴻海]]、[[廣達]]、[[緯創]]、[[緯穎]]、[[英業達]]、[[華碩]]、[[神達]]、[[技嘉]]。\n- [[EMC Lab]]：列名 [[耕興]]、[[SGS]]、[[創得]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AISeverEcosystem.md"
+              },
+              "score": 2.493962
+             },
+             {
+              "text": "Data center full-spectrum connectivity › High-speed electrical connectivity\n- [[Amphenol OverPass Cable Systems]] — 來源稱其 enable high-speed signal transmission from ASIC packages to end-points across the system。\n- [[ExtremePort OSFP Connectors]] — 來源稱 connectors and cages have 60 contacts per port、0.6 mm pitch，並 optimized for signal integrity、thermal management and multi-lane pluggable architecture。\n- [[Amphenol XtremePass]] — 來源稱 XtremePass 448G connector solution supports scalable form factors from 32DP to 128DP，並跨 Ethernet、NVLink、PCIe、InfiniBand systems。\n- [[OSFP Cable Assemblies]] — 來源稱 OSFP cable assemblies compatible with 25G/lane NRZ up to 224G/lane PAM4，deliver aggregate bandwidths of 200G、400G、800G and 1.6T per cable assembly，available in Passive and Active variants。\n- [[Sentry HD High-Speed Backplane Connector]] — 來源稱其是 next-generation high-speed backplane connector platform。\n- [[Celerity 224 Gb-s BGA Mezzanine Connectors]] — 來源稱其 designed to support data rates up to 224 Gb/s PAM4。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 3.611264
+             },
+             {
+              "text": "Data center full-spectrum connectivity › Power 與 cooling connectivity\n- [[Amphenol BarKlip I-O products]] / [[BarKlip Busbar Connectors]] — 來源稱其 distribute high-current power between busbars、cables and circuit boards，適用 power-dense data centers、OCP rack and power solutions。\n- [[60 A Universal AC Input Connector and Cable Assemblies]] — 來源稱其 meet 2OU power distribution architecture standards，將 power 從 busway routing 到 power shelf。\n- [[M-CRPS +54V Connectors and Cable Assemblies]] — 來源稱其 meet OCP M-CRPS power supply input specifications。\n- [[PwrBlade ULTRA HD+ Cable Assembly]] — 來源稱其 Cable-to-Board serves as high-power I/O cable configuration in a low-profile design。\n- [[OSFP-RHS 224G Cold Plate and Cage Assembly]] — 來源稱其 optimizes port thermal efficiency and reliability，meeting MSA requirements，並提供 one-step press assembly。\n- [[Amphenol Liquid Cooling Leakage Detection Sensor Cable Assembly]] — 來源稱其 detects coolant leaks and ensures system reliability。\n- [[Liquid Cooling Quick Disconnect Connectors]] — 來源稱其用於 high-efficiency thermal management。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 2.781684
+             },
+             {
+              "text": "Data center full-spectrum connectivity › Optical 與 fiber connectivity\n- [[Amphenol XPO-LPO]] — 來源稱其以 224 Gb/s per lane across 64 channels，面向 AI scale-up deployments。\n- [[1.6T OSFP Transceivers]] — 來源稱 Amphenol 200G/lane optical modules support DR4、FR4、2×DR4、2×FR4、AOC、breakout AOC configurations with LC or MPO ports。\n- [[Amphenol Co-packaged Optics]] — 來源稱 Amphenol offers an architecture from high-density electrical interposer to linear optical conversion module to fiber plant。\n- [[LEAP On-Board Transceiver]] — 來源稱其為 12-channel duplex optical transceiver，up to 25Gbps per channel，300Gbps cumulative on multi-mode fiber。\n- [[300G CXP2 Active Optical Cable]] — 來源稱 CXP2 to CXP2 AOC provides cost-effective plug and play cabling solution，delivers high hardware faceplate port density among existing SFF industry standards。\n- [[CommScope Rapid Fiber Connect Platform]] — 來源稱其 simplifies and accelerates AI scaling by pre-integrating optics off-site and reducing on-site fiber connections。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 2.778396
+             },
+             {
+              "text": "Data center full-spectrum connectivity › 底部圖上產品清單\n來源底部再以清單列出多個 electrical interconnect / memory / card edge / cable connector 類別，包括 [[SOCAMM and LPCAMM CAMM2 Connectors]]、[[CompacLink PCIe Gen 6 Compression Board-to-Board Connectors]]、[[Mini Cool Edge IO]] / [[Multi-Trak]]、[[Titen]]、[[Cool Express Link]]、[[DDR5 and Next Gen Memory Connector]]、[[Double & Single Density Mini Cool Edge]]、[[U.2 SFF8639]]、[[PCIe CEM 7 Connectors]] 與 [[Direct Attached PCIe CEM Cable Connectors]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 1.24358
+             },
+             {
+              "text": "Data center full-spectrum connectivity › 相關來源\n- [[full-spectrum-data-center-connectivity-brochure]] — 來源未標示正式日期、raw converted 2026-09-17 的 Amphenol full-spectrum data center connectivity brochure。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 0.23024
+             },
+             {
+              "text": "Data center server 高速互連產品組合 › 相關來源\n- [[data-center-server-solutions-guide]] — 來源未標示正式日期、raw converted 2026-09-17 的 Amphenol data center server solutions guide。\n- [[compute-tray-flyer]] — 來源未標示正式日期、raw converted 2026-09-17 的 Amphenol Next-Gen Compute Tray Component Solutions flyer。\n- [[HSD Cable test image 1]]\n- [[HSD Cable test image 2]]\n- [[HSD Cable test image 3]]\n- [[HSD Cable test image 4]]\n- [[HSD Cable test image 6]]\n- [[HSD Cable test image 7]]\n- [[HSD Cable test image]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center server 高速互連產品組合.md"
+              },
+              "score": 5.143681
+             },
+             {
+              "text": "Data center server 高速互連產品組合 › Power connectors / power cables\n來源列出 power connectors 與 power cables，包含：\n\n- [[AirMax Power Connectors]]\n- [[Minitek Pwr 4.2 High Current Connector]]\n- [[PwrBlade MiniMezz Connector Series]]\n- [[Minitek Pwr 3.0 Connector System]]\n- [[PwrBlade ULTRA Connector System]]\n- [[OCP ORv3 AC Input Cable Assemblies]]\n- [[Minitek Pwr 5.7 Connector System]]\n- [[PwrBlade+ Cable Connectors]]\n- [[Minitek Pwr CEM-5 PCIe Connector]]\n\n來源列出若干 current rating、stack height、wire gauge 與 GPU power connector 語彙，例如 13A per contact、5A per circuit、>200A、24% height reduction、16AWG–12AWG、28A、12VHPWR、12V-2x6、600W GPU cards；但未提供完整測試條件、熱條件或 UL / safety 認證文件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center server 高速互連產品組合.md"
+              },
+              "score": 4.748284
+             },
+             {
+              "text": "Data center server 高速互連產品組合\n[[Data center server 高速互連產品組合]] 是 [[data-center-server-solutions-guide]] 中用來組織 [[Amphenol Communications Solutions]] / [[Amphenol]] data center server interconnect portfolio 的分類視角，涵蓋 backplane、I/O、board-to-board、SSD、power、memory、card edge、magnetic jack、fan connector 與 ethernet cable。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center server 高速互連產品組合.md"
+              },
+              "score": 3.876087
+             },
+             {
+              "text": "Data center server 高速互連產品組合 › Memory module sockets\n來源列出 memory module sockets，包含：\n\n- [[DDR5 Memory Module Sockets]]\n- [[DDR4 Ultra Low Profile]]\n- [[DDR4 Memory Module Sockets]]\n\n來源文字提到 DDR5 SMT memory module connector、high system-level shock and vibration testing、287-terminal / 288-pin、DDR4 vertical DIMM sockets、0.85mm pitch 與 2.4mm seat height；但未標示 JEDEC 版本或完整 socket 型號。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center server 高速互連產品組合.md"
+              },
+              "score": 3.354819
+             },
+             {
+              "text": "Data center server 高速互連產品組合 › High-speed backplane connectors\n來源列出 high-speed [[Backplane Connector]] 分類，產品 / 名稱包含：\n\n- [[HD Express EXAMAX2]]\n- [[Paladin HD]]\n- [[EXAMAX2]]\n- [[XCede HD2]]\n- [[XCede HD]]\n\n來源中的相關語彙包含 112Gb/s、PCIe Gen 6、224Gb/s PAM4、56Gb/s PAM4、low insertion / extraction forces、reduced crosstalk、PCIe Gen 7、90Ω、85Ω / 100Ω impedance versions 等；但 OCR 位置不穩，不能未經原 PDF 驗證就寫成精確規格表。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center server 高速互連產品組合.md"
+              },
+              "score": 2.907824
+             },
+             {
+              "text": "R&S PCB test solutions › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 4.895206
+             },
+             {
+              "text": "R&S PCB test solutions › 圖上工具 / 合作方文字\n| 圖上文字 | 可能角色 | 來源 | 限制 |\n|---|---|---|---|\n| [[SPEAG]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未說明是合作夥伴、工具、方法或範例 |\n| [[SWISSTO12]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[QWED]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[KEYCOM]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[RSTW]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開完整單位名稱 |\n| TDR | 測 impedance | [[0 Digital Test - What are SIPI and Serdes]] | 未提供 TDR option 或探頭型號 |\n| Delta-L | 損耗量測相關 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供方法定義、標準或軟體名稱 |\n| ISD/ADK | 圖上方法 / 工具文字 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開縮寫，未說明與 Delta-L 的關係 |\n| w/ cable / connector testing | cable / connector testing | [[0 Digital Test - What are SIPI and Serdes]] | 未提供連接器類型、線纜規格或測試項目 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.815975
+             },
+             {
+              "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.761815
+             },
+             {
+              "text": "R&S PCB test solutions › 可追溯限制\n- 本來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。\n- 本頁不把 Slide 21 的圖上列名解讀為正式解決方案型錄或完整採購配置。\n- [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]] 的角色未明，僅保留圖上列名。\n- [[ISD-ADK]] 與 PL 未展開縮寫，需後續來源補證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.884609
+             },
+             {
+              "text": "R&S PCB test solutions › 未決事項\n- Slide 21 未標示 R&S PCB test solutions 的正式文件版次與產品 portfolio 對應。\n- Slide 21 未標示 [[TDR]]、[[Delta-L]]、ISD/ADK、DK/DF extraction 的標準版本、演算法、測試條件或工具型號。\n- Slide 21 未展開 PL、ISD、ADK、RSTW、SWISSTO12、QWED、KEYCOM。\n- 需回看原始 PPTX 圖像確認各圖示、商標、箭頭與工具對應關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.702471
+             },
+             {
+              "text": "AI 伺服器 PCB 供應鏈升級 › 未決事項\n- [[AI Server PCB test image 4]] 未標示內容日期、年份、季度或資料期間。\n- [[AI Server PCB test image 4]] 未標示 TPCA Show 的年份、場次或展會期間。\n- [[AI Server PCB test image 4]] 未說明量產的定義、量產時間、出貨量、平台規格或供應鏈名單。\n- [[AI Server PCB test image 4]] 未說明 HVLP銅箔第4、5代的技術定義或供應商。\n- [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 皆未標示發布日期、報告名稱、頁碼、網址或文件版次。\n- [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 未定義 GB200 / GB300 / VR200 的試產、量產、樣機與放量。\n- [[HSD PCB image 11]] 未說明載板供應商、CCL 材料供應商、PCB 供應商百分比的分母、期間、地區、平台範圍或樣本來源。\n- [[HSD PCB image 11]] 未說明南亞完整公司名稱、交期數字或供應狀態。\n- [[HSD PCB image 11]] 未說明 `盧森堡` 在銅箔欄中的公司 / 地區 / 實體指涉。\n- [[HSD PCB image 11]] 與 [[HSD PCB image 1]] 在南亞交期、GB200 / GB300 ComputeTray PCB 供應商欄與「單擴 / 單擋版本採用M7」有讀圖差異。\n- [[HSD PCB image 11]] 中 VR200 CPX 的 PCB 供應商欄為「無法辨識」。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+              },
+              "score": 5.243424
+             },
+             {
+              "text": "AI 伺服器 PCB 供應鏈升級 › 與既有知識的關係\n- [[CCL 產品規格分級]] 記錄既有來源中的 M6 / M7 / M8 分級、[[Df]] 範圍與公司產品狀態；本頁新增的是 [[AI Server PCB test image 4]] 對 AI server PCB 供應鏈升級方向中的 M8 說法，以及 [[HSD PCB image 1]] / [[HSD PCB image 11]] 對 GB200 / GB300 / VR200 CCL 材料欄的 M8、M7、LDK、LDK2、HVLP3、HVLP4 說法。\n- [[AI 伺服器 PCB 原物料台日韓供應鏈]] 記錄 [[TrendForce]]（Nov., 2025）對原材料、CCL、PCB、EMS 與下游 AI伺服器的供應鏈分類；本頁不把 [[HSD PCB image 11]] 的供應商列名與 TrendForce 圖表合併為同一口徑。\n- [[GB200]]、[[GB300]] 與 [[VR200]] 分別記錄 [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 中三個平台欄位的具體說法。\n- [[HSD PCB image 1 與 11 規格比較表差異]] 專門保存兩份高度重疊來源的讀圖差異。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+              },
+              "score": 2.208392
+             },
+             {
+              "text": "AI 伺服器 PCB 供應鏈升級\n[[AI 伺服器 PCB 供應鏈升級]] 是此 vault 用來記錄市場來源中把 [[AI伺服器]]、[[ASIC平台]]、[[PCB]] 材料、製程與設備升級放在同一張表格中的說法；所有量產、推出與製程數字都必須保留來源日期或明示來源未標示日期。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+              },
+              "score": 1.68433
+             },
+             {
+              "text": "AI 伺服器 PCB 供應鏈升級 › 相關來源\n- [[AI Server PCB test image 4]] — 未標示日期的「PCB供應鏈升級重點」表格，整理 AI伺服器趨勢、ASIC平台進展、材料升級方向、製程挑戰與 TPCA Show 焦點。\n- [[HSD PCB image 1]] — 來源發布日期未標示、取得於 2026-09-04 的 GB200 / GB300 / VR200 規格比較表。\n- [[HSD PCB image 11]] — 來源發布日期未標示、raw 轉換於 2026-09-04 的 GB200 / GB300 / VR200 規格比較表。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+              },
+              "score": 0.818436
+             },
+             {
+              "text": "AI 伺服器 PCB 供應鏈升級 › 來源中的說法\n⚠️ [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）說 [[GB200]] ComputeTray 的 `PCB供應商/欣興` 欄為「無」，但既有頁面 [[AI 伺服器 PCB 供應鏈升級]] 說 [[HSD PCB image 1]] 的 GB200 / GB300 ComputeTray 供應商欄曾整理為「勝宏? / 欣興」。判斷：此處至少對 [[GB200]] 構成讀圖差異；需回看原圖確認，不可把「無」改寫成「無供應商」或「欣興無供應」。\n\n⚠️ [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）說 [[VR200]] CPX 欄為「單擴版本採用M7」，但既有頁面 [[AI 伺服器 PCB 供應鏈升級]] 說 [[HSD PCB image 1]] 為「單擋版本採用M7」。判斷：疑似 OCR / 讀圖差異；在人工裁決前保留兩種字樣。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+              },
+              "score": 0.491577
+             },
+             {
+              "text": "AI 資料中心基礎設施 › 來源中的說法\n- [[0. AI Data Center image 3]]（來源未標示日期）沒有座標軸、單位、趨勢線、數據比較或表格，因此此頁不將其解讀為市場規模、出貨量、占比、成長率或產品性能數值證據。\n- [[0. AI Data Center image 3]]（來源未標示日期）沒有可辨識的公司名稱、具體產品名稱或型號，因此此頁不把圖中的資料中心、機櫃、電塔或電子設備機箱視為特定供應商、產品線或型號。\n- [[0. AI Data Center image]]（來源未標示日期）以資料中心 / 機房解決方案示意圖呈現一套整合基礎設施組成，分類包含 [[Power Management]]、[[Rack & Accessories]]、[[Management System]]、[[Precision Cooling]] 與 [[Service]]。\n- [[0. AI Data Center image]]（來源未標示日期）在 [[Power Management]] 下列出 5 個項目：[[UPS]]、[[Power Distribution Unit]]、[[Rack-Mount Remote Power Panel]]、[[Rack Power Distribution Unit]]、[[Rack-Mount Static Transfer Switch]]。\n- [[0. AI Data Center image]]（來源未標示日期）在 [[Rack & Accessories]] 下列出 2 個項目：[[Modular Rack]] 與 [[Rack Accessories]]。\n- [[0. AI Data Center image]]（來源未標示日期）在 [[Management System]] 下列出 3 個項目：[[InfraSuite Manager]]、[[EnviroStation]]、[[EnviroProbe]]。\n- [[0. AI Data Center image]]（來源未標示日期）在 [[Precision Cooling]] 下列出 1 個項目：[[RowCool]]。\n- [[0. AI Data Center image]]（來源未標示日期）在 [[Service]] 下列出 [[System Design and Planning]] 與 [[Rapid and Comprehensive Services]]。\n- [[0. AI Data Center image]]（來源未標示日期）沒有座標軸、單位、統計數據、時間序列、數值比較或趨勢線，因此此頁不將其解讀為市場規模、出貨量、占比、成長率或產品性能數值證據。\n- [[0. AI Data Center image]]（來源未標示日期）未明確出現公司名；若有品牌標誌，來源文字標示為無法辨識，因此此頁不將 InfraSuite Manager、EnviroStation、EnviroProbe、RowCool 等名稱歸屬於特定供應商或產品線。\n- [[4 AI Data Center Eco-Chain image 1]]（12/10/2025，日期格式未標示）以 **Ecosytem** 為標題，將 AI / datacenter / server / semiconductor / peripheral 相關企業與品牌整理在 ecosystem map 中。\n- [[4 AI Data Center Eco-Chain image 1]]（12/10/2025，日期格式未標示）列出上方分類：[[Cloud Service]]、[[Datacenter]]、[[AI Server]]、[[Power]]、[[Cooling]]、[[Security]]。\n- [[4 AI Data Center Eco-Chain image 1]]（12/10/2025，日期格式未標示）在 [[Compute]] 下列出 [[IP Core]]、[[CPU]]、[[GPU]]、[[Special AI Chips]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+              },
+              "score": 2.947082
+             },
+             {
+              "text": "AI 資料中心基礎設施 › 可追溯範圍\n本頁根據五張圖像來源建立：[[0. AI Data Center image 1]]、[[0. AI Data Center image 2]]、[[0. AI Data Center image 3]]、[[0. AI Data Center image]] 與 [[4 AI Data Center Eco-Chain image 1]]。\n\n- [[0. AI Data Center image 1]] 可追溯的主張限於：AI / data center 場景與 **Enabling AI**、[[Connectivity]]、[[Power]]、[[Resilience]] 的視覺關聯。\n- [[0. AI Data Center image 2]] 可追溯的主張限於：資料中心 / 機房 solution diagram 中列出的子系統分類與 1–11 編號設備 / 系統名稱。\n- [[0. AI Data Center image 3]] 可追溯的主張限於：**Enabling AI** 與資料中心 / 機房 / 基礎設施場景的視覺關聯，以及 [[Connectivity]]、[[Power]]、[[Resilience]] 三個明示重點方塊。\n- [[0. AI Data Center image]] 可追溯的主張限於：資料中心 / 機房 solution diagram 中列出的子系統分類、1–11 編號設備 / 系統名稱，以及「2 or 3」共同標示造成的位置未決問題。\n- [[4 AI Data Center Eco-Chain image 1]] 可追溯的主張限於：12/10/2025（日期格式未標示）頁面上的 ecosystem map 分類、公司 / 品牌 / logo 列名、頁尾 Rohde & Schwarz / COMPANY RESTRICT / RS / 頁碼 25 等可見資訊。\n- 由於前四份來源都未標示日期，所有與時序、市場現況、供應商名單、產品導入、客戶採用、出貨量或市場占比相關的判斷都需要其他來源補強。\n- 即使 [[4 AI Data Center Eco-Chain image 1]] 有頁尾日期 12/10/2025，它仍未提供市場數值、排名、關係線或採用狀態，因此不能單獨支持市場份額、導入狀態、供應鏈上下游關係或 R&S 往來關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+              },
+              "score": 2.791679
+             },
+             {
+              "text": "AI 資料中心基礎設施\nAI 資料中心基礎設施是此 vault 用來記錄支撐 AI 部署或運作的資料中心能力組合；在 [[0. AI Data Center image 1]] 與 [[0. AI Data Center image 3]] 中，來源未標示日期的圖像明示其核心面向包含 **Connectivity**、**Power**、**Resilience**，而 [[0. AI Data Center image 2]] 與 [[0. AI Data Center image]] 則以未標示日期的 3D 機房示意圖列出 Power Management、Rack & Accessories、Management System、Precision Cooling 與 Service 等資料中心 solution components。[[4 AI Data Center Eco-Chain image 1]] 則在頁尾標示 12/10/2025（日期格式未標示）的 ecosystem map 中，補充 cloud service、datacenter、AI server、compute 與 peripheral 的市場參與者 / 品牌分類視角。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+              },
+              "score": 1.949982
+             },
+             {
+              "text": "AI 資料中心基礎設施 › 相關來源\n- [[0. AI Data Center image 1]] — 未標示日期的 AI data center 概念示意圖，明示 **Enabling AI**、[[Connectivity]]、[[Power]]、[[Resilience]]。\n- [[0. AI Data Center image 2]] — 未標示日期的 data center / 機房整合基礎設施 3D 示意圖，列出 [[Power Management]]、[[Rack & Accessories]]、[[Management System]]、[[Precision Cooling]]、[[Service]] 與 1–11 的設備 / 系統對應。\n- [[0. AI Data Center image 3]] — 未標示日期的 AI data center 概念示意圖，明示 **Enabling AI**、[[Connectivity]]、[[Power]]、[[Resilience]]，並描述電塔、資料中心、機櫃、冷卻 / 管線、電子設備機箱、通訊線路與鎖頭圖示等視覺元素。\n- [[0. AI Data Center image]] — 未標示日期的 data center / 機房解決方案示意圖，列出 [[Power Management]]、[[Rack & Accessories]]、[[Management System]]、[[Precision Cooling]]、[[Service]] 與 1–11 的設備 / 系統對應。\n- [[4 AI Data Center Eco-Chain image 1]] — 頁尾標示 12/10/2025（日期格式未標示）的 AI data center ecosystem map，列出 cloud service、datacenter、AI server、compute 與 peripheral 相關分類與企業 / 品牌名稱。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+              },
+              "score": 1.907225
+             },
+             {
+              "text": "AI 資料中心基礎設施 › 未決事項\n- [[4 AI Data Center Eco-Chain image 1]] 中 Azure、Google Cloud、Vertiv、Microsoft、Qualcomm、Source Photonics 等部分項目以 logo 或單字母呈現，完整文字無法辨識或未清楚顯示。\n- [[4 AI Data Center Eco-Chain image 1]] 中星號代表意義未說明。\n- [[0. AI Data Center image 1]]、[[0. AI Data Center image 2]]、[[0. AI Data Center image 3]] 與 [[0. AI Data Center image]] 是否來自同一份簡報、同一供應商或同一敘事脈絡，來源未標示。\n- [[4 AI Data Center Eco-Chain image 1]] 是否與前四張 AI Data Center image 來源來自同一份簡報、同一供應商或同一敘事脈絡，來源未標示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+              },
+              "score": 1.849105
+             },
+             {
+              "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 12.08367
+             },
+             {
+              "text": "R&S CMX500 › 規格與數字的使用限制\n- [[CMX500_specs_en_5216-4127-22_v1100]] 是正式 Specifications Version 11.00（August 2025）；引用數字時仍需保留原文條件，例如溫度、warm-up、level alignment、overrange、EVM waveform、SCS、modulation、channel bandwidth、port、RMS / PEP、typ. / meas. / nom.。\n- [[CMX500_Features_CSW9-20-0_en_32]] 是 Features and Functions overview；其中沒有 tolerance limits 的 data 不具 binding。\n- 不能從 [[R&S CMX-B500x]]、[[R&S CMX-B600x]]、`.xx` 後綴或其他命名規則推導完整料號；完整 order number 只能抄自來源或正式 configure / ordering data。\n- [[R&S CMX-RF42E]] 的更多資料在另一份 PD 3609.7719.22 specifications；本頁不得補推該文件版次、日期或額外規格。\n- 報價與組態相容性需交由正式 configure 工具確認；wiki 只忠實記錄來源文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 43,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 10.879377
+             },
+             {
+              "text": "\\[1\\] [https://kitalent.com](https://kitalent.com/zh-tw/ai-technology-and-digital-infrastructure-recruitment/digital-infrastructure-and-data-centers-recruitment/data-center-construction-recruitment/)",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-db9753a8cd8a072d",
+                "original_ref": "raw/Market/OneNote/Construction (2026-8-20)/QPS for DC.md",
+                "sha256": "db9753a8cd8a072dc6651618d8fe3f10705ce95bef29fe9a9b21b594d6aa8416",
+                "raw_ref": "raw/Market/OneNote/Construction (2026-8-20)/QPS for DC.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Construction (2026-8-20)/QPS for DC.md",
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 20.891186
+             },
+             {
+              "text": "[I/O Design Challenges Grow In AI Data Centers And HPC Clusters](https://semiengineering.com/i-o-design-challenges-grow-in-ai-data-centers-and-hpc-clusters/)",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-68e5c65bc97be956",
+                "original_ref": "raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md",
+                "sha256": "68e5c65bc97be956bd677453a27445cf9c9d5fa65c731dcd6ce88aa865ae093a",
+                "raw_ref": "raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/AI server PCB (2026-8-12)/AI Server PCB test.md",
+               "section": 68,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.863188
+             },
+             {
+              "text": "s Zuckerberg pledges hundreds of billions for AI data centers in superintelligence",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-91445f60352ca51e",
+                "original_ref": "raw/Market/infineon-powering-the-future-of-ai-whitepaper-cn 1.md",
+                "sha256": "91445f60352ca51eee44a2bda279075b55e5271846fa61f8d59bb72c7101c316",
+                "raw_ref": "raw/Market/infineon-powering-the-future-of-ai-whitepaper-cn 1.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/infineon-powering-the-future-of-ai-whitepaper-cn 1.md",
+               "section": 714,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 18.525868
+             },
+             {
+              "text": "s Zuckerberg pledges hundreds of billions for AI data centers in superintelligence",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-1d9e7b39a2b73879",
+                "original_ref": "raw/Market/infineon-powering-the-future-of-ai-whitepaper-cn.md",
+                "sha256": "1d9e7b39a2b73879d1a10b035496c9094d4aa606586d48efa44ec78141d4bd00",
+                "raw_ref": "raw/Market/infineon-powering-the-future-of-ai-whitepaper-cn.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/infineon-powering-the-future-of-ai-whitepaper-cn.md",
+               "section": 714,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 18.525868
+             }
+            ],
+            "text": "### Short answer\nAI data center technology shifts the tester requirement toward broader connectivity validation—network emulation, RF/WLAN signaling, throughput/PER/BLER, IP/application analysis, latency/jitter impairment control, generative-AI user-experience KPIs, multi-radio desense, and non-signaling waveform/TX validation—while core AI server PCB, cable, optical, power-rail, and cooling-related measurements are mapped in the passages to VNA/phase-noise/oscilloscope/power tools rather than to a signaling tester [22][23][32][43][55][58][63].\n### Technology change → required measurement capability\n| AI data center / AI infrastructure change | Measurement capability impact for Signaling / Non-signaling Tester |\n|---|---|\n| AI data center infrastructure is framed around Connectivity, Power, and Resilience, and full-spectrum data center connectivity includes high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection [8][92]. | The signaling tester portion is most relevant where “connectivity” becomes wireless/network/application validation, while the passages map PCB, cable, optical, power-rail, and related hardware measurements to tools such as R&S ZNA/ZNB, R&S FSWP, MXO, and ZISO rather than to CMX500 [22][23][43][63]. |\n| AI server boards and interconnects are moving toward 20+ layer UBB, high-end ABF, low-Dk CCL, 800G AOC, PCIe 6/7, InfiniBand 800Gbe, SiPh/CPO, higher GPU TDP, liquid cooling, HVDC, 5–10 kW PSU, liquid-cooled power cabinets, and BBU [5]. | These changes increase the need for IL, TDR, high-speed cable, optical VNA, jitter/phase-noise, LDO NSD, power-rail, multiphase DC, PI, and BMS-related measurements, but the cited mapping assigns those needs to ZNA/ZNB, FSWP, MXO, and ZISO rather than to a signaling/non-signaling tester [5][61][62][63]. |\n| Wi‑Fi is moving toward Wi‑Fi 8 / IEEE 802.11bn, where the cited source says the focus shifts from sheer speed to ultra-high reliability and introduces testing hurdles such as distributed resource units and unequal modulation [36]. | A signaling tester therefore needs next-generation WLAN RF signaling capability and PHY-feature validation such as dRU measurements and UEQM analysis; the cited source says Wi‑Fi 8 RF signaling tests were implemented on the R&S CMX500 one-box signaling tester and showcased with a Broadcom prototype WLAN device [36][37]. |\n| Generative AI applications introduce user-experience metrics rather than only RF metrics, and the cited testbed uses CMX500 to configure network parameters, channel fading models, latency, jitter, and RF impairments while measuring Time to First Token and Tokens Per Second [41][43]. | A signaling tester used for AI application scenarios needs controlled network-condition emulation plus application-layer KPI measurement, including TTFT and TPS, not only RF parametric testing [41][42][43]. |\n| Multi-technology devices can experience mutual interference when using more than one communication technology, and the cited UAV signaling note says CMX500 can support multi-technology de-sense validation across technologies such as LTE, 5G, and Wi‑Fi [28]. | The tester needs multi-technology, multi-channel signaling and desense capability to observe WLAN/LTE/NR interference effects under real connections [28][58]. |\n| CMX500 features include NR FR1/FR2 signaling and TX measurements, LTE signaling and measurements, WLAN signaling and TX measurements, fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, application tests, IP traffic analysis, IMS/audio/POLQA, and remote-control interfaces [22]. | The required signaling capability expands from “connect the DUT” to RF + protocol + traffic + application validation across cellular and WLAN technologies [22][23][32]. |\n| The CMX500 non-signaling GPRF Generator use case supports ARB, CW, dual tone, replay `.wv` files, up to four GPRF Generator instances in parallel, waveform replay/creation, and standalone TX measurement workflows [55][56]. | The non-signaling side needs flexible waveform generation/replay and standalone TX measurement for R&D validation, while license and release-status caveats must be checked because the GPRF page is based on a callbox presentation rather than formal specifications [55][56][57]. |\n### Bottom line\n【推論】As AI data centers push higher-speed interconnect, optical connectivity, denser power, and liquid cooling, the tester portfolio must cover both infrastructure hardware measurements and wireless/application connectivity measurements, but the passages support CMX500-type signaling/non-signaling testers mainly for cellular/WLAN signaling, traffic/application testing, desense, Wi‑Fi 8 signaling, and GPRF waveform/TX workflows, not for the PCB/optical/power measurements mapped to ZNA/ZNB, FSWP, MXO, and ZISO [5][22][23][36][43][55][58][63].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "AISeverEcosystem › 重點摘要\n- [[AISeverEcosystem]] 是一份 AI server ecosystem / server rack / ICs Excel 轉檔來源，主要把 AI server 供應鏈分成 [[GPU模組]]、[[ABF載板]]、[[伺服器主機板]]、[[PCB]]、[[CCL]]、[[連接器]] / 線纜、[[網通交換機]]、[[矽光子]]、[[散熱器]]、[[電源供應器]]、[[伺服器機殼]]、[[伺服器 ODM]]、[[EMC Lab]] 與 IC 相關分類。\n- 來源同時列出部分公司、台股代號、角色亮點、[[R&S Solution]] 與 sales kits 連結；多數欄位為 `NaN`，因此不可推論未填欄位代表不適用、無需求或無 R&S solution。\n- [[ServerRack]] sheet 中，[[伺服器主機板]] / PCBA 的 [[R&S Solution]] 欄列出 [[R&S ZNL]] 用於 PDN Target Z、[[MXO]] 用於 power rail / multiphase DC / PI、[[ZISO]]、[[R&S FSWP]] 用於 LDO NSD test / clock jitter test、[[R&S ZNA]] 用於 high speed trace test。\n- [[伺服器電路板]] / PCB 分類列出關鍵元件為 `20+層UBB、高階ABF、低Dk CCL`，並在 [[博智]] 列寫 `GB200/NVL72帶動層數、材料等級暴衝。`；[[R&S Solution]] 欄列 [[R&S ZNA]] / [[R&S ZNB]]：IL、TDR。\n- [[連接器]] / 線纜分類列出 `CPU/GPU Socket、UQD水冷快接、800 G AOC`，角色亮點稱 [[PCIe 6]] / [[PCIe 7]]、[[InfiniBand]] 800 Gbe 提升 connector ASP；[[R&S Solution]] 欄列 [[R&S ZNA]] / [[R&S ZNB]] + [[OSP]]：high speed cable。\n- [[網通交換機]] 分類列出 [[智邦]]、[[神準]]、[[明泰]]、[[鴻海]]、[[達創]]、[[鈺登]]，[[R&S Solution]] 欄在 [[智邦]] 列出 [[R&S FSWP]]：jitter / phase noise test、VNA（[[R&S ZNA]] / [[R&S ZNB]]）、EMI pretest，並有一個 SharePoint sales kit 連結。\n- [[矽光子]] 分類列出關鍵元件 `40G/100G/400G/800G光收發模組, CPO/NEO（Near-packaged optics) &（pluggable）`；角色亮點稱 [[CPO]] 對有源 / 無源 SiPh、先進封裝、測試需求提升，且提到 [[前鼎]] 提供高速載板、[[光聖]] 提供 ELS 外部雷射源；[[R&S Solution]] 欄列 optical VNA：[[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]，以及 [[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]]。\n- [[散熱器]] 分類列出關鍵元件 `滑軌、液冷板、CDU、風扇`，在 [[建準]] 角色亮點稱 `GPU TDP由700 W升至1200 W，液冷與滑軌結構同步升級。`；[[R&S Solution]] 欄列 [[MXO]]：motor driver analysis。\n- [[電源供應器]] 分類列出關鍵元件 `HVDC、5–10 kW PSU、液冷電源櫃、BBU`，在 [[光寶科]] 角色亮點稱 `Blackwell平台功耗翻倍，推升高密度電源需求`；[[R&S Solution]] 欄列 [[MXO]]：power rail / multiphase DC / PI、[[ZISO]]、[[R&S FSWP]]：LDO NSD test、BMS test，並有一個 SharePoint sales kit 連結。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AISeverEcosystem.md"
+             },
+             "score": 10.15722
+            },
+            {
+             "text": "Data center full-spectrum connectivity\n[[Data center full-spectrum connectivity]] 是 [[full-spectrum-data-center-connectivity-brochure]] 呈現的 portfolio 視角：把 AI / data center 的 high-speed electrical interconnect、optical interconnect、fiber deployment、rack power distribution、busbar、liquid cooling 與 leak detection 放在同一張 data center connectivity brochure 中。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+             },
+             "score": 8.14467
+            },
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 17.436427
+            },
+            {
+             "text": "R&S CMX500 › Application tests 與 audio\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n- 未啟用 R&S CMX-KA100 等 application test license 時，IP application test functionality 降到最低；只能使用 standalone mode，不能連接 external servers，也不支援 IP based measurements 或 tools。\n- R&S CMX-KA100 提供 internal IP services 與 IP connection to DUT 測試 applications，包含 DNS、IMS、Message Center、FTP、HTTP、DNS monitor、IP logging、iPerf、Ping、throughput、Max Throughput Wizard、web server。\n- R&S CMX-KA110 增強 KA100，加入 QoS、ePDG、N3IWF、delay measurement、IP tune tool、SMPP / MT SMS advanced settings。\n- R&S CMX-KA150 提供 IP analysis tool，用於監控與分析 DUT uplink / downlink IP traffic。\n- R&S CMX-KA180 提供 audio codecs for 4G and 5G IMS voice call，支援 AMR-NB、AMR-WB、EVS，並包含 [[R&S CMX-ZG180A]] external sound card drivers and configuration settings。\n- R&S CMX-KA181 加入 [[POLQA]]，用於 measuring perceived speech quality；measurement version 為 3，mode 為 full-band 或 narrowband。\n- R&S CMX-KA401 支援 WAV player / recorder、upload/download WAV files、file-based POLQA measurements 與 end-to-end audio delay。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 35,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 17.102445
+            },
+            {
+             "text": "Signaling test solution › 重點摘要\n- 本來源是 OneNote 複製出的 [[UAV]] signaling test solution 筆記，raw 轉檔日期為 2026-09-17；正文未標示正式發布日期、作者、文件版次或適用客戶 / 專案。\n- 來源指出無人機常使用多種通信技術，例子包含 proprietary radio / image transmission、Wi‑Fi、[[LTE]]、未來 [[5G]]、[[RTK]]、[[SATCOM]] 與 encrypted frequency-hopping radio。\n- 來源以多款無人機 / UAV 產品為例整理核心通訊技術：[[DJI Mini 4 Pro]]、[[DJI Mavic 3]]、[[DJI Mavic 3 Enterprise]]、[[Parrot ANAFI Ai]]、[[XAG P100]]、[[Skydio X2E]]、[[RQ-4 Global Hawk]] 與 [[Switchblade]]。\n- 來源稱 [[R&S CMX500]] RF frequency range 為 **400 MHz 至 8 GHz**，可提供 [[LTE]]、[[5G]] 與 [[Wi-Fi]] UE 的單一技術 signaling test。\n- 來源列出 signaling test 可包含基本 RF 量測、application layer tests 與 protocol test；基本 RF 量測項目包含 Power、Frequency、Spectrum、[[EVM]]、[[PER]] / [[BLER]]、[[MIMO]]。\n- 來源列出一組 [[R&S CMX500]] 5G test configuration，包含 [[R&S CMX-PB70H]]、[[R&S CMX-B200A]]、[[R&S CMX-B300C]]、[[R&S CMX-B600B]]、[[R&S CMX-KA100]] 與 [[R&S CMX-KM600]]。\n- 來源列出一組 [[R&S CMX500]] Wi‑Fi test configuration，包含 WLAN signaling、WLAN TX measurement 與 WLAN ARB generator options，例如 [[R&S CMX-KS350B]]、[[R&S CMX-KS351B]]、[[R&S CMX-KS352B]]、[[R&S CMX-KS355B]]、[[R&S CMX-KS356B]]、[[R&S CMX-KS360B]]、[[R&S CMX-KM350]]、[[R&S CMX-KM351]]、[[R&S CMX-KM352]]、[[R&S CMX-KM360]]、[[R&S CMX-KW350]]、[[R&S CMX-KW351]]、[[R&S CMX-KW352]]。\n- 來源指出如果 UAV 使用兩種以上通訊技術，通訊技術之間可能造成相互干擾；基於 [[R&S CMX500]] 支援多種通訊技術，可進行 De-sense validation。\n- 來源對多技術整合驗證的配置原則是：software options 合併上述 5G 與 Wi‑Fi 表格，hardware 以滿足兩者中最大的 carrier aggregation 或 [[MIMO]] 作為配置。\n- 來源末尾列出兩個待讀材料：本機 PDF `5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.pdf`，以及 SharePoint 上 `Making Deployed 5G Private Networks more Resilient.pptx`；正文未擷取。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Signaling test solution.md"
+             },
+             "score": 11.852984
+            },
+            {
+             "text": "CMX500_Features_CSW9-20-0_en_32 › 無線技術與測試主題\n- [[NR FR1]]、[[NR FR2]]、[[LTE]]、[[NB-IoT]]、[[WLAN]]、[[LTE C-V2X]]、[[NR C-V2X]]、[[RedCap]]、[[eRedCap]]、[[NTN]]、[[Direct-to-cell communication]]。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]、[[Spectrum analysis]]。\n- [[POLQA]]、[[IMS]]、[[iPerf]]、[[QoS]]、[[ePDG]]、[[N3IWF]]、[[IP traffic analysis]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+             },
+             "score": 12.285574
+            },
+            {
+             "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 重點摘要\n- 來源未標示發布日期；raw frontmatter `created: 2026-09-11`，本文 ingest 日期為 2026-09-15。\n- [[Rohde & Schwarz]] 宣稱在最終 IEEE standard ratification 之前，已將 first [[Wi-Fi 8 RF signaling tests]] 實作到 [[R&S CMX500]] one-box signaling tester。\n- 展示情境：[[MWC Barcelona 2026]]，[[Rohde & Schwarz]] booth 5A80，Fira Gran Via Barcelona，hall 5。\n- 測試對象：[[Broadcom]] prototype next-generation WLAN device / prototype [[Wi-Fi 8]] device。\n- [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的焦點被描述為從 sheer speed 轉向 ultra-high reliability（[[UHR]]）performance。\n- 來源稱 [[Wi-Fi 8]] 延續 [[Wi-Fi 7]] 的 core PHY parameters：supported frequencies up to 7.125 GHz、channel bandwidths up to 320 MHz、4096QAM modulation、[[MLO]]。\n- 來源列出 [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的新 testing hurdles，包括 [[distributed resource units]]（dRU）與 [[unequal modulation]]（UEQM）。\n- dRU measurements 被描述為可驗證 device boosting uplink transmit power 與 improving connection reliability 的 effectiveness。\n- UEQM analysis 被描述為可評估 test device 是否能依 specified modulation coding scheme（MCS）combinations 正確 adapt modulation。\n- [[R&S CMX500]] 被定位為 modular、powerful one-box signaling tester，支援 [[LTE]]、[[NR]] SA/NSA、[[NR-NTN]]、[[NB-NTN]]、Direct-to-Cell（[[D2C]] / [[DTC]]）與 WLAN including [[Wi‑Fi 7]] and [[Wi‑Fi 8]]。\n- Press & media contact：[[Christian Mokry]]，PR Manager Test & measurement。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+             },
+             "score": 5.393617
+            },
+            {
+             "text": "Wi-Fi 8 RF signaling tests › 來源中的測試情境\n依 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]：\n\n- [[Rohde & Schwarz]] 在 final IEEE standard ratification 前，已將 first [[Wi-Fi 8]] RF tests in signaling mode 實作到 [[R&S CMX500]] one-box signaling tester。\n- 測試展示使用 [[Broadcom]] prototype next-generation WLAN device。\n- 展示地點為 [[MWC Barcelona 2026]]，[[Rohde & Schwarz]] booth 5A80。\n- 來源稱 [[R&S CMX500]] 可 showcase physical layer features unique to [[Wi-Fi 8]]。\n- 來源將 [[R&S CMX500]] 定位為 multi-technology multi-channel signaling tester，以及 future-ready platform for cellular and non-cellular standards。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md"
+             },
+             "score": 6.541202
+            },
+            {
+             "text": "Generative AI user experience testing\n[[Generative AI user experience testing]] 是 [[Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing]] 中描述的測試方法：在可控制的 wireless network conditions 下，以 [[Time to First Token]]、[[Tokens Per Second]] 等指標量化 generative AI application 的 end-user experience。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Generative AI user experience testing.md"
+             },
+             "score": 5.41152
+            },
+            {
+             "text": "Generative AI user experience testing › 測試目的\n依 [[Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing]]，industry still lacks mature metrics and standardized test frameworks for evaluating user experience of generative AI applications；[[3GPP]] 與 [[GTI]] 等組織正在進行 related research。\n\n本來源中的 testbed 目標是：\n\n- 在 diverse wireless environments 下量化 end-user experience。\n- 比較不同 network conditions 對 generative AI application response 的影響。\n- 支援 on-device generative AI application design optimization。\n- 為 future network optimization 提供 reference points。\n- 支援 [[6G-enabled AI technologies]] 的 evolution、validation and standardization。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Generative AI user experience testing.md"
+             },
+             "score": 4.839366
+            },
+            {
+             "text": "Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing › 重點摘要\n- [[Rohde & Schwarz]] 與 [[China Mobile Research Institute]] 在 [[MWC Shanghai 2026]] 展示一套 generative AI applications 測試 solution。\n- 來源稱此 solution based on the [[R&S CMX500]] 5G one-box signaling tester，可在 diverse network conditions 下首次量化 measurement end-user experience of generative AI applications。\n- 測試架構中：\n  - [[Large language model]] 部署在 server side 或 cloud。\n  - [[R&S CMX500]] 與執行 client-side test application 的 smart terminal 建立 radio connection。\n  - [[R&S CMX500]] 可配置 network parameters、channel fading models、latency、jitter、RF impairments 等 variables。\n  - 使用者透過 terminal-side application 輸入 prompts，接收 LLM inference responses。\n  - Host PC software 收集與分析 data，並產生 charts。\n- 來源列出的 key performance indicators 包含 [[Time to First Token]]（TTFT）與 [[Tokens Per Second]]（TPS）。\n- 來源稱此方法可支援 optimization of on-device generative AI application design，並提供 future network optimization 的 reference points。\n- 來源把 [[R&S CMX500]] 描述為 all-in-one test platform，支援 SA / NSA architectures、FR1 to FR3（up to 18 GHz）、built-in IMS server、RF conformance、protocol validation、VoNR acoustics 與 carrier aggregation。\n- [[Liu Guangyi]] 的引述把此 testbed 連到 6G-enabled ubiquitous intelligent connectivity、native network computing capabilities、new AI service metrics 與 testing methodologies。\n- [[Jin Hailiang]] 的引述把此 testbed 描述為 generative AI user experience testing 的 benchmark，並指向 future test scenarios、industry use cases 與 standardization。\n- 展示地點：China Mobile’s 6G Zone，Hall 3，N3E60。\n- Press & media contact：[[Christian Mokry]]，PR Manager Test & measurement。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md"
+             },
+             "score": 10.437505
+            },
+            {
+             "text": "CMX500 GPRF Generator\n[[CMX500 GPRF Generator]] 是 [[CMX500_Callbox]] 中的 [[R&S CMX500]] non-signaling use case：在 CMX500 上產生 ARB、CW、dual tone 或 replay `.wv` waveform，支援 R&D waveform replay / creation 與 standalone TX measurement 工作流。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+             },
+             "score": 6.917317
+            },
+            {
+             "text": "CMX500 GPRF Generator › Signal types\n依 [[CMX500_Callbox]]，GPRF Generator signal types 包含：\n\n- ARB。\n- CW。\n- Dual Tone。\n- Replay `.wv` files。\n- Up to 4 GPRF Generator instances in parallel。\n- ARB Sequencer。\n- Upload directly in the configuration sidebar。\n\n來源 slide 標示 **No License required**，但該說法需與 technology-specific ARB / WinIQSim2 licensing 分開理解。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+             },
+             "score": 1.880986
+            },
+            {
+             "text": "CMX500 GPRF Generator › 使用限制\n- [[CMX500_Callbox]] 是簡報來源，不是 formal feature list 或 specifications。\n- `No License required` 只可先記為 GPRF Generator slide claim；technology-specific ARB replay / WinIQSim2 waveform 明確需要 KWxxx licenses。\n- Planned for CSW 9.00 / coming with CSW 9.10 需以 release note 驗證。\n- 本頁未補推 KW option 的 order number；需回正式 CMX500 features、pricing 或 configurator。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+             },
+             "score": 1.556994
+            },
+            {
+             "text": "CMX500 Desense Testing\n[[CMX500 Desense Testing]] 是 [[CMX500_Callbox]] 中描述的 WLAN + cellular one-box interference / desense use case：以 [[R&S CMX500]] 在真實連線下同時處理 WLAN、LTE 與 NR 測試，觀察互相干擾或 desense 影響。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 Desense Testing.md"
+             },
+             "score": 7.784464
+            },
+            {
+             "text": "AISeverEcosystem R&S solution mapping › Optical / SiPh / CPO\n- [[矽光子]]欄將 optical VNA 對應到 [[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]，以及 [[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]]。\n- 來源角色亮點稱 [[CPO]] 對有源 / 無源 [[SiPh]]、先進封裝與測試需求大幅提升，並稱 [[前鼎]]提供高速載板給矽光子模組與 CPO 元件、[[光聖]]提供 ELS 外部雷射源。\n- 這些說法都只追溯到 [[AISeverEcosystem]]，不等同於量產、採購、出貨或 R&S formal application note。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+             },
+             "score": 6.195224
+            },
+            {
+             "text": "AISeverEcosystem R&S solution mapping › Jitter / phase noise / clock / LDO noise\n- [[R&S FSWP]] 在 [[伺服器主機板]]分類中被列為 LDO NSD test、clock jitter test。\n- [[R&S FSWP]] 在 [[網通交換機]]分類中被列為 jitter / phase noise test。\n- [[R&S FSWP]] 也出現在 [[電源供應器]]的 LDO NSD test、[[智原]]與[[譜瑞-KY]]的 IC / high-speed transmission solution 欄，但未提供測試條件。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+             },
+             "score": 5.880963
+            },
+            {
+             "text": "AISeverEcosystem R&S solution mapping › 來源中的 mapping\n| 分類 | 對象 / 企業欄 | 來源中的 R&S Solution | 來源日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| [[伺服器主機板]] / PCBA | [[鴻海]] | [[R&S ZNL]]: PDN Target Z；[[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test、clock jitter test；[[R&S ZNA]]: high speed trace test | 來源未標示正式日期；raw converted 2026-09-17 | 未提供正式 test setup、option、fixture、頻率或 sales kit |\n| [[伺服器電路板]] / [[PCB]] | [[博智]] | [[R&S ZNA]] / [[R&S ZNB]]: IL、TDR | 來源未標示正式日期；raw converted 2026-09-17 | 只對應表內 [[博智]]列，不能推論其他 PCB 廠同樣適用 |\n| [[連接器]] / 線纜 | [[嘉澤]] / [[嘉基]] | [[R&S ZNA]] / [[R&S ZNB]] + [[OSP]]: high speed cable | 來源未標示正式日期；raw converted 2026-09-17 | [[嘉澤]] / [[嘉基]] 同格寫法未決；未提供 cable type、connector type 或 calibration method |\n| [[網通交換機]] | [[智邦]] | [[R&S FSWP]]: jitter / phase noise test；VNA（[[R&S ZNA]] / [[R&S ZNB]]）；EMI pretest | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；不可推論完整 switching test portfolio |\n| [[矽光子]] | [[上詮]] | optical VNA：[[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]；[[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]] | 來源未標示正式日期；raw converted 2026-09-17 | ThinkLands、GOCA、Newkey 與 PSA 未展開；未提供 optical VNA setup 或 module type |\n| [[散熱器]] | [[建準]] | [[MXO]]: motor driver analysis | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 motor driver type、fan / pump 類型或量測條件 |\n| [[電源供應器]] | [[光寶科]] | [[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test；BMS test | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；未提供 HVDC / PSU / BBU 測試配置 |\n| [[GPU]] | [[輝達]] | [[R&S ZNA]]: TDR、[[OSP]] | 來源未標示正式日期；raw converted 2026-09-17 | 不代表 R&S 與 NVIDIA 合作或採購關係；僅是表內 solution mapping |\n| [[CPU]] | [[超微]] | [[R&S ZNA]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 TDR、SI、PI 或其他測項 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+             },
+             "score": 5.719044
+            },
+            {
+             "text": "AI 資料中心基礎設施\nAI 資料中心基礎設施是此 vault 用來記錄支撐 AI 部署或運作的資料中心能力組合；在 [[0. AI Data Center image 1]] 與 [[0. AI Data Center image 3]] 中，來源未標示日期的圖像明示其核心面向包含 **Connectivity**、**Power**、**Resilience**，而 [[0. AI Data Center image 2]] 與 [[0. AI Data Center image]] 則以未標示日期的 3D 機房示意圖列出 Power Management、Rack & Accessories、Management System、Precision Cooling 與 Service 等資料中心 solution components。[[4 AI Data Center Eco-Chain image 1]] 則在頁尾標示 12/10/2025（日期格式未標示）的 ecosystem map 中，補充 cloud service、datacenter、AI server、compute 與 peripheral 的市場參與者 / 品牌分類視角。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+             },
+             "score": 1.949982
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "technical_knowledge",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 6,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/AISeverEcosystem.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 35,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/sources/AISeverEcosystem.md",
+             "raw_refs": [
+              "raw/Market/OneNote/AISeverEcosystem.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md",
+             "raw_refs": [
+              "raw/Market/OneNote/full-spectrum-data-center-connectivity-brochure.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/Signaling test solution.md",
+             "raw_refs": [
+              "raw/Market/OneNote/UAV/Communication of UAVs.md",
+              "raw/Market/OneNote/UAV_Communication/Communications on UAVs.md",
+              "raw/Market/OneNote/UAV_Communication/Signaling test solution.md",
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+              "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md",
+             "raw_refs": [
+              "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Generative AI user experience testing.md",
+             "raw_refs": [
+              "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+              "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md",
+             "raw_refs": [
+              "raw/Market/OneNote/CMX500_Callbox.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/CMX500 Desense Testing.md",
+             "raw_refs": [
+              "raw/Market/OneNote/CMX500_Callbox.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+             "raw_refs": [
+              "raw/Market/OneNote/AISeverEcosystem.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md",
+             "raw_refs": [
+              "raw/Market/0. AI Data Center image 1.md",
+              "raw/Market/0. AI Data Center image 2.md",
+              "raw/Market/0. AI Data Center image 3.md",
+              "raw/Market/0. AI Data Center image.md",
+              "raw/Market/4 AI Data Center Eco-Chain image 1.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,71 @@
+{
+ "id": "Q0339",
+ "grader": "1.2",
+ "coverage": 0.625,
+ "points": [
+  {
+   "n": 1,
+   "point": "每條規格主張必須標明型號與來源文件版次，來源未標版次就要明說沒標",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions formal docs/versions in citations, but not the rule for every claim or unversioned sources"
+  },
+  {
+   "n": 2,
+   "point": "規格數字必須連同測試條件一起引用，不換算單位；option 相依性照抄原文，不自行推論相容性",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions same conditions and exact options, but omits no unit conversion and no inferred option compatibility"
+  },
+  {
+   "n": 3,
+   "point": "只有 specifications with limits / without limits 代表保證效能；typ./nom./meas./n. trc. 不由 R&S 保證，不能用來做比較主張",
+   "verified": true,
+   "label": "covered",
+   "why": "requires warranted specs and rejects typical/marketing values for comparison"
+  },
+  {
+   "n": 4,
+   "point": "訊號分析儀規格文件同樣註明無 tolerance limits 的資料不具約束力且可能變更",
+   "verified": true,
+   "label": "covered",
+   "why": "explicitly says FSW data without tolerance limits is non-binding and may change"
+  },
+  {
+   "n": 5,
+   "point": "對競品的主張若只有 R&S internal battle card 單一來源，用於客戶文件前必須另查對手官方資料與第三方證據",
+   "verified": true,
+   "label": "partial",
+   "why": "requires competitor datasheets, but omits single R&S-internal-source caveat and third-party evidence"
+  },
+  {
+   "n": 6,
+   "point": "only platform、first validated、leadership、lower TCO 等銷售語言不可當作可驗證技術規格",
+   "verified": true,
+   "label": "partial",
+   "why": "warns against marketing values, but does not identify only platform/first validated/leadership/lower TCO language"
+  },
+  {
+   "n": 7,
+   "point": "現有 battle card 未提供競品的正式 datasheet、文件版次、order number、option code、release status 或測試條件",
+   "verified": true,
+   "label": "partial",
+   "why": "asks for competitor datasheets/options/conditions, but omits missing doc version, order number, release status, etc."
+  },
+  {
+   "n": 8,
+   "point": "Aerospace / Defense（衛星、UAV）的 R&S solution mapping 只是 sales mapping，不可當作測試配置建議書，仍需 sales kits、application notes、datasheet 或正式 proposal",
+   "verified": true,
+   "label": "partial",
+   "why": "says current satellite/use-case evidence is not a competitor comparison, but misses sales-mapping-not-test-configuration rule and required follow-up evidence types"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "Keysight is described as having strong market presence in aerospace / defense",
+  "DO-160 is cited in a military / aviation drone EMC proposal context",
+  "A Starlink UT test-flow source maps spectrum analyzer choices to R&S FSW and Keysight N9040B UXA, and signal generator choices to R&S SMW200A and Keysight E8257D PSG",
+  "Satellite payload group delay measurement can use R&S FSW spectrum analyzer and R&S SMW200A signal generator",
+  "TVAC satellite payload testing passages state that setup drift, cable changes, and temperature changes require recalibration"
+ ]
+}

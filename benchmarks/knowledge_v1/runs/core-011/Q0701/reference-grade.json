@@ -1,0 +1,66 @@
+{
+ "id": "Q0701",
+ "grader": "1.2",
+ "coverage": 0.143,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's only linkage of signal generators to an AI-related application domain is the high-speed digital/AI-server deck, where signal generators are mapped to RefClk and PLL jitter performance alongside phase noise analyzers.",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not mention RefClk/PLL jitter mapping or phase-noise analyzers"
+  },
+  {
+   "n": 2,
+   "point": "The same source maps signal generators to ADC/DAC frontend performance testing, together with spectrum analyzers.",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not mention ADC/DAC frontend testing with spectrum analyzers"
+  },
+  {
+   "n": 3,
+   "point": "That instrument mapping comes with no test conditions, and the Vault forbids converting these instrument categories into formal product configurations or capability claims.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Presents detailed signal-generator capabilities/specs instead of noting no conditions and no formal capability claims"
+  },
+  {
+   "n": 4,
+   "point": "The AI context of that high-speed digital source is the Taiwan AI server eco-chain, i.e. AI data-center/server hardware, not AI algorithm testing.",
+   "verified": true,
+   "label": "partial",
+   "why": "Mentions AI/data-center hardware context, but not Taiwan AI server eco-chain or distinction from algorithm testing"
+  },
+  {
+   "n": 5,
+   "point": "The Vault's AI/ML wireless use case is AI-enhanced CSI feedback using a two-sided AI model to compress and report channel state information — a modem/algorithm topic, not a signal generation capability.",
+   "verified": true,
+   "label": "missing",
+   "why": "No discussion of AI-enhanced CSI feedback or two-sided AI model"
+  },
+  {
+   "n": 6,
+   "point": "In that AI demonstration the test instrument is the R&S CMX500 configured as an AI-enabled base station emulator, not a vector signal generator.",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not state CMX500 is used as an AI-enabled base-station emulator, not a vector signal generator"
+  },
+  {
+   "n": 7,
+   "point": "Where the Vault does list concrete signal generation capabilities (SMW200A: LTE, Cellular IoT, 5G NR R17/18 K171, OFDM K114, custom digital modulation), the stated application is 3GPP NTN component testing, not AI.",
+   "verified": true,
+   "label": "partial",
+   "why": "Lists some concrete SMW200A generation capabilities but omits that their application is 3GPP NTN, not AI"
+  }
+ ],
+ "contradicted": 1,
+ "invented": [
+  "wide RF frequency coverage",
+  "wide vector/I/Q modulation bandwidth ... up to 2 GHz",
+  "Large ARB memory, high sample rate, and waveform bandwidth",
+  "Multichannel, MIMO and fading generation",
+  "Waveform replay and flexible arbitrary-source generation",
+  "Fast automated source operation",
+  "224 Gb/s per lane across 64 channels for AI scale-up deployments"
+ ]
+}

@@ -1,0 +1,76 @@
+{
+ "id": "Q0846",
+ "grader": "1.2",
+ "coverage": 0.375,
+ "points": [
+  {
+   "n": 1,
+   "point": "Chip vendor 是 5G device testing value chain 中明示的角色，validation 目標直接包含 Chipset L1–L4 測試計畫與驗證，signaling 層對應 CMX500 / CMW500 / CMsquares",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions chipset/modem DUT and CMX500 signaling, but misses chip vendor value-chain role, Chipset L1–L4 validation, CMW500/CMsquares"
+  },
+  {
+   "n": 2,
+   "point": "測試類型同時涵蓋 Signaling / Signaling Protocol 與 Non-signaling RF，且 value chain 由 chip vendor 一路串到 network operator",
+   "verified": true,
+   "label": "partial",
+   "why": "covers signaling and non-signaling RF uses, but not the full value chain from chip vendor to network operator"
+  },
+  {
+   "n": 3,
+   "point": "R&S 已與 Tier 1 chipset vendors 合作驗證其平台與 WI-555 / RFT 555 的 NR-NTN test cases，是半導體客戶的既有切入點",
+   "verified": true,
+   "label": "partial",
+   "why": "covers NR-NTN chipset conformance evidence, but not Tier 1 chipset vendors nor WI-555/RFT 555 specifically"
+  },
+  {
+   "n": 4,
+   "point": "PCT roadmap 指出近期需求來自 test houses / chipset vendors，尤其是 RedCap 與 Rel.17 整體",
+   "verified": true,
+   "label": "missing",
+   "why": "does not cite PCT roadmap demand from test houses/chipset vendors or RedCap"
+  },
+  {
+   "n": 5,
+   "point": "與晶片商共同展示 / 驗證已有案例：CMX500 OBT one-box signaling tester 搭 MediaTek NTN-NR device 做 Rel.17 NTN 連線",
+   "verified": true,
+   "label": "covered",
+   "why": "states CMX500 OBT with MediaTek NTN-NR device for Rel.17 live connection"
+  },
+  {
+   "n": 6,
+   "point": "FR3 / 6G 早期研究機會：CMX500 OBT 在 13 GHz 建立 signaling environment 並驗證 Qualcomm 5G mobile test platform 的 throughput",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention FR3/6G 13 GHz Qualcomm throughput validation"
+  },
+  {
+   "n": 7,
+   "point": "Non-signaling / ATE 延伸機會：由 CMX validation 擴展到 CMP180 / CMP200 / CMW100 量產線，CMP200 + RRH 定位為 FR2 nonsignaling high-volume RF parametric testing",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions CMP180 non-signaling production RF, but misses CMX-to-CMP180/CMP200/CMW100 scaling and CMP200+RRH FR2 parametric testing"
+  },
+  {
+   "n": 8,
+   "point": "競爭風險：R&S battle card 自述 Keysight 在美國與 key semiconductor accounts 很強，宣稱 25/25 semiconductor companies，且未附可追溯外部證據",
+   "verified": true,
+   "label": "missing",
+   "why": "no Keysight semiconductor-account competitive risk"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "R&S CMX‑KS627B/M/X",
+  "R&S CMX‑KS628B/X",
+  "R&S CMX‑KS629B/X",
+  "R&S CMX‑KS527B/X",
+  "R&S CMX‑KS352B",
+  "R&S CMX‑KS356B",
+  "R&S CMX‑KS353B / KS357B",
+  "R&S CMX‑KS360B",
+  "R&S CMX‑KS365B",
+  "CMX‑KA098 = NGeCall / IMS eCall application test software option"
+ ]
+}

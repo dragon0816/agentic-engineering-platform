@@ -1,0 +1,1520 @@
+{
+ "question": {
+  "id": "Q0846",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Semiconductor, and what evidence supports each opportunity?",
+  "market": "Semiconductor",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-f3ad1cd68b5a43cd8a1d3a37ea0b4b6b",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Semiconductor, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 101.11,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-f3ad1cd68b5a43cd8a1d3a37ea0b4b6b",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T20:10:53.972425Z",
+    "updated_at": "2026-10-11T20:12:34.941166Z",
+    "messages": [
+     {
+      "message_id": "message-703506f648284030868e0e496eb2e50f",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Semiconductor, and what evidence supports each opportunity?",
+      "created_at": "2026-10-11T20:10:53.993082Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-ebb95841e0e54524b96af698c3688de2",
+      "role": "assistant",
+      "text": "建議主軸：知識庫未提供正式「strongest」排序；【推論】若以「有明確半導體 / chipset / modem DUT 證據」與「明確 signaling / non-signaling 測試鏈接」為準，最有證據支撐的機會是 NR‑NTN chipset/device validation、Wi‑Fi 7 R&D + production RF test、Automotive 5G modem NG eCall verification [29][31][37][18][19][20][48][49]。\n### 推薦先賣\nR&S 的 NR‑NTN conformance 測試案例在 R&S TS8980 Conformance Test Platform、R&S TS‑RRM 與 R&S CMX500 上執行，且 measurements 在 NR FR1 執行，DUT 是 Samsung NR‑NTN chipset [29]。\n較新 PR 語境稱 R&S 已在 GCF NR‑NTN conformance test cases 取得 highest number validated，涵蓋 RF、RRM、PCT domains；all measurements conducted on TS8980、TS‑RRM、CMX500，DUT 為 Samsung NR‑NTN chipset [31][37]。\nCMX500 被描述為 conformance test solutions 的核心 5G one-box signaling tester，支援 early R&D through integrated fading and channel emulation，以及 satellite constellation visualization [29]。\nCMX500 OBT 也被用於 MediaTek NTN‑NR device as DUT 的 live 5G NTN‑NR Rel.17 connection 展示，CMX500 OBT 在 setup 中 simulate satellite base station，CMX500 operate in interactive callbox mode，可 trigger voice calls alongside RF-related measurements [17]。\n可對接 option：NR NTN Rel.17/18/19 signaling extensions 包含 R&S CMX‑KS627B/M/X、R&S CMX‑KS628B/X、R&S CMX‑KS629B/X；NB‑NTN signaling Rel.17 為 R&S CMX‑KS527B/X [7]。\nR&S Wi‑Fi 7 testing solution 明確把 R&S CMX500 定位為 R&D signaling / interworking 測試，把 R&S CMP180 定位為 production non-signaling RF 測試 [20]。\nCMX500 是 multi-technology multi-channel signaling tester，已新增 integrated Wi‑Fi 7 test functionality，用於 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation [18]。\nWi‑Fi 7 R&D 測試需要在 signaling mode 與 real-world conditions 下量測 RF TX/RX characteristics；MLO 是 Wi‑Fi 7 key feature，因此 multiple RF chains 的 test environment 很重要 [18]。\nCMP180 在 WLAN device production phase 被定位為 non-signaling RF testing；來源說 production phase 中所有 RF measurements 以 non-signaling mode 執行以節省時間，CMP180 optimized for this purpose [19]。\nCMP180 支援 Wi‑Fi 6E、Wi‑Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz；它 integrated two analyzers, two generators and two sets of eight RF ports，可 single box 支援 2x2 MIMO，兩台 CMP180 可擴展至 four analyzers and generators 以測 4x4 MIMO AP [19]。\n可對接 option：CMX500 WLAN signaling options 包含 802.11be STA basic R&S CMX‑KS352B、802.11be AP basic R&S CMX‑KS356B、802.11bn STA/AP basic R&S CMX‑KS353B / KS357B、2x2 MIMO R&S CMX‑KS360B、advanced encryption/authentication R&S CMX‑KS365B [6]。\nQualcomm Snapdragon Auto 5G Modem‑RF 的 NG eCall verification process employed R&S CMX500 mobile radio tester [48]。\nCMX500 被描述為 NG eCall including voice and data transmission 的 comprehensive testing solution；測試 simulating a PSAP，並 validated compliance of the implementation at both ends with EN 17240:2024 [48]。\n來源稱 CMX500 with R&S CMX‑KA098 software option can be effectively used for NG eCall testing under realistic network conditions；驗證對象為 Snapdragon Auto 5G Modem‑RF 的 NG eCall functionality，合作方為 R&S 與 Qualcomm Technologies [49]。\nCMX‑KA098 是 CMX500 的 NGeCall / IMS eCall application test software option；其 test scope 包含 IMS eCall session establishment、MSD transfer、voice link、audio interface verification、PSAP callback、5GS/NR eCall over IMS cases 與 LTE/EPS eCall over IMS cases [50][56]。\nCMX‑KA098 version baseline 包含 CEN EN 17240:2024 條件：CMX500 >= CSW 2025.0.0.1850 / CMX‑KA098 >= V4.3.0‑RC8 [54]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 / CMX500 OBT | 5G NR/LTE/WLAN device signaling、NR‑NTN R&D、callbox、RF measurement | CMX500 支援 LTE、NR FR1、NR FR2、NSA、SA、FDD、TDD；提供 NR FR1/FR2 signaling and TX measurements、LTE signaling、WLAN signaling/TX measurements、fading、AWGN、BLER、throughput、PER、IMS/audio/POLQA、XLAPI/SCPI automation。[1][5] | One-box network emulation and measurement；可覆蓋 cellular + WLAN signaling / measurement，且 OBT 已在 NTN live connection 與 Bluetest OTA multi-technology validation 語境中被使用。[1][14][17] | [1][5][14][17] | Features document 是 features/functions overview，不是 technical specifications datasheet，且 data without tolerance limits is not binding。[4] |\n| R&S CMX500 + R&S TS8980 + R&S TS‑RRM | NR‑NTN chipset conformance / validation | NR‑NTN measurements conducted on TS8980、TS‑RRM、CMX500 in NR FR1；DUT 為 Samsung NR‑NTN chipset。[29][37] | 直接有 chipset DUT 與 GCF/PTCRB conformance 語境；測試 domains 包含 RF、RRM、PCT。[31][37] | [29][31][37][64] | TS‑RRM formal specifications、version、BOM、software release、test case list、order number 未提供；來源未逐項說明哪些 RRM test cases 由 TS‑RRM 執行。[38][39] |\n| CMX500 NR‑NTN signaling options | NR‑NTN Rel.17/18/19、NB‑NTN signaling | R&S CMX‑KS627B/M/X = NR signaling extension Rel.17 NTN；R&S CMX‑KS628B/X = NR signaling extension Rel.18 NTN；R&S CMX‑KS629B/X = NR signaling extension Rel.19 NTN；R&S CMX‑KS527B/X = NB‑NTN signaling Rel.17。[7] | NTN chipset/device labs can map product capability discussions to named CMX500 NTN signaling option families. | [7] | 正式 NTN BOM / configuration 不可由 PR 或 option table 自動推導；需 configuration guide。[30] |\n| R&S CMX500 Wi‑Fi signaling options | Wi‑Fi 7 R&D signaling、MLO/MIMO/coexistence/E2E tests | R&S CMX‑KS352B = WLAN signaling 802.11be STA basic；R&S CMX‑KS356B = WLAN signaling 802.11be AP basic；R&S CMX‑KS360B = WLAN signaling 2x2 MIMO；R&S CMX‑KS365B = WLAN advanced encryption/authentication；R&S CMX‑KS353B/KS357B = 802.11bn STA/AP basic。[6] | CMX500 is positioned for Wi‑Fi 7 R&D signaling under real-world conditions, including RF TX/RX, MLO, 2x2 MIMO, 6 GHz, coexistence and E2E tests。[18] | [6][18] | Passage confirms Wi‑Fi 7 R&D/device test, not a specific semiconductor customer pipeline or volume demand.[18] |\n| R&S CMP180 | WLAN production non-signaling RF testing | Supports Wi‑Fi 6E、Wi‑Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz；two analyzers/two generators/two sets of eight RF ports；single-box 2x2 MIMO；two instruments scalable to 4x4 MIMO AP testing。[19] | Production phase RF measurements are done in non-signaling mode to save time, and CMP180 is optimized for this purpose。[19] | [19][20] | 知識庫未標示 CMP180 option codes、order numbers、pricing 或 semiconductor-specific customer fit. |\n| R&S CMX500 + CMX‑KA098 | Automotive 5G modem NG eCall verification | CMX‑KA098 = NGeCall / IMS eCall application test software option；Ident No 1222.6639.02；short text APPL IMS NGECALL；service contract CMX‑PU100。[50][53][57] | Directly used for Snapdragon Auto 5G Modem‑RF NG eCall verification under realistic network conditions, simulating PSAP and validating EN 17240:2024 compliance.[48][49] | [48][49][50][53][57] | Source does not list full test case IDs, measurement conditions, software versions or pass/fail report for the Qualcomm verification.[48] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| NTN demo / early partner validation | CMX500 OBT + satellite-base-station emulation setup | Lead with MediaTek NTN‑NR device as DUT, live 5G NTN‑NR Rel.17 connection, LEO satellite access node emulation, and interactive callbox mode.[17] | This is PR/demo-level evidence and cannot replace formal CMX500 NR‑NTN configuration.[17][30] |\n| WLAN production RF test | CMP180 | Lead with non-signaling RF measurements to save time in production, Wi‑Fi 7 / Wi‑Fi 6E / 5G NR FR1 support, 500 MHz bandwidth, 2x2 MIMO single-box and 4x4 scaling with two instruments.[19] | CMP180 option stack, price and production throughput numbers are not in the passages. |\n| Automotive 5G modem NG eCall | CMX500 + CMX‑KA098 | Lead with Qualcomm Snapdragon Auto 5G Modem‑RF verification, PSAP simulation, EN 17240:2024, voice/data transmission, and realistic network conditions.[48][49] | Full test case IDs, measurement conditions, software versions and pass/fail report are not listed.[48] |\n### 限制\nThe vault does not provide a formal ranked list of “strongest opportunities,” so any prioritization is an inference from how directly the passages tie a tester to a chipset/modem DUT or to explicit R&D/production signaling/non-signaling use cases [29][37][48][49][20].\nPress-release positioning is not the same as measured market demand; the cited passages support technical fit and demonstrated use, not market share, revenue forecast, or customer purchase intent [17][29][31][48][49].\nFor CMX500 features/options, the features document is not a binding technical specifications datasheet, and data without tolerance limits is not binding [4].\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[4] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[5] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[6] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[7] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[14] Wiki：R&S CMX500 OBT（來源：`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[17] Wiki：R&S CMX500 OBT（來源：`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[18] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[19] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[20] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[29] Wiki：NR-NTN conformance testing（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[30] Wiki：NR-NTN conformance testing（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[31] Wiki：NR-NTN conformance testing（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[37] Wiki：R&S TS-RRM（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[38] Wiki：R&S TS-RRM（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[39] Wiki：R&S TS-RRM（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[48] Wiki：Snapdragon Auto 5G Modem-RF（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`）\n[49] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[50] Wiki：R&S CMX-KA098（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`…）\n[53] Wiki：R&S CMX-KA098（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`…）\n[54] Wiki：R&S CMX-KA098（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-K",
+      "created_at": "2026-10-11T20:12:34.941166Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-0d91ae85f2a442d79e1c02d416854fd6",
+       "request_id": "request-0d91ae85f2a442d79e1c02d416854fd6",
+       "span_id": "span-0d91ae85f2a442d79e1c02d416854fd6",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "建議主軸：知識庫未提供正式「strongest」排序；【推論】若以「有明確半導體 / chipset / modem DUT 證據」與「明確 signaling / non-signaling 測試鏈接」為準，最有證據支撐的機會是 NR‑NTN chipset/device validation、Wi‑Fi 7 R&D + production RF test、Automotive 5G modem NG eCall verification [29][31][37][18][19][20][48][49]。\n### 推薦先賣\nR&S 的 NR‑NTN conformance 測試案例在 R&S TS8980 Conformance Test Platform、R&S TS‑RRM 與 R&S CMX500 上執行，且 measurements 在 NR FR1 執行，DUT 是 Samsung NR‑NTN chipset [29]。\n較新 PR 語境稱 R&S 已在 GCF NR‑NTN conformance test cases 取得 highest number validated，涵蓋 RF、RRM、PCT domains；all measurements conducted on TS8980、TS‑RRM、CMX500，DUT 為 Samsung NR‑NTN chipset [31][37]。\nCMX500 被描述為 conformance test solutions 的核心 5G one-box signaling tester，支援 early R&D through integrated fading and channel emulation，以及 satellite constellation visualization [29]。\nCMX500 OBT 也被用於 MediaTek NTN‑NR device as DUT 的 live 5G NTN‑NR Rel.17 connection 展示，CMX500 OBT 在 setup 中 simulate satellite base station，CMX500 operate in interactive callbox mode，可 trigger voice calls alongside RF-related measurements [17]。\n可對接 option：NR NTN Rel.17/18/19 signaling extensions 包含 R&S CMX‑KS627B/M/X、R&S CMX‑KS628B/X、R&S CMX‑KS629B/X；NB‑NTN signaling Rel.17 為 R&S CMX‑KS527B/X [7]。\nR&S Wi‑Fi 7 testing solution 明確把 R&S CMX500 定位為 R&D signaling / interworking 測試，把 R&S CMP180 定位為 production non-signaling RF 測試 [20]。\nCMX500 是 multi-technology multi-channel signaling tester，已新增 integrated Wi‑Fi 7 test functionality，用於 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation [18]。\nWi‑Fi 7 R&D 測試需要在 signaling mode 與 real-world conditions 下量測 RF TX/RX characteristics；MLO 是 Wi‑Fi 7 key feature，因此 multiple RF chains 的 test environment 很重要 [18]。\nCMP180 在 WLAN device production phase 被定位為 non-signaling RF testing；來源說 production phase 中所有 RF measurements 以 non-signaling mode 執行以節省時間，CMP180 optimized for this purpose [19]。\nCMP180 支援 Wi‑Fi 6E、Wi‑Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz；它 integrated two analyzers, two generators and two sets of eight RF ports，可 single box 支援 2x2 MIMO，兩台 CMP180 可擴展至 four analyzers and generators 以測 4x4 MIMO AP [19]。\n可對接 option：CMX500 WLAN signaling options 包含 802.11be STA basic R&S CMX‑KS352B、802.11be AP basic R&S CMX‑KS356B、802.11bn STA/AP basic R&S CMX‑KS353B / KS357B、2x2 MIMO R&S CMX‑KS360B、advanced encryption/authentication R&S CMX‑KS365B [6]。\nQualcomm Snapdragon Auto 5G Modem‑RF 的 NG eCall verification process employed R&S CMX500 mobile radio tester [48]。\nCMX500 被描述為 NG eCall including voice and data transmission 的 comprehensive testing solution；測試 simulating a PSAP，並 validated compliance of the implementation at both ends with EN 17240:2024 [48]。\n來源稱 CMX500 with R&S CMX‑KA098 software option can be effectively used for NG eCall testing under realistic network conditions；驗證對象為 Snapdragon Auto 5G Modem‑RF 的 NG eCall functionality，合作方為 R&S 與 Qualcomm Technologies [49]。\nCMX‑KA098 是 CMX500 的 NGeCall / IMS eCall application test software option；其 test scope 包含 IMS eCall session establishment、MSD transfer、voice link、audio interface verification、PSAP callback、5GS/NR eCall over IMS cases 與 LTE/EPS eCall over IMS cases [50][56]。\nCMX‑KA098 version baseline 包含 CEN EN 17240:2024 條件：CMX500 >= CSW 2025.0.0.1850 / CMX‑KA098 >= V4.3.0‑RC8 [54]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 / CMX500 OBT | 5G NR/LTE/WLAN device signaling、NR‑NTN R&D、callbox、RF measurement | CMX500 支援 LTE、NR FR1、NR FR2、NSA、SA、FDD、TDD；提供 NR FR1/FR2 signaling and TX measurements、LTE signaling、WLAN signaling/TX measurements、fading、AWGN、BLER、throughput、PER、IMS/audio/POLQA、XLAPI/SCPI automation。[1][5] | One-box network emulation and measurement；可覆蓋 cellular + WLAN signaling / measurement，且 OBT 已在 NTN live connection 與 Bluetest OTA multi-technology validation 語境中被使用。[1][14][17] | [1][5][14][17] | Features document 是 features/functions overview，不是 technical specifications datasheet，且 data without tolerance limits is not binding。[4] |\n| R&S CMX500 + R&S TS8980 + R&S TS‑RRM | NR‑NTN chipset conformance / validation | NR‑NTN measurements conducted on TS8980、TS‑RRM、CMX500 in NR FR1；DUT 為 Samsung NR‑NTN chipset。[29][37] | 直接有 chipset DUT 與 GCF/PTCRB conformance 語境；測試 domains 包含 RF、RRM、PCT。[31][37] | [29][31][37][64] | TS‑RRM formal specifications、version、BOM、software release、test case list、order number 未提供；來源未逐項說明哪些 RRM test cases 由 TS‑RRM 執行。[38][39] |\n| CMX500 NR‑NTN signaling options | NR‑NTN Rel.17/18/19、NB‑NTN signaling | R&S CMX‑KS627B/M/X = NR signaling extension Rel.17 NTN；R&S CMX‑KS628B/X = NR signaling extension Rel.18 NTN；R&S CMX‑KS629B/X = NR signaling extension Rel.19 NTN；R&S CMX‑KS527B/X = NB‑NTN signaling Rel.17。[7] | NTN chipset/device labs can map product capability discussions to named CMX500 NTN signaling option families. | [7] | 正式 NTN BOM / configuration 不可由 PR 或 option table 自動推導；需 configuration guide。[30] |\n| R&S CMX500 Wi‑Fi signaling options | Wi‑Fi 7 R&D signaling、MLO/MIMO/coexistence/E2E tests | R&S CMX‑KS352B = WLAN signaling 802.11be STA basic；R&S CMX‑KS356B = WLAN signaling 802.11be AP basic；R&S CMX‑KS360B = WLAN signaling 2x2 MIMO；R&S CMX‑KS365B = WLAN advanced encryption/authentication；R&S CMX‑KS353B/KS357B = 802.11bn STA/AP basic。[6] | CMX500 is positioned for Wi‑Fi 7 R&D signaling under real-world conditions, including RF TX/RX, MLO, 2x2 MIMO, 6 GHz, coexistence and E2E tests。[18] | [6][18] | Passage confirms Wi‑Fi 7 R&D/device test, not a specific semiconductor customer pipeline or volume demand.[18] |\n| R&S CMP180 | WLAN production non-signaling RF testing | Supports Wi‑Fi 6E、Wi‑Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz；two analyzers/two generators/two sets of eight RF ports；single-box 2x2 MIMO；two instruments scalable to 4x4 MIMO AP testing。[19] | Production phase RF measurements are done in non-signaling mode to save time, and CMP180 is optimized for this purpose。[19] | [19][20] | 知識庫未標示 CMP180 option codes、order numbers、pricing 或 semiconductor-specific customer fit. |\n| R&S CMX500 + CMX‑KA098 | Automotive 5G modem NG eCall verification | CMX‑KA098 = NGeCall / IMS eCall application test software option；Ident No 1222.6639.02；short text APPL IMS NGECALL；service contract CMX‑PU100。[50][53][57] | Directly used for Snapdragon Auto 5G Modem‑RF NG eCall verification under realistic network conditions, simulating PSAP and validating EN 17240:2024 compliance.[48][49] | [48][49][50][53][57] | Source does not list full test case IDs, measurement conditions, software versions or pass/fail report for the Qualcomm verification.[48] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| NTN demo / early partner validation | CMX500 OBT + satellite-base-station emulation setup | Lead with MediaTek NTN‑NR device as DUT, live 5G NTN‑NR Rel.17 connection, LEO satellite access node emulation, and interactive callbox mode.[17] | This is PR/demo-level evidence and cannot replace formal CMX500 NR‑NTN configuration.[17][30] |\n| WLAN production RF test | CMP180 | Lead with non-signaling RF measurements to save time in production, Wi‑Fi 7 / Wi‑Fi 6E / 5G NR FR1 support, 500 MHz bandwidth, 2x2 MIMO single-box and 4x4 scaling with two instruments.[19] | CMP180 option stack, price and production throughput numbers are not in the passages. |\n| Automotive 5G modem NG eCall | CMX500 + CMX‑KA098 | Lead with Qualcomm Snapdragon Auto 5G Modem‑RF verification, PSAP simulation, EN 17240:2024, voice/data transmission, and realistic network conditions.[48][49] | Full test case IDs, measurement conditions, software versions and pass/fail report are not listed.[48] |\n### 限制\nThe vault does not provide a formal ranked list of “strongest opportunities,” so any prioritization is an inference from how directly the passages tie a tester to a chipset/modem DUT or to explicit R&D/production signaling/non-signaling use cases [29][37][48][49][20].\nPress-release positioning is not the same as measured market demand; the cited passages support technical fit and demonstrated use, not market share, revenue forecast, or customer purchase intent [17][29][31][48][49].\nFor CMX500 features/options, the features document is not a binding technical specifications datasheet, and data without tolerance limits is not binding [4].\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[4] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[5] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[6] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[7] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[14] Wiki：R&S CMX500 OBT（來源：`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[17] Wiki：R&S CMX500 OBT（來源：`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[18] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[19] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[20] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[29] Wiki：NR-NTN conformance testing（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[30] Wiki：NR-NTN conformance testing（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[31] Wiki：NR-NTN conformance testing（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[37] Wiki：R&S TS-RRM（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[38] Wiki：R&S TS-RRM（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[39] Wiki：R&S TS-RRM（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[48] Wiki：Snapdragon Auto 5G Modem-RF（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`）\n[49] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[50] Wiki：R&S CMX-KA098（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`…）\n[53] Wiki：R&S CMX-KA098（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`…）\n[54] Wiki：R&S CMX-KA098（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-K",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-0d91ae85f2a442d79e1c02d416854fd6",
+      "request_id": "request-0d91ae85f2a442d79e1c02d416854fd6",
+      "span_id": "span-0d91ae85f2a442d79e1c02d416854fd6",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-0d91ae85f2a442d79e1c02d416854fd6",
+       "request_id": "request-0d91ae85f2a442d79e1c02d416854fd6",
+       "span_id": "span-0d91ae85f2a442d79e1c02d416854fd6",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "建議主軸：知識庫未提供正式「strongest」排序；【推論】若以「有明確半導體 / chipset / modem DUT 證據」與「明確 signaling / non-signaling 測試鏈接」為準，最有證據支撐的機會是 NR‑NTN chipset/device validation、Wi‑Fi 7 R&D + production RF test、Automotive 5G modem NG eCall verification [29][31][37][18][19][20][48][49]。\n### 推薦先賣\nR&S 的 NR‑NTN conformance 測試案例在 R&S TS8980 Conformance Test Platform、R&S TS‑RRM 與 R&S CMX500 上執行，且 measurements 在 NR FR1 執行，DUT 是 Samsung NR‑NTN chipset [29]。\n較新 PR 語境稱 R&S 已在 GCF NR‑NTN conformance test cases 取得 highest number validated，涵蓋 RF、RRM、PCT domains；all measurements conducted on TS8980、TS‑RRM、CMX500，DUT 為 Samsung NR‑NTN chipset [31][37]。\nCMX500 被描述為 conformance test solutions 的核心 5G one-box signaling tester，支援 early R&D through integrated fading and channel emulation，以及 satellite constellation visualization [29]。\nCMX500 OBT 也被用於 MediaTek NTN‑NR device as DUT 的 live 5G NTN‑NR Rel.17 connection 展示，CMX500 OBT 在 setup 中 simulate satellite base station，CMX500 operate in interactive callbox mode，可 trigger voice calls alongside RF-related measurements [17]。\n可對接 option：NR NTN Rel.17/18/19 signaling extensions 包含 R&S CMX‑KS627B/M/X、R&S CMX‑KS628B/X、R&S CMX‑KS629B/X；NB‑NTN signaling Rel.17 為 R&S CMX‑KS527B/X [7]。\nR&S Wi‑Fi 7 testing solution 明確把 R&S CMX500 定位為 R&D signaling / interworking 測試，把 R&S CMP180 定位為 production non-signaling RF 測試 [20]。\nCMX500 是 multi-technology multi-channel signaling tester，已新增 integrated Wi‑Fi 7 test functionality，用於 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation [18]。\nWi‑Fi 7 R&D 測試需要在 signaling mode 與 real-world conditions 下量測 RF TX/RX characteristics；MLO 是 Wi‑Fi 7 key feature，因此 multiple RF chains 的 test environment 很重要 [18]。\nCMP180 在 WLAN device production phase 被定位為 non-signaling RF testing；來源說 production phase 中所有 RF measurements 以 non-signaling mode 執行以節省時間，CMP180 optimized for this purpose [19]。\nCMP180 支援 Wi‑Fi 6E、Wi‑Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz；它 integrated two analyzers, two generators and two sets of eight RF ports，可 single box 支援 2x2 MIMO，兩台 CMP180 可擴展至 four analyzers and generators 以測 4x4 MIMO AP [19]。\n可對接 option：CMX500 WLAN signaling options 包含 802.11be STA basic R&S CMX‑KS352B、802.11be AP basic R&S CMX‑KS356B、802.11bn STA/AP basic R&S CMX‑KS353B / KS357B、2x2 MIMO R&S CMX‑KS360B、advanced encryption/authentication R&S CMX‑KS365B [6]。\nQualcomm Snapdragon Auto 5G Modem‑RF 的 NG eCall verification process employed R&S CMX500 mobile radio tester [48]。\nCMX500 被描述為 NG eCall including voice and data transmission 的 comprehensive testing solution；測試 simulating a PSAP，並 validated compliance of the implementation at both ends with EN 17240:2024 [48]。\n來源稱 CMX500 with R&S CMX‑KA098 software option can be effectively used for NG eCall testing under realistic network conditions；驗證對象為 Snapdragon Auto 5G Modem‑RF 的 NG eCall functionality，合作方為 R&S 與 Qualcomm Technologies [49]。\nCMX‑KA098 是 CMX500 的 NGeCall / IMS eCall application test software option；其 test scope 包含 IMS eCall session establishment、MSD transfer、voice link、audio interface verification、PSAP callback、5GS/NR eCall over IMS cases 與 LTE/EPS eCall over IMS cases [50][56]。\nCMX‑KA098 version baseline 包含 CEN EN 17240:2024 條件：CMX500 >= CSW 2025.0.0.1850 / CMX‑KA098 >= V4.3.0‑RC8 [54]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 / CMX500 OBT | 5G NR/LTE/WLAN device signaling、NR‑NTN R&D、callbox、RF measurement | CMX500 支援 LTE、NR FR1、NR FR2、NSA、SA、FDD、TDD；提供 NR FR1/FR2 signaling and TX measurements、LTE signaling、WLAN signaling/TX measurements、fading、AWGN、BLER、throughput、PER、IMS/audio/POLQA、XLAPI/SCPI automation。[1][5] | One-box network emulation and measurement；可覆蓋 cellular + WLAN signaling / measurement，且 OBT 已在 NTN live connection 與 Bluetest OTA multi-technology validation 語境中被使用。[1][14][17] | [1][5][14][17] | Features document 是 features/functions overview，不是 technical specifications datasheet，且 data without tolerance limits is not binding。[4] |\n| R&S CMX500 + R&S TS8980 + R&S TS‑RRM | NR‑NTN chipset conformance / validation | NR‑NTN measurements conducted on TS8980、TS‑RRM、CMX500 in NR FR1；DUT 為 Samsung NR‑NTN chipset。[29][37] | 直接有 chipset DUT 與 GCF/PTCRB conformance 語境；測試 domains 包含 RF、RRM、PCT。[31][37] | [29][31][37][64] | TS‑RRM formal specifications、version、BOM、software release、test case list、order number 未提供；來源未逐項說明哪些 RRM test cases 由 TS‑RRM 執行。[38][39] |\n| CMX500 NR‑NTN signaling options | NR‑NTN Rel.17/18/19、NB‑NTN signaling | R&S CMX‑KS627B/M/X = NR signaling extension Rel.17 NTN；R&S CMX‑KS628B/X = NR signaling extension Rel.18 NTN；R&S CMX‑KS629B/X = NR signaling extension Rel.19 NTN；R&S CMX‑KS527B/X = NB‑NTN signaling Rel.17。[7] | NTN chipset/device labs can map product capability discussions to named CMX500 NTN signaling option families. | [7] | 正式 NTN BOM / configuration 不可由 PR 或 option table 自動推導；需 configuration guide。[30] |\n| R&S CMX500 Wi‑Fi signaling options | Wi‑Fi 7 R&D signaling、MLO/MIMO/coexistence/E2E tests | R&S CMX‑KS352B = WLAN signaling 802.11be STA basic；R&S CMX‑KS356B = WLAN signaling 802.11be AP basic；R&S CMX‑KS360B = WLAN signaling 2x2 MIMO；R&S CMX‑KS365B = WLAN advanced encryption/authentication；R&S CMX‑KS353B/KS357B = 802.11bn STA/AP basic。[6] | CMX500 is positioned for Wi‑Fi 7 R&D signaling under real-world conditions, including RF TX/RX, MLO, 2x2 MIMO, 6 GHz, coexistence and E2E tests。[18] | [6][18] | Passage confirms Wi‑Fi 7 R&D/device test, not a specific semiconductor customer pipeline or volume demand.[18] |\n| R&S CMP180 | WLAN production non-signaling RF testing | Supports Wi‑Fi 6E、Wi‑Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz；two analyzers/two generators/two sets of eight RF ports；single-box 2x2 MIMO；two instruments scalable to 4x4 MIMO AP testing。[19] | Production phase RF measurements are done in non-signaling mode to save time, and CMP180 is optimized for this purpose。[19] | [19][20] | 知識庫未標示 CMP180 option codes、order numbers、pricing 或 semiconductor-specific customer fit. |\n| R&S CMX500 + CMX‑KA098 | Automotive 5G modem NG eCall verification | CMX‑KA098 = NGeCall / IMS eCall application test software option；Ident No 1222.6639.02；short text APPL IMS NGECALL；service contract CMX‑PU100。[50][53][57] | Directly used for Snapdragon Auto 5G Modem‑RF NG eCall verification under realistic network conditions, simulating PSAP and validating EN 17240:2024 compliance.[48][49] | [48][49][50][53][57] | Source does not list full test case IDs, measurement conditions, software versions or pass/fail report for the Qualcomm verification.[48] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| NTN demo / early partner validation | CMX500 OBT + satellite-base-station emulation setup | Lead with MediaTek NTN‑NR device as DUT, live 5G NTN‑NR Rel.17 connection, LEO satellite access node emulation, and interactive callbox mode.[17] | This is PR/demo-level evidence and cannot replace formal CMX500 NR‑NTN configuration.[17][30] |\n| WLAN production RF test | CMP180 | Lead with non-signaling RF measurements to save time in production, Wi‑Fi 7 / Wi‑Fi 6E / 5G NR FR1 support, 500 MHz bandwidth, 2x2 MIMO single-box and 4x4 scaling with two instruments.[19] | CMP180 option stack, price and production throughput numbers are not in the passages. |\n| Automotive 5G modem NG eCall | CMX500 + CMX‑KA098 | Lead with Qualcomm Snapdragon Auto 5G Modem‑RF verification, PSAP simulation, EN 17240:2024, voice/data transmission, and realistic network conditions.[48][49] | Full test case IDs, measurement conditions, software versions and pass/fail report are not listed.[48] |\n### 限制\nThe vault does not provide a formal ranked list of “strongest opportunities,” so any prioritization is an inference from how directly the passages tie a tester to a chipset/modem DUT or to explicit R&D/production signaling/non-signaling use cases [29][37][48][49][20].\nPress-release positioning is not the same as measured market demand; the cited passages support technical fit and demonstrated use, not market share, revenue forecast, or customer purchase intent [17][29][31][48][49].\nFor CMX500 features/options, the features document is not a binding technical specifications datasheet, and data without tolerance limits is not binding [4].\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[4] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[5] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[6] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[7] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[14] Wiki：R&S CMX500 OBT（來源：`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[17] Wiki：R&S CMX500 OBT（來源：`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[18] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[19] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[20] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[29] Wiki：NR-NTN conformance testing（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[30] Wiki：NR-NTN conformance testing（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[31] Wiki：NR-NTN conformance testing（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[37] Wiki：R&S TS-RRM（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[38] Wiki：R&S TS-RRM（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[39] Wiki：R&S TS-RRM（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[48] Wiki：Snapdragon Auto 5G Modem-RF（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`）\n[49] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[50] Wiki：R&S CMX-KA098（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`…）\n[53] Wiki：R&S CMX-KA098（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`…）\n[54] Wiki：R&S CMX-KA098（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-K",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_Cdsd8DqZYymX777CmbLPcBG7",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "建議主軸：知識庫未提供正式「strongest」排序；【推論】若以「有明確半導體 / chipset / modem DUT 證據」與「明確 signaling / non-signaling 測試鏈接」為準，最有證據支撐的機會是 NR‑NTN chipset/device validation、Wi‑Fi 7 R&D + production RF test、Automotive 5G modem NG eCall verification [29][31][37][18][19][20][48][49]。\n### 推薦先賣\nR&S 的 NR‑NTN conformance 測試案例在 R&S TS8980 Conformance Test Platform、R&S TS‑RRM 與 R&S CMX500 上執行，且 measurements 在 NR FR1 執行，DUT 是 Samsung NR‑NTN chipset [29]。\n較新 PR 語境稱 R&S 已在 GCF NR‑NTN conformance test cases 取得 highest number validated，涵蓋 RF、RRM、PCT domains；all measurements conducted on TS8980、TS‑RRM、CMX500，DUT 為 Samsung NR‑NTN chipset [31][37]。\nCMX500 被描述為 conformance test solutions 的核心 5G one-box signaling tester，支援 early R&D through integrated fading and channel emulation，以及 satellite constellation visualization [29]。\nCMX500 OBT 也被用於 MediaTek NTN‑NR device as DUT 的 live 5G NTN‑NR Rel.17 connection 展示，CMX500 OBT 在 setup 中 simulate satellite base station，CMX500 operate in interactive callbox mode，可 trigger voice calls alongside RF-related measurements [17]。\n可對接 option：NR NTN Rel.17/18/19 signaling extensions 包含 R&S CMX‑KS627B/M/X、R&S CMX‑KS628B/X、R&S CMX‑KS629B/X；NB‑NTN signaling Rel.17 為 R&S CMX‑KS527B/X [7]。\nR&S Wi‑Fi 7 testing solution 明確把 R&S CMX500 定位為 R&D signaling / interworking 測試，把 R&S CMP180 定位為 production non-signaling RF 測試 [20]。\nCMX500 是 multi-technology multi-channel signaling tester，已新增 integrated Wi‑Fi 7 test functionality，用於 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation [18]。\nWi‑Fi 7 R&D 測試需要在 signaling mode 與 real-world conditions 下量測 RF TX/RX characteristics；MLO 是 Wi‑Fi 7 key feature，因此 multiple RF chains 的 test environment 很重要 [18]。\nCMP180 在 WLAN device production phase 被定位為 non-signaling RF testing；來源說 production phase 中所有 RF measurements 以 non-signaling mode 執行以節省時間，CMP180 optimized for this purpose [19]。\nCMP180 支援 Wi‑Fi 6E、Wi‑Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz；它 integrated two analyzers, two generators and two sets of eight RF ports，可 single box 支援 2x2 MIMO，兩台 CMP180 可擴展至 four analyzers and generators 以測 4x4 MIMO AP [19]。\n可對接 option：CMX500 WLAN signaling options 包含 802.11be STA basic R&S CMX‑KS352B、802.11be AP basic R&S CMX‑KS356B、802.11bn STA/AP basic R&S CMX‑KS353B / KS357B、2x2 MIMO R&S CMX‑KS360B、advanced encryption/authentication R&S CMX‑KS365B [6]。\nQualcomm Snapdragon Auto 5G Modem‑RF 的 NG eCall verification process employed R&S CMX500 mobile radio tester [48]。\nCMX500 被描述為 NG eCall including voice and data transmission 的 comprehensive testing solution；測試 simulating a PSAP，並 validated compliance of the implementation at both ends with EN 17240:2024 [48]。\n來源稱 CMX500 with R&S CMX‑KA098 software option can be effectively used for NG eCall testing under realistic network conditions；驗證對象為 Snapdragon Auto 5G Modem‑RF 的 NG eCall functionality，合作方為 R&S 與 Qualcomm Technologies [49]。\nCMX‑KA098 是 CMX500 的 NGeCall / IMS eCall application test software option；其 test scope 包含 IMS eCall session establishment、MSD transfer、voice link、audio interface verification、PSAP callback、5GS/NR eCall over IMS cases 與 LTE/EPS eCall over IMS cases [50][56]。\nCMX‑KA098 version baseline 包含 CEN EN 17240:2024 條件：CMX500 >= CSW 2025.0.0.1850 / CMX‑KA098 >= V4.3.0‑RC8 [54]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 / CMX500 OBT | 5G NR/LTE/WLAN device signaling、NR‑NTN R&D、callbox、RF measurement | CMX500 支援 LTE、NR FR1、NR FR2、NSA、SA、FDD、TDD；提供 NR FR1/FR2 signaling and TX measurements、LTE signaling、WLAN signaling/TX measurements、fading、AWGN、BLER、throughput、PER、IMS/audio/POLQA、XLAPI/SCPI automation。[1][5] | One-box network emulation and measurement；可覆蓋 cellular + WLAN signaling / measurement，且 OBT 已在 NTN live connection 與 Bluetest OTA multi-technology validation 語境中被使用。[1][14][17] | [1][5][14][17] | Features document 是 features/functions overview，不是 technical specifications datasheet，且 data without tolerance limits is not binding。[4] |\n| R&S CMX500 + R&S TS8980 + R&S TS‑RRM | NR‑NTN chipset conformance / validation | NR‑NTN measurements conducted on TS8980、TS‑RRM、CMX500 in NR FR1；DUT 為 Samsung NR‑NTN chipset。[29][37] | 直接有 chipset DUT 與 GCF/PTCRB conformance 語境；測試 domains 包含 RF、RRM、PCT。[31][37] | [29][31][37][64] | TS‑RRM formal specifications、version、BOM、software release、test case list、order number 未提供；來源未逐項說明哪些 RRM test cases 由 TS‑RRM 執行。[38][39] |\n| CMX500 NR‑NTN signaling options | NR‑NTN Rel.17/18/19、NB‑NTN signaling | R&S CMX‑KS627B/M/X = NR signaling extension Rel.17 NTN；R&S CMX‑KS628B/X = NR signaling extension Rel.18 NTN；R&S CMX‑KS629B/X = NR signaling extension Rel.19 NTN；R&S CMX‑KS527B/X = NB‑NTN signaling Rel.17。[7] | NTN chipset/device labs can map product capability discussions to named CMX500 NTN signaling option families. | [7] | 正式 NTN BOM / configuration 不可由 PR 或 option table 自動推導；需 configuration guide。[30] |\n| R&S CMX500 Wi‑Fi signaling options | Wi‑Fi 7 R&D signaling、MLO/MIMO/coexistence/E2E tests | R&S CMX‑KS352B = WLAN signaling 802.11be STA basic；R&S CMX‑KS356B = WLAN signaling 802.11be AP basic；R&S CMX‑KS360B = WLAN signaling 2x2 MIMO；R&S CMX‑KS365B = WLAN advanced encryption/authentication；R&S CMX‑KS353B/KS357B = 802.11bn STA/AP basic。[6] | CMX500 is positioned for Wi‑Fi 7 R&D signaling under real-world conditions, including RF TX/RX, MLO, 2x2 MIMO, 6 GHz, coexistence and E2E tests。[18] | [6][18] | Passage confirms Wi‑Fi 7 R&D/device test, not a specific semiconductor customer pipeline or volume demand.[18] |\n| R&S CMP180 | WLAN production non-signaling RF testing | Supports Wi‑Fi 6E、Wi‑Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz；two analyzers/two generators/two sets of eight RF ports；single-box 2x2 MIMO；two instruments scalable to 4x4 MIMO AP testing。[19] | Production phase RF measurements are done in non-signaling mode to save time, and CMP180 is optimized for this purpose。[19] | [19][20] | 知識庫未標示 CMP180 option codes、order numbers、pricing 或 semiconductor-specific customer fit. |\n| R&S CMX500 + CMX‑KA098 | Automotive 5G modem NG eCall verification | CMX‑KA098 = NGeCall / IMS eCall application test software option；Ident No 1222.6639.02；short text APPL IMS NGECALL；service contract CMX‑PU100。[50][53][57] | Directly used for Snapdragon Auto 5G Modem‑RF NG eCall verification under realistic network conditions, simulating PSAP and validating EN 17240:2024 compliance.[48][49] | [48][49][50][53][57] | Source does not list full test case IDs, measurement conditions, software versions or pass/fail report for the Qualcomm verification.[48] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| NTN demo / early partner validation | CMX500 OBT + satellite-base-station emulation setup | Lead with MediaTek NTN‑NR device as DUT, live 5G NTN‑NR Rel.17 connection, LEO satellite access node emulation, and interactive callbox mode.[17] | This is PR/demo-level evidence and cannot replace formal CMX500 NR‑NTN configuration.[17][30] |\n| WLAN production RF test | CMP180 | Lead with non-signaling RF measurements to save time in production, Wi‑Fi 7 / Wi‑Fi 6E / 5G NR FR1 support, 500 MHz bandwidth, 2x2 MIMO single-box and 4x4 scaling with two instruments.[19] | CMP180 option stack, price and production throughput numbers are not in the passages. |\n| Automotive 5G modem NG eCall | CMX500 + CMX‑KA098 | Lead with Qualcomm Snapdragon Auto 5G Modem‑RF verification, PSAP simulation, EN 17240:2024, voice/data transmission, and realistic network conditions.[48][49] | Full test case IDs, measurement conditions, software versions and pass/fail report are not listed.[48] |\n### 限制\nThe vault does not provide a formal ranked list of “strongest opportunities,” so any prioritization is an inference from how directly the passages tie a tester to a chipset/modem DUT or to explicit R&D/production signaling/non-signaling use cases [29][37][48][49][20].\nPress-release positioning is not the same as measured market demand; the cited passages support technical fit and demonstrated use, not market share, revenue forecast, or customer purchase intent [17][29][31][48][49].\nFor CMX500 features/options, the features document is not a binding technical specifications datasheet, and data without tolerance limits is not binding [4].\n\n來源：\n[1] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[4] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[5] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[6] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[7] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[14] Wiki：R&S CMX500 OBT（來源：`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[17] Wiki：R&S CMX500 OBT（來源：`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[18] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[19] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[20] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[29] Wiki：NR-NTN conformance testing（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[30] Wiki：NR-NTN conformance testing（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[31] Wiki：NR-NTN conformance testing（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[37] Wiki：R&S TS-RRM（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[38] Wiki：R&S TS-RRM（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[39] Wiki：R&S TS-RRM（來源：`Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md`、`Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md`）\n[48] Wiki：Snapdragon Auto 5G Modem-RF（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`）\n[49] Wiki：NG eCall EN 17240 2024 verification（來源：`Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md`、`cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md`）\n[50] Wiki：R&S CMX-KA098（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`…）\n[53] Wiki：R&S CMX-KA098（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md`…）\n[54] Wiki：R&S CMX-KA098（來源：`CMW-KA096_PanEUNGeCall_TC_Status.md`、`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX-K",
+          "evidence": {
+           "raw_citations": 24,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-c6e85a9f60004612b73a0cae31993961",
+            "request_id": "request-c6e85a9f60004612b73a0cae31993961",
+            "span_id": "span-c6e85a9f60004612b73a0cae31993961",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in Semiconductor, and what evidence supports each opportunity?",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 7.862991
+             },
+             {
+              "text": "R&S CMX500 › Base unit 與主要訂購資訊\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n| 項目 | Type / code | Order No. | 原文說明 |\n|---|---|---|---|\n| CMX500 Radio communication tester | CMX500 | 1201.0002K70 | accessories 包含 power cords、operating manual (getting started)、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters |\n| CMX500 basic assembly | R&S CMX-PB70H | 1222.0676.09 | basic assembly |\n| R&S CMX accelerator unit | R&S CMX-B200A | 1222.0747.02 | accelerated digital signal processing capabilities |\n| R&S CMX processing unit | R&S CMX-B300C | 1222.0801.04 | generic high-performance computing platform for advanced data processing |\n| R&S CMX IF unit | R&S CMX-B500A | 1222.0924.02 | IF frequency range vector signal analysis and ARB based generator |\n| R&S CMX RF unit | R&S CMX-B600B | 1222.0953.03 | FR1 frequency range vector signal analysis and ARB based generator |\n\n[[CMX500_Features_CSW9-20-0_en_32]] 使用 generic code [[R&S CMX-B500x]] 與 [[R&S CMX-B600x]]；[[CMX500_specs_en_5216-4127-22_v1100]] 在 ordering information 中列出具體 orderable unit 為 [[R&S CMX-B500A]] 與 [[R&S CMX-B600B]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 5.059436
+             },
+             {
+              "text": "R&S CMX500 › 使用介面與 automation\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n| 介面 | 原文定位 |\n|---|---|\n| [[CMsquares]] | 單一 graphical user interface，web-based、responsive，支援 RF tests、functional tests、advanced signaling tests、protocol tests |\n| [[R&S CMXmars]] | Message log analysis，可離線分析或在線監控 instrument messaging |\n| [[R&S CMsequencer]] | Graphical scripting interface，可在 CMX500 或 Windows PC 上建立、設定與執行 test scripts |\n| [[XLAPI]] | Python-based scripting interface，適合 complex scripting use cases |\n| [[SCPI]] | Remote control interface，適合 simple、standardized scripting use cases |\n\nXLAPI scripting environment：Python 3.10；script development computer 可為 Windows PC 或 CMX500；XLAPI installation package 為 **CMX-KF600X**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 36,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.522791
+             },
+             {
+              "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.451712
+             },
+             {
+              "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.03711
+             },
+             {
+              "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx | WLAN SISO signaling |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx | 802.11ax station testing |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx | 802.11be station testing |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx | 802.11bn station testing |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx | 802.11ax AP testing |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx | 802.11be AP testing |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx | 802.11bn AP testing |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx | 2x2 MIMO support |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx | Enterprise security support |\n| R&S CMX-KS500B / M / X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx | 僅 LTE standalone 需要；NR NSA LTE anchor cells 包含於 NR signaling options |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx | D2C fixed / variable delay |\n| R&S CMX-KS600B / M / X | NR signaling enabler, Rel. 15 | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx | 包含 5G NR SA option 2、NSA option 3、DL 2x2/4x4 MIMO、one CC、UL 256QAM |\n| R&S CMX-KS610B / M / X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx | UL 2x2 MIMO、CA up to 9 CC |\n| R&S CMX-KS611B / M / X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx | SUL / Rel. 16 features |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.813784
+             },
+             {
+              "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS612B / M / X | NR signaling extension, CA 10 to 12 CC | 1222.6574.xx / 1222.6580.xx / 1222.6597.xx | CA 10 to 12 CC |\n| R&S CMX-KS613B / X | Multi-SIM enabler | 1222.9580.xx / 1222.9596.xx | Basic / expert |\n| R&S CMX-KS617B / M / X | NR signaling extension, Rel. 17, RedCap | 1222.6600.xx / 1222.6616.xx / 1222.6622.xx | RedCap |\n| R&S CMX-KS618B / X | NR signaling extension, Rel. 18, eRedCap | 1222.9609.xx / 1222.9621.xx | eRedCap |\n| R&S CMX-KS627B / M / X | NR signaling extension, Rel. 17, NTN | 1222.8690.xx / 1222.8702.xx / 1222.8719.xx | NTN |\n| R&S CMX-KS628B / X | NR signaling extension, Rel. 18, NTN | 1222.9638.xx / 1222.9650.xx | NTN |\n| R&S CMX-KS629B / X | NR signaling extension, Rel. 19, NTN | 1223.0086.xx / 1223.0092.xx | NTN |\n| R&S CMX-KS637B / M / X | NR signaling extension, Rel. 17 w/o RedCap & NTN | 1222.8777.xx / 1222.8783.xx / 1222.8790.xx | Rel. 17 without RedCap & NTN |\n| R&S CMX-KS638B / X | NR signaling extension w/o eRedCap & NTN Rel. 18 | 1222.9667.xx / 1222.9680.xx | Rel. 18 without eRedCap & NTN |\n| R&S CMX-KS527B / X | NB-NTN signaling, Rel. 17 | 1222.9738.xx / 1222.9744.xx | NB-IoT options set 中 basic / expert |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 26,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.732181
+             },
+             {
+              "text": "R&S CMX500 › Mechanical、power、dimensions\n| 項目 | 規格 |\n|---|---|\n| Nonoperating vibration, sinusoidal | 5 Hz to 55 Hz，0.3 mm double amplitude constant；55 Hz to 150 Hz，0.5 g constant；EN 60068-2-6 |\n| Nonoperating vibration, random | 8 Hz to 500 Hz，acceleration 1.2 g RMS；EN 60068-2-64 |\n| Shock | 40 g shock spectrum；MIL-STD-810 method 516 procedure I |\n| Power supply with R&S CMX-PB70H | one C20 AC power connector |\n| Rated voltage | 240 V to 173 V AC range：full power 100 V to 240 V AC ±10 %，2800 W，all instrument configurations possible；173 V to 100 V AC range：power linear degradation 2800 W to 1580 W，只適用 low optioned configurations |\n| Rated frequency | 50 Hz to 60 Hz ±5 % |\n| Rated current | max. 16 A to 12.5 A |\n| Standby with OCXO | warm max. 6 W；cold max. 10 W |\n| Calibration interval | 12 months |\n| Dimensions | 444.5 mm × 328.8 mm × 610.0 mm；17.50 in × 12.95 in × 23.99 in |\n| Rackmounting | 19 inch 1/1，7 HU，550 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 40,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.286539
+             },
+             {
+              "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 2.570631
+             },
+             {
+              "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 2.555599
+             },
+             {
+              "text": "CMX500 Callbox › UI 與 automation\n來源將 [[CMsquares]] 描述為 web based、all-in-one configuration、all tools in one place、modern UI，並列出：\n\n- live views。\n- App Testing。\n- NTN live views。\n- Sequencer。\n- Log analysis。\n- One-click RF testing。\n\n在 RF pre-conformance 脈絡中，來源稱可 quick switch from manual to automated pre-conformance，且使用 same technology specific license，並指向 [[CMX500 Sequencer Test Packages]] 與 `Sequencer-CMX-Test_Packages_Database.xlsx`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 1.675516
+             },
+             {
+              "text": "CMX500 Callbox › Testing phases\n[[CMX500_Callbox]] 將測試階段放在下列脈絡中：\n\n- [[Go-NoGo Testing]]。\n- [[Non-Sig Testing]]。\n- [[Conformance Testing]]。\n- [[R&D Testing]]。\n\n來源未明確說這四者是完整 lifecycle，也未定義各階段 pass/fail 標準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 0.965981
+             },
+             {
+              "text": "R&S CMX500 OBT › 來源中的定位\n[[CMW500 to CMX500OBT_License_Swap_Process]] 將 license swap 流程描述為 `License swap for OBT upgrades`，並以：\n\n- Unit A：[[R&S CMW500]]。\n- Unit B：[[R&S CMX500 OBT]]。\n\n來表示從 CMW500 setup 升級到 CMX500 OBT 時的 keycode transfer target。\n\n來源短版流程另寫明：Customers who upgrade their Setup2 to CMX500 OBT，R&S offers a license swap CMW500 → CMX500。\n\n[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]]（來源未標示發布日期；raw created 2026-09-11）將 [[R&S CMX500 OBT]] 描述為 CMX500 one-box signaling tester（OBT），可在 [[Bluetest]] RTS 中讓 developers 進行 realistic [[MIMO]] stress tests。該來源明確說 [[Bluetest]] 已將 [[R&S CMX500 OBT]] 的 4G 與 [[5G NR]] test functionality 整合進 [[Bluetest Flow]] control software，並讓 developers 使用 [[R&S CMX500 OBT]] 在 [[Bluetest]] RTS 中執行 [[5G NR Standalone]]、[[5G NR Non-Standalone]]（EN-DC）與 [[LTE]] testing。\n\n[[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]]（來源未標示發布日期；raw created 2026-09-11）將 [[R&S CMX500 OBT]] 描述為 state-of-the-art one-box signaling tester，用於展示基於 [[3GPP Release 17]] specifications 的 [[5G NTN-NR]] connection。該來源說展示 setup 使用 [[R&S CMX500 OBT]] 與 [[MediaTek]] 的 NTN-NR device as DUT，並在 [[MWC Barcelona 2024]] 的 Rohde & Schwarz booth 展示 live 5G NTN-NR connection。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+              },
+              "score": 3.053444
+             },
+             {
+              "text": "R&S CMX500 OBT › Bluetest RTS / OTA test 語境\n依 [[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]]：\n\n- [[R&S CMX500 OBT]] 可與 [[Bluetest]] reverberation test systems（RTS）及 [[Bluetest Flow]] v1.18 搭配。\n- 支援使用 [[R&S CMX500 OBT]] 在 Bluetest RTS 中執行 [[5G NR Standalone]]、[[5G NR Non-Standalone]]（EN-DC）與 [[LTE]] testing。\n- [[Bluetest]] 也將較早的 [[WLAN]] stations / access points（[[IEEE 802.11]] a/b/g/n/ac/ax/be）integrated testing capabilities 擴充到 [[Wi-Fi 7]] 320 MHz bandwidth support。\n- 來源將此整合定位為 single tester and reverberation test system 的 multi-technology validation path。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+              },
+              "score": 2.38328
+             },
+             {
+              "text": "R&S CMX500 OBT\nR&S CMX500 OBT 是 [[R&S CMX500]] 的 one box tester upgrade / target configuration 語彙；在 [[CMW500 to CMX500OBT_License_Swap_Process]]（November 2024；文件版次來源未標示）中，它是 [[R&S CMW500]] license swap 的 Unit B / target unit。[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 進一步把 [[R&S CMX500 OBT]] 描述為可在 [[Bluetest]] reverberation test systems（RTS）中與 [[Bluetest Flow]] v1.18 搭配，用於 4G、[[5G NR]] 與 [[WLAN]] over-the-air tests 的 one-box signaling tester。[[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 則把它放在 [[MWC Barcelona 2024]] 的 [[5G NTN-NR Rel.17 connection demonstration]] 中，用來 simulate satellite base station 並支援 interactive callbox mode。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+              },
+              "score": 2.144462
+             },
+             {
+              "text": "R&S CMX500 OBT › License swap 語境\n[[CMW500 to CMX500OBT_License_Swap_Process]] 對 CMX500 OBT upgrade 定義了一組 allowed keycode swaps，包含 5G NR measurement、LTE measurement、WLAN signaling / measurement、IP application 與 NGeCall application。流程要求先刪除 [[R&S CMW500]] 上的 permanent licenses，並用 Delete Confirmation Keys 確認刪除，再由 Swap Team 為 [[R&S CMX500 OBT]] 產生對應 new keys。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+              },
+              "score": 1.291401
+             },
+             {
+              "text": "R&S CMX500 OBT › MWC 2024 5G NTN-NR Rel.17 展示語境\n依 [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]]：\n\n- 展示使用 [[R&S CMX500 OBT]] 與 [[MediaTek]] 的 NTN-NR device as DUT。\n- 展示內容為 live [[5G NTN-NR]] connection，emulating a [[Low Earth Orbit]] satellite access node。\n- [[R&S CMX500 OBT]] radio communication tester 在 setup 中 simulate the satellite base station。\n- [[R&S SMBV100B]] vector signal generator 在 setup 中以 integrated GNSS option simulate the different satellite constellations。\n- [[R&S CMX500]] 會 operate in an interactive callbox mode，allowing users to trigger voice calls alongside RF-related measurements。\n- 來源定位此 test mode 為評估 future NTN-NR devices powered by [[MediaTek]] NTN test platform 在不同條件下的 5G connection performance and reliability。\n\n此段只可作為 [[MWC Barcelona 2024]] 展示 / PR 層級證據；不能取代 [[CMX500 NR-NTN configuration]]、[[CMX500_specs_en_5216-4127-22_v1100]] 或 [[CMX500_Features_CSW9-20-0_en_32]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+              },
+              "score": 0.726577
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › R&D：R&S CMX500 single-box signaling testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- [[R&S CMX500]] 是 multi-technology multi-channel signaling tester。\n- 來源稱其已新增 integrated [[Wi-Fi 7]] test functionality。\n- 目的在 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation。\n- Wi-Fi 7 R&D 測試需在 signaling mode 與 real-world conditions 下量測 RF TX / RX characteristics。\n- [[MLO]] 是 [[Wi-Fi 7]] key feature，因此提供 multiple RF chains 的 test environment 很重要。\n- 來源列出的 Wi‑Fi 7-specific tests 包含 2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 2.761739
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › Production：R&S CMP180 non-signaling RF testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。\n- [[R&S CMP180]] 被定位為 optimized for this purpose 的 radio communication tester。\n- 來源稱 [[R&S CMP180]] 支援 many cellular and non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform。\n- 來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。\n- 來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。\n- 來源稱 two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 2.737886
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing\n[[Wi-Fi 7 R&D and production testing]] 是 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 中描述的測試方案組合：以 [[R&S CMX500]] 覆蓋 R&D signaling / interworking 測試，以 [[R&S CMP180]] 覆蓋 production non-signaling RF 測試。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 2.062226
+             },
+             {
+              "text": "FWA CPE 測試與驗證\n[[FWA CPE 測試與驗證]]是 [[FWA CPE]] 來源中對 FWA CPE 產品在 EVT、DVT、PVT、MP 階段可能涉及的 conformance、regulatory、OTA、production line 與功能驗證項目的整理。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FWA CPE 測試與驗證.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "FWA CPE 測試與驗證 › 來源日期與範圍\n- 主要來源：[[FWA CPE]]。\n- 來源正式日期：來源正文未標示。\n- raw converted：2026-09-17。\n- 來源同時列出 conformance test、regulatory test、conducted、OTA 與 PL test 等資料連結，但附件正文未擷取；本頁只記錄連結名稱與表格文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FWA CPE 測試與驗證.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "FWA CPE 測試與驗證 › 來源列出的待讀測試資料\n| 區段 | 來源列出的材料 | 可支持的主張範圍 |\n|---|---|---|\n| Conformance test | `TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.pptx` | 只可說來源列出 [[R&S TS8980 Conformance Test Platform]] / FR2 conformance presentation 連結；不可推論內容 |\n| Regulatory test | `Regulatory test for wireless devices with cellular technology.pptx` | 只可說來源列出 cellular wireless device regulatory test 連結；不可推論各國法規測項 |\n| Conducted | `1C111_1e_3GPPPreConfGuide.pdf` | 只可說來源列出 3GPP pre-conformance guide 連結；不可推論儀器配置或測項 |\n| OTA | 來源只列出 OTA 小標題 | 無附件內容；只能記錄 OTA 是待補資料方向 |\n| PL test | `PVT for SmallCell BTS PL test` / `MWC26 purposal for customer.pptx` | 只可說來源列出 small cell BTS PL test / PVT proposal 連結；不可推論 production line test 規格 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FWA CPE 測試與驗證.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "FWA CPE 測試與驗證 › 室內 1-Box CPE\n依 [[FWA CPE]] 表格，室內 1-Box / Indoor CPE / PC3 / [[Wi-Fi 6]] 類型的驗證項目包含：\n\n- DVT：[[Wi-Fi]] [[DFS]]、5G Attach / carrier aggregation、功耗量測。\n- PVT：[[PTCRB]] RF、TR-069、24hr 穩定性。\n- MP：FCT 吞吐 / 延遲。\n\n來源未列 EVT 項目。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FWA CPE 測試與驗證.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "FWA CPE 測試與驗證 › 室外 2-Box CPE\n依 [[FWA CPE]] 表格，室外 2-Box / ODU + IDU / PC4 / 高增益天線類型的驗證項目包含：\n\n- EVT：[[ODU]] 天線增益、[[PoE]] 供電。\n- DVT：OTA [[TRP]] / [[TIS]]、[[DFS]]、[[EN-DC]]。\n- PVT：[[GCF]]、環境耐受 -40°C 到 +55°C。\n- MP：OTA 共存、韌體 OTA。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FWA CPE 測試與驗證.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "FWA CPE 測試與驗證 › 企業級室內 uCPE\n依 [[FWA CPE]] 表格，企業級室內 / [[uCPE]] / [[Wi-Fi 7]] / Multi-Gig 類型的驗證項目包含：\n\n- DVT：[[Wi-Fi 7]] MU-MIMO、Slice。\n- PVT：多 [[PDU Session]]、SLA 驗證。\n- MP：端到端 1Gbps UL / DL。\n\n來源未列 EVT 項目。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FWA CPE 測試與驗證.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "FWA CPE 測試與驗證 › 戶外高階 mmWave ODU\n依 [[FWA CPE]] 表格，戶外高階 / [[mmWave ODU]] / PC4 類型的驗證項目包含：\n\n- EVT：mmWave [[Beamforming]]。\n- DVT：FR2 [[EVM]]、熱管理。\n- PVT：[[CTIA]] OTA、[[IP67]]。\n- MP：多用戶 [[MIMO]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FWA CPE 測試與驗證.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "FWA CPE 測試與驗證 › 標準線索\n[[FWA CPE]] 表格列出的標準包含下列線索；本頁只記錄來源列名，不替代標準原文：\n\n| 標準線索 | 來源中的用途 / 類型 | 未決限制 |\n|---|---|---|\n| [[ETSI EN 301 893]] | Wi-Fi 5GHz TPC / DFS、IDU Wi-Fi、Wi-Fi 6E / 7 | 需確認版本、頻段與裝置類別適用性 |\n| [[ETSI EN 301 575]] | 能耗、ODU / IDU 能耗 | 需確認版本與產品 scope |\n| [[ETSI TS 123 316]] | 5G-RG、Hybrid Access | 來源使用 ETSI TS 寫法；需對應 3GPP TS 23.316 版本 |\n| [[ETSI EN 300 019-1-4]] | 戶外環境 / 嚴苛環境 | 需確認測試類別與環境 profile |\n| [[ETSI EN 303 687]] | 若 FR2 BS 側 | 來源沒有說明適用條件 |\n| [[3GPP TS 38.101]] | FR1 / FR2 UE RF、PC4、高功率類別 | 表格中的 URL 疑似不是正式 TS 38.101 文件；需查標準原文 |\n| [[3GPP TS 38.133]] | RRM、OTA | 需確認與 FWA CPE / ODU 的測試對應 |\n| [[3GPP TS 38.306]] | UE Capability、1024QAM | 需確認版本與 capability 條件 |\n| [[3GPP TS 23.501]] | 5G Core、Slice | 表格連結疑似指向 TS 123316；需確認 |\n| [[3GPP TS 38.141]] | BS conformance, FWA 適用 | 來源說 FWA 適用，但未標示 BS / UE / CPE 的界線 |\n| [[3GPP TS 38.331]] | RRC | 來源僅列標準線索與連結，未提供版本或章節 |\n| [[GSMA TS.64]] | FWA Devices Architecture and Requirements、ODU-IDU GbE / PoE、Networking、QoS、mmWave 戶外、MIMO | 來源連到 v1.0，但未提供完整發布日期與版本狀態 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FWA CPE 測試與驗證.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "NR-NTN conformance testing › Rohde & Schwarz 測試系統\n依 [[Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP]]，test cases are conducted on：\n\n- [[R&S TS8980 Conformance Test Platform]]\n- [[R&S TS-RRM]]\n- [[R&S CMX500]]\n\n依 [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]]，all measurements were conducted on：\n\n- [[R&S TS8980 Conformance Test Platform]]\n- [[R&S TS-RRM]]\n- [[R&S CMX500]]\n\n來源並明示 measurements 在 [[NR FR1]] 執行，DUT 為 latest [[Samsung NR-NTN chipset]] from [[Samsung]]。\n\n來源也說 [[R&S CMX500]] 是 [[Rohde & Schwarz]] conformance test solutions 的核心 5G one-box signaling tester，支援 early R&D through integrated [[Fading]] and [[channel emulation]]，以及 intuitive tool for visualizing satellite constellations；[[R&S CONTEST]] test system software platform facilitates execution of [[3GPP]] test cases。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NR-NTN conformance testing.md"
+              },
+              "score": 2.98023
+             },
+             {
+              "text": "NR-NTN conformance testing › 與既有 CMX500 NTN 測試頁的關係\n- [[CMX500 NTN one-box tester]]：描述 [[R&S CMX500]] 作為 NTN all-in-one / one-box tester 的 PR positioning。本頁補入 GCF validated conformance test case claim。\n- [[5G NTN validation and testing]]：整理 NTN validation、partner testing、demo 與 certification test plan。本頁補入 GCF/PTCRB conformance validation 口徑。\n- [[CMX500 NR-NTN configuration]]：整理 NR-NTN application-specific configuration rules。本頁不提供 option stack 或 formal product configuration。\n- [[R&S CMX500 OBT]]：若來源提供 further information link 或 PR positioning，不能自動推導 OBT BOM；正式配置仍需 specification / configuration guide。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NR-NTN conformance testing.md"
+              },
+              "score": 1.735234
+             },
+             {
+              "text": "NR-NTN conformance testing › WI-555 / RFT 555 狀態口徑\n較早來源 [[Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP]] 說 [[Rohde & Schwarz]] 正與 Tier 1 chipset vendors 合作，successfully verifying their respective platforms and the test cases outlined in [[WI-555]] and [[RFT 555]]。同一來源也說 successful validation will activate [[WI-555]] and [[RFT 555]] and kick off conformance testing for [[NR-NTN]] devices。\n\n較新語境的 [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]] 說：\n\n- 已 successful validated highest number in [[GCF]] conformance test cases for [[NR-NTN]] to this date。\n- validated test cases within [[GCF]] [[WI-555]] are defined according to [[3GPP]] test specifications for [[RF]]、[[RRM]] and [[PCT]]。\n- 該結果 presented at recent [[Global Certification Forum]] meeting [[CAG #86]] in Düsseldorf。\n- 來源同時提到 following successful validation of the first 5G-based [[NR-NTN]] at [[PTCRB]]。\n\n⚠️ [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]]（raw created 2026-09-11；發布日期未標示）說 validated test cases within [[GCF]] [[WI-555]] have been achieved and presented at [[CAG #86]]，但既有頁面 [[NR-NTN conformance testing]] 說 successful validation will activate [[WI-555]] and [[RFT 555]]。判斷：新來源代表 GCF validation 狀態已有進展，但因兩份來源皆未標示發布日期與正式 activation date，本頁把較早來源視為 pre-validation readiness，把新來源視為後續 PR claim；仍不得推論完整 test case list、activation date 或 certification body minutes。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NR-NTN conformance testing.md"
+              },
+              "score": 1.13019
+             },
+             {
+              "text": "R&S TS8980 Conformance Test Platform › TS8980FTA-M1\n- `TS8980FTA-M1` full type approval systems 支援 RF 與 RRM OTA conformance test cases。\n- `TS8980FTA-M1` single-rack test systems 搭配 mmWave test chambers，例如 [[R&S ATS1800C]] 或 [[R&S ATS1800M]] CATR-based 5G NR mmWave test chamber。\n- `TS8980FTA-M1` 設計用於符合 [[TS 38.521-2]]、[[TS 38.521-3]] 或 [[TS 38.533]] 的 RF / RRM conformance test cases。\n- `TS8980FTA-M1` systems 提供基於 [[R&S CMW500]] 的 full signaling。\n- [[R&S CMX500]] 搭配 [[R&S CMXHEAD30]] remote radio head，擴充 [[R&S CMW500]] 對 5G NR FR1 與 FR2 的 signaling capabilities。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md"
+              },
+              "score": 4.343291
+             },
+             {
+              "text": "R&S TS8980 Conformance Test Platform › TS8980FTA-3 / TS8980FTA-3A\n- [[R&S TS8980FTA]]-3 / -3A full type approval systems 支援 RF 與 RRM conformance test cases。\n- `R&S TS8980FTA-3 (TS8980)` dual-rack test systems 設計用於符合下列規範的 RF / RRM conformance test cases：\n  - [[TS 51.010-1]]\n  - [[TS 34.121-1]]\n  - [[TS 36.521-1]]\n  - [[TS 36.521-3]]\n  - [[TS 38.521-1]]\n  - [[TS 38.521-3]]\n  - [[TS 38.521-4]]\n  - [[TS 38.533]]\n- `R&S TS8980FTA-3 (TS8980)` 提供基於 [[R&S CMWflexx]]、[[R&S CMWC]] 與最多 4 台 [[R&S CMW500]] 的 full signaling。\n- `TS8980FTA-3A` 以 [[R&S CMX500]] radio communication tester 擴充 [[R&S CMW500]] 的 5G NR signaling capabilities。\n- [[R&S SMW200A]] 用於 RF interference。\n- [[R&S FSW]] 可執行特殊 5G NR、LTE 與 WCDMA measurements。\n- [[R&S SSCU3A-1]] 與 [[R&S SSCU3B-1]] signal switching and conditioning units 結合 inband、wideband、filtering 與 net-op functionality。\n- 16 個 DUT connectors 支援 DUT 與 test system 的彈性連接。\n- `R&S TS8980FTA-3 (TS8980)` 是 `R&S TS8980FTA-2` system 的後繼系統；來源稱改良元件支援 5G NR 與 LTE-Advanced Pro 的 additional carrier aggregation 與 MIMO schemes。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md"
+              },
+              "score": 4.164358
+             },
+             {
+              "text": "R&S TS8980 Conformance Test Platform › TS8980FTA / TS8980PRE 系列\n依 [[RS_TS8980FTA_PRE_Series_SystemManual_en_63]]：\n\n- [[R&S TS8980FTA]] 與 [[R&S TS8980PRE]] 是基於 [[R&S CONTEST]] 的 test systems series。\n- [[R&S TS8980FTA]] 用於 **full conformance testing**；FTA 展開為 **full type approval**。\n- [[R&S TS8980PRE]] 用於 **pre-conformance testing**；PRE 展開為 **pre-conformance**。\n- 文件描述的 variants 包含 `R&S®TS8980FTA-3`、`R&S®TS8980FTA-3A`、`R&S®TS8980FTA-M1`、`R&S®TS8980PRE-3`、`R&S®TS8980PRE-3A`、`R&S®TS8980PRE-M1`。\n- R&S CONTEST-based test system series 用於量測 DUT 的 RF 與 RRM properties。\n- DUT 需依適用情況符合 [[3GPP]] Release 99 到 15 的 GSM、WCDMA、LTE 或 NR 5G。\n- Test system series 支援 LTE 與 NR 的 R&D 與 pre-conformance measurements。\n- Hardware setups、implemented test methods 與 test cases 涵蓋 transmitter、receiver 與 performance measurements。\n- Hardware configuration 可依所需 test case coverage 調整。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md"
+              },
+              "score": 1.358581
+             },
+             {
+              "text": "R&S TS8980 Conformance Test Platform › 文件與來源層級\n| 來源 | 層級 | 日期 / 版本 | 可支撐的主張 |\n|---|---|---|---|\n| [[RS_TS8980FTA_PRE_Series_SystemManual_en_63]] | System Manual | Version 63；© 2025；正式發布日期來源未標示 | TS8980FTA/PRE variants、system architecture、CONTEST-based operation、rack / PDU / cabling / component roles、maintenance / glossary |\n| [[Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP]] | PR | 來源未標示發布日期；raw created 2026-09-11 | TS8980 與 TS-RRM / CMX500 作為 NR-NTN upcoming validation test system components |\n| [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]] | PR | 來源未標示發布日期；raw created 2026-09-11 | TS8980 / TS-RRM / CMX500 用於 GCF validated NR-NTN RF / RRM / PCT measurements |\n| [[FWA CPE]] | OneNote link hub | raw converted 2026-09-17 | TS8980 FR2 conformance presentation 待讀材料線索 |\n| [[1C111_0e_3GPPPreConfGuide]] / [[1C111_1e_3GPPPreConfGuide]] | Application note | 06.2025 | TS8980 作為 strict 3GPP RF conformance / validated test cases dedicated solution example |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md"
+              },
+              "score": 1.248945
+             },
+             {
+              "text": "R&S TS-RRM\n[[R&S TS-RRM]] 是 [[Rohde & Schwarz]] 的 test system component；在 NR-NTN PR 中，它與 [[NR-NTN]] [[3GPP]] conformance testing、[[RRM]] test cases、[[GCF]] [[WI-555]] 與 [[PTCRB]] validation 語境相關。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS-RRM.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S TS-RRM › 來源中的角色\n依 [[Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP]]：\n\n- [[GCF]] [[WI-555]] 與 [[PTCRB]] [[RFT 555]] 將包含 [[RF]]、[[RRM]] 與 [[PCT]] test cases。\n- Test cases are conducted on [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] 與 [[R&S CMX500]]。\n- 來源脈絡為準備 [[NR-NTN]] in [[NR FR1]] 的 GCF / PTCRB upcoming validation。\n\n依 [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]]：\n\n- All measurements were conducted on [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] and [[R&S CMX500]] in [[NR FR1]]。\n- Validation covers [[RF]]、[[RRM]] and [[PCT]] domains as defined in [[3GPP Release 17]]。\n- DUT 為 latest [[Samsung NR-NTN chipset]] from [[Samsung]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS-RRM.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S TS-RRM › 使用限制\n- 來源未提供 [[R&S TS-RRM]] 的完整名稱展開、formal specifications、version、BOM、software release、test case list 或 order number。\n- 雖然名稱與 [[RRM]] 相關，來源未逐項說明哪些 [[RRM]] test cases 由 [[R&S TS-RRM]] 執行。\n- 不可由本來源推論 [[R&S TS-RRM]] 對所有 [[NR-NTN]] RRM scenarios 的支援範圍。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS-RRM.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S TS-RRM › unresolved\n- [[R&S TS-RRM]] 的正式文件版次與產品 / 系統配置未標示。\n- [[R&S TS-RRM]] 與 [[R&S CMX500]]、[[R&S TS8980 Conformance Test Platform]] 的系統分工未標示。\n- [[WI-555]] / [[RFT 555]] 中具體 RRM test case IDs 未標示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS-RRM.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "NTN protocol signaling › SIB19：NTN system information baseline\n依 [[5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100]]，[[SIB19]] 是 NTN system information broadcast 中最重要的 signaling enhancement。\n\nSIB19 可由 NTN cells broadcast，也可由 TN cells broadcast 以支援 TN-NTN mobility。主要內容包括：\n\n- `t-Service`：NTN quasi-earth fixed system 何時停止服務目前 coverage area。\n- `referenceLocation` 與 `distanceThresh`：location-based procedures 與 CHO 使用的地面 reference point / distance threshold。\n- `movingReferenceLocation`：Rel. 18 支援 earth-moving beams。\n- `NTN-NeighCellConfigList` 與 `NTN-NeighCellConfigList_ext`：neighbor satellite / cell information。\n- `NTN-CovEnh`：Rel. 18 uplink coverage enhancements。\n- `satSwitchWithReSync`：satellite switch with resynchronization。\n- `NTN-config`：satellite ephemeris、timing、polarization、Kmac、cellSpecificKoffset、TA info、epochTime。\n- `t-ServiceStart`、`carrierFreq`、`physCellID`、`ssb-TimeOffset` 等。\n- Msg4 HARQ-ACK repetition 與 RSRP threshold 相關 fields。\n\nSIB19 與 terrestrial legacy SIB 的關鍵差異是 time-variant：內容可能每幾秒更新一次，且以 `ntn-UlSyncValidityDuration` / T430 表示有效期。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN protocol signaling.md"
+              },
+              "score": 1.543281
+             },
+             {
+              "text": "NTN protocol signaling › Random access procedure\nNTN random access 的主要差異在 time-related operations 與 coverage robustness：\n\n- 建議使用 long PRACH sequence formats，例如 B4、C0、C2，以改善 gNB reception。\n- UE 在 PRACH 前需根據 GNSS location 與 SIB19 ephemeris / TA info 估計 initial timing advance。\n- RAR 內 legacy 12-bit timing advance range 太短，無法補償 NTN long delay；因此使用 Koffset defer Msg3 transmission。\n- `ra-ResponseWindow` 不直接延長，而是以 estimated RTT 延後 window start，以改善 energy efficiency。\n- Msg4 contention resolution timer 也以 RTT / Kmac 延後。\n- Rel. 18 coverage enhancements 允許 Msg4 HARQ-ACK repetitions。\n\n對 satellite switch with resynchronization，[[Satellite switch with resynchronization]] 補充：\n\n- target satellite resynchronization 的 random access 可由 [[PDCCH order]] 觸發。\n- legacy PDCCH order [[CFRA]] 與 [[CBRA]] 可於 [[TAT]] expired 時用於 target satellite UL sync。\n- PDCCH order CFRA 可不論 TAT status 用於 satellite switch with resync 的 target UL sync。\n- first UL transmission 可走 dynamic grant / configured grant、[[PUCCH-SR]] 或 RACH-based access。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN protocol signaling.md"
+              },
+              "score": 1.475198
+             },
+             {
+              "text": "NTN protocol signaling\n[[NTN protocol signaling]] 是 [[NR-NTN]] 為處理 satellite ephemeris、large RTT、Doppler shift、timing advance、random access、mobility、HARQ、DRX、GNSS / location 與 NAS / 5GC procedures 而加入或調整的 PHY、MAC、RLC、PDCP、RRC、NAS signaling 與 system information。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN protocol signaling.md"
+              },
+              "score": 0.067432
+             },
+             {
+              "text": "NTN protocol signaling › NAS / 5GC updates\n來源整理 [[TS 23.501]]、[[TS 24.501]]、[[TS 38.413]] 中 NTN 相關更新：\n\n- 多 TAC broadcast：NTN cell 可對同一 PLMN signaling 多個 tracking area codes。\n- 5GC RAT type values：`NR(LEO)`、`NR(MEO)`、`NR(GEO)`、`NR(OTHERSAT)`。\n- AMF 可根據 UE location verification 判斷 PLMN 是否可在目前 location operation。\n- NTN NAS timers 因 long RTT 延長，例如 T5310、T3517、T3521、T3580、T3581 等。\n- voice-centric UE 若收到不支援 voice over satellite 的 NTN info，可 signaling virtually disables NTN NG-RAN support capability。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN protocol signaling.md"
+              },
+              "score": 0.058537
+             },
+             {
+              "text": "NTN protocol signaling › t-ServiceStart 與 ssb-TimeOffset\n依 [[Satellite switch with resynchronization]]：\n\n- `t-ServiceStart` 格式與 `t-Service` 相同。\n- 若 `t-ServiceStart` 未 signaling，UE 假設 `t-ServiceStart = t-Service`，即 hard switch。\n- `t-ServiceStart > t-Service` 被視為 unforeseen case，UE 假設 `t-ServiceStart = t-Service`。\n- `t-ServiceStart` field indicates time in multiples of 10 ms after 00:00:00 on Gregorian calendar date 1st January 1900。\n- exact start time is between the time indicated by this field minus 1 and the time indicated by this field。\n- `ssb-TimeOffset` value 以 number of subframes 表示，且只能 configured as 5 subframes or multiples of 5 subframes。\n- source / target satellite 的 SFN0 starting boundaries aligned at the uplink time synchronization reference point。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN protocol signaling.md"
+              },
+              "score": 0.050593
+             },
+             {
+              "text": "NTN protocol signaling › SIB27\n[[SIB27]] 是 Rel. 19 引入，用於 [[MBS]] over NTN 的 intended service area（ISA）：\n\n- ISA 可為 circular 或 polygon area。\n- 用於限制或管理 MBS broadcast service reception。\n- 目的之一是處理 NTN coverage 跨國造成的 broadcast content access control 問題。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN protocol signaling.md"
+              },
+              "score": 0.043971
+             },
+             {
+              "text": "NTN protocol signaling › SIB25\n[[SIB25]] 是 Rel. 18 引入，用於 NTN cell 中提供 terrestrial network coverage information：\n\n- `coverageAreaInfoList-r18`。\n- `tn-AreaId-r18`。\n- `tn-ReferenceLocation-r18`。\n- `tn-DistanceRadius-r18`。\n- 最多支援 32 個 TN areas。\n\n用途是讓 UE 在預期無 TN coverage 時跳過 TN measurements，降低 NTN to TN cell reselection 的 power consumption。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN protocol signaling.md"
+              },
+              "score": 0.043056
+             },
+             {
+              "text": "NTN protocol signaling › 使用限制\n- 本頁只整理 white paper 與技術筆記中的 protocol signaling high-level / selected details；正式 IE names、ASN.1、timer rules、MAC CE formats 與 procedures 需查 [[TS 38.331]]、[[TS 38.321]]、[[TS 38.213]]、[[TS 38.214]]、[[TS 38.300]]、[[TS 23.501]]、[[TS 24.501]]。\n- 來源多處說 3GPP naming 在 Koffset / Kmac 等項目上有不同寫法；實作與測試時需以特定 release 的正式 TS 為準。\n- Rel. 19 / Rel. 20 / future items 可能仍在討論或 proposal 階段。\n- [[Satellite switch with resynchronization]] 來源未標示正式發布日期、文件版次或 3GPP TS 版本，且 development aspects 屬 R&S internal implementation notes，不可直接視為 normative text。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN protocol signaling.md"
+              },
+              "score": 0.042758
+             },
+             {
+              "text": "Snapdragon Auto 5G Modem-RF › NG eCall / EN 17240:2024 verification\n本來源中的驗證說法如下：\n\n- Verification process employed [[R&S CMX500]] mobile radio tester。\n- [[R&S CMX500]] 被描述為 comprehensive testing solution for NG eCall including voice and data transmission。\n- 測試 simulating a [[PSAP]]。\n- 來源稱 test validated the compliance of the implementation at both ends with [[EN 17240]]:2024。\n- 來源沒有列出完整 test case ID、measurement conditions、software versions 或 pass/fail report。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Snapdragon Auto 5G Modem-RF.md"
+              },
+              "score": 1.430367
+             },
+             {
+              "text": "NG eCall EN 17240 2024 verification › 驗證範圍\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 驗證對象：[[Snapdragon Auto 5G Modem-RF]] 的 [[Next Generation eCall]] functionality。\n- 合作方：[[Rohde & Schwarz]] 與 [[Qualcomm Technologies]]。\n- 測試設備：[[R&S CMX500]] mobile radio tester。\n- Software context：來源稱 [[R&S CMX500]] with [[R&S CMX-KA098]] software option can be effectively used for NG eCall testing under realistic network conditions。\n- 標準：[[EN 17240]]:2024。\n- 測試情境：simulating a [[PSAP]]。\n- 驗證內容：NG eCall including voice and data transmission，並 validated the compliance of the implementation at both ends with EN 17240:2024。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              },
+              "score": 1.544444
+             },
+             {
+              "text": "R&S CMX-KA098\nR&S CMX-KA098 是 [[R&S CMX500]] 的 NGeCall / IMS eCall application test software option；[[CMW500 to CMX500OBT_License_Swap_Process]]（November 2024；文件版次來源未標示）把它列為 [[R&S CMW-KA096]] license swap recipient，[[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]]（Dec. 2024；文件版次來源未標示）則提供 CMX500 搭配 CMX-KA098 執行 [[NGeCall over NR-LTE]] / [[NGeCall over LTE]] capability tests 的支援清單。[[CMX500_Software_Maintenance_PU-Option_Mapping]]（表頭標示 28.10.2025/CH）進一步補出它的 Ident No、短文字與 software maintenance service contract PU mapping。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S CMX-KA098 › License swap 來源\n- 來源：[[CMW500 to CMX500OBT_License_Swap_Process]]。\n- 文件月份：November 2024。\n- 頁尾日期：11/6/2024；日期格式未標示。\n- 文件版次：來源未標示。\n- 文件分類：COMPANY CONFIDENTIAL。\n- Recipient keycode：CMX-KA098。\n- Recipient description：Application test IMS NGeCALL。\n- Source keycode：[[R&S CMW-KA096]]（for CMWPC）。\n- Source description：NGECALL APPL。\n- 使用情境：[[R&S CMW500]] → [[R&S CMX500 OBT]] license swap for OBT upgrades。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S CMX-KA098 › Capability list 來源\n- 來源：[[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]]。\n- 文件 / 工作簿名稱：`CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.xlsx`。\n- 文件分類：COMPANY RESTRICTED。\n- 文件主題：NGeCall over NR/LTE Reference List。\n- Capability listing：[[R&S CMX500]] with CMX-KA098。\n- CEN TS 17240:2018 區段日期 / 狀態：Dec. 2024。\n- 文件版次：來源未標示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S CMX-KA098 › Software maintenance PU mapping 來源\n- 來源：[[CMX500_Software_Maintenance_PU-Option_Mapping]]。\n- 表頭標示：28.10.2025/CH。\n- Type：CMX-KA098。\n- Ident No：1222.6639.02。\n- Vertriebskurztext：APPL IMS NGECALL。\n- Servicevertrag：CMX-PU100。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S CMX-KA098 › 版本基準\n[[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 中可辨識的 CMX-KA098 版本基準如下：\n\n| 區段 | CMX500 / CMX-KA098 條件 |\n|---|---|\n| CEN TS 17240:2018 | [[R&S CMX500]] >= CSW 7.40 / CMX-KA098 >= V4.1.0 |\n| CEN TS 17240:2018 | [[R&S CMX500]] >= CSW 7.80 / CMX-KA098 >= V4.2.0 |\n| CEN EN 17240:2024 | [[R&S CMX500]] >= CSW 2025.0.0.1850 / CMX-KA098 >= V4.3.0-RC8 |\n\n來源同時列出 CMWrun [[R&S CMX-KF671B]] / CMWrun >= 1.9.15.37，用於 CEN EN 17240:2024 與 ETSI TS 103 683 V2.1.1 alternative coverage。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S CMX-KA098 › 支援標準範圍\n[[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 的 reference list 涵蓋：\n\n- [[CEN TS 17240]]:2018。\n- [[CEN EN 17240]]:2024 / 2024draft（來源兩種寫法並存）。\n- [[ETSI TS 103 683]] V2.1.1。\n- [[3GPP TS 34.229-5]]。\n- [[3GPP TS 34.229-1]]。\n- [[3GPP TS 38.523-1]]。\n- [[3GPP TS 36.523-1]]。\n- [[3GPP TS 26.269]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S CMX-KA098 › 功能與測試範圍摘錄\nCMX-KA098 在來源中的測試範圍包含：\n\n- IMS eCall session establishment，包含 automatic、manual 與 test eCall。\n- SIM/USIM conformance、network registration、limited service condition、eCall-only IVS cases。\n- MSD transfer、MSD update、negative AL-ACK、missing AL-ACK、IPv4 / IPv6 MSD transfer。\n- Voice link established、audio interface verification、Time-Warping / No Time-Warping conformance test。\n- PSAP callback、clear-down、remain registered、redial / no-redial cases。\n- 5GS / NR 相關 eCall over IMS cases，由 [[3GPP TS 34.229-5]] 與 [[3GPP TS 38.523-1]] 區段支撐。\n- LTE / EPS 相關 eCall over IMS cases，由 [[3GPP TS 34.229-1]] 與 [[3GPP TS 36.523-1]] 區段支撐。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "R&S CMX-KA098 › Software maintenance mapping\n[[CMX500_Software_Maintenance_PU-Option_Mapping]] 補出 CMX-KA098 的 software maintenance mapping：\n\n| Type | Ident No | 短文字 | Servicevertrag |\n|---|---|---|---|\n| CMX-KA098 | 1222.6639.02 | APPL IMS NGECALL | CMX-PU100 |\n\n這補足了 [[CMW500 to CMX500OBT_License_Swap_Process]] 未提供 CMX-KA098 order / ident number 的缺口；但該 mapping 來源未提供 price、license dependency、service contract coverage 或功能詳述。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "Non-codebook based uplink transmission › 與其他 usage 的差異\n- [[Codebook based uplink transmission]]：network 透過 [[Precoding information and number of layers]] 明確指示 precoder；codebook SRS resource 可有 multiple antenna ports。\n- [[SRS antenna switching]]：重點是 xTyR、logical-to-physical antenna mapping 與 antenna switching use cases。\n- [[Non-codebook based uplink transmission]] 的特徵是 [[Precoding information and number of layers]] 欄位 0 bit、SRI 指出 SRS resources / antennas subset、且每個 SRS resource one SRS port。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Non-codebook based uplink transmission.md"
+              },
+              "score": 0.162255
+             },
+             {
+              "text": "功率半導體概念股 › 技術與應用語彙\n- [[Power IC - Power Management IC image 1]] 把 [[SiC]]、[[GaN]]、[[SiC-GaN 磊晶片]] 與 [[SiC-GaN 晶圓代工]] 放在 [[磊晶-基板]] 分類。\n- [[Power IC - Power Management IC image 1]] 把 [[車用整流二極體]]、[[二極體]]、[[MOSFET]]、[[蕭特基整流元件]]、[[車規二極體]] 與 [[橋式整流器]] 放在 [[整流-車用二極體]] 分類。\n- [[Power IC - Power Management IC image 1]] 把 [[MOSFET]]、[[IGBT]]、[[電源管理 IC]]、[[DrMOS]]、[[中低壓 MOSFET]]、[[矽基 MOSFET]]、[[伺服器電源供應鏈]] 與 [[高壓伺服器電源]] 放在 [[功率半導體]] 分類。\n- [[Power IC - Power Management IC image 3]] 與 [[Power IC - Power Management IC image]] 新增 / 重複確認 [[PMIC]]、[[MOSFET 功率元件]]、[[整流二極體與保護元件]]、[[第三代半導體晶圓代工]]、[[GaAs-Ga 通訊射頻供應鏈]]、[[半導體封測]]、[[高階導線架]]、[[車用功率散熱模組機構件]]、[[電源供應器]] 與 [[電源系統廠]] 等分類語彙。\n- [[Power IC - Power Management IC image 4]] 新增 [[AI 伺服器]]、[[800V]]、[[HVDC]]、[[DC-DC]]、[[DDR5]]、[[GPU]] 與 [[BMC]] 監控語境。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/功率半導體概念股.md"
+              },
+              "score": 3.854864
+             },
+             {
+              "text": "捷敏-KY\n[[捷敏-KY]] 是 [[Power IC - Power Management IC image 3]]（來源未標示日期；取得於 2026-09-04）列於「中下游：半導體封測與導線架材料」中「功率半導體封測」分類的公司名稱，圖上代號為 6525。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/捷敏-KY.md"
+              },
+              "score": 3.884971
+             },
+             {
+              "text": "功率半導體概念股 › 與既有頁面的關係\n- [[伺服器供應鏈]] 已整理伺服器上游零組件、非半導體類與電源供應器分類；本頁只根據功率 IC / PMIC 圖像來源補充功率半導體概念股表中的語彙。\n- [[PSU]] 與 [[Server Hall 電力供應鏈]] 記錄資料中心 / server rack 供電階段；本頁不提供 PSU 產品、規格或供應商驗證。\n- [[資料中心電力電子生態系]] 使用 2025 年 [[Yole Group]] 圖像整理 data center power electronics ecosystem；本頁使用的是概念股與資訊圖來源，兩者不可合併為市場份額或完整供應商名單。\n- [[台股電源管理 IC AI 受惠程度對照表]] 依 [[Power IC - Power Management IC image 2]] 與 [[Power IC - Power Management IC image 5]] 整理 PMIC AI 受惠程度；本頁的 [[Power IC - Power Management IC image]]、[[Power IC - Power Management IC image 3]] 與 [[Power IC - Power Management IC image 4]] 則整理概念股分類與 AI 伺服器電力架構升級敘事。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/功率半導體概念股.md"
+              },
+              "score": 4.898765
+             },
+             {
+              "text": "Yole Group › 可追溯限制\n- [[Power delivery unit image 12]]、[[Power delivery unit image 5]] 與 [[Power delivery unit image 6]] 均未提供報告完整頁碼、章節、作者或方法論。\n- [[Power delivery unit image 12]] 與 [[Power delivery unit image 5]] 是 data center [[PSU]] suppliers 地理分布圖；[[Power delivery unit image 6]] 是 NVIDIA-centered power electronics ecosystem 圖。兩者口徑不同，不能直接合併成完整供應商名單或市場排名。\n- [[Power delivery unit image 5]] 是 lossy OCR / 讀圖衍生資料，與 [[Power delivery unit image 12]] 高度重疊，不可視為獨立市場驗證。\n- [[Power delivery unit image 6]] 的 **EVERYONE IS LOOKING TO WORK WITH NVIDIA** 與 **privileged position** 是圖上敘事文字；來源未提供可量化定義或驗證方法。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Yole Group.md"
+              },
+              "score": 4.151228
+             },
+             {
+              "text": "FWA CPE 測試與驗證 › 與既有測試概念的關係\n- [[Wi-Fi 7 OTA MIMO stress testing]] 提供 R&S / chamber partner 對 Wi-Fi 7 OTA 測試的 PR 層級整合說法；本頁提供 CPE 產品開發階段中的 DVT / PVT / MP 測試分類。\n- [[4G 5G NR WLAN OTA MIMO stress testing]] 提供 cellular + WLAN OTA MIMO stress testing integration；本頁把 OTA TRP / TIS、EN-DC、DFS 等放入 FWA CPE 類型表中。\n- [[R&S TS8980 Conformance Test Platform]] 已由 NR-NTN PR 來源建立；本來源只補充它被列入 FWA CPE / FR2 conformance test 待讀材料清單，不能新增正式規格。\n- [[NR-NTN conformance testing]] 與本頁同屬 conformance testing 語境，但技術對象不同：前者是 NR-NTN conformance PR，後者是 FWA CPE OneNote 測試資料整理。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FWA CPE 測試與驗證.md"
+              },
+              "score": 5.029796
+             },
+             {
+              "text": "R&S TS8980 Conformance Test Platform › 來源中的角色（NR-NTN PR）\n依 [[Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP]]：\n\n- Test cases are conducted on the [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] and [[R&S CMX500]]。\n- 目的為 preparing the system’s upcoming validation by [[GCF]] and [[PTCRB]] for [[NR-NTN]] in [[NR FR1]]。\n- 測試領域包含 [[RF]]、[[RRM]] 與 [[PCT]]，但來源未指定 [[R&S TS8980 Conformance Test Platform]] 對應其中哪一個或哪些 domain。\n\n依 [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]]：\n\n- All measurements were conducted on [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] and [[R&S CMX500]] in [[NR FR1]]。\n- 測試用於 verifying latest [[Samsung NR-NTN chipset]] from [[Samsung]] as DUT。\n- 來源把這些 measurements 連到 [[GCF]] validated [[3GPP Release 17]] [[NR-NTN]] conformance test cases across [[RF]]、[[RRM]] and [[PCT]] domains。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md"
+              },
+              "score": 7.404596
+             },
+             {
+              "text": "non-signaling\nwith signaling",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-6f4e9ea1141f0dd1",
+                "original_ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+                "sha256": "6f4e9ea1141f0dd1b05cf4e085ab51bd7dcd7db37f1ff9d1d0a6974ab9025692",
+                "raw_ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+               "section": 93,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 17.605508
+             },
+             {
+              "text": "Non-signaling",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-094dfa34f112d59b",
+                "original_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+                "sha256": "094dfa34f112d59b36ac5657e84e88379ec21b54fd169328c309f062cf839f95",
+                "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+               "section": 315,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.818487
+             },
+             {
+              "text": "Non-signaling - RF\nSignaling - Protocol\nPre-conformance",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-930719e012588eec",
+                "original_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+                "sha256": "930719e012588eec7cb2f397159386a87d1a5920c6edc93e0410be578603327b",
+                "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+               "section": 62,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.567208
+             },
+             {
+              "text": "Non signaling- RF",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-930719e012588eec",
+                "original_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+                "sha256": "930719e012588eec7cb2f397159386a87d1a5920c6edc93e0410be578603327b",
+                "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+               "section": 63,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.356823
+             }
+            ],
+            "text": "建議主軸：知識庫未提供正式「strongest」排序；【推論】若以「有明確半導體 / chipset / modem DUT 證據」與「明確 signaling / non-signaling 測試鏈接」為準，最有證據支撐的機會是 NR‑NTN chipset/device validation、Wi‑Fi 7 R&D + production RF test、Automotive 5G modem NG eCall verification [29][31][37][18][19][20][48][49]。\n### 推薦先賣\nR&S 的 NR‑NTN conformance 測試案例在 R&S TS8980 Conformance Test Platform、R&S TS‑RRM 與 R&S CMX500 上執行，且 measurements 在 NR FR1 執行，DUT 是 Samsung NR‑NTN chipset [29]。\n較新 PR 語境稱 R&S 已在 GCF NR‑NTN conformance test cases 取得 highest number validated，涵蓋 RF、RRM、PCT domains；all measurements conducted on TS8980、TS‑RRM、CMX500，DUT 為 Samsung NR‑NTN chipset [31][37]。\nCMX500 被描述為 conformance test solutions 的核心 5G one-box signaling tester，支援 early R&D through integrated fading and channel emulation，以及 satellite constellation visualization [29]。\nCMX500 OBT 也被用於 MediaTek NTN‑NR device as DUT 的 live 5G NTN‑NR Rel.17 connection 展示，CMX500 OBT 在 setup 中 simulate satellite base station，CMX500 operate in interactive callbox mode，可 trigger voice calls alongside RF-related measurements [17]。\n可對接 option：NR NTN Rel.17/18/19 signaling extensions 包含 R&S CMX‑KS627B/M/X、R&S CMX‑KS628B/X、R&S CMX‑KS629B/X；NB‑NTN signaling Rel.17 為 R&S CMX‑KS527B/X [7]。\nR&S Wi‑Fi 7 testing solution 明確把 R&S CMX500 定位為 R&D signaling / interworking 測試，把 R&S CMP180 定位為 production non-signaling RF 測試 [20]。\nCMX500 是 multi-technology multi-channel signaling tester，已新增 integrated Wi‑Fi 7 test functionality，用於 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation [18]。\nWi‑Fi 7 R&D 測試需要在 signaling mode 與 real-world conditions 下量測 RF TX/RX characteristics；MLO 是 Wi‑Fi 7 key feature，因此 multiple RF chains 的 test environment 很重要 [18]。\nCMP180 在 WLAN device production phase 被定位為 non-signaling RF testing；來源說 production phase 中所有 RF measurements 以 non-signaling mode 執行以節省時間，CMP180 optimized for this purpose [19]。\nCMP180 支援 Wi‑Fi 6E、Wi‑Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz；它 integrated two analyzers, two generators and two sets of eight RF ports，可 single box 支援 2x2 MIMO，兩台 CMP180 可擴展至 four analyzers and generators 以測 4x4 MIMO AP [19]。\n可對接 option：CMX500 WLAN signaling options 包含 802.11be STA basic R&S CMX‑KS352B、802.11be AP basic R&S CMX‑KS356B、802.11bn STA/AP basic R&S CMX‑KS353B / KS357B、2x2 MIMO R&S CMX‑KS360B、advanced encryption/authentication R&S CMX‑KS365B [6]。\nQualcomm Snapdragon Auto 5G Modem‑RF 的 NG eCall verification process employed R&S CMX500 mobile radio tester [48]。\nCMX500 被描述為 NG eCall including voice and data transmission 的 comprehensive testing solution；測試 simulating a PSAP，並 validated compliance of the implementation at both ends with EN 17240:2024 [48]。\n來源稱 CMX500 with R&S CMX‑KA098 software option can be effectively used for NG eCall testing under realistic network conditions；驗證對象為 Snapdragon Auto 5G Modem‑RF 的 NG eCall functionality，合作方為 R&S 與 Qualcomm Technologies [49]。\nCMX‑KA098 是 CMX500 的 NGeCall / IMS eCall application test software option；其 test scope 包含 IMS eCall session establishment、MSD transfer、voice link、audio interface verification、PSAP callback、5GS/NR eCall over IMS cases 與 LTE/EPS eCall over IMS cases [50][56]。\nCMX‑KA098 version baseline 包含 CEN EN 17240:2024 條件：CMX500 >= CSW 2025.0.0.1850 / CMX‑KA098 >= V4.3.0‑RC8 [54]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 / CMX500 OBT | 5G NR/LTE/WLAN device signaling、NR‑NTN R&D、callbox、RF measurement | CMX500 支援 LTE、NR FR1、NR FR2、NSA、SA、FDD、TDD；提供 NR FR1/FR2 signaling and TX measurements、LTE signaling、WLAN signaling/TX measurements、fading、AWGN、BLER、throughput、PER、IMS/audio/POLQA、XLAPI/SCPI automation。[1][5] | One-box network emulation and measurement；可覆蓋 cellular + WLAN signaling / measurement，且 OBT 已在 NTN live connection 與 Bluetest OTA multi-technology validation 語境中被使用。[1][14][17] | [1][5][14][17] | Features document 是 features/functions overview，不是 technical specifications datasheet，且 data without tolerance limits is not binding。[4] |\n| R&S CMX500 + R&S TS8980 + R&S TS‑RRM | NR‑NTN chipset conformance / validation | NR‑NTN measurements conducted on TS8980、TS‑RRM、CMX500 in NR FR1；DUT 為 Samsung NR‑NTN chipset。[29][37] | 直接有 chipset DUT 與 GCF/PTCRB conformance 語境；測試 domains 包含 RF、RRM、PCT。[31][37] | [29][31][37][64] | TS‑RRM formal specifications、version、BOM、software release、test case list、order number 未提供；來源未逐項說明哪些 RRM test cases 由 TS‑RRM 執行。[38][39] |\n| CMX500 NR‑NTN signaling options | NR‑NTN Rel.17/18/19、NB‑NTN signaling | R&S CMX‑KS627B/M/X = NR signaling extension Rel.17 NTN；R&S CMX‑KS628B/X = NR signaling extension Rel.18 NTN；R&S CMX‑KS629B/X = NR signaling extension Rel.19 NTN；R&S CMX‑KS527B/X = NB‑NTN signaling Rel.17。[7] | NTN chipset/device labs can map product capability discussions to named CMX500 NTN signaling option families. | [7] | 正式 NTN BOM / configuration 不可由 PR 或 option table 自動推導；需 configuration guide。[30] |\n| R&S CMX500 Wi‑Fi signaling options | Wi‑Fi 7 R&D signaling、MLO/MIMO/coexistence/E2E tests | R&S CMX‑KS352B = WLAN signaling 802.11be STA basic；R&S CMX‑KS356B = WLAN signaling 802.11be AP basic；R&S CMX‑KS360B = WLAN signaling 2x2 MIMO；R&S CMX‑KS365B = WLAN advanced encryption/authentication；R&S CMX‑KS353B/KS357B = 802.11bn STA/AP basic。[6] | CMX500 is positioned for Wi‑Fi 7 R&D signaling under real-world conditions, including RF TX/RX, MLO, 2x2 MIMO, 6 GHz, coexistence and E2E tests。[18] | [6][18] | Passage confirms Wi‑Fi 7 R&D/device test, not a specific semiconductor customer pipeline or volume demand.[18] |\n| R&S CMP180 | WLAN production non-signaling RF testing | Supports Wi‑Fi 6E、Wi‑Fi 7、5G NR FR1 up to 8 GHz、bandwidths up to 500 MHz；two analyzers/two generators/two sets of eight RF ports；single-box 2x2 MIMO；two instruments scalable to 4x4 MIMO AP testing。[19] | Production phase RF measurements are done in non-signaling mode to save time, and CMP180 is optimized for this purpose。[19] | [19][20] | 知識庫未標示 CMP180 option codes、order numbers、pricing 或 semiconductor-specific customer fit. |\n| R&S CMX500 + CMX‑KA098 | Automotive 5G modem NG eCall verification | CMX‑KA098 = NGeCall / IMS eCall application test software option；Ident No 1222.6639.02；short text APPL IMS NGECALL；service contract CMX‑PU100。[50][53][57] | Directly used for Snapdragon Auto 5G Modem‑RF NG eCall verification under realistic network conditions, simulating PSAP and validating EN 17240:2024 compliance.[48][49] | [48][49][50][53][57] | Source does not list full test case IDs, measurement conditions, software versions or pass/fail report for the Qualcomm verification.[48] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| NTN demo / early partner validation | CMX500 OBT + satellite-base-station emulation setup | Lead with MediaTek NTN‑NR device as DUT, live 5G NTN‑NR Rel.17 connection, LEO satellite access node emulation, and interactive callbox mode.[17] | This is PR/demo-level evidence and cannot replace formal CMX500 NR‑NTN configuration.[17][30] |\n| WLAN production RF test | CMP180 | Lead with non-signaling RF measurements to save time in production, Wi‑Fi 7 / Wi‑Fi 6E / 5G NR FR1 support, 500 MHz bandwidth, 2x2 MIMO single-box and 4x4 scaling with two instruments.[19] | CMP180 option stack, price and production throughput numbers are not in the passages. |\n| Automotive 5G modem NG eCall | CMX500 + CMX‑KA098 | Lead with Qualcomm Snapdragon Auto 5G Modem‑RF verification, PSAP simulation, EN 17240:2024, voice/data transmission, and realistic network conditions.[48][49] | Full test case IDs, measurement conditions, software versions and pass/fail report are not listed.[48] |\n### 限制\nThe vault does not provide a formal ranked list of “strongest opportunities,” so any prioritization is an inference from how directly the passages tie a tester to a chipset/modem DUT or to explicit R&D/production signaling/non-signaling use cases [29][37][48][49][20].\nPress-release positioning is not the same as measured market demand; the cited passages support technical fit and demonstrated use, not market share, revenue forecast, or customer purchase intent [17][29][31][48][49].\nFor CMX500 features/options, the features document is not a binding technical specifications datasheet, and data without tolerance limits is not binding [4].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 7.862991
+            },
+            {
+             "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 4.451712
+            },
+            {
+             "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 4.03711
+            },
+            {
+             "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx | WLAN SISO signaling |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx | 802.11ax station testing |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx | 802.11be station testing |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx | 802.11bn station testing |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx | 802.11ax AP testing |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx | 802.11be AP testing |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx | 802.11bn AP testing |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx | 2x2 MIMO support |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx | Enterprise security support |\n| R&S CMX-KS500B / M / X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx | 僅 LTE standalone 需要；NR NSA LTE anchor cells 包含於 NR signaling options |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx | D2C fixed / variable delay |\n| R&S CMX-KS600B / M / X | NR signaling enabler, Rel. 15 | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx | 包含 5G NR SA option 2、NSA option 3、DL 2x2/4x4 MIMO、one CC、UL 256QAM |\n| R&S CMX-KS610B / M / X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx | UL 2x2 MIMO、CA up to 9 CC |\n| R&S CMX-KS611B / M / X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx | SUL / Rel. 16 features |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 25,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 3.813784
+            },
+            {
+             "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS612B / M / X | NR signaling extension, CA 10 to 12 CC | 1222.6574.xx / 1222.6580.xx / 1222.6597.xx | CA 10 to 12 CC |\n| R&S CMX-KS613B / X | Multi-SIM enabler | 1222.9580.xx / 1222.9596.xx | Basic / expert |\n| R&S CMX-KS617B / M / X | NR signaling extension, Rel. 17, RedCap | 1222.6600.xx / 1222.6616.xx / 1222.6622.xx | RedCap |\n| R&S CMX-KS618B / X | NR signaling extension, Rel. 18, eRedCap | 1222.9609.xx / 1222.9621.xx | eRedCap |\n| R&S CMX-KS627B / M / X | NR signaling extension, Rel. 17, NTN | 1222.8690.xx / 1222.8702.xx / 1222.8719.xx | NTN |\n| R&S CMX-KS628B / X | NR signaling extension, Rel. 18, NTN | 1222.9638.xx / 1222.9650.xx | NTN |\n| R&S CMX-KS629B / X | NR signaling extension, Rel. 19, NTN | 1223.0086.xx / 1223.0092.xx | NTN |\n| R&S CMX-KS637B / M / X | NR signaling extension, Rel. 17 w/o RedCap & NTN | 1222.8777.xx / 1222.8783.xx / 1222.8790.xx | Rel. 17 without RedCap & NTN |\n| R&S CMX-KS638B / X | NR signaling extension w/o eRedCap & NTN Rel. 18 | 1222.9667.xx / 1222.9680.xx | Rel. 18 without eRedCap & NTN |\n| R&S CMX-KS527B / X | NB-NTN signaling, Rel. 17 | 1222.9738.xx / 1222.9744.xx | NB-IoT options set 中 basic / expert |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 26,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 3.732181
+            },
+            {
+             "text": "R&S CMX500 OBT › Bluetest RTS / OTA test 語境\n依 [[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]]：\n\n- [[R&S CMX500 OBT]] 可與 [[Bluetest]] reverberation test systems（RTS）及 [[Bluetest Flow]] v1.18 搭配。\n- 支援使用 [[R&S CMX500 OBT]] 在 Bluetest RTS 中執行 [[5G NR Standalone]]、[[5G NR Non-Standalone]]（EN-DC）與 [[LTE]] testing。\n- [[Bluetest]] 也將較早的 [[WLAN]] stations / access points（[[IEEE 802.11]] a/b/g/n/ac/ax/be）integrated testing capabilities 擴充到 [[Wi-Fi 7]] 320 MHz bandwidth support。\n- 來源將此整合定位為 single tester and reverberation test system 的 multi-technology validation path。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+             },
+             "score": 2.38328
+            },
+            {
+             "text": "R&S CMX500 OBT › MWC 2024 5G NTN-NR Rel.17 展示語境\n依 [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]]：\n\n- 展示使用 [[R&S CMX500 OBT]] 與 [[MediaTek]] 的 NTN-NR device as DUT。\n- 展示內容為 live [[5G NTN-NR]] connection，emulating a [[Low Earth Orbit]] satellite access node。\n- [[R&S CMX500 OBT]] radio communication tester 在 setup 中 simulate the satellite base station。\n- [[R&S SMBV100B]] vector signal generator 在 setup 中以 integrated GNSS option simulate the different satellite constellations。\n- [[R&S CMX500]] 會 operate in an interactive callbox mode，allowing users to trigger voice calls alongside RF-related measurements。\n- 來源定位此 test mode 為評估 future NTN-NR devices powered by [[MediaTek]] NTN test platform 在不同條件下的 5G connection performance and reliability。\n\n此段只可作為 [[MWC Barcelona 2024]] 展示 / PR 層級證據；不能取代 [[CMX500 NR-NTN configuration]]、[[CMX500_specs_en_5216-4127-22_v1100]] 或 [[CMX500_Features_CSW9-20-0_en_32]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+             },
+             "score": 0.726577
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing › R&D：R&S CMX500 single-box signaling testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- [[R&S CMX500]] 是 multi-technology multi-channel signaling tester。\n- 來源稱其已新增 integrated [[Wi-Fi 7]] test functionality。\n- 目的在 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation。\n- Wi-Fi 7 R&D 測試需在 signaling mode 與 real-world conditions 下量測 RF TX / RX characteristics。\n- [[MLO]] 是 [[Wi-Fi 7]] key feature，因此提供 multiple RF chains 的 test environment 很重要。\n- 來源列出的 Wi‑Fi 7-specific tests 包含 2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 2.761739
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing › Production：R&S CMP180 non-signaling RF testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。\n- [[R&S CMP180]] 被定位為 optimized for this purpose 的 radio communication tester。\n- 來源稱 [[R&S CMP180]] 支援 many cellular and non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform。\n- 來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。\n- 來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。\n- 來源稱 two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 2.737886
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing\n[[Wi-Fi 7 R&D and production testing]] 是 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 中描述的測試方案組合：以 [[R&S CMX500]] 覆蓋 R&D signaling / interworking 測試，以 [[R&S CMP180]] 覆蓋 production non-signaling RF 測試。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 2.062226
+            },
+            {
+             "text": "NR-NTN conformance testing › Rohde & Schwarz 測試系統\n依 [[Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP]]，test cases are conducted on：\n\n- [[R&S TS8980 Conformance Test Platform]]\n- [[R&S TS-RRM]]\n- [[R&S CMX500]]\n\n依 [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]]，all measurements were conducted on：\n\n- [[R&S TS8980 Conformance Test Platform]]\n- [[R&S TS-RRM]]\n- [[R&S CMX500]]\n\n來源並明示 measurements 在 [[NR FR1]] 執行，DUT 為 latest [[Samsung NR-NTN chipset]] from [[Samsung]]。\n\n來源也說 [[R&S CMX500]] 是 [[Rohde & Schwarz]] conformance test solutions 的核心 5G one-box signaling tester，支援 early R&D through integrated [[Fading]] and [[channel emulation]]，以及 intuitive tool for visualizing satellite constellations；[[R&S CONTEST]] test system software platform facilitates execution of [[3GPP]] test cases。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NR-NTN conformance testing.md"
+             },
+             "score": 2.98023
+            },
+            {
+             "text": "NR-NTN conformance testing › 與既有 CMX500 NTN 測試頁的關係\n- [[CMX500 NTN one-box tester]]：描述 [[R&S CMX500]] 作為 NTN all-in-one / one-box tester 的 PR positioning。本頁補入 GCF validated conformance test case claim。\n- [[5G NTN validation and testing]]：整理 NTN validation、partner testing、demo 與 certification test plan。本頁補入 GCF/PTCRB conformance validation 口徑。\n- [[CMX500 NR-NTN configuration]]：整理 NR-NTN application-specific configuration rules。本頁不提供 option stack 或 formal product configuration。\n- [[R&S CMX500 OBT]]：若來源提供 further information link 或 PR positioning，不能自動推導 OBT BOM；正式配置仍需 specification / configuration guide。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NR-NTN conformance testing.md"
+             },
+             "score": 1.735234
+            },
+            {
+             "text": "NR-NTN conformance testing › WI-555 / RFT 555 狀態口徑\n較早來源 [[Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP]] 說 [[Rohde & Schwarz]] 正與 Tier 1 chipset vendors 合作，successfully verifying their respective platforms and the test cases outlined in [[WI-555]] and [[RFT 555]]。同一來源也說 successful validation will activate [[WI-555]] and [[RFT 555]] and kick off conformance testing for [[NR-NTN]] devices。\n\n較新語境的 [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]] 說：\n\n- 已 successful validated highest number in [[GCF]] conformance test cases for [[NR-NTN]] to this date。\n- validated test cases within [[GCF]] [[WI-555]] are defined according to [[3GPP]] test specifications for [[RF]]、[[RRM]] and [[PCT]]。\n- 該結果 presented at recent [[Global Certification Forum]] meeting [[CAG #86]] in Düsseldorf。\n- 來源同時提到 following successful validation of the first 5G-based [[NR-NTN]] at [[PTCRB]]。\n\n⚠️ [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]]（raw created 2026-09-11；發布日期未標示）說 validated test cases within [[GCF]] [[WI-555]] have been achieved and presented at [[CAG #86]]，但既有頁面 [[NR-NTN conformance testing]] 說 successful validation will activate [[WI-555]] and [[RFT 555]]。判斷：新來源代表 GCF validation 狀態已有進展，但因兩份來源皆未標示發布日期與正式 activation date，本頁把較早來源視為 pre-validation readiness，把新來源視為後續 PR claim；仍不得推論完整 test case list、activation date 或 certification body minutes。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NR-NTN conformance testing.md"
+             },
+             "score": 1.13019
+            },
+            {
+             "text": "R&S TS-RRM › 來源中的角色\n依 [[Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP]]：\n\n- [[GCF]] [[WI-555]] 與 [[PTCRB]] [[RFT 555]] 將包含 [[RF]]、[[RRM]] 與 [[PCT]] test cases。\n- Test cases are conducted on [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] 與 [[R&S CMX500]]。\n- 來源脈絡為準備 [[NR-NTN]] in [[NR FR1]] 的 GCF / PTCRB upcoming validation。\n\n依 [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]]：\n\n- All measurements were conducted on [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] and [[R&S CMX500]] in [[NR FR1]]。\n- Validation covers [[RF]]、[[RRM]] and [[PCT]] domains as defined in [[3GPP Release 17]]。\n- DUT 為 latest [[Samsung NR-NTN chipset]] from [[Samsung]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS-RRM.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "R&S TS-RRM › 使用限制\n- 來源未提供 [[R&S TS-RRM]] 的完整名稱展開、formal specifications、version、BOM、software release、test case list 或 order number。\n- 雖然名稱與 [[RRM]] 相關，來源未逐項說明哪些 [[RRM]] test cases 由 [[R&S TS-RRM]] 執行。\n- 不可由本來源推論 [[R&S TS-RRM]] 對所有 [[NR-NTN]] RRM scenarios 的支援範圍。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS-RRM.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "R&S TS-RRM › unresolved\n- [[R&S TS-RRM]] 的正式文件版次與產品 / 系統配置未標示。\n- [[R&S TS-RRM]] 與 [[R&S CMX500]]、[[R&S TS8980 Conformance Test Platform]] 的系統分工未標示。\n- [[WI-555]] / [[RFT 555]] 中具體 RRM test case IDs 未標示。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS-RRM.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "Snapdragon Auto 5G Modem-RF › NG eCall / EN 17240:2024 verification\n本來源中的驗證說法如下：\n\n- Verification process employed [[R&S CMX500]] mobile radio tester。\n- [[R&S CMX500]] 被描述為 comprehensive testing solution for NG eCall including voice and data transmission。\n- 測試 simulating a [[PSAP]]。\n- 來源稱 test validated the compliance of the implementation at both ends with [[EN 17240]]:2024。\n- 來源沒有列出完整 test case ID、measurement conditions、software versions 或 pass/fail report。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/Snapdragon Auto 5G Modem-RF.md"
+             },
+             "score": 1.430367
+            },
+            {
+             "text": "NG eCall EN 17240 2024 verification › 驗證範圍\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 驗證對象：[[Snapdragon Auto 5G Modem-RF]] 的 [[Next Generation eCall]] functionality。\n- 合作方：[[Rohde & Schwarz]] 與 [[Qualcomm Technologies]]。\n- 測試設備：[[R&S CMX500]] mobile radio tester。\n- Software context：來源稱 [[R&S CMX500]] with [[R&S CMX-KA098]] software option can be effectively used for NG eCall testing under realistic network conditions。\n- 標準：[[EN 17240]]:2024。\n- 測試情境：simulating a [[PSAP]]。\n- 驗證內容：NG eCall including voice and data transmission，並 validated the compliance of the implementation at both ends with EN 17240:2024。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+             },
+             "score": 1.544444
+            },
+            {
+             "text": "R&S CMX-KA098\nR&S CMX-KA098 是 [[R&S CMX500]] 的 NGeCall / IMS eCall application test software option；[[CMW500 to CMX500OBT_License_Swap_Process]]（November 2024；文件版次來源未標示）把它列為 [[R&S CMW-KA096]] license swap recipient，[[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]]（Dec. 2024；文件版次來源未標示）則提供 CMX500 搭配 CMX-KA098 執行 [[NGeCall over NR-LTE]] / [[NGeCall over LTE]] capability tests 的支援清單。[[CMX500_Software_Maintenance_PU-Option_Mapping]]（表頭標示 28.10.2025/CH）進一步補出它的 Ident No、短文字與 software maintenance service contract PU mapping。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "R&S CMX-KA098 › Software maintenance PU mapping 來源\n- 來源：[[CMX500_Software_Maintenance_PU-Option_Mapping]]。\n- 表頭標示：28.10.2025/CH。\n- Type：CMX-KA098。\n- Ident No：1222.6639.02。\n- Vertriebskurztext：APPL IMS NGECALL。\n- Servicevertrag：CMX-PU100。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "R&S CMX-KA098 › 版本基準\n[[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 中可辨識的 CMX-KA098 版本基準如下：\n\n| 區段 | CMX500 / CMX-KA098 條件 |\n|---|---|\n| CEN TS 17240:2018 | [[R&S CMX500]] >= CSW 7.40 / CMX-KA098 >= V4.1.0 |\n| CEN TS 17240:2018 | [[R&S CMX500]] >= CSW 7.80 / CMX-KA098 >= V4.2.0 |\n| CEN EN 17240:2024 | [[R&S CMX500]] >= CSW 2025.0.0.1850 / CMX-KA098 >= V4.3.0-RC8 |\n\n來源同時列出 CMWrun [[R&S CMX-KF671B]] / CMWrun >= 1.9.15.37，用於 CEN EN 17240:2024 與 ETSI TS 103 683 V2.1.1 alternative coverage。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "R&S CMX-KA098 › 功能與測試範圍摘錄\nCMX-KA098 在來源中的測試範圍包含：\n\n- IMS eCall session establishment，包含 automatic、manual 與 test eCall。\n- SIM/USIM conformance、network registration、limited service condition、eCall-only IVS cases。\n- MSD transfer、MSD update、negative AL-ACK、missing AL-ACK、IPv4 / IPv6 MSD transfer。\n- Voice link established、audio interface verification、Time-Warping / No Time-Warping conformance test。\n- PSAP callback、clear-down、remain registered、redial / no-redial cases。\n- 5GS / NR 相關 eCall over IMS cases，由 [[3GPP TS 34.229-5]] 與 [[3GPP TS 38.523-1]] 區段支撐。\n- LTE / EPS 相關 eCall over IMS cases，由 [[3GPP TS 34.229-1]] 與 [[3GPP TS 36.523-1]] 區段支撐。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "R&S CMX-KA098 › Software maintenance mapping\n[[CMX500_Software_Maintenance_PU-Option_Mapping]] 補出 CMX-KA098 的 software maintenance mapping：\n\n| Type | Ident No | 短文字 | Servicevertrag |\n|---|---|---|---|\n| CMX-KA098 | 1222.6639.02 | APPL IMS NGECALL | CMX-PU100 |\n\n這補足了 [[CMW500 to CMX500OBT_License_Swap_Process]] 未提供 CMX-KA098 order / ident number 的缺口；但該 mapping 來源未提供 price、license dependency、service contract coverage 或功能詳述。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX-KA098.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "R&S TS8980 Conformance Test Platform › 來源中的角色（NR-NTN PR）\n依 [[Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP]]：\n\n- Test cases are conducted on the [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] and [[R&S CMX500]]。\n- 目的為 preparing the system’s upcoming validation by [[GCF]] and [[PTCRB]] for [[NR-NTN]] in [[NR FR1]]。\n- 測試領域包含 [[RF]]、[[RRM]] 與 [[PCT]]，但來源未指定 [[R&S TS8980 Conformance Test Platform]] 對應其中哪一個或哪些 domain。\n\n依 [[Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains]]：\n\n- All measurements were conducted on [[R&S TS8980 Conformance Test Platform]]、[[R&S TS-RRM]] and [[R&S CMX500]] in [[NR FR1]]。\n- 測試用於 verifying latest [[Samsung NR-NTN chipset]] from [[Samsung]] as DUT。\n- 來源把這些 measurements 連到 [[GCF]] validated [[3GPP Release 17]] [[NR-NTN]] conformance test cases across [[RF]]、[[RRM]] and [[PCT]] domains。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md"
+             },
+             "score": 7.404596
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "technical_knowledge",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 36,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 25,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 26,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX500 OBT.md",
+             "raw_refs": [
+              "raw/Productions/CMW500 to CMX500OBT_License_Swap_Process.md",
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+              "raw/Productions/PR/Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md",
+              "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+              "raw/Productions/XLAPI-CMX_Scenario_Database.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+             "raw_refs": [
+              "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/NR-NTN conformance testing.md",
+             "raw_refs": [
+              "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+              "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S TS-RRM.md",
+             "raw_refs": [
+              "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+              "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/Snapdragon Auto 5G Modem-RF.md",
+             "raw_refs": [
+              "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md",
+             "raw_refs": [
+              "raw/Productions/PR/Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard.md",
+              "raw/Productions/PR/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX-KA098.md",
+             "raw_refs": [
+              "raw/Productions/CMW-KA096_PanEUNGeCall_TC_Status.md",
+              "raw/Productions/CMW500 to CMX500OBT_License_Swap_Process.md",
+              "raw/Productions/CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status.md",
+              "raw/Productions/CMX500_Software_Maintenance_PU-Option_Mapping.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S TS8980 Conformance Test Platform.md",
+             "raw_refs": [
+              "raw/Market/OneNote/1C111_0e_3GPPPreConfGuide.md",
+              "raw/Market/OneNote/1C111_1e_3GPPPreConfGuide.md",
+              "raw/Market/OneNote/FWA CPE SmallCell/FWA CPE.md",
+              "raw/Market/OneNote/RS_TS8980FTA_PRE_Series_SystemManual_en_63.md",
+              "raw/Productions/PR/Rohde & Schwarz prepares for NR-NTN conformance testing by successfully verifying first test cases in line with 3GPP.md",
+              "raw/Productions/PR/Rohde & Schwarz achieves highest number of GCF validated 3GPP NR NTN test cases for RF, RRM and PCT domains.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

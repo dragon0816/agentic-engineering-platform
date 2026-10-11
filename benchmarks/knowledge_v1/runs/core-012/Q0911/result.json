@@ -1,0 +1,136 @@
+{
+ "id": "Q0911",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 46.5,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Virtual tester.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 14,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Validated results.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 16,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR conducted base station transmitter tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 21,
+   "kind": "wiki",
+   "ref": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 69,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Validated results.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Virtual tester.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 15,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Validated results.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 70,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Validated results.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 20,
+   "kind": "wiki",
+   "ref": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 23,
+   "kind": "wiki",
+   "ref": "wiki/sources/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 25,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR OTA Base Station Receiver Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 22,
+   "kind": "wiki",
+   "ref": "wiki/sources/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 53,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Virtual tester.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "generator provides RF stimulus / interferers to the DUT",
+   "measurement results then support debugging",
+   "for an RFIC validation use case",
+   "generate wanted signals, modulated signals, CW signals"
+  ],
+  "reason": "The answer’s core placement—signal generators/analyzers belong mainly in test execution, with results feeding a broader debug/validation workflow—is a fair synthesis of the cited Virtual tester and RF test setup passages. Some phrasing generalizes beyond the passages, especially applying base-station RF test examples to RFIC validation and asserting debug flow or wanted-signal stimulus, but these are modest inferences rather than contradictions.",
+  "confidence": "medium"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

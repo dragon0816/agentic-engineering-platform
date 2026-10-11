@@ -1,0 +1,2024 @@
+{
+ "question": {
+  "id": "Q0339",
+  "text": "What evidence is required to compare our Signal Generator / Signal Analyzer solution with a competitor for Aerospace / Defense without making unsupported claims?",
+  "market": "Aerospace / Defense",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "competitive",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-c920b1cac61b456987b650fb32d0f65d",
+ "exchange": {
+  "sent": "What evidence is required to compare our Signal Generator / Signal Analyzer solution with a competitor for Aerospace / Defense without making unsupported claims?",
+  "http_status": 200,
+  "seconds": 53.25,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-c920b1cac61b456987b650fb32d0f65d",
+    "actor": "leo.chi",
+    "title": "What evidence is required to compare our Signal Generator / Signal Analy…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T21:52:41.882775Z",
+    "updated_at": "2026-10-11T21:53:35.015032Z",
+    "messages": [
+     {
+      "message_id": "message-3e53fc8a3c654be49a41c68bf3f83017",
+      "role": "user",
+      "text": "What evidence is required to compare our Signal Generator / Signal Analyzer solution with a competitor for Aerospace / Defense without making unsupported claims?",
+      "created_at": "2026-10-11T21:52:41.902694Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-60026c225bcb4993931bb46a4bbeab5d",
+      "role": "assistant",
+      "text": "### Short answer\nTo compare our Signal Generator / Signal Analyzer solution with a competitor for Aerospace / Defense without unsupported claims, we need traceable evidence for four things: our exact product configuration and warranted specs, the Aerospace / Defense use case being claimed, the competitor’s exact product configuration and official specs, and a side-by-side test method or source that directly supports each comparison point. [3][54][61][70][7][12]\n### Evidence required\n| Evidence needed | Why it is required | Current support / gap |\n|---|---|---|\n| Our Signal Generator datasheet, configuration guide, option stack, order numbers, and spec conditions for the exact configuration being compared | SMW200A specs and configuration guide are the proper sources for RF/baseband performance, interfaces, environmental data, ordering information, mandatory configuration, compatibility, retrofitting notes, recommended extras, and service notes. [1] | Current SMW200A pages say formal quotation/configuration still requires checking the official PDF, latest ordering information, and configure tool. [61] |\n| Our Signal Analyzer datasheet, option stack, and spec conditions for the exact configuration being compared | FSW specs define the high-end signal/spectrum analyzer family and its options such as analysis bandwidth, frequency range, and other hardware options. [5][6][66] | Current FSW pages say the markdown is lossy and full options/footnotes must be checked in the PDF before quotation. [70] |\n| Warranted-vs-nonwarranted status for every numeric claim | SMW200A specifications with limits and specifications without limits are warranted, while n. trc., typ., nom., and meas. are not guaranteed. [3] | FSW similarly states specifications with limits and specifications without limits are warranted, while non-traceable specifications, typical data, nominal values, and measured values are not guaranteed. [54] |\n| A direct Aerospace / Defense application link for the claimed use case | The RAW evidence only shows an Aerospace & Defense Test presentation context and separately lists “Signal Generator / Signal Analyzer,” without a detailed use case, model, option stack, or comparison. [97][99] | A stronger application link exists for satellite payload testing: R&S FSW + R&S SMW200A are positioned for complete payload testing, including group delay, linearity, NPR, modulation, OFDM, spurious, and signal quality. [51] |\n| The exact Aerospace / Defense standard, test case, or qualification context | DO-160, MIL-STD-461, and MIL-STD-464 are mentioned in drone EMC/EME context, but the sources are not formal standards and cannot be used to infer complete limits, categories, waveforms, setups, or pass/fail criteria. [18][20][86] | For any claim tied to DO-160, MIL-STD-461, MIL-STD-464, satellite payload qualification, or TVAC, the relevant official standard/test plan and its version are still required. [18][20][49] |\n| Competitor official datasheet, configuration guide, release notes, support terms, and option list | Keysight-related battle-card descriptions are R&S battle-card views and need Keysight official or third-party verification; the battle card does not provide formal datasheets, document versions, order numbers, option codes, release status, or test conditions. [7] | Anritsu-related weakness claims also cannot be treated as official specs or market facts, and Anritsu frequency range, bandwidth, data rate, option code, software tools, and support model require Anritsu official datasheets/release notes/support terms. [12] |\n| A competitor model that is actually in the same instrument class and use case | Current passages mention Keysight N9040B UXA as a spectrum analyzer and Keysight E8257D PSG as a signal generator in a Starlink user-terminal test-equipment mapping, but that mapping is deck-level and requires formal product specs, options, frequency range, uncertainty, and test method before use. [34] | Current passages do not provide a validated Aerospace / Defense competitor comparison against our SMW200A / FSW solution. [7][34][75] |\n| A controlled side-by-side test method, measurement setup, uncertainty budget, and calibration conditions | Satellite group-delay pages state actual performance depends on DUT, frequency range, bandwidth, SNR, option, and calibration setup, and do not provide a complete uncertainty budget, test limits, standard chapter, or test case ID. [96] | TVAC pages likewise state the source is solution-level and not a product qualification certificate, and it lacks pressure, temperature profile, dwell time, calibration interval, and uncertainty budget. [22] |\n| Evidence for any market-share, ecosystem, customer, or superiority claim | Keysight pages explicitly do not infer market share, customers, shipment volume, or adoption status, and ecosystem/market-dominance claims in the battle card lack traceable external evidence. [7][75] | R&S superiority, only-vendor, and lower-TCO statements in battle-card-style sources are sales positioning, not directly citable technical specifications. [12] |\n### Minimum evidence pack before making the comparison\n1. R&S SMW200A official specifications and configuration guide for the proposed generator configuration, including frequency option, baseband module, modulation bandwidth, fading/channel-emulation options if claimed, and all mandatory/compatibility notes. [1][57][65]  \n2. R&S FSW official specifications for the proposed analyzer model and options, including frequency range, analysis-bandwidth option, real-time or I/Q options if claimed, and applicability restrictions by model. [6][66][69]  \n3. A documented Aerospace / Defense test scenario that directly uses signal generation and signal analysis, such as satellite payload complete testing with FSW + SMW200A, or a formal EMC/EME standard/test plan when the claim is about drone or airborne equipment testing. [51][86]  \n4. Competitor official datasheets/configuration guides/release notes for the exact competing signal generator and signal analyzer models, because current Keysight and Anritsu battle-card information is not official competitor evidence. [7][12]  \n5. A side-by-side comparison table limited to parameters that both sides document under comparable conditions, because SMW200A and FSW distinguish warranted specifications from typical, nominal, measured, and non-guaranteed data. [3][54]  \n6. Test setup evidence, calibration evidence, and uncertainty information for performance claims, because the satellite and TVAC sources do not provide complete uncertainty budgets or qualification-level test procedures. [22][96]  \n### What we cannot claim from the current passages alone\nWe cannot claim that our Signal Generator / Signal Analyzer solution is better than a competitor for Aerospace / Defense, because the current competitor passages either rely on R&S battle-card descriptions needing external validation or only list deck-level equipment mappings without formal competitor specs and test conditions. [7][34][75]  \nWe cannot claim a formal Aerospace / Defense qualification fit from the DO-160 or military drone passages, because those pages are not formal standard summaries and cannot be used to determine complete categories, limits, waveforms, setups, pass/fail criteria, or required test items. [18][20]\n\n來源：\n[1] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[3] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[5] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[6] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[7] Wiki：Keysight（來源：`AI Server PCB test image 24.md`、`AI Server PCB test image 50.md`、`2026_02_CMX500_Keysight_Sales_Battle_Card.md`）\n[12] Wiki：Anritsu（來源：`2026_02_CMX500_Anritsu_Sales_Battle_Card.md`）\n[18] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[20] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[22] Wiki：TVAC 衛星酬載測試（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[34] Wiki：Starlink User Terminal 測試流程（來源：`Starlink UT Test Flow.md`）\n[49] Wiki：衛星酬載與元件測試（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[51] Wiki：衛星酬載與元件測試（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[54] Wiki：FSW_specs_en_5215-6749-22_v1701（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[57] Wiki：SMW200A_specs_en_3606-8037-22_v3100（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[61] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[65] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[66] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[69] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[70] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[75] Wiki：Keysight（來源：`AI Server PCB test image 24.md`、`AI Server PCB test image 50.md`、`2026_02_CMX500_Keysight_Sales_Battle_Card.md`）\n[86] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[96] Wiki：衛星酬載群延遲量測（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[97] `raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md`\n[99] `raw/Market/OneNote/R&S portfolio for O-RU testing.md`\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+      "created_at": "2026-10-11T21:53:35.015032Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-7c9f1d5240b04946a81ae576c6c77825",
+       "request_id": "request-7c9f1d5240b04946a81ae576c6c77825",
+       "span_id": "span-7c9f1d5240b04946a81ae576c6c77825",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": true,
+    "answer": "### Short answer\nTo compare our Signal Generator / Signal Analyzer solution with a competitor for Aerospace / Defense without unsupported claims, we need traceable evidence for four things: our exact product configuration and warranted specs, the Aerospace / Defense use case being claimed, the competitor’s exact product configuration and official specs, and a side-by-side test method or source that directly supports each comparison point. [3][54][61][70][7][12]\n### Evidence required\n| Evidence needed | Why it is required | Current support / gap |\n|---|---|---|\n| Our Signal Generator datasheet, configuration guide, option stack, order numbers, and spec conditions for the exact configuration being compared | SMW200A specs and configuration guide are the proper sources for RF/baseband performance, interfaces, environmental data, ordering information, mandatory configuration, compatibility, retrofitting notes, recommended extras, and service notes. [1] | Current SMW200A pages say formal quotation/configuration still requires checking the official PDF, latest ordering information, and configure tool. [61] |\n| Our Signal Analyzer datasheet, option stack, and spec conditions for the exact configuration being compared | FSW specs define the high-end signal/spectrum analyzer family and its options such as analysis bandwidth, frequency range, and other hardware options. [5][6][66] | Current FSW pages say the markdown is lossy and full options/footnotes must be checked in the PDF before quotation. [70] |\n| Warranted-vs-nonwarranted status for every numeric claim | SMW200A specifications with limits and specifications without limits are warranted, while n. trc., typ., nom., and meas. are not guaranteed. [3] | FSW similarly states specifications with limits and specifications without limits are warranted, while non-traceable specifications, typical data, nominal values, and measured values are not guaranteed. [54] |\n| A direct Aerospace / Defense application link for the claimed use case | The RAW evidence only shows an Aerospace & Defense Test presentation context and separately lists “Signal Generator / Signal Analyzer,” without a detailed use case, model, option stack, or comparison. [97][99] | A stronger application link exists for satellite payload testing: R&S FSW + R&S SMW200A are positioned for complete payload testing, including group delay, linearity, NPR, modulation, OFDM, spurious, and signal quality. [51] |\n| The exact Aerospace / Defense standard, test case, or qualification context | DO-160, MIL-STD-461, and MIL-STD-464 are mentioned in drone EMC/EME context, but the sources are not formal standards and cannot be used to infer complete limits, categories, waveforms, setups, or pass/fail criteria. [18][20][86] | For any claim tied to DO-160, MIL-STD-461, MIL-STD-464, satellite payload qualification, or TVAC, the relevant official standard/test plan and its version are still required. [18][20][49] |\n| Competitor official datasheet, configuration guide, release notes, support terms, and option list | Keysight-related battle-card descriptions are R&S battle-card views and need Keysight official or third-party verification; the battle card does not provide formal datasheets, document versions, order numbers, option codes, release status, or test conditions. [7] | Anritsu-related weakness claims also cannot be treated as official specs or market facts, and Anritsu frequency range, bandwidth, data rate, option code, software tools, and support model require Anritsu official datasheets/release notes/support terms. [12] |\n| A competitor model that is actually in the same instrument class and use case | Current passages mention Keysight N9040B UXA as a spectrum analyzer and Keysight E8257D PSG as a signal generator in a Starlink user-terminal test-equipment mapping, but that mapping is deck-level and requires formal product specs, options, frequency range, uncertainty, and test method before use. [34] | Current passages do not provide a validated Aerospace / Defense competitor comparison against our SMW200A / FSW solution. [7][34][75] |\n| A controlled side-by-side test method, measurement setup, uncertainty budget, and calibration conditions | Satellite group-delay pages state actual performance depends on DUT, frequency range, bandwidth, SNR, option, and calibration setup, and do not provide a complete uncertainty budget, test limits, standard chapter, or test case ID. [96] | TVAC pages likewise state the source is solution-level and not a product qualification certificate, and it lacks pressure, temperature profile, dwell time, calibration interval, and uncertainty budget. [22] |\n| Evidence for any market-share, ecosystem, customer, or superiority claim | Keysight pages explicitly do not infer market share, customers, shipment volume, or adoption status, and ecosystem/market-dominance claims in the battle card lack traceable external evidence. [7][75] | R&S superiority, only-vendor, and lower-TCO statements in battle-card-style sources are sales positioning, not directly citable technical specifications. [12] |\n### Minimum evidence pack before making the comparison\n1. R&S SMW200A official specifications and configuration guide for the proposed generator configuration, including frequency option, baseband module, modulation bandwidth, fading/channel-emulation options if claimed, and all mandatory/compatibility notes. [1][57][65]  \n2. R&S FSW official specifications for the proposed analyzer model and options, including frequency range, analysis-bandwidth option, real-time or I/Q options if claimed, and applicability restrictions by model. [6][66][69]  \n3. A documented Aerospace / Defense test scenario that directly uses signal generation and signal analysis, such as satellite payload complete testing with FSW + SMW200A, or a formal EMC/EME standard/test plan when the claim is about drone or airborne equipment testing. [51][86]  \n4. Competitor official datasheets/configuration guides/release notes for the exact competing signal generator and signal analyzer models, because current Keysight and Anritsu battle-card information is not official competitor evidence. [7][12]  \n5. A side-by-side comparison table limited to parameters that both sides document under comparable conditions, because SMW200A and FSW distinguish warranted specifications from typical, nominal, measured, and non-guaranteed data. [3][54]  \n6. Test setup evidence, calibration evidence, and uncertainty information for performance claims, because the satellite and TVAC sources do not provide complete uncertainty budgets or qualification-level test procedures. [22][96]  \n### What we cannot claim from the current passages alone\nWe cannot claim that our Signal Generator / Signal Analyzer solution is better than a competitor for Aerospace / Defense, because the current competitor passages either rely on R&S battle-card descriptions needing external validation or only list deck-level equipment mappings without formal competitor specs and test conditions. [7][34][75]  \nWe cannot claim a formal Aerospace / Defense qualification fit from the DO-160 or military drone passages, because those pages are not formal standard summaries and cannot be used to determine complete categories, limits, waveforms, setups, pass/fail criteria, or required test items. [18][20]\n\n來源：\n[1] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[3] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[5] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[6] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[7] Wiki：Keysight（來源：`AI Server PCB test image 24.md`、`AI Server PCB test image 50.md`、`2026_02_CMX500_Keysight_Sales_Battle_Card.md`）\n[12] Wiki：Anritsu（來源：`2026_02_CMX500_Anritsu_Sales_Battle_Card.md`）\n[18] Wiki：DO-160 airborne equipment EMC testing（來源：`2025RS Drone Solution.md`）\n[20] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[22] Wiki：TVAC 衛星酬載測試（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[34] Wiki：Starlink User Terminal 測試流程（來源：`Starlink UT Test Flow.md`）\n[49] Wiki：衛星酬載與元件測試（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[51] Wiki：衛星酬載與元件測試（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[54] Wiki：FSW_specs_en_5215-6749-22_v1701（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[57] Wiki：SMW200A_specs_en_3606-8037-22_v3100（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[61] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[65] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[66] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[69] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[70] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[75] Wiki：Keysight（來源：`AI Server PCB test image 24.md`、`AI Server PCB test image 50.md`、`2026_02_CMX500_Keysight_Sales_Battle_Card.md`）\n[86] Wiki：軍用無人機 EMC 與 EME testing（來源：`2025RS Drone Solution.md`）\n[96] Wiki：衛星酬載群延遲量測（來源：`Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md`）\n[97] `raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md`\n[99] `raw/Market/OneNote/R&S portfolio for O-RU testing.md`\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-7c9f1d5240b04946a81ae576c6c77825",
+      "request_id": "request-7c9f1d5240b04946a81ae576c6c77825",
+      "span_id": "span-7c9f1d5240b04946a81ae576c6c77825",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-7c9f1d5240b04946a81ae576c6c77825",
+       "request_id": "request-7c9f1d5240b04946a81ae576c6c77825",
+       "span_id": "span-7c9f1d5240b04946a81ae576c6c77825",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.2"
+       },
+       "trace": {
+        "trace_id": "trace-7c9f1d5240b04946a81ae576c6c77825",
+        "request_id": "request-7c9f1d5240b04946a81ae576c6c77825",
+        "span_id": "span-7c9f1d5240b04946a81ae576c6c77825",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "What evidence is required to compare our Signal Generator / Signal Analyzer solution with a competitor for Aerospace / Defense without making unsupported claims?",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "R&S SMW200A › 文件依據\n- 來源：[[SMW200A_config-guide_en_3606-8037-92_v0600]]。\n- 文件名稱：`R&S®SMW200A Vector Signal Generator – Configuration guide`。\n- 文件代碼：`PD 3606.8037.92`。\n- 文件版次：`Version 06.00`。\n- 文件日期：`May 2024`。\n- 文件性質：configuration guide；適合查 mandatory configuration、requires / not compatible / retrofitting notes、ordering information、recommended extras 與 service notes。\n\n- 來源：[[SMW200A_specs_en_3606-8037-22_v3100]]。\n- 文件名稱：`R&S®SMW200A Vector Signal Generator Specifications`。\n- 文件代碼：`PD 3606.8037.22`。\n- 文件版次：`Version 31.00`。\n- 文件日期：`May 2026`。\n- 文件性質：產品 specifications；記錄 RF/baseband performance、interfaces、environmental data、ordering information 與 options。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 17.642535
+         },
+         {
+          "text": "R&S SMW200A › 產品定位與架構\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]（Version 31.00，May 2026）與 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（Version 06.00，May 2024）：\n\n- [[R&S SMW200A]] 可從 single-path vector signal generator 擴充到 multichannel [[MIMO]] receiver tester。\n- 支援最多 `8` 個 signal sources 與最多 `64` 個 fading channels。\n- 可連接 [[R&S SGT100A]] signal generator modules，提供最多 `8` 條 RF paths。\n- 最多可在 `2` 個 internal baseband modules 上配置 `8` 個 baseband generators，具 real-time coder 與 ARB。\n- 單機可配置最多兩個 internal RF paths：RF path A 為 mandatory，RF path B 為 optional second RF path。\n- Baseband section 分成 standard baseband section 與 wideband baseband section；standard baseband 最高 `160 MHz` RF modulation bandwidth，wideband baseband 最高 `2 GHz` RF modulation bandwidth。\n- 可選 integrated fading section，channel emulation bandwidth 最高 `800 MHz`；最多可安裝 `4` 個 fading modules，提供最多 `64` 個 logical faders。\n- 單一儀器可實作 MIMO fading scenarios：`2x2`、`3x3`、`4x4`、`8x4`、`4x8`、`2x4x4`。\n- Path-specific、baseband-specific 與 fading/MIMO software options 採 floating license concept；若同一 feature 需同時在兩個 paths 或兩個 baseband generators 使用，通常需安裝兩份對應 option。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 16.24716
+         },
+         {
+          "text": "R&S SMW200A › 規格適用條件與語彙\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]（Version 31.00，May 2026）：\n\n- Product data 適用條件：ambient temperature 下 storage `3 hours` 後 warm-up operation `30 minutes`、符合 specified environmental conditions、遵守 recommended calibration interval、完成所有 applicable internal automatic adjustments。\n- Specifications with limits 與 specifications without limits 代表 warranted product performance。\n- `n. trc.`、`typ.`、`nom.`、`meas.` 不由 Rohde & Schwarz 保證。\n- Uncertainties 的 coverage factor 為 `2`，依 GUM 計算。\n- 依 3GPP standard，本文件中的 `Gbps`、`Mcps`、`Mbps`、`Msps`、`kbps`、`ksps`、`Msample/s` 不是 SI units。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 7.275479
+         },
+         {
+          "text": "R&S FSW › 其他硬體 options（摘錄）\n| Option code | 名稱 | Order No. | 原文說明 / 限制 |\n|---|---|---|---|\n| R&S FSW-B4 | OCXO precision frequency reference | 1313.0703.02 | user-retrofittable |\n| R&S FSW-B8E | Resolution bandwidth up to 40 MHz | 1338.6911.02 | 適用 [[R&S FSW8]]/13/26/43/50/67/85；signal analysis bandwidth 不由 B8E 定義 |\n| R&S FSW-B8 | Resolution bandwidth up to 80 MHz | 1313.2464.26 或 1313.2464.02 | 1313.2464.26 適用 [[R&S FSW8]]/13/26；1313.2464.02 適用 [[R&S FSW43]]/50/67/85 且 export license required |\n| R&S FSW-B10 | External generator control | 1313.1622.02 | contact service center |\n| R&S FSW-B13 | Highpass filter for harmonic measurements | 1313.0761.02 | user-retrofittable |\n| R&S FSW-B17 | Digital baseband Interface | 1313.0784.02 | user-retrofittable |\n| R&S FSW-B18 | Spare solid state drive | 1313.0790.21 | user-retrofittable |\n| R&S FSW-B21 | LO/IF connections for external mixers | 1313.1100.28 / 1313.1100.86 | 不適用 [[R&S FSW8]]、[[R&S FSW13]]；.28 適用 [[R&S FSW26]]/43/50/67；.86 適用 [[R&S FSW85]] |\n| R&S FSW-B24 | RF preamplifier | 1313.0832.13/.26/.43/.49/.51/.66/.67 | 適用範圍依型號與 order no.；來源未列 [[R&S FSW85]] 適用 B24 |\n| R&S FSW-B25 | Electronic attenuator, 1 dB steps | 1313.0990.02 | 適用 [[R&S FSW8]]/13/26 |\n| R&S FSW-B33 | USB mass memory write protection | 1313.3602.02 | 不可 retrofittable；factory pre-installed |\n| R&S FSW-B71 | Analog baseband inputs | 1313.1651.13/.26/.67/.86 | order no. 依型號範圍不同 |\n| R&S FSW-B71E | 80 MHz analysis bandwidth for analog baseband inputs | 1313.6547.02 | 需 R&S FSW-B71；user-retrofittable |\n| R&S FSW-B2071 | Oscilloscope baseband inputs | 1331.8302.02 | 適用所有 FSW models；user-retrofittable |\n| R&S FSW-B90G | Frequency extension 90 GHz | 1331.7693.02 | 不可 retrofittable；僅適用 [[R&S FSW85]]；f > 85 GHz without preselection |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSW.md"
+          },
+          "score": 6.898717
+         },
+         {
+          "text": "R&S FSW\nR&S FSW 是 Rohde & Schwarz 的 high-end Signal and Spectrum Analyzer 系列，依 Version 17.01（September 2025）涵蓋 8 GHz 至 85 GHz 型號，[[R&S FSW85]] 搭配 R&S FSW-B90G 可延伸至 90 GHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSW.md"
+          },
+          "score": 5.588832
+         },
+         {
+          "text": "R&S FSW › Analysis bandwidth options（硬體 options）\n| Option code | 名稱 | Order No. | 適用與限制 |\n|---|---|---|---|\n| R&S FSW-B40 | 40 MHz analysis bandwidth | 1313.0861.02 | user-retrofittable |\n| R&S FSW-B80 | 80 MHz analysis bandwidth | 1313.0878.02 | user-retrofittable |\n| R&S FSW-B160 | 160 MHz analysis bandwidth | 1325.4850.14 | contact service center |\n| R&S FSW-B320 | 320 MHz analysis bandwidth | 1325.4867.14 | includes 200 MHz IF filter |\n| R&S FSW-B512 | 512 MHz analysis bandwidth | 1331.7106.14 | includes 200 MHz IF filter |\n| R&S FSW-B512R | Real-time spectrum analyzer 512 MHz, POI ≤ 15 µs | 1331.7106.16 | contact service center；includes 512 MHz analysis bandwidth and 200 MHz IF filter |\n| R&S FSW-B1200 | 1.2 GHz analysis bandwidth | 1331.6400.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory；不適用 [[R&S FSW8]]、[[R&S FSW13]] |\n| R&S FSW-B2001 | 2 GHz analysis bandwidth | 1331.6916.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory |\n| R&S FSW-B4001 | 4.4 GHz analysis bandwidth | 1338.5215.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；contact service center |\n| R&S FSW-B6001 | 6.4 GHz analysis bandwidth | 1338.5221.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B8001 | 8.312 GHz analysis bandwidth | 1338.5238.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B800R | Real-time spectrum analyzer 800 MHz, POI ≤ 15 µs | 1331.6400.16 | 適用 [[R&S FSW26]]/43/50/67/85；export license required |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSW.md"
+          },
+          "score": 4.206604
+         },
+         {
+          "text": "Keysight › 未決事項\n- [[AI Server PCB test image 24]] 未標示內容日期、年份、季度或資料期間。\n- [[AI Server PCB test image 50]] 未標示內容日期、年份、季度或資料期間。\n- [[AI Server PCB test image 24]] 與 [[AI Server PCB test image 50]] 未標示 Keysight 相關方案的文件版次、產品規格、型號細節、option code 或價格。\n- [[AI Server PCB test image 24]] 未標示圖中合作夥伴名稱。\n- [[AI Server PCB test image 50]] 的 `Delta-L 测量软件（来自台作伙伴）` 與 `Delta-L 探头（来自台作伙伴）` 中「台作伙伴」前一字可能不清楚，來源明示無法完全辨識。\n- [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 是 R&S battle card，對 Keysight 的競品描述需要 Keysight 官方資料或第三方資料驗證。\n- [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 未提供 Keysight UXM 各 SKU 的正式 datasheet、文件版次、order number、option code、release status 或測試條件。\n- [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 中 ecosystem partnerships、market dominance、NTN / RedCap / FR3 / 6G path 等說法未附可追溯外部證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight.md"
+          },
+          "score": 11.599041
+         },
+         {
+          "text": "Keysight › R&S 2026-02-26 battle card 中的 Keysight 描述\n依 [[2026_02_CMX500_Keysight_Sales_Battle_Card]]（2026-02-26）：\n\n- Keysight 被描述為 large US-based test & measurement vendor，總部位於 Santa Rosa, California, USA，員工數約 **16,800+**。\n- 來源說 Keysight 在 semiconductor、aerospace / defense、cloud 與 wireless testing 具 strong market presence。\n- 來源說 Keysight 在美國與 key semiconductor accounts 很強，並宣稱有 broad ecosystem partnerships：24/25 top tech companies、14/15 operators、25/25 semiconductor companies。\n- 來源列出 Keysight portfolio：[[Keysight UXM]] 5G Wireless Test Platforms（[[Keysight E7515B]]、[[Keysight E7515W]]、[[Keysight E7515P]]、[[Keysight E7515E]]、[[Keysight E7515R]]）、[[ProbSim]] channel emulators、[[Nemo]] field test tools、[[RaySim]] digital twin engine、[[Atlas]] AI-powered device test、C-V2X 與 cybersecurity tools。\n- 來源說 Keysight UXM portfolio fragmented across multiple hardware SKUs，每個 SKU 有不同 bandwidth、RF ports、Wi-Fi、Rel-17/18 capabilities。\n- 來源說 Keysight software model 分散於 Atlas、Channel Studio、RaySim、Nemo、WLAN tools 與 UXM-specific feature options，並稱 no unified automation environment。\n- 來源說 Keysight support model 使用 tiered [[KeysightCare]] model：Assured、Enhanced、Application Software Support，另有 optional warranty and calibration assurance plan。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight.md"
+          },
+          "score": 11.532527
+         },
+         {
+          "text": "Keysight\n[[Keysight]]（圖中亦寫作 [[是德科技]]）是在既有 PCB 測試圖像來源中被列為高頻高速 [[PCB]] 測試解決方案相關公司的測試量測廠商名稱；在 [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 中，Keysight 也被描述為大型美國 test & measurement vendor 與 [[R&S CMX500]] 的 wireless device testing 競品供應商。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight.md"
+          },
+          "score": 6.374371
+         },
+         {
+          "text": "Anritsu › Battle card 中的公司輪廓\n依 [[2026_02_CMX500_Anritsu_Sales_Battle_Card]]（2026-02-26）：\n\n- Headquarters：Kanagawa, Japan。\n- Company size：約 4,000+ employees global。\n- Market positioning：source 稱其在 Japan T&M market share 為 #1，但 global footprint 較弱。\n- Strengths：good LTE/eCall signaling（[[Anritsu MD8475B]]）、solid RF heritage、strong Japanese operator relationships。\n- Support model：traditional hardware service；source 評為 software ecosystem 較弱、cloud capabilities limited，且 TestDeck 是唯一 DX tool。\n\n以上為 R&S internal battle card 對競品的描述；來源未引用 Anritsu 官方文件或第三方市場資料。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Anritsu.md"
+          },
+          "score": 5.105187
+         },
+         {
+          "text": "Anritsu › 來源列出的產品組合\n| 產品 / 平台 | 來源描述 | 限制 |\n|---|---|---|\n| [[Anritsu MT8000A]] | 5G NR FR1 / FR2 / FR3 | source 稱需 separate RF boards、external mmWave converters、multiple boxes；未列 Anritsu datasheet 版次 |\n| [[Anritsu MD8475B]] | LTE / IMS / eCall | source 稱是 Anritsu strength之一 |\n| [[Anritsu MT8821C]] | LTE / LTE-A / 3G / 2G RF | source 稱 LTE RF requires MT8821C |\n| [[Anritsu MT8862A]] | Wi-Fi | source 稱 MT8000A 無 WLAN signaling，Wi-Fi 需 separate tester |\n| [[Anritsu MT8852B]] | Bluetooth | source 僅列入 portfolio，未展開規格 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Anritsu.md"
+          },
+          "score": 3.920449
+         },
+         {
+          "text": "Anritsu › 使用限制\n- 本頁目前只依 R&S 內部 battle card 建立；不能把 source 對 Anritsu 的弱點敘事視為 Anritsu 官方規格或市場事實。\n- Anritsu 產品的 frequency range、bandwidth、data rate、option code、software tools 與 support model 需要另以 Anritsu 官方 datasheet / release notes / support terms 驗證。\n- 來源中出現的 R&S superiority / only vendor / lower TCO 等語句屬 sales positioning，不是可直接引用的技術規格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Anritsu.md"
+          },
+          "score": 3.513186
+         },
+         {
+          "text": "NTN signal generator solutions › End-to-end system testing\n來源將 E2E system testing 描述為對 UE、NTN payload、service link channel emulator 與 feeder link channel emulator 的 RF satellite link emulation。[[R&S SMW200A]] 需要 firmware version ≥ 5.30，並透過 B14 或 B15 搭配 [[R&S SMW-K820]] customized dynamic fading 支援：\n\n- satellite trajectory modelling。\n- frequency-dependent atmospheric effects。\n- longer path delays。\n- enhanced Doppler capabilities。\n- up to 1073 ms delay。\n- up to ±1 MHz Doppler（pure Doppler）。\n\n[[R&S Space Nexus]] 在來源中被描述為 PC Software，available on request，可依 satellite trajectory 產生 [[R&S SMW200A]] fading files。\n\n詳見 [[SMW200A NTN end-to-end channel emulation]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 4.064121
+         },
+         {
+          "text": "NTN signal generator solutions › 來源中的 solution 分層\n[[3GPP NTN Signal Generator Solutions Overview-EN-UR]] 將 NTN testing 分為四類：\n\n- Component Testing。\n- [[Satellite Access Node]]（[[SAN]]）Testing。\n- End-to-end System Testing。\n- User Equipment（UE）Testing。\n\n來源可讀內容主要展開前三者，尤其是 [[R&S SMW200A]] 的 channel emulation、[[5G NR SAN conformance testing]] 與 [[SMW200A NTN end-to-end channel emulation]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 4.063592
+         },
+         {
+          "text": "NTN signal generator solutions › 與 NTN validation / conformance 的關係\n- [[5G NTN validation and testing]]：較寬的 NTN validation、partner collaboration、CMX500 / SMBV100B / Viasat / Gatehouse / MediaTek PR 語境。\n- [[NR-NTN conformance testing]]：偏 UE / GCF / PTCRB / TS8980 / CMX500 conformance validation。\n- [[5G NR SAN conformance testing]]：本來源新增的 Satellite Access Node 測試概念，聚焦 SAN transmitter、receiver、performance 與 OTA chapters。\n- [[NTN propagation emulation and fading]]：既有 CMX500 PR 中 propagation emulation 與 fading 的概念；本來源補充 SMW200A dynamic fading / Doppler / path delay 實作線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 3.451595
+         },
+         {
+          "text": "DO-160 airborne equipment EMC testing › Section 21 — Emission of RF Energy\n來源說此測試確保 equipment does not emit excessive RF noise，以 protect aircraft sensors and receivers。來源分為：\n\n- Conducted Emissions（low freq）。\n- Radiated Emissions（high freq）。\n\n標題中同列 [[RE102]] / CE，但未提供 limit table 或 exact mapping。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+          },
+          "score": 2.305313
+         },
+         {
+          "text": "DO-160 airborne equipment EMC testing › 來源列出的 sections\n| Section | 來源描述 |\n|---:|---|\n| 15 | Magnetic field / magnetic effect。 |\n| 16 | Power input（electrical testing, non-EMC）。 |\n| 17 | Voltage spike（AC / DC）。 |\n| 18 | Audio frequency conducted susceptibility - power inputs。 |\n| 19 | Induced signal susceptibility。 |\n| 20 | Radio frequency susceptibility（radiated and conducted）。 |\n| 21 | Emission of radio frequency energy。 |\n| 22 | Lightning induced transient susceptibility。 |\n| 25 | Electrostatic discharge。 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+          },
+          "score": 2.07614
+         },
+         {
+          "text": "DO-160 airborne equipment EMC testing › 使用限制\n- 本頁不是 [[RTCA DO-160]] 正式標準摘要；只保存 [[2025RS Drone Solution]] 的簡報文字。\n- 不得由本頁推論 DO-160G / DO-160 任何 section 的完整 category、limit、waveform、test setup 或 pass / fail criteria。\n- 來源把 DO-160 放在 military / aviation drone example 中，但未說明特定 drone、eVTOL 或 avionics equipment 的 qualification plan。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+          },
+          "score": 1.572125
+         },
+         {
+          "text": "軍用無人機 EMC 與 EME testing › 與 standard EMC test 的差異\n[[2025RS Drone Solution]] 對 system level EME effects test 與 standard EMC test 的差異描述包含：\n\n- system level 依 requirements operate in fixed / operational environment。\n- operational environmental conditions may have no definition。\n- 分析 EM interference，涵蓋 time and frequency domain。\n- standard EMC test 則 according to test methods、frequency domain、research and design work 等。\n\n來源排版破碎，以上只保留可見語句，不延伸成正式測試方法。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+          },
+          "score": 5.146888
+         },
+         {
+          "text": "軍用無人機 EMC 與 EME testing › 使用限制\n- 本頁是 Market 類簡報摘要，不是 [[MIL-STD-461]]、[[MIL-STD-464]] 或 [[RTCA DO-160]] 標準文件。\n- 不可由此頁直接判定任一 drone / UAV / eVTOL 產品必須測哪些項目。\n- [[MIL-STD-464C]] / [[MIL-STD-464D]] 版本差異需後續查正式標準或 procurement documentation。\n- 系統層 EME / HPM / EMP / lightning / RADHAZ 測試涉及安全與法規限制，來源未提供可部署或可執行參數。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+          },
+          "score": 3.621898
+         },
+         {
+          "text": "軍用無人機 EMC 與 EME testing › Complex EME emulation\n來源的 RF electromagnetic environment 章節列出：\n\n- emulate complex EME signals。\n- enable the military electromagnetic spectrum operation。\n- emulating different electromagnetic environment。\n- evaluating military system level effects under EM interferences。\n- simulating different operational scenarios。\n\n這支持 [[Electromagnetic Environment Emulation]] 與 [[UAV UAS Drones T&M Solutions]] 的客製化測試方向，但來源未提供 signal library、scenario definition、threat emitter model、功率、頻段、同步或安全條件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+          },
+          "score": 2.635887
+         },
+         {
+          "text": "TVAC 衛星酬載測試 › 使用限制\n- 來源未提供 [[R&S ZN-Z33]]、[[R&S NRP33SN-V]]、[[R&S NRP67SN-V]] 的完整 datasheet、order number、完整 environmental specification 或 ESA norms 條文。\n- 來源未說明 TVAC chamber 的 pressure、temperature profile、dwell time、calibration interval 或 uncertainty budget。\n- 本頁只記錄 2022 application brochure 的 solution-level 說法，不可視為產品 qualification certificate。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/TVAC 衛星酬載測試.md"
+          },
+          "score": 7.983132
+         },
+         {
+          "text": "TVAC 衛星酬載測試 › 典型 setup 元件\n[[Satellite_payload_testing_app-bro_en_5215-2120-92_v0200]] 的 TVAC test setup 可包含：\n\n- signal generator\n- RF switching matrix\n- signal analyzer\n- network analyzer\n- multimeter\n- DC power system\n- laptop / PC remote operation\n- test interface\n- TVAC\n- satellite or satellite components\n- bulkhead connector interface\n\n來源標示 TVAC setup 中距離為 10 m to 25 m。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/TVAC 衛星酬載測試.md"
+          },
+          "score": 6.186616
+         },
+         {
+          "text": "TVAC 衛星酬載測試 › 測試問題\n依 [[Satellite_payload_testing_app-bro_en_5215-2120-92_v0200]]（September 2022，Version 02.00）：\n\n- Satellite payload qualification 需要使用 [[TVAC]] 進行 performance testing。\n- Commercial off-the-shelf test and measurement equipment 無法在 TVAC conditions 下工作。\n- Spectrum analyzers、vector network analyzers、signal generators 等設備必須留在 TVAC 外部，並以長 cables 連接 chamber 內的 DUT。\n- Test setup 中的 cables、adapters 與 switches 會隨 TVAC temperature changes 發生 drift。\n- 在不同 temperature 下於 chamber 中完成的 calibration 不再有效。\n- 移動 cables 與改變 temperatures 後，需要 regular recalibration 以確保 measurement accuracy。\n- TVAC 內 calibration procedure 特別困難，因 vacuum applied 時 operator 無法進入 chamber。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/TVAC 衛星酬載測試.md"
+          },
+          "score": 2.084998
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 與既有知識的關係\n- 與 [[R&S SMW200A]]：補充 NTN channel emulation、SAN conformance testing 與 E2E testing 的 application / configuration 視角；不取代 [[SMW200A_specs_en_3606-8037-22_v3100]] 或 [[SMW200A_config-guide_en_3606-8037-92_v0600]]。\n- 與 [[R&S FSW]]：補充在 NTN component testing 中的分析角色與簡報級摘要規格；正式 frequency / bandwidth / option 仍以 [[FSW_specs_en_5215-6749-22_v1701]] 為準。\n- 與 [[R&S FSVA3000]]：補充 FSW / FSVA 5G NR options support Chapter 6 & 9 measurements 的簡報說法；未列出 FSVA3000 具體型號或 option stack。\n- 與 [[5G NTN validation and testing]]：新增 signal-generator-centric / channel-emulation-centric 的 NTN validation path，與既有 CMX500 / partner PR 語境互補。\n- 與 [[NR-NTN conformance testing]]：既有頁偏向 UE / GCF / PTCRB / TS8980 / CMX500 conformance validation；本來源聚焦 [[Satellite Access Node]] conformance testing 與 [[3GPP TS 38.181]] / [[3GPP TS 38.108]]。\n- 與 [[NTN propagation emulation and fading]]：既有頁整理 CMX500 PR 中 propagation emulation 與 fading 區分；本來源提供 SMW200A dynamic fading / Doppler / path delay 的 signal generator 實作線索，但未使用相同術語區分。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 14,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 10.190788
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 關鍵實體與概念\n- [[R&S SMW200A]]：核心 signal generator / channel emulator。\n- [[R&S FSW]]：component testing 與 SAN transmitter measurement 的 spectrum / signal analysis instrument。\n- [[R&S FSVA3000]]：來源 slide 33 說 5G NR options on FSW / FSVA support Chapter 6 & 9 measurements。\n- [[R&S Space Nexus]]：來源 slide 27 的 PC software，available on request，用於依 satellite trajectory 產生 SMW200A fading files。\n- [[NTN signal generator solutions]]：本來源的 solution-level 概念節點。\n- [[5G NR SAN conformance testing]]：本來源最明確的 3GPP conformance testing 應用。\n- [[SMW200A NTN end-to-end channel emulation]]：本來源對 SMW200A + K820 / Space Nexus 的 E2E satellite RF link emulation 說法。\n- [[3GPP TS 38.108]]、[[3GPP TS 38.181]]、[[3GPP TS 36.108]]、[[3GPP TS 36.181]]、[[3GPP TR 38.821]]、[[3GPP TR 38.863]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 13,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 9.447016
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 原文未解的問題\n- 正式發布日期未標示；來源只提供封面 `12-2025`、末頁 `Last updated: 08/25` 與 slide 27 的 `2025-09-29` workshop date。\n- 來源是 lossy markdown，圖片與圖表可能有遺漏；完整視覺資訊需回原始 pptx。\n- slide 8 對 n510–n512 的 channel bandwidth 欄位不完整，且 n512 bandwidth 註記 under discussion in 3GPP。\n- slide 28 的 B15 / K823 欄位部分空白；不能自行補上 max RF CA bandwidth、path delay 或 Doppler 數值。\n- slide 41 標題寫 `3GPP 38.181-1 v1.01`，與其他頁 `v17.1.0` 不一致；未判斷是否 OCR / 簡報筆誤。\n- slide 45 註記 `*Available in Q1 2021` 的對應項目不清楚，且與 2025 簡報語境相距較遠。\n- Recommended configurations 是簡報建議，不含價格、service contract、calibration、完整 accessory、export control 或最新 option availability。\n- [[R&S Space Nexus]] 的正式版本、料號、授權方式、輸出格式與 availability 條件未標示。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 15,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 7.850624
+         },
+         {
+          "text": "衛星酬載群延遲量測 › 測量原理\n- [[R&S SMW200A]] 產生 multi-carrier continuous wave signal 作為 stimulus。\n- Multi-carrier stimulus 的 tones 數量與 spacing / aperture 可依 DUT 需求調整。\n- [[R&S FSW]] 的 group delay measurement 分兩步：\n  - Reference calibration：generator 直接連接 analyzer，analyzer 判定 individual carriers 的 reference phase 與 amplitude。\n  - Group delay and gain measurement：連接 DUT，analyzer 由 reference signal 與 DUT output multicarrier signal 的 phase difference 判定 carrier frequency range 的 group delay。\n- 來源列出使用 [[R&S SMW-K61]] 與 [[R&S FSW-K17]] multicarrier group delay measurement application。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+          },
+          "score": 8.115578
+         },
+         {
+          "text": "衛星酬載群延遲量測 › 方法選擇\n依 [[Satellite_payload_testing_app-bro_en_5215-2120-92_v0200]]：\n\n- [[R&S FSW]] + [[R&S SMW200A]] 建議用於 complete payload testing。\n- [[R&S ZNA]] 建議用於 component level testing。\n- Spectrum analyzer + signal generator 的 measuring principle 是產生 multi-carrier signal，量測 carriers 之間的 phase shift / difference，再計算 group delay。\n- VNA 的 measuring principle 是產生 two-tone signal，並在 reference 與 measurement receivers 中量測 carriers 之間的 phase。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+          },
+          "score": 8.101905
+         },
+         {
+          "text": "衛星酬載群延遲量測 › 來源列出的優點\n- 可在 milliseconds 內量測 wideband signals 的 absolute group delay 與 relative group delay。\n- Signal averaging 與 smoothing 可改善 carrier-to-noise ratio，在 cables 與 fixtures 導致 high signal path losses 時取得 valid results。\n- 可自動補償 in-orbit measurements 的 Doppler effects。\n- Frequency converters 的 relative group delay 可達 1 ns measurement accuracy，且不需要 reference mixer 或 golden device。\n- Non-frequency-translating measurements 的 relative group delay 可達 300 ps measurement accuracy。\n- [[R&S SMW200A]] 可內部彈性產生 MCCW signals 與 modulated signals，並可設定 carrier spacing 與 number of carriers。\n- Deembedding function 可修正 measurement setup 中 cables 與 fixtures 的 frequency response。\n- [[R&S FSW-K17S]] option 可量測 low SNR 的 wideband signals，透過分析 overall signal 的 subspans 改善 SNR 與 measurement speeds。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+          },
+          "score": 7.679314
+         },
+         {
+          "text": "NTN 裝置法規測試 › EN 301 681 測試與 solution mapping\n來源指出 [[EN 301 681]] measurements are preferred conducted，並列出 test cases：\n\n- Unwanted emissions outside the band。\n- Unwanted emissions within the band。\n- Unwanted emissions in carrier-off state。\n- Protection of the radio astronomy service operation 1660 to 1660.5 MHz and 1668 to 1670 MHz。\n- Receiver Adjacent Channel Selectivity。\n- Receiver Blocking Characteristics。\n- MES Control and Monitoring Function / CMF processor monitoring。\n- Equipment identity。\n\nTypical setup / required instruments 包含：\n\n- Spectrum analyzer 30 MHz–12.75 GHz。\n- Signal generator for CW and unwanted signal。\n- BER measure。\n- System emulator / Mobile Radio Tester。\n- Test load、filter、coupler、RF interference signal generator。\n- [[R&S SMBV100B]]。\n- 來源稱 latest [[R&S CMW500]] SW can support 3GPP R17 NB-NTN signalling。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN 裝置法規測試.md"
+          },
+          "score": 9.938542
+         },
+         {
+          "text": "NTN 裝置法規測試 › EN 303 981 測試與 solution mapping\n來源指出 [[EN 303 981]]使用 radiated measurement for antenna characterizations，並列出 test cases：\n\n- Antenna beam pointing。\n- Off / on-axis spurious radiation。\n- Carrier suppression / cessation of missions。\n- Blocking performance。\n- Adjacent Signal Selectivity。\n- Image frequency rejection。\n- Location and Identification of the WBES。\n- Control and Monitoring Functions。\n- Receive antenna off-axis gain pattern。\n\nRequired instruments / solution mapping 包含：\n\n- Signal generator for CW and unwanted signal，30 MHz–60 GHz。\n- [[R&S SMBV100B]]。\n- [[R&S ELEKTRA]]。\n- [[R&S TS8996]] RSE & customization。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN 裝置法規測試.md"
+          },
+          "score": 7.034372
+         },
+         {
+          "text": "NTN 裝置法規測試 › unresolved\n- 來源未標示 EN 301 681、EN 303 981 等 standards 的版本與修訂日期。\n- Product examples 是圖表中的 market examples / Declaration of Conformity 線索，未提供 DoC 文件、日期或地區。\n- Latest CMW500 SW support 3GPP R17 NB-NTN signalling 未提供 software version、option、test case 或 supported band。\n- CE RED / ETSI / FCC regulation adaptation 的正式 work items 未標示。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN 裝置法規測試.md"
+          },
+          "score": 1.757138
+         },
+         {
+          "text": "Starlink User Terminal 測試流程 › Test equipment mapping\n依 [[Starlink UT Test Flow]]：\n\n| 測試類別 | 來源列出的設備 |\n|---|---|\n| Spectrum analyzer | [[R&S FSW]]、Keysight N9040B UXA |\n| Signal generator | [[R&S SMW200A]]、Keysight E8257D PSG |\n| Power meter | [[R&S NRX]] with NRP33S、Bird 43 wattmeter |\n| VNA / array calibration | Keysight PNA-X、[[R&S ZNA]] |\n| Satellite simulator | Terma Ku/Ka-band loopback EIRP / G/T testing |\n\n這些設備是 deck-level recommendation；正式配置需回查產品規格、option、frequency range、uncertainty 與測試方法。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Starlink User Terminal 測試流程.md"
+          },
+          "score": 7.911642
+         },
+         {
+          "text": "Starlink User Terminal 測試流程 › Regulatory certification path\n來源列出：\n\n- FCC USA：Part 15 WLAN router、Part 25 NGSO satellite、SAR / MPE testing。\n- Taiwan NCC：Fixed satellite service compliance、Ku-band uplink overlap review。\n- Labs：[[Bureau Veritas]] Taoyuan、local R&S / Keysight partnerships for emissions。\n- Key Limits：EIRP density、PFD at ground、interference mitigation、beacon power。\n- Timeline：DVT cert 3–6 months、PVT production ramp post-approval。\n\n⚠️ [[Starlink UT Test Flow]]（2026-09-18 raw converted）說 NCC/FCC certification: Taiwan labs，且 Key Takeaways 說 Taiwan labs (NCC, Bureau Veritas) critical for LEO certification path，但既有頁面 [[NCC]] 說 NCC 在衛星 / 通訊監理語境應連到 [[國家通訊傳播委員會]]，不是測試實驗室。判斷：將 NCC 視為監理 / 認證流程節點而非 lab；實驗室角色目前只由 [[Bureau Veritas]] Taoyuan 與未具名 local partnerships 支撐。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Starlink User Terminal 測試流程.md"
+          },
+          "score": 7.235731
+         },
+         {
+          "text": "Starlink User Terminal 測試流程 › 來源口徑\n- 來源：[[Starlink UT Test Flow]]。\n- 正式日期：來源未標示。\n- raw converted：2026-09-18。\n- 資料類型：Market / OneNote / PowerPoint lossy derivative。\n- 限制：本頁不是 Starlink 官方 test plan、NCC / FCC 認證流程文件、量產 SOP 或實驗室 scope。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Starlink User Terminal 測試流程.md"
+          },
+          "score": 5.488786
+         },
+         {
+          "text": "Starlink User Terminal › Recommended RF test equipment\n[[Starlink UT Test Flow]] 推薦：\n\n- Spectrum analyzer：[[R&S FSW]]（43.5 GHz、POI 0.46 µs）、Keysight N9040B UXA。\n- Signal generator：[[R&S SMW200A]]（100 kHz–31.8 GHz）、Keysight E8257D PSG。\n- Power meter：[[R&S NRX]] with NRP33S（±2.5 dB abs）、Bird 43 wattmeter。\n- VNA：Keysight PNA-X（67 GHz）、[[R&S ZNA]] for array calibration。\n- Satellite simulator：Terma Ku/Ka-band for loopback EIRP / G/T testing。\n\n這些是該 deck 的推薦清單；正式頻率範圍、POI、功率不確定度、option 需求與 order number 必須回查各產品 datasheet。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Starlink User Terminal.md"
+          },
+          "score": 8.207932
+         },
+         {
+          "text": "Starlink User Terminal › Phased array evolution\n[[Starlink UT Test Flow]] 以 beamformer impact 比較三個版本：\n\n| 版本 | 來源說法 |\n|---|---|\n| V1 Circular | 79 DBFs、1,264 elements、motors、NF 3–4 dB |\n| Rev3 Gen2 | 16 Shiraz、1,536 elements、NF 2.5–3 dB |\n| Rev4 Gen3 | 6 Shiraz daisy-chain、1,536 elements、NF 2–2.5 dB、110° FOV |\n\n來源另稱 Rev4 gains：\n\n- Jitter 9 ms vs 112 ms Rev3。\n- Down 307 Mbps。\n- Power efficiency +50%。\n\n這些數字連到 [[相控陣列天線]] 與 [[Beamforming]] 主題，但來源未提供 teardown、FCC filing、SpaceX 官方文件或第三方測試報告。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Starlink User Terminal.md"
+          },
+          "score": 6.965236
+         },
+         {
+          "text": "Starlink User Terminal › Regulatory / certification 語境\n來源提到：\n\n- FCC USA：Part 15 WLAN router、Part 25 NGSO satellite、SAR / MPE testing。\n- Taiwan NCC：Fixed satellite service compliance、Ku-band uplink overlap review。\n- Labs：[[Bureau Veritas]] Taoyuan、local R&S / Keysight partnerships for emissions。\n- Key limits：EIRP density、PFD at ground、interference mitigation、beacon power。\n- Timeline：DVT certification 3–6 months、PVT production ramp post-approval。\n\n⚠️ [[Starlink UT Test Flow]]（2026-09-18 raw converted）說 NCC/FCC certification: Taiwan labs，且 Labs: Bureau Veritas (Taoyuan), local R&S/Keysight partnerships for emissions；但既有頁面 [[NCC]] 說 NCC 在衛星 / 通訊監理語境應連到 [[國家通訊傳播委員會]]，不是測試實驗室。判斷：本來源可能把監理機關、認證流程與實驗室混寫；在取得 NCC 公告或 Bureau Veritas scope 前，不把 NCC 寫成 lab。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Starlink User Terminal.md"
+          },
+          "score": 6.480905
+         },
+         {
+          "text": "SDR-assisted UAV security › Jamming detection\n[[Software-Defined_Radio_Deployments_in_UAV-Driven_Applications_A_Comprehensive_Review]] 摘錄多項 jamming detection 研究：\n\n- [55] 使用 [[Holy Stone HS720E]]、[[Ettus USRP B210]] 與 [[GNU Radio]]，研究 barrage、protocol-aware、single-tone、successive-pulse jamming attacks。Spectrogram-based CNN model 達到 99.79% accuracy 與 0.03% false alarm rate。\n- [56] [[BloodHound]] 使用 [[Ettus X310]] SDR units 與 raw I/Q samples，在 mobile environments 中 early detect / identify jamming；來源稱 detection accuracy 超過 99%。\n- [57] [[BloodHound+]] 使用 sparse autoencoders 分析 I/Q grayscale images；在 RJP=0.5、receiver distance=10 m 時 classification accuracy 達 99.7%。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SDR-assisted UAV security.md"
+          },
+          "score": 7.193354
+         },
+         {
+          "text": "SDR-assisted UAV security › GPS spoofing / jamming detection\n來源指出 affordable SDR devices，如 [[HackRF One]]、[[BladeRF 2.0]] 與 [[BladeRF x40]]，可用於 GNSS spoofing / jamming attacks，也可用於測試 defense mechanisms：\n\n- [62] 提出 lightweight LSTM-based detection model，並以 knowledge distillation 壓縮，利於整合進 UAV control systems。\n- [63] 研究 [[HackRF One]] 1.0 與 external TCXO 對 GNSS signal spoofing / jamming threats 的影響；受測 UAV GNSS receivers 包含 3DR IRIS+、Tarot 650 v2.2、DJI Inspire、Sky Hunter。\n- [64] [[MAVIDS]] 使用 PCA 與 one-class classifiers，並以 [[HackRF One]]、[[GPS-SDR-SIM]] 與 [[GNU Radio Companion]] 進行 GPS spoofing / jamming experiments；macro-averaged F1 scores 為 GPS spoofing 90.57%、jamming 94.3%。\n- [66] 使用 cellular BS 與 Wi-Fi AP crowd-sourced information 進行 GPS spoofing detection / mitigation，並以 [[HackRF One]] + TCXO 產生 spoofing signals。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SDR-assisted UAV security.md"
+          },
+          "score": 5.67271
+         },
+         {
+          "text": "SDR-assisted UAV security › unresolved\n- 各 jamming / spoofing research 的法規授權、測試場地許可與 safety controls 未在本次摘要中完整展開。\n- 來源沒有把 SDR-assisted security solutions 對應到商用產品 maturity level。\n- [[HackRF One]]、[[BladeRF x40]]、[[Ettus USRP X310]] 等 device 在不同研究中的配置、firmware、clocking、antenna 與 calibration 條件需逐篇回查。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SDR-assisted UAV security.md"
+          },
+          "score": 5.422309
+         },
+         {
+          "text": "SatelliteEcoChain › 航太材料\n- [[益材科技]] — 來源在航太材料區段列名，但未填角色亮點或 R&S Solution。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SatelliteEcoChain.md"
+          },
+          "score": 11.402938
+         },
+         {
+          "text": "SatelliteEcoChain › 與既有知識的關係\n- [[4. Satellite Eco-chain in Taiwan]] 是 OneNote link hub，先前只列出 `SatelliteEcoChain.xlsx` 與外部網頁 / 圖片待讀；本來源是同名 Excel 經 markitdown 轉出的表格內容，因此補足部分待讀材料。\n- [[台灣太空產業]] 已依 [[0.Satcom Industry]] 整理 TASA、台灣太空產業地圖、2024 衛星地面設備產值與若干公司列名；本來源新增的是 Excel 表格中的分類與 R&S solution mapping，不提供市場規模或產值。\n- [[低軌衛星零組件與地面終端供應鏈]] 由 2026-09-15 市場分析報告支撐公司技術定位與市場敘事；本來源只可補充「某公司被列入某分類」與「R&S solution mapping」，不能覆蓋該報告中的市場主張。\n- [[Satellite User Terminal 外部資料清單]] 已保存 OneWeb / Kuiper / Starlink user terminal 待讀資料；本來源新增 UT 區段列名與 R&S CMX500 / CMP180 / SMW200A / SMBV100B 等測試設備線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 16,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SatelliteEcoChain.md"
+          },
+          "score": 11.307555
+         },
+         {
+          "text": "SatelliteEcoChain › 關鍵實體與概念\n- [[台灣衛星產業鏈 R&S solution mapping]] — 本來源最直接支撐的概念頁，整理 satellite eco-chain 表格分類、企業列名、R&S solution mapping 與使用限制。\n- [[台灣衛星產業鏈外部資料清單]] — 既有頁面曾把 `SatelliteEcoChain.xlsx` 標為未擷取；本來源提供該 Excel 的 markdown 擷取版本，但仍需回查原始 Excel。\n- [[衛星地面設備]]、[[Satellite User Terminal 外部資料清單]]、[[低軌衛星零組件與地面終端供應鏈]] — 本來源列出的 UT、地面站、通訊模組與 PCB 分類可與這些頁面互相追溯，但不可直接合併為已驗證供應關係。\n- [[衛星酬載與元件測試]]、[[衛星酬載群延遲量測]]、[[TVAC 衛星酬載測試]] — 表格中的 G/T、NPR、Group delay、DVB-S2/S2X 與 R&S 儀器 mapping 可連到既有衛星測試主題。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 15,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SatelliteEcoChain.md"
+          },
+          "score": 9.31433
+         },
+         {
+          "text": "Satellite_payload_testing_app-bro_en_5215-2120-92_v0200 › 關鍵實體與概念\n- [[Rohde & Schwarz]]：提供 satellite payload and components test and measurement solutions。\n- [[Rohde & Schwarz GmbH & Co KG]]：文件頁尾 copyright owner，© 2017–2022，地址標示 81671 Munich, Germany。\n- [[R&S FSW]]：用於 group delay、linearity、NPR、signal quality、spurious、carrier-in-carrier 與 oscillator / synthesizer measurements；來源列 key features 為 up to 90 GHz、up to 500 GHz with external harmonic mixers、up to 8.3 GHz internal analysis bandwidth、800 MHz real-time analysis bandwidth。\n- [[R&S SMW200A]]：用於 multi-carrier / modulated signal generation、OFDM waveform generation、DPD、NPR stimulus；來源列 key features 為 up to 67 GHz、up to 2 GHz I/Q modulation bandwidth、with [[R&S SMW-K555]] 可達 4 GHz signal bandwidth、optional second RF path up to 44 GHz。\n- [[R&S ZNA]]：用於 payload components RF measurements、converter / mixer group delay、noise figure、amplifier/filter/antenna measurements；來源列 key features 包含 up to 67 GHz、up to eight independent receivers、four phase coherent sources、two internal LO sources、internal combiner。\n- [[R&S FS-SNS]]：smart noise source，用於簡化 spectrum analyzer 的 noise figure and gain measurements。\n- [[R&S ZN-Z33]]：TVAC-compatible automatic calibration unit，可放在 chamber 內做 inline recalibration。\n- [[R&S NRP33SN-V]] 與 [[R&S NRP67SN-V]]：TVAC-designed three-path diode power sensors，分別支援 up to 33 GHz / 67 GHz。\n- [[R&S RTP]]、[[R&S RTO6]]：oscilloscopes，用於 satellite digital interface trigger、decode 與 debug。\n- [[衛星酬載與元件測試]]：本來源的總題目。\n- [[衛星酬載群延遲量測]]：比較 spectrum analyzer + signal generator 與 VNA two-tone technique 的測試主題。\n- [[TVAC 衛星酬載測試]]：thermal vacuum chamber 下 satellite payload qualification 測試主題。\n- [[Noise figure measurement]]、[[Group delay]]、[[NPR]]、[[EVM]]、[[OFDM]]、[[Spurious emissions]]、[[SpaceWire]]、[[SpaceFibre]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md"
+          },
+          "score": 7.93934
+         },
+         {
+          "text": "Satellite_payload_testing_app-bro_en_5215-2120-92_v0200 › 重點摘要\n這份來源是 Rohde & Schwarz application brochure《Satellite payload and components testing》，文件代碼 `PD 5215.2120.92`，Version 02.00，文件日期標示 `September 2022 (ch)`，主題是使用 [[Rohde & Schwarz]] 儀器測試 [[衛星酬載與元件測試]]、transponders、modules 與 components。\n\n- 衛星通訊系統支援 direct broadcast、wireless communications、remote sensing，涵蓋 commercial 與 government systems，並要求 24/7 reliable operation 與 multi-decade system longevity。\n- 來源將 payload 技術演進描述為從 bent-pipe 或 digital transparent payloads 進展到 digital regenerative payloads；regenerative payloads 增加 system capacity 與 flexibility，但也增加 testing complexity。\n- Bent-pipe payload channel 高階組成包含 uplink antenna、low noise amplifier、filter、frequency converter、filter、high power amplifier、filter、downlink antenna 與 local oscillator。\n- Regenerative payload channel 在 RF chain 中加入 digital demodulator、baseband processing and switching、digital modulator 等功能區塊。\n- 來源定位 [[R&S FSW]]、[[R&S SMW200A]] 與 [[R&S ZNA]] 為 satellite payload / component RF testing 的核心儀器：[[R&S FSW]] + [[R&S SMW200A]] 偏 complete payload testing，[[R&S ZNA]] 偏 component level testing。\n- [[衛星酬載群延遲量測]] 是主要測試主題之一；來源比較 multi-carrier group delay measurement 與 [[R&S ZNA]] two-tone technique。\n- Linearity and gain transfer measurements 涵蓋 gain compression、AM/AM、AM/PM、NPR、ACLR、DPD 與 EVM 等 payload / component characterization。\n- [[TVAC 衛星酬載測試]] 使用 chamber 外部測試儀器、長 cables、inline calibration modules 與 TVAC-compatible power sensors，以處理 temperature drift 與 vacuum 下無法人工進入 chamber 的 calibration 問題。\n- Digital interface testing 涵蓋 [[SpaceWire]]、8b/10b-based [[SpaceFibre]]、MIL-STD-1553、ARINC 429、CAN、I²C/SPI、UART 等 bus trigger/decode/debug 測試。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md"
+          },
+          "score": 6.730196
+         },
+         {
+          "text": "Satellite_payload_testing_app-bro_en_5215-2120-92_v0200 › 原文未解的問題\n- 來源未提供完整頁面 OCR；此摘要基於分段萃取後重點。\n- 雖然 raw 路徑屬於 Market，本文件本身是 2022 年 R&S application brochure；其產品與 option 狀態可能已由後續 datasheet / specifications 更新。\n- 來源未列所有 option 的 order number；涉及 [[R&S FSW-K17]]、[[R&S FSW-K17S]]、[[R&S SMW-K61]]、[[R&S FSW-K18]]、[[R&S FSW-K18D]]、[[R&S FSW-K18M]]、[[R&S SMW-K541]]、[[R&S SMW-K114]]、[[R&S FSW-K96]]、[[R&S FSW-K50]]、[[R&S FSW-K70]]、[[R&S ZNA-K9]]、[[R&S ZNA-K30]] 等選配時，仍需回查對應產品規格書。\n- 來源未提供 TVAC accessories、power sensors、calibration units 的完整 datasheet、order number、ESA norms 細節或 qualified temperature / vacuum test report。\n- 來源未標示 brochure 的發布日，只標示 `September 2022 (ch)`；引用時應保留年月層級。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md"
+          },
+          "score": 5.307707
+         },
+         {
+          "text": "衛星酬載與元件測試 › 使用限制\n- 本概念頁來自 2022 年 application brochure，屬 application / solution 說明，不是最新產品規格書。\n- 不可用本頁取代 [[R&S FSW]]、[[R&S SMW200A]]、[[R&S ZNA]] 等產品 datasheet 的 option、order number 或規格條件。\n- 來源沒有給出完整 satellite payload qualification test plan、標準版本、ESA / ECSS 章節或客戶案例。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/衛星酬載與元件測試.md"
+          },
+          "score": 6.006168
+         },
+         {
+          "text": "衛星酬載與元件測試\n[[衛星酬載與元件測試]]是針對 satellite transponders、payload subsystems、modules 與 RF / digital components 的設計、開發、驗證與 qualification 測試集合，來源以 [[Rohde & Schwarz]] 儀器方案為主。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/衛星酬載與元件測試.md"
+          },
+          "score": 4.403466
+         },
+         {
+          "text": "衛星酬載與元件測試 › 儀器與測試角色\n依 [[Satellite_payload_testing_app-bro_en_5215-2120-92_v0200]]：\n\n- [[R&S FSW]] + [[R&S SMW200A]]：建議用於 complete payload testing，涵蓋 group delay、linearity、NPR、modulation、OFDM、spurious 與 signal quality。\n- [[R&S ZNA]]：建議用於 component level testing，特別是 converters、mixers、amplifiers、filters、antennas、noise figure、group delay 與 phase measurements。\n- [[R&S RTP]] 與 [[R&S RTO6]]：用於 satellite digital interface decode / trigger / debug。\n- [[R&S ZN-Z33]]、[[R&S NRP33SN-V]]、[[R&S NRP67SN-V]]：用於 [[TVAC 衛星酬載測試]] 的 inline calibration 與 chamber 內 power measurement。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/衛星酬載與元件測試.md"
+          },
+          "score": 3.167636
+         },
+         {
+          "text": "FSW_specs_en_5215-6749-22_v1701 › 原文未解的問題\n- 來源為轉換後 markdown 摘要，且目前 markdown 為 lossy derivative；報價或驗證規格前應回查原始 PDF。\n- 價格未標示。\n- 多數 firmware options 可否在特定客戶既有儀器上升級，除來源明列 requires/excludes/contact service center/user-retrofittable 外，仍需依實際 serial number 與 configure 工具判定。\n- R&S FSW-B24 RF preamplifier 的來源適用範圍列至 [[R&S FSW67]]；未標示 [[R&S FSW85]] 適用 B24。不要推論 [[R&S FSW85]] 可訂 B24。\n- 來源列出多個 discontinued power sensors 與 discontinued oscilloscope configurations；若需報價或替代品，來源未指明後繼型號者不可自行推論。\n- 來源未標示價格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 19,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/FSW_specs_en_5215-6749-22_v1701.md"
+          },
+          "score": 12.387143
+         },
+         {
+          "text": "FSW_specs_en_5215-6749-22_v1701 › 與既有知識的關係\n- 既有 vault 已有 [[R&S FSV3000]]、[[R&S FSVA3000]]、[[R&S FPL1003]] 等 spectrum analyzer 產品頁；本來源補入更高階的 [[R&S FSW]] 系列，頻率範圍最高至 85 GHz，搭配 R&S FSW-B90G 可至 90 GHz。\n- 本來源與既有 [[R&S FSV3000]] / [[R&S FSVA3000]] 同屬 Productions 類資料；頁面保留文件版次與日期，避免不同 datasheet 版次的規格混用。\n- 本次 ingest 發現既有 [[R&S FSW50]] 與 [[R&S FSW67]] 的 DANL 摘錄有段落標題或數值錯位，已在受影響頁面以 ⚠️ 標註並改依本來源正文重新整理。\n- 多個概念頁（例如 [[YIG preselector]]、[[Signal analysis bandwidth]]、[[Level measurement uncertainty]]）尚未建立，可由 Knowledge 類資料另行補足技術背景。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/FSW_specs_en_5215-6749-22_v1701.md"
+          },
+          "score": 11.984483
+         },
+         {
+          "text": "FSW_specs_en_5215-6749-22_v1701 › 產品資料與規格標示規則\n- Specifications with limits 代表 warranted product performance。\n- Non-traceable specifications with limits（n. trc.）依同樣方式指定與測試，但因缺少可 traceable to national metrology standards 的 measuring equipment，product performance 不保證。\n- Specifications without limits 代表 warranted product performance，通常為指定值無偏差或偏差可忽略的參數。\n- Typical data（typ.）為代表性資訊；標 range 時表示 production time 約 80% instruments 可達成。\n- Nominal values（nom.）不做 statistical evaluation，production 時不測試該 parameter。\n- Measured values（meas.）是 individual samples 的 measurement results。\n- Non-traceable specifications with limits、typical data、nominal values、measured values 不由 Rohde & Schwarz 保證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/FSW_specs_en_5215-6749-22_v1701.md"
+          },
+          "score": 10.046269
+         },
+         {
+          "text": "SMW200A_specs_en_3606-8037-22_v3100 › 原文未解的問題\n- 來源未標示價格。\n- 來源為分段萃取重點，不是完整逐頁文字；報價前仍需回查 `raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md`、正式 PDF 與 configure 工具。\n- Multichannel、MIMO、fading、digital standards、GNSS/avionics、external pulse sequencer options 的完整規格分別指向其他文件：`PD 3673.1276.22`、`PD 5213.9434.22`、`PD 3607.6896.22`、`PD 3607.1388.22`；本來源只摘錄到交叉引用與部分摘要。\n- RF path combination table 的所有 possible / not possible 組合仍需回查原表；本來源摘要僅明列 `R&S®SMW-B94L` required and only possible for `2 × 12.75 GHz`、`2 × 31.8 GHz`、`2 × 44 GHz`，以及 44 GHz 同型 suffix 組合限制。\n- Source text 中有部分技術圖表為 measured performance 圖，本次只記錄圖名與明列數字，未重新讀取曲線數值。\n- 來源提供讀圖補充為 p001 封面資訊，但本次提示未提供可原封不動複製的圖片嵌入行；依 productions 讀圖規則，未把讀圖內容作為規格主張寫入產品頁。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 16,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SMW200A_specs_en_3606-8037-22_v3100.md"
+          },
+          "score": 11.894677
+         },
+         {
+          "text": "SMW200A_specs_en_3606-8037-22_v3100 › 關鍵實體與概念\n- [[R&S SMW200A]]：本來源的主要產品實體，Rohde & Schwarz vector signal generator。\n- [[Rohde & Schwarz]]：發布者與製造商。\n- [[R&S SGT100A]]：來源說 [[R&S SMW200A]] 可連接 SGT100A signal generator modules，提供最多 8 條 RF paths。\n- [[R&S WinIQSIM2]]：來源說 waveform packages for signals from R&S WinIQSIM2；R&S WinIQSIM2 requires an external PC。\n- [[R&S Pulse Sequencer]]：外部 pulse sequencer software 相關 options 的規格另見 `PD 3607.1388.22`。\n- [[Vector signal generator]]、[[RF path]]、[[RF modulation bandwidth]]、[[I-Q modulation]]、[[Phase noise]]、[[Pulse modulation]]、[[AWGN]]、[[GNSS simulation]]、[[MIMO]]、[[Fading simulator]]、[[Digital I-Q Interface]]、[[HUMS]]、[[SCPI]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SMW200A_specs_en_3606-8037-22_v3100.md"
+          },
+          "score": 11.619861
+         },
+         {
+          "text": "SMW200A_specs_en_3606-8037-22_v3100 › 主要配置與相依關係\n- RF path A 必須安裝一個 `R&S®SMW-B10xx` frequency option。\n- RF path B 若安裝 `R&S®SMW-B20xx` frequency option，baseband main module 必須是 `R&S®SMW-B13T` 或 `R&S®SMW-B13XT`。\n- 必須安裝 `R&S®SMW-B13`、`R&S®SMW-B13T` 或 `R&S®SMW-B13XT` 其中一個 signal routing and baseband main module。\n- `R&S®SMW-B13` 與 `R&S®SMW-B13T` 不能安裝於配備 `R&S®SMW-B1044O`、`R&S®SMW-B2044O`、`R&S®SMW-B1056O` 或 `R&S®SMW-B1067O` frequency options 的儀器。\n- `R&S®SMW-B1044` 只能與 `R&S®SMW-B2044` 組合；`R&S®SMW-B1044N` 只能與 `R&S®SMW-B2044N` 組合；`R&S®SMW-B1044O` 只能與 `R&S®SMW-B2044O` 組合。\n- `R&S®SMW-B94L` 是 deeper chassis，Order No. `1438.8150.02`；來源明列 required and only possible for `2 × 12.75 GHz`、`2 × 31.8 GHz`、`2 × 44 GHz` RF path combinations。\n- 所有已安裝 RF paths 必須具有相同 phase noise performance level；RF path A 的 `R&S®SMW-B709/-B710/-B711` 分別對應 RF path B 的 `R&S®SMW-B719/-B720/-B721`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/SMW200A_specs_en_3606-8037-22_v3100.md"
+          },
+          "score": 8.416562
+         },
+         {
+          "text": "R&S SMBV100B › 文件與適用範圍\n- 主要來源：[[SMBV100B_specs_en_3607-8201-22_v1301]]。\n- 文件：R&S®SMBV100B Vector Signal Generator Specifications。\n- 文件編號：PD 3607.8201.22。\n- 文件版次：Specifications Version 13.01。\n- 文件日期：August 2025（footer：August 2025 (la)）。\n- 產品：R&S®SMBV100B vector signal generator。\n- 規格適用條件：ambient temperature 下 storage 3 hours、warm-up operation 30 minutes、specified environmental conditions met、recommended calibration interval adhered to、all applicable internal automatic adjustments performed。\n- Rohde & Schwarz 不 warranted：Non-traceable specifications with limits、typical data、nominal values、measured values。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMBV100B.md"
+          },
+          "score": 14.235879
+         },
+         {
+          "text": "R&S SMBV100B › Baseband enhancements\n| Code | Name | Order No. | 原文說明 / 關係 |\n|---|---|---:|---|\n| R&S®SMBVB-K62 | Additive white Gaussian noise（AWGN） | 1423.7876.02 | Adds AWGN with settable bandwidth and settable C/N ratio or Eb/N0。 |\n| R&S®SMBVB-K80 | Bit error rate tester | 1423.7647.02 | BER and BLER measurement；clock rate 100 Hz to 100 MHz。 |\n| R&S®SMBVB-K540 | Envelope tracking | 1423.7701.02 | Analog I/Q outputs 可產生 envelope signal；prerequisite：必須安裝 R&S®SMBVB-K17 option。 |\n| R&S®SMBVB-K541 | AM/AM, AM/φM predistortion | 1423.7718.02 | Predistortion；state on/off；shaping polynomial、from table。 |\n| R&S®SMBVB-K544 | User-defined frequency response correction | 1423.8150.02 | Scattering parameter 與 additional frequency response correction；minimum compensation bandwidth 25 MHz。 |\n| R&S®SMBVB-K548 | Crest factor reduction | 1423.8820.02 | Clipping and filtering；desired crest factor delta –20 dB to 0 dB。 |\n| R&S®SMBVB-K811 | Notched signals | 1423.8972.02 | Up to 25 band-stop filters for baseband signal。 |\n| R&S®SMBVB-K980 | Health and utilization monitoring service（HUMS） | 1423.8872.02 | Data readout/display via SNMP、REST JSON、SCPI、device web；提供 device、options、licenses、status、service、utilization、event log 等資訊。 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 35,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMBV100B.md"
+          },
+          "score": 11.500416
+         },
+         {
+          "text": "R&S SMBV100B › Waveform package and recommended extras\n| Code | Name | Order No. | 原文說明 / 關係 |\n|---|---|---:|---|\n| R&S®SMBVB-K200 | 1 waveform | 1423.8714.71 | Waveform package for signals from R&S®WinIQSIM2、R&S®Pulse Sequencer Software、R&S®Pulse Sequencer DFS。 |\n| R&S®SMBVB-K200 | 5 waveforms | 1423.8714.72 | 每台儀器最多可註冊 250 waveforms。 |\n| R&S®SMBVB-K200 | 50 waveforms | 1423.8714.75 | 每台儀器最多可註冊 250 waveforms。 |\n| R&S®SMBVB-Z10 | Spare CFAST card | 3639.9910.02 | Recommended extra。 |\n| R&S®ZZA-KNA33 | 19-inch rack adapter | 1177.8090.00 | Recommended extra。 |\n| R&S®TS-USB1 | USB serial adapter for RS-232 remote control | 6124.2531.00 | Recommended extra；RS-232 remote control recommended extra。 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 36,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMBV100B.md"
+          },
+          "score": 10.104361
+         },
+         {
+          "text": "R&S SMW200A › Unresolved\n- 來源未標示價格。\n- 本頁整合 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（configuration guide，May 2024）與 [[SMW200A_specs_en_3606-8037-22_v3100]]（specifications，May 2026）；兩者文件性質不同。報價前應回查正式 PDF、最新 ordering information 與 configure 工具。\n- Multichannel、MIMO、fading、digital standards、GNSS/avionics、external pulse sequencer options 的完整規格需另查引用文件：`PD 3673.1276.22`、`PD 5213.9434.22`、`PD 3607.6896.22`、`PD 3607.1388.22`。\n- RF path combination table 的全部 allowed / not allowed combinations 與灰底 deeper chassis 條件需回查原表；本頁只照錄來源明列摘要與 `R&S®SMW-B94L` 明列條件。\n- Recommended rack adapter 與 2 m digital baseband cable 在 May 2024 configuration guide 與 May 2026 specifications 不一致；不可自行判定是否替代或等效。\n- 來源為分段萃取重點，不是完整逐頁文字；圖表曲線僅記錄來源明列的文字與數字。\n- 來源提供讀圖補充為 p001 封面資訊，但本次提示未提供可原封不動複製的圖片嵌入行；依 productions 讀圖規則，未把讀圖內容作為規格主張寫入本頁。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 28,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 6.052896
+         },
+         {
+          "text": "R&S SMW200A › Digital I/Q\n- Standard digital baseband outputs 至少需 `R&S®SMW-K18`；wideband digital baseband outputs 至少需 `R&S®SMW-K19`。\n- Digital I/Q input/output 可用於 [[R&S SMW200A]] 與其他 Rohde & Schwarz 儀器之間的 lossless connection，例如 [[R&S SGT100A]]、[[R&S SMM100A]]、[[R&S SMCV100B]] 或 CMW500 wideband radio communication tester 的 fading applications。\n- DIG I/Q interface 符合 `R&S®Digital I/Q Interface PAD-R`，level `LVDS`，connector `26-pin MDR`。\n- HS DIG I/Q interface 符合 `R&S®Digital I/Q Interface 40G PAD-R`，connector `QSFP+/QSFP 28`。\n- Wideband HS DIG I/Q standard system configuration mode：40G up to `1.05 GHz`，50G up to `1.25 GHz`；advanced mode with `R&S®SMW-K822` input up to `500 MHz`，with `R&S®SMW-K823` input up to `1000 MHz`。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 18,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 5.569133
+         },
+         {
+          "text": "R&S SMW200A › 與既有資料的矛盾與更新\n⚠️ [[SMW200A_config-guide_en_3606-8037-92_v0600]]（May 2024）說 `R&S®SMW-B1031` Order No. 是 `1428.5307.02`，但既有頁面 [[R&S SMW200A]] 說 May 2024 configuration guide 摘錄未顯示 `.02` 後綴。判斷：本次重新匯入的來源摘錄已明列完整 order number，因此本頁以 `1428.5307.02` 記錄，並移除「未顯示 `.02`」作為未決事項。\n\n⚠️ [[SMW200A_specs_en_3606-8037-22_v3100]]（May 2026）說 recommended 19 inch rack adapter 是 `R&S®ZZA-KN4B`，Order No. `1703.1346.00`，但 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（May 2024）說 recommended 19 inch rack adapter 是 `R&S®ZZA-KN4`，Order No. `1175.3033.00`。判斷：兩份來源並列；報價採用前需回查最新 ordering document 或 configure 工具，不自行判定舊料號是否停用。\n\n⚠️ [[SMW200A_specs_en_3606-8037-22_v3100]]（May 2026）說 `Cable for Rohde & Schwarz digital baseband interfaces (2 m)` Order No. 是 `3716.5425.00` 且未標示 type code，但 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（May 2024）說 2 m digital baseband cable 是 `R&S®SMU-Z6`，Order No. `1415.0201.02`。判斷：兩份來源並列；不可自行推論兩者是否等效或取代。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 5.46121
+         },
+         {
+          "text": "R&S SMW200A\n[[R&S SMW200A]] 是 Rohde & Schwarz 的 vector signal generator；依 `R&S®SMW200A Vector Signal Generator Specifications` `Version 31.00`（`May 2026`），RF path A 可覆蓋 `100 kHz to 67 GHz`，RF path B 可覆蓋至 `44 GHz`，並可由 single-path vector signal generator 擴充到 multichannel MIMO receiver tester（來源：[[SMW200A_specs_en_3606-8037-22_v3100]]）。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 5.33223
+         },
+         {
+          "text": "R&S SMW200A › Signal routing and baseband main module\n| Code | Name / description | Order No. | 原文說明 / 限制 |\n|---|---|---:|---|\n| `R&S®SMW-B13` | Signal routing and baseband main module，one I/Q path to RF section | `1413.2807.02` | Standard baseband section；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13T` | Signal routing and baseband main module，two I/Q paths to RF section | `1413.3003.02` | Standard baseband section；若要安裝 RF path B 需 `B13T` 或 `B13XT`；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13XT` | Wideband baseband main module，two I/Q paths to RF section | `1413.8005.02` | Wideband baseband section；RF modulation bandwidth up to `2 GHz`。 |\n\n- Standard baseband section：`R&S®SMW-B13` 或 `R&S®SMW-B13T`；RF modulation bandwidth 最高 `160 MHz`；可安裝 `R&S®SMW-B10` standard baseband generator 與 `R&S®SMW-B14` fading simulator。\n- Wideband baseband section：`R&S®SMW-B13XT`；RF modulation bandwidth 最高 `2 GHz`；可安裝 `R&S®SMW-B9` / `R&S®SMW-B9F` wideband baseband generator 與 `R&S®SMW-B15` fading simulator and signal processor。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S SMW200A.md"
+          },
+          "score": 4.495094
+         },
+         {
+          "text": "R&S FSW › 型號總覽\n| 型號 | DC coupled frequency range | AC coupled frequency range | Order No. |\n|---|---:|---:|---|\n| [[R&S FSW8]] | 2 Hz to 8 GHz | 10 MHz to 8 GHz | 1331.5003.08 |\n| [[R&S FSW13]] | 2 Hz to 13.6 GHz | 10 MHz to 13.6 GHz | 1331.5003.13 |\n| [[R&S FSW26]] | 2 Hz to 26.5 GHz | 10 MHz to 26.5 GHz | 1331.5003.26 |\n| [[R&S FSW43]] | 2 Hz to 43.5 GHz | 10 MHz to 43.5 GHz | 1331.5003.43 |\n| [[R&S FSW50]] | 2 Hz to 50 GHz | 10 MHz to 50 GHz | 1331.5003.50 |\n| [[R&S FSW67]] | 2 Hz to 67 GHz | 10 MHz to 67 GHz | 1331.5003.67 |\n| [[R&S FSW85]] RF1 standard | 2 Hz to 85 GHz | 10 MHz to 85 GHz | 1331.5003.85 |\n| [[R&S FSW85]] RF1 with R&S FSW-B90G, YIG preselector off | 2 Hz to 90 GHz | 10 MHz to 90 GHz | R&S FSW-B90G: 1331.7693.02 |\n| [[R&S FSW85]] RF2 | 2 Hz to 67 GHz | 10 MHz to 67 GHz | 來源未標示獨立 order no. |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSW.md"
+          },
+          "score": 2.364227
+         },
+         {
+          "text": "R&S FSW › 共通規格條件\n- Product data 適用條件：ambient temperature 儲存 3 小時、warm-up operation 30 分鐘、符合指定 environmental conditions、遵守 recommended calibration interval，且若適用已完成 internal automatic adjustments。\n- Frequency resolution：0.01 Hz。\n- Recommended calibration interval：1 year。\n- Operating temperature range：+5 °C to +50 °C。\n- Permissible temperature range：0 °C to +55 °C。\n- Storage temperature range：–40 °C to +70 °C。\n- Display：30.7 cm WXGA color touchscreen，1280 × 800 pixel。\n- Internal data storage：standard solid state disk ≥ 128 Gbyte。\n- AC input voltage range：100 V to 240 V；AC supply frequency：50 Hz to 60 Hz / 400 Hz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSW.md"
+          },
+          "score": 2.362597
+         },
+         {
+          "text": "R&S FSW › 文件版次\n- 來源：[[FSW_specs_en_5215-6749-22_v1701]]。\n- 文件：PD 5215.6749.22。\n- 文件版次：Version 17.01。\n- 文件日期：September 2025。\n- 文件註記：Data without tolerance limits is not binding；規格可能變更。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSW.md"
+          },
+          "score": 2.200596
+         },
+         {
+          "text": "R&S FSW › 其他硬體 options（摘錄）\n| Option code | 名稱 | Order No. | 原文說明 / 限制 |\n|---|---|---|---|\n| R&S FSW-B106 | I/Q memory extension 6 GB | 1331.6451.02 | 需 R&S FSW-B160/-U160/-B320 |\n| R&S FSW-B108 | I/Q memory extension 8 GB | 1331.6751.02 | 需 R&S FSW-B1200/-U1200/-B2001/-U2001/-B800R |\n| R&S FSW-B124 | I/Q memory extension 24 GB | 1338.5273.02 | 需 R&S FSW-B4001/-U4001/-B6001/-U6001/-B8001/-U8001 |\n| R&S FSW-B112 | USB instrument remote control, type B plug | 1353.3290.02 | 來源未標示 retrofittable 狀態 |\n| R&S FSW-B517 | DIG IQ 40G streaming out interface | 1331.6980.02 | 需 R&S FSW-B512/-U512/-B1200/-U1200/-B2001/-U2001/-B800R；不適用 B4001/B6001/B8001 |\n| R&S FSW-B1017 | DIG IQ 40G streaming out interface, max. 1 GHz bandwidth | 1350.7008.02 | 需 R&S FSW-B1200/-U1200/-B2001/-U2001/-B800R |\n| R&S FSW-FL | Floating license smart card with USB adapter | 1345.1940.02 | floating license 需此 hardware option |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSW.md"
+          },
+          "score": 2.178489
+         },
+         {
+          "text": "R&S FSW › Unresolved\n- 價格未標示。\n- 來源 markdown 是 lossy derivative；完整選配與 footnote 報價前需回查 PDF。\n- R&S FSW-B24 未列 [[R&S FSW85]] 適用，不能推論可用。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSW.md"
+          },
+          "score": 1.769984
+         },
+         {
+          "text": "Keysight › Battle card 中的 UXM portfolio 描述\n| UXM / 工具 | 來源描述 | 來源 | 限制 |\n|---|---|---|---|\n| [[Keysight E7515P]] | high-end wideband；5G platform with Wi-Fi as additional capability；quick table 稱 up to 15 GHz | [[2026_02_CMX500_Keysight_Sales_Battle_Card]] | R&S battle card 單一來源；未提供 Keysight 官方規格 |\n| [[Keysight E7515W]] | Wi-Fi 7 / connectivity；dedicated Wi-Fi connectivity platform | [[2026_02_CMX500_Keysight_Sales_Battle_Card]] | 未提供 official datasheet / option list |\n| [[Keysight E7515B]] | standard / mid-tier 5G UXM | [[2026_02_CMX500_Keysight_Sales_Battle_Card]] | 未提供正式型號規格 |\n| [[Keysight E7515E]] | value / mid-tier 5G UXM | [[2026_02_CMX500_Keysight_Sales_Battle_Card]] | 未提供正式型號規格 |\n| [[Keysight E7515R]] | RedCap / IoT-only SKU | [[2026_02_CMX500_Keysight_Sales_Battle_Card]] | 未提供正式型號規格 |\n| [[ProbSim]] | channel emulator | [[2026_02_CMX500_Keysight_Sales_Battle_Card]] | 未列型號 / 版本 |\n| [[RaySim]] | digital twin / ray tracing engine；advanced fading、digital twin、FR3 scenarios 相關 | [[2026_02_CMX500_Keysight_Sales_Battle_Card]] | 未列版本或功能範圍 |\n| [[Channel Studio]] | channel modeling / fading 相關 tool | [[2026_02_CMX500_Keysight_Sales_Battle_Card]] | 未列版本或功能範圍 |\n| [[Nemo]] | field test tools | [[2026_02_CMX500_Keysight_Sales_Battle_Card]] | 未列具體產品 |\n| [[Atlas]] | AI-powered device test / test management | [[2026_02_CMX500_Keysight_Sales_Battle_Card]] | 未列版本或功能範圍 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight.md"
+          },
+          "score": 4.373125
+         },
+         {
+          "text": "Keysight › 圖中關聯產品 / 軟體 / 探頭\n| 名稱 | 圖上角色 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| [[Keysight N1500A]] | 材料量測解決方案與 [[Materials Measurement Suite]] | [[AI Server PCB test image 24]]、[[AI Server PCB test image 50]] | 來源未標示日期 | 未列規格與版本 |\n| [[Keysight ENA]] | ENA / PNA 量測平台之一 | [[AI Server PCB test image 24]]、[[AI Server PCB test image 50]] | 來源未標示日期 | 未列具體型號 |\n| [[Keysight PNA]] | ENA / PNA 量測平台之一 | [[AI Server PCB test image 24]]、[[AI Server PCB test image 50]] | 來源未標示日期 | 未列具體型號 |\n| [[Keysight PathWave ADS]] | 用於 [[PCB建模]] | [[AI Server PCB test image 24]]、[[AI Server PCB test image 50]] | 來源未標示日期 | 未列版本 |\n| [[TDR 探頭]] | 圖上寫作是德科技或合作夥伴 | [[AI Server PCB test image 24]]、[[AI Server PCB test image 50]] | 來源未標示日期 | 未列型號 |\n| [[Delta-L 測量軟體]] | 圖上寫作來自合作夥伴 / 局部無法完全辨識 | [[AI Server PCB test image 24]]、[[AI Server PCB test image 50]] | 來源未標示日期 | [[AI Server PCB test image 50]] 的「台作伙伴」字樣需回看原圖確認 |\n| [[Delta-L 探頭]] | 圖上寫作來自合作夥伴 / 局部無法完全辨識 | [[AI Server PCB test image 24]]、[[AI Server PCB test image 50]] | 來源未標示日期 | [[AI Server PCB test image 50]] 的「台作伙伴」字樣需回看原圖確認 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight.md"
+          },
+          "score": 3.491049
+         },
+         {
+          "text": "Keysight › 相關來源\n- [[AI Server PCB test image 24]] — 未標示日期的 Keysight 高頻高速 PCB 測試解決方案流程圖，整理原材料表徵、材料選擇、電路板抽樣測試與大批量監控。\n- [[AI Server PCB test image 50]] — 未標示日期的 Keysight 高頻高速 PCB 測試解決方案流程圖，內容與 [[AI Server PCB test image 24]] 高度相似，並新增局部 OCR 無法完全辨識限制。\n- [[2026_02_CMX500_Keysight_Sales_Battle_Card]] — 2026-02-26 的 R&S CMX500 vs. Keysight battle card，描述 Keysight UXM portfolio、software / tool fragmentation、KeysightCare 與 R&S competitive positioning。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight.md"
+          },
+          "score": 2.613851
+         },
+         {
+          "text": "Keysight › 高頻高速 PCB 測試圖像來源\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）圖說為 **圖 4：Keysight高频高速PCB测试解决方案**。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）在 [[TDR 探頭]] 項目中寫有 **TDR 探头（是德科技或合作伙伴）**。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）列出 **N1500A + ENA/PNA 先进材料测量解决方案**。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）列出 **基于 ENA/PNA 的 Delta-L 损耗、TDR 阻抗测量和 Dk/Df 提取**。\n- [[AI Server PCB test image 50]]（來源未標示日期；取得於 2026-09-04）頁尾圖題為 **图 4：Keysight高频高速PCB测试解决方案**。\n- [[AI Server PCB test image 50]]（來源未標示日期；取得於 2026-09-04）列出公司名稱 **Keysight** 與 **是德科技**，並在 [[TDR 探頭]] 項目中寫有 **TDR 探头（是德科技或合作伙伴）**。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight.md"
+          },
+          "score": 0.789821
+         },
+         {
+          "text": "Keysight › 可追溯範圍\n- PCB 測試相關內容只記錄 [[AI Server PCB test image 24]] 與 [[AI Server PCB test image 50]] 圖上出現的 Keysight / 是德科技名稱與相關工具組合。\n- Wireless testing / UXM portfolio 相關內容只記錄 [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 的 R&S battle card 觀點；它不是 Keysight 官方資料。\n- 本頁不推論 Keysight 在 AI server、資料中心、PCB 測試、wireless device testing 或 UXM 市場的市占率、客戶、出貨量或導入狀態。\n- 本頁不把 [[Delta-L 測量軟體]]、[[Delta-L 探頭]] 的合作夥伴自行補成任何公司名稱，因來源未標示具體名稱。\n- [[AI Server PCB test image 50]] 對 `Delta-L 测量软件（来自台作伙伴）` 與 `Delta-L 探头（来自台作伙伴）` 的「台作伙伴」字樣標示為無法完全辨識；本頁保留該未決事項，不把它當作確定公司或正式名稱。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Keysight.md"
+          },
+          "score": 0.763438
+         },
+         {
+          "text": "Anritsu\n[[Anritsu]] 是一間日本 test & measurement vendor；在 [[2026_02_CMX500_Anritsu_Sales_Battle_Card]] 中被描述為 R&S radio communication tester portfolio 的競品供應商。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Anritsu.md"
+          },
+          "score": 2.889487
+         },
+         {
+          "text": "Anritsu › Battle card 中的弱點敘事\n[[2026_02_CMX500_Anritsu_Sales_Battle_Card]] 對 Anritsu 的主要弱點敘事如下：\n\n- Fragmented hardware architecture：FR1 / FR2 / FR3 需多 RF boards；source 列 boards 021/022/023/024/031/032/033，另一處另列 041。\n- Early multi-box dependency：FR2、high CA、mobility 被描述為 often require multiple MT8000As。\n- No integrated fading / external IP tools：source 稱 IP Option 012 + external PC；fading 需要 external PC software / chambers / software。\n- Software fragmentation：SSNR、RTD、ATS、MX844030PC 被描述為 disconnected tools。\n- LTE RF requires [[Anritsu MT8821C]]：source 稱 MT8000A cannot replace MT8821C for legacy RF。\n- FR3 headroom：source 稱 Anritsu FR3 module supports only 0.4–16 GHz，限制 future 6G / FR3 evaluations beyond 16 GHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Anritsu.md"
+          },
+          "score": 0.845103
+         },
+         {
+          "text": "NTN signal generator solutions › 使用限制\n- 來源是 2025 簡報與 OneNote 轉檔，不是正式 datasheet、configuration guide、price book 或 3GPP specification。\n- 來源標示 12-2025、Last updated 08/25 與 2025-09-29 workshop date；正式發布日期未標示。\n- 來源中的 recommended configurations 不能直接視為可報價 BOM；需回查正式 configuration guide、option availability、export control 與 service plan。\n- 來源中的 R17/18 option wording 不可直接覆寫正式 product option name；正式命名仍以產品規格書為準。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 3.169964
+         },
+         {
+          "text": "NTN signal generator solutions › Component testing\n依 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]] slide 16，component testing 使用 DUT、[[R&S SMW200A]] 與 [[R&S FSW]]：\n\n- [[R&S SMW200A]]：frequency up to 67 GHz，overrange 72 GHz；RF modulation bandwidth up to 2 GHz，up to 4 GHz with [[R&S SMW-K555]]。\n- [[R&S SMW200A]] signal generation SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal generation（K114）、custom digital modulation。\n- [[R&S FSW]]：frequency up to 85 GHz，overrange 90 GHz；analysis bandwidth up to 8 GHz。\n- [[R&S FSW]] signal analysis SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal analysis（K96）、Vector signal analysis（K70）。\n\n以上是 2025 簡報摘要值；正式產品規格仍需回查 [[R&S SMW200A]]、[[R&S FSW]] 與其對應 specifications。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 1.97133
+         },
+         {
+          "text": "NTN signal generator solutions\n[[NTN signal generator solutions]] 是 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]]（封面標示 12-2025；末頁標示 Last updated: 08/25）中用來整理 [[R&S SMW200A]]、[[R&S FSW]] 與相關 software options 在 [[3GPP]] [[NTN]] 測試中的 solution-level 應用框架。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 1.622858
+         },
+         {
+          "text": "NTN signal generator solutions › SAN testing\n來源將 SAN testing 連到 [[3GPP TS 38.108]]、[[3GPP TS 38.181]]、[[3GPP TS 36.108]] 與 [[3GPP TS 36.181]]。在 signal generator 角度，[[R&S SMW200A]] 提供：\n\n- Fixed Reference Channels（FRCs）。\n- Test Models（TMs）。\n- Fading Module。\n- AWGN Module。\n- static UE propagation models。\n- TDL and moving propagation。\n- SISO / MIMO。\n- NB-IoT options：K119 / K115 / K143 / K146。\n- NR options：K144 / K148 / K171。\n- B14 / B15 + K71 moving propagation。\n\n詳見 [[5G NR SAN conformance testing]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+          },
+          "score": 0.203853
+         },
+         {
+          "text": "DO-160 airborne equipment EMC testing › 來源中的 DO-160 定位\n[[2025RS Drone Solution]] 說 [[RTCA DO-160]] is important because it provides the minimum operational performance standards for electronic systems and equipment that support aviation to pursue increased safety, system capacity and efficiency。\n\n來源另說其 purpose 是提供 means of determining performance characteristics of airborne equipment in environmental conditions which may be encountered in airborne operation of the equipment，並可與 applicable standards 一起作為 minimum specification。\n\n使用限制：來源未提供 DO-160 的正式版次文件、section limit table、category matrix 或適用 drone 類型。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+          },
+          "score": 1.409328
+         },
+         {
+          "text": "DO-160 airborne equipment EMC testing › Section 20 — Radio Frequency Susceptibility\n來源說此測試確保 EUT exposed to a level of RF modulated power 時不受影響，並分為：\n\n- Conducted Susceptibility（low freq）。\n- Radiated Susceptibility（high freq）。\n\n來源說 emissions can come from equipment installed inside aircraft as well as external radiators such as radar stations；Conducted Susceptibility similar to [[CS114]] test，Radiated Susceptibility similar to [[RS103]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+          },
+          "score": 1.378125
+         },
+         {
+          "text": "DO-160 airborne equipment EMC testing\n[[DO-160 airborne equipment EMC testing]] 是 [[2025RS Drone Solution]] 中引用 [[RTCA DO-160]] 作為 airborne equipment environmental conditions and test procedures 的測試線索，用於 military / aviation drone EMC proposal context。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+          },
+          "score": 1.293018
+         },
+         {
+          "text": "DO-160 airborne equipment EMC testing › Section 15 — Magnetic Effect\n來源說 Section 15 concern 為 equipment magnetic effect，目標是 finding or proving the closest distance to compasses or compass sensors（flux gates）at which that unit is allowed to be installed。\n\n來源列出 classification：Cat Y、Cat Z、Cat A、Cat B、Class C，其中 Cat Y 被描述為 equipment next to navigation compass，Class C 被描述為 equipment >3.0 m from navigation compass。來源未提供完整 category definition。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+          },
+          "score": 0.702364
+         },
+         {
+          "text": "軍用無人機 EMC 與 EME testing › Common MIL EMC standards\n[[2025RS Drone Solution]] 列出：\n\n- [[MIL-STD-461]] — requirements for the control of electromagnetic interference emission and susceptibility。\n- [[MIL-STD-464]] — electromagnetic environmental effects requirements for systems。\n- [[RTCA DO-160]] — environmental conditions and test procedures for airborne equipment。\n\n來源另在 example 頁將 military / aviation drone EMC test standards 分為 component level 與 full system level：\n\n| 層級 | 來源列名 |\n|---|---|\n| Component level | [[RTCA DO-160G]]、[[MIL-STD-461G]]、[[DEF STAN 59-411 Part 3]]、[[GJB 151B]] |\n| Full system level | [[MIL-STD-464D]]、[[DEF STAN 59-411 Part 4]]、[[GJB 1389A]] |\n\n使用限制：來源同時在另一頁將 applicable standards 列為 [[MIL-STD-464C]]，而 example 頁列 [[MIL-STD-464D]]；目前只保留為版本線索，未裁決適用版本。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+          },
+          "score": 2.208063
+         },
+         {
+          "text": "軍用無人機 EMC 與 EME testing\n[[軍用無人機 EMC 與 EME testing]] 是 [[2025RS Drone Solution]] 中針對 military / aviation drones 在 unforgiving electromagnetic environment、multi-domain operations 與 system-level effects 下的測試標準與 solution 線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+          },
+          "score": 0.989411
+         },
+         {
+          "text": "軍用無人機 EMC 與 EME testing › MIL-STD-464 system-level testing\n[[2025RS Drone Solution]] 說 [[MIL-STD-464]] provides the basis of environment testing for vehicles that have to work in the most unforgiving condition，並將其描述為 system level testing standard。\n\n來源列出的 main chapter / sub-items 包含：\n\n- margins，6 dB margins。\n- intra-system EMC。\n- hull generated intermodulation interference / IMI。\n- shipboard internal EME。\n- multipaction。\n- induced levels at antenna ports of antenna-connected receivers。\n- external RF EME。\n- [[High Power Microwave]] / HPM sources。\n- lightning。\n- [[Electromagnetic Pulse]] / EMP。\n- subsystems and equipment electromagnetic interference / EMI。\n- portable electronics devices and carry-on equipment requirements。\n- non-developmental items / NDI and commercial items。\n- electrostatic environments。\n- radiation hazards / RADHAZ：HERP、HERF、HERO。\n- life cycle / E3 hardness。\n- electrical bonding、power current return path、antenna installations、mechanical interfaces、shock / fault / ignitable vapour protection。\n- external grounds。\n- TEMPEST。\n- system radiated emission、EMCON、platform radiated emission。\n- EM spectrum supportability。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+          },
+          "score": 0.531461
+         },
+         {
+          "text": "TVAC 衛星酬載測試 › TVAC power sensors\n依來源：\n\n- [[R&S NRP33SN-V]] 與 [[R&S NRP67SN-V]] power sensors 專為 TVAC 設計，符合 European Space Agency norms。\n- [[R&S NRP33SN-V]] 覆蓋 up to 33 GHz。\n- [[R&S NRP67SN-V]] 覆蓋 up to 67 GHz。\n- 兩者可進行 fast、highly accurate power measurements。\n- Dynamic range up to 93 dB。\n- 量測獨立於 signal bandwidth 與 modulation type。\n- 可透過 power over Ethernet LAN connection 從 chamber 外控制。\n- 將 sensors 直接連接至 chamber 內 satellite input 或 output，可簡化 measurement setup 與 calibration procedure。\n- 將 sensors 靠近 DUT 量測，可消除 long RF cables 的需求並改善 measurement accuracy。\n- Rohde & Schwarz TVAC cables 與 special LAN feedthroughs 使用 vacuum friendly materials，並已 baked 以消除 VOC 與其他 contaminants。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/TVAC 衛星酬載測試.md"
+          },
+          "score": 0.673491
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 重點摘要\n此來源是由 `3GPP NTN Signal Generator Solutions Overview-EN-UR.pptx` 轉出的 lossy markdown；封面標示 `1GP` 與 `12-2025`，末頁標示 `Last updated: 08/25`，其中 slide 27 另標示 `2025-09-29 Nokia Workshop at R&S - SigGen Product Update`。本頁以來源原文呈現的 2025 年簡報語境處理，不自行推論正式發布日。\n\n簡報主題是 [[Rohde & Schwarz]] 針對 [[3GPP]] [[NTN]] 的 signal generator / channel emulation 測試方案，涵蓋：\n\n- [[5G NTN-NR]] 的 Release 17 / 18 / 19 演進與頻段。\n- [[Satellite Access Node]]（[[SAN]]）conformance testing。\n- [[NTN signal generator solutions]] 的 component testing、SAN testing、end-to-end system testing 與 UE testing 分層。\n- [[R&S SMW200A]] 作為 channel emulator / signal generator 的 NTN 測試能力。\n- [[R&S FSW]] 與 [[R&S FSVA3000]] 在 component testing / SAN transmitter measurement 中的角色。\n- [[R&S Space Nexus]] 依 satellite trajectory 產生 [[R&S SMW200A]] fading files 的待請求 PC software 線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 5.834447
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › R&S solution overview\n來源 slide 10 將 NTN testing 分為：\n\n- Component Testing。\n- Satellite Access Node（SAN）Testing。\n- End-to-end System Testing。\n- User Equipment（UE）Testing。\n\n來源 slide 10 標示 `Covered with this set of slides`，但此 markdown 轉檔主要可讀內容集中於 [[R&S SMW200A]] channel emulation、component testing、SAN conformance testing 與 E2E system testing。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 3.55506
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › NTN end-to-end system testing\n來源 slide 24–28 說 E2E system testing 會以 channel emulator for service link 與 channel emulator for feeder link 模擬 UE、NTN payload 之間的 RF satellite link。\n\n來源 slide 25 標示 `SMW firmware version ≥ 5.30`，key features 包含：\n\n- Flexible definition of terrestrial channel profiles；B14 or B15 required。\n- Customized dynamic fading；K820 required。\n- Model satellite trajectory。\n- Account for frequency-dependent atmospheric effects。\n- Longer path delays and enhanced Doppler capabilities。\n- Up to 1073 ms delay。\n- Up to ±1 MHz Doppler（pure Doppler）。\n\n來源 slide 26 對 [[R&S SMW-K820]] customized dynamic fading 的 E2E testing key features：customer-provided list、flexible definition of satellite movement、possibility to account for frequency-dependent atmospheric effects、longer path delays and enhanced Doppler capabilities。Key parameters：update interval、delay、Doppler、pathloss。\n\n來源 slide 27 說 [[R&S Space Nexus]] 是 PC Software，available on request，可 generate SMW200A fading files based on a satellite trajectory；key parameters 同為 update interval、delay、Doppler、pathloss。\n\n來源 slide 28 的 SMW200A channel emulation table：",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 3.475633
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › 5G NTN SAN conformance testing\n| Configuration | 來源說法 |\n|---|---|\n| SMW B10/B14 | Solution for testing needs up to 160 MHz；full support of [[3GPP TS 38.181]] Rel. 17 SAN testing requirements；receiver characteristics；performance characteristics；support signal bandwidths up to 160 MHz；support delay requirements；support residual Doppler requirements for LEO。 |\n| SMW B9/B15 recommended | Solution for testing needs up to 200 MHz；full support of [[3GPP TS 38.181]] Rel. 17 SAN testing requirements；receiver characteristics；performance characteristics；support bandwidths up to 200 MHz；support delay requirements；supports residual Doppler requirements for LEO。 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 2.676628
+         },
+         {
+          "text": "3GPP NTN Signal Generator Solutions Overview-EN-UR › NTN end-to-end system testing\n| Configuration | Fading channels | Max fading bandwidth | Max RF CA bandwidth | Max path delay | Max Doppler / extra Doppler |\n|---|---:|---:|---:|---:|---|\n| SMW-B14 hardware | up to 32 | 160 MHz | 160 MHz | 671 ms | ±4 kHz Rayleigh |\n| SMW-B15 hardware | up to 64 | 200 MHz | 800 MHz | 1073 ms | ±4 kHz Rayleigh；±244 kHz pure Doppler |\n| SMW-B14 with K820 | up to 8 | 160 MHz | 160 MHz | 671 ms | ±4 kHz Rayleigh；±195 kHz pure Doppler |\n| SMW-B15 with K820 | up to 16 | 200 MHz | 800 MHz | 1073 ms | ±4 kHz Rayleigh；±244 kHz pure Doppler；additional Doppler shift ±1.953 MHz pure Doppler |\n| SMW-B15 with K822 | up to 8 | 400 MHz | 800 MHz | 32.7 µs | ±4 kHz Rayleigh；dynamic fading not supported |\n| SMW-B15 with K823 | up to 4 | 800 MHz | 來源表格空白 / 未辨識 | 來源表格空白 / 未辨識 | dynamic fading not supported |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+          },
+          "score": 1.968044
+         },
+         {
+          "text": "衛星酬載群延遲量測 › 測量原理\n- [[R&S ZNA]] 使用 two-tone stimulus signal。\n- 儀器量測 DUT input 與 output 的兩個 signals 之 phase difference。\n- Group delay 由 phase difference 與 frequency offset 計算。\n- 兩個 signals 間的 frequency offset Δf 是 aperture。\n- [[R&S ZNA]] 具備用於量測不同 frequency signals 之 phase 的 frontend。\n- Calibration 只需要 unknown through mixer。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+          },
+          "score": 4.963502
+         },
+         {
+          "text": "衛星酬載群延遲量測 › 使用限制\n- 本頁的 accuracy 數字與 method benefits 來自 2022 application brochure；實際性能需依 DUT、frequency range、bandwidth、SNR、option 與 calibration setup 確認。\n- 本頁不取代 [[R&S FSW]]、[[R&S SMW200A]]、[[R&S ZNA]] 的正式規格書。\n- 來源未提供完整 uncertainty budget、test limits、標準章節或 test case ID。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+          },
+          "score": 3.98486
+         },
+         {
+          "text": "<!-- Slide number: 1 -->\n# Making Deployed 5G Private Networks more Resilient\nRandy Schnell\nBusiness Development Manager\nAerospace & Defense Test",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-ee03d2faf62e9553",
+            "original_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+            "sha256": "ee03d2faf62e95530401e678c264a927c21cc58e47bb7aadc133b34233fc6940",
+            "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 27.653305
+         },
+         {
+          "text": "https://www.parpro.com.tw/solutions/aerospace-defense/",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-6ae422456b68416f",
+            "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+            "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+            "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.758653
+         },
+         {
+          "text": "Signal Generator\nSignal Analyzer",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-c478cd76758e3230",
+            "original_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+            "sha256": "c478cd76758e32304c76f6cddcc468bbab6c09f305ddd986166116e13cef3c38",
+            "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+           "section": 37,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 22.699916
+         },
+         {
+          "text": "Network analyzer\nVector signal generator\nBroadband Amplifier",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-4a179a13677acd8f",
+            "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+            "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "section": 177,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 19.87828
+         }
+        ],
+        "text": "### Short answer\nTo compare our Signal Generator / Signal Analyzer solution with a competitor for Aerospace / Defense without unsupported claims, we need traceable evidence for four things: our exact product configuration and warranted specs, the Aerospace / Defense use case being claimed, the competitor’s exact product configuration and official specs, and a side-by-side test method or source that directly supports each comparison point. [3][54][61][70][7][12]\n### Evidence required\n| Evidence needed | Why it is required | Current support / gap |\n|---|---|---|\n| Our Signal Generator datasheet, configuration guide, option stack, order numbers, and spec conditions for the exact configuration being compared | SMW200A specs and configuration guide are the proper sources for RF/baseband performance, interfaces, environmental data, ordering information, mandatory configuration, compatibility, retrofitting notes, recommended extras, and service notes. [1] | Current SMW200A pages say formal quotation/configuration still requires checking the official PDF, latest ordering information, and configure tool. [61] |\n| Our Signal Analyzer datasheet, option stack, and spec conditions for the exact configuration being compared | FSW specs define the high-end signal/spectrum analyzer family and its options such as analysis bandwidth, frequency range, and other hardware options. [5][6][66] | Current FSW pages say the markdown is lossy and full options/footnotes must be checked in the PDF before quotation. [70] |\n| Warranted-vs-nonwarranted status for every numeric claim | SMW200A specifications with limits and specifications without limits are warranted, while n. trc., typ., nom., and meas. are not guaranteed. [3] | FSW similarly states specifications with limits and specifications without limits are warranted, while non-traceable specifications, typical data, nominal values, and measured values are not guaranteed. [54] |\n| A direct Aerospace / Defense application link for the claimed use case | The RAW evidence only shows an Aerospace & Defense Test presentation context and separately lists “Signal Generator / Signal Analyzer,” without a detailed use case, model, option stack, or comparison. [97][99] | A stronger application link exists for satellite payload testing: R&S FSW + R&S SMW200A are positioned for complete payload testing, including group delay, linearity, NPR, modulation, OFDM, spurious, and signal quality. [51] |\n| The exact Aerospace / Defense standard, test case, or qualification context | DO-160, MIL-STD-461, and MIL-STD-464 are mentioned in drone EMC/EME context, but the sources are not formal standards and cannot be used to infer complete limits, categories, waveforms, setups, or pass/fail criteria. [18][20][86] | For any claim tied to DO-160, MIL-STD-461, MIL-STD-464, satellite payload qualification, or TVAC, the relevant official standard/test plan and its version are still required. [18][20][49] |\n| Competitor official datasheet, configuration guide, release notes, support terms, and option list | Keysight-related battle-card descriptions are R&S battle-card views and need Keysight official or third-party verification; the battle card does not provide formal datasheets, document versions, order numbers, option codes, release status, or test conditions. [7] | Anritsu-related weakness claims also cannot be treated as official specs or market facts, and Anritsu frequency range, bandwidth, data rate, option code, software tools, and support model require Anritsu official datasheets/release notes/support terms. [12] |\n| A competitor model that is actually in the same instrument class and use case | Current passages mention Keysight N9040B UXA as a spectrum analyzer and Keysight E8257D PSG as a signal generator in a Starlink user-terminal test-equipment mapping, but that mapping is deck-level and requires formal product specs, options, frequency range, uncertainty, and test method before use. [34] | Current passages do not provide a validated Aerospace / Defense competitor comparison against our SMW200A / FSW solution. [7][34][75] |\n| A controlled side-by-side test method, measurement setup, uncertainty budget, and calibration conditions | Satellite group-delay pages state actual performance depends on DUT, frequency range, bandwidth, SNR, option, and calibration setup, and do not provide a complete uncertainty budget, test limits, standard chapter, or test case ID. [96] | TVAC pages likewise state the source is solution-level and not a product qualification certificate, and it lacks pressure, temperature profile, dwell time, calibration interval, and uncertainty budget. [22] |\n| Evidence for any market-share, ecosystem, customer, or superiority claim | Keysight pages explicitly do not infer market share, customers, shipment volume, or adoption status, and ecosystem/market-dominance claims in the battle card lack traceable external evidence. [7][75] | R&S superiority, only-vendor, and lower-TCO statements in battle-card-style sources are sales positioning, not directly citable technical specifications. [12] |\n### Minimum evidence pack before making the comparison\n1. R&S SMW200A official specifications and configuration guide for the proposed generator configuration, including frequency option, baseband module, modulation bandwidth, fading/channel-emulation options if claimed, and all mandatory/compatibility notes. [1][57][65]  \n2. R&S FSW official specifications for the proposed analyzer model and options, including frequency range, analysis-bandwidth option, real-time or I/Q options if claimed, and applicability restrictions by model. [6][66][69]  \n3. A documented Aerospace / Defense test scenario that directly uses signal generation and signal analysis, such as satellite payload complete testing with FSW + SMW200A, or a formal EMC/EME standard/test plan when the claim is about drone or airborne equipment testing. [51][86]  \n4. Competitor official datasheets/configuration guides/release notes for the exact competing signal generator and signal analyzer models, because current Keysight and Anritsu battle-card information is not official competitor evidence. [7][12]  \n5. A side-by-side comparison table limited to parameters that both sides document under comparable conditions, because SMW200A and FSW distinguish warranted specifications from typical, nominal, measured, and non-guaranteed data. [3][54]  \n6. Test setup evidence, calibration evidence, and uncertainty information for performance claims, because the satellite and TVAC sources do not provide complete uncertainty budgets or qualification-level test procedures. [22][96]  \n### What we cannot claim from the current passages alone\nWe cannot claim that our Signal Generator / Signal Analyzer solution is better than a competitor for Aerospace / Defense, because the current competitor passages either rely on R&S battle-card descriptions needing external validation or only list deck-level equipment mappings without formal competitor specs and test conditions. [7][34][75]  \nWe cannot claim a formal Aerospace / Defense qualification fit from the DO-160 or military drone passages, because those pages are not formal standard summaries and cannot be used to determine complete categories, limits, waveforms, setups, pass/fail criteria, or required test items. [18][20]",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "R&S SMW200A › 文件依據\n- 來源：[[SMW200A_config-guide_en_3606-8037-92_v0600]]。\n- 文件名稱：`R&S®SMW200A Vector Signal Generator – Configuration guide`。\n- 文件代碼：`PD 3606.8037.92`。\n- 文件版次：`Version 06.00`。\n- 文件日期：`May 2024`。\n- 文件性質：configuration guide；適合查 mandatory configuration、requires / not compatible / retrofitting notes、ordering information、recommended extras 與 service notes。\n\n- 來源：[[SMW200A_specs_en_3606-8037-22_v3100]]。\n- 文件名稱：`R&S®SMW200A Vector Signal Generator Specifications`。\n- 文件代碼：`PD 3606.8037.22`。\n- 文件版次：`Version 31.00`。\n- 文件日期：`May 2026`。\n- 文件性質：產品 specifications；記錄 RF/baseband performance、interfaces、environmental data、ordering information 與 options。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S SMW200A.md"
+         },
+         "score": 17.642535
+        },
+        {
+         "text": "R&S SMW200A › 規格適用條件與語彙\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]（Version 31.00，May 2026）：\n\n- Product data 適用條件：ambient temperature 下 storage `3 hours` 後 warm-up operation `30 minutes`、符合 specified environmental conditions、遵守 recommended calibration interval、完成所有 applicable internal automatic adjustments。\n- Specifications with limits 與 specifications without limits 代表 warranted product performance。\n- `n. trc.`、`typ.`、`nom.`、`meas.` 不由 Rohde & Schwarz 保證。\n- Uncertainties 的 coverage factor 為 `2`，依 GUM 計算。\n- 依 3GPP standard，本文件中的 `Gbps`、`Mcps`、`Mbps`、`Msps`、`kbps`、`ksps`、`Msample/s` 不是 SI units。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S SMW200A.md"
+         },
+         "score": 7.275479
+        },
+        {
+         "text": "R&S FSW\nR&S FSW 是 Rohde & Schwarz 的 high-end Signal and Spectrum Analyzer 系列，依 Version 17.01（September 2025）涵蓋 8 GHz 至 85 GHz 型號，[[R&S FSW85]] 搭配 R&S FSW-B90G 可延伸至 90 GHz。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S FSW.md"
+         },
+         "score": 5.588832
+        },
+        {
+         "text": "R&S FSW › Analysis bandwidth options（硬體 options）\n| Option code | 名稱 | Order No. | 適用與限制 |\n|---|---|---|---|\n| R&S FSW-B40 | 40 MHz analysis bandwidth | 1313.0861.02 | user-retrofittable |\n| R&S FSW-B80 | 80 MHz analysis bandwidth | 1313.0878.02 | user-retrofittable |\n| R&S FSW-B160 | 160 MHz analysis bandwidth | 1325.4850.14 | contact service center |\n| R&S FSW-B320 | 320 MHz analysis bandwidth | 1325.4867.14 | includes 200 MHz IF filter |\n| R&S FSW-B512 | 512 MHz analysis bandwidth | 1331.7106.14 | includes 200 MHz IF filter |\n| R&S FSW-B512R | Real-time spectrum analyzer 512 MHz, POI ≤ 15 µs | 1331.7106.16 | contact service center；includes 512 MHz analysis bandwidth and 200 MHz IF filter |\n| R&S FSW-B1200 | 1.2 GHz analysis bandwidth | 1331.6400.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory；不適用 [[R&S FSW8]]、[[R&S FSW13]] |\n| R&S FSW-B2001 | 2 GHz analysis bandwidth | 1331.6916.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory |\n| R&S FSW-B4001 | 4.4 GHz analysis bandwidth | 1338.5215.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；contact service center |\n| R&S FSW-B6001 | 6.4 GHz analysis bandwidth | 1338.5221.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B8001 | 8.312 GHz analysis bandwidth | 1338.5238.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B800R | Real-time spectrum analyzer 800 MHz, POI ≤ 15 µs | 1331.6400.16 | 適用 [[R&S FSW26]]/43/50/67/85；export license required |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S FSW.md"
+         },
+         "score": 4.206604
+        },
+        {
+         "text": "Keysight › 未決事項\n- [[AI Server PCB test image 24]] 未標示內容日期、年份、季度或資料期間。\n- [[AI Server PCB test image 50]] 未標示內容日期、年份、季度或資料期間。\n- [[AI Server PCB test image 24]] 與 [[AI Server PCB test image 50]] 未標示 Keysight 相關方案的文件版次、產品規格、型號細節、option code 或價格。\n- [[AI Server PCB test image 24]] 未標示圖中合作夥伴名稱。\n- [[AI Server PCB test image 50]] 的 `Delta-L 测量软件（来自台作伙伴）` 與 `Delta-L 探头（来自台作伙伴）` 中「台作伙伴」前一字可能不清楚，來源明示無法完全辨識。\n- [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 是 R&S battle card，對 Keysight 的競品描述需要 Keysight 官方資料或第三方資料驗證。\n- [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 未提供 Keysight UXM 各 SKU 的正式 datasheet、文件版次、order number、option code、release status 或測試條件。\n- [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 中 ecosystem partnerships、market dominance、NTN / RedCap / FR3 / 6G path 等說法未附可追溯外部證據。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 8,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/Keysight.md"
+         },
+         "score": 11.599041
+        },
+        {
+         "text": "Anritsu › 使用限制\n- 本頁目前只依 R&S 內部 battle card 建立；不能把 source 對 Anritsu 的弱點敘事視為 Anritsu 官方規格或市場事實。\n- Anritsu 產品的 frequency range、bandwidth、data rate、option code、software tools 與 support model 需要另以 Anritsu 官方 datasheet / release notes / support terms 驗證。\n- 來源中出現的 R&S superiority / only vendor / lower TCO 等語句屬 sales positioning，不是可直接引用的技術規格。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/Anritsu.md"
+         },
+         "score": 3.513186
+        },
+        {
+         "text": "DO-160 airborne equipment EMC testing › 使用限制\n- 本頁不是 [[RTCA DO-160]] 正式標準摘要；只保存 [[2025RS Drone Solution]] 的簡報文字。\n- 不得由本頁推論 DO-160G / DO-160 任何 section 的完整 category、limit、waveform、test setup 或 pass / fail criteria。\n- 來源把 DO-160 放在 military / aviation drone example 中，但未說明特定 drone、eVTOL 或 avionics equipment 的 qualification plan。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 9,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md"
+         },
+         "score": 1.572125
+        },
+        {
+         "text": "軍用無人機 EMC 與 EME testing › 使用限制\n- 本頁是 Market 類簡報摘要，不是 [[MIL-STD-461]]、[[MIL-STD-464]] 或 [[RTCA DO-160]] 標準文件。\n- 不可由此頁直接判定任一 drone / UAV / eVTOL 產品必須測哪些項目。\n- [[MIL-STD-464C]] / [[MIL-STD-464D]] 版本差異需後續查正式標準或 procurement documentation。\n- 系統層 EME / HPM / EMP / lightning / RADHAZ 測試涉及安全與法規限制，來源未提供可部署或可執行參數。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 7,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+         },
+         "score": 3.621898
+        },
+        {
+         "text": "TVAC 衛星酬載測試 › 使用限制\n- 來源未提供 [[R&S ZN-Z33]]、[[R&S NRP33SN-V]]、[[R&S NRP67SN-V]] 的完整 datasheet、order number、完整 environmental specification 或 ESA norms 條文。\n- 來源未說明 TVAC chamber 的 pressure、temperature profile、dwell time、calibration interval 或 uncertainty budget。\n- 本頁只記錄 2022 application brochure 的 solution-level 說法，不可視為產品 qualification certificate。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 7,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/TVAC 衛星酬載測試.md"
+         },
+         "score": 7.983132
+        },
+        {
+         "text": "Starlink User Terminal 測試流程 › Test equipment mapping\n依 [[Starlink UT Test Flow]]：\n\n| 測試類別 | 來源列出的設備 |\n|---|---|\n| Spectrum analyzer | [[R&S FSW]]、Keysight N9040B UXA |\n| Signal generator | [[R&S SMW200A]]、Keysight E8257D PSG |\n| Power meter | [[R&S NRX]] with NRP33S、Bird 43 wattmeter |\n| VNA / array calibration | Keysight PNA-X、[[R&S ZNA]] |\n| Satellite simulator | Terma Ku/Ka-band loopback EIRP / G/T testing |\n\n這些設備是 deck-level recommendation；正式配置需回查產品規格、option、frequency range、uncertainty 與測試方法。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 9,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Starlink User Terminal 測試流程.md"
+         },
+         "score": 7.911642
+        },
+        {
+         "text": "衛星酬載與元件測試 › 使用限制\n- 本概念頁來自 2022 年 application brochure，屬 application / solution 說明，不是最新產品規格書。\n- 不可用本頁取代 [[R&S FSW]]、[[R&S SMW200A]]、[[R&S ZNA]] 等產品 datasheet 的 option、order number 或規格條件。\n- 來源沒有給出完整 satellite payload qualification test plan、標準版本、ESA / ECSS 章節或客戶案例。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/衛星酬載與元件測試.md"
+         },
+         "score": 6.006168
+        },
+        {
+         "text": "衛星酬載與元件測試 › 儀器與測試角色\n依 [[Satellite_payload_testing_app-bro_en_5215-2120-92_v0200]]：\n\n- [[R&S FSW]] + [[R&S SMW200A]]：建議用於 complete payload testing，涵蓋 group delay、linearity、NPR、modulation、OFDM、spurious 與 signal quality。\n- [[R&S ZNA]]：建議用於 component level testing，特別是 converters、mixers、amplifiers、filters、antennas、noise figure、group delay 與 phase measurements。\n- [[R&S RTP]] 與 [[R&S RTO6]]：用於 satellite digital interface decode / trigger / debug。\n- [[R&S ZN-Z33]]、[[R&S NRP33SN-V]]、[[R&S NRP67SN-V]]：用於 [[TVAC 衛星酬載測試]] 的 inline calibration 與 chamber 內 power measurement。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/衛星酬載與元件測試.md"
+         },
+         "score": 3.167636
+        },
+        {
+         "text": "FSW_specs_en_5215-6749-22_v1701 › 產品資料與規格標示規則\n- Specifications with limits 代表 warranted product performance。\n- Non-traceable specifications with limits（n. trc.）依同樣方式指定與測試，但因缺少可 traceable to national metrology standards 的 measuring equipment，product performance 不保證。\n- Specifications without limits 代表 warranted product performance，通常為指定值無偏差或偏差可忽略的參數。\n- Typical data（typ.）為代表性資訊；標 range 時表示 production time 約 80% instruments 可達成。\n- Nominal values（nom.）不做 statistical evaluation，production 時不測試該 parameter。\n- Measured values（meas.）是 individual samples 的 measurement results。\n- Non-traceable specifications with limits、typical data、nominal values、measured values 不由 Rohde & Schwarz 保證。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/FSW_specs_en_5215-6749-22_v1701.md"
+         },
+         "score": 10.046269
+        },
+        {
+         "text": "SMW200A_specs_en_3606-8037-22_v3100 › 主要配置與相依關係\n- RF path A 必須安裝一個 `R&S®SMW-B10xx` frequency option。\n- RF path B 若安裝 `R&S®SMW-B20xx` frequency option，baseband main module 必須是 `R&S®SMW-B13T` 或 `R&S®SMW-B13XT`。\n- 必須安裝 `R&S®SMW-B13`、`R&S®SMW-B13T` 或 `R&S®SMW-B13XT` 其中一個 signal routing and baseband main module。\n- `R&S®SMW-B13` 與 `R&S®SMW-B13T` 不能安裝於配備 `R&S®SMW-B1044O`、`R&S®SMW-B2044O`、`R&S®SMW-B1056O` 或 `R&S®SMW-B1067O` frequency options 的儀器。\n- `R&S®SMW-B1044` 只能與 `R&S®SMW-B2044` 組合；`R&S®SMW-B1044N` 只能與 `R&S®SMW-B2044N` 組合；`R&S®SMW-B1044O` 只能與 `R&S®SMW-B2044O` 組合。\n- `R&S®SMW-B94L` 是 deeper chassis，Order No. `1438.8150.02`；來源明列 required and only possible for `2 × 12.75 GHz`、`2 × 31.8 GHz`、`2 × 44 GHz` RF path combinations。\n- 所有已安裝 RF paths 必須具有相同 phase noise performance level；RF path A 的 `R&S®SMW-B709/-B710/-B711` 分別對應 RF path B 的 `R&S®SMW-B719/-B720/-B721`。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/SMW200A_specs_en_3606-8037-22_v3100.md"
+         },
+         "score": 8.416562
+        },
+        {
+         "text": "R&S SMW200A › Unresolved\n- 來源未標示價格。\n- 本頁整合 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（configuration guide，May 2024）與 [[SMW200A_specs_en_3606-8037-22_v3100]]（specifications，May 2026）；兩者文件性質不同。報價前應回查正式 PDF、最新 ordering information 與 configure 工具。\n- Multichannel、MIMO、fading、digital standards、GNSS/avionics、external pulse sequencer options 的完整規格需另查引用文件：`PD 3673.1276.22`、`PD 5213.9434.22`、`PD 3607.6896.22`、`PD 3607.1388.22`。\n- RF path combination table 的全部 allowed / not allowed combinations 與灰底 deeper chassis 條件需回查原表；本頁只照錄來源明列摘要與 `R&S®SMW-B94L` 明列條件。\n- Recommended rack adapter 與 2 m digital baseband cable 在 May 2024 configuration guide 與 May 2026 specifications 不一致；不可自行判定是否替代或等效。\n- 來源為分段萃取重點，不是完整逐頁文字；圖表曲線僅記錄來源明列的文字與數字。\n- 來源提供讀圖補充為 p001 封面資訊，但本次提示未提供可原封不動複製的圖片嵌入行；依 productions 讀圖規則，未把讀圖內容作為規格主張寫入本頁。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 28,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S SMW200A.md"
+         },
+         "score": 6.052896
+        },
+        {
+         "text": "R&S SMW200A › Signal routing and baseband main module\n| Code | Name / description | Order No. | 原文說明 / 限制 |\n|---|---|---:|---|\n| `R&S®SMW-B13` | Signal routing and baseband main module，one I/Q path to RF section | `1413.2807.02` | Standard baseband section；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13T` | Signal routing and baseband main module，two I/Q paths to RF section | `1413.3003.02` | Standard baseband section；若要安裝 RF path B 需 `B13T` 或 `B13XT`；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13XT` | Wideband baseband main module，two I/Q paths to RF section | `1413.8005.02` | Wideband baseband section；RF modulation bandwidth up to `2 GHz`。 |\n\n- Standard baseband section：`R&S®SMW-B13` 或 `R&S®SMW-B13T`；RF modulation bandwidth 最高 `160 MHz`；可安裝 `R&S®SMW-B10` standard baseband generator 與 `R&S®SMW-B14` fading simulator。\n- Wideband baseband section：`R&S®SMW-B13XT`；RF modulation bandwidth 最高 `2 GHz`；可安裝 `R&S®SMW-B9` / `R&S®SMW-B9F` wideband baseband generator 與 `R&S®SMW-B15` fading simulator and signal processor。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 11,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S SMW200A.md"
+         },
+         "score": 4.495094
+        },
+        {
+         "text": "R&S FSW › 型號總覽\n| 型號 | DC coupled frequency range | AC coupled frequency range | Order No. |\n|---|---:|---:|---|\n| [[R&S FSW8]] | 2 Hz to 8 GHz | 10 MHz to 8 GHz | 1331.5003.08 |\n| [[R&S FSW13]] | 2 Hz to 13.6 GHz | 10 MHz to 13.6 GHz | 1331.5003.13 |\n| [[R&S FSW26]] | 2 Hz to 26.5 GHz | 10 MHz to 26.5 GHz | 1331.5003.26 |\n| [[R&S FSW43]] | 2 Hz to 43.5 GHz | 10 MHz to 43.5 GHz | 1331.5003.43 |\n| [[R&S FSW50]] | 2 Hz to 50 GHz | 10 MHz to 50 GHz | 1331.5003.50 |\n| [[R&S FSW67]] | 2 Hz to 67 GHz | 10 MHz to 67 GHz | 1331.5003.67 |\n| [[R&S FSW85]] RF1 standard | 2 Hz to 85 GHz | 10 MHz to 85 GHz | 1331.5003.85 |\n| [[R&S FSW85]] RF1 with R&S FSW-B90G, YIG preselector off | 2 Hz to 90 GHz | 10 MHz to 90 GHz | R&S FSW-B90G: 1331.7693.02 |\n| [[R&S FSW85]] RF2 | 2 Hz to 67 GHz | 10 MHz to 67 GHz | 來源未標示獨立 order no. |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S FSW.md"
+         },
+         "score": 2.364227
+        },
+        {
+         "text": "R&S FSW › 其他硬體 options（摘錄）\n| Option code | 名稱 | Order No. | 原文說明 / 限制 |\n|---|---|---|---|\n| R&S FSW-B106 | I/Q memory extension 6 GB | 1331.6451.02 | 需 R&S FSW-B160/-U160/-B320 |\n| R&S FSW-B108 | I/Q memory extension 8 GB | 1331.6751.02 | 需 R&S FSW-B1200/-U1200/-B2001/-U2001/-B800R |\n| R&S FSW-B124 | I/Q memory extension 24 GB | 1338.5273.02 | 需 R&S FSW-B4001/-U4001/-B6001/-U6001/-B8001/-U8001 |\n| R&S FSW-B112 | USB instrument remote control, type B plug | 1353.3290.02 | 來源未標示 retrofittable 狀態 |\n| R&S FSW-B517 | DIG IQ 40G streaming out interface | 1331.6980.02 | 需 R&S FSW-B512/-U512/-B1200/-U1200/-B2001/-U2001/-B800R；不適用 B4001/B6001/B8001 |\n| R&S FSW-B1017 | DIG IQ 40G streaming out interface, max. 1 GHz bandwidth | 1350.7008.02 | 需 R&S FSW-B1200/-U1200/-B2001/-U2001/-B800R |\n| R&S FSW-FL | Floating license smart card with USB adapter | 1345.1940.02 | floating license 需此 hardware option |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 7,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S FSW.md"
+         },
+         "score": 2.178489
+        },
+        {
+         "text": "R&S FSW › Unresolved\n- 價格未標示。\n- 來源 markdown 是 lossy derivative；完整選配與 footnote 報價前需回查 PDF。\n- R&S FSW-B24 未列 [[R&S FSW85]] 適用，不能推論可用。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 11,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S FSW.md"
+         },
+         "score": 1.769984
+        },
+        {
+         "text": "Keysight › 可追溯範圍\n- PCB 測試相關內容只記錄 [[AI Server PCB test image 24]] 與 [[AI Server PCB test image 50]] 圖上出現的 Keysight / 是德科技名稱與相關工具組合。\n- Wireless testing / UXM portfolio 相關內容只記錄 [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 的 R&S battle card 觀點；它不是 Keysight 官方資料。\n- 本頁不推論 Keysight 在 AI server、資料中心、PCB 測試、wireless device testing 或 UXM 市場的市占率、客戶、出貨量或導入狀態。\n- 本頁不把 [[Delta-L 測量軟體]]、[[Delta-L 探頭]] 的合作夥伴自行補成任何公司名稱，因來源未標示具體名稱。\n- [[AI Server PCB test image 50]] 對 `Delta-L 测量软件（来自台作伙伴）` 與 `Delta-L 探头（来自台作伙伴）` 的「台作伙伴」字樣標示為無法完全辨識；本頁保留該未決事項，不把它當作確定公司或正式名稱。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/Keysight.md"
+         },
+         "score": 0.763438
+        },
+        {
+         "text": "軍用無人機 EMC 與 EME testing › Common MIL EMC standards\n[[2025RS Drone Solution]] 列出：\n\n- [[MIL-STD-461]] — requirements for the control of electromagnetic interference emission and susceptibility。\n- [[MIL-STD-464]] — electromagnetic environmental effects requirements for systems。\n- [[RTCA DO-160]] — environmental conditions and test procedures for airborne equipment。\n\n來源另在 example 頁將 military / aviation drone EMC test standards 分為 component level 與 full system level：\n\n| 層級 | 來源列名 |\n|---|---|\n| Component level | [[RTCA DO-160G]]、[[MIL-STD-461G]]、[[DEF STAN 59-411 Part 3]]、[[GJB 151B]] |\n| Full system level | [[MIL-STD-464D]]、[[DEF STAN 59-411 Part 4]]、[[GJB 1389A]] |\n\n使用限制：來源同時在另一頁將 applicable standards 列為 [[MIL-STD-464C]]，而 example 頁列 [[MIL-STD-464D]]；目前只保留為版本線索，未裁決適用版本。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md"
+         },
+         "score": 2.208063
+        },
+        {
+         "text": "衛星酬載群延遲量測 › 使用限制\n- 本頁的 accuracy 數字與 method benefits 來自 2022 application brochure；實際性能需依 DUT、frequency range、bandwidth、SNR、option 與 calibration setup 確認。\n- 本頁不取代 [[R&S FSW]]、[[R&S SMW200A]]、[[R&S ZNA]] 的正式規格書。\n- 來源未提供完整 uncertainty budget、test limits、標準章節或 test case ID。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 10,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+         },
+         "score": 3.98486
+        },
+        {
+         "text": "<!-- Slide number: 1 -->\n# Making Deployed 5G Private Networks more Resilient\nRandy Schnell\nBusiness Development Manager\nAerospace & Defense Test",
+         "citation": {
+          "kind": "raw",
+          "source": {
+           "source_id": "src-ee03d2faf62e9553",
+           "original_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+           "sha256": "ee03d2faf62e95530401e678c264a927c21cc58e47bb7aadc133b34233fc6940",
+           "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+           "page": null,
+           "slide": null,
+           "parent_source_id": null
+          },
+          "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": null
+         },
+         "score": 27.653305
+        },
+        {
+         "text": "Signal Generator\nSignal Analyzer",
+         "citation": {
+          "kind": "raw",
+          "source": {
+           "source_id": "src-c478cd76758e3230",
+           "original_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+           "sha256": "c478cd76758e32304c76f6cddcc468bbab6c09f305ddd986166116e13cef3c38",
+           "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+           "page": null,
+           "slide": null,
+           "parent_source_id": null
+          },
+          "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+          "section": 37,
+          "page": null,
+          "slide": null,
+          "wiki_page": null
+         },
+         "score": 22.699916
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [
+         {
+          "name": "competitor",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 8,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Keysight.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 3,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Keysight.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Keysight.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Anritsu.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 3,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Anritsu.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/Anritsu.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/entities/R&S SMW200A.md",
+         "raw_refs": [
+          "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+          "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S FSW.md",
+         "raw_refs": [
+          "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/Keysight.md",
+         "raw_refs": [
+          "raw/Market/AI Server PCB test image 24.md",
+          "raw/Market/AI Server PCB test image 50.md",
+          "raw/Productions/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/Anritsu.md",
+         "raw_refs": [
+          "raw/Productions/2026_02_CMX500_Anritsu_Sales_Battle_Card.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/DO-160 airborne equipment EMC testing.md",
+         "raw_refs": [
+          "raw/Market/OneNote/2025RS Drone Solution.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/軍用無人機 EMC 與 EME testing.md",
+         "raw_refs": [
+          "raw/Market/OneNote/2025RS Drone Solution.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/TVAC 衛星酬載測試.md",
+         "raw_refs": [
+          "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/Starlink User Terminal 測試流程.md",
+         "raw_refs": [
+          "raw/Market/OneNote/Starlink UT Test Flow.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/衛星酬載與元件測試.md",
+         "raw_refs": [
+          "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/FSW_specs_en_5215-6749-22_v1701.md",
+         "raw_refs": [
+          "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/SMW200A_specs_en_3606-8037-22_v3100.md",
+         "raw_refs": [
+          "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+          "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md",
+         "raw_refs": [
+          "raw/Market/OneNote/Satellite_payload_testing_app-bro_en_5215-2120-92_v0200.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-5c92abdd4890445cbc6f3a1a2081aea1",
+      "task_sha256": "e19e5971d2bac52325476676d7c684ea45c92ef4660bf8019d5d762899874e53",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.12.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "validated",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validated",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "passed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": null
+    },
+    "evidence": {
+     "raw_citations": 24,
+     "facet_status": "covered",
+     "missing_facets": [],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {
+      "competitor": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

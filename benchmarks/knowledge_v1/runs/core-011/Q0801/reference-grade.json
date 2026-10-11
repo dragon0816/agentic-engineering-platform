@@ -1,0 +1,69 @@
+{
+ "id": "Q0801",
+ "grader": "1.2",
+ "coverage": 0.375,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's 5G device testing value chain lists the chip vendor as one of four ecosystem roles and ties the roles to RF, signaling, application, OTA, pre-conformance, conformance and carrier-acceptance testing.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions chip-vendor scope and many test types, but not the four ecosystem roles"
+  },
+  {
+   "n": 2,
+   "point": "The validation/conformance goals that apply to chipset (semiconductor) work include chipset L1–L4 test plan and verification.",
+   "verified": true,
+   "label": "covered",
+   "why": "states chipset L1–L4 test plan verification"
+  },
+  {
+   "n": 3,
+   "point": "Other named chipset-level signaling goals are modem-stack debug and end-to-end IMS/SIP/TCP-IP validation plus app-stack debug.",
+   "verified": true,
+   "label": "covered",
+   "why": "states modem-stack debug, IMS/SIP/TCP-IP validation, app-stack debug"
+  },
+  {
+   "n": 4,
+   "point": "The signaling / protocol / application test layer is mapped to R&S CMX500, CMW500 and CMsquares.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions CMX500 capabilities, but not mapping to CMX500/CMW500/CMsquares"
+  },
+  {
+   "n": 5,
+   "point": "Protocol-conformance signaling capability is used directly with Tier 1 chipset vendors to verify their platforms against WI-555 / RFT 555 NR-NTN test cases.",
+   "verified": true,
+   "label": "missing",
+   "why": "no Tier 1 chipset vendors or WI-555/RFT 555 NR-NTN cases"
+  },
+  {
+   "n": 6,
+   "point": "Chipset vendors are recorded as a source of recent PCT (protocol conformance) demand, notably Rel-17 and RedCap.",
+   "verified": true,
+   "label": "missing",
+   "why": "no PCT demand from chipset vendors, Rel-17 or RedCap"
+  },
+  {
+   "n": 7,
+   "point": "Pre-standard signaling-mode capability on the CMX500 one-box signaling tester was demonstrated with a Broadcom prototype WLAN device before IEEE Wi-Fi 8 ratification.",
+   "verified": true,
+   "label": "missing",
+   "why": "no Broadcom prototype Wi-Fi 8 pre-ratification CMX500 demo"
+  },
+  {
+   "n": 8,
+   "point": "A virtualized protocol-stack signaling tester is described as a shift-left capability for chipset development, running protocol tests on a virtual terminal before physical chipset manufacture.",
+   "verified": true,
+   "label": "missing",
+   "why": "no virtualized pre-silicon protocol-stack shift-left testing"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "Key signaling test capabilities include LTE and 5G NR network emulation across LTE, NR FR1, NR FR2, NSA, SA, FDD, and TDD",
+  "Key IP application capabilities include DNS, IMS, Message Center, FTP, HTTP, DNS monitor, IP logging, iPerf, Ping, throughput, Max Throughput Wizard, and web server",
+  "Key automation capabilities include GUI, graphical scripting, Python-based XLAPI, and SCPI remote control"
+ ]
+}

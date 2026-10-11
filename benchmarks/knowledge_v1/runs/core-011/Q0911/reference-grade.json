@@ -1,0 +1,69 @@
+{
+ "id": "Q0911",
+ "grader": "1.2",
+ "coverage": 0.0,
+ "points": [
+  {
+   "n": 1,
+   "point": "Vault 的實際 RFIC/半導體案例：Samsung Foundry RF/Analog Enablement Group，DUT 為 5G SoC including VCO，使用 FSWP50（analyzer）+ SMW200A 44GHz / SGS100A（signal generator）",
+   "verified": true,
+   "label": "missing",
+   "why": "No Samsung Foundry RF/Analog case, DUT 5G SoC/VCO, or FSWP50+SMW200A/SGS100A combination stated"
+  },
+  {
+   "n": 2,
+   "point": "該案例的量測在 probe station 上進行，並搭配自動化 VCO tuning 軟體，顯示儀器位於晶片級 characterization / validation 這一步",
+   "verified": true,
+   "label": "missing",
+   "why": "No probe station, automated VCO tuning software, or chip-level characterization placement"
+  },
+  {
+   "n": 3,
+   "point": "測試區塊對儀器類別的 mapping：RefClk 與 PLL jitter performance 由 phase noise analyzers 與 signal generators 負責",
+   "verified": true,
+   "label": "missing",
+   "why": "No RefClk/PLL jitter to phase-noise analyzer and signal generator mapping"
+  },
+  {
+   "n": 4,
+   "point": "ADC / DAC frontend performance 由 spectrum analyzers 與 signal generators 負責，是 signal generator / analyzer 在高速數位 / 混訊晶片驗證中的另一個落點",
+   "verified": true,
+   "label": "missing",
+   "why": "No ADC/DAC frontend to spectrum analyzer and signal generator mapping"
+  },
+  {
+   "n": 5,
+   "point": "RFIC 的 bare board / socket / transmission line 評估這一段，來源明示的 fit 是 VNAs，而非 signal generator / analyzer",
+   "verified": true,
+   "label": "missing",
+   "why": "No VNA fit for bare board/socket/transmission-line evaluation; does not distinguish from signal generator/analyzer"
+  },
+  {
+   "n": 6,
+   "point": "2026.7 DDT success stories 把 SoC testing 對應到 FSWP、SMA100B（RF and Microwave Signal Generator）與 ZNA67",
+   "verified": true,
+   "label": "missing",
+   "why": "No DDT SoC testing mapping to FSWP, SMA100B, and ZNA67"
+  },
+  {
+   "n": 7,
+   "point": "Vault 明示不推論這些儀器在各應用中的角色分工（stimulus / analysis / phase noise / VNA / automation），因此「流程位置」只能到 mapping 層級",
+   "verified": true,
+   "label": "contradicted",
+   "why": "It assigns stimulus/measurement/debug/validation roles despite reference saying Vault does not support role-level inference"
+  },
+  {
+   "n": 8,
+   "point": "Samsung 案例被歸納為可包裝成 RF / analog enablement 測試方案，但軟體正式名稱與版本未標示",
+   "verified": true,
+   "label": "missing",
+   "why": "No RF/analog enablement packaging note or caveat about software name/version"
+  }
+ ],
+ "contradicted": 1,
+ "invented": [
+  "“A signal generator provides RF/vector/wanted/interferer signals to the DUT”",
+  "“A signal or spectrum analyzer measures DUT RF behavior”",
+  "“They fit as lab instruments in the standard test stack / lab equipment interfaces used to run tests”"
+ ]
+}

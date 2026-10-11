@@ -1,0 +1,73 @@
+{
+ "id": "Q1041",
+ "grader": "1.2",
+ "coverage": 0.375,
+ "points": [
+  {
+   "n": 1,
+   "point": "Vault 把 Eye diagram 列為 high-speed PCB/PCBA signal integrity flow 的量測項目之一（Slide 20），與 IL、Xtalk、TDR Impedance、Stackup Planner、TL Calculator 並列",
+   "verified": true,
+   "label": "covered",
+   "why": "lists eye diagram in high-speed PCB/PCBA SI with IL, crosstalk, TDR, stackup, TL modeling"
+  },
+  {
+   "n": 2,
+   "point": "在 R&S PCB test solutions 流程中，Eye diagram 屬於 Material/Stackup selection 階段的量測 / 分析項目，因此材料與疊層選擇決策依賴它",
+   "verified": true,
+   "label": "covered",
+   "why": "states R&S material/stackup selection uses eye diagram with DK/DF, roughness, impedance, etc."
+  },
+  {
+   "n": 3,
+   "point": "產品選配決策：R&S®ZNA-K20 提供含 eye diagram 的 extended time domain analysis，且必須搭配 R&S®ZNA-K2（TDR）",
+   "verified": true,
+   "label": "contradicted",
+   "why": "says exact R&S product/option code was not validated, instead of ZNA-K20 requiring ZNA-K2"
+  },
+  {
+   "n": 4,
+   "point": "同一選配關係在 ZNA67EXT 規格頁也成立，Requires 欄明示 R&S®ZNA-K2，Order No. 1332.4746.02",
+   "verified": true,
+   "label": "contradicted",
+   "why": "does not give ZNA67EXT Requires K2 / order number and says option code was not validated"
+  },
+  {
+   "n": 5,
+   "point": "PCB layout 決策依據：fiber weave 造成的 intra-pair skew 會顯著劣化 receiver 端看到的 differential eye diagram，並造成 duty cycle distortion、AC common-mode noise 與 EMI",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions fiber-weave/skew degrading receiver differential eye, but omits duty-cycle distortion, AC common-mode noise, and EMI"
+  },
+  {
+   "n": 6,
+   "point": "同一結論已落地為 wiki 說法，並連到 intra-pair skew 與 PCIe Gen5 layout mitigation 脈絡",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions PCIe Gen5 layout/fiber-weave context only generally, not the wiki/intra-pair-skew linkage"
+  },
+  {
+   "n": 7,
+   "point": "缺少 eye diagram 資料被當作產品聲明的可追溯限制：沒有眼圖等實測資料時，不得把 brochure claim 寫成量產或實測證據",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention missing eye diagrams as a traceability limit for brochure claims"
+  },
+  {
+   "n": 8,
+   "point": "連接器頁同樣以缺少 PAM4 eye diagram / BER / compliance 為由，拒絕把 224 Gb/s PAM4 寫成認證或出貨狀態",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention connector pages rejecting 224G PAM4 certification/shipping claims due to missing eye/BER/compliance"
+  }
+ ],
+ "contradicted": 2,
+ "invented": [
+  "many bits are overlaid in time so the waveform resembles an “eye”",
+  "The more open the eye, the more timing and voltage margin the receiver has",
+  "Key readouts include eye height voltage margin and eye width timing margin",
+  "For PCIe, the measurable “eye opening” is expressed as eye height and eye width after equalization",
+  "15 ± 1.5 mV eye height",
+  "0.3 UI / 9.375 ± 0.5 ps minimum eye width",
+  "A PCIe redriver output must meet or exceed the listed eye-opening values"
+ ]
+}

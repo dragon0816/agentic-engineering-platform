@@ -1,0 +1,66 @@
+{
+ "id": "Q0581",
+ "grader": "1.2",
+ "coverage": 0.143,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's automotive radar content is confined to the AREG800A radar echo generator, which is not a VNA",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions AREG800A echo generation but not that it is the only automotive radar source or not a VNA"
+  },
+  {
+   "n": 2,
+   "point": "The automotive radar frequency bands documented in the Vault are 24–24.25 GHz, 76–81 GHz and 24–44 GHz (FE44S), given for radar echo generator frontends",
+   "verified": true,
+   "label": "missing",
+   "why": "does not give the documented 24/76–81/24–44 GHz radar frontend bands"
+  },
+  {
+   "n": 3,
+   "point": "The Vault distinguishes FMCW from non-FMCW radar only in the echo-generation/distance context, not as a VNA measurement requirement",
+   "verified": true,
+   "label": "contradicted",
+   "why": "turns FMCW/echo-generation context into VNA requirements"
+  },
+  {
+   "n": 4,
+   "point": "The ZNA VNA family page describes coverage from 10 MHz up to 67 GHz with no reference to radar or automotive use cases",
+   "verified": true,
+   "label": "contradicted",
+   "why": "gives ZNA up to 67 GHz but links it to automotive radar needs despite no such context"
+  },
+  {
+   "n": 5,
+   "point": "mmWave VNA coverage in the Vault extends to 110 GHz via the ZNA67EXT converter-head system, stated purely as instrument specification",
+   "verified": true,
+   "label": "partial",
+   "why": "states ZNA67EXT 10 MHz to 110 GHz but not that this is only an instrument spec"
+  },
+  {
+   "n": 6,
+   "point": "ZNA67EXT dynamic-range data is segmented by band, including the 75 GHz to 80 GHz segment that overlaps the 76–81 GHz radar band, but the Vault never attributes this to radar needs",
+   "verified": true,
+   "label": "missing",
+   "why": "omits 75–80 GHz dynamic-range segment and no-radar attribution caveat"
+  },
+  {
+   "n": 7,
+   "point": "ZNB3000 VNA models are documented with frequency upgrade options up to 54.0 GHz, again with no radar or automotive application context",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention ZNB3000 up to 54 GHz or lack of radar context"
+  }
+ ],
+ "contradicted": 2,
+ "invented": [
+  "That increases VNA needs on the IF side",
+  "supported VNA measurement spans for AREG800A IF transfer characteristics",
+  "For ghost-object suppression, the required VNA capability includes time-domain measurement",
+  "VNAs that can address these broader or higher-frequency needs include R&S ZNA models",
+  "the VNA must support wider IF-span characterization up to 0.7 GHz to 5.7 GHz",
+  "the VNA must support time-domain analysis with fine frequency stepping",
+  "AREG800A ghost-object measurement condition explicitly uses a vector network analyzer"
+ ]
+}

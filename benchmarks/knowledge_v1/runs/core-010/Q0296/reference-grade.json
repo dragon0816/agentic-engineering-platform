@@ -1,0 +1,70 @@
+{
+ "id": "Q0296",
+ "grader": "1.2",
+ "coverage": 0.062,
+ "points": [
+  {
+   "n": 1,
+   "point": "R&S RTP and RTO6 oscilloscopes are positioned for satellite digital interface trigger, decode and debug — the clearest A&D oscilloscope use case in the Vault.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "says drone/airborne EMC is clearest, omits RTP/RTO6 satellite use case"
+  },
+  {
+   "n": 2,
+   "point": "The covered bus standards are the space/avionics set: SpaceWire, 8b/10b SpaceFibre, MIL-STD-1553, ARINC 429, CAN, I²C/SPI, UART.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not list SpaceWire/SpaceFibre/MIL-STD-1553/ARINC/CAN/I2C/SPI/UART set"
+  },
+  {
+   "n": 3,
+   "point": "Multi-domain correlation (RF link + DC power + datacom bus on one 4-channel scope) is the differentiating value proposition for satellite debug.",
+   "verified": true,
+   "label": "missing",
+   "why": "no satellite multi-domain RF/DC/datacom correlation"
+  },
+  {
+   "n": 4,
+   "point": "A concrete named satellite-chain lead exists: 精英電腦 under satellite control board / OBC is mapped to 'Oscilloscope'.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention 精英電腦 OBC oscilloscope lead"
+  },
+  {
+   "n": 5,
+   "point": "Spacecraft OBC hardware actually carries CAN, SpaceWire, MIL-STD-1553B, RS422 and LVDS interfaces, which is the technical basis for the scope need.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention OBC CAN/SpaceWire/MIL-STD-1553B/RS422/LVDS basis"
+  },
+  {
+   "n": 6,
+   "point": "UAV camera / image-processing high-speed serial links (GMSL, LVDS) at 邑錡 are mapped to R&S RTO and R&S MXO.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention 邑錡, GMSL/LVDS, or RTO/MXO mapping"
+  },
+  {
+   "n": 7,
+   "point": "UAV battery/power and motor/gimbal segments give further MXO leads (德鑫新技, 其昜先進).",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention 德鑫新技/其昜先進 or MXO leads"
+  },
+  {
+   "n": 8,
+   "point": "These mappings are leads only — the Vault prohibits inferring purchase, use, deployment, evaluation or certification by the named companies.",
+   "verified": true,
+   "label": "partial",
+   "why": "states many items are unverified, but not the specific purchase/use/deployment/evaluation/certification prohibition"
+  }
+ ],
+ "contradicted": 1,
+ "invented": [
+  "Airborne / drone EMC transient 與 immunity debug 是最明確的技術需求線索",
+  "Oscilloscope | Drone power electronics / control electronics 的 pre-compliance debug",
+  "Military system-level EME / HIRF / EMP / lightning 測試中的時域除錯與事件捕捉",
+  "Airborne / drone transient immunity debug 是 Oscilloscope 的優先開發機會"
+ ]
+}

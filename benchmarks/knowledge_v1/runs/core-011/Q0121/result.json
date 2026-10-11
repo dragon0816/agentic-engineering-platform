@@ -1,0 +1,193 @@
+{
+ "id": "Q0121",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 111.297,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 100,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 73,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR conducted base station transmitter tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 86,
+   "kind": "wiki",
+   "ref": "wiki/sources/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Network Infrastructure T&M drivers.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 16,
+   "kind": "wiki",
+   "ref": "wiki/sources/MWC2025---WIC-INFRA.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S SMW200A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 41,
+   "kind": "wiki",
+   "ref": "wiki/concepts/O-RU testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 43,
+   "kind": "wiki",
+   "ref": "wiki/concepts/O-RAN Beamforming Measurements.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 18,
+   "kind": "wiki",
+   "ref": "wiki/sources/MWC2025---WIC-INFRA.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 23,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR OTA Base Station Receiver Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 22,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR OTA Base Station Receiver Tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 70,
+   "kind": "wiki",
+   "ref": "wiki/sources/MWC2025---WIC-INFRA.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 49,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S SMW200A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 8,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S FSW.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 53,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S FSW.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 42,
+   "kind": "wiki",
+   "ref": "wiki/concepts/O-RU testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 69,
+   "kind": "wiki",
+   "ref": "wiki/sources/MWC2025---WIC-INFRA.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 92,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NTN test and measurement aspects.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 13,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NTN signal generator solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 32,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NTN test and measurement aspects.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "Measurements include power consumption optimization, power statistics over time, device activity versus power consumption...",
+   "Energy-saving amplifier development uses a turnkey VSG + VSA + software solution...",
+   "the envelope signal for the tracker is generated in real time, with R&S SMW-K546 cited",
+   "R&S FSW-K18 cited as the analyzer-side software application",
+   "NTN testing must account for high path loss, Doppler shift, time delay...",
+   "R&S SMW200A can support satellite trajectory modeling... up to ±1 MHz pure Doppler",
+   "R&S FSW / FSWX support satellite payload testing, EVM, ACLR, group delay..."
+  ],
+  "reason": "Most of the 3GPP, MIMO/beamforming, OTA, spectrum-bandwidth, and O-RAN mappings are supported by the provided passages. However, the energy-efficiency row and the NTN row rely on cited items [69], [92], [13], and [32], whose supporting passage text is not provided here, so those substantive chains are not evidence-backed against the supplied passages.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: Most of the 3GPP, MIMO/beamforming, OTA, spectrum-bandwidth, and O-RAN mappings are supported by the provided passages. However, the energy-efficiency row and the NTN row rely on cited items [69], [92], [13], and [32], whose supporting passage text is not provided here, so those substantive chains a"
+}

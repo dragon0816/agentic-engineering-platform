@@ -1,6 +1,6 @@
 # Handoff
 
-Updated: 2026-10-09 (Asia/Taipei), by Claude Code
+Updated: 2026-10-12 (Asia/Taipei), by Claude Code
 
 ## Where the current work stopped (2026-10-09)
 
@@ -64,10 +64,29 @@ Lint -> Benchmark -> Push) and the K1-K3 specs; progress rows are in `docs/TASKS
   (passes on rerun) is unidentified (see TASKS); the OCNG image failure is fixed
   (b293aeb). Next stage after validation: K4 (Excel, HTML, .ppt, images).
 
-Knowledge state (2026-10-10, latest): Skill 1.10.0 is live. A no-support retry check
-plus Skill 1.11.0 was tried in `runs/core-006`, came out worse and was rolled back
-(code revert ca110b0). The coverage target is 0.50, set after calibration
-(`benchmarks/knowledge_v1/references-b/`). Overreach remains the open problem.
+Knowledge state (2026-10-12, latest): answer quality was tuned against a fresh baseline
+(see DECISIONS 2026-10-12 and `runs/core-009` … `core-012` reviews). Live now, commit
+425c5f6: Knowledge Skill `company-agent/knowledge-query@1.12.0` (1.10.0 in `disabled/`),
+`engineering/knowledge-query@1.0.1` (1.0.0 in `disabled/`), Agent Web restarted on 425c5f6.
+Baseline core-009 -> core-012: answerable coverage 0.372 -> 0.477 (target 0.50), 36-question
+PASS/INSUFFICIENT/FAIL 21/6/8 -> 28/2/6, contradicted 27 -> 15, invented 47 -> 67, median
+185 -> 74 s, p90 329 -> 115 s. Verification on 425c5f6: ruff and mypy clean; full pytest
+2519 passed, 6 skipped. Rollback per change: C3 revert 425c5f6; C2 revert 43dcd76 and move
+1.10.0 back for 1.12.0; C1 revert 9d0d74c and move engineering 1.0.0 back (204dcfa is a pure
+speed-up with identical retrieval output); restart Agent Web after each.
+
+Open for the owner (structural, not implemented):
+1. Retrieval recall is the remaining gap (75% of missed answerable key points sit on pages
+   never offered; all reference sources exist). Options: run the last planner round's
+   queries (today they are discarded), or a fourth round (`retrieval_rounds` 3, about +8 s);
+   a per-question "page title + summary" recall pass using the K2 bilingual index lines.
+2. The citation preflight still fails first drafts on a sentence split at "vs." and on
+   labeled inferences; deciding whether a bold label line is formatting changes the rule.
+3. run.py's reviewer sees only the first 16 cited passages (1,500 chars each); answers now
+   cite more, which turns supported answers into FAIL (core-012: 28 PASS with 16, 33 with 48).
+   Widening it changes the grader, so earlier runs would need regrading for comparison.
+4. Invented claims rose with fuller answers (47 -> 67); a claim-level check against the
+   cited passage would add one model call per answer.
 
 Benchmark telemetry (2026-10-10, d29ac63): every knowledge_v1, coding_v1 and
 business workflow lab run now writes a `benchmark_run` into

@@ -1,0 +1,57 @@
+{
+ "id": "Q0051",
+ "grader": "1.2",
+ "coverage": 0.167,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's signal integrity capability list is a high-speed PCB/PCBA flow: IL / Xtalk / eye diagram, TDR impedance, Stackup Planner, TL Calculator — not a wireless-application list.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Includes the PCB SI items, but presents them as wireless-communication capabilities instead of noting they are not a wireless application list."
+  },
+  {
+   "n": 2,
+   "point": "Signal Integrity is positioned in the Digital / high-speed digital test context, with RF as a separate target category, so the Vault does not frame SI as a wireless-communication capability area.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Frames SI as applicable to wireless infrastructure rather than saying the Vault positions SI in Digital/high-speed digital with RF separate."
+  },
+  {
+   "n": 3,
+   "point": "In the R&S PCB test solutions flow, Signal Integrity modeling/testing is defined as IL, DK/DF, roughness and impedance.",
+   "verified": true,
+   "label": "covered",
+   "why": "States IL, DK/DF, roughness and impedance/TDR under PCB material/stackup and SI modeling."
+  },
+  {
+   "n": 4,
+   "point": "The only wireless-infrastructure SI reference is O-RU / Open RAN testing, where \"Timing / Sync / Signal Integrity\" is listed as one key test focus area.",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not mention O-RU/Open RAN or the 'Timing / Sync / Signal Integrity' test focus area."
+  },
+  {
+   "n": 5,
+   "point": "In the Jio mmWave (Wi-Fi over mmWave) project, signal integrity is tied to EVM/modulation-quality tuning after signal up-conversion.",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not mention Jio Wi-Fi-over-mmWave, EVM/modulation-quality tuning, or signal integrity after up-conversion."
+  },
+  {
+   "n": 6,
+   "point": "In an SDR/UAV wireless review, filtering stages plus configurable AGC are what mitigate interference and maintain signal integrity.",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not mention SDR/UAV filtering stages or configurable AGC maintaining signal integrity."
+  }
+ ],
+ "contradicted": 2,
+ "invented": [
+  "supported signal-integrity capabilities for wireless communication applications are",
+  "For wireless communication, the most important SI capability set is therefore",
+  "RefClk and PLL jitter performance",
+  "Higher-frequency / mmWave network-analysis capability ... up to 67 GHz, 110 GHz ... 1.1 THz",
+  "OTA/MIMO/beamforming-related measurement capability"
+ ]
+}

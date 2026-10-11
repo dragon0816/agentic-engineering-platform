@@ -1,0 +1,1589 @@
+{
+ "question": {
+  "id": "Q0051",
+  "text": "What are the most important signal integrity capabilities for applications in Wireless Communication?",
+  "market": "Wireless Communication",
+  "product": "Oscilloscope",
+  "type": "basic",
+  "difficulty": "L1"
+ },
+ "session_id": "conversation-b0a115e4f2284f4cac79f812746c5871",
+ "exchange": {
+  "sent": "What are the most important signal integrity capabilities for applications in Wireless Communication?",
+  "http_status": 200,
+  "seconds": 46.219,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-b0a115e4f2284f4cac79f812746c5871",
+    "actor": "leo.chi",
+    "title": "What are the most important signal integrity capabilities for applicatio…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T21:46:34.688619Z",
+    "updated_at": "2026-10-11T21:47:20.762345Z",
+    "messages": [
+     {
+      "message_id": "message-5d6455ead1624e23ba6b8c9618132004",
+      "role": "user",
+      "text": "What are the most important signal integrity capabilities for applications in Wireless Communication?",
+      "created_at": "2026-10-11T21:46:34.714404Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-657949ce975f4816bec75d0f26dcb8ab",
+      "role": "assistant",
+      "text": "The supported signal-integrity capabilities for wireless communication applications are high-speed digital/PCB validation capabilities: transmission-channel validation, interface testing, RefClk/PLL jitter measurement, PDN testing, ADC/DAC frontend testing, and PCB/PCBA SI flow covering insertion loss, crosstalk, eye diagram, and TDR impedance [7].\n| Capability | What it covers | Evidence |\n|---|---|---|\n| Transmission-channel validation | Tx/Rx path, channel, Tx package, PCBs, connectors, Rx package, and equalization/DSP/DAC/ADC context for high-speed electrical interfaces [2] | [2] |\n| Interface test | Scopes, BERTs, AWGs, and switch matrices for validating high-speed electrical interfaces [2] | [2] |\n| RefClk and PLL jitter performance | Phase-noise analyzers and signal generators for reference-clock and PLL jitter performance validation [2] | [2] |\n| Power Distribution Network / power integrity | PDN testing with scopes and network analyzers [2] | [2] |\n| ADC/DAC frontend performance | Spectrum analyzers and signal generators for ADC/DAC frontend performance testing [2] | [2] |\n| PCB/PCBA SI flow | Insertion loss, crosstalk, eye diagram, TDR impedance, stackup planning, and transmission-line calculation [2] | [2] |\n| PCB material/stackup and SI modeling | Impedance/TDR, DK/DF extraction, IL, roughness, Xtalk, TL modeling, eye diagram, and signal-integrity modeling/testing [33] | [33] |\n| Wireless infrastructure digital-design test tools | High-speed digital and power designs in mobile network infrastructure need fast, reliable, accurate T&M tools including VNA, probes, phase-noise analyzer, power supplies, multimeter, oscilloscopes, and signal source [46] | [46] |\n| Higher-frequency / mmWave network-analysis capability | Wireless infrastructure sources list network-analysis products up to 67 GHz, 110 GHz, and banded mmWave converters up to 1.1 THz in the “More Spectrum Bands & Higher Frequencies” context [49] | [49] |\n| OTA/MIMO/beamforming-related measurement capability | Active antennas and Massive MIMO make measured systems more complex, high frequencies make conducted testing impractical, and OTA testing becomes necessary at higher frequencies / Massive MIMO [47] | [47] |\n【推論】For wireless communication, the most important SI capability set is therefore a combined workflow: high-speed PCB/channel SI, clock-jitter validation, PDN/power integrity, ADC/DAC frontend validation, and VNA/probing/oscilloscope/signal-source based debug, because the wireless-infrastructure source explicitly connects high-speed digital and power designs to those T&M tools, while the SI/PI source details the corresponding SI validation blocks [46][7].\n\n來源：\n[2] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[7] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[33] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[46] Wiki：MWC2025---WIC-INFRA（來源：`MWC2025---WIC-INFRA.md`）\n[47] Wiki：MWC2025---WIC-INFRA（來源：`MWC2025---WIC-INFRA.md`）\n[49] Wiki：MWC2025---WIC-INFRA（來源：`MWC2025---WIC-INFRA.md`）",
+      "created_at": "2026-10-11T21:47:20.762345Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-afda076520834eac8ae16018bf6ffaf3",
+       "request_id": "request-afda076520834eac8ae16018bf6ffaf3",
+       "span_id": "span-afda076520834eac8ae16018bf6ffaf3",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "The supported signal-integrity capabilities for wireless communication applications are high-speed digital/PCB validation capabilities: transmission-channel validation, interface testing, RefClk/PLL jitter measurement, PDN testing, ADC/DAC frontend testing, and PCB/PCBA SI flow covering insertion loss, crosstalk, eye diagram, and TDR impedance [7].\n| Capability | What it covers | Evidence |\n|---|---|---|\n| Transmission-channel validation | Tx/Rx path, channel, Tx package, PCBs, connectors, Rx package, and equalization/DSP/DAC/ADC context for high-speed electrical interfaces [2] | [2] |\n| Interface test | Scopes, BERTs, AWGs, and switch matrices for validating high-speed electrical interfaces [2] | [2] |\n| RefClk and PLL jitter performance | Phase-noise analyzers and signal generators for reference-clock and PLL jitter performance validation [2] | [2] |\n| Power Distribution Network / power integrity | PDN testing with scopes and network analyzers [2] | [2] |\n| ADC/DAC frontend performance | Spectrum analyzers and signal generators for ADC/DAC frontend performance testing [2] | [2] |\n| PCB/PCBA SI flow | Insertion loss, crosstalk, eye diagram, TDR impedance, stackup planning, and transmission-line calculation [2] | [2] |\n| PCB material/stackup and SI modeling | Impedance/TDR, DK/DF extraction, IL, roughness, Xtalk, TL modeling, eye diagram, and signal-integrity modeling/testing [33] | [33] |\n| Wireless infrastructure digital-design test tools | High-speed digital and power designs in mobile network infrastructure need fast, reliable, accurate T&M tools including VNA, probes, phase-noise analyzer, power supplies, multimeter, oscilloscopes, and signal source [46] | [46] |\n| Higher-frequency / mmWave network-analysis capability | Wireless infrastructure sources list network-analysis products up to 67 GHz, 110 GHz, and banded mmWave converters up to 1.1 THz in the “More Spectrum Bands & Higher Frequencies” context [49] | [49] |\n| OTA/MIMO/beamforming-related measurement capability | Active antennas and Massive MIMO make measured systems more complex, high frequencies make conducted testing impractical, and OTA testing becomes necessary at higher frequencies / Massive MIMO [47] | [47] |\n【推論】For wireless communication, the most important SI capability set is therefore a combined workflow: high-speed PCB/channel SI, clock-jitter validation, PDN/power integrity, ADC/DAC frontend validation, and VNA/probing/oscilloscope/signal-source based debug, because the wireless-infrastructure source explicitly connects high-speed digital and power designs to those T&M tools, while the SI/PI source details the corresponding SI validation blocks [46][7].\n\n來源：\n[2] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[7] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[33] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[46] Wiki：MWC2025---WIC-INFRA（來源：`MWC2025---WIC-INFRA.md`）\n[47] Wiki：MWC2025---WIC-INFRA（來源：`MWC2025---WIC-INFRA.md`）\n[49] Wiki：MWC2025---WIC-INFRA（來源：`MWC2025---WIC-INFRA.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-afda076520834eac8ae16018bf6ffaf3",
+      "request_id": "request-afda076520834eac8ae16018bf6ffaf3",
+      "span_id": "span-afda076520834eac8ae16018bf6ffaf3",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-afda076520834eac8ae16018bf6ffaf3",
+       "request_id": "request-afda076520834eac8ae16018bf6ffaf3",
+       "span_id": "span-afda076520834eac8ae16018bf6ffaf3",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The supported signal-integrity capabilities for wireless communication applications are high-speed digital/PCB validation capabilities: transmission-channel validation, interface testing, RefClk/PLL jitter measurement, PDN testing, ADC/DAC frontend testing, and PCB/PCBA SI flow covering insertion loss, crosstalk, eye diagram, and TDR impedance [7].\n| Capability | What it covers | Evidence |\n|---|---|---|\n| Transmission-channel validation | Tx/Rx path, channel, Tx package, PCBs, connectors, Rx package, and equalization/DSP/DAC/ADC context for high-speed electrical interfaces [2] | [2] |\n| Interface test | Scopes, BERTs, AWGs, and switch matrices for validating high-speed electrical interfaces [2] | [2] |\n| RefClk and PLL jitter performance | Phase-noise analyzers and signal generators for reference-clock and PLL jitter performance validation [2] | [2] |\n| Power Distribution Network / power integrity | PDN testing with scopes and network analyzers [2] | [2] |\n| ADC/DAC frontend performance | Spectrum analyzers and signal generators for ADC/DAC frontend performance testing [2] | [2] |\n| PCB/PCBA SI flow | Insertion loss, crosstalk, eye diagram, TDR impedance, stackup planning, and transmission-line calculation [2] | [2] |\n| PCB material/stackup and SI modeling | Impedance/TDR, DK/DF extraction, IL, roughness, Xtalk, TL modeling, eye diagram, and signal-integrity modeling/testing [33] | [33] |\n| Wireless infrastructure digital-design test tools | High-speed digital and power designs in mobile network infrastructure need fast, reliable, accurate T&M tools including VNA, probes, phase-noise analyzer, power supplies, multimeter, oscilloscopes, and signal source [46] | [46] |\n| Higher-frequency / mmWave network-analysis capability | Wireless infrastructure sources list network-analysis products up to 67 GHz, 110 GHz, and banded mmWave converters up to 1.1 THz in the “More Spectrum Bands & Higher Frequencies” context [49] | [49] |\n| OTA/MIMO/beamforming-related measurement capability | Active antennas and Massive MIMO make measured systems more complex, high frequencies make conducted testing impractical, and OTA testing becomes necessary at higher frequencies / Massive MIMO [47] | [47] |\n【推論】For wireless communication, the most important SI capability set is therefore a combined workflow: high-speed PCB/channel SI, clock-jitter validation, PDN/power integrity, ADC/DAC frontend validation, and VNA/probing/oscilloscope/signal-source based debug, because the wireless-infrastructure source explicitly connects high-speed digital and power designs to those T&M tools, while the SI/PI source details the corresponding SI validation blocks [46][7].\n\n來源：\n[2] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[7] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[33] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[46] Wiki：MWC2025---WIC-INFRA（來源：`MWC2025---WIC-INFRA.md`）\n[47] Wiki：MWC2025---WIC-INFRA（來源：`MWC2025---WIC-INFRA.md`）\n[49] Wiki：MWC2025---WIC-INFRA（來源：`MWC2025---WIC-INFRA.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_nfeAAz9DrouBTf2GuISHpZiV",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "The supported signal-integrity capabilities for wireless communication applications are high-speed digital/PCB validation capabilities: transmission-channel validation, interface testing, RefClk/PLL jitter measurement, PDN testing, ADC/DAC frontend testing, and PCB/PCBA SI flow covering insertion loss, crosstalk, eye diagram, and TDR impedance [7].\n| Capability | What it covers | Evidence |\n|---|---|---|\n| Transmission-channel validation | Tx/Rx path, channel, Tx package, PCBs, connectors, Rx package, and equalization/DSP/DAC/ADC context for high-speed electrical interfaces [2] | [2] |\n| Interface test | Scopes, BERTs, AWGs, and switch matrices for validating high-speed electrical interfaces [2] | [2] |\n| RefClk and PLL jitter performance | Phase-noise analyzers and signal generators for reference-clock and PLL jitter performance validation [2] | [2] |\n| Power Distribution Network / power integrity | PDN testing with scopes and network analyzers [2] | [2] |\n| ADC/DAC frontend performance | Spectrum analyzers and signal generators for ADC/DAC frontend performance testing [2] | [2] |\n| PCB/PCBA SI flow | Insertion loss, crosstalk, eye diagram, TDR impedance, stackup planning, and transmission-line calculation [2] | [2] |\n| PCB material/stackup and SI modeling | Impedance/TDR, DK/DF extraction, IL, roughness, Xtalk, TL modeling, eye diagram, and signal-integrity modeling/testing [33] | [33] |\n| Wireless infrastructure digital-design test tools | High-speed digital and power designs in mobile network infrastructure need fast, reliable, accurate T&M tools including VNA, probes, phase-noise analyzer, power supplies, multimeter, oscilloscopes, and signal source [46] | [46] |\n| Higher-frequency / mmWave network-analysis capability | Wireless infrastructure sources list network-analysis products up to 67 GHz, 110 GHz, and banded mmWave converters up to 1.1 THz in the “More Spectrum Bands & Higher Frequencies” context [49] | [49] |\n| OTA/MIMO/beamforming-related measurement capability | Active antennas and Massive MIMO make measured systems more complex, high frequencies make conducted testing impractical, and OTA testing becomes necessary at higher frequencies / Massive MIMO [47] | [47] |\n【推論】For wireless communication, the most important SI capability set is therefore a combined workflow: high-speed PCB/channel SI, clock-jitter validation, PDN/power integrity, ADC/DAC frontend validation, and VNA/probing/oscilloscope/signal-source based debug, because the wireless-infrastructure source explicitly connects high-speed digital and power designs to those T&M tools, while the SI/PI source details the corresponding SI validation blocks [46][7].\n\n來源：\n[2] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[7] Wiki：0 Digital Test - What are SIPI and Serdes（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[33] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[46] Wiki：MWC2025---WIC-INFRA（來源：`MWC2025---WIC-INFRA.md`）\n[47] Wiki：MWC2025---WIC-INFRA（來源：`MWC2025---WIC-INFRA.md`）\n[49] Wiki：MWC2025---WIC-INFRA（來源：`MWC2025---WIC-INFRA.md`）",
+          "evidence": {
+           "raw_citations": 6,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-8a79a327e6e04f6593801d170c08dd60",
+            "request_id": "request-8a79a327e6e04f6593801d170c08dd60",
+            "span_id": "span-8a79a327e6e04f6593801d170c08dd60",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "What are the most important signal integrity capabilities for applications in Wireless Communication?",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 5.590892
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 4.688399
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 與既有知識的關係\n- [[SerDes]] 已記錄 die-to-die、SoC IP 與封裝示意圖中的 SerDes 語彙；本頁補充 R&S 簡報中 SerDes 與 SI / PI / validation challenges 的測試場景。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]] 與 [[TDR 阻抗測量]] 可承接 Slide 20–21 中對 high speed PCB / PCBA signal integrity flow 與 PCB test solutions 的列名。\n- [[Power Integrity 外部資料清單]] 保存既有 OneNote link hub 中的 PDN impedance 待讀資料；本頁只加入 Slide 11 明示的 [[Power Distribution Network]] 測試區塊。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 2.729429
+             },
+             {
+              "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 10.734975
+             },
+             {
+              "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 6.3959
+             },
+             {
+              "text": "R&S PCB test solutions › 可追溯限制\n- 本來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。\n- 本頁不把 Slide 21 的圖上列名解讀為正式解決方案型錄或完整採購配置。\n- [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]] 的角色未明，僅保留圖上列名。\n- [[ISD-ADK]] 與 PL 未展開縮寫，需後續來源補證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 6.059164
+             },
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 7.357146
+             },
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 原文未解的問題\n- Slide 1 標示日期 **2026.3.4**，Slide 11 頁腳另出現 **6/13/2025 High-Speed Digital- Market Trends**；來源未說明 2025-06-13 是頁腳模板日期、內容來源日期或另一份簡報日期。\n- 來源未標示本簡報的文件版次、受眾、會議名稱、對外 / 對內使用限制細節；只可確定封面有 **COMPANY RESTRICTED**。\n- Slide 3、6、7、10、12–15、16、18、19、22–24、26 多數內容在 markdown 中主要是圖片嵌入，未 OCR 出可可靠摘錄的正文。\n- Slide 4 standards 清單未提供各標準的版本、發布組織、資料率、介面型態或適用測試方法。\n- Slide 5 Parallel v.s. Serial Interface 未擷取圖中說明，不能由本 markdown 直接比較 parallel 與 serial 的技術差異。\n- Slide 17 的 L/S 與 pitch 數值排列不完整，無法判定 6/6、60/60、30/30、?、60、120 分別對應 HDI、Package Substrate、CoWoS 或 ABF 的哪一欄。\n- Slide 21 未提供 R&S PCB test solutions 對應的正式產品型號、order number、software option、測試頻率、測試標準、fixture、calibration 或量測不確定度。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 5.837931
+             },
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 關鍵實體與概念\n- [[Dr. Milton Lien]] — 封面列名的作者 / 講者。\n- [[RSTW]] — 封面單位文字之一，來源未展開完整名稱。\n- [[SerDes]] — 本簡報主題之一，並在 standards / eco-chain / transmission channel 脈絡中出現。\n- [[Signal Integrity]] — Slide 20 以 high speed PCB/PCBA signal integrity flow 呈現，包含 [[IL]]、[[Xtalk]]、[[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]] 與 [[TL Calculator]]。\n- [[Power Integrity]] — 封面題名中的 PI；Slide 11 以 [[Power Distribution Network]] 形式出現，並列 scopes 與 network analyzers。\n- [[High speed SerDes standards]] — Slide 4 的高速介面 / 標準列名。\n- [[High speed SerDes eco-chain]] — Slide 9 的上中下游產業鏈分類。\n- [[R&S PCB test solutions]] — Slide 21 的 PCB fabricator / system house 測試流程與工具 / 方法集合。\n- [[HDI vs Package substrate]] — Slide 17 的 HDI、package substrate、CoWoS、ABF、L/S、pitch 對照線索。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] — 既有概念頁可承接 Slide 20–21 的 PCB / PCBA 測試內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 5.747563
+             },
+             {
+              "text": "Digital design test success stories › 與既有測試概念的關係\n- [[SerDes 與 SI PI 測試概覽]] 與 [[R&S PCB test solutions]] 提供 high-speed digital、SI/PI 與 PCB 測試流程脈絡；本頁只保存 success-story 簡報中的應用 / 儀器對應關係。\n- [[高頻高速 PCB 測試解決方案]] 主要來自 Keysight 圖像來源，描述原材料表徵、材料選擇、抽樣測試與量產監控；本頁的 ATE PCB testing 只指出 [[R&S ZNA67]] 被列名，不能推論完整流程。\n- [[HSD Cable test 外部資料清單]] 保存 cable / connector / signal integrity 外部待讀材料；本頁的 High speed Cable testing slide 未提供可採用的 cable test 主張。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Digital design test success stories.md"
+              },
+              "score": 10.107293
+             },
+             {
+              "text": "Digital design test success stories › 來源中的 mapping\n| 投影片 | 來源標題 | 明示對應儀器 | 可連到的主題 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Slide 2–3 | DAC/ADC testing => FSWP, SMA100B | [[R&S FSWP]]、[[R&S SMA100B]] | [[DAC ADC testing]] | 2026.7 | 只 OCR 出標題與儀器名稱；圖片內容未解讀 |\n| Slide 4–5 | SOC testing => FSWP, SMA100B, ZNA67 | [[R&S FSWP]]、[[R&S SMA100B]]、[[R&S ZNA67]] | [[SoC testing]] | 2026.7 | 未提供 DUT、介面、頻率、量測結果或 option |\n| Slide 6 | SOC testing=> ZNA67 | [[R&S ZNA67]] | [[SoC testing]] | 2026.7 | 圖片內容未 OCR；不可推論 ZNA67 的完整配置 |\n| Slide 7 | ATE PCB testing=> ZNA67 | [[R&S ZNA67]] | [[ATE PCB testing]]、[[R&S PCB test solutions]] | 2026.7 | 未標示 ATE 平台、fixture、頻率、PCB 板材或 pass/fail 條件 |\n| Slide 8 | O/E, E/O, TIA testing | 來源未標示 | [[O-E E-O TIA testing]]、[[TIA testing]] | 2026.7 | 未標示儀器、光電轉換器、資料率或標準 |\n| Slide 9–10 | High speed Cable testing | 來源未標示 | [[High speed Cable testing]]、[[HSD Cable test 外部資料清單]] | 2026.7 | 未標示 cable 類型、資料率、連接器或量測方法 |\n| Slide 11–12 | Digital Power Test | 來源未標示 | [[Digital Power Test]]、[[Power Integrity]] | 2026.7 | 未標示測試項目、電壓 / 電流、負載或儀器 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Digital design test success stories.md"
+              },
+              "score": 7.349928
+             },
+             {
+              "text": "Digital design test success stories › 未決事項\n- unresolved: Slide 2–7 圖片未 OCR，無法確認每個 success story 的客戶、DUT、測試配置、結果或導入狀態。\n- unresolved: Slide 8–12 未標示儀器 mapping，需回看原始 PPTX 或後續 OCR。\n- unresolved: 來源未標示是否所有案例都屬於同一期間、同一地區或同一業務單位。\n- unresolved: 來源未標示 [[DAC ADC testing]]、[[SoC testing]]、[[ATE PCB testing]]、[[O-E E-O TIA testing]]、[[High speed Cable testing]]、[[Digital Power Test]] 的正式定義或測試標準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Digital design test success stories.md"
+              },
+              "score": 5.369249
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 可學到的 sales / solution pattern\n- 來源明示的 win factor 不是單一儀器規格，而是 total solution：probe、mount-kit、de-embedding tool 與 local partner。這與 [[R&S PCB test solutions]] 中 material measurement / sampling testing / process monitoring 的流程視角互補。\n- Bare board for SoCs、socket / transmission line evaluation 與 board-to-board connector DUT 都落在 [[Signal Integrity]]、[[Insertion Loss]]、[[Return Loss]]、[[Impedance]] 與 de-embedding 的交界。\n- Samsung 5G SoC including VCO case 顯示 [[R&S FSWP50]]、[[R&S SMW200A]] 與 automated VCO tuning software 可以被包裝成 RF / analog enablement 測試方案，但來源未提供正式 software product name 或 version。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 8.332031
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 來源中的案例\n| 案例 | 日期 / 期間 | Customer / 對象 | DUT / application | 來源明示方案 | 限制 |\n|---|---|---|---|---|---|\n| TRI case | 來源未標示正式日期；raw converted 2026-09-18 | [[TRI]] | dual-side ATE inline measurement，test sides A/B each measure two DUTs | 4-port VNA [[R&S ZNB3044]]、[[R&S OSP320]]、flying probe module、interposer board | TRI 未展開；DUT、頻率、fixture、calibration 未標示 |\n| AMD case | 來源未標示正式日期；raw converted 2026-09-18 | [[AMD]] / [[AMD EPYC 9965]] case | validation optimization、socket–socket interconnection test | default setup 與 optimized setup 比較；SDD12 100 cycles stability proof | 67 GHz claim 未標示完整儀器組合，不能改寫單機儀器規格 |\n| LSmtron success story | Slide 8 頁尾 28/04/2020 | [[LSmtron]] | Board to Board Connector | ZNB40、probe、mount-kit、de-embedding tool、local partner [[TeraBit Solutions]] / [[AtaiTec]] | ZNB40 正式型號、probe 型號、de-embedding tool 名稱未標示 |\n| Bare Board for SoCs | 來源未標示正式日期；raw converted 2026-09-18 | [[Advantest]]、[[Meritech]] | PCB test with probing；impedance、insertion loss、return loss | ZNB40、probe、mount-kit、de-embedding tool | ATS / ZVA67 / ZNA43 欄位分層不明 |\n| Samsung Foundry RF/Analog Enablement | 來源未標示正式日期；raw converted 2026-09-18 | [[Samsung Electronics]] | 5G SoC including VCO | [[R&S FSWP50]]、[[R&S SMW200A]] 44GHz、SGS100A、automated VCO Tuning S/W | SGS100A 需補證；software 版本、scope 與交付方式未標示 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 7.978162
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 未決事項\n- TRI、RSKR、ICR、WIC、ADT、AUT、ATS、ZVA67、SGS100A 等縮寫 / 型號需補證。\n- ZNB40 是否對應既有 R&S ZNB 系列正式型號與 40 GHz configuration 未確認。\n- AMD optimized setup up to 67 GHz 的完整 topology、extender、probe、calibration 與 de-embedding method 未標示。\n- Samsung case 中 automated VCO Tuning S/W 的名稱、版本、license、交付形式與支援範圍未標示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 5.028818
+             },
+             {
+              "text": "MWC2025---WIC-INFRA › 原文未解的問題\n- 來源是 PowerPoint 轉成 markdown 的 lossy derivative；圖片、圖表位置、產品照片與部分連線圖細節可能遺失。\n- 正式發布日期只可確認 MWC 2025 語境；簡報版次、作者與文件代碼未標示。\n- `COMPANY RESTRICTED` 標示代表使用時需注意資料分類；本 ingest 只保留來源內容，不推論可公開散布範圍。\n- `All 38.141 measurements supported` 是簡報層級 solution claim，未提供完整 test case matrix、option code、release version、calibration accessories 或正式 compliance statement。\n- [[R&S CMPHEAD30]] 的 RF bands 29 / 39 / 47、QDART validation、parallel DUT testing 與 path correction 為簡報說法，仍需 datasheet 或 production test 文件補證。\n- [[O-RU testing]] 的 O-RAN WG4 Conformance Specifications 未標示版本、profile、test case IDs、certification authority 或 option code。\n- [[ETSI ES 202 706-1]] energy efficiency testing 未標示版本與適用 O-RU / base station 類型。\n- 早期 6G 研究的 4 GHz / 8 GHz bandwidth、4096QAM / generic OFDM analysis 未指定產品型號、測試條件、頻段或標準版本。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MWC2025---WIC-INFRA.md"
+              },
+              "score": 13.143903
+             },
+             {
+              "text": "MWC2025---WIC-INFRA › Network densification、small cells、production 與 private networks\n- Slide 25 network densification 包含 FWA for last mile、mmWave radios、sub-6 small cells、repeaters。\n- Slide 26 將 [[R&S ATS1800C]]、[[R&S FSV]]、[[R&S FE44A]]、[[R&S CMQ200]]、[[R&S RTP]] / [[R&S RTO]]、[[R&S ZNA]] 等列於 chamber / conformance、small cells、embedded design & power、RF design and compliance 脈絡。\n- Slide 27 提出 high-volume testing of mmWave small cells and radio units，產品 / 方案包含 [[R&S CMPHEAD30]]、Wireless Manufacturing Test（WMT），並宣稱 fully validated in QDART、ultrafast measurement speed、parallel testing of multiple DUTs、supported RF bands 29 / 39 / 47、fully automated path correction concept。\n- Slide 28–29 private networks 以 healthcare、industries & manufacturers、transport、enterprises / campus / stadiums、mission critical communications、smart city / neutral hosts 等為應用，強調 site acceptance、data analytics、service monitoring、spectrum clearance & interference hunting。\n- Slide 30 將 network infrastructure architecture 分為 antenna、RU / radio unit、BBU / baseband unit 與 mobile network，測試活動包含 design & validation、R&D、conformance、calibration、Rx/Tx tests、go/no-go tests、network measurement / analysis / troubleshooting / monitoring、baseband verification、functional performance、RF parametric、RF component & digital design、baseband algorithm、transmitter / receiver / performance tests。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MWC2025---WIC-INFRA.md"
+              },
+              "score": 9.309132
+             },
+             {
+              "text": "MWC2025---WIC-INFRA › 與既有知識的關係\n- 補強 [[Beamforming]]：既有頁面主要是 link hub，本來源提供簡報層級的 beamforming / MIMO / Massive MIMO 定義與測試方案映射。\n- 補強 [[5G NR Base Station Conformance Testing]]：來源再次確認 5G NR base station conformance testing 從 conducted 到 OTA 的 R&D 脈絡，並提到 [[3GPP TS 38.141-2]]、test case wizard 與 transmitter / receiver / performance tests。\n- 補強 [[R&S ATS1800C]] 與 [[R&S PWC200]]：來源提供 2025 MWC sales / solution view，特別是 PWC200 1.5 m vs 23.5 m 的 far-field / near-field 說法與 ATS1800C 30 cm quiet zone。\n- 補強 [[O-RU testing]]：既有頁面只有 link hub，這份來源新增 integrated solution、C/U/S/M planes、O-TMA、VSE、FSW / FSVA3000、SMW200A / SMBV100B、PVT360A、3GPP TS 38.141 / O-RAN WG4 與 ETSI ES 202 706-1 energy efficiency testing 的簡報層級資訊。\n- 連接 [[FWA CPE 測試與驗證]] 與 [[Network Densification]]：來源把 FWA、mmWave radios、sub-6 small cells、repeaters 視為 densification use cases，但未提供 FWA CPE 標準、型號或測試矩陣。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MWC2025---WIC-INFRA.md"
+              },
+              "score": 8.518353
+             },
+             {
+              "text": "112G PAM4 PCB 工程測試資料清單 › 使用限制\n- 本頁不得把 `112G PAM4` 推論為特定標準、特定 lane rate、特定 connector、特定 PCB material 或特定 compliance requirement。\n- 本頁不得把 `VNA` 推論為 R&S、Keysight 或其他廠牌的特定 [[Vector Network Analyzer]]。\n- 本頁不得把 `Probe`、`Station/Handler`、`Software`、`VNA` 四個欄位解讀為完整測試設備清單，因來源沒有資料列。\n- 本頁不得把 lossy markdown 未轉出的內容補寫成原 PDF 內容；若需要工程細節，必須回讀原始 PDF 或取得更完整 OCR。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+              },
+              "score": 7.23221
+             },
+             {
+              "text": "112G PAM4 PCB 工程測試資料清單 › 可追溯線索\n| 線索 | 來源明示文字 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| 題名 | 112G PAM4 PCB Engineering | [[112G PAM4 PCB Engineering]] | 正式日期來源未標示；raw converted 2026-09-17 | 不足以推論標準版本、測試範圍或應用場景 |\n| 存取標記 | COMPANY RESTRICTED | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未說明限制範圍或文件控管規則 |\n| 章節 / 主題 | Transmission Lines on PCB | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 transmission line geometry、stackup、impedance 或 loss 數值 |\n| 測試配置欄位 | Probe | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 probe 型號、頻寬、pitch、供應商或 calibration method |\n| 測試配置欄位 | Station/Handler | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 station / handler 型號、夾治具或 automation context |\n| 測試配置欄位 | Software | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供軟體名稱、版本、script 或 license |\n| 測試配置欄位 | VNA | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 [[Vector Network Analyzer]] 型號、port 數、頻率範圍、校準件或 S-parameter 設定 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+              },
+              "score": 4.164464
+             },
+             {
+              "text": "112G PAM4 PCB 工程測試資料清單 › 未決事項\n- 原 PDF 的正式日期、版次、作者、部門、頁數與頁碼未標示。\n- 來源未說明 `112G PAM4` 的資料率口徑、標準版本、channel model、fixture、test coupon 或量測頻率範圍。\n- 來源未提供 transmission lines on PCB 的幾何、stackup、阻抗、loss、via、connector、launch 或 S-parameter 目標。\n- 來源未提供 probe、station / handler、software、VNA 的型號、供應商、設定或校準方式。\n- 來源未說明是否與 [[R&S PCB test solutions]]、[[高頻高速 PCB 測試解決方案]] 或任何正式產品方案直接相關。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+              },
+              "score": 4.11625
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › 可追溯限制\n- 本頁只追溯 [[snla426]]（June 2023）摘要中的 application note 內容。\n- 來源摘要未提供完整頁碼、圖號、TI URL、修訂紀錄或 PCI-SIG 條文引用。\n- 來源摘要未提供所有 stack-up、routing geometry、via / anti-pad / capacitor pad 圖的原圖。\n- 來源摘要未提供材料表格的測試結構、trace geometry、copper roughness、溫度、濕度或 measurement / simulation 條件。\n- 本頁不把 TI application note 規則推論為所有 PCB、所有 PCIe implementations 或所有 high-speed standards 的通用要求。\n- 本頁不支撐產品供應鏈、客戶導入、量產、出貨、成本或市場份額主張。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 15.374581
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › 與既有知識的關係\n- [[SerDes 與 SI PI 測試概覽]] 提供 high-speed digital validation 與儀器類型的 R&S 簡報視角；本頁補入 TI 對 [[PCIe Gen5]] PCB layout 的 application note 規則。\n- [[Dk-Df]] 既有頁面整理市場圖卡中的 Dk / Df 語彙；本頁提供 Df / Dissipation Factor、dielectric loss 與 material insertion loss table 的 PCIe Gen5 應用脈絡。\n- [[玻纖布]] 既有頁面整理玻纖布市場分類；本頁提供 fiberglass weave / epoxy εr 差異造成 intra-pair skew 的 layout 層級解釋。\n- [[PCIe Gen5 SSD]] 是 SSD 產品 / controller 脈絡；本頁是 PCIe Gen5 channel / PCB layout 脈絡，兩者不可混用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 9.754902
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › Reference plane 與 vias\n- [[snla426]]（June 2023）說 high-speed signal trace 從 origination 到 termination 必須全程維持相同 GND reference。\n- [[snla426]]（June 2023）說若無法維持相同 GND reference，需 via-stitch 兩個 GND planes，以確保 continuous grounding 與 uniform impedance。\n- [[snla426]]（June 2023）說 stitching vias 應對稱放置於 signal transition vias 50 mils center-to-center 以內，越近越好。\n- [[snla426]]（June 2023）說 high-speed signals 必須 route over solid reference plane，除非絕對必要，不應跨越 plane split 或 reference plane void。\n- [[snla426]]（June 2023）說 TI 不建議 high-speed signal references 使用 power planes。\n- [[snla426]]（June 2023）說若完全無法避免 routing over a plane-split，需在 split 兩側放置 stitching capacitors，提供 high-frequency current return path；stitching capacitors 必須為 1 µF 或更低，並盡可能靠近 plane crossing。\n- [[snla426]]（June 2023）說 vias 需要 staggered placement；aligned vias 會阻擋 current return path。\n- [[snla426]]（June 2023）建議 high-speed traces 只放在 top layer 或 bottom layer；若需要 vias，應考慮 back drilling，否則 stub length 可能降低 signal bandwidth。\n- [[snla426]]（June 2023）說 via transitions 造成的 stubs 若長於 15 mils，應 back-drill 以降低 insertion losses 並避免 resonance。\n- [[snla426]]（June 2023）說 PCIe Gen5 20/80% rise/fall time 為 12 ps；為保留 12 ps rise/fall time，需要約 29 GHz bandwidth（0.35/0.12 ns rule）。\n- [[snla426]]（June 2023）說在 29 GHz bandwidth 且使用 Megtron 6（ε 約 3.4）時，quarter wavelength 約 54 mils；若未使用 back drilling，stub 必須小於約 54 mils；對 typical FR4（ε 約 4.2）PCB，maximum stub length 約 51 mils。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 5.123919
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100 › 重點摘要\n- [[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援 3GPP [[5G NR]] technology，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD 與 TDD device testing。\n- [[R&S CMX500]] 配置包含 OBT lite、OBT、OBT plus、OBT FR1 specialist、OBT FR2 specialist，主要差異在 [[R&S CMX-B200A]] accelerator unit、[[R&S CMX-B500A]] IF unit、[[R&S CMX-B600B]] RF unit 的數量。\n- [[NR FR1]] 與 [[LTE]] 測試使用 integrated RF units；[[R&S CMX-B600B]] RF unit 的 frequency range 為 **400 MHz to 8000 MHz**。\n- [[NR FR2]] 測試可搭配 [[R&S CMXHEAD30]]、[[R&S CMXHEAD50]] 或 [[R&S CMXHEAD50-Evo]] remote radio head；remote radio head 在 IF 與 5G NR FR2 frequency ranges 間執行 upconversion / downconversion。\n- 適用的 radiated chamber test environments 包含 [[R&S CMQ500]] shielding cube 與 [[R&S ATS800R]] CATR rack based antenna test system。\n- [[R&S CMX500]] 內建 vector signal analysis 與 ARB generator，可做 FR2 transmitters / receivers RF parametric testing；5G NR receiver tests 可在 3GPP fading propagation conditions 下使用 internal baseband fading emulation。\n- Product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘，符合指定 environmental conditions，遵守 recommended calibration interval，且已執行所有適用的 internal automatic adjustments。\n- 文件區分 specifications with limits、non-traceable specifications with limits、specifications without limits、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n- 文件聲明：**Data without tolerance limits is not binding**；**Subject to change**。\n- 版權：© 2019–2025 [[Rohde & Schwarz]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 19.80418
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100 › 原文未解的問題\n- unresolved：來源未列價格。\n- unresolved：多數 FR2 remote radio head setup 的實際配置需要依 [[R&S CMXHEAD30]]、[[R&S CMXHEAD50]]、[[R&S CMXHEAD50-Evo]]、[[R&S CMXH-B73A]] / [[R&S CMXH-B73B]] / [[R&S CMXH-B73C]] / [[R&S CMXH-B74A]] / [[R&S CMXH-B76A]] 與 software options 計算；本頁不推論相容性。\n- unresolved：[[R&S CMX-RF42E]] 更多資訊位於 **R&S CMX-RF42 | R&S CMX-RF42E Active RF Frontend for NR FR2 specifications（PD 3609.7719.22）**，本來源未提供該文件版次或日期。\n- unresolved：[[R&S CMX500]] accessories 中提到 power cords、operating manual、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters，但未逐一列完整料號。\n- unresolved：source excerpt 未包含所有 options / service plans 的完整 ordering table；報價前需回查完整 specifications 與 configure 工具。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 17.185247
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100 › 測試主題與技術\n- [[5G NR]]、[[NR FR1]]、[[NR FR2]]、[[LTE]]、[[NSA]]、[[SA]]、[[FDD]]、[[TDD]]、[[Fading]]、[[ARB generator]]、[[Vector signal analysis]]、[[FFT spectrum analyzer]]、[[EVM]]、[[Displayed average noise level]]、[[Remote radio head]]。\n- 引用標準包含 [[3GPP TS 38.521-1]]、[[3GPP TS 38.521-2]] 與 Guide to the Expression of Uncertainty in Measurement（GUM）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 14.157148
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽\n[[SerDes 與 SI PI 測試概覽]] 是依 [[0 Digital Test - What are SIPI and Serdes]] 建立的 high-speed digital 測試主題頁，用來連接 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]]、[[PCB]] / [[PCBA]] 與相關驗證儀器類型。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 2.051119
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 未決事項\n- Slide 11 未標示各測試區塊對應的標準版本、測試流程、儀器型號、軟體 option 或測試條件。\n- Slide 20 未標示 IL、Xtalk、Eye diagram、TDR impedance、Stackup Planner 與 TL Calculator 的工具、供應商或規格。\n- 需回看原始 PPTX 才能確認圖片中的 waveform、diagram 與 instrument details。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 1.699696
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 可追溯限制\n- 本來源是 lossy markdown derivative，多數圖像未 OCR；不可把未擷取的圖片內容當成已驗證主張。\n- Slide 11 的頁腳日期 **6/13/2025** 與封面日期 **2026.3.4** 並存，未能判定何者是內容日期。\n- 本頁不推論 R&S 具備所有列名儀器或方案，也不把儀器類型轉換成正式 product configuration。\n- 本頁不提供 [[Signal Integrity]]、[[Power Integrity]] 或 [[SerDes]] 的標準定義；只保存來源明示的測試區塊與儀器類型。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 1.100535
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 0.92488
+             },
+             {
+              "text": "R&S PCB test solutions › 圖上工具 / 合作方文字\n| 圖上文字 | 可能角色 | 來源 | 限制 |\n|---|---|---|---|\n| [[SPEAG]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未說明是合作夥伴、工具、方法或範例 |\n| [[SWISSTO12]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[QWED]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[KEYCOM]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[RSTW]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開完整單位名稱 |\n| TDR | 測 impedance | [[0 Digital Test - What are SIPI and Serdes]] | 未提供 TDR option 或探頭型號 |\n| Delta-L | 損耗量測相關 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供方法定義、標準或軟體名稱 |\n| ISD/ADK | 圖上方法 / 工具文字 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開縮寫，未說明與 Delta-L 的關係 |\n| w/ cable / connector testing | cable / connector testing | [[0 Digital Test - What are SIPI and Serdes]] | 未提供連接器類型、線纜規格或測試項目 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 5.31517
+             },
+             {
+              "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 4.429935
+             },
+             {
+              "text": "R&S PCB test solutions › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 既有內容來自 Keysight 圖像，流程是原材料表徵、材料選擇、電路板抽樣測試、大批量監控；本頁保存 R&S 簡報中的類似但不完全相同的流程詞。\n- [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 均已有既有頁面；本來源增加 2026.3.4 R&S 簡報的追溯來源，但沒有新增可量化規格。\n- [[SerDes 與 SI PI 測試概覽]] 連接 Slide 11 和 Slide 20 的 validation challenges / SI flow；本頁聚焦 Slide 21 的 PCB test solutions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 2.672079
+             },
+             {
+              "text": "R&S PCB test solutions › 未決事項\n- Slide 21 未標示 R&S PCB test solutions 的正式文件版次與產品 portfolio 對應。\n- Slide 21 未標示 [[TDR]]、[[Delta-L]]、ISD/ADK、DK/DF extraction 的標準版本、演算法、測試條件或工具型號。\n- Slide 21 未展開 PL、ISD、ADK、RSTW、SWISSTO12、QWED、KEYCOM。\n- 需回看原始 PPTX 圖像確認各圖示、商標、箭頭與工具對應關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 1.480465
+             },
+             {
+              "text": "R&S PCB test solutions › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 0.951016
+             },
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 與既有知識的關係\n- 既有 [[SerDes]] 頁主要來自 D2D / SoC IP / XPU-HBM-Optical I/O 圖像來源；本來源補充 2026.3.4 簡報層級的 high speed SerDes standards、產業鏈與驗證挑戰脈絡，但不提供 SerDes 的資料率、lane 數或具體標準條文。\n- 既有 [[高頻高速 PCB 測試解決方案]] 主要記錄 Keysight 圖像中的原材料表徵、材料選擇、抽樣測試與量產監控；本來源的 [[R&S PCB test solutions]] 以 R&S 簡報角度列出 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 PL / process monitoring，可作為平行視角。\n- 既有 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 已記錄 Keysight 圖像來源；本來源 Slide 21 再次把 DK/DF extraction、TDR、Delta-L 與 ISD/ADK 放在 PCB test solutions 流程中，但沒有新增標準版本、儀器型號或 option code。\n- 既有 [[Package Substrate]] 與 [[ABF載板]] 頁已有多份市場圖像來源；本來源 Slide 17 顯示 HDI vs Package substrate / CoWoS / ABF 對照，但因 OCR / 轉檔結果不足，僅作為待回看原始投影片的線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 5.442857
+             },
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- Slide 21 題為 **R&S PCB test solutions**，面向 **PCB Fabricator and System House**，將流程分成 Material Measurement、Material/Stackup selection、Signal Integrity modeling/testing、Sampling testing、PL/Process Monitoring，並列出 impedance (TDR)、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram、Delta-L、ISD/ADK、w/ cable / connector testing 等項目。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 4.125988
+             },
+             {
+              "text": "Digital design test success stories\n[[Digital design test success stories]] 是 [[DDT SuccessStories_202607]] 中對 2026.7 digital design test 應用案例的簡報層級 mapping，將部分測試應用連到 [[R&S FSWP]]、[[R&S SMA100B]] 與 [[R&S ZNA67]]，但未提供細部配置或測試結果。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Digital design test success stories.md"
+              },
+              "score": 4.691974
+             },
+             {
+              "text": "Digital design test success stories › 與 R&S 儀器頁的關係\n- [[R&S FSWP]] 在既有 Productions 頁中被定義為 Phase Noise Analyzer and VCO Tester；[[DDT SuccessStories_202607]] 只說它出現在 DAC/ADC testing 與 SOC testing 的 success-story mapping 中，未新增規格。\n- [[R&S SMA100B]] 在既有 Productions 頁中被定義為 RF and Microwave Signal Generator；[[DDT SuccessStories_202607]] 只說它出現在 DAC/ADC testing 與 SOC testing 的 success-story mapping 中，未新增規格。\n- [[R&S ZNA67]] 在既有 Productions 頁中被定義為 67 GHz Vector Network Analyzer；[[DDT SuccessStories_202607]] 只說它出現在 SOC testing 與 ATE PCB testing 的 success-story mapping 中，未新增規格。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Digital design test success stories.md"
+              },
+              "score": 4.106313
+             },
+             {
+              "text": "Digital design test success stories › 可追溯限制\n- [[DDT SuccessStories_202607]] 是 PowerPoint 轉出的 lossy markdown；除標題與少量文字外，大部分成功案例細節在圖片中，尚未 OCR。\n- 本頁不把 success-story mapping 解讀為正式 solution bundle、報價配置、必選 option、客戶背書或量產導入證據。\n- 本頁不推論 [[R&S FSWP]]、[[R&S SMA100B]]、[[R&S ZNA67]] 在各應用中的角色分工；例如 stimulus、analysis、phase noise、VNA 或 automation 角色都需後續來源補證。\n- Market 類資料會隨時間變動；本頁的時間點只限於來源標示的 2026.7。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Digital design test success stories.md"
+              },
+              "score": 3.197076
+             },
+             {
+              "text": "Digital design test success stories › 相關來源\n- [[DDT SuccessStories_202607]] — 2026.7 的 Digital design test success stories 來源摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Digital design test success stories.md"
+              },
+              "score": 0.127173
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 與既有知識的關係\n- [[R&S PCB test solutions]] — 保存 R&S high-speed digital 簡報中的 PCB test flow；本頁補入 case-sharing 中的 customer / partner / competitor context。\n- [[SerDes 與 SI PI 測試概覽]] — 本頁提供 PCB / interconnect probing 的實務案例語境。\n- [[Keysight ENA]] — 在 LSmtron case 中作為 competitor。\n- [[R&S ZNB3044]]、[[R&S ZNA43]]、[[R&S FSWP50]]、[[R&S SMW200A]] — 本來源提供 Market 應用案例，不改寫 Productions 規格。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 1.345262
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例\n[[高速互連 probing 與 de-embedding 測試案例]] 是從 [[TRI_AMD_RSKR Sharing1]] 抽出的 Market 層級案例集合，描述以 VNA、probe、mount-kit、de-embedding tool 與 local partner 解決 PCB、socket、connector 與 SoC validation 量測問題。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 0.389303
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 相關來源\n- [[TRI_AMD_RSKR Sharing1]] — company confidential case sharing，來源正式日期未標示，raw converted 2026-09-18。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 0.322072
+             },
+             {
+              "text": "MWC2025---WIC-INFRA › Digital Design & Power / Energy saving\n- Slide 14–15 將 highspeed digital and power designs 定位為需要快速、可靠、準確 T&M tools 的 verification / debugging 領域，測試工具包括 [[VNA]]、probes、phase noise analyzer、power supplies、multimeter、oscilloscopes、signal source。\n- Slide 16 說 rising energy costs drive MNOs to boost efficiency，base stations and components offer substantial energy-saving potential。\n- Slide 17 提出 optimization of power consumption、power statistics over time、device activity versus power consumption、real-time power / voltage / current statistics、up to 800 W / up to four channels；產品包括 [[R&S NGP800]]、[[R&S RTO]] / [[R&S RTP]]、RT-ZHD07 voltage probe、RT-ZC31 current probe。\n- Slide 18 提到 measurement-driven development of energy-saving amplifiers、envelope signal for tracker generated in real-time、turnkey solution based on VSG + VSA + SW、dedicated SW applications for Doherty、[[R&S SMW-K546]] 與 [[R&S FSW-K18]]。\n- Slide 19 提出 PA load-pull testing，用於確認 PA 在 final design 看到不同 impedance 時的 behavior。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MWC2025---WIC-INFRA.md"
+              },
+              "score": 5.83299
+             },
+             {
+              "text": "MWC2025---WIC-INFRA › MIMO、Beamforming 與 OTA\n- Slide 4 定義 [[Beamforming]]：透過 bundling transmitted energy 並將能量導向 user 以增加 antenna gain。\n- Slide 4 定義 [[MIMO]]：transceiver 端有 many antennas，用於增加 capacity。\n- Slide 4 定義 [[Massive MIMO]]：transceiver 端有 very high number of antenna elements，結合 beamforming 與 spatial multiplexing。\n- Slide 4 說 operators with mid-band spectrum 對 Massive MIMO 較有信心，例子包括 China、US；並說 beamforming 是提升 system efficiency 的 essential measure，尤其是 mmWave。\n- Slide 5 以 `Up to nx8 MIMO Generation & Analysis`、5G NR multi-channel analysis、integrated fading simulation，連到 [[R&S SMW200A]] plus [[R&S SGT100A]] 與 [[R&S VSE]] 5G MIMO analysis software。\n- Slide 6 對 beamforming components / accuracy 提出 fully integrated solution、no calibration needed、simultaneous measurement on ≤24 ports within one instrument；產品語彙包括 [[R&S NRPM]]（18 GHz–90 GHz ultra-wideband OTA power measurement solution）與 [[R&S ZNBT]]（multiport network analyzer ≤40 GHz）。\n- Slide 7 說 Active Antennas 與 Massive MIMO 使 measured systems 更複雜，高頻使 conducted testing impractical，far-field 條件量測需要 sophisticated T&M solutions；並說 higher frequencies / Massive MIMO 下 OTA testing 將成為必要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MWC2025---WIC-INFRA.md"
+              },
+              "score": 5.602987
+             },
+             {
+              "text": "MWC2025---WIC-INFRA › OTA conformance 與 chamber solutions\n- Slide 8 把 [[R&S ATS1800C]] 與 [[R&S PWC200]] 列為 OTA testing solutions；ATS1800C 是 FR2 compact test system with high-quality quiet zone，PWC200 是 mid-band Massive MIMO device verification / plane wave converter。\n- Slide 8 說 [[R&S PWC200]] 可在近場距離做 far-field measurements，例如 3.5 GHz、1 m aperture 的 5G massive MIMO base station 可在 1.5 m 做 OTA testing，而 direct far-field measurement 需要 23.5 m。\n- Slide 9 說 `All 38.141 measurements supported`，並指向 [[3GPP TS 38.141-2]]、5G NR Base Station Transmitter / Receiver / Performance Tests、Signal Generator built-in presets 與 5G NR Test Case Wizard。\n- Slide 11 標題為 `5G NR base Station Conformance Testing (R&D) From Conducted to OTA testing`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MWC2025---WIC-INFRA.md"
+              },
+              "score": 5.554266
+             },
+             {
+              "text": "MWC2025---WIC-INFRA › Spectrum、mmWave 與 early 6G research\n- Slide 10 以 `More Spectrum Bands & Higher Frequencies` 連到 transition to 6G 的 RF performance demand。\n- Signal generation 產品列名包括 [[R&S SMA100B]] up to 67 GHz、[[R&S SMW200A]] up to 67 GHz、[[R&S SMB100A]] up to 40 GHz、[[R&S SMM100A]] up to 44 GHz、[[R&S SMBV100B]] 3/6 GHz，以及 [[R&S SFI]]、[[FE110ST]]、[[FE170ST]]、[[FC330ST]]、[[FC500ST]] 等 frequency converter / front end。\n- Spectrum analysis 產品列名包括 [[R&S FSW]] up to 90 GHz、[[R&S FSVA3050]] up to 50/54 GHz、[[R&S FPS]] up to 40 GHz、[[R&S PVT360A]] / [[R&S CMP200]]、[[FE44S]]、[[FE50DTR]]、[[FC330SR]] 等。\n- Network analysis 產品列名包括 [[R&S ZNA]] up to 67 GHz、[[R&S ZNA67EXT]] up to 110 GHz、[[R&S ZNB]]、[[R&S ZVA]] 10 MHz–110 GHz，以及 banded mmW converters up to 1.1 THz。\n- Slide 13 early 6G research 提到 up-to 4 GHz signal generation bandwidth、up to 8 GHz signal bandwidth、generic OFDM analysis、4096QAM / multi-modulation 與 flat signals over entire frequency range。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MWC2025---WIC-INFRA.md"
+              },
+              "score": 4.315826
+             },
+             {
+              "text": "MWC2025---WIC-INFRA › 重點摘要\n這份來源是由 `MWC2025---WIC-INFRA.pptx` 轉出的 lossy markdown，標題為 `Mobile Network Infrastructure — leading T&M solutions for evolving industry trends`，語境為 Mobile World Congress 2025 Barcelona，頁首標示 `COMPANY RESTRICTED`；正式簡報日期除 MWC 2025 語境外未標示，raw converted 日期為 2026-09-17。\n\n來源把 mobile network infrastructure 的主要 industry drivers 整理為：\n\n- [[Increasing MIMO degrees and Beamforming]] / [[Beamforming]]。\n- [[OTA testing]]。\n- [[More Spectrum Bands and Higher Frequencies]]。\n- [[Digital Design & Power]]。\n- [[Network energy saving]] / energy efficiency。\n- [[Network Densification]]。\n- [[Cost Efficiency and Flexibility]]。\n- [[Private Networks]]。\n- [[Disaggregation and Virtualization]]。\n- [[Open RAN]] / [[O-RU testing]]。\n\n簡報以 Rohde & Schwarz 測試量測產品組合對應上述趨勢，包括 [[R&S SMW200A]]、[[R&S SGT100A]]、[[R&S VSE]]、[[R&S NRQ6]]、[[R&S NRPM]]、[[R&S ZNBT]]、[[R&S ATS1800C]]、[[R&S PWC200]]、[[R&S FSW]]、[[R&S FSVA3000]]、[[R&S PVT360A]]、[[R&S CMP200]]、[[R&S CMPHEAD30]]、[[R&S RTO]] / [[R&S RTP]]、[[R&S NGP800]]、[[R&S ZNA]]、[[R&S CMQ200]] 與多種 mmWave frequency converter / front end。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/MWC2025---WIC-INFRA.md"
+              },
+              "score": 2.79125
+             },
+             {
+              "text": "112G PAM4 PCB 工程測試資料清單 › 與既有知識的關係\n- [[SerDes 與 SI PI 測試概覽]] 已記錄 high-speed digital validation challenges，包括 transmission channel、PCBs、connectors、scopes、BERTs、AWGs、network analyzers 等測試脈絡；本頁只補一個 112G PAM4 PCB 題名與 VNA / probe 類表頭，不新增測試方法。\n- [[R&S PCB test solutions]] 已保存 [[Dk-Df]]、[[TDR 阻抗測量]]、[[Delta-L]]、IL、Xtalk、Eye diagram、material / stackup selection 等流程詞；[[112G PAM4 PCB Engineering]] 沒有提供足夠內容把這些流程套到 112G PAM4 PCB。\n- [[高頻高速 PCB 測試解決方案]] 已保存 Keysight high-frequency / high-speed PCB 測試流程；本來源不足以比較 Keysight 與 R&S，也不足以建立採購配置。\n- [[SerDes]] 與 [[High speed SerDes standards]] 可作為 112G PAM4 的上位 high-speed interface / SerDes 脈絡，但本來源沒有明示任何 standard organization、standard version 或 compliance test。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+              },
+              "score": 2.502241
+             },
+             {
+              "text": "112G PAM4 PCB 工程測試資料清單\n[[112G PAM4 PCB 工程測試資料清單]] 是依 [[112G PAM4 PCB Engineering]] 建立的稀疏資料節點，用來保存一份 company restricted、轉檔後只剩少量表頭的 112G PAM4 PCB engineering / transmission line 測試線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+              },
+              "score": 1.885587
+             },
+             {
+              "text": "112G PAM4 PCB 工程測試資料清單 › 相關來源\n- [[112G PAM4 PCB Engineering]] — raw converted 2026-09-17、正式發布日期未標示的 company restricted 112G PAM4 PCB Engineering 來源摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+              },
+              "score": 0.281706
+             },
+             {
+              "text": "112G PAM4 PCB 工程測試資料清單 › 來源中的說法\n- [[112G PAM4 PCB Engineering]] 的 raw frontmatter 顯示原始檔名為 `112G PAM4 PCB Engineering.pdf`，轉檔日期為 2026-09-17。\n- [[112G PAM4 PCB Engineering]] 正文含 `COMPANY RESTRICTED`。\n- [[112G PAM4 PCB Engineering]] 正文含標題 `Transmission Lines on PCB`。\n- [[112G PAM4 PCB Engineering]] 保留一個空表格，欄位為 `Probe`、`Station/Handler`、`Software`、`VNA`。\n- [[112G PAM4 PCB Engineering]] 沒有保留任何表格資料列。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+              },
+              "score": 0.226712
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › Dk / Df 與 fiber weave skew\n- [[snla426]]（June 2023）說 routing differential signals 時，每條 trace 會因 [[fiberglass weave]] 與 [[epoxy]] 的 static permittivity（εr）差異，而經歷不同 dielectric constants 與 signal velocities。\n- [[snla426]]（June 2023）說 fiberglass weave 的 εr 約為 6，epoxy 的 εr 約為 3。\n- [[snla426]]（June 2023）說 fiber glass laminate 中的 holes 或 openings 會造成 εr 與 loss tangent（Df）差異。\n- [[snla426]]（June 2023）說 εr 與 Df 差異會在 signal bandwidth 的不同頻率上造成 transmission media 的 [[return loss]] 或 [[insertion loss]] resonance / anti-resonance。\n- [[snla426]]（June 2023）說 differential pair 兩條 signal 若經過不同 fiberglass / epoxy 比例，會產生 [[intra-pair skew]]，並劣化 receiver 看到的 differential eye diagram。\n- [[snla426]]（June 2023）說 fiber weave skew 會造成 duty cycle distortion、AC common-mode voltage noise 與 EMI issues。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 3.9607
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › Impedance 與 length matching\n- [[snla426]]（June 2023）說 [[PCIe specification]] 要求 differential impedance 為 70 到 100 Ω。\n- [[snla426]]（June 2023）說 Add-In-Cards 為了與不同 root complexes 與 end points 互通，需要 85 Ω differential impedance。\n- [[snla426]]（June 2023）說 85 Ω differential impedance 要求不適用於 vias、AC coupling capacitor pads、connectors、cables，但仍需注意最小化 impedance discontinuity。\n- [[snla426]]（June 2023）說 clock target impedance 為 100 Ω；maximum allowed random jitter RMS 為 200 fs，對滿足 PCIe Gen5 link EQ validation test requirements 很重要。\n- [[snla426]]（June 2023）說不需要在不同 lanes 或 pairs 之間做 trace length matching；每個 differential pair 內嵌 clock，因此允許不同 differential trace length。\n- [[snla426]]（June 2023）說 intra-pair trace positive lead 與 negative lead 長度需控制在 5 mils 以內，以降低 common-mode noise。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 3.240604
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › Routing quick rules\n[[snla426]]（June 2023）列出的 high-speed differential signal quick rules 包括：\n\n- 不可在任何 high-speed differential signal 上放置 probe 或 test points。\n- 不可將 high-speed traces route 在 crystals、oscillators、clock signal generators、switching power regulators、mounting holes、magnetic devices、board edge，或使用 / 複製 clock signals 的 ICs 下方或附近。\n- BGA breakout 後，high-speed differential signals 應避開 PCIe device，因為 internal state transitions 產生的 high current transients 很難濾除。\n- 盡可能將 high-speed differential pair signals route 在 PCB top layer 或 bottom layer，並搭配 adjacent GND layer。\n- High-speed differential signals 與 reference plane edge 的距離需 ≥ 5×W 或 5×RPH，取較大者。\n- High-speed differential signals 至少需距離 reference plane voids 4×RPH；此規則不適用於 high-speed differential signals 上 SMD pads 的 voiding。\n- PCIe device BGA escape 後需維持 constant trace width，以避免 transmission lines 中的 impedance mismatches。\n- 為改善 crosstalk，應遵循 ground-signal-ground signal routing，並將所有 high-speed differential pairs 對稱且平行地一起 routing。\n- Package escape 與 routing 到 connector pins 時會自然偏離此要求，但 trace deviations 必須盡可能短，否則可能需要 trace width compensation。\n- HFSS simulation 可用於最佳化 trace width。\n- 多個 high-speed interfaces 的 devices 中，需避免不同 interfaces 間的 crosstalk。\n- Package escape 後、connector termination 前，每個 differential pair 不應 route 在另一 differential pair 的 4–5×RPH mils 內。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 2.804658
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › Crosstalk mitigation\n[[snla426]]（June 2023）指出 crosstalk mitigation 可透過降低 differential signal insertion loss（SDD21）或改善 crosstalk 達成，方法包括：\n\n- 最大化 pair-to-pair spacing。\n- [[ground stitching]]。\n- 最佳化 via anti-pads。\n- 通常建議使用 closely coupled strip line 以降低 crosstalk 影響。\n- Vias 與 anti-pads 需要謹慎設計。\n- [[TI DS320PR1601 EVM]] 使用 co-planar GND reference waveguide 以降低 crosstalk 影響。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 2.789484
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › 文件脈絡\n- [[snla426]]（June 2023）是 [[Texas Instruments]] application note《High-Speed PCB Layout for PCIe Gen 5》，文件編號 SNLA426，作者 [[Vicente Flores Prado]]。\n- [[snla426]]（June 2023）目標是協助熟悉 [[PCB manufacturing]]、[[PCB layout]] 與 design 的人員，在設計 high-speed [[PCI Express]] 平台時理解 PCB layout best practices 與 layout options。\n- [[snla426]]（June 2023）指出 [[PCIe Gen5]] 資料傳輸速率為 32 GT/s；Gen5 x16 lane 設計需要以最佳化 [[crosstalk]]、[[return loss]]、[[insertion loss]] 為核心。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 2.250022
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100 › 與既有知識的關係\n- 本來源是 [[R&S CMX500]] 的正式 Specifications 文件，補足 [[CMX500_Features_CSW9-20-0_en_32]] 未提供的 base unit order number、hardware unit order number、具體 [[R&S CMX-B500A]] / [[R&S CMX-B600B]] 型號、FR1/FR2 RF 規格、環境條件、尺寸重量、電源與 service / warranty 資訊。\n- [[CMX500_Features_CSW9-20-0_en_32]] 是 Features and Functions overview，文件版本 Version 32，對應 CSW 9.20.0 and higher；本來源是 Specifications Version 11.00（August 2025）。兩者層次不同，應在 [[R&S CMX500]] 產品頁並列使用。\n- 本來源提到 external local oscillator EVM 測試使用 [[R&S SMA100B]] RF and microwave signal generator 與 R&S SMA-B711 ultra low phase noise option；這與既有 [[R&S SMA100B]] 頁可互相追溯。\n- 本來源列出 [[R&S CMX-RF42E]] 的獨立 specifications 文件 **PD 3609.7719.22**，但未提供該文件的版次或日期。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 8.499254
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100 › 產品與硬體\n- [[R&S CMX500]] — Radio Communication Tester；base unit order no. **1201.0002K70**。\n- [[R&S CMX-PB70H]] — CMX500 basic assembly；order no. **1222.0676.09**。\n- [[R&S CMX-B200A]] — accelerator unit；order no. **1222.0747.02**；提供 accelerated digital signal processing capabilities 與 two high-speed digital I/Q interfaces。\n- [[R&S CMX-B300C]] — processing unit；order no. **1222.0801.04**；需要 [[R&S CMX-PB70H]]，提供 high-performance computing platform、LAN DAU、internal LAN 與 USB 3.0 DAU interface。\n- [[R&S CMX-B500A]] — IF unit；order no. **1222.0924.02**；提供 IF frequency range 的 vector signal analysis 與 ARB based generator functionality。\n- [[R&S CMX-B600B]] — RF unit；order no. **1222.0953.03**；提供 FR1 frequency range 的 vector signal analysis 與 ARB based generator functionality。\n- [[R&S CMXHEAD30]] — remote radio head；order no. **1201.0002K73**；搭配 [[R&S CMXH-B73A]] hardware unit，order no. **1430.9106.02**。\n- [[R&S CMXHEAD50]] — remote radio head；order no. **1201.0002K76**；搭配 [[R&S CMXH-B73B]] hardware unit，order no. **1430.9106.03**。\n- [[R&S CMXHEAD50-Evo]] — HEAD50-Evo setup 使用 [[R&S CMXH-B73C]]、[[R&S CMXH-B74A]] 與 [[R&S CMXH-B76A]]。\n- [[R&S CMX-RF42E]] — Active RF frontend for NR FR2 extension；order no. **1441.3004K02**。\n- [[R&S CM-Z30A]] — remote radio head connection cable，length 3 m；order no. **1212.1040.02**。\n- [[R&S CMX-ZG100A]] — monitor；order no. **1222.3100.02**。\n- [[R&S CMX-Z101A]] — monitor mount；order no. **1222.3098.02**。\n- [[R&S ZZA-KN7]] — 19 inch adapter，7 HU，1/1；order no. **1175.3062.00**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 7.451883
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100 › Ordering information 摘錄\n| 項目 | Type / code | Order No. | 原文說明 |\n|---|---|---|---|\n| CMX500 Radio communication tester | CMX500 | 1201.0002K70 | accessories 包含 power cords、operating manual、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters |\n| CMX500 basic assembly | R&S CMX-PB70H | 1222.0676.09 | basic assembly |\n| Accelerator unit | R&S CMX-B200A | 1222.0747.02 | accelerated digital signal processing |\n| Processing unit | R&S CMX-B300C | 1222.0801.04 | generic high-performance computing platform |\n| IF unit | R&S CMX-B500A | 1222.0924.02 | IF vector signal analysis and ARB based generator |\n| RF unit | R&S CMX-B600B | 1222.0953.03 | FR1 vector signal analysis and ARB based generator |\n| WLAN TX measurements 802.11a/b/g/n/ac | R&S CMX-KM350 | 1222.7135.02 | analyzer option |\n| WLAN TX measurements 802.11ax | R&S CMX-KM351 | 1222.7141.02 | analyzer option |\n| WLAN TX measurements 802.11be | R&S CMX-KM352 | 1222.7158.02 | analyzer option |\n| LTE analyzer | R&S CMX-KM500 | 1222.5603.02 | analyzer option |\n| 5G NR analyzer | R&S CMX-KM600 | 1222.4013.02 | analyzer option |\n| 5G NR generator | R&S CMX-KW601 | 1222.1920.02 | generator option |\n| Remote radio head | R&S CMXHEAD30 | 1201.0002K73 | mmWave extension with CMXHEAD30 |\n| Hardware unit | R&S CMXH-B73A | 1430.9106.02 | for CMXHEAD30 |\n| Remote radio head | R&S CMXHEAD50 | 1201.0002K76 | mmWave extension with CMXHEAD50 / CMXHEAD50-Evo |\n| Hardware unit | R&S CMXH-B73B | 1430.9106.03 | for CMXHEAD50 |\n| Advanced TRX unit for signaling | R&S CMXH-B73C | 1430.9106.04 | for CMXHEAD50-Evo |\n| High-class synthesizer | R&S CMXH-B74A | 1430.7555.02 | for CMXHEAD50-Evo |\n| Housing for R&S CMXH-B74A | R&S CMXH-B76A | 1430.7710.02 | housing |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 6.820017
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100\n這份來源是 [[R&S CMX500]] Radio Communication Tester 的 **Specifications** 文件，文件編號 **PD 5216.4127.22**，文件版本 **Version 11.00**，文件日期 **August 2025**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 4.707784
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100 › Software / measurement options\n- [[R&S CMX-KM350]] — WLAN TX measurements IEEE 802.11a/b/g/n/ac；order no. **1222.7135.02**。\n- [[R&S CMX-KM351]] — WLAN TX measurements IEEE 802.11ax；order no. **1222.7141.02**。\n- [[R&S CMX-KM352]] — WLAN TX measurements IEEE 802.11be；order no. **1222.7158.02**。\n- [[R&S CMX-KM500]] — LTE analyzer；order no. **1222.5603.02**。\n- [[R&S CMX-KM600]] — 5G NR analyzer；order no. **1222.4013.02**。\n- [[R&S CMX-KW601]] — 5G NR generator；order no. **1222.1920.02**。\n- [[R&S CMXH-K50G]] — extended frequency range up to 50.2 GHz for [[R&S CMXHEAD50]] / [[R&S CMXHEAD50-Evo]]；order no. **1222.6568.02**。\n- [[R&S CMXH-K51RX]] — enable Rx Low Noise In port；order no. **1222.6551.02**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 4.077859
+             },
+             {
+              "text": "R&S SMA100B\nR&S SMA100B 是 Rohde & Schwarz 的 RF and Microwave Signal Generator，依 Specifications Version 10.00（February 2026）透過 R&S®SMAB-B1xx frequency options 覆蓋 8 kHz to 3 GHz 到 8 kHz to 67 GHz，並可依 options 增加 high output power、ultra low phase noise、analog modulation、clock synthesizer、power analysis 與 remote control 功能。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMA100B.md"
+              },
+              "score": 6.884243
+             },
+             {
+              "text": "CMX500 use-case based 5G testing\n[[CMX500 use-case based 5G testing]] 是 [[Rethink 5G Testing solution overview 5G RedCap NTN FWA]] 中對 [[R&S CMX500]] 的 market / solution positioning：以 use-case based approach 支援 5G eMBB、FWA、RedCap、NTN、XR 等裝置測試，而不只是一組單點工具。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 0.118812
+             },
+             {
+              "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx | WLAN SISO signaling |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx | 802.11ax station testing |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx | 802.11be station testing |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx | 802.11bn station testing |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx | 802.11ax AP testing |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx | 802.11be AP testing |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx | 802.11bn AP testing |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx | 2x2 MIMO support |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx | Enterprise security support |\n| R&S CMX-KS500B / M / X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx | 僅 LTE standalone 需要；NR NSA LTE anchor cells 包含於 NR signaling options |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx | D2C fixed / variable delay |\n| R&S CMX-KS600B / M / X | NR signaling enabler, Rel. 15 | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx | 包含 5G NR SA option 2、NSA option 3、DL 2x2/4x4 MIMO、one CC、UL 256QAM |\n| R&S CMX-KS610B / M / X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx | UL 2x2 MIMO、CA up to 9 CC |\n| R&S CMX-KS611B / M / X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx | SUL / Rel. 16 features |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 7.468254
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › LEO 衛星終端與高頻測試線索\n[[無線通訊認證實驗室]]將認證實驗室應用連到 [[LEO 衛星終端認證]]：\n\n- 支援 [[Starlink]] / [[Project Kuiper]] 用戶終端 RF 驗證。\n- [[相控陣列天線]] beamforming 測試。\n- [[mmWave]] 與 [[MIMO]] 高頻測試能力。\n- 台灣供應鏈加速全球市場准入。\n- [[耕興]]等 [[RCB]] 提供 8–12 週 GMA 週期。\n\n這些說法可連到 [[低軌衛星終端設備檢測]]、[[相控陣列天線]]、[[Satellite User Terminal 外部資料清單]]，但不可直接改寫為已驗證的 Starlink / Kuiper 認證服務、客戶案例或完整測試能力。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 4.936611
+             },
+             {
+              "text": "Starlink › 與既有頁面的關係\n- [[Satellite User Terminal 外部資料清單]] 既有頁面把 Starlink teardown、FCC filings、R&S / Keysight / GSOA testing links 與 Taiwan Focus 列為待讀線索；[[Starlink UT Test Flow]] 是其中一份已轉出的本機附件。\n- [[衛星地面設備]] 保存 user terminal / ground equipment / terminal ecosystem 的總覽。\n- [[低軌衛星終端設備檢測]] 保存台灣衛星地球電臺設備技術規範與檢測框架。\n- [[相控陣列天線]] 連接 Starlink user terminal 的 phased array / beamformer evolution 線索。\n- [[Starlink User Terminal]] 保存本來源中較具體的產品 / terminal 層資料。\n- [[Starlink User Terminal 測試流程]] 保存本來源中的 EVT / DVT / PVT 與 RF / environmental / field validation 流程。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Starlink.md"
+              },
+              "score": 2.386037
+             },
+             {
+              "text": "穩懋 › 來源中的說法\n- [[Power IC - Power Management IC image 3]]（來源未標示日期；取得於 2026-09-04）將 [[穩懋]]（3105）列於「第三代半導體與特殊製程」大分類。\n- 同一來源將 [[穩懋]] 放在「GaAs/Ga 通訊射頻供應鏈」子分類。\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）將[[穩懋]] / WIN Semiconductors 列為衛星本體零組件廠商，技術定位為 [[GaAs]] 晶圓代工。\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）稱[[穩懋]]為全球最大 GaAs 晶圓代工廠，產品涵蓋衛星間高頻連結與手機直連技術所需 RF 元件，並稱其早期即參與 [[SpaceX]]計畫。\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）在手機直連衛星章節中稱台灣廠商目前主要透過[[穩懋]]的 GaAs RF 元件代工以及手機品牌供應鏈間接受惠。\n- [[0.Satcom Industry]]（來源正文未標示正式發布日期；內容含 2025 年與 2024 年資料點；raw converted 2026-09-17）在台灣太空產業供應鏈中，將「穩懋半導體」列於「太空系統與衛星應用」。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/穩懋.md"
+              },
+              "score": 3.034685
+             },
+             {
+              "text": "5G NR Base station conformance testing - EN - UR_Public › 重點摘要\n- Conducted transmitter characteristics summary 說 `All 38.141 measurements supported`，並列出 chapter 6 的 BS output power、output power dynamics、transmit ON/OFF power、frequency error、modulation quality、time alignment error、occupied bandwidth、ACLR、operating band unwanted emissions、spurious emissions 與 transmitter intermodulation。\n- 來源圖示 / 文字把 BS type 1-C output power、output power dynamics、frequency error、EVM、unwanted emissions 等測試連到 [[R&S FSVA3000]]；transmitter intermodulation 例子連到 [[R&S SMW200A]]，且說 intermodulation 需 additional signal generator。\n- [[R&S SMW200A]] 的 Test Case wizard 被描述為可依 [[3GPP TS 38.141-1]] 與 [[3GPP TS 38.141-2]] 直接選擇 5G NR gNB conformance test case，支援 transmitter / receiver characteristic 與 receiver performance test cases，並支援 R15、R16（with K148）與 R17（with K171）。\n- Conducted receiver characteristics chapter 7 表列 wanted signal、AWGN、modulated interferer、CW interferer 在 reference sensitivity、dynamic range、ACS、in-band blocking、out-of-band blocking、receiver spurious emissions、receiver intermodulation、in-channel selectivity 的使用情境。\n- Conducted performance characteristics chapter 8 涵蓋 PUSCH、PUCCH、PRACH performance requirements，release 欄包含 15、16 與 planned 17 items。\n- [[R&S SMW200A]] fading / channel emulation 章節列出 5G NR Release 15/16 performance testing 依賴 TDL models，來源列出 TDLA30、TDLB100、TDLC60、TDLC300 delay profile 與 FR1 / FR2 channel model names。\n- 來源說 `Option Concept for WIDEBAND Baseband`：1×B15 for 1x1、2×B15 for 1x2 / 2x1 / 2x2 / 2x1x1、4×B15 for other MIMO configurations，並註記 assumes B13XT and 2×B9。\n- Measurement uncertainties 章節引用 38.141-1 section 4.1.2；對 transmitter tests，例子包含 6.2 BS output power、6.5.2 EVM、6.5.3 time alignment error。來源宣稱 [[R&S FSW]] level measurement uncertainty、EVM performance 與 transmitter branches time alignment uncertainty 的 R&S statement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/5G NR Base station conformance testing - EN - UR_Public.md"
+              },
+              "score": 3.202833
+             },
+             {
+              "text": "R&S SMW200A › Digital standards、R&S WinIQSIM2、Pulse Sequencer、MIMO 與 fading\n- Internal digital modulation systems 至少需安裝一個 `R&S®SMW-B10` 或 `R&S®SMW-B9`。\n- 來源列出 cellular、wireless connectivity、navigation、broadcast 與 other standards options；包含 `GSM/EDGE`、`3GPP FDD`、`LTE Release 8` 到 `Release 15`、`Cellular IoT`、`5G New Radio`、`5G NR Release 16/17`、`IEEE 802.11a/b/g/n/j/p/ac/ax/be/ad/ay`、`Bluetooth EDR/5.x/5.4`、`GNSS`、`DVB-S2/S2X`、`DVB-RCS2`、`LoRa`、`HRP UWB` 等。\n- 來源描述 digital standards 不需要 separate PC software；但 waveform packages for signals from [[R&S WinIQSIM2]] 另明列 [[R&S WinIQSIM2]] requires an external PC。判斷：前者指 instrument internal digital standards，後者指 WinIQSIM2 workflow，不合併為單一規則。\n- `R&S®SMW-K144`：5G New Radio，Order No. `1414.4990.02`。\n- `R&S®SMW-K145`：5G New Radio closed-loop BS test，Order No. `1414.6506.02`。\n- `R&S®SMW-K148`：5G NR Release 16，Order No. `1414.6664.02`。\n- `R&S®SMW-K170`：5G NR sidelink，Order No. `1413.8640.02`。\n- `R&S®SMW-K171`：5G NR Release 17，Order No. `1413.7280.02`。\n- [[R&S WinIQSIM2]] requires an external PC；`R&S®SMW-K200` waveform packages 可登錄 1、5 或 50 waveforms，每台 instrument 最多 `250 waveforms`。\n- [[R&S Pulse Sequencer]] 相關 options 包含 `R&S®SMW-K300`、`K301`、`K302`、`K304`、`K306`、`K307`、`K308`、`K315`、`K350`。\n- Multichannel、MIMO and fading 完整規格另見 `PD 3673.1276.22`；digital standards 完整規格另見 `PD 5213.9434.22`；GNSS/avionics 另見 `PD 3607.6896.22`；Pulse Sequencer 另見 `PD 3607.1388.22`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 21,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 7.676062
+             },
+             {
+              "text": "R&S SMA100B › Power analysis\n- R&S®SMAB-K28 Power analysis 建議使用 latest power sensor firmware version。\n- 支援 modes：power versus frequency、power versus power、power versus time trace mode。\n- Supported power sensors：R&S®NRP-Z81/-Z85/-Z86 支援 power versus frequency、power versus time、pulse data measurement and power versus power；來源標示為 phased-out products。R&S®NRP18P/NRP40P/NRP50P 支援 power versus frequency、power versus time、pulse data measurement and power versus power。\n- Number of points per sweep：10 to 1000。\n- Frequency range：依 R&S®NRP power sensor and R&S®SMA100B frequency option，為 signal generator 或 power sensor full frequency range 較低者；支援 frequency-converting DUTs。\n- Y-axis setting range：–200 dBm to +100 dBm。\n- Number of traces：4；number of markers：4；trace data export file formats JPG、BMP、XPM、PNG、CSV。\n- Power versus time mode with R&S®NRP-Z81/-Z85/-Z86：sweep time 100 ns to 1 s；resolution 12.5 ns 或 2 ns（periodic signals、internally triggered）；pulse data measurement 僅適用 R&S®NRP-Z81/-Z85/-Z86。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 19,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMA100B.md"
+              },
+              "score": 4.664925
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › flexible testing configurations\n來源列出 OBT Lite、OBT、OBT Plus、OBT FR2 Specialist 等 flexible testing configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 0.110129
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › 已擷取的無線通訊認證實驗室簡報內容\n依 [[無線通訊認證實驗室]]：\n\n- [[無線通訊認證實驗室]]用於測試與驗證無線設備符合法規、安全與性能標準，涵蓋 [[RF 測試]]、[[EMC]]、安規及一致性認證。\n- 來源稱其可經 [[NCC]]、[[TAF]]、[[FCC]] 等機構認可，並支援 [[Global Market Access]] 與上市加速。\n- 主要測試項目包含：頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試、[[PTCRB]] / [[GCF]] 認證。\n- 認證必要性包含防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端、6G 等需求。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 4.228654
+             },
+             {
+              "text": "Project Kuiper\n[[Project Kuiper]] 是 [[Amazon]] 的低軌衛星通訊 / user terminal 相關計畫名稱，本 vault 目前由 [[Kuiper UT Test & Supply Chain]] 提供其用戶終端測試流程、產品化準備與供應鏈策略的 company restricted 簡報說法。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Project Kuiper.md"
+              },
+              "score": 6.546056
+             },
+             {
+              "text": "穩懋\n[[穩懋]] 是來源中列於 [[GaAs]]、通訊射頻供應鏈、低軌衛星 RF 元件、手機直連衛星 RF 元件代工，以及太空系統與衛星應用分類的公司名稱；不同來源提供的證據層級不同，本頁只保留可追溯來源說法。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/穩懋.md"
+              },
+              "score": 2.730459
+             },
+             {
+              "text": "5G NR Base station conformance testing - EN - UR_Public\n本來源是 Matthias Weilhammer（1GP1）於 2023-06 的 [[5G NR Base Station Conformance Testing]] 簡報轉檔，整理 [[3GPP TS 38.141-1]] conducted conformance testing、[[3GPP TS 38.141-2]] radiated conformance testing，以及 R&S 儀器 / chamber 在 gNB 測試中的配置線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/5G NR Base station conformance testing - EN - UR_Public.md"
+              },
+              "score": 2.804148
+             },
+             {
+              "text": "R&S SMA100B › 軟體 / keycode options\n| Licence code | 名稱 | Order No. | 原文說明 / requires |\n|---|---|---|---|\n| R&S®SMAB-K725 | Chirp signal generation | 1420.9861.02 | 需要 R&S®SMAB-K22、R&S®SMAB-K23、R&S®SMAB-K720；FW version > 4.70.xxx required |\n| R&S®SMAB-K28 | Power analysis | 1420.9755.02 | 建議使用 latest power sensor firmware version |\n| R&S®SMAB-K722 | Clock synthesizer frequency extension to 6 GHz | 1420.9810.02 | not available for instruments equipped with R&S®SMAB-B103 |\n| R&S®SMAB-K724 | High dynamic uninterrupted level sweep | 1420.9832.02 | serial number < 102000 需聯絡 Rohde & Schwarz service department |\n| R&S®SMAB-K980 | Health and utilization monitoring service HUMS | 1420.9284.02 | 支援 SNMP、REST JSON、SCPI、device web |\n| R&S®SMAB-K554 | R&S®SZM control via USB by the R&S®SMA100B microwave signal generator | 1420.9884.02 | Recommended extra |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 26,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMA100B.md"
+              },
+              "score": 4.610825
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › OBT Plus\n來源列 OBT Plus：\n\n- Support for FR2 2x2 MIMO and up to 8 CC。\n- Up to 16 CC LTE / FR1。\n- High Throughput Testing。\n- High order CA Testing，massive band combos。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 0.10376
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › 未決事項\n- [[Test House]] 來源未標示正式日期、作者、版本、發布單位與適用地區。\n- [[無線通訊認證實驗室]]來源未標示正式發布日期、作者、版本與簡報用途。\n- [[無線通訊認證實驗室]] Slide 8 僅有 `圖片2.jpg` 嵌入，未提供 OCR 文字。\n- [[ISL]] 完整名稱、組織角色與與 [[電信技術中心]] 的關係未標示。\n- [[耕興]]的 30 MHz–325 GHz、108 座測試場地、連續 10 年 FCC 最佳實驗室認證與首張 Wi‑Fi 8 證書需官方來源補證。\n- [[SGS]] 的台灣場地、認可範圍與 GMA service scope 未標示。\n- [[Test House]] 是否為特定機構、一般概念或 OneNote 分類名稱，來源未標示。\n- 需要取得[[電信技術中心]] CATR / FR2 測試場之 TAF 認證證書、認證範圍、有效日期與量測不確定度。\n- 需要確認 111年08月簡報中的 3–40 GHz、unwanted emission 至 90 GHz、TRP / TIS / EVM 與 Quiet Zone 90 cm 是否仍為現行能力。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 4.068874
+             },
+             {
+              "text": "耕興\n[[耕興]]（SPORTON）是 [[無線通訊認證實驗室]] 來源中列出的台灣無線通訊認證實驗室之一，來源稱其核心能力涵蓋 5G、Wi‑Fi 與 mmWave。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/耕興.md"
+              },
+              "score": 3.52847
+             },
+             {
+              "text": "穩懋 › 低軌衛星、手機直連衛星與太空產業列名\n| 來源 | 日期 / 期間 | 分類 | 來源說法 | 限制 |\n|---|---|---|---|---|\n| [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]] | 2026-09-15 | GaAs 晶圓代工 / RF 元件 | 全球最大 GaAs 晶圓代工廠；產品涵蓋衛星間高頻連結與手機直連技術所需 RF 元件；早期即參與 SpaceX 計畫 | 未提供產品料號、製程節點、客戶公告、合約、出貨量、營收占比或 SpaceX 官方證據。 |\n| [[0.Satcom Industry]] | 來源正文未標示正式發布日期；內容含 2025 年資料點 | 太空系統與衛星應用 | 將「穩懋半導體」列於台灣太空產業供應鏈的太空系統與衛星應用分類 | 未提供產品、客戶、供應鏈層級、合約、量產或展出項目細節。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/穩懋.md"
+              },
+              "score": 2.531578
+             },
+             {
+              "text": "5G NR Base station conformance testing - EN - UR_Public › 與既有知識的關係\n- [[Small Cell BTS]] 先前只保存 `5G NR Base station conformance testing - EN - UR_Public.pptx` 的待讀連結；本來源是該附件轉出的 lossy markdown，將 [[5G NR Base Station Conformance Testing]] 從 link hub 題名補強為有正文可追溯的測試概要。\n- [[Base Station]] 與 [[BTS]] 仍只提供 glossary / link-hub 層級定義；本來源補入 3GPP TS 38.141 的 base station type 與 conformance testing 語境。\n- [[EVM]] 既有頁面主要來自 UE pre-conformance testing；本來源只補充 base station transmitter signal quality 與 test system uncertainty 語境，不改寫 UE EVM limits。\n- [[R&S SMW200A]]、[[R&S FSVA3000]]、[[R&S FSW]]、[[R&S SGT100A]] 既有頁面以 Productions datasheet / specs 為主；本來源是 Market / application presentation，僅支撐 gNB conformance testing setup / solution-level 說法，不取代產品規格。\n- [[NR-NTN conformance testing]] 是 NTN UE / GCF / PTCRB conformance PR 脈絡；本來源是 terrestrial NR base station / gNB conformance testing，兩者不可合併。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/5G NR Base station conformance testing - EN - UR_Public.md"
+              },
+              "score": 2.413719
+             },
+             {
+              "text": "Satellite Applications Catapult › 來源中的資訊\n- [[Space Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）列出連結文字 `Space Capabilities Catalogue - Satellite Applications Catapult`，URL 為 `https://sa.catapult.org.uk/space-capabilities-catalogue/`。\n- 本次 ingest 未擷取該外部網頁正文、更新日期、catalogue 版本、分類規則、公司名單、capabilities 條目或資料來源。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Satellite Applications Catapult.md"
+              },
+              "score": 0.73056
+             },
+             {
+              "text": "PI for Digital Power › 來源列出的外部連結\n| 類別 | 連結標題 / 可見文字 | URL | 日期 / 期間 |\n|---|---|---|---|\n| [[PDN impedance]] / [[Power Integrity]] guide | Mastering PDN Impedance: A Comprehensive Guide for Power Integrity Design | `https://www.allpcb.com/allelectrohub/mastering-pdn-impedance-a-comprehensive-guide-for-power-integrity-design` | 來源未標示 |\n| Active ultra-high current [[PDN]] impedance measurement | Ultrafast Impedance Measurement of Active Ultra-High Current PDNs｜Signal Integrity Journal | `https://www.signalintegrityjournal.com/articles/3798-ultrafast-impedance-measurement-of-active-ultra-high-current-pdns` | 來源未標示 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/PI for Digital Power.md"
+              },
+              "score": 0.462145
+             },
+             {
+              "text": "R&S FSWX › Signal analysis bandwidth\n| 項目 | 規格 / 條件 |\n|---|---|\n| 每個 RF input | 最高 4 GHz bandwidth |\n| RF input A | 最高 8 GHz bandwidth |\n| Standard I/Q data maximum signal analysis bandwidth | 40 MHz（nom.） |\n| R&S FSW31/32-B100 | 100 MHz（nom.） |\n| R&S FSW31/32-B320 | 320 MHz（nom.） |\n| R&S FSW31/32-B600 | 600 MHz（nom.） |\n| R&S FSW31/32-B1G2 | 1.2 GHz（nom.） |\n| R&S FSW31/32-B2G | 2 GHz（nom.） |\n| R&S FSW31/32-B4G | f < 7.5 GHz：2 GHz（nom.）；f ≥ 7.5 GHz：4 GHz（nom.） |\n| R&S FSW31/32-B6G | f < 7.5 GHz：2 GHz（nom.）；f < 14 GHz：4 GHz（nom.）；f ≥ 14 GHz、RF input A only：6 GHz（nom.） |\n| R&S FSW31/32-B8G | f < 7.5 GHz：2 GHz（nom.）；f < 14 GHz：4 GHz（nom.）；f ≥ 14 GHz、RF input A only：8 GHz（nom.） |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWX.md"
+              },
+              "score": 5.172792
+             },
+             {
+              "text": "Rethink 5G Testing solution overview 5G RedCap NTN FWA › 重點摘要\n- 來源主題是 Rethink 5G testing：如何針對 suitable use cases and markets 實作 ultimate 5G device experience，並把 testing focus 從 single tools 轉為 complete use cases。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- Wireless communication equipment shipment forecast 以 2022 為基準列出：Base Station RUs 0.01 Bn、Smartphones 1.2 Bn、Cellular IoT modules 0.4 Bn、Wi‑Fi devices 4.4 Bn、Bluetooth devices 5.1 Bn；CAGR4 分別為 +5%、+4%、+19%、+8%、+8%，資料來源列 [[IDC]]、[[Berg Insight]]、[[Murata]]。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- 5G global ecosystem Q2CY2023 snapshot 指出 5G ecosystem 相較 LTE 仍在 early stages，列出 chipsets 110 / commercial 104、devices 1820 / commercial 1546、operators 532 / commercial 254、5G connections 約 1B、5G SA 41、mmW 128 / commercial 47、FWA CPE 203。來源標示 [[GSA Gambod]] and [[Ericsson Mobile Data]], Q2 2023。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- LTE / 5G connection forecast 顯示 5G 從 2020 年 160.267 增至 2028 年 4974.568，同期 LTE 從 4751.87 於 2022 年達 5157.401 後逐年下降到 2028 年 3583.092；單位與資料來源在萃取片段未完整標示。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- 5G device value chain 包含 [[Network operator]]、[[Device manufacturer]]、[[Test house]]、[[Chip vendor]]，測試階段 / 場域涵蓋 Lab、R&D、Production、Operations、Use cases；測試類型涵蓋 RF、Signaling、Application、OTA、Pre-conformance、Conformance approval、Carrier acceptance、Non-signaling RF、Signaling Protocol、Service and repair。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rethink 5G Testing solution overview 5G RedCap NTN FWA.md"
+              },
+              "score": 1.764426
+             },
+             {
+              "text": "無線通訊認證實驗室 › 重點摘要\n本來源是由 `無線通訊認證實驗室.pptx` 轉出的 company restricted 簡報，正式發布日期與文件版次未標示；raw frontmatter 顯示 converted 日期為 2026-09-17。\n\n來源將[[無線通訊認證實驗室]]定義為測試與驗證無線設備符合法規、安全與性能標準的實驗室，涵蓋 [[RF 測試]]、[[EMC]]、安規與一致性認證，並稱其可支援 [[Global Market Access]]（GMA）與加速上市。\n\n主要內容包括：\n\n- 無線設備認證實驗室涵蓋 RF、EMC、安規與一致性認證。\n- 主要測試項目包含頻譜、輸出功率、[[DFS]]、[[SAR]]、EMI / EMS、靜電放電、電源突波、[[Protocol 相容性]]、互操作性測試與 [[PTCRB]] / [[GCF]] 認證。\n- 來源稱認證必要性包括防止電磁干擾與頻譜衝突、保障用戶安全、加速上市、降低召回與法律風險，以及滿足台灣供應鏈衛星終端與 6G 等需求。\n- 來源列出台灣 [[NCC]] 認證流程：準備文件 / 樣品 / 電路圖 / 天線規格、提交 [[RCB]] 核驗機構初審、[[TAF]] 認可實驗室 RF / EMC 測試約 3–4 週、報告審查與證書核發，並稱證書有效期 5 年。\n- 來源列出台灣領先認證實驗室：[[耕興]]、[[SGS]]、[[電信技術中心]] / [[ISL]]。\n- 來源稱[[耕興]]具 30 MHz–325 GHz 全頻段測試能力、108 座測試場地、連續 10 年 FCC 最佳實驗室認證、10 米半電波暗室、OTA / SAR / [[相控陣列天線]]測試等能力。\n- 來源簡述 [[FCC 無線設備法規測試]]、[[CE RED 無線設備法規測試]]、Wi‑Fi / BLE 聯盟流程的差異。\n- 來源將 LEO 衛星終端認證應用連到 Starlink / Kuiper user terminal RF validation、[[相控陣列天線]] beamforming 測試、mmWave / MIMO 高頻測試、台灣供應鏈 GMA，以及耕興等 [[RCB]] 提供 8–12 週 GMA 週期的說法。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/無線通訊認證實驗室.md"
+              },
+              "score": 2.581146
+             },
+             {
+              "text": "NCC › 衛星 / 通訊監理語境中的 NCC\n- [[低軌衛星通信終端設備技術規範與相關檢測]]（來源標示 111年08月）列出 NCC 電信事業申請衛星固定通信用無線電頻率核配有關事項草案、NCC 衛星地球電臺設置使用管理辦法部分條文修正草案，以及 NCC 衛星地球電臺設備技術規範草案總說明。\n- 上述語境應連到 [[國家通訊傳播委員會]]，不應與交換機光器件圖上的 NCC 混用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/NCC.md"
+              },
+              "score": 7.4508
+             },
+             {
+              "text": "工研院 › unresolved\n- 需取得[[工研院]]官方新聞稿、技術簡報或論文，確認 Ka 頻段低軌衛星射頻晶片組規格與日期。\n- 需取得工研院 Micro Outdoor gNB 或 O-RAN Micro RU 的正式規格、驗證狀態與合作廠商資訊。\n- 需確認工研院 O-RAN 計畫的補助年度、預算、執行單位、OTIC 認證項目與產業化成果。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/工研院.md"
+              },
+              "score": 2.838608
+             },
+             {
+              "text": "R&S FSW › 共通規格條件\n- Product data 適用條件：ambient temperature 儲存 3 小時、warm-up operation 30 分鐘、符合指定 environmental conditions、遵守 recommended calibration interval，且若適用已完成 internal automatic adjustments。\n- Frequency resolution：0.01 Hz。\n- Recommended calibration interval：1 year。\n- Operating temperature range：+5 °C to +50 °C。\n- Permissible temperature range：0 °C to +55 °C。\n- Storage temperature range：–40 °C to +70 °C。\n- Display：30.7 cm WXGA color touchscreen，1280 × 800 pixel。\n- Internal data storage：standard solid state disk ≥ 128 Gbyte。\n- AC input voltage range：100 V to 240 V；AC supply frequency：50 Hz to 60 Hz / 400 Hz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 2.362597
+             },
+             {
+              "text": "Satellite Applications Catapult\n[[Satellite Applications Catapult]]是 [[Space Supply Chain]] 中 `Space Capabilities Catalogue` 外部連結 URL 所指向的組織 / 網站名稱線索；本 vault 目前尚未擷取該 catalogue 正文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Satellite Applications Catapult.md"
+              },
+              "score": 0.639563
+             },
+             {
+              "text": "PI for Digital Power › 關鍵實體與概念\n- [[Power Integrity 外部資料清單]]：本來源最直接支撐的新概念頁，用來保存這份 OneNote 連結索引本身。\n- [[Power Integrity]]：來源標題與頁名顯示主題聚焦 digital power 的 power integrity；但來源未擷取設計方法、規格、量測流程或案例正文。\n- [[PDN]]、[[PDN impedance]]：兩個連結標題都與 power distribution network impedance 相關；本頁只記錄連結存在。\n- [[ALLPCB]]：第一個連結的網域 / 標題來源；本來源未提供作者、發布日期或文章內容。\n- [[Signal Integrity Journal]]：第二個連結的媒體 / 期刊名稱；本來源未提供作者、發布日期或文章內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/PI for Digital Power.md"
+              },
+              "score": 0.349995
+             },
+             {
+              "text": "R&S FSWX › 產品定位與架構\n- 產品定位：multiport signal and spectrum analyzer。\n- 內部 multipath architecture 支援 1-port 與 2-port instruments。\n- 可用於 spectrum、noise measurement、phase noise、modulation quality（EVM）的 [[Cross-correlation]]。\n- 提供 extended [[Spurious free dynamic range]]（SFDR）。\n- 改善 [[Displayed average noise level]]（DANL）以尋找 hidden spurs。\n- 可在 high-power carrier 存在時量測 distortion 與 noise。\n- 可針對 EVM 要求嚴苛的 components 做 characterization。\n- Multipath wideband phase coherent receivers 可使用 independent receivers 同時進行 signal analysis 與 spectrum analysis。\n- 可在 spectrum 任意位置、相同或不同頻率同時觀察 signals。\n- 可同時量測 antenna 的 H 或 V polarizations、device input 與 output，並直接比較 ports 之間的 amplitude、frequency、phase。\n- Image free I/Q and vector signal analysis 使用 preselected capture and analysis，避免 unwanted signals 干擾量測。\n- Operating system：Linux based operating system，目標為 high security 與 long-term support。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWX.md"
+              },
+              "score": 4.053057
+             },
+             {
+              "text": "Rethink 5G Testing solution overview 5G RedCap NTN FWA › 關鍵實體與概念\n- 實體 / 工具：[[R&S CMX500]]、[[R&S CMW500]]、[[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100]]、[[R&S CMQ]]、[[R&S ATS1800C]]、[[R&S TS8980 Conformance Test Platform]]、[[R&S NGM200]]、[[R&S SMW200A]]、[[R&S FSW]]、[[R&S RTO]]、[[R&S CONTEST]]、[[R&S CMsquares]]、[[R&S CMsequencer]]。\n- 5G device / test 概念：[[5G device testing value chain]]、[[5G device requirements]]、[[Carrier Aggregation testing]]、[[Pre-conformance testing]]、[[Conformance testing]]、[[Carrier acceptance]]、[[OTA testing]]、[[Non-signaling RF]]、[[Signaling Protocol]]。\n- FWA 概念：[[5G FWA CPE deployment and testing requirements]]、[[FWA CPE 市場與測試分類]]、[[FWA CPE 測試與驗證]]、[[Indoor CPE]]、[[Outdoor CPE]]、[[mmWave ODU]]、[[MU-MIMO]]、[[1024QAM]]。\n- RedCap 概念：[[5G RedCap device testing]]、[[5G RedCap]]、[[RedCap]]、[[3GPP Release 17]]、[[3GPP Release 18]]、[[5G SA network]]、[[RedCap-specific BWP]]、[[RedCap early indication]]、[[HD-FDD]]。\n- NTN 概念：[[NTN IoT device testing requirements]]、[[5G NTN validation and testing]]、[[NTN propagation emulation and fading]]、[[NB-NTN]]、[[NTN-IoT]]、[[NTN-NR]]、[[SIB31]]、[[SIB32]]、[[Doppler frequency shift]]、[[RTT]]、[[GNSS]]、[[Satellite ephemeris]]。\n- Market / ecosystem 來源名稱：[[GSA]]、[[GSA FWA Survey]]、[[GSMA Intelligence]]、[[Quectel RedCap insights]]、[[Bullitt Group Market Study 2022]]、[[IDC]]、[[Berg Insight]]、[[Murata]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rethink 5G Testing solution overview 5G RedCap NTN FWA.md"
+              },
+              "score": 0.286218
+             },
+             {
+              "text": "![](Picture4.jpg)\nWireless communication tester\nEMI test receiver\nSignal & spectrum analyzer\nWireless communication tester",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-4a179a13677acd8f",
+                "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+                "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+               "section": 175,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 22.798077
+             },
+             {
+              "text": "[Space Capabilities Catalogue - Satellite Applications Catapult](https://sa.catapult.org.uk/space-capabilities-catalogue/)",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-6ae422456b68416f",
+                "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+                "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.788606
+             },
+             {
+              "text": "![](Grafik73.jpg)\nTiming / Sync / Signal Integrity",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-8ea3b55008b7c337",
+                "original_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+                "sha256": "8ea3b55008b7c337d029721ca2f0a210e3b1b6cf0fc902f9409ce7834ac35594",
+                "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.452389
+             },
+             {
+              "text": "range of signal generators, signal analyzers and radio communication testers.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-06b5fb58225495b8",
+                "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+                "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+                "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "section": 495,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 14.007342
+             }
+            ],
+            "text": "The supported signal-integrity capabilities for wireless communication applications are high-speed digital/PCB validation capabilities: transmission-channel validation, interface testing, RefClk/PLL jitter measurement, PDN testing, ADC/DAC frontend testing, and PCB/PCBA SI flow covering insertion loss, crosstalk, eye diagram, and TDR impedance [7].\n| Capability | What it covers | Evidence |\n|---|---|---|\n| Transmission-channel validation | Tx/Rx path, channel, Tx package, PCBs, connectors, Rx package, and equalization/DSP/DAC/ADC context for high-speed electrical interfaces [2] | [2] |\n| Interface test | Scopes, BERTs, AWGs, and switch matrices for validating high-speed electrical interfaces [2] | [2] |\n| RefClk and PLL jitter performance | Phase-noise analyzers and signal generators for reference-clock and PLL jitter performance validation [2] | [2] |\n| Power Distribution Network / power integrity | PDN testing with scopes and network analyzers [2] | [2] |\n| ADC/DAC frontend performance | Spectrum analyzers and signal generators for ADC/DAC frontend performance testing [2] | [2] |\n| PCB/PCBA SI flow | Insertion loss, crosstalk, eye diagram, TDR impedance, stackup planning, and transmission-line calculation [2] | [2] |\n| PCB material/stackup and SI modeling | Impedance/TDR, DK/DF extraction, IL, roughness, Xtalk, TL modeling, eye diagram, and signal-integrity modeling/testing [33] | [33] |\n| Wireless infrastructure digital-design test tools | High-speed digital and power designs in mobile network infrastructure need fast, reliable, accurate T&M tools including VNA, probes, phase-noise analyzer, power supplies, multimeter, oscilloscopes, and signal source [46] | [46] |\n| Higher-frequency / mmWave network-analysis capability | Wireless infrastructure sources list network-analysis products up to 67 GHz, 110 GHz, and banded mmWave converters up to 1.1 THz in the “More Spectrum Bands & Higher Frequencies” context [49] | [49] |\n| OTA/MIMO/beamforming-related measurement capability | Active antennas and Massive MIMO make measured systems more complex, high frequencies make conducted testing impractical, and OTA testing becomes necessary at higher frequencies / Massive MIMO [47] | [47] |\n【推論】For wireless communication, the most important SI capability set is therefore a combined workflow: high-speed PCB/channel SI, clock-jitter validation, PDN/power integrity, ADC/DAC frontend validation, and VNA/probing/oscilloscope/signal-source based debug, because the wireless-infrastructure source explicitly connects high-speed digital and power designs to those T&M tools, while the SI/PI source details the corresponding SI validation blocks [46][7].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+             },
+             "score": 4.688399
+            },
+            {
+             "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+             },
+             "score": 7.357146
+            },
+            {
+             "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 4.429935
+            },
+            {
+             "text": "MWC2025---WIC-INFRA › Digital Design & Power / Energy saving\n- Slide 14–15 將 highspeed digital and power designs 定位為需要快速、可靠、準確 T&M tools 的 verification / debugging 領域，測試工具包括 [[VNA]]、probes、phase noise analyzer、power supplies、multimeter、oscilloscopes、signal source。\n- Slide 16 說 rising energy costs drive MNOs to boost efficiency，base stations and components offer substantial energy-saving potential。\n- Slide 17 提出 optimization of power consumption、power statistics over time、device activity versus power consumption、real-time power / voltage / current statistics、up to 800 W / up to four channels；產品包括 [[R&S NGP800]]、[[R&S RTO]] / [[R&S RTP]]、RT-ZHD07 voltage probe、RT-ZC31 current probe。\n- Slide 18 提到 measurement-driven development of energy-saving amplifiers、envelope signal for tracker generated in real-time、turnkey solution based on VSG + VSA + SW、dedicated SW applications for Doherty、[[R&S SMW-K546]] 與 [[R&S FSW-K18]]。\n- Slide 19 提出 PA load-pull testing，用於確認 PA 在 final design 看到不同 impedance 時的 behavior。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/MWC2025---WIC-INFRA.md"
+             },
+             "score": 5.83299
+            },
+            {
+             "text": "MWC2025---WIC-INFRA › MIMO、Beamforming 與 OTA\n- Slide 4 定義 [[Beamforming]]：透過 bundling transmitted energy 並將能量導向 user 以增加 antenna gain。\n- Slide 4 定義 [[MIMO]]：transceiver 端有 many antennas，用於增加 capacity。\n- Slide 4 定義 [[Massive MIMO]]：transceiver 端有 very high number of antenna elements，結合 beamforming 與 spatial multiplexing。\n- Slide 4 說 operators with mid-band spectrum 對 Massive MIMO 較有信心，例子包括 China、US；並說 beamforming 是提升 system efficiency 的 essential measure，尤其是 mmWave。\n- Slide 5 以 `Up to nx8 MIMO Generation & Analysis`、5G NR multi-channel analysis、integrated fading simulation，連到 [[R&S SMW200A]] plus [[R&S SGT100A]] 與 [[R&S VSE]] 5G MIMO analysis software。\n- Slide 6 對 beamforming components / accuracy 提出 fully integrated solution、no calibration needed、simultaneous measurement on ≤24 ports within one instrument；產品語彙包括 [[R&S NRPM]]（18 GHz–90 GHz ultra-wideband OTA power measurement solution）與 [[R&S ZNBT]]（multiport network analyzer ≤40 GHz）。\n- Slide 7 說 Active Antennas 與 Massive MIMO 使 measured systems 更複雜，高頻使 conducted testing impractical，far-field 條件量測需要 sophisticated T&M solutions；並說 higher frequencies / Massive MIMO 下 OTA testing 將成為必要。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/MWC2025---WIC-INFRA.md"
+             },
+             "score": 5.602987
+            },
+            {
+             "text": "MWC2025---WIC-INFRA › Spectrum、mmWave 與 early 6G research\n- Slide 10 以 `More Spectrum Bands & Higher Frequencies` 連到 transition to 6G 的 RF performance demand。\n- Signal generation 產品列名包括 [[R&S SMA100B]] up to 67 GHz、[[R&S SMW200A]] up to 67 GHz、[[R&S SMB100A]] up to 40 GHz、[[R&S SMM100A]] up to 44 GHz、[[R&S SMBV100B]] 3/6 GHz，以及 [[R&S SFI]]、[[FE110ST]]、[[FE170ST]]、[[FC330ST]]、[[FC500ST]] 等 frequency converter / front end。\n- Spectrum analysis 產品列名包括 [[R&S FSW]] up to 90 GHz、[[R&S FSVA3050]] up to 50/54 GHz、[[R&S FPS]] up to 40 GHz、[[R&S PVT360A]] / [[R&S CMP200]]、[[FE44S]]、[[FE50DTR]]、[[FC330SR]] 等。\n- Network analysis 產品列名包括 [[R&S ZNA]] up to 67 GHz、[[R&S ZNA67EXT]] up to 110 GHz、[[R&S ZNB]]、[[R&S ZVA]] 10 MHz–110 GHz，以及 banded mmW converters up to 1.1 THz。\n- Slide 13 early 6G research 提到 up-to 4 GHz signal generation bandwidth、up to 8 GHz signal bandwidth、generic OFDM analysis、4096QAM / multi-modulation 與 flat signals over entire frequency range。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/MWC2025---WIC-INFRA.md"
+             },
+             "score": 4.315826
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/R&S PCB test solutions.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/MWC2025---WIC-INFRA.md",
+             "raw_refs": [
+              "raw/Market/OneNote/MWC2025---WIC-INFRA.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

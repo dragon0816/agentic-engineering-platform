@@ -1,0 +1,71 @@
+{
+ "id": "Q0911",
+ "grader": "1.2",
+ "coverage": 0.0,
+ "points": [
+  {
+   "n": 1,
+   "point": "Vault 的實際 RFIC/半導體案例：Samsung Foundry RF/Analog Enablement Group，DUT 為 5G SoC including VCO，使用 FSWP50（analyzer）+ SMW200A 44GHz / SGS100A（signal generator）",
+   "verified": true,
+   "label": "missing",
+   "why": "No Samsung RFIC case, 5G SoC/VCO, FSWP50 or SGS100A stated"
+  },
+  {
+   "n": 2,
+   "point": "該案例的量測在 probe station 上進行，並搭配自動化 VCO tuning 軟體，顯示儀器位於晶片級 characterization / validation 這一步",
+   "verified": true,
+   "label": "missing",
+   "why": "No probe station, automated VCO tuning, or chip-level characterization placement"
+  },
+  {
+   "n": 3,
+   "point": "測試區塊對儀器類別的 mapping：RefClk 與 PLL jitter performance 由 phase noise analyzers 與 signal generators 負責",
+   "verified": true,
+   "label": "missing",
+   "why": "No RefClk/PLL jitter to phase-noise analyzer + signal generator mapping"
+  },
+  {
+   "n": 4,
+   "point": "ADC / DAC frontend performance 由 spectrum analyzers 與 signal generators 負責，是 signal generator / analyzer 在高速數位 / 混訊晶片驗證中的另一個落點",
+   "verified": true,
+   "label": "missing",
+   "why": "No ADC/DAC frontend to spectrum analyzer + signal generator mapping"
+  },
+  {
+   "n": 5,
+   "point": "RFIC 的 bare board / socket / transmission line 評估這一段，來源明示的 fit 是 VNAs，而非 signal generator / analyzer",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not state bare-board/socket/transmission-line fit is VNA, not signal generator/analyzer"
+  },
+  {
+   "n": 6,
+   "point": "2026.7 DDT success stories 把 SoC testing 對應到 FSWP、SMA100B（RF and Microwave Signal Generator）與 ZNA67",
+   "verified": true,
+   "label": "missing",
+   "why": "No DDT SoC testing mapping to FSWP, SMA100B, ZNA67"
+  },
+  {
+   "n": 7,
+   "point": "Vault 明示不推論這些儀器在各應用中的角色分工（stimulus / analysis / phase noise / VNA / automation），因此「流程位置」只能到 mapping 層級",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Assigns stimulus/measurement/automation roles despite Vault limitation to mapping level"
+  },
+  {
+   "n": 8,
+   "point": "Samsung 案例被歸納為可包裝成 RF / analog enablement 測試方案，但軟體正式名稱與版本未標示",
+   "verified": true,
+   "label": "missing",
+   "why": "No RF/analog enablement packaging or note that software name/version is unspecified"
+  }
+ ],
+ "contradicted": 1,
+ "invented": [
+  "Signal Generator / Signal Analyzer sit in the lab test-execution and validation-measurement part of the workflow",
+  "The signal generator is the RF stimulus source connected to the DUT",
+  "The analyzer is the RF measurement receiver connected to the DUT output or emission port",
+  "pass/fail-style validation metrics",
+  "output power, frequency error, modulation quality/EVM, time alignment error, occupied bandwidth, ACLR, SEM/OBUE, spurious emissions, and transmitter intermodulation"
+ ]
+}

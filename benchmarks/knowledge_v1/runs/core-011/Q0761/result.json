@@ -1,0 +1,104 @@
+{
+ "id": "Q0761",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 40.797,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 43,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 11,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 57,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 85,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 51,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Data center full-spectrum connectivity.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 38,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 58,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 8,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Data center full-spectrum connectivity.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 52,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Data center full-spectrum connectivity.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "Dk/Df-related extraction",
+   "PDN impedance-type validation using network analyzers",
+   "CPO-adjacent testing",
+   "During material measurement, stackup selection, signal-integrity modeling/testing, sampling testing, and process monitoring"
+  ],
+  "reason": "The core answer is backed by the passages: ZNA/ZNB are mapped to PCB IL/TDR, high-speed trace, connector/cable high-speed testing, and optical VNA/SiPh contexts, and the SI/PI passages place network analyzers in PDN testing. Some workflow details are extrapolated from broader PCB-flow or data-center-connectivity passages rather than explicitly tied to a VNA, but the overall placement is a fair reading of the cited evidence.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

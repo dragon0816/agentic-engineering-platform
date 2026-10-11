@@ -1,0 +1,65 @@
+{
+ "id": "Q0211",
+ "grader": "1.2",
+ "coverage": 0.438,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's radar-specific instrument is the AREG800A automotive radar echo generator, not a signaling tester.",
+   "verified": true,
+   "label": "partial",
+   "why": "Identifies AREG800A radar echo/artificial-object role and not tester, but omits automotive-only context"
+  },
+  {
+   "n": 2,
+   "point": "Radar in the Vault's defense/counter-UAV context is only a detection sensor category with no test method or product detail.",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not mention counter-UAV radar as only a sensor category with no details"
+  },
+  {
+   "n": 3,
+   "point": "In the device testing value chain, signaling testers (CMX500/CMW500) occupy the signaling / protocol / application layer.",
+   "verified": true,
+   "label": "partial",
+   "why": "Mentions CMX500 signaling/radio link/application uses, but not full CMX500/CMW500 value-chain mapping"
+  },
+  {
+   "n": 4,
+   "point": "Non-signaling testers (CMP180/CMP200/CMW100) are mapped to the production / manufacturing stage.",
+   "verified": true,
+   "label": "partial",
+   "why": "Mentions CMP180 production testing, but omits CMP200/CMW100 and manufacturing-stage mapping"
+  },
+  {
+   "n": 5,
+   "point": "The CMP180 is explicitly characterized as a production / R&D non-signaling tester.",
+   "verified": true,
+   "label": "partial",
+   "why": "Says CMP180 is for production/wireless device testing, but not explicit production/R&D non-signaling characterization"
+  },
+  {
+   "n": 6,
+   "point": "In the defense (A&D) private-5G resilience work the signaling tester is used as the 5G network emulator for the communications link, not for radar.",
+   "verified": true,
+   "label": "partial",
+   "why": "Places tester on communications link, not radar, but omits private-5G resilience and network-emulator role"
+  },
+  {
+   "n": 7,
+   "point": "On air vehicles the signaling tester's role is link signaling plus multi-technology de-sense validation across co-located radios.",
+   "verified": true,
+   "label": "partial",
+   "why": "Mentions link/signaling validation, but not multi-technology de-sense across co-located radios"
+  },
+  {
+   "n": 8,
+   "point": "The Vault forbids inferring a signaling tester into the EMC/EME (system-level defense) test domain or the reverse.",
+   "verified": true,
+   "label": "partial",
+   "why": "Implied separation from radar/EMC/EME, but no explicit Vault prohibition or reverse inference"
+  }
+ ],
+ "contradicted": 0,
+ "invented": []
+}

@@ -1,0 +1,67 @@
+{
+ "id": "Q0671",
+ "grader": "1.2",
+ "coverage": 0.688,
+ "points": [
+  {
+   "n": 1,
+   "point": "The AI market requirement is stated as servers/data centers for AI and HPC deployment needing high-speed internal interconnect and interfaces (downstream tier of the high-speed SerDes eco-chain).",
+   "verified": true,
+   "label": "partial",
+   "why": "states AI/data-center connectivity and high-speed interfaces, but not the specific AI/HPC servers/data centers downstream-tier requirement"
+  },
+  {
+   "n": 2,
+   "point": "The measurable signal-integrity parameters for high-speed PCB/PCBA are IL, Xtalk, Eye diagram and TDR impedance (Slide 20 signal integrity flow).",
+   "verified": true,
+   "label": "covered",
+   "why": "lists IL, Xtalk, Eye diagram, and TDR impedance"
+  },
+  {
+   "n": 3,
+   "point": "The Interface Test block maps to the oscilloscope (Scopes) together with BERTs, AWGs and switch matrices — this is the required oscilloscope capability for high-speed interface validation.",
+   "verified": true,
+   "label": "covered",
+   "why": "maps Interface Test to scopes with BERTs, AWGs, and switch matrices, with eye/interface validation capability"
+  },
+  {
+   "n": 4,
+   "point": "The Power Distribution Network block maps to oscilloscopes plus network analyzers, giving a second oscilloscope capability leg (PDN / power integrity).",
+   "verified": true,
+   "label": "covered",
+   "why": "states PDN maps to scopes and network analyzers"
+  },
+  {
+   "n": 5,
+   "point": "On the power side, the AI requirement (Blackwell platform power doubling, high-density power demand) is mapped to MXO for power rail / multiphase DC / PI measurement.",
+   "verified": true,
+   "label": "partial",
+   "why": "maps power rail/multiphase DC/PI to MXO, but omits Blackwell power doubling/high-density demand"
+  },
+  {
+   "n": 6,
+   "point": "For AI server motherboard/PCBA, the measurable parameters PDN Target Z and power rail / multiphase DC / PI are mapped to R&S ZNL and MXO respectively.",
+   "verified": true,
+   "label": "partial",
+   "why": "covers power rail/multiphase DC/PI to MXO, but omits PDN Target Z and R&S ZNL mapping"
+  },
+  {
+   "n": 7,
+   "point": "The Vault explicitly records that the source provides no oscilloscope model, bandwidth, data rate or test standard, so the chain cannot be quantified into a scope specification.",
+   "verified": true,
+   "label": "partial",
+   "why": "notes no bandwidth/sample rate/formal specs, but does not fully state no model, data rate, or test standard"
+  },
+  {
+   "n": 8,
+   "point": "The instrument mappings carry no option, firmware, fixture or calibration conditions, limiting them to sales-level clues rather than a formal test configuration.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions no option codes/fixtures/formal specs, but omits firmware, calibration, and sales-level limitation"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "Oscilloscope-family mapping is represented by MXO"
+ ]
+}

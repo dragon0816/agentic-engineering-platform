@@ -1,0 +1,69 @@
+{
+ "id": "Q0646",
+ "grader": "1.2",
+ "coverage": 0.562,
+ "points": [
+  {
+   "n": 1,
+   "point": "最強機會之一是以 CMX500 為核心的 Generative AI user experience testing，用 TTFT／TPS 量化 generative AI 應用的使用者體驗（R&S 與 China Mobile Research Institute, MWC Shanghai 2026）。",
+   "verified": true,
+   "label": "partial",
+   "why": "有 CMX500、R&S/CMRI、TTFT/TPS，但未明說 MWC Shanghai 2026"
+  },
+  {
+   "n": 2,
+   "point": "該機會的差異化來自 signaling tester 能可控地配置網路與無線條件（network parameters、fading、latency、jitter、RF impairments），非 signaling RF tester 無此能力。",
+   "verified": true,
+   "label": "partial",
+   "why": "有列可控 network/fading/latency/jitter/RF impairments，但未說非 signaling RF tester 做不到"
+  },
+  {
+   "n": 3,
+   "point": "此 testbed 的宣稱價值包含支援 on-device generative AI 應用設計最佳化與 future network optimization 的 reference points。",
+   "verified": true,
+   "label": "missing",
+   "why": "未提 on-device generative AI 設計最佳化或 future network optimization reference points"
+  },
+  {
+   "n": 4,
+   "point": "第二個機會是 AI/ML air-interface 驗證：CMX500 被配置成 AI-enabled base station emulator，用於 two-sided AI model 的 AI-enhanced CSI feedback 驗證（KT / Qualcomm / R&S）。",
+   "verified": true,
+   "label": "partial",
+   "why": "有 AI-enhanced CSI 與 CMX500 作 AI-enabled base station emulator，但缺 KT 與 two-sided AI model"
+  },
+  {
+   "n": 5,
+   "point": "該 PoC 的量化宣稱是相較非 AI 技術約 50% downlink throughput 提升，是支撐 5G-Advanced / 6G AI 驗證商機的主要證據。",
+   "verified": true,
+   "label": "covered",
+   "why": "明確提到相較 conventional non-AI 約 50% downlink throughput increase"
+  },
+  {
+   "n": 6,
+   "point": "第三個機會是把 AI 用在 signaling tester 的測試工作流本身：CMX500 AI Scripting Assistant 以 generative AI 與 NLP 協助生成、擴充與解釋 XLAPI scripts。",
+   "verified": true,
+   "label": "covered",
+   "why": "明確提到 generative AI/NLP 生成、擴充、理解 XLAPI scripts"
+  },
+  {
+   "n": 7,
+   "point": "需求面證據：R&S AI Workplace 客戶問卷（Latest Update 2026-08-19）正在蒐集 virtual testing 與 AI-assisted, agentic test workflows 的需求、限制、工具整合與成功指標。",
+   "verified": true,
+   "label": "missing",
+   "why": "未說 R&S AI Workplace 問卷蒐集 virtual testing 與 agentic workflows 需求等"
+  },
+  {
+   "n": 8,
+   "point": "所有 AI 相關證據都是 PR／demonstration 層級，不是正式 test specification、standardized benchmark 或 product datasheet，不可當成已驗證規格或商機。",
+   "verified": true,
+   "label": "covered",
+   "why": "限制段說多項來源為 PR/demo/news/mapping，非正式規格或 benchmark"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "AI server non-signaling electrical test 是 AI 供應鏈機會",
+  "R&S ZNA / R&S ZNB non-signaling electrical test | AI server PCB / SI / high-speed interconnect",
+  "R&S FSWP non-signaling electrical test | AI server clock / jitter / phase noise / LDO noise"
+ ]
+}

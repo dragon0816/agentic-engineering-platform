@@ -1,0 +1,1910 @@
+{
+ "question": {
+  "id": "Q0646",
+  "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in AI, and what evidence supports each opportunity?",
+  "market": "AI",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "strategic",
+  "difficulty": "L5"
+ },
+ "session_id": "conversation-772bb992a03349a5b76f4e043de6f2fb",
+ "exchange": {
+  "sent": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in AI, and what evidence supports each opportunity?",
+  "http_status": 200,
+  "seconds": 125.922,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-772bb992a03349a5b76f4e043de6f2fb",
+    "actor": "leo.chi",
+    "title": "Based on current vault evidence, what are the strongest opportunities fo…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T20:58:17.342350Z",
+    "updated_at": "2026-10-11T21:00:23.105956Z",
+    "messages": [
+     {
+      "message_id": "message-6308a35c6e4c4727959dfdb605870016",
+      "role": "user",
+      "text": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in AI, and what evidence supports each opportunity?",
+      "created_at": "2026-10-11T20:58:17.367299Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-d6fb7601e963430da80b2d55b05cf583",
+      "role": "assistant",
+      "text": "### 推薦先賣\nCMX500 的 generative AI application user-experience testing 是最直接的 AI + signaling tester 機會，因為 R&S 與 China Mobile Research Institute 展示的 solution based on R&S CMX500，可在 diverse network conditions 下量化 generative AI applications 的 end-user experience [43]。\n這個 testbed 使用 CMX500 與 smart terminal 建立 radio connection，並可配置 network parameters、channel fading models、latency、jitter、RF impairments 等 variables [47]。\n這個 testbed 的 KPI 包含 Time to First Token（TTFT）與 Tokens Per Second（TPS） [43]。\nCMX500 的 AI-enhanced CSI / 6G proof-of-concept 是第二個直接 AI + signaling tester 機會，因為 Qualcomm AI-enabled wireless device prototype 連接到 CMX500，且 CMX500 被配置為 AI-enabled base station emulator [54]。\n該展示宣稱相較 conventional non-AI technology，downlink throughput increased by approximately 50% [54]。\nCMX500 的 application testing capabilities 被用來展示 performance gain 如何轉換成 enhanced video streaming user experience [54]。\nCMX500 AI Scripting Assistant 是 tester automation 機會，因為它是 R&S CMX500 5G one-box signaling tester 的 AI-powered scripting tool，使用 generative AI 與 natural language processing 協助生成、擴充與理解 XLAPI scripts [14]。\nCMX500 AI Scripting Assistant 的 domain-specific applications 包含 R&D 5G NR protocol testing、application testing 與 CMX instrument automation [15]。\nAI server non-signaling electrical test 是 AI 供應鏈機會，因為 AISeverEcosystem R&S solution mapping 將 AI server ecosystem 分類與 R&S Solution 欄位對應為 sales / test solution 線索 [83]。\nAI server PCB / interconnect 的 non-signaling electrical test 線索包含 R&S ZNA / R&S ZNB 用於 IL、TDR、high speed cable 與 high speed trace test [85]。\nAI server clock / jitter / phase-noise / LDO-noise 的 non-signaling electrical test 線索包含 R&S FSWP 用於 LDO NSD test、clock jitter test、jitter / phase noise test [84]。\nCMP180 的 AI 直連機會目前未被知識庫證實；知識庫只確認 CMP180 在 WLAN production phase 以 non-signaling mode 執行 RF measurements，以節省時間 [12]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 signaling tester | Generative AI application user-experience testing | 知識庫確認 CMX500 可配置 network parameters、channel fading models、latency、jitter 與 RF impairments。[47] | 它被展示為 based on CMX500 的 generative AI applications test solution，可量化 end-user experience。[43] | KPI 包含 TTFT 與 TPS。[43] | 來源未提供 TTFT / TPS measurement methodology、prompt set、LLM model、server / cloud configuration、terminal model、radio scenario table 或 reproducibility data。[45] |\n| R&S CMX500 signaling tester | AI-enhanced CSI feedback / 6G radio proof-of-concept | 知識庫確認 CMX500 在展示中 configured as an AI-enabled base station emulator。[54] | 它與 Qualcomm AI-enabled wireless device prototype 搭配，用於展示 AI-enhanced radio transmission 的 downlink throughput gain。[55] | 來源宣稱約 50% downlink throughput increase compared to conventional non-AI technology。[55] | 來源未提供完整 measurement methodology、test conditions 或 reproducibility data。[56] |\n| CMX500 AI Scripting Assistant | AI-assisted tester automation | 知識庫確認它可 generate accurate XLAPI scripts、extend existing scripts、provide explanations for given scripts。[81] | 它針對 CMX500 5G one-box signaling tester，協助 test engineers 生成、擴充與理解 XLAPI scripts。[14] | 它的 domain-specific applications 包含 R&D 5G NR protocol testing、application testing 與 CMX instrument automation。[15] | 來源未列 formal product version、order number、license code、support matrix 或 hardware / software prerequisites。[79] |\n| R&S ZNA / R&S ZNB non-signaling electrical test | AI server PCB / SI / high-speed interconnect | 知識庫確認 ZNA / ZNB 在 AI server mapping 中對應 IL、TDR、high speed cable 與 high speed trace test。[85] | AISeverEcosystem mapping 是 AI server ecosystem 分類與 R&S Solution 欄位的 sales / test solution 線索。[83] | ServerRack sheet 的 PCB 分類列出 20+層UBB、高階ABF、低Dk CCL，且 R&S Solution 欄列 ZNA / ZNB：IL、TDR。[88] | 該 mapping 不是 formal datasheet、application note、configuration guide 或 ordering guide。[17] |\n| R&S FSWP non-signaling electrical test | AI server clock / jitter / phase noise / LDO noise | 知識庫確認 FSWP 在伺服器主機板分類中列為 LDO NSD test、clock jitter test，且在網通交換機分類中列為 jitter / phase noise test。[84] | AI server mapping 將 FSWP 放入伺服器主機板、網通交換機、電源供應器與 IC / high-speed transmission solution 欄。[84] | AISeverEcosystem 的 ICs sheet 將 R&S FSWP 放入 IC / 矽智財 / 製程與高速傳輸 IC 相關分類。[21] | 來源未提供 option、firmware、fixture 或 calibration 條件。[18] |\n| R&S CMP180 non-signaling radio tester | Wi-Fi production non-signaling RF testing | 知識庫確認 CMP180 支援 Wi-Fi 6E、Wi-Fi 7 與 5G NR FR1 up to 8 GHz，bandwidths up to 500 MHz。[12] | WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間，且 CMP180 被定位為 optimized for this purpose。[12] | CMP180 integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 MIMO testing。[12] | 知識庫未證實 CMP180 的 Wi-Fi production non-signaling RF testing 是 AI use case。 |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Generative AI app over 5G / future wireless | CMX500 + smart terminal + host PC software | 用 CMX500 控制 radio connection、network parameters、fading、latency、jitter 與 RF impairments，觀察 TTFT / TPS。[43][47] | Host PC software 名稱、版本、order number 與資料格式未標示。[45] |\n| AI-native air interface / 6G PoC | CMX500 + AI-enabled wireless device prototype | 用 CMX500 as AI-enabled base station emulator 驗證 AI-enhanced CSI feedback 與 throughput gain。[54][55] | 該 AI-enabled base station emulator mode 是否為可訂購功能、prototype feature 或展示用配置未說明。[56] |\n| CMX500 test engineering productivity | CMX500 AI Scripting Assistant + XLAPI | 用 generative AI / NLP 生成、擴充、解釋 XLAPI scripts，支援 R&D 5G NR protocol testing、application testing 與 CMX automation。[14][15][81] | Deployment options、license、版本、資料治理與適用 CMX500 software release 仍未標示。[50] |\n| AI server PCB / interconnect validation | R&S ZNA / R&S ZNB | 以 IL、TDR、high speed cable 與 high speed trace test 切入 AI server PCB、連接器與高速通道。[85][86] | 來源未提供正式 test setup、option、fixture、frequency 或 sales kit 正文。[86] |\n| AI server clock / power noise validation | R&S FSWP | 以 LDO NSD、clock jitter、jitter / phase noise test 切入 server motherboard、network switch、power supply 與 high-speed IC。[84] | 來源未提供測試條件。[84] |\n### 限制\nGenerative AI user-experience testing 目前是 PR / demonstration-level evidence，不是正式 test specification、standardized benchmark 或 product datasheet [46]。\nAI-enhanced CSI feedback 的約 50% throughput gain 是 PR demonstration claim，且不可改寫成 CMX500 formal specification、Qualcomm prototype commercial performance 或 6G standard requirement [52]。\nCMX500 AI Scripting Assistant 來源是新聞稿，不是 specifications、deployment guide 或 security architecture [50]。\nAISeverEcosystem R&S solution mapping 只代表 Excel 表中的 sales / test solution 線索，不代表正式產品配置、客戶關係或已驗證商機 [83]。\nCMP180 的 Wi-Fi 7 production non-signaling RF testing 來源是 PR / demonstration positioning，不是正式 datasheet、configuration guide、test case list 或 certification document [77]。\n\n來源：\n[12] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[14] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[15] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[17] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[18] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[21] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n[43] Wiki：Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[45] Wiki：Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[46] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[47] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[50] Wiki：AI-assisted agentic test workflows（來源：`AIW_Products_Customer_Questionnaire.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[52] Wiki：AI-enhanced CSI feedback（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[54] Wiki：AI-enhanced CSI feedback（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[55] Wiki：6G AI proof-of-concept demonstration（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[56] Wiki：6G AI proof-of-concept demonstration（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[77] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[79] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[81] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[83] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[84] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[85] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[86] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[88] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）",
+      "created_at": "2026-10-11T21:00:23.105956Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-bdbffcbd7d95450eaac43f549f2a15dc",
+       "request_id": "request-bdbffcbd7d95450eaac43f549f2a15dc",
+       "span_id": "span-bdbffcbd7d95450eaac43f549f2a15dc",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "### 推薦先賣\nCMX500 的 generative AI application user-experience testing 是最直接的 AI + signaling tester 機會，因為 R&S 與 China Mobile Research Institute 展示的 solution based on R&S CMX500，可在 diverse network conditions 下量化 generative AI applications 的 end-user experience [43]。\n這個 testbed 使用 CMX500 與 smart terminal 建立 radio connection，並可配置 network parameters、channel fading models、latency、jitter、RF impairments 等 variables [47]。\n這個 testbed 的 KPI 包含 Time to First Token（TTFT）與 Tokens Per Second（TPS） [43]。\nCMX500 的 AI-enhanced CSI / 6G proof-of-concept 是第二個直接 AI + signaling tester 機會，因為 Qualcomm AI-enabled wireless device prototype 連接到 CMX500，且 CMX500 被配置為 AI-enabled base station emulator [54]。\n該展示宣稱相較 conventional non-AI technology，downlink throughput increased by approximately 50% [54]。\nCMX500 的 application testing capabilities 被用來展示 performance gain 如何轉換成 enhanced video streaming user experience [54]。\nCMX500 AI Scripting Assistant 是 tester automation 機會，因為它是 R&S CMX500 5G one-box signaling tester 的 AI-powered scripting tool，使用 generative AI 與 natural language processing 協助生成、擴充與理解 XLAPI scripts [14]。\nCMX500 AI Scripting Assistant 的 domain-specific applications 包含 R&D 5G NR protocol testing、application testing 與 CMX instrument automation [15]。\nAI server non-signaling electrical test 是 AI 供應鏈機會，因為 AISeverEcosystem R&S solution mapping 將 AI server ecosystem 分類與 R&S Solution 欄位對應為 sales / test solution 線索 [83]。\nAI server PCB / interconnect 的 non-signaling electrical test 線索包含 R&S ZNA / R&S ZNB 用於 IL、TDR、high speed cable 與 high speed trace test [85]。\nAI server clock / jitter / phase-noise / LDO-noise 的 non-signaling electrical test 線索包含 R&S FSWP 用於 LDO NSD test、clock jitter test、jitter / phase noise test [84]。\nCMP180 的 AI 直連機會目前未被知識庫證實；知識庫只確認 CMP180 在 WLAN production phase 以 non-signaling mode 執行 RF measurements，以節省時間 [12]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 signaling tester | Generative AI application user-experience testing | 知識庫確認 CMX500 可配置 network parameters、channel fading models、latency、jitter 與 RF impairments。[47] | 它被展示為 based on CMX500 的 generative AI applications test solution，可量化 end-user experience。[43] | KPI 包含 TTFT 與 TPS。[43] | 來源未提供 TTFT / TPS measurement methodology、prompt set、LLM model、server / cloud configuration、terminal model、radio scenario table 或 reproducibility data。[45] |\n| R&S CMX500 signaling tester | AI-enhanced CSI feedback / 6G radio proof-of-concept | 知識庫確認 CMX500 在展示中 configured as an AI-enabled base station emulator。[54] | 它與 Qualcomm AI-enabled wireless device prototype 搭配，用於展示 AI-enhanced radio transmission 的 downlink throughput gain。[55] | 來源宣稱約 50% downlink throughput increase compared to conventional non-AI technology。[55] | 來源未提供完整 measurement methodology、test conditions 或 reproducibility data。[56] |\n| CMX500 AI Scripting Assistant | AI-assisted tester automation | 知識庫確認它可 generate accurate XLAPI scripts、extend existing scripts、provide explanations for given scripts。[81] | 它針對 CMX500 5G one-box signaling tester，協助 test engineers 生成、擴充與理解 XLAPI scripts。[14] | 它的 domain-specific applications 包含 R&D 5G NR protocol testing、application testing 與 CMX instrument automation。[15] | 來源未列 formal product version、order number、license code、support matrix 或 hardware / software prerequisites。[79] |\n| R&S ZNA / R&S ZNB non-signaling electrical test | AI server PCB / SI / high-speed interconnect | 知識庫確認 ZNA / ZNB 在 AI server mapping 中對應 IL、TDR、high speed cable 與 high speed trace test。[85] | AISeverEcosystem mapping 是 AI server ecosystem 分類與 R&S Solution 欄位的 sales / test solution 線索。[83] | ServerRack sheet 的 PCB 分類列出 20+層UBB、高階ABF、低Dk CCL，且 R&S Solution 欄列 ZNA / ZNB：IL、TDR。[88] | 該 mapping 不是 formal datasheet、application note、configuration guide 或 ordering guide。[17] |\n| R&S FSWP non-signaling electrical test | AI server clock / jitter / phase noise / LDO noise | 知識庫確認 FSWP 在伺服器主機板分類中列為 LDO NSD test、clock jitter test，且在網通交換機分類中列為 jitter / phase noise test。[84] | AI server mapping 將 FSWP 放入伺服器主機板、網通交換機、電源供應器與 IC / high-speed transmission solution 欄。[84] | AISeverEcosystem 的 ICs sheet 將 R&S FSWP 放入 IC / 矽智財 / 製程與高速傳輸 IC 相關分類。[21] | 來源未提供 option、firmware、fixture 或 calibration 條件。[18] |\n| R&S CMP180 non-signaling radio tester | Wi-Fi production non-signaling RF testing | 知識庫確認 CMP180 支援 Wi-Fi 6E、Wi-Fi 7 與 5G NR FR1 up to 8 GHz，bandwidths up to 500 MHz。[12] | WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間，且 CMP180 被定位為 optimized for this purpose。[12] | CMP180 integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 MIMO testing。[12] | 知識庫未證實 CMP180 的 Wi-Fi production non-signaling RF testing 是 AI use case。 |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Generative AI app over 5G / future wireless | CMX500 + smart terminal + host PC software | 用 CMX500 控制 radio connection、network parameters、fading、latency、jitter 與 RF impairments，觀察 TTFT / TPS。[43][47] | Host PC software 名稱、版本、order number 與資料格式未標示。[45] |\n| AI-native air interface / 6G PoC | CMX500 + AI-enabled wireless device prototype | 用 CMX500 as AI-enabled base station emulator 驗證 AI-enhanced CSI feedback 與 throughput gain。[54][55] | 該 AI-enabled base station emulator mode 是否為可訂購功能、prototype feature 或展示用配置未說明。[56] |\n| CMX500 test engineering productivity | CMX500 AI Scripting Assistant + XLAPI | 用 generative AI / NLP 生成、擴充、解釋 XLAPI scripts，支援 R&D 5G NR protocol testing、application testing 與 CMX automation。[14][15][81] | Deployment options、license、版本、資料治理與適用 CMX500 software release 仍未標示。[50] |\n| AI server PCB / interconnect validation | R&S ZNA / R&S ZNB | 以 IL、TDR、high speed cable 與 high speed trace test 切入 AI server PCB、連接器與高速通道。[85][86] | 來源未提供正式 test setup、option、fixture、frequency 或 sales kit 正文。[86] |\n| AI server clock / power noise validation | R&S FSWP | 以 LDO NSD、clock jitter、jitter / phase noise test 切入 server motherboard、network switch、power supply 與 high-speed IC。[84] | 來源未提供測試條件。[84] |\n### 限制\nGenerative AI user-experience testing 目前是 PR / demonstration-level evidence，不是正式 test specification、standardized benchmark 或 product datasheet [46]。\nAI-enhanced CSI feedback 的約 50% throughput gain 是 PR demonstration claim，且不可改寫成 CMX500 formal specification、Qualcomm prototype commercial performance 或 6G standard requirement [52]。\nCMX500 AI Scripting Assistant 來源是新聞稿，不是 specifications、deployment guide 或 security architecture [50]。\nAISeverEcosystem R&S solution mapping 只代表 Excel 表中的 sales / test solution 線索，不代表正式產品配置、客戶關係或已驗證商機 [83]。\nCMP180 的 Wi-Fi 7 production non-signaling RF testing 來源是 PR / demonstration positioning，不是正式 datasheet、configuration guide、test case list 或 certification document [77]。\n\n來源：\n[12] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[14] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[15] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[17] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[18] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[21] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n[43] Wiki：Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[45] Wiki：Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[46] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[47] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[50] Wiki：AI-assisted agentic test workflows（來源：`AIW_Products_Customer_Questionnaire.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[52] Wiki：AI-enhanced CSI feedback（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[54] Wiki：AI-enhanced CSI feedback（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[55] Wiki：6G AI proof-of-concept demonstration（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[56] Wiki：6G AI proof-of-concept demonstration（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[77] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[79] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[81] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[83] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[84] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[85] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[86] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[88] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-bdbffcbd7d95450eaac43f549f2a15dc",
+      "request_id": "request-bdbffcbd7d95450eaac43f549f2a15dc",
+      "span_id": "span-bdbffcbd7d95450eaac43f549f2a15dc",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-bdbffcbd7d95450eaac43f549f2a15dc",
+       "request_id": "request-bdbffcbd7d95450eaac43f549f2a15dc",
+       "span_id": "span-bdbffcbd7d95450eaac43f549f2a15dc",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "### 推薦先賣\nCMX500 的 generative AI application user-experience testing 是最直接的 AI + signaling tester 機會，因為 R&S 與 China Mobile Research Institute 展示的 solution based on R&S CMX500，可在 diverse network conditions 下量化 generative AI applications 的 end-user experience [43]。\n這個 testbed 使用 CMX500 與 smart terminal 建立 radio connection，並可配置 network parameters、channel fading models、latency、jitter、RF impairments 等 variables [47]。\n這個 testbed 的 KPI 包含 Time to First Token（TTFT）與 Tokens Per Second（TPS） [43]。\nCMX500 的 AI-enhanced CSI / 6G proof-of-concept 是第二個直接 AI + signaling tester 機會，因為 Qualcomm AI-enabled wireless device prototype 連接到 CMX500，且 CMX500 被配置為 AI-enabled base station emulator [54]。\n該展示宣稱相較 conventional non-AI technology，downlink throughput increased by approximately 50% [54]。\nCMX500 的 application testing capabilities 被用來展示 performance gain 如何轉換成 enhanced video streaming user experience [54]。\nCMX500 AI Scripting Assistant 是 tester automation 機會，因為它是 R&S CMX500 5G one-box signaling tester 的 AI-powered scripting tool，使用 generative AI 與 natural language processing 協助生成、擴充與理解 XLAPI scripts [14]。\nCMX500 AI Scripting Assistant 的 domain-specific applications 包含 R&D 5G NR protocol testing、application testing 與 CMX instrument automation [15]。\nAI server non-signaling electrical test 是 AI 供應鏈機會，因為 AISeverEcosystem R&S solution mapping 將 AI server ecosystem 分類與 R&S Solution 欄位對應為 sales / test solution 線索 [83]。\nAI server PCB / interconnect 的 non-signaling electrical test 線索包含 R&S ZNA / R&S ZNB 用於 IL、TDR、high speed cable 與 high speed trace test [85]。\nAI server clock / jitter / phase-noise / LDO-noise 的 non-signaling electrical test 線索包含 R&S FSWP 用於 LDO NSD test、clock jitter test、jitter / phase noise test [84]。\nCMP180 的 AI 直連機會目前未被知識庫證實；知識庫只確認 CMP180 在 WLAN production phase 以 non-signaling mode 執行 RF measurements，以節省時間 [12]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 signaling tester | Generative AI application user-experience testing | 知識庫確認 CMX500 可配置 network parameters、channel fading models、latency、jitter 與 RF impairments。[47] | 它被展示為 based on CMX500 的 generative AI applications test solution，可量化 end-user experience。[43] | KPI 包含 TTFT 與 TPS。[43] | 來源未提供 TTFT / TPS measurement methodology、prompt set、LLM model、server / cloud configuration、terminal model、radio scenario table 或 reproducibility data。[45] |\n| R&S CMX500 signaling tester | AI-enhanced CSI feedback / 6G radio proof-of-concept | 知識庫確認 CMX500 在展示中 configured as an AI-enabled base station emulator。[54] | 它與 Qualcomm AI-enabled wireless device prototype 搭配，用於展示 AI-enhanced radio transmission 的 downlink throughput gain。[55] | 來源宣稱約 50% downlink throughput increase compared to conventional non-AI technology。[55] | 來源未提供完整 measurement methodology、test conditions 或 reproducibility data。[56] |\n| CMX500 AI Scripting Assistant | AI-assisted tester automation | 知識庫確認它可 generate accurate XLAPI scripts、extend existing scripts、provide explanations for given scripts。[81] | 它針對 CMX500 5G one-box signaling tester，協助 test engineers 生成、擴充與理解 XLAPI scripts。[14] | 它的 domain-specific applications 包含 R&D 5G NR protocol testing、application testing 與 CMX instrument automation。[15] | 來源未列 formal product version、order number、license code、support matrix 或 hardware / software prerequisites。[79] |\n| R&S ZNA / R&S ZNB non-signaling electrical test | AI server PCB / SI / high-speed interconnect | 知識庫確認 ZNA / ZNB 在 AI server mapping 中對應 IL、TDR、high speed cable 與 high speed trace test。[85] | AISeverEcosystem mapping 是 AI server ecosystem 分類與 R&S Solution 欄位的 sales / test solution 線索。[83] | ServerRack sheet 的 PCB 分類列出 20+層UBB、高階ABF、低Dk CCL，且 R&S Solution 欄列 ZNA / ZNB：IL、TDR。[88] | 該 mapping 不是 formal datasheet、application note、configuration guide 或 ordering guide。[17] |\n| R&S FSWP non-signaling electrical test | AI server clock / jitter / phase noise / LDO noise | 知識庫確認 FSWP 在伺服器主機板分類中列為 LDO NSD test、clock jitter test，且在網通交換機分類中列為 jitter / phase noise test。[84] | AI server mapping 將 FSWP 放入伺服器主機板、網通交換機、電源供應器與 IC / high-speed transmission solution 欄。[84] | AISeverEcosystem 的 ICs sheet 將 R&S FSWP 放入 IC / 矽智財 / 製程與高速傳輸 IC 相關分類。[21] | 來源未提供 option、firmware、fixture 或 calibration 條件。[18] |\n| R&S CMP180 non-signaling radio tester | Wi-Fi production non-signaling RF testing | 知識庫確認 CMP180 支援 Wi-Fi 6E、Wi-Fi 7 與 5G NR FR1 up to 8 GHz，bandwidths up to 500 MHz。[12] | WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間，且 CMP180 被定位為 optimized for this purpose。[12] | CMP180 integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 MIMO testing。[12] | 知識庫未證實 CMP180 的 Wi-Fi production non-signaling RF testing 是 AI use case。 |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Generative AI app over 5G / future wireless | CMX500 + smart terminal + host PC software | 用 CMX500 控制 radio connection、network parameters、fading、latency、jitter 與 RF impairments，觀察 TTFT / TPS。[43][47] | Host PC software 名稱、版本、order number 與資料格式未標示。[45] |\n| AI-native air interface / 6G PoC | CMX500 + AI-enabled wireless device prototype | 用 CMX500 as AI-enabled base station emulator 驗證 AI-enhanced CSI feedback 與 throughput gain。[54][55] | 該 AI-enabled base station emulator mode 是否為可訂購功能、prototype feature 或展示用配置未說明。[56] |\n| CMX500 test engineering productivity | CMX500 AI Scripting Assistant + XLAPI | 用 generative AI / NLP 生成、擴充、解釋 XLAPI scripts，支援 R&D 5G NR protocol testing、application testing 與 CMX automation。[14][15][81] | Deployment options、license、版本、資料治理與適用 CMX500 software release 仍未標示。[50] |\n| AI server PCB / interconnect validation | R&S ZNA / R&S ZNB | 以 IL、TDR、high speed cable 與 high speed trace test 切入 AI server PCB、連接器與高速通道。[85][86] | 來源未提供正式 test setup、option、fixture、frequency 或 sales kit 正文。[86] |\n| AI server clock / power noise validation | R&S FSWP | 以 LDO NSD、clock jitter、jitter / phase noise test 切入 server motherboard、network switch、power supply 與 high-speed IC。[84] | 來源未提供測試條件。[84] |\n### 限制\nGenerative AI user-experience testing 目前是 PR / demonstration-level evidence，不是正式 test specification、standardized benchmark 或 product datasheet [46]。\nAI-enhanced CSI feedback 的約 50% throughput gain 是 PR demonstration claim，且不可改寫成 CMX500 formal specification、Qualcomm prototype commercial performance 或 6G standard requirement [52]。\nCMX500 AI Scripting Assistant 來源是新聞稿，不是 specifications、deployment guide 或 security architecture [50]。\nAISeverEcosystem R&S solution mapping 只代表 Excel 表中的 sales / test solution 線索，不代表正式產品配置、客戶關係或已驗證商機 [83]。\nCMP180 的 Wi-Fi 7 production non-signaling RF testing 來源是 PR / demonstration positioning，不是正式 datasheet、configuration guide、test case list 或 certification document [77]。\n\n來源：\n[12] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[14] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[15] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[17] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[18] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[21] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n[43] Wiki：Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[45] Wiki：Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[46] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[47] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[50] Wiki：AI-assisted agentic test workflows（來源：`AIW_Products_Customer_Questionnaire.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[52] Wiki：AI-enhanced CSI feedback（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[54] Wiki：AI-enhanced CSI feedback（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[55] Wiki：6G AI proof-of-concept demonstration（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[56] Wiki：6G AI proof-of-concept demonstration（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[77] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[79] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[81] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[83] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[84] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[85] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[86] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[88] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_OLcwQ87LyHjnPPCYHZx1gICa",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "### 推薦先賣\nCMX500 的 generative AI application user-experience testing 是最直接的 AI + signaling tester 機會，因為 R&S 與 China Mobile Research Institute 展示的 solution based on R&S CMX500，可在 diverse network conditions 下量化 generative AI applications 的 end-user experience [43]。\n這個 testbed 使用 CMX500 與 smart terminal 建立 radio connection，並可配置 network parameters、channel fading models、latency、jitter、RF impairments 等 variables [47]。\n這個 testbed 的 KPI 包含 Time to First Token（TTFT）與 Tokens Per Second（TPS） [43]。\nCMX500 的 AI-enhanced CSI / 6G proof-of-concept 是第二個直接 AI + signaling tester 機會，因為 Qualcomm AI-enabled wireless device prototype 連接到 CMX500，且 CMX500 被配置為 AI-enabled base station emulator [54]。\n該展示宣稱相較 conventional non-AI technology，downlink throughput increased by approximately 50% [54]。\nCMX500 的 application testing capabilities 被用來展示 performance gain 如何轉換成 enhanced video streaming user experience [54]。\nCMX500 AI Scripting Assistant 是 tester automation 機會，因為它是 R&S CMX500 5G one-box signaling tester 的 AI-powered scripting tool，使用 generative AI 與 natural language processing 協助生成、擴充與理解 XLAPI scripts [14]。\nCMX500 AI Scripting Assistant 的 domain-specific applications 包含 R&D 5G NR protocol testing、application testing 與 CMX instrument automation [15]。\nAI server non-signaling electrical test 是 AI 供應鏈機會，因為 AISeverEcosystem R&S solution mapping 將 AI server ecosystem 分類與 R&S Solution 欄位對應為 sales / test solution 線索 [83]。\nAI server PCB / interconnect 的 non-signaling electrical test 線索包含 R&S ZNA / R&S ZNB 用於 IL、TDR、high speed cable 與 high speed trace test [85]。\nAI server clock / jitter / phase-noise / LDO-noise 的 non-signaling electrical test 線索包含 R&S FSWP 用於 LDO NSD test、clock jitter test、jitter / phase noise test [84]。\nCMP180 的 AI 直連機會目前未被知識庫證實；知識庫只確認 CMP180 在 WLAN production phase 以 non-signaling mode 執行 RF measurements，以節省時間 [12]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 signaling tester | Generative AI application user-experience testing | 知識庫確認 CMX500 可配置 network parameters、channel fading models、latency、jitter 與 RF impairments。[47] | 它被展示為 based on CMX500 的 generative AI applications test solution，可量化 end-user experience。[43] | KPI 包含 TTFT 與 TPS。[43] | 來源未提供 TTFT / TPS measurement methodology、prompt set、LLM model、server / cloud configuration、terminal model、radio scenario table 或 reproducibility data。[45] |\n| R&S CMX500 signaling tester | AI-enhanced CSI feedback / 6G radio proof-of-concept | 知識庫確認 CMX500 在展示中 configured as an AI-enabled base station emulator。[54] | 它與 Qualcomm AI-enabled wireless device prototype 搭配，用於展示 AI-enhanced radio transmission 的 downlink throughput gain。[55] | 來源宣稱約 50% downlink throughput increase compared to conventional non-AI technology。[55] | 來源未提供完整 measurement methodology、test conditions 或 reproducibility data。[56] |\n| CMX500 AI Scripting Assistant | AI-assisted tester automation | 知識庫確認它可 generate accurate XLAPI scripts、extend existing scripts、provide explanations for given scripts。[81] | 它針對 CMX500 5G one-box signaling tester，協助 test engineers 生成、擴充與理解 XLAPI scripts。[14] | 它的 domain-specific applications 包含 R&D 5G NR protocol testing、application testing 與 CMX instrument automation。[15] | 來源未列 formal product version、order number、license code、support matrix 或 hardware / software prerequisites。[79] |\n| R&S ZNA / R&S ZNB non-signaling electrical test | AI server PCB / SI / high-speed interconnect | 知識庫確認 ZNA / ZNB 在 AI server mapping 中對應 IL、TDR、high speed cable 與 high speed trace test。[85] | AISeverEcosystem mapping 是 AI server ecosystem 分類與 R&S Solution 欄位的 sales / test solution 線索。[83] | ServerRack sheet 的 PCB 分類列出 20+層UBB、高階ABF、低Dk CCL，且 R&S Solution 欄列 ZNA / ZNB：IL、TDR。[88] | 該 mapping 不是 formal datasheet、application note、configuration guide 或 ordering guide。[17] |\n| R&S FSWP non-signaling electrical test | AI server clock / jitter / phase noise / LDO noise | 知識庫確認 FSWP 在伺服器主機板分類中列為 LDO NSD test、clock jitter test，且在網通交換機分類中列為 jitter / phase noise test。[84] | AI server mapping 將 FSWP 放入伺服器主機板、網通交換機、電源供應器與 IC / high-speed transmission solution 欄。[84] | AISeverEcosystem 的 ICs sheet 將 R&S FSWP 放入 IC / 矽智財 / 製程與高速傳輸 IC 相關分類。[21] | 來源未提供 option、firmware、fixture 或 calibration 條件。[18] |\n| R&S CMP180 non-signaling radio tester | Wi-Fi production non-signaling RF testing | 知識庫確認 CMP180 支援 Wi-Fi 6E、Wi-Fi 7 與 5G NR FR1 up to 8 GHz，bandwidths up to 500 MHz。[12] | WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間，且 CMP180 被定位為 optimized for this purpose。[12] | CMP180 integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 MIMO testing。[12] | 知識庫未證實 CMP180 的 Wi-Fi production non-signaling RF testing 是 AI use case。 |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Generative AI app over 5G / future wireless | CMX500 + smart terminal + host PC software | 用 CMX500 控制 radio connection、network parameters、fading、latency、jitter 與 RF impairments，觀察 TTFT / TPS。[43][47] | Host PC software 名稱、版本、order number 與資料格式未標示。[45] |\n| AI-native air interface / 6G PoC | CMX500 + AI-enabled wireless device prototype | 用 CMX500 as AI-enabled base station emulator 驗證 AI-enhanced CSI feedback 與 throughput gain。[54][55] | 該 AI-enabled base station emulator mode 是否為可訂購功能、prototype feature 或展示用配置未說明。[56] |\n| CMX500 test engineering productivity | CMX500 AI Scripting Assistant + XLAPI | 用 generative AI / NLP 生成、擴充、解釋 XLAPI scripts，支援 R&D 5G NR protocol testing、application testing 與 CMX automation。[14][15][81] | Deployment options、license、版本、資料治理與適用 CMX500 software release 仍未標示。[50] |\n| AI server PCB / interconnect validation | R&S ZNA / R&S ZNB | 以 IL、TDR、high speed cable 與 high speed trace test 切入 AI server PCB、連接器與高速通道。[85][86] | 來源未提供正式 test setup、option、fixture、frequency 或 sales kit 正文。[86] |\n| AI server clock / power noise validation | R&S FSWP | 以 LDO NSD、clock jitter、jitter / phase noise test 切入 server motherboard、network switch、power supply 與 high-speed IC。[84] | 來源未提供測試條件。[84] |\n### 限制\nGenerative AI user-experience testing 目前是 PR / demonstration-level evidence，不是正式 test specification、standardized benchmark 或 product datasheet [46]。\nAI-enhanced CSI feedback 的約 50% throughput gain 是 PR demonstration claim，且不可改寫成 CMX500 formal specification、Qualcomm prototype commercial performance 或 6G standard requirement [52]。\nCMX500 AI Scripting Assistant 來源是新聞稿，不是 specifications、deployment guide 或 security architecture [50]。\nAISeverEcosystem R&S solution mapping 只代表 Excel 表中的 sales / test solution 線索，不代表正式產品配置、客戶關係或已驗證商機 [83]。\nCMP180 的 Wi-Fi 7 production non-signaling RF testing 來源是 PR / demonstration positioning，不是正式 datasheet、configuration guide、test case list 或 certification document [77]。\n\n來源：\n[12] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[14] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[15] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[17] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[18] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[21] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）\n[43] Wiki：Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[45] Wiki：Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[46] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[47] Wiki：Generative AI user experience testing（來源：`Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md`）\n[50] Wiki：AI-assisted agentic test workflows（來源：`AIW_Products_Customer_Questionnaire.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[52] Wiki：AI-enhanced CSI feedback（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[54] Wiki：AI-enhanced CSI feedback（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[55] Wiki：6G AI proof-of-concept demonstration（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[56] Wiki：6G AI proof-of-concept demonstration（來源：`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`）\n[77] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[79] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[81] Wiki：CMX500 AI Scripting Assistant（來源：`AIW_Products_Customer_Questionnaire.md`、`AIW_on_prem_prerequisites_ScriptAssist.md`、`CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md`）\n[83] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[84] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[85] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[86] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[88] Wiki：AISeverEcosystem（來源：`AISeverEcosystem.md`）",
+          "evidence": {
+           "raw_citations": 23,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-af6960288d234f0aa428e5ddead1a276",
+            "request_id": "request-af6960288d234f0aa428e5ddead1a276",
+            "span_id": "span-af6960288d234f0aa428e5ddead1a276",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "Based on current vault evidence, what are the strongest opportunities for Signaling / Non-signaling Tester in AI, and what evidence supports each opportunity?",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "R&S CMX500 › Application tests 與 audio\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n- 未啟用 R&S CMX-KA100 等 application test license 時，IP application test functionality 降到最低；只能使用 standalone mode，不能連接 external servers，也不支援 IP based measurements 或 tools。\n- R&S CMX-KA100 提供 internal IP services 與 IP connection to DUT 測試 applications，包含 DNS、IMS、Message Center、FTP、HTTP、DNS monitor、IP logging、iPerf、Ping、throughput、Max Throughput Wizard、web server。\n- R&S CMX-KA110 增強 KA100，加入 QoS、ePDG、N3IWF、delay measurement、IP tune tool、SMPP / MT SMS advanced settings。\n- R&S CMX-KA150 提供 IP analysis tool，用於監控與分析 DUT uplink / downlink IP traffic。\n- R&S CMX-KA180 提供 audio codecs for 4G and 5G IMS voice call，支援 AMR-NB、AMR-WB、EVS，並包含 [[R&S CMX-ZG180A]] external sound card drivers and configuration settings。\n- R&S CMX-KA181 加入 [[POLQA]]，用於 measuring perceived speech quality；measurement version 為 3，mode 為 full-band 或 narrowband。\n- R&S CMX-KA401 支援 WAV player / recorder、upload/download WAV files、file-based POLQA measurements 與 end-to-end audio delay。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 35,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 16.516023
+             },
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 15.754846
+             },
+             {
+              "text": "R&S CMX500 › mmWave extension 與 remote radio heads\n[[CMX500_specs_en_5216-4127-22_v1100]] 指出 3GPP FR2 frequency range 測試可由 [[R&S CMX500]] 搭配 [[R&S CMXHEAD30]]、[[R&S CMXHEAD50]] 或 [[R&S CMXHEAD50-Evo]] 執行。Remote radio head 是獨立 compact unit，在 IF 與 5G NR FR2 frequency ranges 間執行 upconversion / downconversion。CMX500 與 remote radio head 的 split concept 可在 5G NR FR2 frequency range 使用短 RF cable lengths，以最佳化 radiated chamber test environments 的 link budget。\n\n適用 radiated chamber test environments：[[R&S CMQ500]] shielding cube 與 [[R&S ATS800R]] CATR rack based antenna test system。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 21,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 14.748362
+             },
+             {
+              "text": "CMX500 Callbox › Callbox 定位\n依 [[CMX500_Callbox]]，callbox 的核心敘事是：\n\n- Easy to set up。\n- Easy to get in a call。\n- Easy to test with。\n- Focus on [[RF Testing]]，including [[3GPP pre-conformance]]。\n\n來源以 [[Device Under Test]]、cell tower 與 smartphone 圖示描述 [[R&S CMX500]] 作為 DUT 連線與測試環境的中心。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 10.082173
+             },
+             {
+              "text": "CMX500 Callbox › Testing phases\n[[CMX500_Callbox]] 將測試階段放在下列脈絡中：\n\n- [[Go-NoGo Testing]]。\n- [[Non-Sig Testing]]。\n- [[Conformance Testing]]。\n- [[R&D Testing]]。\n\n來源未明確說這四者是完整 lifecycle，也未定義各階段 pass/fail 標準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 5.528119
+             },
+             {
+              "text": "CMX500 Callbox › UI 與 automation\n來源將 [[CMsquares]] 描述為 web based、all-in-one configuration、all tools in one place、modern UI，並列出：\n\n- live views。\n- App Testing。\n- NTN live views。\n- Sequencer。\n- Log analysis。\n- One-click RF testing。\n\n在 RF pre-conformance 脈絡中，來源稱可 quick switch from manual to automated pre-conformance，且使用 same technology specific license，並指向 [[CMX500 Sequencer Test Packages]] 與 `Sequencer-CMX-Test_Packages_Database.xlsx`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 4.191845
+             },
+             {
+              "text": "Virtual Signalling Tester › 來源定義\n[[mx844030pc-j1200]] 將 [[Virtual Signalling Tester]] 描述為 software protocol simulator / Virtual Signalling Test Solution，透過虛擬化 protocol stack，在 PC 上重現多個 protocol layers：\n\n- [[RRC-NAS]]\n- [[PDCP]]\n- [[RLC]]\n- [[MAC]]\n\n來源主張它可不使用一般硬體測試儀而在 PC 上快速建立 protocol test environment；但 RF-IF configuration 仍使用 [[Anritsu MD8190A]] Universal RF Unit 與 [[MX819020A]] RF Platform。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 8.317376
+             },
+             {
+              "text": "Virtual Signalling Tester › 與 Virtual tester 的區分\n[[Virtual tester]] 在 [[AIW_Products_Customer_Questionnaire]] 中是 R&S AI Workplace questionnaire 的 agentic workflow concept，跨 implementation、test、debug、validation。\n\n[[Virtual Signalling Tester]] 則是 [[mx844030pc-j1200]] 中 Anritsu NR / RedCap protocol simulation and test product / solution 語彙。兩者名稱相近，但目前沒有來源支持它們是同一產品、同一架構或同一市場分類。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 7.818932
+             },
+             {
+              "text": "Virtual Signalling Tester\n[[Virtual Signalling Tester]] 是 [[mx844030pc-j1200]] 中 Anritsu 對 virtualized protocol stack test solution 的產品 / 解決方案語彙，核心是用 PC-based software protocol simulator 建立 NR / RedCap protocol test environment。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 5.838113
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › R&D：R&S CMX500 single-box signaling testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- [[R&S CMX500]] 是 multi-technology multi-channel signaling tester。\n- 來源稱其已新增 integrated [[Wi-Fi 7]] test functionality。\n- 目的在 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation。\n- Wi-Fi 7 R&D 測試需在 signaling mode 與 real-world conditions 下量測 RF TX / RX characteristics。\n- [[MLO]] 是 [[Wi-Fi 7]] key feature，因此提供 multiple RF chains 的 test environment 很重要。\n- 來源列出的 Wi‑Fi 7-specific tests 包含 2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 5.916583
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing\n[[Wi-Fi 7 R&D and production testing]] 是 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 中描述的測試方案組合：以 [[R&S CMX500]] 覆蓋 R&D signaling / interworking 測試，以 [[R&S CMP180]] 覆蓋 production non-signaling RF 測試。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 5.776737
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › Production：R&S CMP180 non-signaling RF testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。\n- [[R&S CMP180]] 被定位為 optimized for this purpose 的 radio communication tester。\n- 來源稱 [[R&S CMP180]] 支援 many cellular and non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform。\n- 來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。\n- 來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。\n- 來源稱 two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 3.794817
+             },
+             {
+              "text": "CMX500 AI Scripting Assistant › 資料、訓練與更新\n來源宣稱 [[CMX500 AI Scripting Assistant]]：\n\n- has exclusive access to proprietary data from [[Rohde & Schwarz]]；\n- has access to specialized resources derived from the expertise of [[Rohde & Schwarz]]；\n- is trained with relevant data to optimize its performance；\n- automatically integrates updates，以確保 users always have access to the most recent information and best practices。\n\n限制：來源未說明 proprietary data 的範圍、資料版本、retrieval / training 分界、模型名稱、資料保護方式、客戶資料處理方式或 update validation 流程。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/CMX500 AI Scripting Assistant.md"
+              },
+              "score": 12.118924
+             },
+             {
+              "text": "CMX500 AI Scripting Assistant\n[[CMX500 AI Scripting Assistant]] 是 [[Rohde & Schwarz]] 新聞稿中介紹的 [[R&S CMX500]] 5G one-box signaling tester AI-powered scripting tool，使用 generative AI 與 natural language processing 協助測試工程師生成、擴充與理解 [[XLAPI]] scripts。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/CMX500 AI Scripting Assistant.md"
+              },
+              "score": 11.619769
+             },
+             {
+              "text": "CMX500 AI Scripting Assistant › 產品定位\n依 [[CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation]]，[[CMX500 AI Scripting Assistant]] 是為 [[R&S CMX500]] 開發的 AI-driven scripting support solution。來源將它定位為可 automate test script generation and functional testing 的工具，目標是協助 mobile device manufacturers 的 test engineers：\n\n- streamline workflows；\n- reduce the risk of errors；\n- speed up time-to-market；\n- 以 tailored and efficient approach automating domain-specific applications。\n\n來源中的 domain-specific applications 包含：\n\n- R&D [[5G NR]] protocol testing；\n- application testing；\n- CMX instrument automation；\n- many more（來源未展開）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/CMX500 AI Scripting Assistant.md"
+              },
+              "score": 6.683388
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › 與既有知識的關係\n- [[R&S PCB test solutions]] 提供 2026.3.4 R&S high-speed digital 簡報中的 PCB fabricator / system house 測試流程；本頁則來自市場 Excel，將 R&S 儀器與 AI server supply-chain 類別做銷售 mapping。\n- [[高頻高速 PCB 測試解決方案]] 與 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 已有 Keysight / PCB test 圖像來源；本頁新增 R&S 方案對應，但未提供可替代正式規格的量測條件。\n- [[AI 伺服器 PCB 供應鏈升級]] 記錄材料與板層升級；本頁只補充對應測試入口，例如 IL、TDR、high speed trace、PDN Target Z。\n- [[資料中心電力電子生態系]]、[[NVIDIA 800V HVDC 架構]] 與 [[AI 資料中心高壓直流供電]] 記錄 data center power electronics；本頁補充 [[MXO]]、[[R&S FSWP]]、[[ZISO]] 與 BMS test 的 sales mapping 線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 29.238277
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › 可追溯限制\n- 本頁只追溯到 [[AISeverEcosystem]] 的 Excel 轉檔內容。\n- 來源未標示正式日期，因此本頁不可用來判斷 2026-09-18 當下市場狀態或客戶優先順序。\n- [[R&S Solution]] 欄不是 formal datasheet、application note、configuration guide 或 ordering guide；不得據此報價或建立正式測試配置。\n- 表內 SharePoint sales kit 連結未擷取正文；目前只可作為待讀材料索引。\n- 公司列名與 solution 同列不代表該公司已購買、正在評估、已合作、已導入、已被拜訪或為 R&S 客戶。\n- 表內 `NaN` 不代表無 solution 或無商機，只代表轉檔來源該欄未提供可讀文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 5.957123
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › 未決事項\n- `unresolved`: [[ZISO]]、[[OSP]]、PSA、[[ThinkLands]]、[[GOCA]]、[[Newkey]]、BMS test 在本來源中未展開正式名稱、版本或配置。\n- `unresolved`: Sales kits 連結需要後續擷取簡報正文，才能確認 solution package、scope 與限制。\n- `unresolved`: [[R&S ZNL]]、[[MXO]]、[[R&S FSWP]]、[[R&S ZNA]]、[[R&S ZNB]]、[[R&S ZNA67EXT]] 在此表中的對應未提供 option / firmware / fixture / calibration 條件。\n- `unresolved`: 來源未說明這份 mapping 是市場研究、sales targeting、account plan、training material 還是個人筆記。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 5.453872
+             },
+             {
+              "text": "AISeverEcosystem › 與既有知識的關係\n- [[AI Server 供應鏈總覽]] 已整理 AI server 從 demand、compute、ODM、networking、PCB/interconnect、power、cooling 到 infrastructure 的八段式供應鏈；本來源新增更偏台股 / customer targeting / R&S solution mapping 的 Excel 表格視角。\n- [[AI 資料中心生態系]] 已整理多張 AI data center ecosystem / industrial chain 圖；本來源提供更細的 server rack 零組件與 IC 分類，但來源未標示日期，不能直接更新為市場現況。\n- [[臺灣 AI 伺服器供應鏈]] 依 TAITRA 2024/4 圖整理上中下游；本來源與其在 [[台光電]]、[[台燿]]、[[聯茂]]、[[欣興]]、[[南電]]、[[景碩]]、[[鴻海]]、[[廣達]]、[[緯創]]、[[英業達]]、[[台達電]]、[[光寶科]]、[[康舒]]、[[建準]]、[[川湖]]、[[勤誠]]等列名上高度相鄰，但本來源另加入 R&S solution 欄。\n- [[AI 伺服器 ODM]] 已整理台系 ODM 比較表與組裝代工列名；本來源在 [[伺服器整合／ODM]] 欄再次列出 [[鴻海]]、[[廣達]]、[[緯創]]、[[緯穎]]、[[英業達]]、[[華碩]]、[[神達]]、[[技嘉]]，但沒有營收、出貨或期間資料。\n- [[AI 伺服器 PCB 供應鏈升級]] 已記錄 GB200 / GB300 / VR200 與 PCB 材料升級；本來源只以 `GB200/NVL72帶動層數、材料等級暴衝` 和 `20+層UBB、高階ABF、低Dk CCL` 補充銷售 / solution mapping 脈絡，沒有新增可量化規格。\n- [[AI 伺服器液冷散熱]] 已整理液冷 / Microchannel lid 與 VR200 散熱估算；本來源新增 [[GPU]] TDP 700 W → 1200 W 與液冷 / 滑軌升級的表格說法，但未標示平台、年份或測試條件。\n- [[資料中心電力電子生態系]] 與 [[NVIDIA 800V HVDC 架構]] 已整理 HVDC、PSU、BBU、PDU 等 power electronics 脈絡；本來源補充電源供應器分類中的 HVDC、5–10 kW PSU、液冷電源櫃、BBU 與 Blackwell 平台功耗翻倍說法，但未提供引用文件或期間。\n- [[R&S PCB test solutions]] 已整理 R&S 2026.3.4 high-speed digital 簡報中的 material measurement、stackup selection、SI testing 與 sampling / process monitoring；本來源把部分 R&S solution 對應到特定市場分類，例如 [[R&S ZNA]] / [[R&S ZNB]] 的 IL / TDR、[[R&S FSWP]] 的 jitter / phase noise / LDO NSD test、[[MXO]] 的 power rail / motor driver analysis。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AISeverEcosystem.md"
+              },
+              "score": 22.586439
+             },
+             {
+              "text": "AISeverEcosystem › 原文未解的問題\n- `unresolved`: 來源正文未標示正式發布日期、資料期間、Excel 版本、作者、部門或更新紀錄；raw 只標示 converted: 2026-09-17。\n- `unresolved`: 原檔名為 `AISeverEcosystem.xlsx`，`AISever` 是否為 `AI Server` 拼字錯誤不得自行更正。\n- `unresolved`: 大量欄位為 `NaN`；不可推論成無資料、無 solution、不適用或空白代表否定。\n- `unresolved`: 表內公司列名是否為完整市場名單、R&S prospect list、客戶名單、投資觀察名單或內部 sales focus，來源未說明。\n- `unresolved`: `R&S Solution` 欄的 [[ZISO]]、[[MXO]]、[[OSP]]、PSA、[[ThinkLands]]、[[GOCA]]、[[Newkey]]、BMS test 未提供正式產品全名、版本、配置、option code 或 sales kit 正文。\n- `unresolved`: SharePoint sales kits 只保存連結，未擷取簡報正文；不可把連結內容當成已知主張。\n- `unresolved`: [[嘉澤]] / [[嘉基]] 被寫在同一企業欄，代號 3533.0；來源未說明是二者合併、讀圖錯位或表格寫法。\n- `unresolved`: [[散熱器]] 角色亮點中的 `GPU TDP由700 W升至1200 W` 未標示 GPU 型號、平台、年份、來源或是否為單顆 GPU。\n- `unresolved`: [[電源供應器]] 角色亮點中的 `Blackwell平台功耗翻倍` 未標示基準平台、功耗口徑或來源。\n- `unresolved`: [[伺服器機殼]] 角色亮點中的 `AI機櫃重2–3噸` 未標示機櫃配置、平台、液冷 / 風冷條件或來源。\n- `unresolved`: [[ICs]] sheet 的股票代號欄混用美股 ticker、台股代號與韓股數字；不可跨市場比較。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AISeverEcosystem.md"
+              },
+              "score": 11.001981
+             },
+             {
+              "text": "AISeverEcosystem › 重點摘要\n- [[伺服器機殼]] / 機櫃分類列出關鍵元件 `高承載機櫃、散熱背板、EMI結構`，在 [[晟銘電]] 角色亮點稱 `AI機櫃重2–3噸，需重新設計載重與屏蔽結構。`\n- [[ICs]] sheet 將伺服器晶片設計 / 生產分成 [[GPU]]、[[CPU]]、[[DRAM]]、[[IC]] / 矽智財 / 製程、[[晶圓代工]]、[[封裝測試]]、[[測試介面]]、[[網通]]、[[BMC]] 與高速傳輸 IC，並為部分分類列出 [[R&S ZNA]]、[[R&S ZNA67EXT]]、[[R&S FSWP]] 等 solution 線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AISeverEcosystem.md"
+              },
+              "score": 7.926579
+             },
+             {
+              "text": "Data center full-spectrum connectivity › 使用限制\n- [[full-spectrum-data-center-connectivity-brochure]] 未標示正式日期；所有產品能力、規格數字與 marketing claim 需標示來源日期缺口。\n- 來源是供應商 brochure，不是第三方市場報告；不可用來推論市占率、排名、客戶導入、採購關係或出貨量。\n- 來源未提供 datasheet 版次、order number、合規證書或測試條件；224G、448G、1.6T、300G、60A、+54V、60 contacts、0.6mm pitch 等數字只能作為來源文字摘錄。\n- PDF 轉檔為 lossy derivative；欄位串接與 OCR 風險需回看原始 PDF。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 7.92068
+             },
+             {
+              "text": "Data center full-spectrum connectivity › 與既有概念的關係\n- [[Data center server 高速互連產品組合]] 偏向 data center server interconnect portfolio 的分類表；[[Data center full-spectrum connectivity]] 更強調 full-spectrum：electrical interconnect + optical + fiber + power + cooling。\n- [[Compute tray component solutions]] 偏向 compute tray connectors、cables、power connector、busbar 與 backplane interconnect；本頁納入 optical transceiver、CPO、fiber deployment 與 liquid cooling。\n- [[高速伺服器儲存互連]] 可連接本頁中的 [[Mini Cool Edge IO]]、[[Cool Express Link]]、[[Direct Attached Copper Cables]]、[[PCIe CEM 7 Connectors]] 與 storage / EDSFF 類產品。\n- [[CPO]]、[[Optical I-O]]、[[Near-Packaged Optics]] 可連接本頁的 [[Amphenol Co-packaged Optics]] 與 [[LEAP On-Board Transceiver]]，但本來源不是技術標準或市場採用證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 4.531656
+             },
+             {
+              "text": "Data center full-spectrum connectivity\n[[Data center full-spectrum connectivity]] 是 [[full-spectrum-data-center-connectivity-brochure]] 呈現的 portfolio 視角：把 AI / data center 的 high-speed electrical interconnect、optical interconnect、fiber deployment、rack power distribution、busbar、liquid cooling 與 leak detection 放在同一張 data center connectivity brochure 中。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 3.761591
+             },
+             {
+              "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 4.271847
+             },
+             {
+              "text": "R&S PCB test solutions › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 既有內容來自 Keysight 圖像，流程是原材料表徵、材料選擇、電路板抽樣測試、大批量監控；本頁保存 R&S 簡報中的類似但不完全相同的流程詞。\n- [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 均已有既有頁面；本來源增加 2026.3.4 R&S 簡報的追溯來源，但沒有新增可量化規格。\n- [[SerDes 與 SI PI 測試概覽]] 連接 Slide 11 和 Slide 20 的 validation challenges / SI flow；本頁聚焦 Slide 21 的 PCB test solutions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.822872
+             },
+             {
+              "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.761815
+             },
+             {
+              "text": "AI 伺服器 PCB 供應鏈升級\n[[AI 伺服器 PCB 供應鏈升級]] 是此 vault 用來記錄市場來源中把 [[AI伺服器]]、[[ASIC平台]]、[[PCB]] 材料、製程與設備升級放在同一張表格中的說法；所有量產、推出與製程數字都必須保留來源日期或明示來源未標示日期。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+              },
+              "score": 12.346863
+             },
+             {
+              "text": "AI 伺服器 PCB 供應鏈升級 › 可追溯限制\n- [[AI Server PCB test image 4]] 是一張表格整理圖，不是統計圖表；沒有座標軸、圖例、樣本數、營收、出貨量、市占率、ASP 或產能資料。\n- [[AI Server PCB test image 4]] 的頁尾只標示「資料來源：採訪整理」與「製表：楊絡懸」，未提供完整資料來源。\n- 本頁不能把 [[AWS Trainium 2 Max]]、[[Google TPU V6]]、[[Meta MTIA 2]] 的「量產」改寫成客觀市場事實；只能寫成 [[AI Server PCB test image 4]]（來源未標示日期）的表格說法。\n- [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 都是來源發布日期未標示的規格比較表；圖中雖有 25Q1、25Q2、25H2、2026、26H2、2027 等平台時間，但不能替代來源發布日期。\n- [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 的試產、量產、樣機、放量、供應商占比、價格與交期說法都缺少定義、樣本、資料來源與驗證文件；不得改寫成客觀已發生事實。\n- [[HSD PCB image 11]] 與 [[HSD PCB image 1]] 高度重疊，不能把兩者當作相互獨立的市場驗證來源。\n- 公司列名不可推論為完整供應鏈、市場排名、採購名單、供應合約、R&S 往來對象或投資建議。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+              },
+              "score": 12.185172
+             },
+             {
+              "text": "AI 伺服器 PCB 供應鏈升級 › 升級面向整理\n| 面向 | 來源文字 | 可追溯數字 / 時間 | 限制 |\n|---|---|---|---|\n| AI伺服器趨勢 | 推升 PCB 邁向高層數、大面積與高速傳輸，供應鏈全面翻新 | [[AI Server PCB test image 4]] 來源未標示日期 | 未提供出貨量、平台樣本、PCB 面積或層數分布 |\n| ASIC平台進展 | AWS Trainium 2 Max、Google TPU V6、Meta MTIA 2量產，2026年新平台將陸續推出 | 2026年；量產時間未標示 | 未定義量產、未列出出貨量、客戶或供應鏈 |\n| 材料升級方向 | HVLP銅箔進入第4、5代，CCL以M8為主，導入低介電、低損耗與高散熱設計 | 第4、5代；來源未標示日期 | 未定義 HVLP 世代、M8、低介電、低損耗或高散熱設計的測試條件 |\n| 製程挑戰 | 主板層數達30～40層，縱深比需達12～14倍，需應對厚銅、雷射鑽孔等高階製程 | 30～40層；12～14倍；來源未標示日期 | 未說明板種、平台、線寬線距、孔徑、板厚或良率 |\n| TPCA Show焦點 | 聚焦玻纖布、HVLP銅箔、CCL發展與高縱深比設備 | 來源未標示日期 | 未標示 TPCA Show 年份、場次、展會期間或參展廠商 |\n| GB200 / GB300 / VR200 板件升級比較 | [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 將 ComputeTray 從 GB200 / GB300 的 5層22L列到 VR200 的 6層26L，NVSwitch Tray 從 24L HLC 列到 32L (N+N HLC)，並列出 VR200 Midplane 44L(N+N HLC) | GB200：25Q1試產、25Q2量產；GB300：25H2樣機/2026放量；VR200：26H2樣機/2027放量；來源發布日期未標示 | 未定義試產、量產、樣機、放量；未提供板厚、孔徑、線寬線距、良率、出貨量或平台驗證證據 |\n| VR200 材料升級與供應商列名 | [[HSD PCB image 11]] 列出 VR200 計算板斗山(M8+LDK+HVLP4)+M4、交換板M8(LDK2+HVLP4) 生益科技/台光電/南亞(交期最快)、HVLP4銅箔三井/古河/盧森堡/金居/福田 | VR200：26H2樣機/2027放量；來源發布日期未標示 | 與 [[HSD PCB image 1]] 既有抄錄「南亞(交期最長)」矛盾；未說明南亞完整公司名稱、交期數字、材料型號、認證狀態或供應關係 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+              },
+              "score": 10.169798
+             },
+             {
+              "text": "AI 資料中心基礎設施 › 可追溯範圍\n本頁根據五張圖像來源建立：[[0. AI Data Center image 1]]、[[0. AI Data Center image 2]]、[[0. AI Data Center image 3]]、[[0. AI Data Center image]] 與 [[4 AI Data Center Eco-Chain image 1]]。\n\n- [[0. AI Data Center image 1]] 可追溯的主張限於：AI / data center 場景與 **Enabling AI**、[[Connectivity]]、[[Power]]、[[Resilience]] 的視覺關聯。\n- [[0. AI Data Center image 2]] 可追溯的主張限於：資料中心 / 機房 solution diagram 中列出的子系統分類與 1–11 編號設備 / 系統名稱。\n- [[0. AI Data Center image 3]] 可追溯的主張限於：**Enabling AI** 與資料中心 / 機房 / 基礎設施場景的視覺關聯，以及 [[Connectivity]]、[[Power]]、[[Resilience]] 三個明示重點方塊。\n- [[0. AI Data Center image]] 可追溯的主張限於：資料中心 / 機房 solution diagram 中列出的子系統分類、1–11 編號設備 / 系統名稱，以及「2 or 3」共同標示造成的位置未決問題。\n- [[4 AI Data Center Eco-Chain image 1]] 可追溯的主張限於：12/10/2025（日期格式未標示）頁面上的 ecosystem map 分類、公司 / 品牌 / logo 列名、頁尾 Rohde & Schwarz / COMPANY RESTRICT / RS / 頁碼 25 等可見資訊。\n- 由於前四份來源都未標示日期，所有與時序、市場現況、供應商名單、產品導入、客戶採用、出貨量或市場占比相關的判斷都需要其他來源補強。\n- 即使 [[4 AI Data Center Eco-Chain image 1]] 有頁尾日期 12/10/2025，它仍未提供市場數值、排名、關係線或採用狀態，因此不能單獨支持市場份額、導入狀態、供應鏈上下游關係或 R&S 往來關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+              },
+              "score": 11.206705
+             },
+             {
+              "text": "AI 資料中心基礎設施 › 未決事項\n- [[0. AI Data Center image 1]] 來源未標示日期；不得將圖中敘事寫成特定時間點的市場現況。\n- [[0. AI Data Center image 2]] 來源未標示日期；不得將圖中列出的 solution components 寫成特定時間點的市場現況、導入狀態或供應鏈狀態。\n- [[0. AI Data Center image 3]] 來源未標示日期；不得將圖中敘事寫成特定時間點的市場現況。\n- [[0. AI Data Center image]] 來源未標示日期；不得將圖中列出的 solution components 寫成特定時間點的市場現況、導入狀態或供應鏈狀態。\n- [[4 AI Data Center Eco-Chain image 1]] 頁尾日期為 12/10/2025，但日期格式未標示；不得推論為 2025-12-10 或 2025-10-12。\n- [[0. AI Data Center image 1]] 來源未標示發布者或公司；不得推論此圖代表某特定廠商觀點。\n- [[0. AI Data Center image 2]] 來源未標示公司名稱、發布者、品牌或可辨識 logo；不得推論 InfraSuite Manager、EnviroStation、EnviroProbe、RowCool 等名稱的供應商歸屬。\n- [[0. AI Data Center image 3]] 來源未標示公司名稱、發布者、品牌或可辨識 logo；不得推論此圖代表某特定廠商觀點。\n- [[0. AI Data Center image]] 來源未標示公司名稱、發布者、品牌或可辨識 logo；不得推論 InfraSuite Manager、EnviroStation、EnviroProbe、RowCool 等名稱的供應商歸屬。\n- [[4 AI Data Center Eco-Chain image 1]] 未標示圖中公司是否為 R&S 往來對象、外部市場參與者、範例名單或內部關注名單。\n- [[0. AI Data Center image 1]] 來源未標示產品或型號；不得推論圖中設備為特定產品線。\n- [[0. AI Data Center image 2]] 來源未標示產品型號或文件版次；不得推論圖中設備為特定型號。\n- [[0. AI Data Center image 3]] 來源未標示具體產品名稱或型號；不得推論圖中設備為特定產品線或型號。\n- [[0. AI Data Center image]] 來源未標示產品型號或文件版次；不得推論圖中設備為特定型號。\n- [[4 AI Data Center Eco-Chain image 1]] 未標示任何產品型號或文件版次；不得把圖中品牌名稱推論成特定產品型號。\n- [[0. AI Data Center image 2]] 中編號 2 or 3 在圖中以同一指示區域呈現，來源未能清楚區分 [[Power Distribution Unit]] 與 [[Rack-Mount Remote Power Panel]] 在圖上的個別位置。\n- [[0. AI Data Center image]] 中編號 2 or 3 在圖中以同一指示區域呈現，來源未能清楚區分 [[Power Distribution Unit]] 與 [[Rack-Mount Remote Power Panel]] 在圖上的個別位置。\n- [[0. AI Data Center image 3]] 中建築外側線路與鎖頭圖示是否代表 cybersecurity、network security、physical security 或其他安全概念，來源未明示。\n- [[0. AI Data Center image 3]] 中上方小型建築群代表資料中心園區、外部設施群、城市、客戶端基礎設施或其他場景，來源未明示。\n- [[0. AI Data Center image 3]] 中右上設備機箱代表運算、網路、硬體設備或特定測試 / 供電設備，來源未明示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+              },
+              "score": 11.074864
+             },
+             {
+              "text": "AI 資料中心基礎設施 › 相關來源\n- [[0. AI Data Center image 1]] — 未標示日期的 AI data center 概念示意圖，明示 **Enabling AI**、[[Connectivity]]、[[Power]]、[[Resilience]]。\n- [[0. AI Data Center image 2]] — 未標示日期的 data center / 機房整合基礎設施 3D 示意圖，列出 [[Power Management]]、[[Rack & Accessories]]、[[Management System]]、[[Precision Cooling]]、[[Service]] 與 1–11 的設備 / 系統對應。\n- [[0. AI Data Center image 3]] — 未標示日期的 AI data center 概念示意圖，明示 **Enabling AI**、[[Connectivity]]、[[Power]]、[[Resilience]]，並描述電塔、資料中心、機櫃、冷卻 / 管線、電子設備機箱、通訊線路與鎖頭圖示等視覺元素。\n- [[0. AI Data Center image]] — 未標示日期的 data center / 機房解決方案示意圖，列出 [[Power Management]]、[[Rack & Accessories]]、[[Management System]]、[[Precision Cooling]]、[[Service]] 與 1–11 的設備 / 系統對應。\n- [[4 AI Data Center Eco-Chain image 1]] — 頁尾標示 12/10/2025（日期格式未標示）的 AI data center ecosystem map，列出 cloud service、datacenter、AI server、compute 與 peripheral 相關分類與企業 / 品牌名稱。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+              },
+              "score": 9.650656
+             },
+             {
+              "text": "AI 資料中心高壓直流供電 › 限制與不可推論事項\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）是 Infineon 白皮書；本頁只記錄 Infineon 在 10/2025 的技術與市場判斷，不代表跨供應商共識。\n- `200 kW` 至 `250 kW`、`4100 A` 至 `5200 A`、`1 MW`、`2300 W/in³`、`97.4%`、`96.6%`、`98.5%` 等數字皆需追溯到 [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）。\n- 來源未提供 Infineon `800 V → 12 V` 示範板、`800 V → 50 V → 6 V` 方案或 `1 kW` 8:1 電源模組的完整料號、量產時間、客戶導入、出貨狀態或採購資訊。\n- 來源未說明 `800 V` 與 [[±400Vdc]] 哪一種架構會成為標準，也未提供標準組織版本或安全法規細節。\n- [[SST(Solid State Transformer ) image 1]] 未標示日期，因此 **800 VDC** 不能寫成特定時間點的 AI data center 市場現況或標準規格。\n- [[SST(Solid State Transformer ) image 1]] 未標示發布者、公司或報告名稱；不得把 **SST technology fueled by AI data centers** 改寫成特定供應商已受惠、已出貨或已導入。\n- [[SST(Solid State Transformer ) image 1]] 沒有提供 [[SST]] 產品型號、效率、功率、認證、客戶、量產或出貨資訊。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心高壓直流供電.md"
+              },
+              "score": 8.078322
+             },
+             {
+              "text": "AI 資料中心高壓直流供電 › 來源中的說法\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）稱，隨著 GPU 功耗上升與每機架 GPU 叢集規模擴大，單機架功率需求將很快突破 `1 MW` 或更高。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）稱，當單機架功率達 MW 等級，系統架構必須從既有 `48 V` 生態系轉向高壓直流供電。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）預計，從 `48 V` 匯流排架構轉向 `800 V` 或 [[±400Vdc]] 架構，會在單機架功率達 `200 kW` 至 `250 kW` 時出現。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）指出，在 `48 V` 匯流排架構下，單機架功率 `200 kW` 至 `250 kW` 對應母排電流約 `4100 A` 至 `5200 A`。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）提出高壓直流架構示例：採用 `800 V DC` 的集中發電與高壓直流配電，並在伺服器主板進行本地功率轉換。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）稱，未來伺服器主板將直接運行於 `800 V` 或 [[±400Vdc]] 電壓。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）指出，高壓直流伺服器主板需要在插入高壓直流匯流排前執行預充電，並在伺服器主板從 IT 機架移除時確保開關及時放電，以避免危險電壓。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）指出，每個伺服器主板需部署 [[eFuse]] 功能，以便故障時快速切斷電源。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）展示基於 [[XDP]] 熱插拔控制器 `XDP70x` 與 [[CoolSiC]] [[JFET]] 的 [[eFuse]] 與 hot-swap 控制方案；實驗條件為輸入電容 `300 µF`，可將伺服器主板從 `0 V` 預充電至 `800 V`。\n- [[SST(Solid State Transformer ) image 1]]（來源未標示日期；取得於 2026-09-04）圖中 [[Data Center]] 應用旁標示 **800 VDC**，其 AC-DC 方塊標示為 **AC-DC (SST)**。\n- [[SST(Solid State Transformer ) image 1]]（來源未標示日期；取得於 2026-09-04）圖上方標示 **34.5 kVAc or 13.8 kVAc 3-Ph Grid**，表示該概念圖把 [[SST]] 放在中高壓三相電網與 DC 應用介面之間。\n- [[SST(Solid State Transformer ) image 1]]（來源未標示日期；取得於 2026-09-04）圖說稱：**SST technology fueled by AI data centers set to modernize grid-infrastructure across battery energy storage systems (BESS), EV megawatt charging systems (MCS), and renewable energy**；這只能作為未標示日期圖上的敘事，不能視為已導入或市場共識。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心高壓直流供電.md"
+              },
+              "score": 4.51785
+             },
+             {
+              "text": "AI 資料中心高壓直流供電 › 800 V 到低壓供電路徑\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）研究兩種關鍵轉換路徑：`800 V → 54 V` 與 `800 V → 12 V`。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）稱，三級架構先將 `800 V` 降至 `54 V`，再經由 [[IBC]] 與 [[VRM]] 功率級或背面 [[垂直供電]] 模組進一步降壓，可降低 [[PDN]] 損耗，並支援 IBC 與 VRM 級均位於夾層卡上的方案。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）稱，二級架構 `800 V → 12 V` 可省去一個完整功率轉換級，節省主板空間。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）稱，Infineon 開發 `800 V → 12 V` 的 `6 kW` 示範板，功率密度超過 `2300 W/in³`。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）指出，`800 V → 12 V` 示範板採用對稱布局，由兩組堆疊式 LLC 變換器組成，並採用矩陣變壓器結構。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）指出，`800 V → 12 V` 示範板初級側採用 `650 V` [[CoolGaN]] 技術，次級側使用 `40 V` 矽基 [[OptiMOS]] 6 系列。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）指出，[[PSOC]] MCU 與 [[EiceDriver]] gate driver 提供 PWM 與驅動信號。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）稱，`800 V → 12 V` 轉換器測試結果為峰值效率 `97.4%`、滿載效率 `96.6%`。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）另探索 `800 V → 50 V → 6 V`，其中 `800 V → 50 V` 堆疊式 LLC 變換級在諧振頻率下工作，峰值效率達 `98.5%`。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）稱，[[Hybrid Switched Capacitor]] 拓撲結合磁能與電容能量傳遞，用於中壓 [[IBC]] 將電壓進一步降至 `6 V`。\n- [[infineon-powering-the-future-of-ai-whitepaper-cn 1]]（10/2025）稱，Infineon 正在開發額定功率 `1 kW`、固定 `8:1` 轉換比的電源模組，用於將現有 `48 V/50 V` 電壓域轉換至 `6 V` 中間匯流排。\n- [[SST(Solid State Transformer ) image 1]]（來源未標示日期；取得於 2026-09-04）只標示 Data Center 側 **800 VDC**；來源未提供 `800 V → 54 V`、`800 V → 12 V`、`800 V → 50 V → 6 V` 或晶片端低壓轉換路徑。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI 資料中心高壓直流供電.md"
+              },
+              "score": 4.408351
+             },
+             {
+              "text": "FWA CPE 市場與測試分類 › 使用限制\n- 本頁不是 FWA CPE 官方市場報告，也不是測試規範。\n- [[FWA CPE]] 中的範例型號僅來自 OneNote 表格；未擷取 datasheet、認證資料或出貨資料。\n- [[GSA-FWA-Company-Directory-V13.4]] 是 forum / member directory；其名單不應被解讀為完整市場排名、市占率或供應關係。\n- 表格標準與測試階段未提供 test case IDs、標準章節、測試限值、配置或正式驗證流程。\n- 來源中的 URL / 附件未擷取正文；不可把連結標題當作完整證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FWA CPE 市場與測試分類.md"
+              },
+              "score": 11.396397
+             },
+             {
+              "text": "FWA CPE 市場與測試分類 › 與既有知識的關係\n- [[Wi-Fi 7 網通設備代工製造]] 已整理 2026-09-15 來源中的 Wi-Fi 7、5G FWA CPE 與台灣網通 ODM / OEM 市場。本頁補上產品形態、測試階段與 GSA directory taxonomy。\n- [[Wi-Fi 7 OTA MIMO stress testing]] 與 [[4G 5G NR WLAN OTA MIMO stress testing]] 著重 R&S / chamber partner 的 OTA integration；本頁只記錄 FWA CPE 類型表中出現的 OTA / MIMO / DFS / EN-DC 等測試語彙。\n- [[R&S TS8980 Conformance Test Platform]] 在 [[FWA CPE]] 中只以 FR2 conformance presentation 連結出現，不能由此推論完整 FWA CPE conformance test coverage。\n- [[GSA-FWA-Company-Directory-V13.4]] 提供 FWA ecosystem company directory 與 product type definition，可用來補強 [[FWA Device Ecosystem Directory]]、[[Wistron NeWeb Corporation]]、[[MediaTek T830]]、[[MediaTek T930]]、[[MediaTek T750]] 等頁面。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FWA CPE 市場與測試分類.md"
+              },
+              "score": 11.319736
+             },
+             {
+              "text": "FWA CPE 市場與測試分類 › GSA FWA Device taxonomy（July 2025）\n[[GSA-FWA-Company-Directory-V13.4]] 將 [[FWA Device]] 定義為包含 [[3GPP]] based modem、用於向住宅或企業建築提供 broadband connectivity 的任何裝置。\n\n來源將 FWA Devices 分為兩個 families：\n\n1. [[CPE]]：AC powered devices，設計為連續 24 hours broadband connectivity。\n2. [[Battery operated devices]]：包含 batteries，設計用於 nomadic 或 sporadic broadband connectivity，例如 [[MiFi]] 或 [[Pocket Hotspot]]。\n\n[[CPE]] family 進一步分為四種 product types：\n\n| GSA product type | 來源定義 | 典型限制 |\n|---|---|---|\n| [[Indoor Sub 6GHz CPE]] / FR1 | 支援最高 6GHz 頻率的 4G 或 5G indoor AC powered FWA device | 來源未給個別產品完整 band / certification |\n| [[Outdoor Sub 6GHz CPE]] / FR1 | 支援最高 6GHz 頻率的 4G 或 5G outdoor AC powered FWA device，通常透過 [[PoE]] | 來源未給 PoE 電氣規格或環境等級 |\n| [[Indoor mmWave CPE]] / FR2 | 支援任一 mmWave frequency 的 5G indoor AC powered FWA device | 來源未逐項列出 FR2 band |\n| [[Outdoor mmWave CPE]] / FR2 | 支援任一 mmWave frequency 的 5G outdoor AC powered FWA device，通常透過 [[PoE]] | 來源未逐項列出 antenna gain、IP rating 或 thermal limit |\n\n額外第 5 種 product type 是 [[Battery Operated Hotspot]]，例如 [[MiFi]] 或 [[Mobile Hotspot]]。[[GSA-FWA-Company-Directory-V13.4]] 也明確排除 [[Smartphones]]、[[Industrial IoT Routers]]、沒有 integrated 3GPP antennas 的 devices、具備 [[Serial Interfaces]] 或 [[Edge Compute Capabilities]] 的 devices，以及 [[NB-IoT]]、[[Cat-M1]]、[[Cat-M2]]、[[Cat-1]] 等 narrowband devices。\n\n⚠️ [[GSA-FWA-Company-Directory-V13.4]]（July 2025）說 FWA CPE taxonomy 是 CPE family 下的 Indoor / Outdoor Sub 6GHz、Indoor / Outdoor mmWave，加上 Battery Operated Hotspot，並排除 Industrial IoT Routers 與具 Edge Compute Capabilities 的 devices，但既有頁面 [[FWA CPE 市場與測試分類]]（來源未標示；raw converted 2026-09-17）說企業級室內 uCPE / Wi-Fi 7 / Multi-Gig 是 FWA CPE 類型之一。判斷：兩者層級不同且來源目的不同；GSA taxonomy 較像 ecosystem directory 收錄規則，OneNote 表格較像產品 / 測試情境分類，暫並列保存，不自動合併。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FWA CPE 市場與測試分類.md"
+              },
+              "score": 3.974118
+             },
+             {
+              "text": "CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation › 原文未解的問題\n- 來源 frontmatter 的 `published` 欄位為空；新聞稿正文也未標示發布日期，因此本頁 document_date 記為「來源未標示」。\n- 來源未標示 [[CMX500 AI Scripting Assistant]] 的正式產品型號、版本、license code、order number、support contract、文件版次或 availability date。\n- 來源未列出 deployment options 的類型；只說 available through various deployment options。\n- 來源未列出支援的 LLM model、embedding model、retrieval architecture、data residency、on-prem / cloud 邊界、security controls 或 update mechanism 細節。\n- 來源宣稱 exclusive access to proprietary data from [[Rohde & Schwarz]]，但未列出資料範圍、版本控管、驗證方法或客戶資料是否會進入訓練 / 更新流程。\n- 來源未說明 [[CMX500 AI Scripting Assistant]] 是否等同、包含或取代 [[ScriptAssist]]、[[TechAssist]] 或其他 [[R&S AI Workplace]] assist。\n- 來源未列出生成 [[XLAPI]] scripts 的正確率、驗證流程、支援 package、支援 CMX software release 或使用限制。\n- MWC 2025 Barcelona 現場展示資訊不等於正式 commercial availability 或量產 / GA 狀態；來源未提供 GA 判定。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md"
+              },
+              "score": 10.307828
+             },
+             {
+              "text": "CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation › 重點摘要\n- [[Rohde & Schwarz]] 宣稱已開發 [[CMX500 AI Scripting Assistant]]，用於 automate test script generation and functional testing，對象是 [[R&S CMX500]] 5G one-box signaling tester。\n- 工具使用 generative AI 與 natural language processing，目標是 streamlining workflows、reducing the risk of errors，以及 speeding up time-to-market。\n- 來源描述的使用者痛點是：mobile device manufacturers 的 test engineers 需在時間壓力下，從多個來源手動彙整測試腳本輸入；來源列出的輸入包括 [[3GPP specifications]]、[[XLAPI]] scripts、[[Python]] 與 [[R&S CMX500]] user manual。\n- [[CMX500 AI Scripting Assistant]] 的 domain-specific applications 包含 R&D [[5G NR]] protocol testing、application testing、CMX instrument automation and many more。\n- 來源宣稱工具可生成 accurate [[XLAPI]] scripts with significantly less time and effort，也可以 extend existing scripts 並 provide explanations for given scripts，以協助較少經驗的使用者理解 scripts 的 structure and logic。\n- 來源宣稱工具具有 exclusive access to proprietary data from [[Rohde & Schwarz]]，並存取 derived from expertise of Rohde & Schwarz 的 specialized resources；來源也說明工具以 relevant data 訓練並自動整合 updates，以維持 current and accurate。\n- 來源說 [[CMX500 AI Scripting Assistant]] 可透過 various deployment options 取得，但未列出部署類型、版本、license code、order number 或硬體需求。\n- 來源說 MWC 2025 Barcelona 的訪客可在 Rohde & Schwarz booth hall 5, booth 5A80 現場體驗該工具。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md"
+              },
+              "score": 7.377018
+             },
+             {
+              "text": "CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation\n這份來源是 [[Rohde & Schwarz]] 新聞稿，介紹 [[CMX500 AI Scripting Assistant]]：一個用於 [[R&S CMX500]] 5G one-box signaling tester 的 AI-powered scripting tool，目標是透過 generative AI 與 natural language processing 協助測試工程師生成、擴充與理解 [[XLAPI]] scripts。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md"
+              },
+              "score": 4.184031
+             },
+             {
+              "text": "Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing › 重點摘要\n- [[Rohde & Schwarz]] 與 [[China Mobile Research Institute]] 在 [[MWC Shanghai 2026]] 展示一套 generative AI applications 測試 solution。\n- 來源稱此 solution based on the [[R&S CMX500]] 5G one-box signaling tester，可在 diverse network conditions 下首次量化 measurement end-user experience of generative AI applications。\n- 測試架構中：\n  - [[Large language model]] 部署在 server side 或 cloud。\n  - [[R&S CMX500]] 與執行 client-side test application 的 smart terminal 建立 radio connection。\n  - [[R&S CMX500]] 可配置 network parameters、channel fading models、latency、jitter、RF impairments 等 variables。\n  - 使用者透過 terminal-side application 輸入 prompts，接收 LLM inference responses。\n  - Host PC software 收集與分析 data，並產生 charts。\n- 來源列出的 key performance indicators 包含 [[Time to First Token]]（TTFT）與 [[Tokens Per Second]]（TPS）。\n- 來源稱此方法可支援 optimization of on-device generative AI application design，並提供 future network optimization 的 reference points。\n- 來源把 [[R&S CMX500]] 描述為 all-in-one test platform，支援 SA / NSA architectures、FR1 to FR3（up to 18 GHz）、built-in IMS server、RF conformance、protocol validation、VoNR acoustics 與 carrier aggregation。\n- [[Liu Guangyi]] 的引述把此 testbed 連到 6G-enabled ubiquitous intelligent connectivity、native network computing capabilities、new AI service metrics 與 testing methodologies。\n- [[Jin Hailiang]] 的引述把此 testbed 描述為 generative AI user experience testing 的 benchmark，並指向 future test scenarios、industry use cases 與 standardization。\n- 展示地點：China Mobile’s 6G Zone，Hall 3，N3E60。\n- Press & media contact：[[Christian Mokry]]，PR Manager Test & measurement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md"
+              },
+              "score": 9.613473
+             },
+             {
+              "text": "Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing › 與既有知識的關係\n- 與 [[R&S CMX500]]：補充 [[R&S CMX500]] 在 generative AI application user experience testbed 中的 PR / solution-level 使用情境；不同於 [[CMX500_specs_en_5216-4127-22_v1100]] 的 binding specifications。\n- 與 [[6G AI proof-of-concept demonstration]]：兩者都把 [[R&S CMX500]] 放在 AI + future wireless / 6G research context；既有頁面聚焦 [[AI-enhanced CSI feedback]] 與 throughput gain，本來源聚焦 generative AI application user experience metrics。\n- 與 [[FR1-FR3 carrier aggregation demonstration]]：既有頁面明示 [[RFU18]] board 將 [[R&S CMX500]] coverage extend up to 18 GHz；本來源也寫 FR1 to FR3 up to 18 GHz，但沒有明示 RFU18，因此應視為 PR solution-level wording，不可直接改寫成 CMX500 base unit formal spec。\n- 與 [[Christian Mokry]]：新增一筆 R&S PR contact block 來源，phone 與 press email 與既有 PR 來源一致。\n- 與 [[中國移動]]：本來源不是交換機產業鏈市場圖，而是 [[China Mobile Research Institute]] 以中國移動科技創新體系核心研發機構身分參與 6G / AI testbed demonstration。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md"
+              },
+              "score": 7.74177
+             },
+             {
+              "text": "Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing › 原文未解的問題\n- 來源未標示發布日期；raw frontmatter created 為 2026-09-11，但不可等同 PR 發布日期。\n- 來源未標示 PR 文件版次、內部文件號、solution order number、software version 或 [[R&S CMX500]] hardware configuration。\n- 來源稱 [[R&S CMX500]] covers frequency ranges from FR1 to FR3（up to 18 GHz），但未說明是否需要 [[RFU18]] 或其他 extension hardware。\n- 來源未提供 TTFT / TPS 的 measurement methodology、prompt set、LLM model name、server / cloud configuration、terminal model、radio scenario table、statistical treatment 或 reproducibility data。\n- 來源未提供 host PC software 名稱、版本、order number 或資料格式。\n- 來源未說明 test framework 是否已被 [[3GPP]]、[[GTI]] 或其他組織採納；僅說相關研究正在進行。\n- 來源未提供 [[MWC Shanghai 2026]] demo 的實測數據、benchmark charts 或公開報告。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md"
+              },
+              "score": 7.241787
+             },
+             {
+              "text": "Generative AI user experience testing › 使用限制\n- 本頁是 PR / demonstration-level evidence，不是正式 test specification、standardized benchmark 或 product datasheet。\n- 來源未提供 measurement methodology、test case definition、LLM model、terminal model、server / cloud environment、network scenario profiles、statistical confidence 或 result tables。\n- 來源未標示 [[R&S CMX500]] software version、licenses、hardware configuration、extension boards 或 order numbers。\n- 來源未說明 host PC software 的產品名稱、版本、license 或資料輸出格式。\n- 來源未說明 [[3GPP]] 或 [[GTI]] 是否已採納本 testbed 的 metrics 或 framework。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Generative AI user experience testing.md"
+              },
+              "score": 8.096723
+             },
+             {
+              "text": "Generative AI user experience testing › Testbed architecture\n依 [[Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing]]：\n\n1. [[Large language model]] 部署在 server side 或 cloud。\n2. [[R&S CMX500]] radio communication tester 與 smart terminal 建立 radio connection。\n3. Smart terminal 執行 client-side test application。\n4. [[R&S CMX500]] 配置 network parameters、channel fading models、latency、jitter、RF impairments and other variables。\n5. User 在 terminal-side application 輸入 prompts。\n6. Terminal 接收 LLM inference responses。\n7. Host PC software 收集與分析 data，並產生 charts。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Generative AI user experience testing.md"
+              },
+              "score": 4.319131
+             },
+             {
+              "text": "Generative AI user experience testing › 與 CMX500 / 6G 測試的關係\n本來源把 [[R&S CMX500]] 定位為此 test solution 的核心 test platform，並說其支援：\n\n- SA and NSA architectures。\n- frequency ranges from FR1 to FR3（up to 18 GHz）。\n- built-in IMS server。\n- one-stop testing for RF conformance、protocol validation、VoNR acoustics and carrier aggregation。\n- 5G-Advanced and 6G research and development。\n\n⚠️ [[Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing]]（來源未標示發布日期；raw created 2026-09-11）說 CMX500 covers frequency ranges from FR1 to FR3 (up to 18 GHz)，但既有頁面 [[R&S CMX500]] 說正式 Specifications Version 11.00（August 2025）中的 [[R&S CMX-B600B]] RF unit frequency range 為 400 MHz to 8000 MHz，且既有頁面 [[FR1-FR3 carrier aggregation demonstration]] 說 18 GHz coverage 由 new [[RFU18]] board extend。判斷：此為 PR solution-level wording 與 formal specs / RFU18 configuration 層級差異；不得把 18 GHz 寫成 CMX500 base RF unit 規格。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Generative AI user experience testing.md"
+              },
+              "score": 4.203245
+             },
+             {
+              "text": "AI-assisted agentic test workflows\n[[AI-assisted agentic test workflows]] 是 [[AIW_Products_Customer_Questionnaire]] 用來描述 AI 協助測試建立、結果分析與工具整合的一組客戶需求場景，重點在 agentic workflow 如何連到既有 engineering environment；[[CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation]] 另提供一個 [[R&S CMX500]] scripting / automation solution-level 例子。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI-assisted agentic test workflows.md"
+              },
+              "score": 8.142638
+             },
+             {
+              "text": "AI-assisted agentic test workflows › 限制與未決事項\n- [[AIW_Products_Customer_Questionnaire]] 是 questionnaire，不是功能規格書。\n- [[CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation]] 是新聞稿，不是 specifications、deployment guide 或 security architecture。\n- 兩份來源都未提供完整 AI agent 架構、模型版本、API、支援儀器清單或部署拓樸。\n- [[AIW_Products_Customer_Questionnaire]] 未說明 [[AI-assisted agentic test workflows]] 是否為正式產品名稱。\n- [[AIW_Products_Customer_Questionnaire]] 未將此概念直接對應到 [[ScriptAssist]] 或 [[TechAssist]] 任一產品；[[CMX500 AI Scripting Assistant]] 來源也未提到 [[R&S AI Workplace]]，不可自行推論。\n- [[CMX500 AI Scripting Assistant]] 的 deployment options、license、版本、資料治理與適用 [[R&S CMX500]] software release 仍未標示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI-assisted agentic test workflows.md"
+              },
+              "score": 5.935473
+             },
+             {
+              "text": "AI-assisted agentic test workflows › Adoption 與治理問題\n問卷要求客戶揭露會影響 adoption 的 constraints：\n\n- data residency；\n- air-gapped labs；\n- approval for cloud / LLM use；\n- IP and test content handling：fully on-prem、hybrid、cloud-acceptable for certain tasks；\n- allowed models；\n- data handling；\n- `no code leaves the lab` guardrail。\n\n[[CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation]] 說 [[CMX500 AI Scripting Assistant]] has exclusive access to proprietary data from [[Rohde & Schwarz]]，並 automatically integrates updates；但該 PR 未提供 data residency、customer IP handling、deployment boundary、model governance 或 security controls。因此治理面仍需回到客戶 discovery 與正式產品文件確認。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI-assisted agentic test workflows.md"
+              },
+              "score": 5.175989
+             },
+             {
+              "text": "AI-enhanced CSI feedback › 使用限制\n- 約 50% throughput gain 是 PR 中的 demonstration claim；引用時必須附帶來源與「相較 conventional non-AI technology」的限定。\n- 不可把此 PR 主張轉換成 [[R&S CMX500]] formal specifications、Qualcomm prototype commercial performance 或 6G standard requirement。\n- 來源未提供測試條件，因此不可推論頻段、bandwidth、MIMO layers、channel model、model architecture 或 latency。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI-enhanced CSI feedback.md"
+              },
+              "score": 6.003213
+             },
+             {
+              "text": "AI-enhanced CSI feedback › unresolved\n- 來源未標示新聞稿發布日期。\n- 來源未提供 CSI feedback AI model 的 architecture、training data、model parameters、compression ratio、latency、standardization reference 或 reproducible benchmark。\n- 來源未提供 throughput gain 的完整 measurement methodology。\n- 來源未提供 video streaming user experience 的量化 QoE 指標。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI-enhanced CSI feedback.md"
+              },
+              "score": 3.336834
+             },
+             {
+              "text": "AI-enhanced CSI feedback › Demonstration context\n- [[Qualcomm Technologies]] 的 AI-enabled wireless device prototype 連接到 [[R&S CMX500]]。\n- [[R&S CMX500]] configured as an AI-enabled base station emulator。\n- 來源宣稱相較 conventional non-AI technology，downlink throughput increased by approximately 50%。\n- [[R&S CMX500]] 的 application testing capabilities 被用來展示 performance gain 如何轉換成 enhanced video streaming user experience。\n- 展示將於 [[MWC Barcelona 2026]] 的 [[KT]] booth 4A60 / hall 4 進行。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AI-enhanced CSI feedback.md"
+              },
+              "score": 2.729631
+             },
+             {
+              "text": "6G AI proof-of-concept demonstration › Demonstration setup\n依 [[KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance]]：\n\n- 參與方：[[KT]]、[[Qualcomm Technologies]]、[[Rohde & Schwarz]]。\n- 場地：[[MWC Barcelona 2026]]，KT booth 4A60，hall 4。\n- Device side：Qualcomm’s AI-enabled wireless device prototype。\n- Network / test side：[[R&S CMX500]]，configured as an AI-enabled base station emulator。\n- 技術主題：[[AI-enhanced CSI feedback]]、two-sided AI model、CSI-RS-based analysis、compressed feedback、[[massive MIMO]]。\n- 宣稱結果：約 50% downlink throughput increase compared to conventional non-AI technology。\n- Application demonstration：利用 [[R&S CMX500]] advanced application testing capabilities 展示 video streaming user experience 的改善。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/6G AI proof-of-concept demonstration.md"
+              },
+              "score": 5.049744
+             },
+             {
+              "text": "6G AI proof-of-concept demonstration › unresolved\n- 來源未標示發布日期。\n- 來源未提供 demonstration 的完整 measurement methodology、test conditions 或 reproducibility data。\n- 來源未說明該 AI-enabled base station emulator mode 是否為 [[R&S CMX500]] 可訂購功能、prototype feature 或展示用配置。\n- 來源未提供 MWC Barcelona 2026 展示後的實測紀錄。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/6G AI proof-of-concept demonstration.md"
+              },
+              "score": 4.210047
+             },
+             {
+              "text": "6G AI proof-of-concept demonstration\n[[6G AI proof-of-concept demonstration]] 是 [[KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance]] 中描述的 KT / Qualcomm Technologies / Rohde & Schwarz 聯合展示，用 [[R&S CMX500]] 與 AI-enabled wireless device prototype 展示 AI-enhanced radio transmission 的 downlink throughput gain 與 video streaming user experience 改善。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/6G AI proof-of-concept demonstration.md"
+              },
+              "score": 1.865992
+             },
+             {
+              "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 與既有知識的關係\n- 既有 [[R&S CMX500]] 頁已依 [[CMX500_Features_CSW9-20-0_en_32]] 記錄 WLAN signaling 802.11bn options 與 WLAN TX measurement option family；本新聞稿提供 PR / demonstration 層級的 [[Wi-Fi 8]] RF signaling tests 與 Broadcom prototype device 展示語境。\n- 既有 [[Wi-Fi 7 OTA MIMO stress testing]]、[[Wi-Fi 7 and 5G RedCap OTA measurements]] 與 [[4G 5G NR WLAN OTA MIMO stress testing]] 聚焦 Wi‑Fi 7 / IEEE 802.11be、OTA chamber integration 與 Bluetest / EMITE；本來源轉向 [[Wi-Fi 8]] / [[IEEE 802.11bn]] RF signaling tests，不是 OTA chamber 測試。\n- 既有 [[Broadcom]] 頁主要收錄 Broadcom 在 switch、PCIe switch 與 TPU roadmap 圖表中的列名；本來源新增 Broadcom 作為 prototype Wi-Fi 8 device 提供方 / 展示合作方的 PR 語境。\n- 本來源屬於 [[Productions]] 資料，但不是 datasheet / configuration guide；不可用來取代 [[CMX500_specs_en_5216-4127-22_v1100]] 或 [[CMX500_Features_CSW9-20-0_en_32]] 的正式規格與 option ordering data。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+              },
+              "score": 8.660942
+             },
+             {
+              "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 關鍵實體與概念\n- [[Rohde & Schwarz]] — 新聞稿發布者與 [[R&S CMX500]] 供應商。\n- [[R&S CMX500]] — multi-technology multi-channel one-box signaling tester；本來源新增 [[Wi-Fi 8]] / [[IEEE 802.11bn]] RF signaling mode 測試語境。\n- [[Broadcom]] — 提供 prototype next-generation WLAN / [[Wi-Fi 8]] device 供展示驗證。\n- [[Wi-Fi 8]] — 對應 [[IEEE 802.11bn]] amendment，來源稱其聚焦 [[UHR]]。\n- [[Wi-Fi 8 RF signaling tests]] — 本來源的核心測試能力宣稱。\n- [[IEEE 802.11bn]] — Wi-Fi 8 amendment；來源未標示標準版次或 ratification 狀態細節，只說 ahead of final ratification。\n- [[UHR]] — Ultra-high reliability；來源稱為 Wi-Fi 8 的性能焦點。\n- [[distributed resource units]] — Wi-Fi 8 PHY feature；來源寫作 dRU。\n- [[unequal modulation]] — Wi-Fi 8 technology；來源寫作 UEQM。\n- [[MLO]] — Wi-Fi 7 / Wi-Fi 8 延續的 Multi-Link-Operation。\n- [[MWC Barcelona 2026]] — 展示場域。\n- [[Christian Mokry]] — Press & media contact。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+              },
+              "score": 3.641509
+             },
+             {
+              "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 重點摘要\n- 來源未標示發布日期；raw frontmatter `created: 2026-09-11`，本文 ingest 日期為 2026-09-15。\n- [[Rohde & Schwarz]] 宣稱在最終 IEEE standard ratification 之前，已將 first [[Wi-Fi 8 RF signaling tests]] 實作到 [[R&S CMX500]] one-box signaling tester。\n- 展示情境：[[MWC Barcelona 2026]]，[[Rohde & Schwarz]] booth 5A80，Fira Gran Via Barcelona，hall 5。\n- 測試對象：[[Broadcom]] prototype next-generation WLAN device / prototype [[Wi-Fi 8]] device。\n- [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的焦點被描述為從 sheer speed 轉向 ultra-high reliability（[[UHR]]）performance。\n- 來源稱 [[Wi-Fi 8]] 延續 [[Wi-Fi 7]] 的 core PHY parameters：supported frequencies up to 7.125 GHz、channel bandwidths up to 320 MHz、4096QAM modulation、[[MLO]]。\n- 來源列出 [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的新 testing hurdles，包括 [[distributed resource units]]（dRU）與 [[unequal modulation]]（UEQM）。\n- dRU measurements 被描述為可驗證 device boosting uplink transmit power 與 improving connection reliability 的 effectiveness。\n- UEQM analysis 被描述為可評估 test device 是否能依 specified modulation coding scheme（MCS）combinations 正確 adapt modulation。\n- [[R&S CMX500]] 被定位為 modular、powerful one-box signaling tester，支援 [[LTE]]、[[NR]] SA/NSA、[[NR-NTN]]、[[NB-NTN]]、Direct-to-Cell（[[D2C]] / [[DTC]]）與 WLAN including [[Wi‑Fi 7]] and [[Wi‑Fi 8]]。\n- Press & media contact：[[Christian Mokry]]，PR Manager Test & measurement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+              },
+              "score": 3.428209
+             },
+             {
+              "text": "R&S CMX500 › Base unit 與主要訂購資訊\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n| 項目 | Type / code | Order No. | 原文說明 |\n|---|---|---|---|\n| CMX500 Radio communication tester | CMX500 | 1201.0002K70 | accessories 包含 power cords、operating manual (getting started)、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters |\n| CMX500 basic assembly | R&S CMX-PB70H | 1222.0676.09 | basic assembly |\n| R&S CMX accelerator unit | R&S CMX-B200A | 1222.0747.02 | accelerated digital signal processing capabilities |\n| R&S CMX processing unit | R&S CMX-B300C | 1222.0801.04 | generic high-performance computing platform for advanced data processing |\n| R&S CMX IF unit | R&S CMX-B500A | 1222.0924.02 | IF frequency range vector signal analysis and ARB based generator |\n| R&S CMX RF unit | R&S CMX-B600B | 1222.0953.03 | FR1 frequency range vector signal analysis and ARB based generator |\n\n[[CMX500_Features_CSW9-20-0_en_32]] 使用 generic code [[R&S CMX-B500x]] 與 [[R&S CMX-B600x]]；[[CMX500_specs_en_5216-4127-22_v1100]] 在 ordering information 中列出具體 orderable unit 為 [[R&S CMX-B500A]] 與 [[R&S CMX-B600B]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 12.721613
+             },
+             {
+              "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 12.08367
+             },
+             {
+              "text": "R&S CMX500 › 規格與數字的使用限制\n- [[CMX500_specs_en_5216-4127-22_v1100]] 是正式 Specifications Version 11.00（August 2025）；引用數字時仍需保留原文條件，例如溫度、warm-up、level alignment、overrange、EVM waveform、SCS、modulation、channel bandwidth、port、RMS / PEP、typ. / meas. / nom.。\n- [[CMX500_Features_CSW9-20-0_en_32]] 是 Features and Functions overview；其中沒有 tolerance limits 的 data 不具 binding。\n- 不能從 [[R&S CMX-B500x]]、[[R&S CMX-B600x]]、`.xx` 後綴或其他命名規則推導完整料號；完整 order number 只能抄自來源或正式 configure / ordering data。\n- [[R&S CMX-RF42E]] 的更多資料在另一份 PD 3609.7719.22 specifications；本頁不得補推該文件版次、日期或額外規格。\n- 報價與組態相容性需交由正式 configure 工具確認；wiki 只忠實記錄來源文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 43,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 10.879377
+             },
+             {
+              "text": "R&S CMX500 › 使用介面與 automation\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n| 介面 | 原文定位 |\n|---|---|\n| [[CMsquares]] | 單一 graphical user interface，web-based、responsive，支援 RF tests、functional tests、advanced signaling tests、protocol tests |\n| [[R&S CMXmars]] | Message log analysis，可離線分析或在線監控 instrument messaging |\n| [[R&S CMsequencer]] | Graphical scripting interface，可在 CMX500 或 Windows PC 上建立、設定與執行 test scripts |\n| [[XLAPI]] | Python-based scripting interface，適合 complex scripting use cases |\n| [[SCPI]] | Remote control interface，適合 simple、standardized scripting use cases |\n\nXLAPI scripting environment：Python 3.10；script development computer 可為 Windows PC 或 CMX500；XLAPI installation package 為 **CMX-KF600X**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 36,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 9.428089
+             },
+             {
+              "text": "R&S CMX500 › RF ports 與 routing\n- RF Com 1、RF Com 2：simultaneous receiver and transmitter testing；2 × SnapN；RF input/output to DUT。\n- RF In 1、RF In 2：transmitter testing；2 × SnapN；RF input from DUT。\n- RF Out 1 to RF Out 4：receiver testing；4 × SnapN；RF output to DUT。\n- Receiver test functions：四個 RF generators（其中兩個在 GPRF mode）可 routing 到 RF Com 1、RF Com 2、RF Out 1 to RF Out 4。\n- Transmitter test functions：RF Com 1、RF Com 2、RF In 1、RF In 2 ports 的四個 input signals 各可 split 到 one or two RF analyzers。\n- FDA tables 支援 user-specific frequency-dependent attenuation corrections。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 8.969422
+             },
+             {
+              "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 3.552195
+             },
+             {
+              "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 3.371309
+             },
+             {
+              "text": "CMX500 Callbox › unresolved\n- 來源未標示簡報版本、作者、正式發佈日期與對應 CSW software release。\n- 多個 use cases 未列出完整 option stack、BOM、DUT 條件或測試報告。\n- Roadmap 字樣如 coming soon、coming in 2025 and later、planned for CSW 9.00 / 9.10 需以 release note 或正式 product documentation 補證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 2.495115
+             },
+             {
+              "text": "CMX500 Callbox › Application / mobility use cases\n來源列出的 callbox application / mobility use cases 包含：\n\n- [[Mobility Testing]]。\n- [[Network Slicing]]。\n- [[IP Throughput]]。\n- [[Security Analysis]]。\n- [[Backend Service]]。\n- [[IMS Services]]。\n- [[WLAN offloading with Voice over WLAN]]。\n- [[ATSSS]]。\n- [[Power Consumption]]。\n- [[XR Responsiveness & L4S]]。\n- [[eCall]] / [[NGeCall]]。\n- [[Speech Quality]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 0.604428
+             },
+             {
+              "text": "Virtual Signalling Tester › Pre-silicon testing\n- 對 chipset development 的 [[Shift-Left]] 有效。\n- 在實體 chipset 製造前，用 virtual terminal 執行 protocol test。\n- 用於早期發現問題、降低 rework、提高 development efficiency。\n- 來源圖中列出 SW Simulation、EDA Emulation、FPGA Prototype、Chipset Integration / Regression。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 2.417347
+             },
+             {
+              "text": "Virtual Signalling Tester › Post-silicon testing\n- 適用 [[IoT]] device 與 communication module 的 basic protocol test。\n- 支援快速 functional test、regression test、sample scenario parameterization、test procedure 與 report / log display。\n- 來源列出 [[5G RedCap]]、Automotive、Healthcare、Industrial IoT、Smart Cities 等應用語境。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 2.195801
+             },
+             {
+              "text": "Virtual Signalling Tester › Interface 類型\n[[mx844030pc-j1200]] 列出三種 Virtual Signalling Tester interface / configuration：\n\n| Interface | 來源描述 | 相關 items |\n|---|---|---|\n| [[MAC-IF]] | MAC-IF for NR/RedCap | [[Anritsu MX844030PC]]、MX844030PC-PL011、MX844030PC-PL012 |\n| [[PHY-IF]] / [[Digital IQ]] | PHY-IF Digital-IQ for RedCap；non real-time | [[Anritsu MX844030PC]]、MX844030PC-PL001 |\n| [[RF-IF]] | RF-IF for RedCap；real-time with Anritsu SDR Unit | [[Anritsu MX844030PC]]、[[Anritsu MD8190A]]、[[MX819020A]] |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 2.049455
+             },
+             {
+              "text": "Virtual Signalling Tester › 與 RTD 的關係\n來源說明 common [[RTD]] GUI 可讓 Post-Silicon phase 的 NR protocol test cases 移植到 Pre-silicon phase。\n\n這使 [[Virtual Signalling Tester]] 在本來源中不只是 standalone simulator，也與 Anritsu 既有 [[RTD]] GUI / [[Anritsu MT8000A]] catalog 語境相連；但來源未提供 RTD catalog 內容或 RTD version。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 0.880196
+             },
+             {
+              "text": "Virtual Signalling Tester › 限制與未決事項\n- 來源未提供 full test case list、scenario library、3GPP release coverage、conformance status 或 throughput metrics。\n- 來源未說明 virtual environment 對 host PC、EDA emulator、DUT、SDR 或 shield box 的完整 timing / synchronization requirement。\n- 來源未提供 [[RTD]] version 或 [[Anritsu MT8000A]] catalog 版次。\n- 來源中的表格轉檔有錯位風險；interface、license 與 support service 應以原 PDF 核對。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual Signalling Tester.md"
+              },
+              "score": 0.773181
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › Interworking：WLAN offloading 與 Voice over WLAN\n同一來源也把 [[R&S CMX500]] 用於 cellular [[5G]] 與 [[WLAN]] 的 seamless traffic offloading and interworking demonstration：\n\n- [[WLAN offloading]] 是把原本 intended for cellular networks 的 data 透過 WLAN 傳送，以減少 cellular bands data load。\n- [[Voice over WLAN]] 情境聚焦在 cellular network 與 WLAN 之間 handover during a voice call，以維持 uninterrupted voice call experience。\n- 來源稱 [[R&S CMX500]] 內建 newly integrated [[N3IWF]] gateway，可測試 WLAN offloading with Voice over WLAN。\n- 來源稱 [[R&S CMX500]] 的 integrated [[POLQA]] voice quality measurement function 可用於 voice over WLAN applications 的 quality of experience early-stage 評估。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 3.637509
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › Wi-Fi 7 技術挑戰\n來源將 [[Wi-Fi 7]] / [[IEEE 802.11be]] 描述為 designed for extremely high data throughput，面向 tens of gigabits per second、low latency、ultra-high-definition video streaming、virtual reality 與 augmented reality applications。來源列出的 higher throughput key elements：\n\n| 技術項目 | 來源說法 |\n|---|---|\n| channel bandwidth | increased channel bandwidth of 320 MHz |\n| spatial streams | up to 16 spatial streams |\n| modulation | 4096 QAM modulation |\n| MLO | key feature；使 multiple RF chains 測試環境變重要 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 2.450887
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › 使用限制\n- 本頁目前只由 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 支撐。\n- 來源是 PR / demonstration positioning，不是正式 datasheet、configuration guide、test case list 或 certification document。\n- 不可從本來源推論 [[R&S CMX500]] Wi‑Fi 7 的 option code、software release、支援 RF chains 數量、MLO link combination、measurement uncertainty 或完整 test coverage。\n- 不可從本來源推論 [[R&S CMP180]] 480 MHz waveform 的正式 [[Wi-Fi 8]] 標準地位、量測規格或 production throughput。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 2.039096
+             },
+             {
+              "text": "CMX500 AI Scripting Assistant › Script generation inputs\n來源描述測試工程師手動產生 test scripts 時，常需從多個來源彙整輸入。來源明示的來源類型包括：\n\n- [[3GPP specifications]]；\n- [[XLAPI]] scripts；\n- [[Python]]；\n- [[R&S CMX500]] user manual。\n\n[[CMX500 AI Scripting Assistant]] 被描述為用來緩解這種 multi-source script generation challenge 的新 solution。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/CMX500 AI Scripting Assistant.md"
+              },
+              "score": 5.214639
+             },
+             {
+              "text": "CMX500 AI Scripting Assistant › Deployment 與 availability\n來源說 [[CMX500 AI Scripting Assistant]] is available from [[Rohde & Schwarz]] through various deployment options。\n\n來源也說 MWC 2025 Barcelona 的訪客可在 [[Rohde & Schwarz]] booth in hall 5, booth 5A80 現場體驗工具。\n\n使用限制：\n\n- `various deployment options` 未展開；不可推論為 cloud、on-prem、hybrid 或 air-gapped。\n- MWC 2025 booth demo 不等於正式 GA、量產、可報價或所有客戶可取得。\n- 來源未列 formal product version、order number、license code、support matrix 或 hardware / software prerequisites。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/CMX500 AI Scripting Assistant.md"
+              },
+              "score": 1.889933
+             },
+             {
+              "text": "CMX500 AI Scripting Assistant › unresolved\n- 來源未標示新聞稿發布日期；raw frontmatter 的 `published` 欄位為空。\n- 來源未列出 [[CMX500 AI Scripting Assistant]] 的正式產品型號、文件版次、software release、order number、license code、價格或 support contract。\n- 來源未說明 `various deployment options` 的具體部署型態。\n- 來源未說明是否與 [[R&S AI Workplace]]、[[R&S AI Workplace Solutions]]、[[ScriptAssist]] 或 [[TechAssist]] 同一產品線或同一工具。\n- 來源未提供支援的 [[R&S CMX500]] software release、[[XLAPI]] version、[[Python]] version、script package、3GPP release 或 application test scope。\n- 來源未提供 AI output 的驗證方式、human review workflow、error handling、security / data residency / IP handling 或模型更新治理。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/CMX500 AI Scripting Assistant.md"
+              },
+              "score": 1.723307
+             },
+             {
+              "text": "CMX500 AI Scripting Assistant › 主要能力\n依 [[CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation]]，來源明示的能力包含：\n\n- generate accurate [[XLAPI]] scripts with significantly less time and effort；\n- extend existing scripts；\n- provide explanations for given scripts；\n- 協助較少經驗的使用者理解 scripts 的 structure and logic，提升 scripting proficiency。\n\n本頁只記錄來源說法；來源未提供 benchmark、correctness metric、coverage matrix、支援 script package 清單或驗證條件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/CMX500 AI Scripting Assistant.md"
+              },
+              "score": 1.433947
+             },
+             {
+              "text": "CMX500 AI Scripting Assistant › 與既有 R&S AI / CMX knowledge 的關係\n- [[R&S CMX500]] 既有頁記錄其 GUI、[[R&S CMsequencer]]、[[XLAPI]] 與 [[SCPI]] remote control / automation 介面；本頁補充的是 AI-assisted scripting assistant 產品 / PR 語境。\n- [[CMX500 XLAPI Scenario Database]] 記錄 xLAPI scenario package database 與 script status；[[CMX500 AI Scripting Assistant]] 來源只說可生成 [[XLAPI]] scripts，未提供 scenario package counts 或 status。\n- [[AI-assisted agentic test workflows]] 既有頁來自 [[AIW_Products_Customer_Questionnaire]]；本頁提供一個 [[R&S CMX500]] 相關的 AI-assisted scripting / automation 具體例子。\n- [[ScriptAssist]] 既有頁來自 [[AIW_on_prem_prerequisites_ScriptAssist]]，只確認 on-prem prerequisites。[[CMX500 AI Scripting Assistant]] 與 [[ScriptAssist]] 名稱相近且都涉及 scripting assistance，但本來源未說兩者相同、相容或從屬，因此暫時分開維護。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/CMX500 AI Scripting Assistant.md"
+              },
+              "score": 0.664208
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping\n[[AISeverEcosystem R&S solution mapping]] 是用來保存 [[AISeverEcosystem]] 中 AI server ecosystem 分類與 [[R&S Solution]] 欄位對應關係的概念頁；它只表示該 Excel 表中的銷售 / 測試方案線索，不代表正式產品配置、客戶關係或已驗證商機。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 4.659576
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › Jitter / phase noise / clock / LDO noise\n- [[R&S FSWP]] 在 [[伺服器主機板]]分類中被列為 LDO NSD test、clock jitter test。\n- [[R&S FSWP]] 在 [[網通交換機]]分類中被列為 jitter / phase noise test。\n- [[R&S FSWP]] 也出現在 [[電源供應器]]的 LDO NSD test、[[智原]]與[[譜瑞-KY]]的 IC / high-speed transmission solution 欄，但未提供測試條件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 4.450475
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › SI / high-speed channel / interconnect\n- [[R&S ZNA]] 與 [[R&S ZNB]] 在來源中被放入 [[伺服器電路板]] / [[PCB]] 的 IL、TDR，以及 [[連接器]] / 線纜的 high speed cable 測試。\n- [[R&S ZNA]] 也出現在 [[伺服器主機板]] / PCBA 的 high speed trace test、[[GPU]] 的 TDR、[[CPU]]、[[智原]]、[[譜瑞-KY]]等 IC / high-speed transmission context。\n- [[R&S ZNA67EXT]] 出現在 [[智原]] 與 [[旺矽]] 的 solution 欄，但來源未提供實際 frequency range 或 fixture。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 3.293492
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › 來源中的 mapping\n| 分類 | 對象 / 企業欄 | 來源中的 R&S Solution | 來源日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| [[伺服器主機板]] / PCBA | [[鴻海]] | [[R&S ZNL]]: PDN Target Z；[[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test、clock jitter test；[[R&S ZNA]]: high speed trace test | 來源未標示正式日期；raw converted 2026-09-17 | 未提供正式 test setup、option、fixture、頻率或 sales kit |\n| [[伺服器電路板]] / [[PCB]] | [[博智]] | [[R&S ZNA]] / [[R&S ZNB]]: IL、TDR | 來源未標示正式日期；raw converted 2026-09-17 | 只對應表內 [[博智]]列，不能推論其他 PCB 廠同樣適用 |\n| [[連接器]] / 線纜 | [[嘉澤]] / [[嘉基]] | [[R&S ZNA]] / [[R&S ZNB]] + [[OSP]]: high speed cable | 來源未標示正式日期；raw converted 2026-09-17 | [[嘉澤]] / [[嘉基]] 同格寫法未決；未提供 cable type、connector type 或 calibration method |\n| [[網通交換機]] | [[智邦]] | [[R&S FSWP]]: jitter / phase noise test；VNA（[[R&S ZNA]] / [[R&S ZNB]]）；EMI pretest | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；不可推論完整 switching test portfolio |\n| [[矽光子]] | [[上詮]] | optical VNA：[[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]；[[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]] | 來源未標示正式日期；raw converted 2026-09-17 | ThinkLands、GOCA、Newkey 與 PSA 未展開；未提供 optical VNA setup 或 module type |\n| [[散熱器]] | [[建準]] | [[MXO]]: motor driver analysis | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 motor driver type、fan / pump 類型或量測條件 |\n| [[電源供應器]] | [[光寶科]] | [[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test；BMS test | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；未提供 HVDC / PSU / BBU 測試配置 |\n| [[GPU]] | [[輝達]] | [[R&S ZNA]]: TDR、[[OSP]] | 來源未標示正式日期；raw converted 2026-09-17 | 不代表 R&S 與 NVIDIA 合作或採購關係；僅是表內 solution mapping |\n| [[CPU]] | [[超微]] | [[R&S ZNA]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 TDR、SI、PI 或其他測項 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 2.889893
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › 來源中的 mapping\n| 分類 | 對象 / 企業欄 | 來源中的 R&S Solution | 來源日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| [[IC]] / 矽智財 / 製程 | [[智原]] | [[R&S ZNA]] + [[R&S ZNA67EXT]]、[[R&S FSWP]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明量測對象是 SerDes、jitter、phase noise、probe station 或 wafer / package |\n| [[測試介面]] | [[旺矽]] | [[R&S ZNA67EXT]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 probe card / socket / fixture / frequency range |\n| 高速傳輸 IC | [[譜瑞-KY]] | [[R&S ZNA]] + [[R&S FSWP]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明高速傳輸 IC 類型、SerDes 速率或測試項目 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 2.029056
+             },
+             {
+              "text": "AISeverEcosystem › 重點摘要\n- [[AISeverEcosystem]] 是一份 AI server ecosystem / server rack / ICs Excel 轉檔來源，主要把 AI server 供應鏈分成 [[GPU模組]]、[[ABF載板]]、[[伺服器主機板]]、[[PCB]]、[[CCL]]、[[連接器]] / 線纜、[[網通交換機]]、[[矽光子]]、[[散熱器]]、[[電源供應器]]、[[伺服器機殼]]、[[伺服器 ODM]]、[[EMC Lab]] 與 IC 相關分類。\n- 來源同時列出部分公司、台股代號、角色亮點、[[R&S Solution]] 與 sales kits 連結；多數欄位為 `NaN`，因此不可推論未填欄位代表不適用、無需求或無 R&S solution。\n- [[ServerRack]] sheet 中，[[伺服器主機板]] / PCBA 的 [[R&S Solution]] 欄列出 [[R&S ZNL]] 用於 PDN Target Z、[[MXO]] 用於 power rail / multiphase DC / PI、[[ZISO]]、[[R&S FSWP]] 用於 LDO NSD test / clock jitter test、[[R&S ZNA]] 用於 high speed trace test。\n- [[伺服器電路板]] / PCB 分類列出關鍵元件為 `20+層UBB、高階ABF、低Dk CCL`，並在 [[博智]] 列寫 `GB200/NVL72帶動層數、材料等級暴衝。`；[[R&S Solution]] 欄列 [[R&S ZNA]] / [[R&S ZNB]]：IL、TDR。\n- [[連接器]] / 線纜分類列出 `CPU/GPU Socket、UQD水冷快接、800 G AOC`，角色亮點稱 [[PCIe 6]] / [[PCIe 7]]、[[InfiniBand]] 800 Gbe 提升 connector ASP；[[R&S Solution]] 欄列 [[R&S ZNA]] / [[R&S ZNB]] + [[OSP]]：high speed cable。\n- [[網通交換機]] 分類列出 [[智邦]]、[[神準]]、[[明泰]]、[[鴻海]]、[[達創]]、[[鈺登]]，[[R&S Solution]] 欄在 [[智邦]] 列出 [[R&S FSWP]]：jitter / phase noise test、VNA（[[R&S ZNA]] / [[R&S ZNB]]）、EMI pretest，並有一個 SharePoint sales kit 連結。\n- [[矽光子]] 分類列出關鍵元件 `40G/100G/400G/800G光收發模組, CPO/NEO（Near-packaged optics) &（pluggable）`；角色亮點稱 [[CPO]] 對有源 / 無源 SiPh、先進封裝、測試需求提升，且提到 [[前鼎]] 提供高速載板、[[光聖]] 提供 ELS 外部雷射源；[[R&S Solution]] 欄列 optical VNA：[[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]，以及 [[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]]。\n- [[散熱器]] 分類列出關鍵元件 `滑軌、液冷板、CDU、風扇`，在 [[建準]] 角色亮點稱 `GPU TDP由700 W升至1200 W，液冷與滑軌結構同步升級。`；[[R&S Solution]] 欄列 [[MXO]]：motor driver analysis。\n- [[電源供應器]] 分類列出關鍵元件 `HVDC、5–10 kW PSU、液冷電源櫃、BBU`，在 [[光寶科]] 角色亮點稱 `Blackwell平台功耗翻倍，推升高密度電源需求`；[[R&S Solution]] 欄列 [[MXO]]：power rail / multiphase DC / PI、[[ZISO]]、[[R&S FSWP]]：LDO NSD test、BMS test，並有一個 SharePoint sales kit 連結。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AISeverEcosystem.md"
+              },
+              "score": 5.284085
+             },
+             {
+              "text": "AISeverEcosystem › ICs 分類\n- [[GPU]]：列名 [[輝達]]（NVDA）、[[超微]]（AMD）、[[英特爾]]（INTC）；[[輝達]] 的 R&S solution 欄列 [[R&S ZNA]]：TDR、[[OSP]]。\n- [[CPU]]：列名 [[超微]]（AMD）、[[英特爾]]（INTC）；[[超微]] 的 R&S solution 欄列 [[R&S ZNA]]。\n- [[DRAM]]：列名 [[三星]]、[[海力士]]、[[美光]]。\n- [[IC]] / 矽智財 / 製程：列名 [[智原]]、[[創意]]、[[世芯-KY]]；[[智原]] 的 R&S solution 欄列 [[R&S ZNA]] + [[R&S ZNA67EXT]]、[[R&S FSWP]]。\n- [[晶圓代工]]：列名 [[台積電]]。\n- [[封裝測試]]：列名 [[日月光]]、[[力成]]。\n- [[測試介面]]：列名 [[旺矽]]、[[穎崴]]、[[中華精測]]；[[旺矽]] 的 R&S solution 欄列 [[R&S ZNA67EXT]]。\n- [[網通]]：列名 [[聯發科]]、[[達發]]。\n- [[BMC]]：列名 [[新唐]]、[[信驊]]。\n- 高速傳輸 IC：列名 [[譜瑞-KY]]、[[祥碩]]；[[譜瑞-KY]] 的 R&S solution 欄列 [[R&S ZNA]] + [[R&S FSWP]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AISeverEcosystem.md"
+              },
+              "score": 3.794358
+             },
+             {
+              "text": "AISeverEcosystem\n> 來源為 `AISeverEcosystem.xlsx` 經 markitdown 轉出的 lossy derivative；原始 Excel 才是 source of truth。來源正文未標示正式發布日期或資料期間，raw frontmatter 僅標示 converted: 2026-09-17。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AISeverEcosystem.md"
+              },
+              "score": 3.614438
+             },
+             {
+              "text": "AISeverEcosystem › ServerRack 分類\n- [[GPU模組]]：關鍵元件為 [[OAM]]、[[UBB底板]] board；列名 [[鴻海]]、[[緯創]]。\n- [[ABF載板]]：列名 [[欣興]]、[[景碩]]、[[南電]]。\n- [[伺服器主機板]] / PCBA：列名 [[鴻海]]、[[廣達]]、[[緯創]]、[[英業達]]；R&S solution 欄對 [[鴻海]]列出 [[R&S ZNL]]、[[MXO]]、[[ZISO]]、[[R&S FSWP]]、[[R&S ZNA]]。\n- [[伺服器電路板]] / [[PCB]]：關鍵元件為 `20+層UBB、高階ABF、低Dk CCL`；列名 [[博智]]、[[高技]]、[[精成科]]、[[欣興]]、[[臻鼎]]、[[健鼎]]、[[金像電]]；R&S solution 欄在 [[博智]]列出 [[R&S ZNA]] / [[R&S ZNB]]：IL、TDR。\n- [[銅箔基板]] / [[CCL]]：關鍵元件同為 `20+層UBB、高階ABF、低Dk CCL`；列名 [[台光電]]、[[聯茂]]、[[台燿]]。\n- [[連接器]] / 線纜：關鍵元件為 `CPU/GPU Socket、UQD水冷快接、800 G AOC`；列名 [[嘉澤]] / [[嘉基]]、[[凡甲]]、[[佳必琪]]、[[優群]]、[[正崴]]、[[宏致]]、[[貿聯]]、[[信邦]]、[[Amphenol]]、[[Molex]]。\n- [[網通交換機]]：列名 [[智邦]]、[[神準]]、[[明泰]]、[[鴻海]]、[[達創]]、[[鈺登]]。\n- [[矽光子]]：列名 [[上詮]]、[[華星光]]、[[波若威]]、[[眾達-KY]]、[[聯鈞]]、[[光聖]]、[[訊芯-KY]]、[[光環]]、[[前鼎]]。\n- [[散熱器]]：關鍵元件為滑軌、液冷板、[[CDU]]、風扇；列名 [[建準]]、[[廣運]]、[[奇鋐]]、[[川湖]]、[[雙鴻]]、[[超眾]]、[[健策]]。\n- [[電源供應器]]：關鍵元件為 [[HVDC]]、5–10 kW [[PSU]]、液冷電源櫃、[[BBU]]；列名 [[光寶科]]、[[台達電]]、[[系統電]]、[[康舒]]、[[全漢]]、[[群光]]。\n- [[伺服器機殼]] / 機櫃：關鍵元件為高承載機櫃、散熱背板、EMI結構；列名 [[晟銘電]]、[[偉訓]]、[[營邦]]、[[富驊]]、[[勤誠]]。\n- [[伺服器整合／ODM]]：列名 [[鴻海]]、[[廣達]]、[[緯創]]、[[緯穎]]、[[英業達]]、[[華碩]]、[[神達]]、[[技嘉]]。\n- [[EMC Lab]]：列名 [[耕興]]、[[SGS]]、[[創得]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AISeverEcosystem.md"
+              },
+              "score": 2.618052
+             },
+             {
+              "text": "Data center full-spectrum connectivity › Optical 與 fiber connectivity\n- [[Amphenol XPO-LPO]] — 來源稱其以 224 Gb/s per lane across 64 channels，面向 AI scale-up deployments。\n- [[1.6T OSFP Transceivers]] — 來源稱 Amphenol 200G/lane optical modules support DR4、FR4、2×DR4、2×FR4、AOC、breakout AOC configurations with LC or MPO ports。\n- [[Amphenol Co-packaged Optics]] — 來源稱 Amphenol offers an architecture from high-density electrical interposer to linear optical conversion module to fiber plant。\n- [[LEAP On-Board Transceiver]] — 來源稱其為 12-channel duplex optical transceiver，up to 25Gbps per channel，300Gbps cumulative on multi-mode fiber。\n- [[300G CXP2 Active Optical Cable]] — 來源稱 CXP2 to CXP2 AOC provides cost-effective plug and play cabling solution，delivers high hardware faceplate port density among existing SFF industry standards。\n- [[CommScope Rapid Fiber Connect Platform]] — 來源稱其 simplifies and accelerates AI scaling by pre-integrating optics off-site and reducing on-site fiber connections。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 1.840089
+             },
+             {
+              "text": "Data center full-spectrum connectivity › High-speed electrical connectivity\n- [[Amphenol OverPass Cable Systems]] — 來源稱其 enable high-speed signal transmission from ASIC packages to end-points across the system。\n- [[ExtremePort OSFP Connectors]] — 來源稱 connectors and cages have 60 contacts per port、0.6 mm pitch，並 optimized for signal integrity、thermal management and multi-lane pluggable architecture。\n- [[Amphenol XtremePass]] — 來源稱 XtremePass 448G connector solution supports scalable form factors from 32DP to 128DP，並跨 Ethernet、NVLink、PCIe、InfiniBand systems。\n- [[OSFP Cable Assemblies]] — 來源稱 OSFP cable assemblies compatible with 25G/lane NRZ up to 224G/lane PAM4，deliver aggregate bandwidths of 200G、400G、800G and 1.6T per cable assembly，available in Passive and Active variants。\n- [[Sentry HD High-Speed Backplane Connector]] — 來源稱其是 next-generation high-speed backplane connector platform。\n- [[Celerity 224 Gb-s BGA Mezzanine Connectors]] — 來源稱其 designed to support data rates up to 224 Gb/s PAM4。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 1.80728
+             },
+             {
+              "text": "Data center full-spectrum connectivity › Power 與 cooling connectivity\n- [[Amphenol BarKlip I-O products]] / [[BarKlip Busbar Connectors]] — 來源稱其 distribute high-current power between busbars、cables and circuit boards，適用 power-dense data centers、OCP rack and power solutions。\n- [[60 A Universal AC Input Connector and Cable Assemblies]] — 來源稱其 meet 2OU power distribution architecture standards，將 power 從 busway routing 到 power shelf。\n- [[M-CRPS +54V Connectors and Cable Assemblies]] — 來源稱其 meet OCP M-CRPS power supply input specifications。\n- [[PwrBlade ULTRA HD+ Cable Assembly]] — 來源稱其 Cable-to-Board serves as high-power I/O cable configuration in a low-profile design。\n- [[OSFP-RHS 224G Cold Plate and Cage Assembly]] — 來源稱其 optimizes port thermal efficiency and reliability，meeting MSA requirements，並提供 one-step press assembly。\n- [[Amphenol Liquid Cooling Leakage Detection Sensor Cable Assembly]] — 來源稱其 detects coolant leaks and ensures system reliability。\n- [[Liquid Cooling Quick Disconnect Connectors]] — 來源稱其用於 high-efficiency thermal management。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 1.706068
+             },
+             {
+              "text": "Data center full-spectrum connectivity › 相關來源\n- [[full-spectrum-data-center-connectivity-brochure]] — 來源未標示正式日期、raw converted 2026-09-17 的 Amphenol full-spectrum data center connectivity brochure。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 0.23024
+             },
+             {
+              "text": "Data center full-spectrum connectivity › 底部圖上產品清單\n來源底部再以清單列出多個 electrical interconnect / memory / card edge / cable connector 類別，包括 [[SOCAMM and LPCAMM CAMM2 Connectors]]、[[CompacLink PCIe Gen 6 Compression Board-to-Board Connectors]]、[[Mini Cool Edge IO]] / [[Multi-Trak]]、[[Titen]]、[[Cool Express Link]]、[[DDR5 and Next Gen Memory Connector]]、[[Double & Single Density Mini Cool Edge]]、[[U.2 SFF8639]]、[[PCIe CEM 7 Connectors]] 與 [[Direct Attached PCIe CEM Cable Connectors]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 0.13427
+             },
+             {
+              "text": "non-signaling\nwith signaling",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-6f4e9ea1141f0dd1",
+                "original_ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+                "sha256": "6f4e9ea1141f0dd1b05cf4e085ab51bd7dcd7db37f1ff9d1d0a6974ab9025692",
+                "raw_ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+               "section": 93,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 17.605508
+             },
+             {
+              "text": "Non-signaling",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-094dfa34f112d59b",
+                "original_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+                "sha256": "094dfa34f112d59b36ac5657e84e88379ec21b54fd169328c309f062cf839f95",
+                "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+               "section": 315,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.818487
+             },
+             {
+              "text": "Non-signaling - RF\nSignaling - Protocol\nPre-conformance",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-930719e012588eec",
+                "original_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+                "sha256": "930719e012588eec7cb2f397159386a87d1a5920c6edc93e0410be578603327b",
+                "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+               "section": 62,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.567208
+             },
+             {
+              "text": "Non signaling- RF",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-930719e012588eec",
+                "original_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+                "sha256": "930719e012588eec7cb2f397159386a87d1a5920c6edc93e0410be578603327b",
+                "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+               "section": 63,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.356823
+             }
+            ],
+            "text": "### 推薦先賣\nCMX500 的 generative AI application user-experience testing 是最直接的 AI + signaling tester 機會，因為 R&S 與 China Mobile Research Institute 展示的 solution based on R&S CMX500，可在 diverse network conditions 下量化 generative AI applications 的 end-user experience [43]。\n這個 testbed 使用 CMX500 與 smart terminal 建立 radio connection，並可配置 network parameters、channel fading models、latency、jitter、RF impairments 等 variables [47]。\n這個 testbed 的 KPI 包含 Time to First Token（TTFT）與 Tokens Per Second（TPS） [43]。\nCMX500 的 AI-enhanced CSI / 6G proof-of-concept 是第二個直接 AI + signaling tester 機會，因為 Qualcomm AI-enabled wireless device prototype 連接到 CMX500，且 CMX500 被配置為 AI-enabled base station emulator [54]。\n該展示宣稱相較 conventional non-AI technology，downlink throughput increased by approximately 50% [54]。\nCMX500 的 application testing capabilities 被用來展示 performance gain 如何轉換成 enhanced video streaming user experience [54]。\nCMX500 AI Scripting Assistant 是 tester automation 機會，因為它是 R&S CMX500 5G one-box signaling tester 的 AI-powered scripting tool，使用 generative AI 與 natural language processing 協助生成、擴充與理解 XLAPI scripts [14]。\nCMX500 AI Scripting Assistant 的 domain-specific applications 包含 R&D 5G NR protocol testing、application testing 與 CMX instrument automation [15]。\nAI server non-signaling electrical test 是 AI 供應鏈機會，因為 AISeverEcosystem R&S solution mapping 將 AI server ecosystem 分類與 R&S Solution 欄位對應為 sales / test solution 線索 [83]。\nAI server PCB / interconnect 的 non-signaling electrical test 線索包含 R&S ZNA / R&S ZNB 用於 IL、TDR、high speed cable 與 high speed trace test [85]。\nAI server clock / jitter / phase-noise / LDO-noise 的 non-signaling electrical test 線索包含 R&S FSWP 用於 LDO NSD test、clock jitter test、jitter / phase noise test [84]。\nCMP180 的 AI 直連機會目前未被知識庫證實；知識庫只確認 CMP180 在 WLAN production phase 以 non-signaling mode 執行 RF measurements，以節省時間 [12]。\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S CMX500 signaling tester | Generative AI application user-experience testing | 知識庫確認 CMX500 可配置 network parameters、channel fading models、latency、jitter 與 RF impairments。[47] | 它被展示為 based on CMX500 的 generative AI applications test solution，可量化 end-user experience。[43] | KPI 包含 TTFT 與 TPS。[43] | 來源未提供 TTFT / TPS measurement methodology、prompt set、LLM model、server / cloud configuration、terminal model、radio scenario table 或 reproducibility data。[45] |\n| R&S CMX500 signaling tester | AI-enhanced CSI feedback / 6G radio proof-of-concept | 知識庫確認 CMX500 在展示中 configured as an AI-enabled base station emulator。[54] | 它與 Qualcomm AI-enabled wireless device prototype 搭配，用於展示 AI-enhanced radio transmission 的 downlink throughput gain。[55] | 來源宣稱約 50% downlink throughput increase compared to conventional non-AI technology。[55] | 來源未提供完整 measurement methodology、test conditions 或 reproducibility data。[56] |\n| CMX500 AI Scripting Assistant | AI-assisted tester automation | 知識庫確認它可 generate accurate XLAPI scripts、extend existing scripts、provide explanations for given scripts。[81] | 它針對 CMX500 5G one-box signaling tester，協助 test engineers 生成、擴充與理解 XLAPI scripts。[14] | 它的 domain-specific applications 包含 R&D 5G NR protocol testing、application testing 與 CMX instrument automation。[15] | 來源未列 formal product version、order number、license code、support matrix 或 hardware / software prerequisites。[79] |\n| R&S ZNA / R&S ZNB non-signaling electrical test | AI server PCB / SI / high-speed interconnect | 知識庫確認 ZNA / ZNB 在 AI server mapping 中對應 IL、TDR、high speed cable 與 high speed trace test。[85] | AISeverEcosystem mapping 是 AI server ecosystem 分類與 R&S Solution 欄位的 sales / test solution 線索。[83] | ServerRack sheet 的 PCB 分類列出 20+層UBB、高階ABF、低Dk CCL，且 R&S Solution 欄列 ZNA / ZNB：IL、TDR。[88] | 該 mapping 不是 formal datasheet、application note、configuration guide 或 ordering guide。[17] |\n| R&S FSWP non-signaling electrical test | AI server clock / jitter / phase noise / LDO noise | 知識庫確認 FSWP 在伺服器主機板分類中列為 LDO NSD test、clock jitter test，且在網通交換機分類中列為 jitter / phase noise test。[84] | AI server mapping 將 FSWP 放入伺服器主機板、網通交換機、電源供應器與 IC / high-speed transmission solution 欄。[84] | AISeverEcosystem 的 ICs sheet 將 R&S FSWP 放入 IC / 矽智財 / 製程與高速傳輸 IC 相關分類。[21] | 來源未提供 option、firmware、fixture 或 calibration 條件。[18] |\n| R&S CMP180 non-signaling radio tester | Wi-Fi production non-signaling RF testing | 知識庫確認 CMP180 支援 Wi-Fi 6E、Wi-Fi 7 與 5G NR FR1 up to 8 GHz，bandwidths up to 500 MHz。[12] | WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間，且 CMP180 被定位為 optimized for this purpose。[12] | CMP180 integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 MIMO testing。[12] | 知識庫未證實 CMP180 的 Wi-Fi production non-signaling RF testing 是 AI use case。 |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Generative AI app over 5G / future wireless | CMX500 + smart terminal + host PC software | 用 CMX500 控制 radio connection、network parameters、fading、latency、jitter 與 RF impairments，觀察 TTFT / TPS。[43][47] | Host PC software 名稱、版本、order number 與資料格式未標示。[45] |\n| AI-native air interface / 6G PoC | CMX500 + AI-enabled wireless device prototype | 用 CMX500 as AI-enabled base station emulator 驗證 AI-enhanced CSI feedback 與 throughput gain。[54][55] | 該 AI-enabled base station emulator mode 是否為可訂購功能、prototype feature 或展示用配置未說明。[56] |\n| CMX500 test engineering productivity | CMX500 AI Scripting Assistant + XLAPI | 用 generative AI / NLP 生成、擴充、解釋 XLAPI scripts，支援 R&D 5G NR protocol testing、application testing 與 CMX automation。[14][15][81] | Deployment options、license、版本、資料治理與適用 CMX500 software release 仍未標示。[50] |\n| AI server PCB / interconnect validation | R&S ZNA / R&S ZNB | 以 IL、TDR、high speed cable 與 high speed trace test 切入 AI server PCB、連接器與高速通道。[85][86] | 來源未提供正式 test setup、option、fixture、frequency 或 sales kit 正文。[86] |\n| AI server clock / power noise validation | R&S FSWP | 以 LDO NSD、clock jitter、jitter / phase noise test 切入 server motherboard、network switch、power supply 與 high-speed IC。[84] | 來源未提供測試條件。[84] |\n### 限制\nGenerative AI user-experience testing 目前是 PR / demonstration-level evidence，不是正式 test specification、standardized benchmark 或 product datasheet [46]。\nAI-enhanced CSI feedback 的約 50% throughput gain 是 PR demonstration claim，且不可改寫成 CMX500 formal specification、Qualcomm prototype commercial performance 或 6G standard requirement [52]。\nCMX500 AI Scripting Assistant 來源是新聞稿，不是 specifications、deployment guide 或 security architecture [50]。\nAISeverEcosystem R&S solution mapping 只代表 Excel 表中的 sales / test solution 線索，不代表正式產品配置、客戶關係或已驗證商機 [83]。\nCMP180 的 Wi-Fi 7 production non-signaling RF testing 來源是 PR / demonstration positioning，不是正式 datasheet、configuration guide、test case list 或 certification document [77]。",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "Wi-Fi 7 R&D and production testing › Production：R&S CMP180 non-signaling RF testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。\n- [[R&S CMP180]] 被定位為 optimized for this purpose 的 radio communication tester。\n- 來源稱 [[R&S CMP180]] 支援 many cellular and non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform。\n- 來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。\n- 來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。\n- 來源稱 two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 3.794817
+            },
+            {
+             "text": "CMX500 AI Scripting Assistant\n[[CMX500 AI Scripting Assistant]] 是 [[Rohde & Schwarz]] 新聞稿中介紹的 [[R&S CMX500]] 5G one-box signaling tester AI-powered scripting tool，使用 generative AI 與 natural language processing 協助測試工程師生成、擴充與理解 [[XLAPI]] scripts。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/CMX500 AI Scripting Assistant.md"
+             },
+             "score": 11.619769
+            },
+            {
+             "text": "CMX500 AI Scripting Assistant › 產品定位\n依 [[CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation]]，[[CMX500 AI Scripting Assistant]] 是為 [[R&S CMX500]] 開發的 AI-driven scripting support solution。來源將它定位為可 automate test script generation and functional testing 的工具，目標是協助 mobile device manufacturers 的 test engineers：\n\n- streamline workflows；\n- reduce the risk of errors；\n- speed up time-to-market；\n- 以 tailored and efficient approach automating domain-specific applications。\n\n來源中的 domain-specific applications 包含：\n\n- R&D [[5G NR]] protocol testing；\n- application testing；\n- CMX instrument automation；\n- many more（來源未展開）。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/CMX500 AI Scripting Assistant.md"
+             },
+             "score": 6.683388
+            },
+            {
+             "text": "AISeverEcosystem R&S solution mapping › 可追溯限制\n- 本頁只追溯到 [[AISeverEcosystem]] 的 Excel 轉檔內容。\n- 來源未標示正式日期，因此本頁不可用來判斷 2026-09-18 當下市場狀態或客戶優先順序。\n- [[R&S Solution]] 欄不是 formal datasheet、application note、configuration guide 或 ordering guide；不得據此報價或建立正式測試配置。\n- 表內 SharePoint sales kit 連結未擷取正文；目前只可作為待讀材料索引。\n- 公司列名與 solution 同列不代表該公司已購買、正在評估、已合作、已導入、已被拜訪或為 R&S 客戶。\n- 表內 `NaN` 不代表無 solution 或無商機，只代表轉檔來源該欄未提供可讀文字。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+             },
+             "score": 5.957123
+            },
+            {
+             "text": "AISeverEcosystem R&S solution mapping › 未決事項\n- `unresolved`: [[ZISO]]、[[OSP]]、PSA、[[ThinkLands]]、[[GOCA]]、[[Newkey]]、BMS test 在本來源中未展開正式名稱、版本或配置。\n- `unresolved`: Sales kits 連結需要後續擷取簡報正文，才能確認 solution package、scope 與限制。\n- `unresolved`: [[R&S ZNL]]、[[MXO]]、[[R&S FSWP]]、[[R&S ZNA]]、[[R&S ZNB]]、[[R&S ZNA67EXT]] 在此表中的對應未提供 option / firmware / fixture / calibration 條件。\n- `unresolved`: 來源未說明這份 mapping 是市場研究、sales targeting、account plan、training material 還是個人筆記。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+             },
+             "score": 5.453872
+            },
+            {
+             "text": "AISeverEcosystem › 重點摘要\n- [[伺服器機殼]] / 機櫃分類列出關鍵元件 `高承載機櫃、散熱背板、EMI結構`，在 [[晟銘電]] 角色亮點稱 `AI機櫃重2–3噸，需重新設計載重與屏蔽結構。`\n- [[ICs]] sheet 將伺服器晶片設計 / 生產分成 [[GPU]]、[[CPU]]、[[DRAM]]、[[IC]] / 矽智財 / 製程、[[晶圓代工]]、[[封裝測試]]、[[測試介面]]、[[網通]]、[[BMC]] 與高速傳輸 IC，並為部分分類列出 [[R&S ZNA]]、[[R&S ZNA67EXT]]、[[R&S FSWP]] 等 solution 線索。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AISeverEcosystem.md"
+             },
+             "score": 7.926579
+            },
+            {
+             "text": "Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing › 重點摘要\n- [[Rohde & Schwarz]] 與 [[China Mobile Research Institute]] 在 [[MWC Shanghai 2026]] 展示一套 generative AI applications 測試 solution。\n- 來源稱此 solution based on the [[R&S CMX500]] 5G one-box signaling tester，可在 diverse network conditions 下首次量化 measurement end-user experience of generative AI applications。\n- 測試架構中：\n  - [[Large language model]] 部署在 server side 或 cloud。\n  - [[R&S CMX500]] 與執行 client-side test application 的 smart terminal 建立 radio connection。\n  - [[R&S CMX500]] 可配置 network parameters、channel fading models、latency、jitter、RF impairments 等 variables。\n  - 使用者透過 terminal-side application 輸入 prompts，接收 LLM inference responses。\n  - Host PC software 收集與分析 data，並產生 charts。\n- 來源列出的 key performance indicators 包含 [[Time to First Token]]（TTFT）與 [[Tokens Per Second]]（TPS）。\n- 來源稱此方法可支援 optimization of on-device generative AI application design，並提供 future network optimization 的 reference points。\n- 來源把 [[R&S CMX500]] 描述為 all-in-one test platform，支援 SA / NSA architectures、FR1 to FR3（up to 18 GHz）、built-in IMS server、RF conformance、protocol validation、VoNR acoustics 與 carrier aggregation。\n- [[Liu Guangyi]] 的引述把此 testbed 連到 6G-enabled ubiquitous intelligent connectivity、native network computing capabilities、new AI service metrics 與 testing methodologies。\n- [[Jin Hailiang]] 的引述把此 testbed 描述為 generative AI user experience testing 的 benchmark，並指向 future test scenarios、industry use cases 與 standardization。\n- 展示地點：China Mobile’s 6G Zone，Hall 3，N3E60。\n- Press & media contact：[[Christian Mokry]]，PR Manager Test & measurement。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md"
+             },
+             "score": 9.613473
+            },
+            {
+             "text": "Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing › 原文未解的問題\n- 來源未標示發布日期；raw frontmatter created 為 2026-09-11，但不可等同 PR 發布日期。\n- 來源未標示 PR 文件版次、內部文件號、solution order number、software version 或 [[R&S CMX500]] hardware configuration。\n- 來源稱 [[R&S CMX500]] covers frequency ranges from FR1 to FR3（up to 18 GHz），但未說明是否需要 [[RFU18]] 或其他 extension hardware。\n- 來源未提供 TTFT / TPS 的 measurement methodology、prompt set、LLM model name、server / cloud configuration、terminal model、radio scenario table、statistical treatment 或 reproducibility data。\n- 來源未提供 host PC software 名稱、版本、order number 或資料格式。\n- 來源未說明 test framework 是否已被 [[3GPP]]、[[GTI]] 或其他組織採納；僅說相關研究正在進行。\n- 來源未提供 [[MWC Shanghai 2026]] demo 的實測數據、benchmark charts 或公開報告。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md"
+             },
+             "score": 7.241787
+            },
+            {
+             "text": "Generative AI user experience testing › 使用限制\n- 本頁是 PR / demonstration-level evidence，不是正式 test specification、standardized benchmark 或 product datasheet。\n- 來源未提供 measurement methodology、test case definition、LLM model、terminal model、server / cloud environment、network scenario profiles、statistical confidence 或 result tables。\n- 來源未標示 [[R&S CMX500]] software version、licenses、hardware configuration、extension boards 或 order numbers。\n- 來源未說明 host PC software 的產品名稱、版本、license 或資料輸出格式。\n- 來源未說明 [[3GPP]] 或 [[GTI]] 是否已採納本 testbed 的 metrics 或 framework。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Generative AI user experience testing.md"
+             },
+             "score": 8.096723
+            },
+            {
+             "text": "Generative AI user experience testing › Testbed architecture\n依 [[Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing]]：\n\n1. [[Large language model]] 部署在 server side 或 cloud。\n2. [[R&S CMX500]] radio communication tester 與 smart terminal 建立 radio connection。\n3. Smart terminal 執行 client-side test application。\n4. [[R&S CMX500]] 配置 network parameters、channel fading models、latency、jitter、RF impairments and other variables。\n5. User 在 terminal-side application 輸入 prompts。\n6. Terminal 接收 LLM inference responses。\n7. Host PC software 收集與分析 data，並產生 charts。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Generative AI user experience testing.md"
+             },
+             "score": 4.319131
+            },
+            {
+             "text": "AI-assisted agentic test workflows › 限制與未決事項\n- [[AIW_Products_Customer_Questionnaire]] 是 questionnaire，不是功能規格書。\n- [[CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation]] 是新聞稿，不是 specifications、deployment guide 或 security architecture。\n- 兩份來源都未提供完整 AI agent 架構、模型版本、API、支援儀器清單或部署拓樸。\n- [[AIW_Products_Customer_Questionnaire]] 未說明 [[AI-assisted agentic test workflows]] 是否為正式產品名稱。\n- [[AIW_Products_Customer_Questionnaire]] 未將此概念直接對應到 [[ScriptAssist]] 或 [[TechAssist]] 任一產品；[[CMX500 AI Scripting Assistant]] 來源也未提到 [[R&S AI Workplace]]，不可自行推論。\n- [[CMX500 AI Scripting Assistant]] 的 deployment options、license、版本、資料治理與適用 [[R&S CMX500]] software release 仍未標示。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AI-assisted agentic test workflows.md"
+             },
+             "score": 5.935473
+            },
+            {
+             "text": "AI-enhanced CSI feedback › 使用限制\n- 約 50% throughput gain 是 PR 中的 demonstration claim；引用時必須附帶來源與「相較 conventional non-AI technology」的限定。\n- 不可把此 PR 主張轉換成 [[R&S CMX500]] formal specifications、Qualcomm prototype commercial performance 或 6G standard requirement。\n- 來源未提供測試條件，因此不可推論頻段、bandwidth、MIMO layers、channel model、model architecture 或 latency。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AI-enhanced CSI feedback.md"
+             },
+             "score": 6.003213
+            },
+            {
+             "text": "AI-enhanced CSI feedback › Demonstration context\n- [[Qualcomm Technologies]] 的 AI-enabled wireless device prototype 連接到 [[R&S CMX500]]。\n- [[R&S CMX500]] configured as an AI-enabled base station emulator。\n- 來源宣稱相較 conventional non-AI technology，downlink throughput increased by approximately 50%。\n- [[R&S CMX500]] 的 application testing capabilities 被用來展示 performance gain 如何轉換成 enhanced video streaming user experience。\n- 展示將於 [[MWC Barcelona 2026]] 的 [[KT]] booth 4A60 / hall 4 進行。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AI-enhanced CSI feedback.md"
+             },
+             "score": 2.729631
+            },
+            {
+             "text": "6G AI proof-of-concept demonstration › Demonstration setup\n依 [[KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance]]：\n\n- 參與方：[[KT]]、[[Qualcomm Technologies]]、[[Rohde & Schwarz]]。\n- 場地：[[MWC Barcelona 2026]]，KT booth 4A60，hall 4。\n- Device side：Qualcomm’s AI-enabled wireless device prototype。\n- Network / test side：[[R&S CMX500]]，configured as an AI-enabled base station emulator。\n- 技術主題：[[AI-enhanced CSI feedback]]、two-sided AI model、CSI-RS-based analysis、compressed feedback、[[massive MIMO]]。\n- 宣稱結果：約 50% downlink throughput increase compared to conventional non-AI technology。\n- Application demonstration：利用 [[R&S CMX500]] advanced application testing capabilities 展示 video streaming user experience 的改善。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/6G AI proof-of-concept demonstration.md"
+             },
+             "score": 5.049744
+            },
+            {
+             "text": "6G AI proof-of-concept demonstration › unresolved\n- 來源未標示發布日期。\n- 來源未提供 demonstration 的完整 measurement methodology、test conditions 或 reproducibility data。\n- 來源未說明該 AI-enabled base station emulator mode 是否為 [[R&S CMX500]] 可訂購功能、prototype feature 或展示用配置。\n- 來源未提供 MWC Barcelona 2026 展示後的實測紀錄。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/6G AI proof-of-concept demonstration.md"
+             },
+             "score": 4.210047
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing › 使用限制\n- 本頁目前只由 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 支撐。\n- 來源是 PR / demonstration positioning，不是正式 datasheet、configuration guide、test case list 或 certification document。\n- 不可從本來源推論 [[R&S CMX500]] Wi‑Fi 7 的 option code、software release、支援 RF chains 數量、MLO link combination、measurement uncertainty 或完整 test coverage。\n- 不可從本來源推論 [[R&S CMP180]] 480 MHz waveform 的正式 [[Wi-Fi 8]] 標準地位、量測規格或 production throughput。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 2.039096
+            },
+            {
+             "text": "CMX500 AI Scripting Assistant › Deployment 與 availability\n來源說 [[CMX500 AI Scripting Assistant]] is available from [[Rohde & Schwarz]] through various deployment options。\n\n來源也說 MWC 2025 Barcelona 的訪客可在 [[Rohde & Schwarz]] booth in hall 5, booth 5A80 現場體驗工具。\n\n使用限制：\n\n- `various deployment options` 未展開；不可推論為 cloud、on-prem、hybrid 或 air-gapped。\n- MWC 2025 booth demo 不等於正式 GA、量產、可報價或所有客戶可取得。\n- 來源未列 formal product version、order number、license code、support matrix 或 hardware / software prerequisites。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/CMX500 AI Scripting Assistant.md"
+             },
+             "score": 1.889933
+            },
+            {
+             "text": "CMX500 AI Scripting Assistant › 主要能力\n依 [[CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation]]，來源明示的能力包含：\n\n- generate accurate [[XLAPI]] scripts with significantly less time and effort；\n- extend existing scripts；\n- provide explanations for given scripts；\n- 協助較少經驗的使用者理解 scripts 的 structure and logic，提升 scripting proficiency。\n\n本頁只記錄來源說法；來源未提供 benchmark、correctness metric、coverage matrix、支援 script package 清單或驗證條件。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/CMX500 AI Scripting Assistant.md"
+             },
+             "score": 1.433947
+            },
+            {
+             "text": "AISeverEcosystem R&S solution mapping\n[[AISeverEcosystem R&S solution mapping]] 是用來保存 [[AISeverEcosystem]] 中 AI server ecosystem 分類與 [[R&S Solution]] 欄位對應關係的概念頁；它只表示該 Excel 表中的銷售 / 測試方案線索，不代表正式產品配置、客戶關係或已驗證商機。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+             },
+             "score": 4.659576
+            },
+            {
+             "text": "AISeverEcosystem R&S solution mapping › Jitter / phase noise / clock / LDO noise\n- [[R&S FSWP]] 在 [[伺服器主機板]]分類中被列為 LDO NSD test、clock jitter test。\n- [[R&S FSWP]] 在 [[網通交換機]]分類中被列為 jitter / phase noise test。\n- [[R&S FSWP]] 也出現在 [[電源供應器]]的 LDO NSD test、[[智原]]與[[譜瑞-KY]]的 IC / high-speed transmission solution 欄，但未提供測試條件。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+             },
+             "score": 4.450475
+            },
+            {
+             "text": "AISeverEcosystem R&S solution mapping › SI / high-speed channel / interconnect\n- [[R&S ZNA]] 與 [[R&S ZNB]] 在來源中被放入 [[伺服器電路板]] / [[PCB]] 的 IL、TDR，以及 [[連接器]] / 線纜的 high speed cable 測試。\n- [[R&S ZNA]] 也出現在 [[伺服器主機板]] / PCBA 的 high speed trace test、[[GPU]] 的 TDR、[[CPU]]、[[智原]]、[[譜瑞-KY]]等 IC / high-speed transmission context。\n- [[R&S ZNA67EXT]] 出現在 [[智原]] 與 [[旺矽]] 的 solution 欄，但來源未提供實際 frequency range 或 fixture。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+             },
+             "score": 3.293492
+            },
+            {
+             "text": "AISeverEcosystem R&S solution mapping › 來源中的 mapping\n| 分類 | 對象 / 企業欄 | 來源中的 R&S Solution | 來源日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| [[伺服器主機板]] / PCBA | [[鴻海]] | [[R&S ZNL]]: PDN Target Z；[[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test、clock jitter test；[[R&S ZNA]]: high speed trace test | 來源未標示正式日期；raw converted 2026-09-17 | 未提供正式 test setup、option、fixture、頻率或 sales kit |\n| [[伺服器電路板]] / [[PCB]] | [[博智]] | [[R&S ZNA]] / [[R&S ZNB]]: IL、TDR | 來源未標示正式日期；raw converted 2026-09-17 | 只對應表內 [[博智]]列，不能推論其他 PCB 廠同樣適用 |\n| [[連接器]] / 線纜 | [[嘉澤]] / [[嘉基]] | [[R&S ZNA]] / [[R&S ZNB]] + [[OSP]]: high speed cable | 來源未標示正式日期；raw converted 2026-09-17 | [[嘉澤]] / [[嘉基]] 同格寫法未決；未提供 cable type、connector type 或 calibration method |\n| [[網通交換機]] | [[智邦]] | [[R&S FSWP]]: jitter / phase noise test；VNA（[[R&S ZNA]] / [[R&S ZNB]]）；EMI pretest | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；不可推論完整 switching test portfolio |\n| [[矽光子]] | [[上詮]] | optical VNA：[[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]；[[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]] | 來源未標示正式日期；raw converted 2026-09-17 | ThinkLands、GOCA、Newkey 與 PSA 未展開；未提供 optical VNA setup 或 module type |\n| [[散熱器]] | [[建準]] | [[MXO]]: motor driver analysis | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 motor driver type、fan / pump 類型或量測條件 |\n| [[電源供應器]] | [[光寶科]] | [[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test；BMS test | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；未提供 HVDC / PSU / BBU 測試配置 |\n| [[GPU]] | [[輝達]] | [[R&S ZNA]]: TDR、[[OSP]] | 來源未標示正式日期；raw converted 2026-09-17 | 不代表 R&S 與 NVIDIA 合作或採購關係；僅是表內 solution mapping |\n| [[CPU]] | [[超微]] | [[R&S ZNA]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 TDR、SI、PI 或其他測項 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+             },
+             "score": 2.889893
+            },
+            {
+             "text": "AISeverEcosystem › 重點摘要\n- [[AISeverEcosystem]] 是一份 AI server ecosystem / server rack / ICs Excel 轉檔來源，主要把 AI server 供應鏈分成 [[GPU模組]]、[[ABF載板]]、[[伺服器主機板]]、[[PCB]]、[[CCL]]、[[連接器]] / 線纜、[[網通交換機]]、[[矽光子]]、[[散熱器]]、[[電源供應器]]、[[伺服器機殼]]、[[伺服器 ODM]]、[[EMC Lab]] 與 IC 相關分類。\n- 來源同時列出部分公司、台股代號、角色亮點、[[R&S Solution]] 與 sales kits 連結；多數欄位為 `NaN`，因此不可推論未填欄位代表不適用、無需求或無 R&S solution。\n- [[ServerRack]] sheet 中，[[伺服器主機板]] / PCBA 的 [[R&S Solution]] 欄列出 [[R&S ZNL]] 用於 PDN Target Z、[[MXO]] 用於 power rail / multiphase DC / PI、[[ZISO]]、[[R&S FSWP]] 用於 LDO NSD test / clock jitter test、[[R&S ZNA]] 用於 high speed trace test。\n- [[伺服器電路板]] / PCB 分類列出關鍵元件為 `20+層UBB、高階ABF、低Dk CCL`，並在 [[博智]] 列寫 `GB200/NVL72帶動層數、材料等級暴衝。`；[[R&S Solution]] 欄列 [[R&S ZNA]] / [[R&S ZNB]]：IL、TDR。\n- [[連接器]] / 線纜分類列出 `CPU/GPU Socket、UQD水冷快接、800 G AOC`，角色亮點稱 [[PCIe 6]] / [[PCIe 7]]、[[InfiniBand]] 800 Gbe 提升 connector ASP；[[R&S Solution]] 欄列 [[R&S ZNA]] / [[R&S ZNB]] + [[OSP]]：high speed cable。\n- [[網通交換機]] 分類列出 [[智邦]]、[[神準]]、[[明泰]]、[[鴻海]]、[[達創]]、[[鈺登]]，[[R&S Solution]] 欄在 [[智邦]] 列出 [[R&S FSWP]]：jitter / phase noise test、VNA（[[R&S ZNA]] / [[R&S ZNB]]）、EMI pretest，並有一個 SharePoint sales kit 連結。\n- [[矽光子]] 分類列出關鍵元件 `40G/100G/400G/800G光收發模組, CPO/NEO（Near-packaged optics) &（pluggable）`；角色亮點稱 [[CPO]] 對有源 / 無源 SiPh、先進封裝、測試需求提升，且提到 [[前鼎]] 提供高速載板、[[光聖]] 提供 ELS 外部雷射源；[[R&S Solution]] 欄列 optical VNA：[[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]，以及 [[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]]。\n- [[散熱器]] 分類列出關鍵元件 `滑軌、液冷板、CDU、風扇`，在 [[建準]] 角色亮點稱 `GPU TDP由700 W升至1200 W，液冷與滑軌結構同步升級。`；[[R&S Solution]] 欄列 [[MXO]]：motor driver analysis。\n- [[電源供應器]] 分類列出關鍵元件 `HVDC、5–10 kW PSU、液冷電源櫃、BBU`，在 [[光寶科]] 角色亮點稱 `Blackwell平台功耗翻倍，推升高密度電源需求`；[[R&S Solution]] 欄列 [[MXO]]：power rail / multiphase DC / PI、[[ZISO]]、[[R&S FSWP]]：LDO NSD test、BMS test，並有一個 SharePoint sales kit 連結。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AISeverEcosystem.md"
+             },
+             "score": 5.284085
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "technical_knowledge",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 35,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 6,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+             "raw_refs": [
+              "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/CMX500 AI Scripting Assistant.md",
+             "raw_refs": [
+              "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "raw/Productions/AIW_on_prem_prerequisites_ScriptAssist.md",
+              "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+             "raw_refs": [
+              "raw/Market/OneNote/AISeverEcosystem.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/AISeverEcosystem.md",
+             "raw_refs": [
+              "raw/Market/OneNote/AISeverEcosystem.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+              "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Generative AI user experience testing.md",
+             "raw_refs": [
+              "raw/Productions/PR/Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/AI-assisted agentic test workflows.md",
+             "raw_refs": [
+              "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+              "raw/Productions/PR/CMX500 AI Scripting Assistant from Rohde & Schwarz facilitates mobile device testing through AI-driven automation.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/AI-enhanced CSI feedback.md",
+             "raw_refs": [
+              "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/6G AI proof-of-concept demonstration.md",
+             "raw_refs": [
+              "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,71 @@
+{
+ "id": "Q0571",
+ "grader": "1.2",
+ "coverage": 0.0,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's automotive requirement notes map to the R&S CMX500 (NG eCall / EN 17240:2024 verification), not to a VNA.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Maps automotive requirements to VNA capabilities and omits CMX500/NG eCall mapping."
+  },
+  {
+   "n": 2,
+   "point": "The other automotive-specific R&S instrument recorded is the AREG800A automotive radar echo generator, covering 76–81 GHz radar echo generation rather than S-parameter measurement.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Mentions AREG800A radar echo generation but turns AREG specs into VNA requirements."
+  },
+  {
+   "n": 3,
+   "point": "Automotive high-speed requirements in the Vault are expressed as ADAS and V2X needing high-speed signal transmission, and as Automotive SerDes Alliance standards for in-vehicle high-speed data links — with no measurement parameter attached.",
+   "verified": true,
+   "label": "missing",
+   "why": "No ADAS/V2X or Automotive SerDes high-speed link requirements."
+  },
+  {
+   "n": 4,
+   "point": "In-vehicle high-speed links appear only as a standards category, without stated test parameters or instrument requirements.",
+   "verified": true,
+   "label": "missing",
+   "why": "No statement that in-vehicle links are only a standards category with no parameters/instruments."
+  },
+  {
+   "n": 5,
+   "point": "The only automotive-to-parameter hint is material-level: Low DK glass fabric is listed for high-frequency/high-speed PCB, server, automotive and communication use, making Dk/Df the associated measurable parameter.",
+   "verified": true,
+   "label": "missing",
+   "why": "No Low DK glass fabric or Dk/Df material-parameter hint."
+  },
+  {
+   "n": 6,
+   "point": "The Vault states these dielectric/loss parameters are extracted with VNA-based solutions (Delta-L loss, TDR impedance, Dk/Df extraction), though the cited instruments are competitor ENA/PNA.",
+   "verified": true,
+   "label": "missing",
+   "why": "No dielectric/loss extraction chain or competitor ENA/PNA context."
+  },
+  {
+   "n": 7,
+   "point": "R&S VNA cases in the Vault tie measurable parameters (impedance, insertion loss, return loss) to a required capability set of multi-port VNA plus probe, mount-kit and de-embedding tool — but for PCB/SoC/connector DUTs, not automotive ones.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Creates automotive radar-to-VNA chains instead of limiting R&S VNA cases to PCB/SoC/connector DUTs."
+  },
+  {
+   "n": 8,
+   "point": "A concrete VNA capability the Vault documents is the 4-port R&S ZNB3044 covering 9 kHz to 43.5 GHz with 1.85 mm ports.",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not mention 4-port R&S ZNB3044, 9 kHz to 43.5 GHz, 1.85 mm ports."
+  }
+ ],
+ "contradicted": 3,
+ "invented": [
+  "The VNA must support time-domain measurement",
+  "The VNA must support the required frequency span and sweep settings, including frequency step size 125 kHz, measurement bandwidth 100 kHz, and source power –10 dBm",
+  "The VNA measurement condition for these level and IF transfer characteristics requires frequency step size 2.5 MHz, measurement bandwidth 1 kHz, source power –10 dBm",
+  "The VNA setup for associated IF transfer characterization must support the stated sweep step, bandwidth, source power, and span conditions",
+  "For the ghost-object chain, the VNA capability maps most directly to time-domain analysis, and R&S ZNA provides the R&S ZNA-K2 Time domain analysis option"
+ ]
+}

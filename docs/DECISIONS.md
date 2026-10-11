@@ -2182,3 +2182,54 @@ own rules. Question-set defaults count every folder of a pulled path.
 
 Rejected: most-specific-only selection (K3.1), which would force each product line's
 skill to repeat the shared rules and let them drift apart.
+
+## 2026-10-12: Knowledge answer quality — three accepted changes after a fresh baseline
+
+Owner request: "with the current data, see whether the harness can be improved further".
+A fresh baseline on HEAD 0be2b14 with Skill 1.10.0 (`runs/core-009`) gave answerable
+coverage 0.372, 21 PASS / 6 INSUFFICIENT / 8 FAIL of 36, median 185 s, p90 329 s
+(core-005 two days earlier: 0.395, 156 s). Each candidate was measured on the same 36
+questions and kept only if answerable coverage beat the baseline and median latency
+worsened by no more than 20%.
+
+1. **C1, kept (core-010): the person's question reaches the vault unchanged, and
+   retrieval is reused.** The conversation tool `knowledge__rs-knowledge` was described by
+   the old `engineering/knowledge-query@1.0.0` Skill ("can answer only with citations to
+   Raw evidence"). The conversation model rewrote 25 of 26 tool questions in core-005,
+   adding "cite Raw evidence", a focus, product names or "rank by strength"; synthesis then
+   cited only the four Raw fallback passages and answered that nothing supports the
+   question (Q0296, Q0546, Q0911, Q0051). `engineering/knowledge-query@1.0.1` (1.0.0 in
+   `disabled/`) and the vault tool's `question` description (9d0d74c) now ask for the
+   person's own words with no added instructions. Separately (204dcfa), the retrieval
+   snapshot is kept per Vault until any file under it changes and large-corpus BM25
+   statistics are memoized; retrieval output is identical (22/22 questions) and about ten
+   times faster. Result: coverage 0.423, 26/2/8, contradicted 27 -> 12, median 72 s.
+2. **C2, kept (core-011): evidence spread over more relevant pages.** Search rounds read up
+   to 20 relevant pages (was 12), every page gives its best three sections before any page
+   goes deeper, and sections are ranked by the question plus its bilingual rewrites
+   (43dcd76). Skill `company-agent/knowledge-query@1.12.0` raises `evidence_sections` from
+   64 to 96 (the contract bound rises to 128); 1.10.0 is in `disabled/`. Offline, reference
+   quotes present in the evidence rose 0.34 -> 0.44. Result: coverage 0.466, invented
+   67 -> 54, median 84 s (+17% on C1). run.py PASS fell to 23 because its reviewer sees
+   only the first 16 cited passages; with up to 48 visible, PASS is 29 vs C1's 28.
+3. **C3, kept (core-012): the first draft cites every line.** 7 of 8 first drafts failed the
+   unchanged citation preflight only on uncited lead-in, short-answer or gap lines, so
+   almost every answer paid a fresh, shorter rewrite. A prompt paragraph asks for that form
+   (425c5f6). Questions needing only one synthesis call: 3 -> 13 of 26. Result: coverage
+   0.477, 28/2/6 (33/2/1 with the wider reviewer window), median 74 s, p90 115 s;
+   invented 54 -> 67.
+
+Not changed: Host validation and grounding rules, refusal behaviour, the number of Harness
+phases and model calls, references and the question bank.
+
+Remaining gap: in core-012, 42 of 56 missing and 33 of 64 partial answerable key points sit on
+pages that never reached synthesis, while all 283 reference sources exist in the Vault.
+Retrieval, not data, is the limit. Structural options for the owner are in HANDOFF.md.
+
+Rejected alternatives:
+- Passing the person's raw message instead of the tool argument: follow-up questions need the
+  model to make them self-contained.
+- Treating uncited bold labels as formatting in the preflight: it changes the grounding rule,
+  which needs the owner.
+- A larger evidence budget (128 sections): offline gain over 96 was small (0.44 -> 0.48) for
+  about 20% more synthesis input.
