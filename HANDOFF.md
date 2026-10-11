@@ -61,8 +61,8 @@ Lint -> Benchmark -> Push) and the K1-K3 specs; progress rows are in `docs/TASKS
   domain experts add question sets under `checks/questions/<folder>/`; the free-form
   ZNAEXT question needs must-mention terms; before the real RS_Knowledge goes live it
   needs one adopt pass and a host.json switch; an intermittent single test failure
-  (passes on rerun) is unidentified; the OCNG PDF image description failure waits for
-  K4. Next stage after validation: K4 (Excel, HTML, .ppt, images).
+  (passes on rerun) is unidentified (see TASKS); the OCNG image failure is fixed
+  (b293aeb). Next stage after validation: K4 (Excel, HTML, .ppt, images).
 
 Knowledge state (2026-10-10, latest): Skill 1.10.0 is live. A no-support retry check
 plus Skill 1.11.0 was tried in `runs/core-006`, came out worse and was rolled back

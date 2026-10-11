@@ -1694,6 +1694,11 @@ s-k-20261011T102952` (not published).
   (free format, not gradable) and organize questions into folder sets.
 - [ ] Before the real RS_Knowledge goes live: its Raw is legacy format and needs one
   adopt pass (as done for rs-k), and host.json must point the project vault at it.
-- [ ] An intermittent single test failure appeared twice in full runs (passes on
-  rerun); not yet identified.
+- [ ] An intermittent single test failure appeared twice in full runs on 2026-10-11
+  (passes on rerun); three further full runs on 2026-10-12 passed (2513/2514/2514), so
+  it is not identified. Full runs now use `-rf` so the next one names itself; past
+  intermittent failures were in the real-browser tests (schedule panel, Agent Web).
+- [x] OCNG PDF: seven diagram images hit the 400-token description limit
+  (`model_output_truncated`); default 1,500 with one 4,000 retry, all eleven
+  described (b293aeb).
 - [ ] K4-K6 per the plan.
