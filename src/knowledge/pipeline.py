@@ -211,6 +211,7 @@ class KnowledgePipeline:
         info, vault = self.sandboxes.open(sandbox_id)
         root = self.drop_roots[info.base_name].resolve()
         known = {entry.source.sha256 for entry in RawIndex.scan(vault).entries}
+        legacy = _legacy_source_shas(vault)
         copied: list[str] = []
         already: list[str] = []
         present: list[str] = []
@@ -230,7 +231,8 @@ class KnowledgePipeline:
                 target = vault.root / "drop" / name
                 if len(data) > MAX_DROP_BYTES:
                     large.append(name)
-                elif hashlib.sha256(data).hexdigest() in known:
+                elif (digest := hashlib.sha256(data).hexdigest()) in known or any(
+                        digest.startswith(prefix) for prefix in legacy):
                     already.append(name)
                 elif target.exists():
                     present.append(name)
@@ -655,3 +657,21 @@ class QuestionSets(Contract):
     sets: dict[str, int] = Field(default_factory=dict)  # "" is the general set
     defaults: tuple[str, ...] = ()
     ungraded: tuple[str, ...] = ()
+
+
+_LEGACY_SHA = re.compile(r"^source_sha:\s*([0-9a-f]{12,64})\s*$", re.MULTILINE)
+
+
+def _legacy_source_shas(vault: Vault) -> set[str]:
+    """Original-file hashes that earlier tooling recorded in its Raw files as
+    `source_sha:` (a sha256 prefix). Adopted legacy Raw is identified by its own
+    bytes, so without these a pull would take every original as new."""
+    found: set[str] = set()
+    for path in (vault.root / "raw").rglob("*.md"):
+        try:
+            with path.open("r", encoding="utf-8", errors="ignore") as handle:
+                head = handle.read(2048)
+        except OSError:
+            continue
+        found.update(match.group(1) for match in _LEGACY_SHA.finditer(head.split("\n---", 1)[0]))
+    return found

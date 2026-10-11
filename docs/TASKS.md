@@ -1668,5 +1668,22 @@ s-k-20261011T102952` (not published).
 - [x] Pages edited by section or merged keep their CRLF line endings (2026-10-11).
 - [x] Collaboration design `docs/phases/KNOWLEDGE_COLLAB.md` (owner, 2026-10-11):
   Pull -> skills -> Convert -> Ingest -> Benchmark -> Push.
-- [ ] C1-C6 per the collaboration design (includes the Knowledge page improvements).
+- [x] C1 project vault settings (drop_root, questions_root, maintainers,
+  knowledge_asset) and Pull of chosen drop folders; sandboxes no longer copy drop/
+  (125a1ed).
+- [x] C2 rule editor, Markdown preview and per-page plan Compare (f383732).
+- [x] C3 question sets by folder and combination, sandbox benchmark through the
+  same Knowledge Harness, sandbox against project vault (2aa5b2c). Category rules
+  layer general to specific for product lines (abb8245).
+- [x] C4 push: merge, benchmark gate (regression blocks, score not lower),
+  first-push-wins compare-and-write with backups, push records; Refresh stages the
+  project vault as the Agent's next Knowledge version (34a933d).
+- [x] C5 Knowledge tab in workflow order (eaa447a).
+- [ ] C6 live trial on a local copy of RS_Knowledge (`%LOCALAPPDATA%\AEP\projects\rsk-copy`).
+- [ ] Owner: add must-mention / must-not-say terms to `checks/questions/ZNAEXT升級配置.md`
+  (free format, not gradable) and organize questions into folder sets.
+- [ ] Before the real RS_Knowledge goes live: its Raw is legacy format and needs one
+  adopt pass (as done for rs-k), and host.json must point the project vault at it.
+- [ ] An intermittent single test failure appeared twice in full runs (passes on
+  rerun); not yet identified.
 - [ ] K4-K6 per the plan.

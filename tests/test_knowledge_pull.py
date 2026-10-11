@@ -64,3 +64,18 @@ def test_pull_stays_inside_the_project_drop(tmp_path: Path) -> None:
         pipeline.pull(sandbox, ("/etc",))
     with pytest.raises(PipelineError, match="unknown_drop_folder"):
         pipeline.pull(sandbox, ("Nope",))
+
+
+def test_an_original_known_to_legacy_raw_by_its_hash_prefix_is_not_pulled(
+        tmp_path: Path) -> None:
+    import hashlib
+
+    pipeline, base = _project(tmp_path)
+    prefix = hashlib.sha256((base / "drop/Market/5G.txt").read_bytes()).hexdigest()[:16]
+    (base / "raw/Market").mkdir(parents=True)
+    (base / "raw/Market/5G.md").write_text(
+        f"---\ntitle: 5G\ntype: raw\nsource_sha: {prefix}\n---\n5G market\n", encoding="utf-8")
+    sandbox = pipeline.create_sandbox("rs-k", "legacy", "leo.chi").sandbox_id
+    pulled = pipeline.pull(sandbox, ("Market",))
+    assert pulled.already_ingested == ("Market/5G.txt",)
+    assert pulled.copied == ("Market/AI/deck.txt",)
