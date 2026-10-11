@@ -266,6 +266,8 @@ def test_wiki_primary_answer_cites_wiki_with_provenance_and_passes_host(
         "wiki/entities/Orphan.md": [],
     }
     assert "WIKI passages are the curated knowledge base" in model.requests[0].messages[0].text
+    # Every line carries a citation, so a first draft can pass the preflight.
+    assert "every sentence and every list or table line" in model.requests[0].messages[0].text
     lines = knowledge_source_lines(record)
     assert any("Wiki：R&S ZNA（來源：`ZNA_specs.md`）" in line for line in lines)
     assert any("Wiki：Orphan（缺來源連結）" in line for line in lines)

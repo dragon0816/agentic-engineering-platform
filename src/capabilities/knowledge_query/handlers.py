@@ -72,6 +72,19 @@ MARKET_MATRIX_SPEC = CapabilitySpec.model_validate(
 )
 
 
+# Offline, 7 of 8 first drafts failed the Host's citation preflight only on one to
+# three uncited framing lines ("... as follows:", "Short answer: ...", "the passages
+# do not rank ..."), so nearly every answer paid a fresh, shorter rewrite
+# (2026-10-12). This asks for that form up front; the checks are unchanged.
+WIKI_CITATION_FORM = (
+    "\n\nForm: every sentence and every list or table line carries at least one "
+    "passage citation [n], including a lead-in line, a short-answer line and a "
+    "statement of what the passages do not say (cite the passage it is about). "
+    "Write a label as a Markdown heading, not as an uncited bold line. Lines without "
+    "a citation are removed."
+)
+
+
 class MarketMatrixHandler:
     def __init__(self, catalog: KnowledgeCatalog) -> None:
         self.catalog = catalog
@@ -348,6 +361,7 @@ class KnowledgeQueryHandler:
                 "in them. An inference is not a verified fact or a direct relationship."
                 if label else ""
             )
+            + WIKI_CITATION_FORM
         )
         answer = QueryEngine(
             vault, self.model, alias=self.alias,
