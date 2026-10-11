@@ -66,6 +66,7 @@ from capabilities.knowledge_pipeline.handlers import (
     INGEST_APPLY_SPEC,
     INGEST_PLAN_SPEC,
     LINT_SPEC,
+    MERGE_SPEC,
     SANDBOX_CONTENTS_SPEC,
     SANDBOX_CREATE_SPEC,
     SANDBOX_DISCARD_SPEC,
@@ -195,7 +196,7 @@ MAX_ATTACHMENT_REQUEST_BYTES = 36 * 1024 * 1024
 PIPELINE_STEPS = {spec.identity.name: spec for spec in (
     SANDBOX_CREATE_SPEC, SANDBOX_LIST_SPEC, SANDBOX_CONTENTS_SPEC, SANDBOX_DISCARD_SPEC,
     DROP_ADD_SPEC, CONVERT_SPEC, INGEST_PLAN_SPEC, INGEST_APPLY_SPEC, LINT_SPEC,
-    ADOPT_SPEC, INDEX_ENRICH_SPEC, INDEX_BUILD_SPEC)}
+    ADOPT_SPEC, INDEX_ENRICH_SPEC, INDEX_BUILD_SPEC, MERGE_SPEC)}
 AUTHORING_ROUTES = (
     "/api/authoring/start", "/api/authoring/get", "/api/authoring/discuss",
     "/api/authoring/preview", "/api/authoring/install",

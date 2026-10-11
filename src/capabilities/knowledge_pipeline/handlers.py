@@ -25,6 +25,7 @@ from capabilities.knowledge_pipeline.contracts import (
     IngestApplyRequest,
     IngestPlanRequest,
     LintRequest,
+    MergeRequest,
     SandboxCreateRequest,
     SandboxDiscarded,
     SandboxList,
@@ -70,6 +71,8 @@ ADOPT_SPEC = _spec("adopt", "Adopt Raw from earlier tooling in a sandbox so it c
 INDEX_ENRICH_SPEC = _spec("index-enrich",
                           "Write bilingual aliases, summary and categories into sandbox pages",
                           "write", "medium")
+MERGE_SPEC = _spec("merge", "Preview or write a three-way merge of a sandbox into a new "
+                   "candidate vault; the published vault is never edited", "write", "medium")
 INDEX_BUILD_SPEC = _spec("index-build", "Preview or write the layered index of a sandbox",
                          "write")
 DROP_ADD_SPEC = _spec("drop-add", "Put one original into a sandbox drop folder", "write")
@@ -93,7 +96,7 @@ class SandboxCreateHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = SandboxCreateRequest.model_validate(inputs)
         info = await _run(lambda: self.pipeline.create_sandbox(
-            request.base, request.label, context.actor))
+            request.base, request.label, context.actor, request.domain))
         return SandboxRecord(sandbox_id=info.sandbox_id, base_name=info.base_name,
                              label=info.label, created_by=info.created_by,
                              created_at=info.created_at)
@@ -217,4 +220,15 @@ class IndexBuildHandler:
         request = IndexBuildRequest.model_validate(inputs)
         result: Contract = await _run(
             lambda: self.pipeline.index_build(request.sandbox_id, request.mode))
+        return result
+
+
+class MergeHandler:
+    def __init__(self, pipeline: KnowledgePipeline) -> None:
+        self.pipeline = pipeline
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        request = MergeRequest.model_validate(inputs)
+        result: Contract = await _run(lambda: self.pipeline.merge(
+            request.sandbox_id, request.mode, dict(request.resolutions)))
         return result

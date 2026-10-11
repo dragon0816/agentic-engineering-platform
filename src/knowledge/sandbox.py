@@ -28,7 +28,10 @@ DISCARDED = ".discarded"
 RECORD = "sandbox.json"
 SCHEMA = "aep.knowledge-sandbox.v1"
 # Working state of a base vault that a copy must not inherit.
-_SKIPPED = {".ingest-backup", ".ingest-snapshot", ".plans", ".condense-cache", ".git", RECORD}
+# `.base` holds the base's wiki and root files as copied, for the three-way merge (K3.3).
+BASE = ".base"
+_SKIPPED = {".ingest-backup", ".ingest-snapshot", ".plans", ".condense-cache", ".git", RECORD,
+            BASE}
 # Windows refuses longer paths unless long paths are enabled system-wide
 # (rs-k has 188-character Raw asset paths; k2 live run, 2026-10-11).
 MAX_PATH = 259
@@ -52,6 +55,9 @@ class SandboxInfo(BaseModel):
     label: str
     created_by: str
     created_at: str
+    # A domain matrix cell (K2 index category) the sandbox works in; changes to
+    # pages outside it are merge proposals (K3, owner 2026-10-11).
+    domain: str | None = None
 
 
 def _slug(text: str) -> str:
@@ -73,7 +79,8 @@ class Sandboxes:
             raise SandboxError("invalid_sandbox_id")
         return folder
 
-    def create(self, base_name: str, base_root: Path, *, label: str, actor: str) -> SandboxInfo:
+    def create(self, base_name: str, base_root: Path, *, label: str, actor: str,
+               domain: str | None = None) -> SandboxInfo:
         try:
             base = Vault(Path(base_root))
         except VaultError:
@@ -86,17 +93,23 @@ class Sandboxes:
                        for d, dirs, files in os.walk(base.root)
                        if not set(Path(d).relative_to(base.root).parts) & _SKIPPED
                        for f in files), default=0)
-        if os.name == "nt" and len(str(folder)) + 1 + longest > MAX_PATH:
+        if os.name == "nt" and len(str(folder)) + 1 + len(BASE) + 1 + longest > MAX_PATH:
             raise SandboxError("path_too_long")
         self.root.mkdir(parents=True, exist_ok=True)
         shutil.copytree(base.root, folder,
                         ignore=lambda _dir, names: [n for n in names if n in _SKIPPED])
         (folder / "drop").mkdir(exist_ok=True)
+        if (base.root / "wiki").is_dir():
+            shutil.copytree(base.root / "wiki", folder / BASE / "wiki")
+        for name in ("index.md", "log.md", "decisions.md"):
+            if (base.root / name).is_file():
+                (folder / BASE).mkdir(exist_ok=True)
+                shutil.copy2(base.root / name, folder / BASE / name)
         info = SandboxInfo(
             sandbox_id=sandbox_id, base_name=base_name, base_root=str(base.root.resolve()),
             base_raw_sha256=raw_digest(base), base_content_sha256=knowledge_digest(base),
             base_decisions_sha256=decision_digest(base), label=label, created_by=actor,
-            created_at=stamp.isoformat(timespec="seconds"))
+            created_at=stamp.isoformat(timespec="seconds"), domain=domain)
         (folder / RECORD).write_text(info.model_dump_json(indent=1), encoding="utf-8")
         return info
 

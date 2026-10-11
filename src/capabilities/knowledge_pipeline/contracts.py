@@ -35,6 +35,7 @@ class KnowledgePipelineHostBinding(Contract):
 class SandboxCreateRequest(Contract):
     base: Symbol
     label: Text = Field(min_length=1, max_length=80)
+    domain: Symbol | None = None  # a K2 index category, e.g. product-vna
 
 
 class SandboxListRequest(Contract):
@@ -106,3 +107,10 @@ class IndexEnrichRequest(Contract):
 class IndexBuildRequest(Contract):
     sandbox_id: Text
     mode: Literal["dry_run", "apply"] = "dry_run"
+
+
+class MergeRequest(Contract):
+    sandbox_id: Text
+    mode: Literal["dry_run", "apply"] = "dry_run"
+    # "<path>#<part>" -> which side wins a conflict
+    resolutions: dict[str, Literal["sandbox", "published"]] = Field(default_factory=dict)

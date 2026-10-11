@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 import uuid
 from datetime import UTC, date, datetime
 from pathlib import Path
@@ -20,8 +21,10 @@ from pydantic import Field
 
 from common.base import Contract
 from knowledge.conflicts import decisions_text
-from knowledge.layered_index import EnrichReport, IndexReport, LayeredIndex
+from knowledge.evolution import knowledge_digest
+from knowledge.layered_index import KEYS, EnrichReport, IndexReport, LayeredIndex, read_entry
 from knowledge.lint import scan
+from knowledge.merge import MergeChange, MergeConflict, Resolution, read_tree, three_way
 from knowledge.migrate import adopt
 from knowledge.planning import DEFAULT_CONVENTIONS, IngestPlanner
 from knowledge.raw import (
@@ -33,8 +36,9 @@ from knowledge.raw import (
     RawIndex,
     load_document,
 )
-from knowledge.sandbox import Sandboxes, SandboxInfo
+from knowledge.sandbox import BASE, Sandboxes, SandboxInfo
 from knowledge.schema import ingest_conventions
+from knowledge.sections import lost_lines
 from knowledge.vault import Vault, WritePlan, normalize
 from models.contracts import ModelClient
 
@@ -154,10 +158,14 @@ class KnowledgePipeline:
 
     # -- sandboxes -----------------------------------------------------------
 
-    def create_sandbox(self, base: str, label: str, actor: str) -> SandboxInfo:
+    def create_sandbox(self, base: str, label: str, actor: str,
+                       domain: str | None = None) -> SandboxInfo:
         if base not in self.bases:
             raise PipelineError("unknown_base_vault")
-        return self.sandboxes.create(base, self.bases[base], label=label, actor=actor)
+        if domain is not None and domain not in KEYS:
+            raise PipelineError("unknown_domain")
+        return self.sandboxes.create(base, self.bases[base], label=label, actor=actor,
+                                     domain=domain)
 
     def _open(self, sandbox_id: str) -> Vault:
         return self.sandboxes.open(sandbox_id)[1]
@@ -306,6 +314,52 @@ class KnowledgePipeline:
 
     # -- lint ----------------------------------------------------------------
 
+    # -- merge (K3.3) ----------------------------------------------------------
+
+    def merge(self, sandbox_id: str, mode: Literal["dry_run", "apply"] = "dry_run",
+              resolutions: dict[str, Resolution] | None = None) -> MergeReport:
+        """Three-way merge of a sandbox into its base vault. A preview writes
+        nothing; apply writes a new candidate vault beside the sandboxes, never
+        the published vault, and refuses while a conflict is unresolved."""
+        info, vault = self.sandboxes.open(sandbox_id)
+        published = Vault(Path(info.base_root))
+        snapshot = vault.root / BASE
+        if snapshot.is_dir():
+            base = read_tree(snapshot, raw=False)
+        elif knowledge_digest(published) == info.base_content_sha256:
+            base = read_tree(published.root, raw=False)  # published has not moved
+        else:
+            raise PipelineError("no_base_snapshot")
+        sandbox_files = read_tree(vault.root)
+        scope = None
+        if info.domain is not None:
+            scope = {rel for rel in sandbox_files if rel.startswith("wiki/") and rel.endswith(".md")
+                     and info.domain in read_entry(vault, rel).categories}
+        merged = three_way(base, sandbox_files, read_tree(published.root), resolutions, scope)
+        report = MergeReport(
+            sandbox_id=sandbox_id, mode=mode, base_name=info.base_name,
+            changes=tuple(merged.changes), conflicts=tuple(merged.conflicts),
+            kept_removed=tuple(merged.kept_removed))
+        if mode == "dry_run":
+            return report
+        if merged.conflicts:
+            raise PipelineError("unresolved_conflicts")
+        stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
+        target = self.sandboxes.root / CANDIDATES / f"{info.base_name}-{stamp}"
+        shutil.copytree(published.root, target,
+                        ignore=lambda _dir, names: [n for n in names if n in _CANDIDATE_SKIP])
+        for rel, data in merged.files.items():
+            path = target / rel
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(data)
+        candidate = Vault(target)
+        lost = _lost_sourced(published, vault, candidate)
+        before, after = _lint_counts(published), _lint_counts(candidate)
+        worse = {key: after[key] - before.get(key, 0) for key in after
+                 if after[key] > before.get(key, 0)}
+        return report.model_copy(update={
+            "candidate_root": str(target), "lost_sourced_lines": lost, "lint_worse": worse})
+
     def lint(self, sandbox_id: str) -> LintSummary:
         report = scan(self._open(sandbox_id))
         counts = {
@@ -324,3 +378,40 @@ class KnowledgePipeline:
             *(f"orphan: {p}" for p in report.orphans)]
         return LintSummary(sandbox_id=sandbox_id, pages=report.pages, clean=report.clean,
                            counts=counts, findings=tuple(findings[:MAX_FINDINGS]))
+
+
+CANDIDATES = "candidates"
+_CANDIDATE_SKIP = {".ingest-backup", ".ingest-snapshot", ".plans", ".condense-cache", ".git"}
+
+
+class MergeReport(Contract):
+    sandbox_id: str
+    mode: Literal["dry_run", "apply"]
+    base_name: str
+    changes: tuple[MergeChange, ...] = ()
+    conflicts: tuple[MergeConflict, ...] = ()
+    kept_removed: tuple[str, ...] = ()
+    candidate_root: str | None = None
+    lost_sourced_lines: int = 0
+    lint_worse: dict[str, int] = Field(default_factory=dict)
+
+
+def _lint_counts(vault: Vault) -> dict[str, int]:
+    report = scan(vault)
+    return {"path_links": len(report.path_links),
+            "missing_frontmatter": len(report.missing_frontmatter),
+            "broken_source_path": len(report.broken_source_path),
+            "unknown_source_id": len(report.unknown_source_id),
+            "unreadable": len(report.unreadable)}
+
+
+def _lost_sourced(published: Vault, sandbox: Vault, candidate: Vault) -> int:
+    """Sourced lines of either side that the candidate no longer carries."""
+    titles = {title.casefold() for rel, title in candidate.wiki_pages()
+              if rel.startswith("wiki/sources/")}
+    lost = 0
+    for side in (published, sandbox):
+        for rel in side.wiki_files():
+            if rel.endswith(".md") and candidate.exists(rel):
+                lost += len(lost_lines(side.read(rel), candidate.read(rel), titles))
+    return lost
