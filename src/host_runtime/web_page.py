@@ -100,6 +100,9 @@ body {
 .kp-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
 .kp-list button { margin: 2px 6px 2px 0; }
 .kp-check { display: inline-block; margin: 2px 14px 2px 0; }
+.kp-sticky { position: sticky; top: 0; z-index: 5; }
+.kp-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.kp-advanced summary { cursor: pointer; font-weight: 600; }
 #kp-rule-text { width: 100%; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
 .kp-markdown { max-height: 70vh; overflow: auto; }
 pre.kp-added { background: var(--ok-bg, #e8f5e9); white-space: pre-wrap; padding: 8px; }
@@ -807,34 +810,30 @@ tr:last-child td { border-bottom: none; }
     </div>
     <div id="kp-disabled" class="empty" hidden>The Knowledge pipeline is not configured on
       this machine (host.json <code>knowledge_pipeline</code>).</div>
+    <div id="kp-status" class="section-status kp-sticky" role="status" aria-live="polite"></div>
     <div id="kp-main">
       <h2>Sandboxes</h2>
       <div class="card">
         <div id="kp-sandboxes" class="kp-list">reading&hellip;</div>
         <form id="kp-new" class="kp-actions">
-          <select id="kp-base" aria-label="Base vault"></select>
+          <select id="kp-base" aria-label="Project vault"></select>
           <input id="kp-label" required maxlength="80" placeholder="Sandbox name, e.g. VNA trial"
                  aria-label="Sandbox name">
           <button class="go" type="submit">Create sandbox</button>
         </form>
       </div>
       <div id="kp-box" hidden>
-        <h2 id="kp-title"></h2>
-        <div class="card"><h3>Pull from the project vault</h3>
+        <div class="kp-head"><h2 id="kp-title"></h2>
+          <button id="kp-discard" type="button">Discard sandbox</button></div>
+        <p class="note kp-flow">Pull &rarr; Rules &rarr; Drop and convert &rarr; Ingest &rarr;
+          Lint &rarr; Benchmark &rarr; Push</p>
+        <div class="card"><h3>1. Pull from the project vault</h3>
           <p class="note">Choose the drop folders this sandbox works on. Originals already
             ingested are skipped; the folders become the sandbox's scope.</p>
           <div id="kp-pull-folders" class="kp-list"></div>
           <div class="kp-actions"><button class="go" id="kp-pull" type="button">Pull</button>
             <span class="note" id="kp-pull-result"></span></div></div>
-        <div class="card"><h3>Drop</h3>
-          <div class="kp-actions">
-            <input id="kp-files" type="file" multiple aria-label="Originals to add">
-            <button id="kp-upload" type="button">Add to drop</button>
-            <button id="kp-preview" type="button">Preview convert</button>
-            <button class="go" id="kp-convert" type="button">Convert</button>
-          </div>
-          <div id="kp-drop"></div><div id="kp-converted"></div></div>
-        <div class="card"><h3>Rules (schema and skills)</h3>
+        <div class="card"><h3>2. Rules (schema and skills)</h3>
           <p class="note">Edit how this sandbox converts and ingests. Saved here only;
             a push brings the change to the project vault.</p>
           <div id="kp-rules" class="kp-list"></div>
@@ -850,18 +849,27 @@ tr:last-child td { border-bottom: none; }
         <div class="card" id="kp-viewer" hidden><h3 id="kp-viewer-title">Preview</h3>
           <div class="kp-actions"><button id="kp-viewer-close" type="button">Close</button></div>
           <div id="kp-viewer-body" class="kp-markdown"></div></div>
-        <div class="card"><h3>Raw</h3>
-          <div class="kp-actions"><button id="kp-adopt" type="button">Adopt legacy Raw</button>
-            <span class="note" id="kp-adopt-result"></span></div>
-          <div id="kp-raw" class="kp-list"></div></div>
-        <div class="card"><h3>Ingest plan</h3>
-          <div id="kp-plan" class="empty">Choose Plan ingest on a Raw document.</div></div>
-        <div class="card"><h3>Layered index</h3>
+        <div class="card"><h3>3. Drop and convert</h3>
+          <p class="note">Add originals from this computer if they are not in the project's
+            drop. The category folder picks the ingest rules (raw/&lt;category&gt;).</p>
           <div class="kp-actions">
-            <button id="kp-enrich" type="button">Write bilingual summaries</button>
-            <button id="kp-index" type="button">Build layered index</button>
-          </div><div id="kp-index-result" class="note"></div></div>
-        <div class="card"><h3>Benchmark</h3>
+            <select id="kp-category" aria-label="Category folder"></select>
+            <input id="kp-files" type="file" multiple aria-label="Originals to add">
+            <button id="kp-upload" type="button">Add to drop</button>
+          </div>
+          <div id="kp-drop"></div>
+          <div class="kp-actions">
+            <button id="kp-preview" type="button">Preview convert</button>
+            <button class="go" id="kp-convert" type="button">Convert</button>
+          </div><div id="kp-converted"></div></div>
+        <div class="card"><h3>4. Ingest</h3>
+          <p class="note">Plan ingest on a Raw document, Compare each page, then apply.</p>
+          <div id="kp-raw" class="kp-list"></div>
+          <div id="kp-plan" class="empty">Choose Plan ingest on a Raw document.</div></div>
+        <div class="card"><h3>5. Lint</h3>
+          <div class="kp-actions"><button id="kp-lint" type="button">Run lint</button></div>
+          <div id="kp-lint-result"></div></div>
+        <div class="card"><h3>6. Benchmark</h3>
           <p class="note">Each question is asked against this sandbox and against the project
             vault, and graded by its must-mention / must-not-say terms.</p>
           <div id="kp-bench-sets" class="kp-list"></div>
@@ -869,29 +877,38 @@ tr:last-child td { border-bottom: none; }
             <button class="go" id="kp-bench" type="button">Run benchmark</button>
             <span class="note" id="kp-bench-state"></span></div>
           <div id="kp-bench-result"></div></div>
-        <div class="card"><h3>Push to the project vault</h3>
-          <p class="note">Push merges this sandbox into the project vault as it is now, runs
-            the question sets ticked under Benchmark on the merged result, and writes only
-            when no question regresses and the score is not lower. Conflicts are chosen
-            under "Merge and publish" below (Preview merge).</p>
+        <div class="card"><h3>7. Push to the project vault</h3>
+          <p class="note">Check conflicts first and choose a side for each. Push merges into
+            the project vault as it is now, runs the question sets ticked under Benchmark on
+            the merged result, and writes only when no question regresses and the score is
+            not lower.</p>
           <div class="kp-actions">
+            <button id="kp-merge-preview" type="button">Check conflicts</button>
             <button class="go" id="kp-push" type="button">Push</button>
             <button id="kp-refresh-agent" type="button">Refresh the Agent's Knowledge</button>
             <span class="note" id="kp-push-state"></span></div>
+          <div id="kp-merge-result"></div>
           <div id="kp-push-result"></div></div>
-        <div class="card"><h3>Merge and publish</h3>
+        <details class="card kp-advanced"><summary>Advanced</summary>
+          <h3>Legacy Raw</h3>
+          <div class="kp-actions"><button id="kp-adopt" type="button">Adopt legacy Raw</button>
+            <span class="note" id="kp-adopt-result"></span></div>
+          <h3>Local candidate</h3>
+          <p class="note">Merge into a local candidate and publish it as the Agent's version
+            without pushing to the project vault.</p>
           <div class="kp-actions">
-            <button id="kp-merge-preview" type="button">Preview merge</button>
             <button id="kp-merge" type="button">Merge into a candidate</button>
             <button id="kp-publish" type="button" disabled>Publish candidate</button>
-          </div><div id="kp-merge-result"></div></div>
-        <div class="card"><h3>Lint</h3>
-          <div class="kp-actions"><button id="kp-lint" type="button">Run lint</button></div>
-          <div id="kp-lint-result"></div></div>
-        <div class="kp-actions"><button id="kp-discard" type="button">Discard sandbox</button></div>
+          </div>
+          <h3>Layered index</h3>
+          <p class="note">Bilingual summaries and category indexes for ingest planning on a
+            large wiki; queries do not use them.</p>
+          <div class="kp-actions">
+            <button id="kp-enrich" type="button">Write bilingual summaries</button>
+            <button id="kp-index" type="button">Build layered index</button>
+          </div><div id="kp-index-result" class="note"></div></details>
       </div>
     </div>
-    <div id="kp-status" class="section-status" role="status" aria-live="polite"></div>
   </section>
   <section id="panel-schedules">
     <div class="workspace-head">
@@ -3639,6 +3656,12 @@ function kpTicked(box) {
 
 async function kpLoadPull() {
   const folders = await pipeline("drop-folders", {base: kpSandbox.base_name});
+  const pick = el("kp-category"); pick.replaceChildren();
+  for (const [value, label] of [["", "(no category)"], ...folders.folders
+      .filter((f) => !f.path.includes("/")).map((f) => [f.path, f.path])]) {
+    const option = document.createElement("option"); option.value = value;
+    option.append(text(label)); pick.append(option);
+  }
   kpChecks(el("kp-pull-folders"), folders.folders.map((f) =>
     [f.path, f.path + " (" + f.files + " files)"]), []);
   if (!folders.folders.length) {
@@ -3813,7 +3836,9 @@ el("kp-new").addEventListener("submit", (event) => {
 });
 el("kp-upload").addEventListener("click", () => kpRun("Adding to drop", async () => {
   for (const file of el("kp-files").files) {
-    await pipeline("drop-add", {sandbox_id: kpSandbox.sandbox_id, name: file.name,
+    const folder = el("kp-category").value;
+    await pipeline("drop-add", {sandbox_id: kpSandbox.sandbox_id,
+      name: (folder ? folder + "/" : "") + file.name,
       data_base64: await kpFileBase64(file)});
   }
   el("kp-files").value = ""; await kpOpen(kpSandbox);
