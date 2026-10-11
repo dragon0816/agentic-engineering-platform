@@ -25,6 +25,7 @@ from pydantic import Field, ValidationError
 from common.base import Contract, Symbol, Text
 from common.execution import Failure, TraceIdentifiers
 from knowledge.contracts import KnowledgeSource
+from knowledge.layered_index import index_entries, is_navigation
 from knowledge.lint import WIKILINK, body_of, head_fields, read_pages
 from knowledge.modelcalls import failure_from_exception
 from knowledge.query_rewrite import content_words
@@ -300,11 +301,13 @@ STATED_NUMBER = re.compile(r"(?<![0-9A-Za-z_])\d+(?:\.\d+)?(?![0-9A-Za-z_])")
 def citable(passage: "Passage", allow_wiki: bool = False) -> bool:
     """Raw is always citable; a curated Wiki page only under Wiki-primary.
 
-    `index.md` is navigation and never citable evidence.
+    `index.md` and the sub-indexes under `wiki/index/` are navigation and
+    never citable evidence.
     """
     if passage.citation.kind == "raw":
         return True
-    return allow_wiki and passage.citation.wiki_page not in (None, "index.md")
+    page = passage.citation.wiki_page
+    return allow_wiki and page is not None and not is_navigation(page)
 
 
 def split_labeled_inferences(text: str, label: str | None) -> tuple[str, tuple[str, ...]]:
@@ -623,7 +626,8 @@ def _corpus(vault: Vault) -> list[_Doc]:
                     ),
                 )
             )
-    texts, _ = read_pages(vault, vault.wiki_files())
+    texts, _ = read_pages(
+        vault, tuple(rel for rel in vault.wiki_files() if not is_navigation(rel)))
     for rel, text in texts.items():
         head = head_fields(text)
         source = by_id.get((head or {}).get("source_id", ""))
@@ -671,6 +675,7 @@ class RetrievalSnapshot:
         self._raw_by_id: dict[str, str] = {}
         self._wiki_by_title: dict[str, str] = {}
         self._index_docs: list[_Doc] = []
+        self._index_page: dict[str, str] = {}
         self._navigation_ready = False
         self._wiki_sections: list[_Doc] | None = None
 
@@ -684,14 +689,19 @@ class RetrievalSnapshot:
                 self._raw_by_ref.setdefault(ref, []).append(doc)
                 if doc.citation.source is not None:
                     self._raw_by_id[doc.citation.source.source_id] = ref
+        every_title = {title.casefold(): rel for rel, title in self._vault.wiki_pages()}
         self._wiki_by_title = {
-            title.casefold(): rel for rel, title in self._vault.wiki_pages()
+            title: rel for title, rel in every_title.items() if not is_navigation(rel)
         }
-        for line in self._vault.read("index.md").splitlines():
-            match = re.match(r"^\s*[-*]\s+\[\[([^\]]+)\]\]\s*[—–-]\s*(.+)$", line)
-            if match is not None:
+        # A layered index (K2) is walked down to its page lines; a page listed
+        # in several categories is one line, not several.
+        lines: set[str] = set()
+        for entry in index_entries(self._vault, every_title):
+            if entry.line not in lines:
+                lines.add(entry.line)
+                self._index_page[entry.line] = entry.page
                 self._index_docs.append(
-                    _Doc(line, Citation(kind="wiki", wiki_page="index.md"))
+                    _Doc(entry.line, Citation(kind="wiki", wiki_page="index.md"))
                 )
 
     def batch(
@@ -907,6 +917,7 @@ class RetrievalSnapshot:
             self._wiki_sections = [
                 _Doc(text, Citation(kind="wiki", wiki_page=rel, section=number))
                 for rel, title in self._vault.wiki_pages()
+                if not is_navigation(rel)
                 for number, text in enumerate(
                     wiki_sections(title, self._vault.read(rel)), 1
                 )
@@ -915,14 +926,29 @@ class RetrievalSnapshot:
 
     def wiki_titles(self) -> dict[str, str]:
         """Wiki page path -> title."""
-        return {rel: title for rel, title in self._vault.wiki_pages()}
+        return {rel: title for rel, title in self._vault.wiki_pages() if not is_navigation(rel)}
 
     def search_wiki_pages(
         self, query: str, *, exclude: set[str], limit: int = 8,
     ) -> tuple[Passage, ...]:
         """The best section of each Wiki page a query finds that is not yet in
-        `exclude`: what a person reads in search results before opening a page."""
+        `exclude`: what a person reads in search results before opening a page.
+
+        Up to half come through the index lines first: their bilingual summary
+        and aliases reach a page whose own text uses the other language."""
         found: list[Passage] = []
+        self._prepare_wiki_navigation()
+        words = content_words(query)
+        hits = _retrieve_docs(self._index_docs, words, k=limit, min_raw=0) \
+            if self._index_docs else ()
+        for hit in hits:
+            page = self._index_page.get(hit.text, "")
+            if not page or page in exclude or any(
+                    item.citation.wiki_page == page for item in found):
+                continue
+            found.extend(self.wiki_page_sections(page, query, k=1))
+            if len(found) >= limit // 2:
+                break
         for passage in _retrieve_docs(
             self._wiki_section_docs(), content_words(query), k=40, min_raw=0
         ):

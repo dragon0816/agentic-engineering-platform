@@ -112,3 +112,74 @@ def test_a_long_category_becomes_a_hub_of_parts(tmp_path: Path) -> None:
     assert len(parts) == 2
     hub = vault.read("wiki/index/market-ai.md")
     assert hub.count("[[Index — AI / AI — 概念 / Concepts") == 2
+
+
+def _layered(tmp_path: Path) -> Vault:
+    vault = _vault(tmp_path)
+    _page(vault.root, "wiki/concepts/收發器.md", "收發器",
+          "向量訊號收發器的吞吐量測試方法：先設定頻寬與調變方式，再量測每秒資料量與錯誤率。",
+          'summary_en: "Vector signal transceiver throughput testing"\n'
+          "index_categories: [product-signal-generator-analyzer]\n")
+    L.LayeredIndex(vault).build(mode="apply")
+    return vault
+
+
+def test_query_walks_the_layered_index_and_never_cites_it(tmp_path: Path) -> None:
+    from knowledge.query import Citation, Passage, RetrievalSnapshot, citable
+
+    vault = _layered(tmp_path)
+    snapshot = RetrievalSnapshot(vault)
+    assert not any(L.is_navigation(rel) for rel in snapshot.wiki_titles())
+    # The English words exist only in the bilingual index line, not in the page.
+    found = snapshot.search_wiki_pages("transceiver throughput", exclude=set())
+    assert found and found[0].citation.wiki_page == "wiki/concepts/收發器.md"
+    assert not any(L.is_navigation(p.citation.wiki_page) for p in found)
+    sub_index = Passage(text="x", score=0,
+                        citation=Citation(kind="wiki", wiki_page="wiki/index/companies.md"))
+    assert not citable(sub_index, allow_wiki=True)
+    # A page listed under two categories is one index line.
+    lines = [doc.text for doc in snapshot._index_docs]
+    assert len(lines) == len(set(lines))
+    assert sum("[[EVM]]" in line for line in lines) == 1
+
+
+def test_ingest_relevance_reads_only_the_chosen_categories(tmp_path: Path) -> None:
+    from test_planning import PlanningModel, document, good_plan_json
+
+    from knowledge.planning import (
+        CATEGORY_CONTRACT,
+        PLAN_CONTRACT,
+        RELEVANCE_CONTRACT,
+        IngestPlanner,
+    )
+
+    vault = _layered(tmp_path)
+    oscilloscopes = "Index — " + L.category_title("product-oscilloscope")
+    model = PlanningModel({
+        CATEGORY_CONTRACT: {"categories": [oscilloscopes, "not a category"]},
+        RELEVANCE_CONTRACT: {"relevant": ["wiki/concepts/Eye diagram.md",
+                                          "wiki/entities/Keysight.md"]},
+        PLAN_CONTRACT: good_plan_json(),
+    })
+    outcome = IngestPlanner(model, vault, alias="planner").plan(document(), today="2026-10-11")
+    categories, relevance = model.requests[0], model.requests[1]
+    assert categories.output_contract == CATEGORY_CONTRACT
+    assert oscilloscopes in categories.messages[1].text
+    shown = relevance.messages[1].text
+    assert "- wiki/concepts/Eye diagram.md — [[Eye diagram]]" in shown
+    assert "Keysight" not in shown.split("===== source")[0]
+    # Only a page the chosen categories offered can be read.
+    assert outcome.relevant == ("wiki/concepts/Eye diagram.md",)
+
+
+def test_a_flat_index_keeps_the_single_relevance_pass(tmp_path: Path) -> None:
+    from test_planning import PlanningModel, document, good_plan_json
+
+    from knowledge.planning import PLAN_CONTRACT, RELEVANCE_CONTRACT, IngestPlanner
+
+    vault = _vault(tmp_path)
+    model = PlanningModel({RELEVANCE_CONTRACT: {"relevant": []},
+                           PLAN_CONTRACT: good_plan_json()})
+    IngestPlanner(model, vault, alias="planner").plan(document(), today="2026-10-11")
+    assert model.requests[0].output_contract == RELEVANCE_CONTRACT
+    assert "- wiki/entities/Keysight.md — Keysight" in model.requests[0].messages[1].text

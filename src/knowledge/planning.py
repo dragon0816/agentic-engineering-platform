@@ -26,6 +26,7 @@ from pydantic import BaseModel, ConfigDict, Field, JsonValue, ValidationError
 
 from common.base import Contract, Symbol, Text
 from common.execution import Failure, TraceIdentifiers
+from knowledge.layered_index import index_entries, is_navigation
 from knowledge.modelcalls import failure_from_exception
 from knowledge.raw import RawDocument, one_line_ending
 from knowledge.vault import (
@@ -43,6 +44,9 @@ from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequi
 
 PLAN_CONTRACT = "knowledge.ingest-plan.v1"
 RELEVANCE_CONTRACT = "knowledge.ingest-relevance.v1"
+CATEGORY_CONTRACT = "knowledge.ingest-categories.v1"
+MAX_CATEGORIES = 3
+INVENTORY_LINE_CHARS = 200
 CONDENSE_OVER_CHARS = 40_000
 CHUNK_CHARS = 24_000
 MAX_RELEVANT = 8
@@ -59,6 +63,19 @@ names, never paths and never a .md suffix. State only what the source supports,
 keep the source's own terms, and when a source contradicts an existing page,
 write a line starting with ⚠️ on the affected page that says which source says
 what. Decisions listed as settled are final: never reinstate a rejected claim."""
+
+CATEGORY_PROMPT = """A source is about to be ingested into a large wiki. Below are the categories
+of its index and the source text. Pick the categories whose pages you would need
+to read and possibly update to ingest this source.
+
+Answer with JSON only: {{"categories": ["an exact category title", ...]}}
+Rules: titles exactly as listed; at most {cap}; an empty list is a valid answer.
+
+===== categories =====
+{categories}
+
+===== source: {source_ref} =====
+{source_text}"""
 
 RELEVANCE_PROMPT = """A source is about to be ingested. Below are the existing wiki pages (path and
 title) and the source text. Decide which existing pages you would need to read
@@ -272,11 +289,8 @@ class IngestPlanner:
                 self.vault.cache_write(key, text)
                 condensed = True
 
-        inventory = self.vault.wiki_pages()
-        inventory_text = (
-            "\n".join(f"- {path} — {title}" for path, title in inventory) or "(no pages yet)"
-        )
         try:
+            inventory, inventory_text = self._inventory(text, source_ref, trace_id)
             answer = self._ask(
                 RELEVANCE_PROMPT.format(
                     inventory=inventory_text,
@@ -412,6 +426,41 @@ class IngestPlanner:
         if response.failure is not None:
             raise _ModelFailed(response.failure)
         return response.structured_output, response.text
+
+    def _inventory(
+        self, text: str, source_ref: str, trace_id: str
+    ) -> tuple[tuple[tuple[str, str], ...], str]:
+        """The pages the relevance pass may choose from. A flat index offers
+        every page; a layered index (K2) first asks which categories the source
+        touches and offers only their pages, each with its bilingual line."""
+        every = self.vault.wiki_pages()
+        pages = tuple((path, title) for path, title in every if not is_navigation(path))
+        entries = [entry for entry in index_entries(
+            self.vault, {title.casefold(): path for path, title in every}) if entry.category]
+        if not entries:
+            listed = "\n".join(f"- {path} — {title}" for path, title in pages)
+            return pages, listed or "(no pages yet)"
+        categories = list(dict.fromkeys(entry.category for entry in entries))
+        answer = self._ask(
+            CATEGORY_PROMPT.format(
+                categories="\n".join(f"- {name}" for name in categories),
+                source_ref=source_ref, source_text=text[: self.condense_over],
+                cap=MAX_CATEGORIES),
+            contract=CATEGORY_CONTRACT,
+            trace=TraceIdentifiers(trace_id=trace_id, request_id="categories", span_id="pass-0"),
+        )
+        named = answer.get("categories") if isinstance(answer, dict) else None
+        chosen = set(list(dict.fromkeys(
+            item for item in (named if isinstance(named, list) else [])
+            if item in categories))[:MAX_CATEGORIES])
+        titles = dict(pages)
+        lines: dict[str, str] = {}
+        for entry in entries:
+            if entry.category in chosen:
+                lines.setdefault(entry.page, f"- {entry.page} — "
+                                 f"{entry.line.lstrip('-* ')[:INVENTORY_LINE_CHARS]}")
+        offered = tuple((path, titles.get(path, path)) for path in lines)
+        return offered, "\n".join(lines.values()) or "(no pages in the chosen categories)"
 
     def _ask(self, prompt: str, *, contract: str, trace: TraceIdentifiers) -> JsonValue:
         structured, text = self._generate(self._request(prompt, trace=trace, contract=contract))

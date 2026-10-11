@@ -50,7 +50,9 @@ index/sources-<year>.md           source summary pages by year
   about 20 pages, so about 100 calls for 2,007 pages.
 - Written through the vault write path, so each page is backed up first and only the
   frontmatter changes. A page whose body would change is refused.
-- Retrieval reads `aliases` and `summary` (they are already in the page text it indexes).
+- Retrieval reads `aliases` and `summary` through the sub-index lines: page text is
+  indexed without its frontmatter, so the bilingual line is how an English question
+  reaches a Chinese page (K2.4).
 
 ### 3. Ingest and query follow the index
 
@@ -58,6 +60,13 @@ index/sources-<year>.md           source summary pages by year
   picks (two short prompts) instead of all 2,007 titles.
 - **Query:** the multi-round search (`retrieval_rounds`) may open sub-indexes as search
   results, so a round can walk index → sub-index → page.
+- **As built (K2.4):** the Host walks `index.md` down through the sub-indexes to their
+  page lines (each line once; `wiki/index/all.md` is not walked) and uses them wherever
+  the flat index lines were used. Each search round shows up to half its results from
+  index-line hits. The sub-index pages are navigation: never searched as evidence and
+  never citable. Ingest: one category call (at most 3 categories), then the relevance
+  call over those categories' pages with their bilingual lines; a flat index keeps the
+  single relevance call.
 
 ### 4. Legacy Raw adoption
 
