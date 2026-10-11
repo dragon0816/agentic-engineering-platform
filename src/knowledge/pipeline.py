@@ -147,9 +147,13 @@ class KnowledgePipeline:
         model: ModelClient | None = None,
         alias: str | None = None,
         describer: Describer | None = None,
+        drop_roots: dict[str, Path] | None = None,
     ) -> None:
         self.sandboxes = sandboxes
         self.bases = dict(bases)
+        # Where each project vault collects originals; default <vault>/drop.
+        self.drop_roots = {name: (drop_roots or {}).get(name, root / "drop")
+                           for name, root in self.bases.items()}
         self.extractors: tuple[Extractor, ...] = (
             PlainTextExtractor(), MarkdownExtractor(), *extractors)
         self.model = model
@@ -172,6 +176,62 @@ class KnowledgePipeline:
 
     def discard_sandbox(self, sandbox_id: str) -> None:
         self.sandboxes.discard(sandbox_id)
+
+    # -- pull (collaboration design section 3) --------------------------------
+
+    def drop_folders(self, base: str, depth: int = 3) -> DropFolders:
+        """The project vault's drop/ folders a sandbox may pull, with file counts."""
+        if base not in self.bases:
+            raise PipelineError("unknown_base_vault")
+        root = self.drop_roots[base]
+        found = []
+        if root.is_dir():
+            for folder in sorted(p for p in root.rglob("*") if p.is_dir()):
+                rel = folder.relative_to(root)
+                if len(rel.parts) <= depth and not any(x.startswith(".") for x in rel.parts):
+                    files = sum(1 for p in folder.rglob("*") if p.is_file())
+                    found.append(DropFolder(path=rel.as_posix(), files=files))
+        return DropFolders(base=base, folders=tuple(found))
+
+    def pull(self, sandbox_id: str, folders: tuple[str, ...]) -> PullResult:
+        """Copy the chosen drop/ folders of the project vault into the sandbox's
+        drop/, keeping their paths. An original already ingested (same content
+        hash) or already in the sandbox is skipped; nothing is replaced."""
+        info, vault = self.sandboxes.open(sandbox_id)
+        root = self.drop_roots[info.base_name].resolve()
+        known = {entry.source.sha256 for entry in RawIndex.scan(vault).entries}
+        copied: list[str] = []
+        already: list[str] = []
+        present: list[str] = []
+        large: list[str] = []
+        clean_folders = []
+        for folder in folders:
+            rel = normalize(folder).strip("/")
+            source = (root / rel).resolve()
+            if not rel or rel.startswith("..") or (source != root and root not in source.parents):
+                raise PipelineError("outside_drop")
+            if not source.is_dir():
+                raise PipelineError("unknown_drop_folder")
+            clean_folders.append(rel)
+            for path in sorted(p for p in source.rglob("*") if p.is_file()):
+                name = path.relative_to(root).as_posix()
+                data = path.read_bytes()
+                target = vault.root / "drop" / name
+                if len(data) > MAX_DROP_BYTES:
+                    large.append(name)
+                elif hashlib.sha256(data).hexdigest() in known:
+                    already.append(name)
+                elif target.exists():
+                    present.append(name)
+                else:
+                    target.parent.mkdir(parents=True, exist_ok=True)
+                    target.write_bytes(data)
+                    copied.append(name)
+        pulled = tuple(dict.fromkeys((*info.pulled, *clean_folders)))
+        self.sandboxes.record(info.model_copy(update={"pulled": pulled}))
+        return PullResult(sandbox_id=sandbox_id, folders=pulled, copied=tuple(copied),
+                          already_ingested=tuple(already), already_in_sandbox=tuple(present),
+                          too_large=tuple(large))
 
     def add_drop(self, sandbox_id: str, name: str, data: bytes) -> str:
         """Put one original into the sandbox's drop/; never replaces a file."""
@@ -415,3 +475,23 @@ def _lost_sourced(published: Vault, sandbox: Vault, candidate: Vault) -> int:
             if rel.endswith(".md") and candidate.exists(rel):
                 lost += len(lost_lines(side.read(rel), candidate.read(rel), titles))
     return lost
+
+
+
+class DropFolder(Contract):
+    path: str
+    files: int = Field(ge=0)
+
+
+class DropFolders(Contract):
+    base: str
+    folders: tuple[DropFolder, ...] = ()
+
+
+class PullResult(Contract):
+    sandbox_id: str
+    folders: tuple[str, ...] = ()  # every folder pulled so far: the sandbox's scope
+    copied: tuple[str, ...] = ()
+    already_ingested: tuple[str, ...] = ()
+    already_in_sandbox: tuple[str, ...] = ()
+    too_large: tuple[str, ...] = ()

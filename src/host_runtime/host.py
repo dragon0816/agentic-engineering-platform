@@ -82,12 +82,14 @@ from capabilities.knowledge_pipeline.contracts import (
     ConvertRequest,
     DropAdded,
     DropAddRequest,
+    DropFoldersRequest,
     IndexBuildRequest,
     IndexEnrichRequest,
     IngestApplyRequest,
     IngestPlanRequest,
     LintRequest,
     MergeRequest,
+    PullRequest,
     SandboxCreateRequest,
     SandboxDiscarded,
     SandboxList,
@@ -99,12 +101,14 @@ from capabilities.knowledge_pipeline.handlers import (
     ADOPT_SPEC,
     CONVERT_SPEC,
     DROP_ADD_SPEC,
+    DROP_FOLDERS_SPEC,
     INDEX_BUILD_SPEC,
     INDEX_ENRICH_SPEC,
     INGEST_APPLY_SPEC,
     INGEST_PLAN_SPEC,
     LINT_SPEC,
     MERGE_SPEC,
+    PULL_SPEC,
     SANDBOX_CONTENTS_SPEC,
     SANDBOX_CREATE_SPEC,
     SANDBOX_DISCARD_SPEC,
@@ -112,12 +116,14 @@ from capabilities.knowledge_pipeline.handlers import (
     AdoptHandler,
     ConvertHandler,
     DropAddHandler,
+    DropFoldersHandler,
     IndexBuildHandler,
     IndexEnrichHandler,
     IngestApplyHandler,
     IngestPlanHandler,
     LintHandler,
     MergeHandler,
+    PullHandler,
     SandboxContentsHandler,
     SandboxCreateHandler,
     SandboxDiscardHandler,
@@ -279,11 +285,13 @@ from knowledge.office import office_extractors
 from knowledge.pipeline import (
     AdoptSummary,
     ConvertResult,
+    DropFolders,
     IngestApplyResult,
     IngestPlanResult,
     KnowledgePipeline,
     LintSummary,
     MergeReport,
+    PullResult,
     SandboxContents,
 )
 from knowledge.sandbox import Sandboxes
@@ -1880,7 +1888,9 @@ def _register_knowledge_pipeline(
             Path(config.knowledge_pipeline.sandbox_root)
             if config.knowledge_pipeline.sandbox_root else None)),
         {item.name: Path(item.root) for item in config.knowledge_pipeline.vaults},
-        extractors=office_extractors(), model=model, alias=alias, describer=describer)
+        extractors=office_extractors(), model=model, alias=alias, describer=describer,
+        drop_roots={item.name: Path(item.drop_root)
+                    for item in config.knowledge_pipeline.vaults if item.drop_root})
     local = ExecutionDependencies(central_required=False)
     for spec, handler, request, response in (
         (SANDBOX_CREATE_SPEC, SandboxCreateHandler(pipeline), SandboxCreateRequest, SandboxRecord),
@@ -1894,6 +1904,8 @@ def _register_knowledge_pipeline(
          EnrichReport),
         (INDEX_BUILD_SPEC, IndexBuildHandler(pipeline), IndexBuildRequest, IndexReport),
         (MERGE_SPEC, MergeHandler(pipeline), MergeRequest, MergeReport),
+        (DROP_FOLDERS_SPEC, DropFoldersHandler(pipeline), DropFoldersRequest, DropFolders),
+        (PULL_SPEC, PullHandler(pipeline), PullRequest, PullResult),
         (DROP_ADD_SPEC, DropAddHandler(pipeline), DropAddRequest, DropAdded),
         (SANDBOX_CONTENTS_SPEC, SandboxContentsHandler(pipeline), SandboxRef,
          SandboxContents),

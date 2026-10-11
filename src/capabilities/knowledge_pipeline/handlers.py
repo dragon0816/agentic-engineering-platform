@@ -20,12 +20,14 @@ from capabilities.knowledge_pipeline.contracts import (
     ConvertRequest,
     DropAdded,
     DropAddRequest,
+    DropFoldersRequest,
     IndexBuildRequest,
     IndexEnrichRequest,
     IngestApplyRequest,
     IngestPlanRequest,
     LintRequest,
     MergeRequest,
+    PullRequest,
     SandboxCreateRequest,
     SandboxDiscarded,
     SandboxList,
@@ -71,6 +73,9 @@ ADOPT_SPEC = _spec("adopt", "Adopt Raw from earlier tooling in a sandbox so it c
 INDEX_ENRICH_SPEC = _spec("index-enrich",
                           "Write bilingual aliases, summary and categories into sandbox pages",
                           "write", "medium")
+DROP_FOLDERS_SPEC = _spec("drop-folders", "List the project vault's drop folders", "read")
+PULL_SPEC = _spec("pull", "Copy chosen drop folders of the project vault into a sandbox",
+                  "write")
 MERGE_SPEC = _spec("merge", "Preview or write a three-way merge of a sandbox into a new "
                    "candidate vault; the published vault is never edited", "write", "medium")
 INDEX_BUILD_SPEC = _spec("index-build", "Preview or write the layered index of a sandbox",
@@ -231,4 +236,25 @@ class MergeHandler:
         request = MergeRequest.model_validate(inputs)
         result: Contract = await _run(lambda: self.pipeline.merge(
             request.sandbox_id, request.mode, dict(request.resolutions)))
+        return result
+
+
+class DropFoldersHandler:
+    def __init__(self, pipeline: KnowledgePipeline) -> None:
+        self.pipeline = pipeline
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        request = DropFoldersRequest.model_validate(inputs)
+        result: Contract = await _run(lambda: self.pipeline.drop_folders(request.base))
+        return result
+
+
+class PullHandler:
+    def __init__(self, pipeline: KnowledgePipeline) -> None:
+        self.pipeline = pipeline
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        request = PullRequest.model_validate(inputs)
+        result: Contract = await _run(lambda: self.pipeline.pull(
+            request.sandbox_id, tuple(request.folders)))
         return result

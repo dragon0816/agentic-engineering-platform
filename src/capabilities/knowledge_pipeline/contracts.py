@@ -10,10 +10,14 @@ from common.base import Contract, Symbol, Text
 
 
 class PipelineVault(Contract):
-    """A base vault people may copy into a sandbox (host.json)."""
+    """A project vault people open sandboxes from (host.json). Its location is
+    set per project (docs/phases/KNOWLEDGE_COLLAB.md section 2)."""
 
     name: Symbol
     root: Text
+    drop_root: Text | None = None  # default <root>/drop
+    questions_root: Text | None = None  # default <root>/checks/questions
+    maintainers: tuple[Text, ...] = ()  # who may push
 
 
 class KnowledgePipelineHostBinding(Contract):
@@ -114,3 +118,12 @@ class MergeRequest(Contract):
     mode: Literal["dry_run", "apply"] = "dry_run"
     # "<path>#<part>" -> which side wins a conflict
     resolutions: dict[str, Literal["sandbox", "published"]] = Field(default_factory=dict)
+
+
+class DropFoldersRequest(Contract):
+    base: Symbol
+
+
+class PullRequest(Contract):
+    sandbox_id: Text
+    folders: tuple[Text, ...] = Field(min_length=1, max_length=50)

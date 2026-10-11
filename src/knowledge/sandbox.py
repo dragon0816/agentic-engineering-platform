@@ -31,8 +31,10 @@ SCHEMA = "aep.knowledge-sandbox.v1"
 # Working state of a base vault that a copy must not inherit.
 # `.base` holds the base's wiki and root files as copied, for the three-way merge (K3.3).
 BASE = ".base"
+# A project vault's drop/ holds every original; a sandbox pulls the folders it
+# works on instead (docs/phases/KNOWLEDGE_COLLAB.md section 3).
 _SKIPPED = {".ingest-backup", ".ingest-snapshot", ".plans", ".condense-cache", ".git", RECORD,
-            BASE}
+            BASE, "drop"}
 # Windows refuses longer paths unless long paths are enabled system-wide
 # (rs-k has 188-character Raw asset paths; k2 live run, 2026-10-11).
 MAX_PATH = 259
@@ -59,6 +61,8 @@ class SandboxInfo(BaseModel):
     # A domain matrix cell (K2 index category) the sandbox works in; changes to
     # pages outside it are merge proposals (K3, owner 2026-10-11).
     domain: str | None = None
+    # drop/ folders pulled from the project vault: the sandbox's scope.
+    pulled: tuple[str, ...] = ()
 
 
 def _slug(text: str) -> str:
@@ -114,6 +118,13 @@ class Sandboxes:
             created_at=stamp.isoformat(timespec="seconds"), domain=domain)
         (folder / RECORD).write_text(info.model_dump_json(indent=1), encoding="utf-8")
         return info
+
+    def record(self, info: SandboxInfo) -> None:
+        """Rewrite a sandbox's record, e.g. after a pull."""
+        folder = self._folder(info.sandbox_id)
+        if not (folder / RECORD).is_file():
+            raise SandboxError("unknown_sandbox")
+        (folder / RECORD).write_text(info.model_dump_json(indent=1), encoding="utf-8")
 
     def list(self) -> tuple[SandboxInfo, ...]:
         if not self.root.is_dir():
