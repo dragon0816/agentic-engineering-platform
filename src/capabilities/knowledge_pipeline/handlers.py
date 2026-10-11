@@ -21,13 +21,16 @@ from capabilities.knowledge_pipeline.contracts import (
     DropAdded,
     DropAddRequest,
     DropFoldersRequest,
+    FileRequest,
     IndexBuildRequest,
     IndexEnrichRequest,
     IngestApplyRequest,
     IngestPlanRequest,
     LintRequest,
     MergeRequest,
+    PlanPageRequest,
     PullRequest,
+    RuleWriteRequest,
     SandboxCreateRequest,
     SandboxDiscarded,
     SandboxList,
@@ -76,6 +79,11 @@ INDEX_ENRICH_SPEC = _spec("index-enrich",
 DROP_FOLDERS_SPEC = _spec("drop-folders", "List the project vault's drop folders", "read")
 PULL_SPEC = _spec("pull", "Copy chosen drop folders of the project vault into a sandbox",
                   "write")
+RULE_FILES_SPEC = _spec("rule-files", "List a sandbox's schema and skill files", "read")
+FILE_READ_SPEC = _spec("file-read", "Read one Markdown file of a sandbox for preview", "read")
+RULE_WRITE_SPEC = _spec("rule-write", "Save the schema or a skill file in a sandbox",
+                        "write")
+PLAN_PAGE_SPEC = _spec("plan-page", "Show a planned page before and after", "read")
 MERGE_SPEC = _spec("merge", "Preview or write a three-way merge of a sandbox into a new "
                    "candidate vault; the published vault is never edited", "write", "medium")
 INDEX_BUILD_SPEC = _spec("index-build", "Preview or write the layered index of a sandbox",
@@ -257,4 +265,47 @@ class PullHandler:
         request = PullRequest.model_validate(inputs)
         result: Contract = await _run(lambda: self.pipeline.pull(
             request.sandbox_id, tuple(request.folders)))
+        return result
+
+
+class RuleFilesHandler:
+    def __init__(self, pipeline: KnowledgePipeline) -> None:
+        self.pipeline = pipeline
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        request = SandboxRef.model_validate(inputs)
+        result: Contract = await _run(lambda: self.pipeline.rule_files(request.sandbox_id))
+        return result
+
+
+class FileReadHandler:
+    def __init__(self, pipeline: KnowledgePipeline) -> None:
+        self.pipeline = pipeline
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        request = FileRequest.model_validate(inputs)
+        result: Contract = await _run(
+            lambda: self.pipeline.read_file(request.sandbox_id, request.path))
+        return result
+
+
+class RuleWriteHandler:
+    def __init__(self, pipeline: KnowledgePipeline) -> None:
+        self.pipeline = pipeline
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        request = RuleWriteRequest.model_validate(inputs)
+        result: Contract = await _run(
+            lambda: self.pipeline.write_rule(request.sandbox_id, request.path, request.text))
+        return result
+
+
+class PlanPageHandler:
+    def __init__(self, pipeline: KnowledgePipeline) -> None:
+        self.pipeline = pipeline
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        request = PlanPageRequest.model_validate(inputs)
+        result: Contract = await _run(lambda: self.pipeline.plan_page(
+            request.sandbox_id, request.plan_id, request.path))
         return result

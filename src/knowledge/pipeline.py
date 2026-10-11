@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 import uuid
 from datetime import UTC, date, datetime
@@ -38,7 +39,7 @@ from knowledge.raw import (
 )
 from knowledge.sandbox import BASE, Sandboxes, SandboxInfo
 from knowledge.schema import ingest_conventions
-from knowledge.sections import lost_lines
+from knowledge.sections import like_endings, lost_lines
 from knowledge.vault import Vault, WritePlan, normalize
 from models.contracts import ModelClient
 
@@ -232,6 +233,62 @@ class KnowledgePipeline:
         return PullResult(sandbox_id=sandbox_id, folders=pulled, copied=tuple(copied),
                           already_ingested=tuple(already), already_in_sandbox=tuple(present),
                           too_large=tuple(large))
+
+    # -- files: preview and rule editing (collaboration C2) --------------------
+
+    def rule_files(self, sandbox_id: str) -> RuleFiles:
+        """The sandbox's schema and skill files, which its maintainer may edit."""
+        vault = self._open(sandbox_id)
+        found = [SCHEMA] if (vault.root / SCHEMA).is_file() else []
+        found += sorted(p.relative_to(vault.root).as_posix()
+                        for p in (vault.root / "skills").glob("*/SKILL.md"))
+        return RuleFiles(sandbox_id=sandbox_id, files=tuple(found))
+
+    def read_file(self, sandbox_id: str, path: str) -> SandboxFile:
+        """One Markdown file of the sandbox, for preview."""
+        vault = self._open(sandbox_id)
+        rel = _readable(path)
+        target = vault.root / rel
+        if not target.is_file():
+            raise PipelineError("unknown_file")
+        data = target.read_bytes()
+        if len(data) > MAX_PREVIEW_BYTES:
+            raise PipelineError("file_too_large")
+        # Shown and edited with LF; a save restores the file's own line endings.
+        return SandboxFile(sandbox_id=sandbox_id, path=rel,
+                           text=data.decode("utf-8").replace("\r\n", "\n"))
+
+    def write_rule(self, sandbox_id: str, path: str, text: str) -> SandboxFile:
+        """Save the schema or one skill file in the sandbox; nothing else is
+        writable this way. The change reaches the project vault only by a push."""
+        vault = self._open(sandbox_id)
+        rel = normalize(path)
+        if not (rel == SCHEMA or _SKILL_FILE.fullmatch(rel)):
+            raise PipelineError("not_a_rule_file")
+        if not text.strip() or len(text.encode("utf-8")) > MAX_PREVIEW_BYTES:
+            raise PipelineError("bad_rule_text")
+        target = vault.root / rel
+        target.parent.mkdir(parents=True, exist_ok=True)
+        original = target.read_bytes().decode("utf-8") if target.is_file() else ""
+        target.write_bytes(like_endings(text, original).encode("utf-8"))
+        return SandboxFile(sandbox_id=sandbox_id, path=rel, text=text)
+
+    def plan_page(self, sandbox_id: str, plan_id: str, path: str) -> PlanPage:
+        """A planned page before and after, so the person sees what an apply
+        would change before applying it."""
+        vault = self._open(sandbox_id)
+        if not plan_id.startswith("plan-") or "/" in plan_id or "\\" in plan_id:
+            raise PipelineError("unknown_plan")
+        stored_path = vault.root / PLANS / f"{plan_id}.json"
+        if not stored_path.is_file():
+            raise PipelineError("unknown_plan")
+        plan = json.loads(stored_path.read_text(encoding="utf-8"))["plan"]
+        rel = normalize(path)
+        page = next((p for p in plan["pages"] if normalize(p["path"]) == rel), None)
+        if page is None:
+            raise PipelineError("unknown_file")
+        return PlanPage(sandbox_id=sandbox_id, plan_id=plan_id, path=rel,
+                        before=vault.read(rel), after=page["content"].replace("\r\n", "\n"))
 
     def add_drop(self, sandbox_id: str, name: str, data: bytes) -> str:
         """Put one original into the sandbox's drop/; never replaces a file."""
@@ -495,3 +552,38 @@ class PullResult(Contract):
     already_ingested: tuple[str, ...] = ()
     already_in_sandbox: tuple[str, ...] = ()
     too_large: tuple[str, ...] = ()
+
+
+
+SCHEMA = "CLAUDE.md"
+MAX_PREVIEW_BYTES = 1024 * 1024
+_SKILL_FILE = re.compile(r"skills/[A-Za-z0-9][A-Za-z0-9._-]*/SKILL\.md")
+_READABLE_AREAS = ("wiki/", "raw/", "skills/", "checks/")
+_READABLE_FILES = (SCHEMA, "index.md", "log.md", "decisions.md")
+
+
+def _readable(path: str) -> str:
+    rel = normalize(path)
+    if ".." in rel.split("/") or not rel.endswith(".md") or not (
+            rel in _READABLE_FILES or rel.startswith(_READABLE_AREAS)):
+        raise PipelineError("not_previewable")
+    return rel
+
+
+class RuleFiles(Contract):
+    sandbox_id: str
+    files: tuple[str, ...] = ()
+
+
+class SandboxFile(Contract):
+    sandbox_id: str
+    path: str
+    text: str
+
+
+class PlanPage(Contract):
+    sandbox_id: str
+    plan_id: str
+    path: str
+    before: str  # empty for a new page
+    after: str

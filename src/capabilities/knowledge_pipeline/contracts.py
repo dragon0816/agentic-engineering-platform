@@ -127,3 +127,20 @@ class DropFoldersRequest(Contract):
 class PullRequest(Contract):
     sandbox_id: Text
     folders: tuple[Text, ...] = Field(min_length=1, max_length=50)
+
+
+class FileRequest(Contract):
+    sandbox_id: Text
+    path: Text
+
+
+class RuleWriteRequest(Contract):
+    sandbox_id: Text
+    path: Text
+    text: str = Field(min_length=1, max_length=1_000_000)
+
+
+class PlanPageRequest(Contract):
+    sandbox_id: Text
+    plan_id: Text
+    path: Text

@@ -99,6 +99,10 @@ body {
 #nav-knowledge::before { content: "\25a4"; }
 .kp-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
 .kp-list button { margin: 2px 6px 2px 0; }
+#kp-rule-text { width: 100%; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
+.kp-markdown { max-height: 70vh; overflow: auto; }
+pre.kp-added { background: var(--ok-bg, #e8f5e9); white-space: pre-wrap; padding: 8px; }
+pre.kp-removed { background: var(--bad-bg, #fdecea); white-space: pre-wrap; padding: 8px; }
 .schedule-grid { display: grid; gap: 14px; }
 .schedule-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
   background: var(--panel); }
@@ -823,6 +827,22 @@ tr:last-child td { border-bottom: none; }
             <button class="go" id="kp-convert" type="button">Convert</button>
           </div>
           <div id="kp-drop"></div><div id="kp-converted"></div></div>
+        <div class="card"><h3>Rules (schema and skills)</h3>
+          <p class="note">Edit how this sandbox converts and ingests. Saved here only;
+            a push brings the change to the project vault.</p>
+          <div id="kp-rules" class="kp-list"></div>
+          <div id="kp-rule-editor" hidden>
+            <p><strong id="kp-rule-path"></strong></p>
+            <textarea id="kp-rule-text" rows="18" spellcheck="false"
+                      aria-label="Rule file text"></textarea>
+            <div class="kp-actions">
+              <button class="go" id="kp-rule-save" type="button">Save</button>
+              <button id="kp-rule-preview" type="button">Preview</button>
+              <button id="kp-rule-close" type="button">Close</button>
+            </div></div></div>
+        <div class="card" id="kp-viewer" hidden><h3 id="kp-viewer-title">Preview</h3>
+          <div class="kp-actions"><button id="kp-viewer-close" type="button">Close</button></div>
+          <div id="kp-viewer-body" class="kp-markdown"></div></div>
         <div class="card"><h3>Raw</h3>
           <div class="kp-actions"><button id="kp-adopt" type="button">Adopt legacy Raw</button>
             <span class="note" id="kp-adopt-result"></span></div>
@@ -3539,9 +3559,72 @@ async function kpOpen(item) {
   const contents = await pipeline("sandbox-contents", {sandbox_id: item.sandbox_id});
   el("kp-drop").replaceChildren(table(["Original in drop"], contents.drop, (row) => [row]));
   const raw = el("kp-raw"); raw.replaceChildren();
-  raw.append(table(["Raw document", ""], contents.raw, (row) => [row,
+  raw.append(table(["Raw document", "", ""], contents.raw, (row) => [row,
+    kpButton("Preview", () => kpRun("Reading", () => kpShowFile(row))),
     kpButton("Plan ingest", () => kpRun("Planning ingest (this asks the model)",
       () => kpPlan(row)))]));
+  await kpLoadRules();
+}
+
+function kpViewer(title, content) {
+  el("kp-viewer").hidden = false; el("kp-viewer-title").textContent = title;
+  el("kp-viewer-body").replaceChildren(content);
+  el("kp-viewer").scrollIntoView({behavior: "smooth", block: "start"});
+}
+
+async function kpShowFile(path) {
+  const file = await pipeline("file-read", {sandbox_id: kpSandbox.sandbox_id, path});
+  kpViewer(path, renderMarkdown(file.text));
+}
+
+function kpLineDiff(before, after) {
+  // Lines added or removed, ignoring order: what a reviewer checks first.
+  const old = new Set(before.split("\n").map((line) => line.trim()));
+  const now = new Set(after.split("\n").map((line) => line.trim()));
+  const box = document.createDocumentFragment();
+  const added = after.split("\n").filter((line) => line.trim() && !old.has(line.trim()));
+  const removed = before.split("\n").filter((line) => line.trim() && !now.has(line.trim()));
+  for (const [label, lines, cls] of [["Added", added, "kp-added"],
+                                     ["Removed", removed, "kp-removed"]]) {
+    const head = document.createElement("p");
+    head.append(text(label + " (" + lines.length + " lines)")); box.append(head);
+    const pre = document.createElement("pre"); pre.className = cls;
+    pre.append(text(lines.join("\n") || "(none)")); box.append(pre);
+  }
+  return box;
+}
+
+async function kpShowPlanPage(planId, path) {
+  const page = await pipeline("plan-page", {sandbox_id: kpSandbox.sandbox_id,
+                                            plan_id: planId, path});
+  const box = document.createDocumentFragment();
+  box.append(page.before ? kpLineDiff(page.before, page.after) : text("New page."));
+  const full = document.createElement("details");
+  const summary = document.createElement("summary");
+  summary.append(text("The page after apply")); full.append(summary, renderMarkdown(page.after));
+  box.append(full);
+  kpViewer(path + " \u2014 planned change", box);
+}
+
+let kpRulePath = null;
+async function kpLoadRules() {
+  const rules = await pipeline("rule-files", {sandbox_id: kpSandbox.sandbox_id});
+  const box = el("kp-rules"); box.replaceChildren();
+  box.append(table(["Rule file", ""], rules.files, (path) => [path,
+    kpButton("Edit", () => kpRun("Reading", async () => {
+      const file = await pipeline("file-read", {sandbox_id: kpSandbox.sandbox_id, path});
+      kpRulePath = path; el("kp-rule-editor").hidden = false;
+      el("kp-rule-path").textContent = path; el("kp-rule-text").value = file.text;
+    }))]));
+  const add = kpButton("New skill", () => {
+    const name = (prompt("Skill folder name, e.g. ingest-competitor") || "").trim();
+    if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(name)) return;
+    kpRulePath = "skills/" + name + "/SKILL.md"; el("kp-rule-editor").hidden = false;
+    el("kp-rule-path").textContent = kpRulePath;
+    el("kp-rule-text").value = "---\nname: " + name + "\nmode: procedure\n"
+      + "applies_to: raw/<Category>\n---\n\n# " + name + "\n";
+  });
+  box.append(add);
 }
 
 function kpFileBase64(file) {
@@ -3567,8 +3650,10 @@ async function kpPlan(rawRef) {
     + " (schema: " + plan.schema_source + (plan.skill ? ", rules: " + plan.skill : "") + ")"));
   box.append(head);
   if (plan.problems.length) box.append(text("Problems: " + plan.problems.join(", ")));
-  box.append(table(["Page", "Change", "Characters"], plan.pages,
-    (row) => [row.path, row.change, String(row.chars)]));
+  box.append(table(["Page", "Change", "Characters", ""], plan.pages,
+    (row) => [row.path, row.change, String(row.chars), plan.plan_id
+      ? kpButton("Compare", () => kpRun("Reading",
+          () => kpShowPlanPage(plan.plan_id, row.path))) : ""]));
   if (plan.contradictions.length) {
     const list = document.createElement("ul");
     for (const line of plan.contradictions) {
@@ -3620,6 +3705,20 @@ el("kp-upload").addEventListener("click", () => kpRun("Adding to drop", async ()
 el("kp-preview").addEventListener("click", () => kpRun("Previewing", () => kpConvert("dry_run")));
 el("kp-convert").addEventListener("click", () => kpRun("Converting", () => kpConvert("apply")));
 el("kp-lint").addEventListener("click", () => kpRun("Linting", kpLint));
+el("kp-viewer-close").addEventListener("click", () => { el("kp-viewer").hidden = true; });
+el("kp-rule-close").addEventListener("click", () => {
+  el("kp-rule-editor").hidden = true; kpRulePath = null;
+});
+el("kp-rule-preview").addEventListener("click", () => {
+  kpViewer((kpRulePath || "") + " (unsaved preview)", renderMarkdown(el("kp-rule-text").value));
+});
+el("kp-rule-save").addEventListener("click", () => kpRun("Saving the rule", async () => {
+  if (!kpRulePath) return;
+  await pipeline("rule-write", {sandbox_id: kpSandbox.sandbox_id, path: kpRulePath,
+                                text: el("kp-rule-text").value});
+  kpStatus("Saved " + kpRulePath + "; the next ingest uses it.");
+  await kpLoadRules();
+}));
 let kpCandidate = null;
 function kpMergeShow(report) {
   const box = el("kp-merge-result"); box.replaceChildren();
