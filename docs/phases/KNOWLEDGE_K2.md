@@ -86,3 +86,16 @@ query follow the index → K2.5 candidate registration and benchmark core-007.
    acceptable?
 3. The sub-index lines and the new frontmatter fields are written in the sandbox only;
    promotion to the published vault waits for the K3 merge. Agreed?
+
+## Outcome of K2.4-K2.5 (2026-10-11)
+
+- Index-led query (e097aa0) measured worse (core-007) and was reverted; candidate data on
+  the old code was also worse (core-008), because the layered `index.md` removed the
+  flat list query navigation ranks and sub-index pages became citable.
+- As adopted (owner, option C): query keeps ranking the previous flat list, read from
+  `wiki/index/all.md` when `index.md` is layered; `wiki/index/` pages are never evidence.
+  Offline on the 36 core questions, the live vault and the K2 sandbox return identical
+  passages for all five retrieval paths (180 of 180), so no benchmark rerun was needed.
+- The layered index serves ingest: one category call (at most 3), then the relevance call
+  over those categories' pages with their bilingual lines; a flat index keeps the single
+  relevance call. Whether the bilingual lines help query is still unmeasured.

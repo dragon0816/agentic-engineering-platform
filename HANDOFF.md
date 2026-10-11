@@ -56,7 +56,12 @@ K2 (`docs/phases/KNOWLEDGE_K2.md`) built but its query change was not accepted.
   from the workspace (copy in `.scratch/`); `.scratch/k25_bind.py candidate|restore`
   re-binds the sandbox for another run (it backs up host.json first).
 - Option A was run (`runs/core-008`): also worse; see the addendum in the
-  core-007 review. Live binding restored. Next: owner decision, then K3.
+  core-007 review. Live binding restored.
+- Option C adopted: layered index for ingest; query reads the flat list from
+  `wiki/index/all.md`, so merging the layered index leaves query unchanged
+  (offline check 180/180 identical). Next: K3 (Karpathy schema Skill from the
+  owner's RS_Knowledge CLAUDE.md and domain skills; section-level writes;
+  sandbox merge).
 
 Knowledge state (2026-10-10, latest): Skill 1.10.0 is live. A no-support retry check
 plus Skill 1.11.0 was tried in `runs/core-006`, came out worse and was rolled back

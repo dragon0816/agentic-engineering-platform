@@ -1642,5 +1642,9 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   0.386, PASS 13 of 22, median 199 s; also worse than core-005. The layered
   index.md removed the flat 2,910-line index that query navigation used, and 7
   answers cited `wiki/index/` pages. Review addendum in the core-007 review.
-- [ ] K2 next step: owner decision after option A.
+- [x] K2 option C (owner): the layered index serves ingest (category call before
+  relevance); query keeps the flat list from `wiki/index/all.md` and never cites
+  `wiki/index/`. Offline: live and sandbox retrieval identical, 180 of 180.
+- [ ] Optional: measure bilingual index lines for query as an addition to the
+  flat list (not a replacement).
 - [ ] K3-K6 per the plan.

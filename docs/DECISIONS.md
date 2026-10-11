@@ -2113,3 +2113,19 @@ rolled back. On the 36 core questions against candidate `rs-knowledge@1.1.0-k2.1
 Kept: K2.2-K2.3 (enrichment and index build act on sandboxes only) and the enriched
 sandbox. Not chosen yet: re-measuring data and code separately, or limiting the
 index to ingest planning; the owner decides (see the core-007 review).
+
+## 2026-10-11: The layered index serves ingest; query keeps the flat list
+
+Decision (owner, after core-008): the layered bilingual index is used for ingest
+planning (pick at most 3 categories, then choose pages among them), while query keeps
+ranking the previous flat index list, read from `wiki/index/all.md` once `index.md` is
+layered. Pages under `wiki/index/` are never evidence.
+
+Why: both measured ways of letting the layered index drive query were worse
+(core-007 0.349, core-008 0.386 vs core-005 0.395 answerable coverage). Keeping the
+flat list makes the K3 merge of the layered index neutral for query: offline, the live
+vault and the K2 sandbox return identical passages on the 36 core questions (180/180).
+
+Rejected for now: index lines taking search slots (core-007); a category-only
+`index.md` as query navigation (core-008). Still open: bilingual lines as an addition
+to the flat list.

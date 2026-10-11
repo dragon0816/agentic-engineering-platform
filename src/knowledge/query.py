@@ -25,6 +25,7 @@ from pydantic import Field, ValidationError
 from common.base import Contract, Symbol, Text
 from common.execution import Failure, TraceIdentifiers
 from knowledge.contracts import KnowledgeSource
+from knowledge.layered_index import ALL_PAGE, ENTRY_LINE, is_navigation
 from knowledge.lint import WIKILINK, body_of, head_fields, read_pages
 from knowledge.modelcalls import failure_from_exception
 from knowledge.query_rewrite import content_words
@@ -300,11 +301,13 @@ STATED_NUMBER = re.compile(r"(?<![0-9A-Za-z_])\d+(?:\.\d+)?(?![0-9A-Za-z_])")
 def citable(passage: "Passage", allow_wiki: bool = False) -> bool:
     """Raw is always citable; a curated Wiki page only under Wiki-primary.
 
-    `index.md` is navigation and never citable evidence.
+    `index.md` and the sub-indexes under `wiki/index/` are navigation and
+    never citable evidence.
     """
     if passage.citation.kind == "raw":
         return True
-    return allow_wiki and passage.citation.wiki_page not in (None, "index.md")
+    page = passage.citation.wiki_page
+    return allow_wiki and page is not None and not is_navigation(page)
 
 
 def split_labeled_inferences(text: str, label: str | None) -> tuple[str, tuple[str, ...]]:
@@ -623,7 +626,8 @@ def _corpus(vault: Vault) -> list[_Doc]:
                     ),
                 )
             )
-    texts, _ = read_pages(vault, vault.wiki_files())
+    texts, _ = read_pages(
+        vault, tuple(rel for rel in vault.wiki_files() if not is_navigation(rel)))
     for rel, text in texts.items():
         head = head_fields(text)
         source = by_id.get((head or {}).get("source_id", ""))
@@ -686,13 +690,30 @@ class RetrievalSnapshot:
                     self._raw_by_id[doc.citation.source.source_id] = ref
         self._wiki_by_title = {
             title.casefold(): rel for rel, title in self._vault.wiki_pages()
+            if not is_navigation(rel)
         }
-        for line in self._vault.read("index.md").splitlines():
+        for line in self._index_lines():
             match = re.match(r"^\s*[-*]\s+\[\[([^\]]+)\]\]\s*[—–-]\s*(.+)$", line)
             if match is not None:
                 self._index_docs.append(
                     _Doc(line, Citation(kind="wiki", wiki_page="index.md"))
                 )
+
+    def _index_lines(self) -> list[str]:
+        """The flat page list that navigation ranks. A layered index (K2) keeps
+        the previous flat list in `wiki/index/all.md`; its top level lists only
+        categories, which measured worse as query navigation (core-007/008)."""
+        lines = self._vault.read("index.md").splitlines()
+        sub_indexes = {
+            title.casefold() for rel, title in self._vault.wiki_pages() if is_navigation(rel)
+        }
+        layered = any(
+            match.group(1).strip().casefold() in sub_indexes
+            for match in map(ENTRY_LINE.match, lines) if match is not None
+        )
+        if layered and self._vault.exists(ALL_PAGE):
+            return self._vault.read(ALL_PAGE).splitlines()
+        return lines
 
     def batch(
         self, queries: tuple[str, ...], *, k: int, min_raw: int = 0
@@ -907,6 +928,7 @@ class RetrievalSnapshot:
             self._wiki_sections = [
                 _Doc(text, Citation(kind="wiki", wiki_page=rel, section=number))
                 for rel, title in self._vault.wiki_pages()
+                if not is_navigation(rel)
                 for number, text in enumerate(
                     wiki_sections(title, self._vault.read(rel)), 1
                 )
@@ -915,7 +937,7 @@ class RetrievalSnapshot:
 
     def wiki_titles(self) -> dict[str, str]:
         """Wiki page path -> title."""
-        return {rel: title for rel, title in self._vault.wiki_pages()}
+        return {rel: title for rel, title in self._vault.wiki_pages() if not is_navigation(rel)}
 
     def search_wiki_pages(
         self, query: str, *, exclude: set[str], limit: int = 8,

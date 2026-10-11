@@ -374,3 +374,45 @@ class LayeredIndex:
             self.vault.write(rel, content, stamp=label)
         self.vault.write("index.md", "\n".join(top) + "\n", stamp=label)
         return report
+
+
+# -- reading the index (K2.4) -------------------------------------------------
+
+ENTRY_LINE = re.compile(r"^\s*[-*]\s+\[\[([^\]|#]+)(?:[|#][^\]]*)?\]\]\s*[—–-]\s*(.+)$")
+ALL_PAGE = f"{INDEX_DIR}/all.md"
+
+
+def is_navigation(rel: str | None) -> bool:
+    """`index.md` and the sub-index pages are navigation, never evidence."""
+    return rel is not None and (rel == "index.md" or rel.startswith(INDEX_DIR + "/"))
+
+
+@dataclass(frozen=True)
+class IndexEntry:
+    category: str  # the top index line it was reached from; "" in a flat index
+    page: str
+    line: str
+
+
+def index_entries(vault: Vault, by_title: dict[str, str]) -> list[IndexEntry]:
+    """The page lines of `index.md`: a flat index's own lines, or, for a layered
+    index, the lines of every sub-index reached from it. The old flat list kept
+    in `wiki/index/all.md` is not walked; the sub-indexes cover every page.
+    `by_title` maps a casefolded title to its path and must include the
+    sub-index pages."""
+    entries: list[IndexEntry] = []
+
+    def walk(rel: str, category: str, seen: set[str]) -> None:
+        for line in vault.read(rel).splitlines():
+            match = ENTRY_LINE.match(line)
+            target = by_title.get(match.group(1).strip().casefold()) if match else None
+            if match is None or target is None:
+                continue
+            if not is_navigation(target):
+                entries.append(IndexEntry(category, target, line.strip()))
+            elif target != ALL_PAGE and target not in seen:
+                seen.add(target)
+                walk(target, category or match.group(1).strip(), seen)
+
+    walk("index.md", "", {"index.md"})
+    return entries
