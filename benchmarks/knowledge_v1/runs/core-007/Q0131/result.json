@@ -1,0 +1,192 @@
+{
+ "id": "Q0131",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 124.844,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 8.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 8.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 15,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 8 RF signaling tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 24,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 25,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 40,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 45,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP180.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 8.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 8.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 8,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 8.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 47,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP180.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 68,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 38,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 39,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 18,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 8 RF signaling tests.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 23,
+   "kind": "wiki",
+   "ref": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 27,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 28,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 48,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP180.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 52,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP180.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "deeper spectrum/emissions",
+   "Spectrum measurement remains necessary because unwanted-emissions items include occupied bandwidth, ACLR, operating-band unwanted emissions / SEM, transmitter spurious emissions, and transmitter intermodulation",
+   "transmitter intermodulation noting that an additional signal generator is required",
+   "realistic multipath testing"
+  ],
+  "reason": "Most Wi‑Fi 7/8 capability points are backed by the passages: 320 MHz bandwidth, 4096QAM with cited EVM examples, MLO/multiple RF chains, Wi‑Fi 8 dRU/UEQM signaling analysis, and 480 MHz only as a candidate. However, the spectrum/emissions row relies on a 5G NR base-station conformance passage rather than Wi‑Fi 7/8 evidence, and the answer presents it as a Wi‑Fi-driven requirement without caveat; 'realistic multipath' also is not in the provided passages.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: Most Wi‑Fi 7/8 capability points are backed by the passages: 320 MHz bandwidth, 4096QAM with cited EVM examples, MLO/multiple RF chains, Wi‑Fi 8 dRU/UEQM signaling analysis, and 480 MHz only as a candidate. However, the spectrum/emissions row relies on a 5G NR base-station conformance passage rather"
+}

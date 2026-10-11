@@ -1,0 +1,1131 @@
+{
+ "question": {
+  "id": "Q0911",
+  "text": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+  "market": "Semiconductor",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-8baa85f2f2eb4c6eaee112cf3b593c07",
+ "exchange": {
+  "sent": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 122.563,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-8baa85f2f2eb4c6eaee112cf3b593c07",
+    "actor": "leo.chi",
+    "title": "For a Semiconductor use case involving RFIC validation, where would Sign…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T06:55:31.382899Z",
+    "updated_at": "2026-10-11T06:57:33.777798Z",
+    "messages": [
+     {
+      "message_id": "message-8e5bb7a2ca094395869b7a8f5d93f691",
+      "role": "user",
+      "text": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+      "created_at": "2026-10-11T06:55:31.390424Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-824db9350107453fa05512a76b403778",
+      "role": "assistant",
+      "text": "The passages do not explicitly name “RFIC validation,” but they do support placing Signal Generator / Signal Analyzer in the **component testing / DUT validation bench**: component testing uses a **DUT + R&S SMW200A signal generator + R&S FSW signal analyzer** setup [4].\n| Workflow point | Where it fits | Supported use |\n|---|---|---|\n| Stimulus into RFIC / DUT | **Before or at DUT input** | The signal generator role is represented by **R&S SMW200A** in component testing, with LTE, Cellular IoT, 5G NR R17/18, OFDM signal generation, and custom digital modulation capabilities [4]. |\n| RF / modulated signal validation from RFIC / DUT | **At DUT output / measurement side** | The signal analyzer role is represented by **R&S FSW** in component testing, with LTE, Cellular IoT, 5G NR R17/18, OFDM signal analysis, and vector signal analysis capabilities [4]. |\n| Receiver-side validation | **Generator drives the DUT receiver path** | In receiver-test context, vector signal generators such as **R&S SMW200A** and **R&S SMBV100B** are used for 5G NR receiver tests, requiring the 5G NR software option `R&S®SMW200A-/SMBV100B-K144` [64]. |\n| Transmitter / emissions validation | **Analyzer measures DUT transmit output or emissions** | Receiver spurious emissions test case 7.6 does not need a signal generator but does need a signal and spectrum analyzer such as **R&S FSW**, **FSVA3000**, or related analyzers [64]. |\n| Generic RF test routing model | **Generator output to DUT for receiver tests; DUT output to analyzer for transmitter tests** | For CMX500 RF routing, receiver test functions route RF generators to RF ports/output-to-DUT, while transmitter test functions route RF input signals from DUT ports to RF analyzers [36]. |\n【推論】For an RFIC validation workflow, Signal Generator / Signal Analyzer would therefore sit in the **bench-level component validation stage around the RFIC DUT**: the signal generator provides known RF/modulated stimulus into the RFIC, and the signal analyzer measures the RFIC output for modulation, spectrum, and transmitter-related performance, consistent with the DUT + SMW200A + FSW component-testing setup [4] and the generator-to-DUT / DUT-to-analyzer routing model [36].\n\n來源：\n[4] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[36] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[64] Wiki：GFM314_3e_5G_NR_BaseStation_Rx_Tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）",
+      "created_at": "2026-10-11T06:57:33.777798Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-dc2ff5206d574b08baeb8a2e43e7f58c",
+       "request_id": "request-dc2ff5206d574b08baeb8a2e43e7f58c",
+       "span_id": "span-dc2ff5206d574b08baeb8a2e43e7f58c",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "The passages do not explicitly name “RFIC validation,” but they do support placing Signal Generator / Signal Analyzer in the **component testing / DUT validation bench**: component testing uses a **DUT + R&S SMW200A signal generator + R&S FSW signal analyzer** setup [4].\n| Workflow point | Where it fits | Supported use |\n|---|---|---|\n| Stimulus into RFIC / DUT | **Before or at DUT input** | The signal generator role is represented by **R&S SMW200A** in component testing, with LTE, Cellular IoT, 5G NR R17/18, OFDM signal generation, and custom digital modulation capabilities [4]. |\n| RF / modulated signal validation from RFIC / DUT | **At DUT output / measurement side** | The signal analyzer role is represented by **R&S FSW** in component testing, with LTE, Cellular IoT, 5G NR R17/18, OFDM signal analysis, and vector signal analysis capabilities [4]. |\n| Receiver-side validation | **Generator drives the DUT receiver path** | In receiver-test context, vector signal generators such as **R&S SMW200A** and **R&S SMBV100B** are used for 5G NR receiver tests, requiring the 5G NR software option `R&S®SMW200A-/SMBV100B-K144` [64]. |\n| Transmitter / emissions validation | **Analyzer measures DUT transmit output or emissions** | Receiver spurious emissions test case 7.6 does not need a signal generator but does need a signal and spectrum analyzer such as **R&S FSW**, **FSVA3000**, or related analyzers [64]. |\n| Generic RF test routing model | **Generator output to DUT for receiver tests; DUT output to analyzer for transmitter tests** | For CMX500 RF routing, receiver test functions route RF generators to RF ports/output-to-DUT, while transmitter test functions route RF input signals from DUT ports to RF analyzers [36]. |\n【推論】For an RFIC validation workflow, Signal Generator / Signal Analyzer would therefore sit in the **bench-level component validation stage around the RFIC DUT**: the signal generator provides known RF/modulated stimulus into the RFIC, and the signal analyzer measures the RFIC output for modulation, spectrum, and transmitter-related performance, consistent with the DUT + SMW200A + FSW component-testing setup [4] and the generator-to-DUT / DUT-to-analyzer routing model [36].\n\n來源：\n[4] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[36] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[64] Wiki：GFM314_3e_5G_NR_BaseStation_Rx_Tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-dc2ff5206d574b08baeb8a2e43e7f58c",
+      "request_id": "request-dc2ff5206d574b08baeb8a2e43e7f58c",
+      "span_id": "span-dc2ff5206d574b08baeb8a2e43e7f58c",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-dc2ff5206d574b08baeb8a2e43e7f58c",
+       "request_id": "request-dc2ff5206d574b08baeb8a2e43e7f58c",
+       "span_id": "span-dc2ff5206d574b08baeb8a2e43e7f58c",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The passages do not explicitly name “RFIC validation,” but they do support placing Signal Generator / Signal Analyzer in the **component testing / DUT validation bench**: component testing uses a **DUT + R&S SMW200A signal generator + R&S FSW signal analyzer** setup [4].\n| Workflow point | Where it fits | Supported use |\n|---|---|---|\n| Stimulus into RFIC / DUT | **Before or at DUT input** | The signal generator role is represented by **R&S SMW200A** in component testing, with LTE, Cellular IoT, 5G NR R17/18, OFDM signal generation, and custom digital modulation capabilities [4]. |\n| RF / modulated signal validation from RFIC / DUT | **At DUT output / measurement side** | The signal analyzer role is represented by **R&S FSW** in component testing, with LTE, Cellular IoT, 5G NR R17/18, OFDM signal analysis, and vector signal analysis capabilities [4]. |\n| Receiver-side validation | **Generator drives the DUT receiver path** | In receiver-test context, vector signal generators such as **R&S SMW200A** and **R&S SMBV100B** are used for 5G NR receiver tests, requiring the 5G NR software option `R&S®SMW200A-/SMBV100B-K144` [64]. |\n| Transmitter / emissions validation | **Analyzer measures DUT transmit output or emissions** | Receiver spurious emissions test case 7.6 does not need a signal generator but does need a signal and spectrum analyzer such as **R&S FSW**, **FSVA3000**, or related analyzers [64]. |\n| Generic RF test routing model | **Generator output to DUT for receiver tests; DUT output to analyzer for transmitter tests** | For CMX500 RF routing, receiver test functions route RF generators to RF ports/output-to-DUT, while transmitter test functions route RF input signals from DUT ports to RF analyzers [36]. |\n【推論】For an RFIC validation workflow, Signal Generator / Signal Analyzer would therefore sit in the **bench-level component validation stage around the RFIC DUT**: the signal generator provides known RF/modulated stimulus into the RFIC, and the signal analyzer measures the RFIC output for modulation, spectrum, and transmitter-related performance, consistent with the DUT + SMW200A + FSW component-testing setup [4] and the generator-to-DUT / DUT-to-analyzer routing model [36].\n\n來源：\n[4] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[36] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[64] Wiki：GFM314_3e_5G_NR_BaseStation_Rx_Tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_ivVKzSs7C7Ttqy68CnJcan7I",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "The passages do not explicitly name “RFIC validation,” but they do support placing Signal Generator / Signal Analyzer in the **component testing / DUT validation bench**: component testing uses a **DUT + R&S SMW200A signal generator + R&S FSW signal analyzer** setup [4].\n| Workflow point | Where it fits | Supported use |\n|---|---|---|\n| Stimulus into RFIC / DUT | **Before or at DUT input** | The signal generator role is represented by **R&S SMW200A** in component testing, with LTE, Cellular IoT, 5G NR R17/18, OFDM signal generation, and custom digital modulation capabilities [4]. |\n| RF / modulated signal validation from RFIC / DUT | **At DUT output / measurement side** | The signal analyzer role is represented by **R&S FSW** in component testing, with LTE, Cellular IoT, 5G NR R17/18, OFDM signal analysis, and vector signal analysis capabilities [4]. |\n| Receiver-side validation | **Generator drives the DUT receiver path** | In receiver-test context, vector signal generators such as **R&S SMW200A** and **R&S SMBV100B** are used for 5G NR receiver tests, requiring the 5G NR software option `R&S®SMW200A-/SMBV100B-K144` [64]. |\n| Transmitter / emissions validation | **Analyzer measures DUT transmit output or emissions** | Receiver spurious emissions test case 7.6 does not need a signal generator but does need a signal and spectrum analyzer such as **R&S FSW**, **FSVA3000**, or related analyzers [64]. |\n| Generic RF test routing model | **Generator output to DUT for receiver tests; DUT output to analyzer for transmitter tests** | For CMX500 RF routing, receiver test functions route RF generators to RF ports/output-to-DUT, while transmitter test functions route RF input signals from DUT ports to RF analyzers [36]. |\n【推論】For an RFIC validation workflow, Signal Generator / Signal Analyzer would therefore sit in the **bench-level component validation stage around the RFIC DUT**: the signal generator provides known RF/modulated stimulus into the RFIC, and the signal analyzer measures the RFIC output for modulation, spectrum, and transmitter-related performance, consistent with the DUT + SMW200A + FSW component-testing setup [4] and the generator-to-DUT / DUT-to-analyzer routing model [36].\n\n來源：\n[4] Wiki：NTN signal generator solutions（來源：`3GPP NTN Signal Generator Solutions Overview-EN-UR.md`）\n[36] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[64] Wiki：GFM314_3e_5G_NR_BaseStation_Rx_Tests（來源：`5G NR Base station conformance testing - EN - UR_Public.md`、`GFM313_3e_5G_NR_BaseStation_Tx_Tests.md`、`GFM314_3e_5G_NR_BaseStation_Rx_Tests.md`）",
+          "evidence": {
+           "raw_citations": 3,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.1.0-k2.1"
+           },
+           "trace": {
+            "trace_id": "trace-4338e13c32d9470ebdc2e62b047f99f7",
+            "request_id": "request-4338e13c32d9470ebdc2e62b047f99f7",
+            "span_id": "span-4338e13c32d9470ebdc2e62b047f99f7",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow? Include where signal generators and signal analyzers are used in the RFIC validation workflow.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "NTN signal generator solutions › 與 NTN validation / conformance 的關係\n- [[5G NTN validation and testing]]：較寬的 NTN validation、partner collaboration、CMX500 / SMBV100B / Viasat / Gatehouse / MediaTek PR 語境。\n- [[NR-NTN conformance testing]]：偏 UE / GCF / PTCRB / TS8980 / CMX500 conformance validation。\n- [[5G NR SAN conformance testing]]：本來源新增的 Satellite Access Node 測試概念，聚焦 SAN transmitter、receiver、performance 與 OTA chapters。\n- [[NTN propagation emulation and fading]]：既有 CMX500 PR 中 propagation emulation 與 fading 的概念；本來源補充 SMW200A dynamic fading / Doppler / path delay 實作線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+              },
+              "score": 3.161566
+             },
+             {
+              "text": "NTN signal generator solutions › SAN testing\n來源將 SAN testing 連到 [[3GPP TS 38.108]]、[[3GPP TS 38.181]]、[[3GPP TS 36.108]] 與 [[3GPP TS 36.181]]。在 signal generator 角度，[[R&S SMW200A]] 提供：\n\n- Fixed Reference Channels（FRCs）。\n- Test Models（TMs）。\n- Fading Module。\n- AWGN Module。\n- static UE propagation models。\n- TDL and moving propagation。\n- SISO / MIMO。\n- NB-IoT options：K119 / K115 / K143 / K146。\n- NR options：K144 / K148 / K171。\n- B14 / B15 + K71 moving propagation。\n\n詳見 [[5G NR SAN conformance testing]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+              },
+              "score": 2.136013
+             },
+             {
+              "text": "NTN signal generator solutions\n[[NTN signal generator solutions]] 是 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]]（封面標示 12-2025；末頁標示 Last updated: 08/25）中用來整理 [[R&S SMW200A]]、[[R&S FSW]] 與相關 software options 在 [[3GPP]] [[NTN]] 測試中的 solution-level 應用框架。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+              },
+              "score": 0.23628
+             },
+             {
+              "text": "NTN signal generator solutions › Component testing\n依 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]] slide 16，component testing 使用 DUT、[[R&S SMW200A]] 與 [[R&S FSW]]：\n\n- [[R&S SMW200A]]：frequency up to 67 GHz，overrange 72 GHz；RF modulation bandwidth up to 2 GHz，up to 4 GHz with [[R&S SMW-K555]]。\n- [[R&S SMW200A]] signal generation SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal generation（K114）、custom digital modulation。\n- [[R&S FSW]]：frequency up to 85 GHz，overrange 90 GHz；analysis bandwidth up to 8 GHz。\n- [[R&S FSW]] signal analysis SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal analysis（K96）、Vector signal analysis（K70）。\n\n以上是 2025 簡報摘要值；正式產品規格仍需回查 [[R&S SMW200A]]、[[R&S FSW]] 與其對應 specifications。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+              },
+              "score": 0.212237
+             },
+             {
+              "text": "NTN signal generator solutions › 來源中的 solution 分層\n[[3GPP NTN Signal Generator Solutions Overview-EN-UR]] 將 NTN testing 分為四類：\n\n- Component Testing。\n- [[Satellite Access Node]]（[[SAN]]）Testing。\n- End-to-end System Testing。\n- User Equipment（UE）Testing。\n\n來源可讀內容主要展開前三者，尤其是 [[R&S SMW200A]] 的 channel emulation、[[5G NR SAN conformance testing]] 與 [[SMW200A NTN end-to-end channel emulation]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+              },
+              "score": 0.198463
+             },
+             {
+              "text": "NTN signal generator solutions › End-to-end system testing\n來源將 E2E system testing 描述為對 UE、NTN payload、service link channel emulator 與 feeder link channel emulator 的 RF satellite link emulation。[[R&S SMW200A]] 需要 firmware version ≥ 5.30，並透過 B14 或 B15 搭配 [[R&S SMW-K820]] customized dynamic fading 支援：\n\n- satellite trajectory modelling。\n- frequency-dependent atmospheric effects。\n- longer path delays。\n- enhanced Doppler capabilities。\n- up to 1073 ms delay。\n- up to ±1 MHz Doppler（pure Doppler）。\n\n[[R&S Space Nexus]] 在來源中被描述為 PC Software，available on request，可依 satellite trajectory 產生 [[R&S SMW200A]] fading files。\n\n詳見 [[SMW200A NTN end-to-end channel emulation]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+              },
+              "score": 0.121891
+             },
+             {
+              "text": "NTN signal generator solutions › 使用限制\n- 來源是 2025 簡報與 OneNote 轉檔，不是正式 datasheet、configuration guide、price book 或 3GPP specification。\n- 來源標示 12-2025、Last updated 08/25 與 2025-09-29 workshop date；正式發布日期未標示。\n- 來源中的 recommended configurations 不能直接視為可報價 BOM；需回查正式 configuration guide、option availability、export control 與 service plan。\n- 來源中的 R17/18 option wording 不可直接覆寫正式 product option name；正式命名仍以產品規格書為準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+              },
+              "score": 0.107878
+             },
+             {
+              "text": "R&S SMBV100B › GNSS and avionics options\n詳細規格參照 GNSS and Avionics Simulation for Rohde & Schwarz Signal Generators specifications（PD 3607.6896.22）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 5.901484
+             },
+             {
+              "text": "R&S SMBV100B › Digital standards、GNSS 與 external software\n- Digital modulation systems 的指定資料需與各 standard 參數一起適用。\n- Internal digital standards 需安裝 R&S®SMBVB-K520 option。\n- Digital standards 詳細 options 描述於 Digital Standards for Signal Generators specifications（PD 5213.9434.22）。\n- R&S®WinIQSIM2 需要 external PC；options 描述於 R&S®WinIQSIM2 specifications（PD 5213.7460.22）。\n- Options with external R&S®Pulse Sequencer Software 或 R&S®Pulse Sequencer DFS software 描述於 R&S®Pulse Sequencer Software specifications（PD 3607.1388.22）。\n- GNSS and avionics options 描述於 GNSS and Avionics Simulation for Rohde & Schwarz Signal Generators specifications（PD 3607.6896.22）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 19,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 5.700515
+             },
+             {
+              "text": "R&S SMBV100B › Analog modulation、sources 與 pulse\n- Pulse train：R&S®SMBVB-K27 option 擴充 R&S®SMBVB-K23，用於 radar applications；prerequisite 必須安裝 R&S®SMBVB-K23 option。\n- Multifunction generator：R&S®SMBVB-K24 option；LF generator 1/2 signal types sine、pulse、triangle、trapezoid；noise generator Gaussian、equal noise amplitude distribution。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 4.937995
+             },
+             {
+              "text": "R&S SMBV100B › GNSS and avionics options\n| Code | Name | Order No. | 原文說明 / 關係 |\n|---|---|---:|---|\n| R&S®SMBVB-K362 | GNSS test suite | 來源未標示 | Test suite。 |\n| R&S®SMBVB-K363 | Car navigation test suite | 來源未標示 | Test suite。 |\n| R&S®SMBVB-K364 | China national GNSS test standard | 來源未標示 | Test suite。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 24,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 4.748552
+             },
+             {
+              "text": "R&S SMBV100B › Base unit\n| 項目 | 內容 |\n|---|---|\n| 型號 | R&S®SMBV100B |\n| Order No. | 1423.1003.02 |\n| 原文說明 | Vector signal generator；內含 baseband generator with ARB（64 Msamples、120 MHz RF bandwidth）、power cable、quick start guide。 |\n| 訂購限制 | Base unit 只能搭配 R&S®SMBVB-B103 frequency option 訂購。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 4.481642
+             },
+             {
+              "text": "R&S SMBV100B › Signal performance for selected standards\n- 3GPP FDD with R&S®SMBVB-K42：Error vector magnitude，1 DPCH，RMS，< 0.8 %，0.3 % measured；test frequency 1800 MHz to 2200 MHz。\n- 3GPP FDD ACLR 條件：test model 1、64 DPCH、1800 MHz to 2200 MHz、average channel power ≤ 0 dBm、I/Q input gain +4 dB、optimization mode high quality、temperature range +18 °C to +33 °C；5 MHz offset > 69 dB，typ. 72 dB；10 MHz offset > 71 dB，typ. 74 dB。\n- Custom digital modulation with R&S®SMBVB-K520 real-time mode：2FSK / 4FSK deviation error at symbol rate up to 2 MHz 為 0.4 % measured，up to 10 MHz 為 1.2 % measured；QPSK/OQPSK/π/4-DQPSK/8PSK/16QAM/32QAM/64QAM EVM at symbol rate up to 5 MHz 為 0.5 % RMS measured，up to 20 MHz 為 0.7 % RMS measured。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 26,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 4.418665
+             },
+             {
+              "text": "R&S SMBV100B › 文件與適用範圍\n- 主要來源：[[SMBV100B_specs_en_3607-8201-22_v1301]]。\n- 文件：R&S®SMBV100B Vector Signal Generator Specifications。\n- 文件編號：PD 3607.8201.22。\n- 文件版次：Specifications Version 13.01。\n- 文件日期：August 2025（footer：August 2025 (la)）。\n- 產品：R&S®SMBV100B vector signal generator。\n- 規格適用條件：ambient temperature 下 storage 3 hours、warm-up operation 30 minutes、specified environmental conditions met、recommended calibration interval adhered to、all applicable internal automatic adjustments performed。\n- Rohde & Schwarz 不 warranted：Non-traceable specifications with limits、typical data、nominal values、measured values。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 4.341179
+             },
+             {
+              "text": "R&S SMBV100B › Frequency / RF / modulation\n| Code | Name | Order No. | 原文說明 / 關係 |\n|---|---|---:|---|\n| R&S®SMBVBKB106 | Frequency extension to 6 GHz | 1423.6370.02 | 搭配 R&S®SMBVB-B103 將 CW mode 擴至 8 kHz to 6 GHz，I/Q mode 擴至 1 MHz to 6 GHz。 |\n| R&S®SMBVB-K704 | Flexible reference input from 1 MHz to 100 MHz | 1423.7618.02 | Variable reference input frequency 1.0 MHz to 100 MHz，step 0.1 Hz；internal 10 MHz reference oscillator lock 到 input frequency；source note 限 5 MHz to 13 MHz 與 95 MHz to 100 MHz input ranges。 |\n| R&S®SMBVB-K31 | High output power | 1423.6670.02 | RF output power option；level setting range at 1 MHz ≤ f ≤ 6 GHz 可至 +30 dBm。 |\n| R&S®SMBVB-K90 | Phase coherence | 1423.7601.02 | Enables phase-coherent RF outputs of two or more instruments in I/Q mode。 |\n| R&S®SMBVB-K22 | Pulse modulator | 1423.7560.02 | Pulse modulation；modulation source external。 |\n| R&S®SMBVB-K23 | Pulse generator | 1423.7576.02 | Pulse generator；搭配 K22 時 pulse modulation source 可 external、internal。 |\n| R&S®SMBVB-K27 | Pulse train | 1423.9279.02 | 擴充 R&S®SMBVB-K23 pulse generator；prerequisite：必須安裝 R&S®SMBVB-K23 option。 |\n| R&S®SMBVB-K24 | Multifunction generator | 1423.7582.02 | LF generator 1/2 signal types sine、pulse、triangle、trapezoid；noise generator Gaussian、equal noise amplitude distribution。 |\n| R&S®SMBVB-K720 | AM/FM/M | 1423.7599.02 | Analog modulation option；來源規格段落描述 AM、FM、φM。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 33,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 4.1486
+             },
+             {
+              "text": "R&S FSW\nR&S FSW 是 Rohde & Schwarz 的 high-end Signal and Spectrum Analyzer 系列，依 Version 17.01（September 2025）涵蓋 8 GHz 至 85 GHz 型號，[[R&S FSW85]] 搭配 R&S FSW-B90G 可延伸至 90 GHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 4.139259
+             },
+             {
+              "text": "R&S FSW › 其他硬體 options（摘錄）\n| Option code | 名稱 | Order No. | 原文說明 / 限制 |\n|---|---|---|---|\n| R&S FSW-B4 | OCXO precision frequency reference | 1313.0703.02 | user-retrofittable |\n| R&S FSW-B8E | Resolution bandwidth up to 40 MHz | 1338.6911.02 | 適用 [[R&S FSW8]]/13/26/43/50/67/85；signal analysis bandwidth 不由 B8E 定義 |\n| R&S FSW-B8 | Resolution bandwidth up to 80 MHz | 1313.2464.26 或 1313.2464.02 | 1313.2464.26 適用 [[R&S FSW8]]/13/26；1313.2464.02 適用 [[R&S FSW43]]/50/67/85 且 export license required |\n| R&S FSW-B10 | External generator control | 1313.1622.02 | contact service center |\n| R&S FSW-B13 | Highpass filter for harmonic measurements | 1313.0761.02 | user-retrofittable |\n| R&S FSW-B17 | Digital baseband Interface | 1313.0784.02 | user-retrofittable |\n| R&S FSW-B18 | Spare solid state drive | 1313.0790.21 | user-retrofittable |\n| R&S FSW-B21 | LO/IF connections for external mixers | 1313.1100.28 / 1313.1100.86 | 不適用 [[R&S FSW8]]、[[R&S FSW13]]；.28 適用 [[R&S FSW26]]/43/50/67；.86 適用 [[R&S FSW85]] |\n| R&S FSW-B24 | RF preamplifier | 1313.0832.13/.26/.43/.49/.51/.66/.67 | 適用範圍依型號與 order no.；來源未列 [[R&S FSW85]] 適用 B24 |\n| R&S FSW-B25 | Electronic attenuator, 1 dB steps | 1313.0990.02 | 適用 [[R&S FSW8]]/13/26 |\n| R&S FSW-B33 | USB mass memory write protection | 1313.3602.02 | 不可 retrofittable；factory pre-installed |\n| R&S FSW-B71 | Analog baseband inputs | 1313.1651.13/.26/.67/.86 | order no. 依型號範圍不同 |\n| R&S FSW-B71E | 80 MHz analysis bandwidth for analog baseband inputs | 1313.6547.02 | 需 R&S FSW-B71；user-retrofittable |\n| R&S FSW-B2071 | Oscilloscope baseband inputs | 1331.8302.02 | 適用所有 FSW models；user-retrofittable |\n| R&S FSW-B90G | Frequency extension 90 GHz | 1331.7693.02 | 不可 retrofittable；僅適用 [[R&S FSW85]]；f > 85 GHz without preselection |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 2.23847
+             },
+             {
+              "text": "R&S FSW › Analysis bandwidth options（硬體 options）\n| Option code | 名稱 | Order No. | 適用與限制 |\n|---|---|---|---|\n| R&S FSW-B40 | 40 MHz analysis bandwidth | 1313.0861.02 | user-retrofittable |\n| R&S FSW-B80 | 80 MHz analysis bandwidth | 1313.0878.02 | user-retrofittable |\n| R&S FSW-B160 | 160 MHz analysis bandwidth | 1325.4850.14 | contact service center |\n| R&S FSW-B320 | 320 MHz analysis bandwidth | 1325.4867.14 | includes 200 MHz IF filter |\n| R&S FSW-B512 | 512 MHz analysis bandwidth | 1331.7106.14 | includes 200 MHz IF filter |\n| R&S FSW-B512R | Real-time spectrum analyzer 512 MHz, POI ≤ 15 µs | 1331.7106.16 | contact service center；includes 512 MHz analysis bandwidth and 200 MHz IF filter |\n| R&S FSW-B1200 | 1.2 GHz analysis bandwidth | 1331.6400.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory；不適用 [[R&S FSW8]]、[[R&S FSW13]] |\n| R&S FSW-B2001 | 2 GHz analysis bandwidth | 1331.6916.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory |\n| R&S FSW-B4001 | 4.4 GHz analysis bandwidth | 1338.5215.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；contact service center |\n| R&S FSW-B6001 | 6.4 GHz analysis bandwidth | 1338.5221.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B8001 | 8.312 GHz analysis bandwidth | 1338.5238.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B800R | Real-time spectrum analyzer 800 MHz, POI ≤ 15 µs | 1331.6400.16 | 適用 [[R&S FSW26]]/43/50/67/85；export license required |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 1.926583
+             },
+             {
+              "text": "R&S FSW › Firmware / licence options（摘錄）\n- R&S FSW-K6 Pulse measurements，Order No. 1313.1322.02。\n- R&S FSW-K7 AM/FM/PM modulation analysis，Order No. 1313.1339.02。\n- R&S FSW-K8 Bluetooth BR/EDR/LE measurements，Order No. 1313.1351.02；R&S FSW-K8E Bluetooth 6.0 channel sounding，Order No. 1353.3284.02，需 R&S FSW-K8。\n- R&S FSW-K40 Phase noise measurements，Order No. 1313.1397.02。\n- R&S FSW-K54 EMI measurements，Order No. 1313.1400.02。\n- R&S FSW-K70 Vector signal analysis，Order No. 1313.1416.02。\n- WLAN options：R&S FSW-K91、K91N、K91AC、K91AX、K91BE、K91P、K91BN、K95、K97；其中 K95/K97 需 R&S FSW-B2001/-B800R/-B4001/-B6001/-B8001 option。\n- 5G NR options：R&S FSW-K144、K145、K147、K147C、K148、K171、K175、K184；requires 依原文列示，報價前需回查 [[FSW_specs_en_5215-6749-22_v1701]]。\n- Real-time application firmware：R&S FSW-K161R、K512RE、K800RE，各自有 bandwidth option requires/excludes。\n- R&S FSW-K553 External frontend control，Order No. 1350.6118.02；支援 [[R&S FE44S]]、[[R&S FE50DTR]]、[[R&S FE110SR]]、[[R&S FE170SR]]。\n- R&S FSW-K575 I/Q noise cancellation，Order No. 1353.2894.02。\n- R&S FSW-K980 Health and utilization monitoring service（HUMS），Order No. 1350.6718.02。\n- 標註 59 的 firmware 也可作為 floating license；order number 由 `.02` 改為 `.51`，並需 R&S FSW-FL hardware option。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 1.04339
+             },
+             {
+              "text": "R&S FSWX\nR&S FSWX 是 Rohde & Schwarz 的 multiport Signal and Spectrum Analyzer 系列，依 Version 12.00（May 2026）提供 [[R&S FSWX3026]] 與 [[R&S FSWX3044]]，可配置 1 或 2 個 RF inputs，且每個 RF input 有完整 RF receive path。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWX.md"
+              },
+              "score": 4.289191
+             },
+             {
+              "text": "R&S FSWX › Firmware / licence options（摘錄）\n| Option code | 名稱 | Order No. | Requires / 原文說明 |\n|---|---|---|---|\n| R&S FSW3-KR110 | User defined frequency correction | 1347.8113.02 | 來源未標示 |\n| R&S FSW3-KR200 | External frontend control | 1347.8107.02 | 支援 [[R&S FE110SR]]、[[R&S FE170SR]] |\n| R&S FSW3-KM100 | I/Q spectrum analyzer | 1347.7600.02 | 來源未標示 |\n| R&S FSW3-KM101 | Vector signal analysis | 1347.7846.02 | 來源未標示 |\n| R&S FSW3-KM102 | Multi-modulation analysis | 1347.7852.02 | 需要 R&S FSW3-KM101 |\n| R&S FSW3-KM103 | BER PRBS Measurements | 1347.7869.02 | 需要 R&S FSW3-KM101 |\n| R&S FSW3-KM105 | Cross-correlation for I/Q spectrum analyzer | 1349.2170.02 | 需要 R&S FSW3-KM100 |\n| R&S FSW3-KM107 | Analog demodulation application | 1347.7646.02 | 來源未標示 |\n| R&S FSW3-KM112 | OFDM vector signal analysis | 1348.5930.02 | 來源未標示 |\n| R&S FSW3-KM113 | Cross-correlation for OFDM vector signal analysis | 3852.5400.02 | 需要 R&S FSW3-KM112 |\n| R&S FSW3-KM118 | Amplifier measurements | 1347.7675.02 | 來源未標示 |\n| R&S FSW3-KM119 | Frequency response measurements | 1347.7698.02 | 需要 R&S FSW3-KM118 |\n| R&S FSW3-KM120 | Direct DPD measurements | 1347.7681.02 | 需要 R&S FSW3-KM118 |\n| R&S FSW3-KM121 | Memory-polynomial DPD measurements | 1347.8388.02 | 需要 R&S FSW3-KM118 |\n| R&S FSW3-KM125 | Noise figure measurement application | 1347.7723.02 | 來源未標示 |\n| R&S FSW3-KM126 | Cross-correlation for noise figure measurement application | 1347.7730.02 | 需要 R&S FSW3-KM125 |\n| R&S FSW3-KM129 | Phase noise measurement application | 1347.7752.02 | 來源未標示 |\n| R&S FSW3-KM130 | Cross-correlation for phase noise | 1347.7769.02 | 需要 R&S FSW3-KM129 |\n| R&S FSW3-KM135 | Cross-application control and triggering | 1349.2129.02 | 來源未標示 |\n| R&S FSW3-KM310 | EUTRA/LTE FDD downlink | 1347.7969.02 | 來源未標示 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWX.md"
+              },
+              "score": 3.561958
+             },
+             {
+              "text": "R&S FSWX › 產品定位與架構\n- 產品定位：multiport signal and spectrum analyzer。\n- 內部 multipath architecture 支援 1-port 與 2-port instruments。\n- 可用於 spectrum、noise measurement、phase noise、modulation quality（EVM）的 [[Cross-correlation]]。\n- 提供 extended [[Spurious free dynamic range]]（SFDR）。\n- 改善 [[Displayed average noise level]]（DANL）以尋找 hidden spurs。\n- 可在 high-power carrier 存在時量測 distortion 與 noise。\n- 可針對 EVM 要求嚴苛的 components 做 characterization。\n- Multipath wideband phase coherent receivers 可使用 independent receivers 同時進行 signal analysis 與 spectrum analysis。\n- 可在 spectrum 任意位置、相同或不同頻率同時觀察 signals。\n- 可同時量測 antenna 的 H 或 V polarizations、device input 與 output，並直接比較 ports 之間的 amplitude、frequency、phase。\n- Image free I/Q and vector signal analysis 使用 preselected capture and analysis，避免 unwanted signals 干擾量測。\n- Operating system：Linux based operating system，目標為 high security 與 long-term support。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWX.md"
+              },
+              "score": 3.525412
+             },
+             {
+              "text": "R&S FSWX › Signal analysis bandwidth\n| 項目 | 規格 / 條件 |\n|---|---|\n| 每個 RF input | 最高 4 GHz bandwidth |\n| RF input A | 最高 8 GHz bandwidth |\n| Standard I/Q data maximum signal analysis bandwidth | 40 MHz（nom.） |\n| R&S FSW31/32-B100 | 100 MHz（nom.） |\n| R&S FSW31/32-B320 | 320 MHz（nom.） |\n| R&S FSW31/32-B600 | 600 MHz（nom.） |\n| R&S FSW31/32-B1G2 | 1.2 GHz（nom.） |\n| R&S FSW31/32-B2G | 2 GHz（nom.） |\n| R&S FSW31/32-B4G | f < 7.5 GHz：2 GHz（nom.）；f ≥ 7.5 GHz：4 GHz（nom.） |\n| R&S FSW31/32-B6G | f < 7.5 GHz：2 GHz（nom.）；f < 14 GHz：4 GHz（nom.）；f ≥ 14 GHz、RF input A only：6 GHz（nom.） |\n| R&S FSW31/32-B8G | f < 7.5 GHz：2 GHz（nom.）；f < 14 GHz：4 GHz（nom.）；f ≥ 14 GHz、RF input A only：8 GHz（nom.） |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWX.md"
+              },
+              "score": 2.076692
+             },
+             {
+              "text": "R&S FSVA3000 › 系列型號\n| 型號 | Order No. | 訂購名稱 / frequency range |\n|---|---:|---|\n| [[R&S FSVA3004]] | 1330.5000.05 | Signal and spectrum analyzer，10 Hz to 4 GHz |\n| [[R&S FSVA3007]] | 1330.5000.08 | Signal and spectrum analyzer，10 Hz to 7.5 GHz |\n| [[R&S FSVA3013]] | 1330.5000.14 | Signal and spectrum analyzer，10 Hz to 13.6 GHz |\n| [[R&S FSVA3030]] | 1330.5000.31 | Signal and spectrum analyzer，10 Hz to 30 GHz |\n| [[R&S FSVA3044]] | 1330.5000.44 | Signal and spectrum analyzer，10 Hz to 44 GHz |\n| [[R&S FSVA3050]] | 1330.5000.51 | Signal and spectrum analyzer，10 Hz to 50 GHz |\n\nSupplied accessories：power cable、quick start guide；[[R&S FSVA3030]] 另隨附 3.5 mm adapter（APC3.5-compatible）female/female；[[R&S FSVA3044]] 另隨附 2.92 mm adapter female/female；[[R&S FSVA3050]] 另隨附 1.85 mm adapter female/female。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSVA3000.md"
+              },
+              "score": 5.114285
+             },
+             {
+              "text": "R&S FSVA3000\nR&S FSVA3000 是 Rohde & Schwarz 的 Signal and Spectrum Analyzer 產品系列，依 [[FSVA3000_specs_en_5216-1211-22_v1601]]（Version 16.01，August 2025）包含 4 GHz 到 50 GHz/54 GHz 型號。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSVA3000.md"
+              },
+              "score": 3.856643
+             },
+             {
+              "text": "R&S FSVA3000 › 主要 hardware options\n| Code | Order No. | 名稱 | 原文說明 / 相依關係 |\n|---|---:|---|---|\n| R&S®FSV3-B1 | 1330.5700.02 | Side carry handles | user-retrofittable |\n| R&S®FSV3-B3 | 1330.3765.02 | Audio demodulator | AF demodulation types AM and FM；audio output loudspeaker and phone jack |\n| R&S®FSV3-B4 | 1330.3794.02 | OCXO frequency reference | 改善 internal reference frequency |\n| R&S®FSV3-B5 | 1330.3820.02 | Additional interfaces | GPIB、IF out、video out、trigger out、AUX port、AUX control |\n| R&S®FSV3-B5E | 1330.3820.03 | Additional interfaces | GPIB 不適用 |\n| R&S®FSV3-B6 | 1330.3913.02 | 10 Gbit/s LAN interface | fast remote control and fast I/Q data transfer |\n| R&S®FSV3-B8E | 1346.4337.02 | Resolution bandwidth up to 40 MHz | signal analysis bandwidth 由 B40/B200/B400/B601/B1001 定義；frequencies > 7.5 GHz 建議 R&S®FSV3-B11 |\n| R&S®FSV3-B10 | 1330.3859.02 | External generator control | LAN based；high sweep speed 建議 R&S®FSV3-B5 |\n| R&S®FSV3-B11 | 1330.3865.02 | YIG preselector bypass | 適用 [[R&S FSVA3013]]、[[R&S FSVA3030]]、[[R&S FSVA3044]]、[[R&S FSVA3050]]；center frequencies > 7.5 GHz 且搭配 bandwidth options 進行 signal analysis 時需要 |\n| R&S®FSV3-B18 | 1330.4003.21 | Spare solid-state drive | includes Windows IoT Enterprise LTSC 2021 license；requires R&S®FSV3-B20 |\n| R&S®FSV3-B20 | 1330.3971.02 | Removable hard drive | front panel |\n| R&S®FSV3-B21 | 1330.4010.02 | LO/IF connections for external mixers | ordering table says for [[R&S FSVA3030]]；external harmonic mixers section says [[R&S FSVA3030]]、[[R&S FSVA3044]]、[[R&S FSVA3050]] applicable with R&S®FSV3-B21 option |\n| R&S®FSV3-B24 | 1330.4049.07/.13/.30/.44/.49/.50 | RF preamplifier | model-specific；.50 for [[R&S FSVA3050]] requires export license |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSVA3000.md"
+              },
+              "score": 2.934492
+             },
+             {
+              "text": "R&S FSVA3000 › Signal analysis bandwidth options\n| 條件 | Maximum signal analysis bandwidth |\n|---|---:|\n| standard | 28 MHz nominal |\n| R&S®FSV3-B40 | 40 MHz nominal |\n| R&S®FSV3-B200 | 200 MHz nominal |\n| R&S®FSV3-B400 | 400 MHz nominal |\n| R&S®FSV3-B601 | 600 MHz nominal |\n| R&S®FSV3-B1001 | 1000 MHz nominal |\n\nf > 7.5 GHz 時需 R&S®FSV3-B11 option，且必須設定 YIG preselector = off。為取得設定的 analysis bandwidth，必須符合 `(fcenter + ½ analysis bandwidth) ≤ fmax`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSVA3000.md"
+              },
+              "score": 1.895453
+             },
+             {
+              "text": "R&S FSVA3000 › 主要 hardware options\n| Code | Order No. | 名稱 | 原文說明 / 相依關係 |\n|---|---:|---|---|\n| R&S®FSV3-B25 | 1330.4078.02 | Electronic attenuator, 1 dB steps | frequency range 10 Hz to 7.5 GHz；setting range 0 dB to 25 dB |\n| R&S®FSV3-B28V | 1330.6664.02 | Noise source control via BNC | adds BNC female for noise source control |\n| R&S®FSV3-B54G | 1346.6369.02 | Frequency extension 54 GHz | requires R&S®FSV3-B11；only applicable to [[R&S FSVA3050]] |\n| R&S®FSV3-B114 | 1330.4910.04 | Enhanced computing power | mandatory |\n| R&S®FSV3-B271 | 1330.4190.02 | Analog baseband inputs, 2 × 200 MHz | requires R&S®FSV3-B200/-B400/-B601 or -B1001；supports I/Q analyzer mode and R&S®FSV3-K91/K96/K144/K145 |\n| R&S®FSV3-B271 | 1330.4190.03 | Analog baseband inputs, 2 × 200 MHz | not combinable with R&S®FSV3-B200/-B400/-B601 or -B1001；supports I/Q analyzer mode and R&S®FSV3-K96 |\n| R&S®FSV3-K703 | 1330.7502.02 | 1 GHz reference | user-retrofittable license key |\n| R&S®FSV3-B710 | 1346.4950.05/.08/.14/.31/.44/.51 | Enhanced performance | minimum frequency 2 Hz；enhanced phase noise and sensitivity specifications；not retrofittable |\n| R&S®FSV3-FL | 1345.1957.02 | Floating license smart card | with USB adapter |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSVA3000.md"
+              },
+              "score": 1.85205
+             },
+             {
+              "text": "CMX500 GPRF Generator\n[[CMX500 GPRF Generator]] 是 [[CMX500_Callbox]] 中的 [[R&S CMX500]] non-signaling use case：在 CMX500 上產生 ARB、CW、dual tone 或 replay `.wv` waveform，支援 R&D waveform replay / creation 與 standalone TX measurement 工作流。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 3.564434
+             },
+             {
+              "text": "CMX500 GPRF Generator › Signal types\n依 [[CMX500_Callbox]]，GPRF Generator signal types 包含：\n\n- ARB。\n- CW。\n- Dual Tone。\n- Replay `.wv` files。\n- Up to 4 GPRF Generator instances in parallel。\n- ARB Sequencer。\n- Upload directly in the configuration sidebar。\n\n來源 slide 標示 **No License required**，但該說法需與 technology-specific ARB / WinIQSim2 licensing 分開理解。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 2.640463
+             },
+             {
+              "text": "CMX500 GPRF Generator › IQ recorder\n來源稱 IQ recorder 可：\n\n- Record up to 4 Gbyte to a file。\n- Save files as `.wv` for replay。\n- Use the same IQ stream + RF parameters as signaling。\n- As many instances as supported by CMX hardware。\n- 2 per RFU。\n- 1 per IFU。\n- FR1 specialist：8 instances in parallel。\n- Inspect the recorded trace directly in GUI。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 1.390876
+             },
+             {
+              "text": "CMX500 GPRF Generator › 使用限制\n- [[CMX500_Callbox]] 是簡報來源，不是 formal feature list 或 specifications。\n- `No License required` 只可先記為 GPRF Generator slide claim；technology-specific ARB replay / WinIQSim2 waveform 明確需要 KWxxx licenses。\n- Planned for CSW 9.00 / coming with CSW 9.10 需以 release note 驗證。\n- 本頁未補推 KW option 的 order number；需回正式 CMX500 features、pricing 或 configurator。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 0.08511
+             },
+             {
+              "text": "CMX500 GPRF Generator › Create ARB on CMX\n來源稱 [[R&S CMX-KW101]] 可在 CMX 上直接建立 ARB：\n\n- WinIQSim2 engine on CMX。\n- Create ARB files via SCPI。\n- Run files directly on CMX。\n- Requires technology-specific KW licenses。\n- Coming with CSW 9.10。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 0.076732
+             },
+             {
+              "text": "CMX500 GPRF Generator › Waveform replay\n來源描述可 replay any waveform from：\n\n- IQ capture。\n- MATLAB。\n- Other sources。\n\n流程線索包含：\n\n1. Convert with R&S MATLAB tools from App Note [[1GP60]]。\n2. Read in complex IQ vector。\n3. Add parameters（sample rate provided in `.info` file in CMX500 captures）。\n4. Run conversion script from [[1GP60]]。\n5. `.wv` stored in active directory。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 0.067918
+             },
+             {
+              "text": "CMX500 GPRF Generator › Technology-specific ARB files\n[[CMX500_Callbox]] 說 KWxxx licenses enable replay of R&S provided technology-specific ARB files，且可從 GLORIS 下載 wv libraries（identical to CMP）。表中列出：\n\n| Technology | License / stack |\n|---|---|\n| GNSS | [[R&S CMX-KW220]] |\n| BT / BT 5.0 | [[R&S CMX-KW310]] |\n| WLAN 802.11 a/b/g/n/ac | [[R&S CMX-KW350]] |\n| WLAN 802.11ax | [[R&S CMX-KW351]] + [[R&S CMX-KW350]] |\n| WLAN 802.11be | [[R&S CMX-KW352]] + [[R&S CMX-KW351]] + [[R&S CMX-KW350]] |\n| WLAN 802.11bn | [[R&S CMX-KW353]] + [[R&S CMX-KW352]] + [[R&S CMX-KW351]] + [[R&S CMX-KW350]] |\n| GSM | [[R&S CMX-KW420]] |\n| WCDMA | [[R&S CMX-KW440]] |\n| LTE | [[R&S CMX-KW500]] |\n| NB-IoT | [[R&S CMX-KW250]] |\n| LTE C-V2X | [[R&S CMX-KW570]] |\n| NR Rel 15/16 | [[R&S CMX-KW601]] |\n| NR Rel 17 | [[R&S CMX-KW602]] + [[R&S CMX-KW601]] |\n| NR C-V2X | [[R&S CMX-KW670]] |\n| AWGN | [[R&S CMX-KW120]] |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 0.044058
+             },
+             {
+              "text": "R&S CMX500 › RF ports 與 routing\n- RF Com 1、RF Com 2：simultaneous receiver and transmitter testing；2 × SnapN；RF input/output to DUT。\n- RF In 1、RF In 2：transmitter testing；2 × SnapN；RF input from DUT。\n- RF Out 1 to RF Out 4：receiver testing；4 × SnapN；RF output to DUT。\n- Receiver test functions：四個 RF generators（其中兩個在 GPRF mode）可 routing 到 RF Com 1、RF Com 2、RF Out 1 to RF Out 4。\n- Transmitter test functions：RF Com 1、RF Com 2、RF In 1、RF In 2 ports 的四個 input signals 各可 split 到 one or two RF analyzers。\n- FDA tables 支援 user-specific frequency-dependent attenuation corrections。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 10.314218
+             },
+             {
+              "text": "R&S CMX500 › 使用介面與 automation\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n| 介面 | 原文定位 |\n|---|---|\n| [[CMsquares]] | 單一 graphical user interface，web-based、responsive，支援 RF tests、functional tests、advanced signaling tests、protocol tests |\n| [[R&S CMXmars]] | Message log analysis，可離線分析或在線監控 instrument messaging |\n| [[R&S CMsequencer]] | Graphical scripting interface，可在 CMX500 或 Windows PC 上建立、設定與執行 test scripts |\n| [[XLAPI]] | Python-based scripting interface，適合 complex scripting use cases |\n| [[SCPI]] | Remote control interface，適合 simple、standardized scripting use cases |\n\nXLAPI scripting environment：Python 3.10；script development computer 可為 Windows PC 或 CMX500；XLAPI installation package 為 **CMX-KF600X**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 36,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 5.648132
+             },
+             {
+              "text": "R&S CMX500 › Rear panel interfaces\n- LAN：Ethernet RJ-45 connector，1000 Mbps。\n- Trigger interfaces：Trig. A、Trig. B，2 × BNC connector，3.3 V TTL；Trig. C、Trig. D、Trig. E，3 × BNC connector，3.3 V TTL；AST Out，1 × BNC connector。\n- Flexx Sync interface：for future use；In 為 1 × mini SAS HD connector；Loop 為 2 × mini SAS HD connector；Out 為 1 × mini SAS HD connector。\n- Flexx Data interface：for future use；In/Out 各 1 × QSFP-DD connector。\n- Flexx IQ interface：for future use；In/Out 各 1 × QSFP-DD connector。\n- LAN Switch Subnet Only interface：for future use；port 1、port 2 各 1 × SFP+ connector。\n- USB：for keyboard、mouse、USB flash drive；2 × USB 3.1 type A connector。\n- HDMI：for external monitor；DisplayPort：for external monitor。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 37,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.864449
+             },
+             {
+              "text": "R&S CMX500 › IF unit：R&S CMX-B500A\n[[R&S CMX-B500A]] 是 [[R&S CMX500]] 的 IF unit option；依 [[CMX500_specs_en_5216-4127-22_v1100]]，它提供 IF frequency range 的 vector signal analysis 與 ARB based generator functionality。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.528708
+             },
+             {
+              "text": "R&S CMX500 › RF unit：R&S CMX-B600B\n[[R&S CMX-B600B]] 是 [[R&S CMX500]] 的 RF unit option；依 [[CMX500_specs_en_5216-4127-22_v1100]]，它提供 FR1 frequency range 的 vector signal analysis 與 ARB based generator functionality。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.528708
+             },
+             {
+              "text": "R&S CMX500 › Base unit 與主要訂購資訊\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n| 項目 | Type / code | Order No. | 原文說明 |\n|---|---|---|---|\n| CMX500 Radio communication tester | CMX500 | 1201.0002K70 | accessories 包含 power cords、operating manual (getting started)、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters |\n| CMX500 basic assembly | R&S CMX-PB70H | 1222.0676.09 | basic assembly |\n| R&S CMX accelerator unit | R&S CMX-B200A | 1222.0747.02 | accelerated digital signal processing capabilities |\n| R&S CMX processing unit | R&S CMX-B300C | 1222.0801.04 | generic high-performance computing platform for advanced data processing |\n| R&S CMX IF unit | R&S CMX-B500A | 1222.0924.02 | IF frequency range vector signal analysis and ARB based generator |\n| R&S CMX RF unit | R&S CMX-B600B | 1222.0953.03 | FR1 frequency range vector signal analysis and ARB based generator |\n\n[[CMX500_Features_CSW9-20-0_en_32]] 使用 generic code [[R&S CMX-B500x]] 與 [[R&S CMX-B600x]]；[[CMX500_specs_en_5216-4127-22_v1100]] 在 ordering information 中列出具體 orderable unit 為 [[R&S CMX-B500A]] 與 [[R&S CMX-B600B]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.461843
+             },
+             {
+              "text": "R&S CMX500 › R&S CMX-B300C processing unit\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX-B300C]] 需要 [[R&S CMX-PB70H]] option，提供 generic high-performance computing platform for advanced data processing。Interfaces：\n\n| 介面 | 規格 |\n|---|---|\n| LAN DAU | CMX500 subnet only；QSFP+；1 Gbps、10 Gbps、40 Gbps |\n| Internal use LAN | CMX500 subnet only；Ethernet RJ-45；1 Gbps |\n| USB DAU | for future use |\n| USB | USB 3.0 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.452923
+             },
+             {
+              "text": "R&S CMX500 › NR FR1\n依 [[CMX500_Features_CSW9-20-0_en_32]]，R&S CMX-KM600 是 frequency range 1 對 NR uplink signals 執行任何 TX tests 的必要 option。NR FR1 uplink measurements 包含 multi-evaluation、PRACH、SRS、TPC measurement。Multi-evaluation 支援 NR channel bandwidth **3 MHz 到 100 MHz**，可分析 FDD 與 TDD signals、NR standalone signals 與 intraband contiguous EN-DC signals。\n\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，R&S CMX-KM600 option 的 5G NR analyzer 條件為 FR1、SCS 30 kHz、16QAM、temperature range +15 °C to +35 °C；input level –25 dBm to –10 dBm RMS、bandwidth 100 MHz 時 EVM **< 0.5 %**。Frequency measurement uncertainty：**< 20 Hz + drift of timebase**；相對於同一台 CMX500 device 的 downlink signal 進行 frequency error measurements 時，uncertainty 符合 [[3GPP TS 38.521-1]] V18.5.0。\n\nR&S CMX-KW601 option 的 5G NR generator 條件：5G NR PDSCH、full allocation、SCS 30 kHz / 60 kHz、modulation 64QAM、PAR 11.8 dB、temperature +15 °C to +35 °C；ports RF Com 1、RF Com 2、RF Out 1 to RF Out 4；output level –5 dBm、bandwidth 100 MHz 時 EVM **< 0.5 %**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 30,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.86517
+             },
+             {
+              "text": "R&S SMW200A › 產品定位與架構\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]（Version 31.00，May 2026）與 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（Version 06.00，May 2024）：\n\n- [[R&S SMW200A]] 可從 single-path vector signal generator 擴充到 multichannel [[MIMO]] receiver tester。\n- 支援最多 `8` 個 signal sources 與最多 `64` 個 fading channels。\n- 可連接 [[R&S SGT100A]] signal generator modules，提供最多 `8` 條 RF paths。\n- 最多可在 `2` 個 internal baseband modules 上配置 `8` 個 baseband generators，具 real-time coder 與 ARB。\n- 單機可配置最多兩個 internal RF paths：RF path A 為 mandatory，RF path B 為 optional second RF path。\n- Baseband section 分成 standard baseband section 與 wideband baseband section；standard baseband 最高 `160 MHz` RF modulation bandwidth，wideband baseband 最高 `2 GHz` RF modulation bandwidth。\n- 可選 integrated fading section，channel emulation bandwidth 最高 `800 MHz`；最多可安裝 `4` 個 fading modules，提供最多 `64` 個 logical faders。\n- 單一儀器可實作 MIMO fading scenarios：`2x2`、`3x3`、`4x4`、`8x4`、`4x8`、`2x4x4`。\n- Path-specific、baseband-specific 與 fading/MIMO software options 採 floating license concept；若同一 feature 需同時在兩個 paths 或兩個 baseband generators 使用，通常需安裝兩份對應 option。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 6.147132
+             },
+             {
+              "text": "R&S SMW200A\n[[R&S SMW200A]] 是 Rohde & Schwarz 的 vector signal generator；依 `R&S®SMW200A Vector Signal Generator Specifications` `Version 31.00`（`May 2026`），RF path A 可覆蓋 `100 kHz to 67 GHz`，RF path B 可覆蓋至 `44 GHz`，並可由 single-path vector signal generator 擴充到 multichannel MIMO receiver tester（來源：[[SMW200A_specs_en_3606-8037-22_v3100]]）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 5.33223
+             },
+             {
+              "text": "R&S SMW200A › Wideband baseband\n- `R&S®SMW-B9` arbitrary waveform mode：waveform length `1 sample to 256 Msample`；with `K515` 到 `2 Gsample`。\n- `R&S®SMW-B9` sample rate：`400 Hz to 600 MHz`；with `K525` 為 `400 Hz to 1200 MHz`；with `K527` 為 `400 Hz to 2400 MHz`。\n- `R&S®SMW-B9` RF bandwidth：`500 MHz`；with `K525` 為 `1000 MHz`；with `K527` 為 `2000 MHz`。\n- `R&S®SMW-B9F` 詳細 GNSS 規格見 `GNSS simulation for Rohde & Schwarz vector signal generators specifications`，文件 `PD 3607.6896.22`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 17,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 4.60055
+             },
+             {
+              "text": "R&S SMW200A › Signal routing and baseband main module\n| Code | Name / description | Order No. | 原文說明 / 限制 |\n|---|---|---:|---|\n| `R&S®SMW-B13` | Signal routing and baseband main module，one I/Q path to RF section | `1413.2807.02` | Standard baseband section；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13T` | Signal routing and baseband main module，two I/Q paths to RF section | `1413.3003.02` | Standard baseband section；若要安裝 RF path B 需 `B13T` 或 `B13XT`；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13XT` | Wideband baseband main module，two I/Q paths to RF section | `1413.8005.02` | Wideband baseband section；RF modulation bandwidth up to `2 GHz`。 |\n\n- Standard baseband section：`R&S®SMW-B13` 或 `R&S®SMW-B13T`；RF modulation bandwidth 最高 `160 MHz`；可安裝 `R&S®SMW-B10` standard baseband generator 與 `R&S®SMW-B14` fading simulator。\n- Wideband baseband section：`R&S®SMW-B13XT`；RF modulation bandwidth 最高 `2 GHz`；可安裝 `R&S®SMW-B9` / `R&S®SMW-B9F` wideband baseband generator 與 `R&S®SMW-B15` fading simulator and signal processor。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 4.495094
+             },
+             {
+              "text": "R&S SMW200A › Digital standards、R&S WinIQSIM2、Pulse Sequencer、MIMO 與 fading\n- Internal digital modulation systems 至少需安裝一個 `R&S®SMW-B10` 或 `R&S®SMW-B9`。\n- 來源列出 cellular、wireless connectivity、navigation、broadcast 與 other standards options；包含 `GSM/EDGE`、`3GPP FDD`、`LTE Release 8` 到 `Release 15`、`Cellular IoT`、`5G New Radio`、`5G NR Release 16/17`、`IEEE 802.11a/b/g/n/j/p/ac/ax/be/ad/ay`、`Bluetooth EDR/5.x/5.4`、`GNSS`、`DVB-S2/S2X`、`DVB-RCS2`、`LoRa`、`HRP UWB` 等。\n- 來源描述 digital standards 不需要 separate PC software；但 waveform packages for signals from [[R&S WinIQSIM2]] 另明列 [[R&S WinIQSIM2]] requires an external PC。判斷：前者指 instrument internal digital standards，後者指 WinIQSIM2 workflow，不合併為單一規則。\n- `R&S®SMW-K144`：5G New Radio，Order No. `1414.4990.02`。\n- `R&S®SMW-K145`：5G New Radio closed-loop BS test，Order No. `1414.6506.02`。\n- `R&S®SMW-K148`：5G NR Release 16，Order No. `1414.6664.02`。\n- `R&S®SMW-K170`：5G NR sidelink，Order No. `1413.8640.02`。\n- `R&S®SMW-K171`：5G NR Release 17，Order No. `1413.7280.02`。\n- [[R&S WinIQSIM2]] requires an external PC；`R&S®SMW-K200` waveform packages 可登錄 1、5 或 50 waveforms，每台 instrument 最多 `250 waveforms`。\n- [[R&S Pulse Sequencer]] 相關 options 包含 `R&S®SMW-K300`、`K301`、`K302`、`K304`、`K306`、`K307`、`K308`、`K315`、`K350`。\n- Multichannel、MIMO and fading 完整規格另見 `PD 3673.1276.22`；digital standards 完整規格另見 `PD 5213.9434.22`；GNSS/avionics 另見 `PD 3607.6896.22`；Pulse Sequencer 另見 `PD 3607.1388.22`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 21,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 4.321513
+             },
+             {
+              "text": "R&S SMW200A › 文件依據\n- 來源：[[SMW200A_config-guide_en_3606-8037-92_v0600]]。\n- 文件名稱：`R&S®SMW200A Vector Signal Generator – Configuration guide`。\n- 文件代碼：`PD 3606.8037.92`。\n- 文件版次：`Version 06.00`。\n- 文件日期：`May 2024`。\n- 文件性質：configuration guide；適合查 mandatory configuration、requires / not compatible / retrofitting notes、ordering information、recommended extras 與 service notes。\n\n- 來源：[[SMW200A_specs_en_3606-8037-22_v3100]]。\n- 文件名稱：`R&S®SMW200A Vector Signal Generator Specifications`。\n- 文件代碼：`PD 3606.8037.22`。\n- 文件版次：`Version 31.00`。\n- 文件日期：`May 2026`。\n- 文件性質：產品 specifications；記錄 RF/baseband performance、interfaces、environmental data、ordering information 與 options。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 4.1337
+             },
+             {
+              "text": "R&S SMW200A › 基本訂購限制\n依 [[SMW200A_config-guide_en_3606-8037-92_v0600]] 與 [[SMW200A_specs_en_3606-8037-22_v3100]]：\n\n- Base unit：`R&S®SMW200A`，Order No. `1412.0000.02`。\n- 原文說明：Vector signal generator；includes power cable and quick start guide。\n- Base unit can only be ordered with an `R&S®SMW-B10xx` frequency option and an `R&S®SMW-B13`、`R&S®SMW-B13T` or `R&S®SMW-B13XT` signal routing and baseband main module。\n- 最低配置必須包含 RF path A 的一個 frequency option，以及一個 signal routing and baseband main module。\n- Step 1 RF path A frequency options 不能 retrofitted。\n- Step 2 baseband main module options 可 factory retrofitted；`R&S®SMW-B13XT` retrofitting only for serial number `102700` or higher。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 4.085558
+             },
+             {
+              "text": "R&S SMW200A › Floating license rules\n- 某些 software options 可在 two-path instruments 中安裝一次或兩次。\n- 多數 path-specific software options 採 floating license concept。\n- 若 option features 要同時在兩個 paths 使用，該 option 必須安裝兩次。\n- 若 option 只安裝一次，只能在 path A 或 path B 其中之一使用。\n- Software option 不綁定特定 path。\n- 對 baseband generator 也是類似規則：若兩個 baseband generators 要同時輸出相同 standard 或 waveform，對應 software option 必須安裝兩次。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 27,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 3.355285
+             },
+             {
+              "text": "SMB100B_specs_en_3607-8182-22_v1200 › 重點摘要\n- Modulation 與 generator options 包含 R&S®SMBB-K720 AM/FM/φM、R&S®SMBB-K22 pulse modulator、R&S®SMBB-K23 pulse generator、R&S®SMBB-K24 multifunction generator、R&S®SMBB-K27 pulse train、R&S®SMBB-B5 Stereo/RDS coder。\n- Remote control standard interface 為 Ethernet/LAN 10/100/1000BASE-T；搭配 R&S®SMBB-B86 或 R&S®SMBB-K986 支援 GPIB、USB 2.0 USB-TMC 與 serial RS-232（需 R&S®TS-USB1）。\n- HUMS 由 R&S®SMBB-K980 提供，readout/display 支援 SNMP v1/v2c/v3、REST JSON、SCPI、device web，包含 device information、hardware/options/software/licenses、service due dates、mass storage、utilization data、event log。\n- 來源包含 ordering information、recommended extras、test-port adapters、documentation of calibration values、accredited calibration 與 warranty/service；未列價格。\n- 來源明確標示 Data without tolerance limits is not binding、Subject to change；報價前仍需回查原始來源與組態工具。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMB100B_specs_en_3607-8182-22_v1200.md"
+              },
+              "score": 2.188678
+             },
+             {
+              "text": "SMB100B_specs_en_3607-8182-22_v1200 › 關鍵實體與概念\n- [[R&S SMB100B]]：本來源的主要產品，Signal Generator family。\n- [[R&S SMA100B]]：既有 RF and Microwave Signal Generator，與 [[R&S SMB100B]] 同為 Rohde & Schwarz signal generator，但 option code 與規格不可混用。\n- [[SSB phase noise]]、[[Wideband noise]]、[[Residual FM]]、[[Residual AM]]、[[RMS jitter]]：spectral purity 與 signal quality 相關規格。\n- [[Frequency sweep]]、[[Level sweep]]、[[List mode]]：frequency/level 設定與觸發功能。\n- [[Amplitude modulation]]、[[Frequency modulation]]、[[Phase modulation]]、[[Pulse modulation]]：analog modulation functions，主要由 R&S®SMBB-K720、R&S®SMBB-K22、R&S®SMBB-K23 提供。\n- [[Stereo-RDS coder]]：R&S®SMBB-B5 option，依來源 ordering information 需 R&S®SMBB-B101/-B103/-B106 frequency option 與 R&S®SMBB-K720。\n- [[Health and utilization monitoring service]]：R&S®SMBB-K980 HUMS option，支援 SNMP、REST JSON、SCPI、device web。\n- [[SCPI]]、[[GPIB]]、[[VISA USB-TMC]]、[[VISA VXI-11]]、[[VNC]]、[[FTP]]、[[SMB]]：remote control、file transfer 與 command set 相關概念。\n- [[Rohde & Schwarz]]：產品製造商與服務提供者。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMB100B_specs_en_3607-8182-22_v1200.md"
+              },
+              "score": 1.553938
+             },
+             {
+              "text": "SMB100B_specs_en_3607-8182-22_v1200 › 重點摘要\n- 來源為 Rohde & Schwarz R&S®SMB100B Signal Generator 規格文件，涵蓋 R&S®SMB100B RF Signal Generator 與 R&S®SMB100B Microwave Signal Generator；文件代碼 PD 3607.8182.22，Specifications Version 12.00，日期 September 2025。\n- [[R&S SMB100B]] 是 analog signal generator family，RF frequency options 最高 6 GHz，microwave frequency options 覆蓋 12.75 GHz 至 40 GHz。\n- Base unit 為 R&S®SMB100B Signal generator，Order No. 1422.1000.02，隨附 power cable 與 quick start guide；基本機必須搭配任一 R&S®SMBB-B101/-B103/-B106/-B112/-B120/-B131/-B140/-B140N frequency option 訂購。\n- Frequency options 覆蓋 8 kHz to 1 GHz、3 GHz、6 GHz、12.75 GHz、20 GHz、31.8 GHz、40 GHz；R&S®SMBB-B140 標示為 8 kHz to 40 GHz export restricted，R&S®SMBB-B140N 為 8 kHz to 40 GHz。\n- Product data 適用條件：在 ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘，符合指定 environmental conditions，遵守 recommended calibration interval，且若適用已執行所有 internal automatic adjustments。\n- 來源定義規格可信度：Specifications with limits 與 Specifications without limits 屬於保證性能；non-traceable specifications with limits、typical data、nominal values、measured values 不由 Rohde & Schwarz 保證，引用時必須保留 n. trc.、typ.、nom.、meas. 標示。\n- 主要性能摘錄：frequency setting resolution 0.001 Hz；synthesis resolution 在 f = 1 GHz 時 0.163 μHz nominal；level setting resolution 0.01 dB；recommended calibration interval 3 years（40 h/week operation in full specified environmental conditions）。\n- Frequency sweep 與 level sweep 都是 digital sweep in discrete steps，支援 auto、single、step、extern single、extern step、external start/stop 等觸發語意；dwell time 5 ms to 100 s，resolution 0.1 ms。\n- Reference options 包含 R&S®SMBB-B1、R&S®SMBB-B1H、R&S®SMBB-B3、R&S®SMBB-K704；R&S®SMBB-B1 與 R&S®SMBB-B1H 只能安裝其中一個。\n- Output power options 包含 R&S®SMBB-K31、R&S®SMBB-K33、R&S®SMBB-K35 與 R&S®SMBB-B32；R&S®SMBB-B32 需要 R&S®SMBB-K31 option。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMB100B_specs_en_3607-8182-22_v1200.md"
+              },
+              "score": 1.466447
+             },
+             {
+              "text": "SMB100B_specs_en_3607-8182-22_v1200 › 與既有知識的關係\n- [[R&S SMB100B]] 與既有 [[R&S SMA100B]] 都是 Rohde & Schwarz signal generator，且都含 reference、phase noise、output power、analog modulation、remote control 與 HUMS options；但 [[R&S SMB100B]] 使用 R&S®SMBB-* option code，[[R&S SMA100B]] 使用 R&S®SMAB-* option code，報價與組態不可互推。\n- [[R&S SMB100B]] 的 RF options 到 6 GHz，microwave options 到 40 GHz；[[R&S SMA100B]] 既有頁面記錄到 67 GHz，兩者 frequency range 不同，不構成矛盾。\n- 本來源屬於 [[Productions]]，可用於產品規格與訂購資訊查詢；技術背景如 [[SSB phase noise]]、[[SCPI]]、[[Amplitude modulation]] 應由 [[Knowledge]] 類來源另建概念頁。\n- 來源包含公司簡介、training、support、sustainable product design 與管理系統認證；這些不是 SMB100B 組態必要資訊，本次僅在來源摘要保留可追溯背景，不寫入產品規格核心段落。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMB100B_specs_en_3607-8182-22_v1200.md"
+              },
+              "score": 0.851576
+             },
+             {
+              "text": "SMM100A_specs_en_3608-7680-22_v3100 › Remote control、connectors 與 general data\n- Remote control interfaces：IEC 60625 GPIB IEEE-488.2、Ethernet/LAN `10/100/1000BASE-T`、USB `3.0 super speed`、serial RS-232 via `R&S®TS-USB1`。\n- Command set：`SCPI 1999.5 or compatible command sets`。\n- LAN services：VISA VXI-11、Telnet/RawEthernet、VNC、FTP、SMB；addressing supports DHCP、static、ZeroConf、M-DNS。\n- HUMS `R&S®SMM-K980` supports SNMP v1/v2c/v3、REST JSON、SCPI、device web，提供 device information、equipment information、system operating status、instrument security information、service information、mass storage information、utilization data 與 event log。\n- RF output connector：`R&S®SMM-B1006/-B1007` 為 N female；`R&S®SMM-B1012/-B1020/-B1031` 為 PC 2.92 mm female interchangeable test port adapter；`R&S®SMM-B1044/-B1044N/-B1044O` 為 PC 1.85 mm male with 1.85 mm female-to-female adapter。\n- Rear panel DisplayPort 與 HDMI 標示為 future use；baseband generator module 的 `T/M/C`、`T/M 2`、`Dig. I/Q In 1` 也標示為 future use。\n- Rated voltage `100 V to 240 V AC`；rated current `7.3 A to 4.6 A`；rated frequency `50 Hz to 60 Hz`, `400 Hz`；fully equipped rated power `410 W measured`。\n- Operating temperature `0 °C to +45 °C`；storage temperature `–40 °C to +60 °C`；operating altitude `4600 m`。\n- Dimensions `435 mm × 192 mm × 460 mm`；fully equipped weight `20.1 kg (44.4 lb)`。\n- Non-volatile memory standard：SSD `512 Gbyte`。\n- Recommended calibration interval：`3 years`，operation `40 h/week` in full range of specified environmental conditions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md"
+              },
+              "score": 5.919219
+             },
+             {
+              "text": "SMM100A_specs_en_3608-7680-22_v3100 › Baseband generator、enhancements 與 signal performance\n- Signal performance examples include 5G NR EVM with `R&S®SMM-K144`、EUTRA/LTE ACPR with `R&S®SMM-K55`、3GPP FDD EVM with `R&S®SMM-K42`、IEEE 802.11be EVM with `R&S®SMM-K147`、custom digital modulation measured deviation/phase error examples。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md"
+              },
+              "score": 5.709929
+             },
+             {
+              "text": "SMM100A_specs_en_3608-7680-22_v3100 › RF options\n| Code | Name / description | Order No. | 相依關係／限制 |\n|---|---|---|---|\n| `R&S®SMM-B709` | Low phase noise | `1441.0828.02` | Standard performance requires `R&S®SMM-B10xx`; low phase noise requires this option. |\n| `R&S®SMM-B90` | Phase coherence | `1440.9709.02` | Provides phase-coherent RF outputs for two or more instruments. |\n| `R&S®SMM-K22` | Pulse modulator | `1441.1330.02` | Pulse modulation option. |\n| `R&S®SMM-K23` | Pulse generator | `1441.1347.02` | High-performance pulse generator. |\n| `R&S®SMM-K24` | Multifunction generator | `1441.1353.02` | Three signal sources for modulation / LF output use. |\n| `R&S®SMM-K553` | External frontend control | `1441.1147.02` | 原文未標示 requires/excludes。 |\n| `R&S®SMM-K554` | External multiplier control | `1441.1001.02` | 原文未標示 requires/excludes。 |\n| `R&S®SMM-K703` | 100 MHz, 1 GHz ultra-low noise reference input/output | `1441.1301.02` | 100 MHz low-noise input/output mode 僅此 option 可用。 |\n| `R&S®SMM-K704` | Flexible reference input, 1 MHz to 100 MHz | `1441.1318.02` | Reference input frequency settable in `0.1 Hz` steps from `1.0 MHz` to `100 MHz`. |\n| `R&S®SMM-K720` | AM/FM/PM | `1441.1324.02` | Analog modulation option. |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md"
+              },
+              "score": 3.562261
+             },
+             {
+              "text": "SMM100A_specs_en_3608-7680-22_v3100 › Waveform packages、extras、documentation、service\n- Digital standards and digital standards using [[R&S WinIQSIM2]]：參照 `Digital Standards for Signal Generators specifications (PD 5213.9434.22)`；[[R&S WinIQSIM2]] requires external PC。\n- Options with external [[R&S Pulse Sequencer]] or [[R&S Pulse Sequencer DFS]]：參照 `R&S®Pulse Sequencer Software specifications (PD 3607.1388.22)`；兩者 requires external PC。\n- Waveform packages：`R&S®SMM-K200` 1 waveform `1441.1124.71`；5 waveforms `1441.1124.72`；50 waveforms `1441.1124.75`；每台 instrument 最多 register `250 waveforms`。\n- HUMS option：`R&S®SMM-K980`，Order No. `1441.1118.02`。\n- Recommended extras：`R&S®ZZA-KN4B` rack adapter `1703.1346.00`；digital baseband interface cable 2 m `3716.5425.00`；digital baseband interface cable 0.5 m `1208.3213.00`；`R&S®DIGIQ-HS` optical cable `3641.2948.03`；`R&S®TS-USB1` USB serial adapter `6124.2531.00`。\n- Adapters for `R&S®SMM-B1012/-B1020/-B2020/-B1031` frequency option：2.92 mm female `1036.4790.00`；2.92 mm male `1036.4802.00`；N female `1036.4777.00`；N male `1036.4783.00`。`R&S®SMM-B2020` 未出現在 frequency options 清單，本來源只在 adapter group 出現。\n- Adapters for `R&S®SMM-B1044/-B1044N`：1.85 mm female to female `3588.9654.00`；1.85 mm female to 2.92 mm female `3628.4728.02`。\n- Documentation of calibration values：`R&S®DCV-2`，Order No. `0240.2193.18`。\n- Warranty：base unit `1 year`；all other items `1 year`。\n- Service options：Calibration service plans up to five years；Warranty and repair up to five years；on demand options 未列具體 order number。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md"
+              },
+              "score": 2.315882
+             },
+             {
+              "text": "SMM100A_specs_en_3608-7680-22_v3100 › 讀圖補充\n以下資訊來自讀圖補充，不等同於文字層原文；本次來源摘錄未提供可嵌入的圖片 wikilink，因此未能帶入 `![[...]]` 圖片供核對。\n\n- 封面頁顯示一張 R&S SMM100A Vector Signal Generator 儀器前左側斜視照片；螢幕可辨識 `44.000 000 000 000...` 與 `SMM100A - Vector Signal Generator`，但單位與功能方塊細節無法辨識。\n- p049 幾乎空白，可見 `Version 31.00, June 2026`、`Rohde & Schwarz RS®SMW100A Vector Signal Generator`、`49`。\n- p050 幾乎空白，可見 `Version 31.00, June 2026`、`50`、`Rohde & Schwarz R&S®SMM100A Vector Signal Generator`。\n- p051 幾乎空白，可見 `Version 31.00, June 2026`、`Rohde & Schwarz R&S®SMW100A Vector Signal Generator`、`51`。\n- p049 與 p051 的頁尾 `SMW100A` 與封面、p050、文件名稱及 ordering information 的 `SMM100A` 不一致。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 17,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md"
+              },
+              "score": 1.777333
+             },
+             {
+              "text": "SMM100A_specs_en_3608-7680-22_v3100 › 原文未解的問題\n- 文件日期有兩種標示：來源開頭為 `June 2026`，文件識別段落為 `May 2026 (nv)`；需人工確認正式文件日期。\n- 讀圖補充 p049 與 p051 頁尾顯示 `SMW100A`，但封面、p050、文件名稱、文件產品與 ordering information 顯示 `SMM100A`；需人工確認 p049/p051 是否為頁尾誤植。\n- 讀圖補充提到圖片，但本次來源摘錄未提供實際 `![[...]]` 圖片嵌入，無法在 wiki 中帶入圖片供核對。\n- 來源未列出價格。\n- Service plans、calibration、warranty and repair 未列具體 service plan order number；extended periods 需聯絡 Rohde & Schwarz sales office。\n- Digital standards and digital standards using [[R&S WinIQSIM2]] 的 option 詳情需參照 `Digital Standards for Signal Generators specifications (PD 5213.9434.22)`，本來源未完整列出所有 digital standards order number。\n- External [[R&S Pulse Sequencer]] / [[R&S Pulse Sequencer DFS]] software options 需參照 `R&S®Pulse Sequencer Software specifications (PD 3607.1388.22)`。\n- Recommended extras 中兩條 Rohde & Schwarz digital baseband interface cable 來源未標示 type code，只列 order number `3716.5425.00` 與 `1208.3213.00`。\n- Recommended extras 中 `R&S®SMM-B1012/-B1020/-B2020/-B1031 frequency option adapters` 出現 `R&S®SMM-B2020`，但本來源 frequency options 清單未列 `R&S®SMM-B2020`；本頁照錄 adapter group，不把 `B2020` 當作可訂購 frequency option。\n- 來源為分段萃取重點，不是完整逐頁 PDF；報價前需回查 raw 來源與 configure 工具確認完整 requires/excludes、retrofittable 狀態與 option compatibility。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 19,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md"
+              },
+              "score": 1.66927
+             },
+             {
+              "text": "SMM100A_specs_en_3608-7680-22_v3100 › 與既有知識的關係\n- [[R&S SMM100A]] 屬於 Rohde & Schwarz signal generator / vector signal generator 產品線，功能定位高於或不同於既有的 [[R&S SMBV100B]]、[[R&S SMCV100B]]、[[R&S SGT100A]]、[[R&S SMB100B]] 與 [[R&S SMA100B]]。\n- 與 [[R&S SMBV100B]] 相比，本來源顯示 [[R&S SMM100A]] 覆蓋到 `44 GHz`，並支援最高 `2 GHz` internal RF modulation bandwidth；[[R&S SMBV100B]] 既有頁面依 Version 13.01 記錄為最高 `6 GHz`、RF modulation bandwidth 最高 `1 GHz`。\n- 與 [[R&S SMCV100B]] 相比，本來源顯示 [[R&S SMM100A]] 面向更高 RF frequency 與更高 baseband bandwidth；[[R&S SMCV100B]] 既有頁面依 Version 17.00 記錄為最高 `7.125 GHz`、baseband extension 到 `240 MHz RF bandwidth`。\n- 與 [[R&S SMA100B]] / [[R&S SMB100B]] 的 analog/RF signal generator 類產品相比，本來源的 [[R&S SMM100A]] 重點在 vector modulation、internal real-time signal generation、ARB 與 digital standards。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 18,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md"
+              },
+              "score": 1.611234
+             },
+             {
+              "text": "SMM100A_specs_en_3608-7680-22_v3100 › 重點摘要\n這份來源是 `R&S®SMM100A Vector Signal Generator Specifications`，文件代碼 `PD 3608.7680.22`，`Version 31.00`；來源開頭標示 `June 2026`，文件識別段落標示 `May 2026 (nv)`，日期仍未決。\n\n[[R&S SMM100A]] 是 Rohde & Schwarz 的 vector signal generator。依本來源，frequency options 覆蓋 `100 kHz to 6 GHz`、`7.5 GHz`、`12.75 GHz`、`20 GHz`、`31.8 GHz` 與 `44 GHz`，最高輸出功率標示為 `up to +18 dBm`，internal RF modulation bandwidth 最高 `2 GHz`。來源定位包含 5G NR FR1/FR2 signal generation、future WLAN requirements、ARB、real-time baseband、custom digital modulation、envelope tracking、frequency response correction、HUMS 與 SCPI automation。\n\nProduct data 適用條件：在 ambient temperature 儲存 `3 hours` 後，warm-up operation `30 minutes`；符合 specified environmental conditions；遵守 recommended calibration interval；已執行所有 applicable internal automatic adjustments。Non-traceable specifications with limits、typical data、nominal values、measured values 不由 Rohde & Schwarz 保證。\n\n⚠️ [[SMM100A_specs_en_3608-7680-22_v3100]]（June 2026）讀圖補充 p049 與 p051 頁尾說 `R&S®SMW100A Vector Signal Generator`，但既有頁面 [[R&S SMM100A]] 說本文件產品為 `R&S®SMM100A Vector Signal Generator`。判斷為來源頁尾疑似誤植；本次 ingest 仍以封面、p050、文件名稱、ordering information 與 source_path 的 `SMM100A` 為主，並把頁尾不一致列入未解問題。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMM100A_specs_en_3608-7680-22_v3100.md"
+              },
+              "score": 1.598405
+             },
+             {
+              "text": "GFM314_3e_5G_NR_BaseStation_Rx_Tests › 涵蓋產品與角色\n來源列出的 Rohde & Schwarz products 包含：\n\n- [[R&S SMW200A]]。\n- [[R&S SMBV100B]]。\n- [[R&S FSW]]。\n- [[R&S FSV3000]]。\n- [[R&S FSVA3000]]。\n- [[R&S FSV]]。\n- [[R&S FSVA]]。\n- [[R&S FPS]]。\n\n可用於 GFM314 receiver tests 的 vector signal generators：\n\n- [[R&S SMW200A]]。\n- [[R&S SMBV100B]]。\n\nRx tests 需要 5G NR software option：\n\n- `R&S®SMW200A-/SMBV100B-K144 5G New Radio`。\n\nReceiver spurious emissions test case 7.6 不需要 signal generator，但需要 signal and spectrum analyzer；來源列出可用 analyzers：\n\n- [[R&S FSW]]。\n- [[R&S FSV3000]]。\n- [[R&S FSVA3000]]。\n- [[R&S FSV]]。\n- [[R&S FSVA]]。\n- [[R&S FPS]]。\n\n文件中的設備縮寫：\n\n- [[R&S SMW200A]] vector signal generator 稱為 `SMW`。\n- [[R&S FSW]] spectrum analyzer 稱為 `FSW`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md"
+              },
+              "score": 10.960361
+             },
+             {
+              "text": "range of signal generators, signal analyzers and radio communication testers.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-06b5fb58225495b8",
+                "original_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+                "sha256": "06b5fb58225495b844235a9631579a2c324ad138b1a8f61b9db37dde864a67d4",
+                "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/SMBV100B_specs_en_3607-8201-22_v1301.md",
+               "section": 495,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 25.903534
+             },
+             {
+              "text": "wide range of signal generators, signal analyzers and radiocommunications testers.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-1b98bb894312d3e6",
+                "original_ref": "raw/Productions/SMCV100B_specs_en_3608-0627-22_v1700.md",
+                "sha256": "1b98bb894312d3e6813c57d52dabffc21b751e287059deb2e5c96c3cc101f651",
+                "raw_ref": "raw/Productions/SMCV100B_specs_en_3608-0627-22_v1700.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/SMCV100B_specs_en_3608-0627-22_v1700.md",
+               "section": 211,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 25.903534
+             },
+             {
+              "text": "wide range of signal generators, signal analyzers and radiocommunications testers.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-1b98bb894312d3e6",
+                "original_ref": "raw/Productions/SMCV100B_specs_en_3608-0627-22_v1700.md",
+                "sha256": "1b98bb894312d3e6813c57d52dabffc21b751e287059deb2e5c96c3cc101f651",
+                "raw_ref": "raw/Productions/SMCV100B_specs_en_3608-0627-22_v1700.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/SMCV100B_specs_en_3608-0627-22_v1700.md",
+               "section": 249,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 25.903534
+             },
+             {
+              "text": "range of signal generators, signal analyzers and radio communication testers.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-06da2c5f1d2f72f1",
+                "original_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+                "sha256": "06da2c5f1d2f72f119e80e8c7c835aa45e792602f9337b4e7dee78622469a272",
+                "raw_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md",
+               "section": 788,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 25.903534
+             }
+            ],
+            "text": "The passages do not explicitly name “RFIC validation,” but they do support placing Signal Generator / Signal Analyzer in the **component testing / DUT validation bench**: component testing uses a **DUT + R&S SMW200A signal generator + R&S FSW signal analyzer** setup [4].\n| Workflow point | Where it fits | Supported use |\n|---|---|---|\n| Stimulus into RFIC / DUT | **Before or at DUT input** | The signal generator role is represented by **R&S SMW200A** in component testing, with LTE, Cellular IoT, 5G NR R17/18, OFDM signal generation, and custom digital modulation capabilities [4]. |\n| RF / modulated signal validation from RFIC / DUT | **At DUT output / measurement side** | The signal analyzer role is represented by **R&S FSW** in component testing, with LTE, Cellular IoT, 5G NR R17/18, OFDM signal analysis, and vector signal analysis capabilities [4]. |\n| Receiver-side validation | **Generator drives the DUT receiver path** | In receiver-test context, vector signal generators such as **R&S SMW200A** and **R&S SMBV100B** are used for 5G NR receiver tests, requiring the 5G NR software option `R&S®SMW200A-/SMBV100B-K144` [64]. |\n| Transmitter / emissions validation | **Analyzer measures DUT transmit output or emissions** | Receiver spurious emissions test case 7.6 does not need a signal generator but does need a signal and spectrum analyzer such as **R&S FSW**, **FSVA3000**, or related analyzers [64]. |\n| Generic RF test routing model | **Generator output to DUT for receiver tests; DUT output to analyzer for transmitter tests** | For CMX500 RF routing, receiver test functions route RF generators to RF ports/output-to-DUT, while transmitter test functions route RF input signals from DUT ports to RF analyzers [36]. |\n【推論】For an RFIC validation workflow, Signal Generator / Signal Analyzer would therefore sit in the **bench-level component validation stage around the RFIC DUT**: the signal generator provides known RF/modulated stimulus into the RFIC, and the signal analyzer measures the RFIC output for modulation, spectrum, and transmitter-related performance, consistent with the DUT + SMW200A + FSW component-testing setup [4] and the generator-to-DUT / DUT-to-analyzer routing model [36].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "NTN signal generator solutions › Component testing\n依 [[3GPP NTN Signal Generator Solutions Overview-EN-UR]] slide 16，component testing 使用 DUT、[[R&S SMW200A]] 與 [[R&S FSW]]：\n\n- [[R&S SMW200A]]：frequency up to 67 GHz，overrange 72 GHz；RF modulation bandwidth up to 2 GHz，up to 4 GHz with [[R&S SMW-K555]]。\n- [[R&S SMW200A]] signal generation SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal generation（K114）、custom digital modulation。\n- [[R&S FSW]]：frequency up to 85 GHz，overrange 90 GHz；analysis bandwidth up to 8 GHz。\n- [[R&S FSW]] signal analysis SW：LTE、Cellular IoT、5G NR R17/18（K171）、OFDM signal analysis（K96）、Vector signal analysis（K70）。\n\n以上是 2025 簡報摘要值；正式產品規格仍需回查 [[R&S SMW200A]]、[[R&S FSW]] 與其對應 specifications。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NTN signal generator solutions.md"
+             },
+             "score": 0.212237
+            },
+            {
+             "text": "R&S CMX500 › RF ports 與 routing\n- RF Com 1、RF Com 2：simultaneous receiver and transmitter testing；2 × SnapN；RF input/output to DUT。\n- RF In 1、RF In 2：transmitter testing；2 × SnapN；RF input from DUT。\n- RF Out 1 to RF Out 4：receiver testing；4 × SnapN；RF output to DUT。\n- Receiver test functions：四個 RF generators（其中兩個在 GPRF mode）可 routing 到 RF Com 1、RF Com 2、RF Out 1 to RF Out 4。\n- Transmitter test functions：RF Com 1、RF Com 2、RF In 1、RF In 2 ports 的四個 input signals 各可 split 到 one or two RF analyzers。\n- FDA tables 支援 user-specific frequency-dependent attenuation corrections。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 15,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 10.314218
+            },
+            {
+             "text": "GFM314_3e_5G_NR_BaseStation_Rx_Tests › 涵蓋產品與角色\n來源列出的 Rohde & Schwarz products 包含：\n\n- [[R&S SMW200A]]。\n- [[R&S SMBV100B]]。\n- [[R&S FSW]]。\n- [[R&S FSV3000]]。\n- [[R&S FSVA3000]]。\n- [[R&S FSV]]。\n- [[R&S FSVA]]。\n- [[R&S FPS]]。\n\n可用於 GFM314 receiver tests 的 vector signal generators：\n\n- [[R&S SMW200A]]。\n- [[R&S SMBV100B]]。\n\nRx tests 需要 5G NR software option：\n\n- `R&S®SMW200A-/SMBV100B-K144 5G New Radio`。\n\nReceiver spurious emissions test case 7.6 不需要 signal generator，但需要 signal and spectrum analyzer；來源列出可用 analyzers：\n\n- [[R&S FSW]]。\n- [[R&S FSV3000]]。\n- [[R&S FSVA3000]]。\n- [[R&S FSV]]。\n- [[R&S FSVA]]。\n- [[R&S FPS]]。\n\n文件中的設備縮寫：\n\n- [[R&S SMW200A]] vector signal generator 稱為 `SMW`。\n- [[R&S FSW]] spectrum analyzer 稱為 `FSW`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md"
+             },
+             "score": 10.960361
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/NTN signal generator solutions.md",
+             "raw_refs": [
+              "raw/Market/OneNote/3GPP NTN Signal Generator Solutions Overview-EN-UR.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md",
+             "raw_refs": [
+              "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+              "raw/Market/OneNote/GFM313_3e_5G_NR_BaseStation_Tx_Tests.md",
+              "raw/Market/OneNote/GFM314_3e_5G_NR_BaseStation_Rx_Tests.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

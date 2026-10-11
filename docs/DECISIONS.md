@@ -2101,3 +2101,15 @@ The owner agreed to the three points in `docs/phases/KNOWLEDGE_K2.md`:
 - **Categories:** 5 markets, 4 product lines, technical, companies, and sources by year.
 - **Cost:** about 100 company-model calls to write bilingual `aliases` and `summary` for all pages.
 - **Scope:** all K2 changes stay in a sandbox of `rs-k` until the K3 merge.
+
+## 2026-10-11: K2.4 index-led retrieval reverted after core-007
+
+Decision: the K2.4 change (query and ingest walking the layered index; e097aa0) is
+reverted (405e9d7) under the owner's rule that a change that makes results worse is
+rolled back. On the 36 core questions against candidate `rs-knowledge@1.1.0-k2.1`
+(core-007), answerable coverage fell from 0.395 to 0.349 and PASS from 16 to 11 of
+22; p90 latency rose 21%. The change also altered retrieval on the live flat index.
+
+Kept: K2.2-K2.3 (enrichment and index build act on sandboxes only) and the enriched
+sandbox. Not chosen yet: re-measuring data and code separately, or limiting the
+index to ingest planning; the owner decides (see the core-007 review).

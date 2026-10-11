@@ -1,0 +1,1272 @@
+{
+ "question": {
+  "id": "Q1041",
+  "text": "What is eye diagram, and which product-related measurement decisions depend on understanding it?",
+  "technical": "High-Speed / Signal Integrity",
+  "topic": "eye diagram",
+  "product_related": "true"
+ },
+ "session_id": "conversation-d16ea874aabc40ac81e18f715a9da7ab",
+ "exchange": {
+  "sent": "What is eye diagram, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 263.938,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-d16ea874aabc40ac81e18f715a9da7ab",
+    "actor": "leo.chi",
+    "title": "What is eye diagram, and which product-related measurement decisions dep…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T07:00:36.263836Z",
+    "updated_at": "2026-10-11T07:04:59.998501Z",
+    "messages": [
+     {
+      "message_id": "message-1980c9b545f846a5bf4bc39e0d6325ae",
+      "role": "user",
+      "text": "What is eye diagram, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-11T07:00:36.285056Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-cd5ccd2dc2c943ca9805cb9ba0741b88",
+      "role": "assistant",
+      "text": "In the provided evidence, an eye diagram is treated as a high-speed PCB/PCBA signal-integrity item evaluated alongside insertion loss and crosstalk, because the raw source lists “IL/Xtalk/Eye diagram” under “Signal integrity flow of high speed PCB/PCBA.” [66]\nUnderstanding it affects material/stackup selection decisions, because R&S PCB test solutions list Eye diagram together with IL, DK/DF, roughness, impedance, Xtalk, and TL modeling under Material/Stackup selection for PCB Fabricator and System House [13].\nUnderstanding it also affects high-speed PCB/PCBA signal-integrity workflow decisions, because the R&S SerDes/SI/PI material lists IL, Xtalk, Eye diagram, TDR Impedance, Stackup Planner, and TL Calculator in the same signal-integrity flow [8][66].\nUnderstanding it affects receiver/product validation decisions, because fiber-weave-induced intra-pair skew is stated to degrade the differential eye diagram seen by the receiver [9].\nUnderstanding it affects PCIe redriver output acceptance decisions, because the source states that PCIe redriver output eye opening must be greater than or equal to the listed eye-opening values [10].\nThe cited PCIe context measures minimum eye width and eye height after equalization and before 3-tap DFE blocks [10].\nIn Rohde & Schwarz product-related context, R&S PCB test solutions cover material measurement, material/stackup selection, signal-integrity modeling/testing, sampling testing, and process monitoring for PCB Fabricator and System House [13][15].\nR&S product mapping links R&S ZNA and R&S ZNB to PCB IL and TDR measurements, but the passages do not directly state an R&S product or option code specifically for eye-diagram measurement [27][29].\n【推論】Because the raw SI flow places Eye diagram next to IL, Xtalk, TDR Impedance, Stackup Planner, and TL Calculator, understanding the eye diagram helps decide whether the product-related measurement focus should be channel loss/crosstalk, impedance/TDR, or stackup/transmission-line modeling. [66]\n\n來源：\n[8] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[9] Wiki：PCIe Gen5 high-speed PCB layout（來源：`snla426.md`）\n[10] Wiki：PCIe Gen5 high-speed PCB layout（來源：`snla426.md`）\n[13] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[15] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[27] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[29] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[66] `raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md`",
+      "created_at": "2026-10-11T07:04:59.998501Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-dbd236336b80455995026f999dfe31fc",
+       "request_id": "request-dbd236336b80455995026f999dfe31fc",
+       "span_id": "span-dbd236336b80455995026f999dfe31fc",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "In the provided evidence, an eye diagram is treated as a high-speed PCB/PCBA signal-integrity item evaluated alongside insertion loss and crosstalk, because the raw source lists “IL/Xtalk/Eye diagram” under “Signal integrity flow of high speed PCB/PCBA.” [66]\nUnderstanding it affects material/stackup selection decisions, because R&S PCB test solutions list Eye diagram together with IL, DK/DF, roughness, impedance, Xtalk, and TL modeling under Material/Stackup selection for PCB Fabricator and System House [13].\nUnderstanding it also affects high-speed PCB/PCBA signal-integrity workflow decisions, because the R&S SerDes/SI/PI material lists IL, Xtalk, Eye diagram, TDR Impedance, Stackup Planner, and TL Calculator in the same signal-integrity flow [8][66].\nUnderstanding it affects receiver/product validation decisions, because fiber-weave-induced intra-pair skew is stated to degrade the differential eye diagram seen by the receiver [9].\nUnderstanding it affects PCIe redriver output acceptance decisions, because the source states that PCIe redriver output eye opening must be greater than or equal to the listed eye-opening values [10].\nThe cited PCIe context measures minimum eye width and eye height after equalization and before 3-tap DFE blocks [10].\nIn Rohde & Schwarz product-related context, R&S PCB test solutions cover material measurement, material/stackup selection, signal-integrity modeling/testing, sampling testing, and process monitoring for PCB Fabricator and System House [13][15].\nR&S product mapping links R&S ZNA and R&S ZNB to PCB IL and TDR measurements, but the passages do not directly state an R&S product or option code specifically for eye-diagram measurement [27][29].\n【推論】Because the raw SI flow places Eye diagram next to IL, Xtalk, TDR Impedance, Stackup Planner, and TL Calculator, understanding the eye diagram helps decide whether the product-related measurement focus should be channel loss/crosstalk, impedance/TDR, or stackup/transmission-line modeling. [66]\n\n來源：\n[8] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[9] Wiki：PCIe Gen5 high-speed PCB layout（來源：`snla426.md`）\n[10] Wiki：PCIe Gen5 high-speed PCB layout（來源：`snla426.md`）\n[13] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[15] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[27] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[29] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[66] `raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-dbd236336b80455995026f999dfe31fc",
+      "request_id": "request-dbd236336b80455995026f999dfe31fc",
+      "span_id": "span-dbd236336b80455995026f999dfe31fc",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-dbd236336b80455995026f999dfe31fc",
+       "request_id": "request-dbd236336b80455995026f999dfe31fc",
+       "span_id": "span-dbd236336b80455995026f999dfe31fc",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "In the provided evidence, an eye diagram is treated as a high-speed PCB/PCBA signal-integrity item evaluated alongside insertion loss and crosstalk, because the raw source lists “IL/Xtalk/Eye diagram” under “Signal integrity flow of high speed PCB/PCBA.” [66]\nUnderstanding it affects material/stackup selection decisions, because R&S PCB test solutions list Eye diagram together with IL, DK/DF, roughness, impedance, Xtalk, and TL modeling under Material/Stackup selection for PCB Fabricator and System House [13].\nUnderstanding it also affects high-speed PCB/PCBA signal-integrity workflow decisions, because the R&S SerDes/SI/PI material lists IL, Xtalk, Eye diagram, TDR Impedance, Stackup Planner, and TL Calculator in the same signal-integrity flow [8][66].\nUnderstanding it affects receiver/product validation decisions, because fiber-weave-induced intra-pair skew is stated to degrade the differential eye diagram seen by the receiver [9].\nUnderstanding it affects PCIe redriver output acceptance decisions, because the source states that PCIe redriver output eye opening must be greater than or equal to the listed eye-opening values [10].\nThe cited PCIe context measures minimum eye width and eye height after equalization and before 3-tap DFE blocks [10].\nIn Rohde & Schwarz product-related context, R&S PCB test solutions cover material measurement, material/stackup selection, signal-integrity modeling/testing, sampling testing, and process monitoring for PCB Fabricator and System House [13][15].\nR&S product mapping links R&S ZNA and R&S ZNB to PCB IL and TDR measurements, but the passages do not directly state an R&S product or option code specifically for eye-diagram measurement [27][29].\n【推論】Because the raw SI flow places Eye diagram next to IL, Xtalk, TDR Impedance, Stackup Planner, and TL Calculator, understanding the eye diagram helps decide whether the product-related measurement focus should be channel loss/crosstalk, impedance/TDR, or stackup/transmission-line modeling. [66]\n\n來源：\n[8] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[9] Wiki：PCIe Gen5 high-speed PCB layout（來源：`snla426.md`）\n[10] Wiki：PCIe Gen5 high-speed PCB layout（來源：`snla426.md`）\n[13] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[15] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[27] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[29] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[66] `raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_pcZ8CduWztcY4yHFANMPl48R",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "In the provided evidence, an eye diagram is treated as a high-speed PCB/PCBA signal-integrity item evaluated alongside insertion loss and crosstalk, because the raw source lists “IL/Xtalk/Eye diagram” under “Signal integrity flow of high speed PCB/PCBA.” [66]\nUnderstanding it affects material/stackup selection decisions, because R&S PCB test solutions list Eye diagram together with IL, DK/DF, roughness, impedance, Xtalk, and TL modeling under Material/Stackup selection for PCB Fabricator and System House [13].\nUnderstanding it also affects high-speed PCB/PCBA signal-integrity workflow decisions, because the R&S SerDes/SI/PI material lists IL, Xtalk, Eye diagram, TDR Impedance, Stackup Planner, and TL Calculator in the same signal-integrity flow [8][66].\nUnderstanding it affects receiver/product validation decisions, because fiber-weave-induced intra-pair skew is stated to degrade the differential eye diagram seen by the receiver [9].\nUnderstanding it affects PCIe redriver output acceptance decisions, because the source states that PCIe redriver output eye opening must be greater than or equal to the listed eye-opening values [10].\nThe cited PCIe context measures minimum eye width and eye height after equalization and before 3-tap DFE blocks [10].\nIn Rohde & Schwarz product-related context, R&S PCB test solutions cover material measurement, material/stackup selection, signal-integrity modeling/testing, sampling testing, and process monitoring for PCB Fabricator and System House [13][15].\nR&S product mapping links R&S ZNA and R&S ZNB to PCB IL and TDR measurements, but the passages do not directly state an R&S product or option code specifically for eye-diagram measurement [27][29].\n【推論】Because the raw SI flow places Eye diagram next to IL, Xtalk, TDR Impedance, Stackup Planner, and TL Calculator, understanding the eye diagram helps decide whether the product-related measurement focus should be channel loss/crosstalk, impedance/TDR, or stackup/transmission-line modeling. [66]\n\n來源：\n[8] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[9] Wiki：PCIe Gen5 high-speed PCB layout（來源：`snla426.md`）\n[10] Wiki：PCIe Gen5 high-speed PCB layout（來源：`snla426.md`）\n[13] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[15] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[27] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[29] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[66] `raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md`",
+          "evidence": {
+           "raw_citations": 8,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "product_option_spec": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.1.0-k2.1"
+           },
+           "trace": {
+            "trace_id": "trace-d1dbd4d074f34938a003530bef1cfe49",
+            "request_id": "request-d1dbd4d074f34938a003530bef1cfe49",
+            "span_id": "span-d1dbd4d074f34938a003530bef1cfe49",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "What is an eye diagram, and which product-related measurement decisions depend on understanding it? Include Rohde & Schwarz product-related context and cite Raw evidence.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- Slide 21 題為 **R&S PCB test solutions**，面向 **PCB Fabricator and System House**，將流程分成 Material Measurement、Material/Stackup selection、Signal Integrity modeling/testing、Sampling testing、PL/Process Monitoring，並列出 impedance (TDR)、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram、Delta-L、ISD/ADK、w/ cable / connector testing 等項目。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 2.481158
+             },
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 重點摘要\n- 本來源是由 `0 Digital Test - What are SIPI and Serdes.pptx` 轉出的 lossy markdown，封面標題為 **What is Serdes and SI/PI?**，作者 / 講者標示為 [[Dr. Milton Lien]]，單位為 Product & Application Engineering, [[RSTW]]，日期標示 **2026.3.4**。\n- 簡報把 R&S Group division 1 targets 分成 **Digital**、**Power**、**RF** 三類，並將 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] / [[PCBA]] 測試放在 Digital / high-speed digital 測試脈絡中。\n- Slide 4 列出多個 high speed SerDes standards / interfaces：[[GMSL]]、[[OIF CEI-112G]]、[[LVDS]]、[[JESD204D]]、[[DisplayPort]]、[[HDMI]]、[[MIPI]]、[[USB]]、[[ASA]]、[[UALink]]、[[PCIe]]、[[NVLink]]、[[Ultra Ethernet]]、[[InfiniBand]]、[[SATA]]、[[SAS]]；來源只列名，未提供各標準版本、發布組織、資料率或測試條件。\n- Slide 5 以 **Parallel v.s. Serial Interface** 作為主題，但轉檔文字主要只有標題與圖片嵌入，未擷取圖中細節；因此只能作為 [[Parallel Interface]] / [[Serial Interface]] 需回看原始簡報的線索。\n- Slide 9 以表格整理 [[High speed SerDes eco-chain]]，分成上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署三層。\n- Slide 11 題為 **Transmission Channel and validation challenges electrical Interfaces**，把高速電性介面驗證拆成 transmission channel、measurement path to DUT / test board development、[[Power Distribution Network]]、ADC / DAC frontend performance、RefClk and PLL jitter performance、interface test 等區塊，並列出 scopes、BERTs、AWGs、switch matrices、phase noise analyzers、signal generators、network analyzers、spectrum analyzers 等儀器類型。\n- Slide 17 題為 **HDI vs Package substrate**，以 [[CoWoS]]、[[Package Substrate]]、[[ABF]]、L/S 與 pitch 等字樣比較，但轉檔文字排列不完整，數值對應關係未能可靠確認。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 2.414463
+             },
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 關鍵實體與概念\n- [[Dr. Milton Lien]] — 封面列名的作者 / 講者。\n- [[RSTW]] — 封面單位文字之一，來源未展開完整名稱。\n- [[SerDes]] — 本簡報主題之一，並在 standards / eco-chain / transmission channel 脈絡中出現。\n- [[Signal Integrity]] — Slide 20 以 high speed PCB/PCBA signal integrity flow 呈現，包含 [[IL]]、[[Xtalk]]、[[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]] 與 [[TL Calculator]]。\n- [[Power Integrity]] — 封面題名中的 PI；Slide 11 以 [[Power Distribution Network]] 形式出現，並列 scopes 與 network analyzers。\n- [[High speed SerDes standards]] — Slide 4 的高速介面 / 標準列名。\n- [[High speed SerDes eco-chain]] — Slide 9 的上中下游產業鏈分類。\n- [[R&S PCB test solutions]] — Slide 21 的 PCB fabricator / system house 測試流程與工具 / 方法集合。\n- [[HDI vs Package substrate]] — Slide 17 的 HDI、package substrate、CoWoS、ABF、L/S、pitch 對照線索。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] — 既有概念頁可承接 Slide 20–21 的 PCB / PCBA 測試內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 1.144197
+             },
+             {
+              "text": "0 Digital Test - What are SIPI and Serdes › 與既有知識的關係\n- 既有 [[SerDes]] 頁主要來自 D2D / SoC IP / XPU-HBM-Optical I/O 圖像來源；本來源補充 2026.3.4 簡報層級的 high speed SerDes standards、產業鏈與驗證挑戰脈絡，但不提供 SerDes 的資料率、lane 數或具體標準條文。\n- 既有 [[高頻高速 PCB 測試解決方案]] 主要記錄 Keysight 圖像中的原材料表徵、材料選擇、抽樣測試與量產監控；本來源的 [[R&S PCB test solutions]] 以 R&S 簡報角度列出 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 PL / process monitoring，可作為平行視角。\n- 既有 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 已記錄 Keysight 圖像來源；本來源 Slide 21 再次把 DK/DF extraction、TDR、Delta-L 與 ISD/ADK 放在 PCB test solutions 流程中，但沒有新增標準版本、儀器型號或 option code。\n- 既有 [[Package Substrate]] 與 [[ABF載板]] 頁已有多份市場圖像來源；本來源 Slide 17 顯示 HDI vs Package substrate / CoWoS / ABF 對照，但因 OCR / 轉檔結果不足，僅作為待回看原始投影片的線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md"
+              },
+              "score": 0.503811
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 未決事項\n- Slide 11 未標示各測試區塊對應的標準版本、測試流程、儀器型號、軟體 option 或測試條件。\n- Slide 20 未標示 IL、Xtalk、Eye diagram、TDR impedance、Stackup Planner 與 TL Calculator 的工具、供應商或規格。\n- 需回看原始 PPTX 才能確認圖片中的 waveform、diagram 與 instrument details。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 2.238004
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 1.802166
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 可追溯限制\n- 本來源是 lossy markdown derivative，多數圖像未 OCR；不可把未擷取的圖片內容當成已驗證主張。\n- Slide 11 的頁腳日期 **6/13/2025** 與封面日期 **2026.3.4** 並存，未能判定何者是內容日期。\n- 本頁不推論 R&S 具備所有列名儀器或方案，也不把儀器類型轉換成正式 product configuration。\n- 本頁不提供 [[Signal Integrity]]、[[Power Integrity]] 或 [[SerDes]] 的標準定義；只保存來源明示的測試區塊與儀器類型。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 1.525464
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 1.433208
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › Dk / Df 與 fiber weave skew\n- [[snla426]]（June 2023）說 routing differential signals 時，每條 trace 會因 [[fiberglass weave]] 與 [[epoxy]] 的 static permittivity（εr）差異，而經歷不同 dielectric constants 與 signal velocities。\n- [[snla426]]（June 2023）說 fiberglass weave 的 εr 約為 6，epoxy 的 εr 約為 3。\n- [[snla426]]（June 2023）說 fiber glass laminate 中的 holes 或 openings 會造成 εr 與 loss tangent（Df）差異。\n- [[snla426]]（June 2023）說 εr 與 Df 差異會在 signal bandwidth 的不同頻率上造成 transmission media 的 [[return loss]] 或 [[insertion loss]] resonance / anti-resonance。\n- [[snla426]]（June 2023）說 differential pair 兩條 signal 若經過不同 fiberglass / epoxy 比例，會產生 [[intra-pair skew]]，並劣化 receiver 看到的 differential eye diagram。\n- [[snla426]]（June 2023）說 fiber weave skew 會造成 duty cycle distortion、AC common-mode voltage noise 與 EMI issues。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 4.396566
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › Eye opening requirements\n| Generation | Extrapolated Eye Height after EQ | Minimum Eye Width after EQ | 來源 | 日期 |\n|---|---:|---:|---|---|\n| [[PCIe Gen3]] | 25 mV | 0.3 UI（37.5 ps） | [[snla426]] | June 2023 |\n| [[PCIe Gen4]] | 15 ± 1.5 mV | 0.3 UI（18.75 ± 0.55 ps） | [[snla426]] | June 2023 |\n| [[PCIe Gen5]] | 15 ± 1.5 mV | 0.3 UI（9.375 ± 0.5 ps） | [[snla426]] | June 2023 |\n\n- [[snla426]]（June 2023）說 minimum eye width 與 eye height 在 post-equalization、3-tap DFE blocks 之前量測。\n- [[snla426]]（June 2023）說 PCIe redriver output 的 eye opening 需要大於或等於表列 eye opening 數值。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 4.374945
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › 未決事項\n- [[PCI Express Base Specification Revision 5.0]] 的正式版本、章節與發布組織頁尚未建立。\n- [[CXL 2.0]] 與 [[TI DS320PR1601]] data sheet 需另以正式 datasheet 補證。\n- `Roger` 是否應修正為 Rogers 或特定 laminate product family 仍需回查原文。\n- Megtron 6、GETEK、Nelco 4000-6、FR4、Tetra Functional FR4 的材料規格與 datasheet 未納入。\n- 來源未標示 TI 建議對不同 PCB stack-up、trace geometry 與 connector 類型的適用範圍。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 18,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 2.638695
+             },
+             {
+              "text": "PCIe Gen5 high-speed PCB layout › 可追溯限制\n- 本頁只追溯 [[snla426]]（June 2023）摘要中的 application note 內容。\n- 來源摘要未提供完整頁碼、圖號、TI URL、修訂紀錄或 PCI-SIG 條文引用。\n- 來源摘要未提供所有 stack-up、routing geometry、via / anti-pad / capacitor pad 圖的原圖。\n- 來源摘要未提供材料表格的測試結構、trace geometry、copper roughness、溫度、濕度或 measurement / simulation 條件。\n- 本頁不把 TI application note 規則推論為所有 PCB、所有 PCIe implementations 或所有 high-speed standards 的通用要求。\n- 本頁不支撐產品供應鏈、客戶導入、量產、出貨、成本或市場份額主張。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+              },
+              "score": 2.166932
+             },
+             {
+              "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.853109
+             },
+             {
+              "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.51411
+             },
+             {
+              "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 1.394948
+             },
+             {
+              "text": "112G PAM4 PCB 工程測試資料清單 › 與既有知識的關係\n- [[SerDes 與 SI PI 測試概覽]] 已記錄 high-speed digital validation challenges，包括 transmission channel、PCBs、connectors、scopes、BERTs、AWGs、network analyzers 等測試脈絡；本頁只補一個 112G PAM4 PCB 題名與 VNA / probe 類表頭，不新增測試方法。\n- [[R&S PCB test solutions]] 已保存 [[Dk-Df]]、[[TDR 阻抗測量]]、[[Delta-L]]、IL、Xtalk、Eye diagram、material / stackup selection 等流程詞；[[112G PAM4 PCB Engineering]] 沒有提供足夠內容把這些流程套到 112G PAM4 PCB。\n- [[高頻高速 PCB 測試解決方案]] 已保存 Keysight high-frequency / high-speed PCB 測試流程；本來源不足以比較 Keysight 與 R&S，也不足以建立採購配置。\n- [[SerDes]] 與 [[High speed SerDes standards]] 可作為 112G PAM4 的上位 high-speed interface / SerDes 脈絡，但本來源沒有明示任何 standard organization、standard version 或 compliance test。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+              },
+              "score": 2.77814
+             },
+             {
+              "text": "112G PAM4 PCB 工程測試資料清單 › 可追溯線索\n| 線索 | 來源明示文字 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| 題名 | 112G PAM4 PCB Engineering | [[112G PAM4 PCB Engineering]] | 正式日期來源未標示；raw converted 2026-09-17 | 不足以推論標準版本、測試範圍或應用場景 |\n| 存取標記 | COMPANY RESTRICTED | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未說明限制範圍或文件控管規則 |\n| 章節 / 主題 | Transmission Lines on PCB | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 transmission line geometry、stackup、impedance 或 loss 數值 |\n| 測試配置欄位 | Probe | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 probe 型號、頻寬、pitch、供應商或 calibration method |\n| 測試配置欄位 | Station/Handler | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 station / handler 型號、夾治具或 automation context |\n| 測試配置欄位 | Software | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供軟體名稱、版本、script 或 license |\n| 測試配置欄位 | VNA | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 [[Vector Network Analyzer]] 型號、port 數、頻率範圍、校準件或 S-parameter 設定 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+              },
+              "score": 1.802254
+             },
+             {
+              "text": "112G PAM4 PCB 工程測試資料清單 › 相關來源\n- [[112G PAM4 PCB Engineering]] — raw converted 2026-09-17、正式發布日期未標示的 company restricted 112G PAM4 PCB Engineering 來源摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+              },
+              "score": 1.202796
+             },
+             {
+              "text": "112G PAM4 PCB 工程測試資料清單 › 來源中的說法\n- [[112G PAM4 PCB Engineering]] 的 raw frontmatter 顯示原始檔名為 `112G PAM4 PCB Engineering.pdf`，轉檔日期為 2026-09-17。\n- [[112G PAM4 PCB Engineering]] 正文含 `COMPANY RESTRICTED`。\n- [[112G PAM4 PCB Engineering]] 正文含標題 `Transmission Lines on PCB`。\n- [[112G PAM4 PCB Engineering]] 保留一個空表格，欄位為 `Probe`、`Station/Handler`、`Software`、`VNA`。\n- [[112G PAM4 PCB Engineering]] 沒有保留任何表格資料列。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+              },
+              "score": 0.967989
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 可學到的 sales / solution pattern\n- 來源明示的 win factor 不是單一儀器規格，而是 total solution：probe、mount-kit、de-embedding tool 與 local partner。這與 [[R&S PCB test solutions]] 中 material measurement / sampling testing / process monitoring 的流程視角互補。\n- Bare board for SoCs、socket / transmission line evaluation 與 board-to-board connector DUT 都落在 [[Signal Integrity]]、[[Insertion Loss]]、[[Return Loss]]、[[Impedance]] 與 de-embedding 的交界。\n- Samsung 5G SoC including VCO case 顯示 [[R&S FSWP50]]、[[R&S SMW200A]] 與 automated VCO tuning software 可以被包裝成 RF / analog enablement 測試方案，但來源未提供正式 software product name 或 version。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 2.454286
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 來源中的案例\n| 案例 | 日期 / 期間 | Customer / 對象 | DUT / application | 來源明示方案 | 限制 |\n|---|---|---|---|---|---|\n| TRI case | 來源未標示正式日期；raw converted 2026-09-18 | [[TRI]] | dual-side ATE inline measurement，test sides A/B each measure two DUTs | 4-port VNA [[R&S ZNB3044]]、[[R&S OSP320]]、flying probe module、interposer board | TRI 未展開；DUT、頻率、fixture、calibration 未標示 |\n| AMD case | 來源未標示正式日期；raw converted 2026-09-18 | [[AMD]] / [[AMD EPYC 9965]] case | validation optimization、socket–socket interconnection test | default setup 與 optimized setup 比較；SDD12 100 cycles stability proof | 67 GHz claim 未標示完整儀器組合，不能改寫單機儀器規格 |\n| LSmtron success story | Slide 8 頁尾 28/04/2020 | [[LSmtron]] | Board to Board Connector | ZNB40、probe、mount-kit、de-embedding tool、local partner [[TeraBit Solutions]] / [[AtaiTec]] | ZNB40 正式型號、probe 型號、de-embedding tool 名稱未標示 |\n| Bare Board for SoCs | 來源未標示正式日期；raw converted 2026-09-18 | [[Advantest]]、[[Meritech]] | PCB test with probing；impedance、insertion loss、return loss | ZNB40、probe、mount-kit、de-embedding tool | ATS / ZVA67 / ZNA43 欄位分層不明 |\n| Samsung Foundry RF/Analog Enablement | 來源未標示正式日期；raw converted 2026-09-18 | [[Samsung Electronics]] | 5G SoC including VCO | [[R&S FSWP50]]、[[R&S SMW200A]] 44GHz、SGS100A、automated VCO Tuning S/W | SGS100A 需補證；software 版本、scope 與交付方式未標示 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 2.14597
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 與既有知識的關係\n- [[R&S PCB test solutions]] — 保存 R&S high-speed digital 簡報中的 PCB test flow；本頁補入 case-sharing 中的 customer / partner / competitor context。\n- [[SerDes 與 SI PI 測試概覽]] — 本頁提供 PCB / interconnect probing 的實務案例語境。\n- [[Keysight ENA]] — 在 LSmtron case 中作為 competitor。\n- [[R&S ZNB3044]]、[[R&S ZNA43]]、[[R&S FSWP50]]、[[R&S SMW200A]] — 本來源提供 Market 應用案例，不改寫 Productions 規格。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 1.60291
+             },
+             {
+              "text": "高速互連 probing 與 de-embedding 測試案例 › 相關來源\n- [[TRI_AMD_RSKR Sharing1]] — company confidential case sharing，來源正式日期未標示，raw converted 2026-09-18。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+              },
+              "score": 1.491571
+             },
+             {
+              "text": "TRI_AMD_RSKR Sharing1 › 重點摘要\n- 來源正式發布日期未標示；raw frontmatter 僅標示 converted: 2026-09-18。Slide 8 頁尾另有 28/04/2020，應視為該 success story slide 的日期線索，不可套用到整份簡報。\n- Slide 2 的 TRI case 題為 Test environment，圖中文字列出 4-port VNA [[R&S ZNB3044]]、[[R&S OSP320]]、DUT、flying probe module、interposer board，並寫明 ATE test scenario 是 dual-side capacity：test sides A and B 各量測 two DUTs，在 single inline measurement cycle 完成 full 4-DUT sequence。\n- Slide 3 的 TRI case 題為 Test Result and capabilities，只能辨識 `< 5`，但來源未標示指標名稱、單位、測試條件或 pass/fail 門檻。\n- Slide 4–5 的 AMD case 題為 Optimization for validation / Test result and stability proof。文字指出 default setup 在 40 GHz 以上 severe noise and uncertainty dominate the signal；optimized setup 則 complete signal stability unlocked up to 67 GHz；100 cycles continuous measurements 的 SDD12 distribution contained within +/- 3σ at 18.75 GHz。\n- Slide 7 backup 題為 Socket – socket interconnection test，明示 [[AMD EPYC 9965]]，但圖片細節未 OCR，未提供 socket、interposer、fixture 或量測規格。\n- Slide 8 的 key success story：Country / Region RSK；Customer 為 [[LSmtron]]，括號說明 manufacturer of FPCB and connector；Products 為 ZNB40；Competitor 為 [[Keysight ENA]]；Strength 是 total solution including probe, mount-kit, and de-embedding tool with local partner [[TeraBit Solutions]]，其為 [[AtaiTec]] 在 Korea 的 agency；DUT 為 Board to Board Connector。\n- Slide 9 ongoing projects：Project 為 Bare Board for SoCs；Customer 欄列 [[Advantest]]（ATS, ZVA67）與 [[Meritech]]（PCB manufacturer, ZNA43）；Application 是 PCB test with probing，包含 impedance、insertion loss、return loss；Offered solution 是 ZNB40、probe、mount-kit、de-embedding tool；What does it take to win: Partners。\n- Slide 10 sales strategy：目標 customer group 覆蓋 ICR、WIC、ADT、AUT；industry 為 Bare board for SoCs (RFIC)；fit 為 VNAs；companies 為 suppliers of Samsung Electronics；comments 為 evaluation of socket and transmission line。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/TRI_AMD_RSKR Sharing1.md"
+              },
+              "score": 1.921638
+             },
+             {
+              "text": "TRI_AMD_RSKR Sharing1 › 關鍵實體與概念\n- [[TRI]] — 來源只提供 TRI case 標題，未展開 TRI 的正式公司 / 組織名稱。\n- [[AMD]]、[[AMD EPYC 9965]] — AMD case 與 socket interconnection test 相關；來源未提供 AMD EPYC 9965 的規格。\n- [[R&S ZNB3044]]、[[R&S OSP320]]、ZNB40、[[R&S ZNA43]]、[[R&S FSWP50]]、[[R&S SMW200A]]、SGS100A — 來源列名的 R&S 儀器或方案線索。\n- [[Keysight ENA]]、Keysight E5052B、VXG — 來源列名的 competitor 產品 / 平台。\n- [[LSmtron]]、[[TeraBit Solutions]]、[[AtaiTec]]、[[Advantest]]、[[Meritech]]、[[Samsung Electronics]]、FormFactor — 來源列名的 customer、partner、competitor-context 或設備供應商線索。\n- [[高速互連 probing 與 de-embedding 測試案例]] — 本來源抽出的測試與 sales case 彙總概念。\n- [[R&S PCB test solutions]]、[[SerDes 與 SI PI 測試概覽]]、[[TDR 阻抗測量]]、[[Dk-Df]]、[[Delta-L]]、[[Insertion Loss]]、[[Return Loss]]、[[Impedance]] — 與 PCB / interconnect test 相關的既有概念。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/TRI_AMD_RSKR Sharing1.md"
+              },
+              "score": 1.519268
+             },
+             {
+              "text": "TRI_AMD_RSKR Sharing1 › 與既有知識的關係\n- [[R&S PCB test solutions]] 已記錄 2026.3.4 R&S high-speed digital 簡報中的 material measurement、stackup selection、SI modeling/testing、sampling testing 與 process monitoring；本來源補入 actual sales / case-sharing 層級的 probing、mount-kit、de-embedding tool 與 partner 需求。\n- [[SerDes 與 SI PI 測試概覽]] 已建立 high-speed digital 測試區塊；本來源補入 Bare Board for SoCs、socket / transmission line evaluation、board-to-board connector DUT 與 5G SoC VCO tuning case。\n- [[R&S ZNB3044]] 既有 Productions 頁面依 July 2026 規格書記錄 base frequency range 9 kHz to 43.5 GHz、with upgrade 到 54.0 GHz；本 Market 來源的 AMD case 說 optimized setup stability up to 67 GHz，但未說明是否由 ZNB3044 單機達成、是否使用 extender / probe / fixture / de-embedding，因此不能直接改寫 ZNB3044 產品規格。\n- [[R&S SMW200A]] 既有頁面依 May 2026 specifications 記錄 RF path A 最高 67 GHz、RF path B 最高 44 GHz；本來源中的 SMW200A(44GHz) 只支撐 Samsung case 中使用 44GHz 等級 SMW200A 的 sales-case 語境。\n- [[Keysight ENA]] 既有頁面來自 Keysight PCB test image；本來源新增其在 LSmtron board-to-board connector case 中作為 competitor 的線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/TRI_AMD_RSKR Sharing1.md"
+              },
+              "score": 0.885867
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › 來源中的 mapping\n| 分類 | 對象 / 企業欄 | 來源中的 R&S Solution | 來源日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| [[伺服器主機板]] / PCBA | [[鴻海]] | [[R&S ZNL]]: PDN Target Z；[[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test、clock jitter test；[[R&S ZNA]]: high speed trace test | 來源未標示正式日期；raw converted 2026-09-17 | 未提供正式 test setup、option、fixture、頻率或 sales kit |\n| [[伺服器電路板]] / [[PCB]] | [[博智]] | [[R&S ZNA]] / [[R&S ZNB]]: IL、TDR | 來源未標示正式日期；raw converted 2026-09-17 | 只對應表內 [[博智]]列，不能推論其他 PCB 廠同樣適用 |\n| [[連接器]] / 線纜 | [[嘉澤]] / [[嘉基]] | [[R&S ZNA]] / [[R&S ZNB]] + [[OSP]]: high speed cable | 來源未標示正式日期；raw converted 2026-09-17 | [[嘉澤]] / [[嘉基]] 同格寫法未決；未提供 cable type、connector type 或 calibration method |\n| [[網通交換機]] | [[智邦]] | [[R&S FSWP]]: jitter / phase noise test；VNA（[[R&S ZNA]] / [[R&S ZNB]]）；EMI pretest | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；不可推論完整 switching test portfolio |\n| [[矽光子]] | [[上詮]] | optical VNA：[[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]；[[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]] | 來源未標示正式日期；raw converted 2026-09-17 | ThinkLands、GOCA、Newkey 與 PSA 未展開；未提供 optical VNA setup 或 module type |\n| [[散熱器]] | [[建準]] | [[MXO]]: motor driver analysis | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 motor driver type、fan / pump 類型或量測條件 |\n| [[電源供應器]] | [[光寶科]] | [[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test；BMS test | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；未提供 HVDC / PSU / BBU 測試配置 |\n| [[GPU]] | [[輝達]] | [[R&S ZNA]]: TDR、[[OSP]] | 來源未標示正式日期；raw converted 2026-09-17 | 不代表 R&S 與 NVIDIA 合作或採購關係；僅是表內 solution mapping |\n| [[CPU]] | [[超微]] | [[R&S ZNA]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 TDR、SI、PI 或其他測項 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 2.758578
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › 來源中的 mapping\n| 分類 | 對象 / 企業欄 | 來源中的 R&S Solution | 來源日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| [[IC]] / 矽智財 / 製程 | [[智原]] | [[R&S ZNA]] + [[R&S ZNA67EXT]]、[[R&S FSWP]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明量測對象是 SerDes、jitter、phase noise、probe station 或 wafer / package |\n| [[測試介面]] | [[旺矽]] | [[R&S ZNA67EXT]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 probe card / socket / fixture / frequency range |\n| 高速傳輸 IC | [[譜瑞-KY]] | [[R&S ZNA]] + [[R&S FSWP]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明高速傳輸 IC 類型、SerDes 速率或測試項目 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 2.589414
+             },
+             {
+              "text": "AISeverEcosystem R&S solution mapping › SI / high-speed channel / interconnect\n- [[R&S ZNA]] 與 [[R&S ZNB]] 在來源中被放入 [[伺服器電路板]] / [[PCB]] 的 IL、TDR，以及 [[連接器]] / 線纜的 high speed cable 測試。\n- [[R&S ZNA]] 也出現在 [[伺服器主機板]] / PCBA 的 high speed trace test、[[GPU]] 的 TDR、[[CPU]]、[[智原]]、[[譜瑞-KY]]等 IC / high-speed transmission context。\n- [[R&S ZNA67EXT]] 出現在 [[智原]] 與 [[旺矽]] 的 solution 欄，但來源未提供實際 frequency range 或 fixture。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+              },
+              "score": 2.470086
+             },
+             {
+              "text": "Christian Mokry › 來源中的角色\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR]]：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Christian Mokry.md"
+              },
+              "score": 1.107993
+             },
+             {
+              "text": "R&S CMX-KM606 › 來源中的描述\n[[CMX_Configuration_Guide_NR-NTN]] 將 [[R&S CMX-KM606]] 列於 NR-NTN software 區段：\n\n- Type：SW。\n- Description：NR NTN measurements — S-band and L-band NR-NTN RF measurements。\n- Mandatory：Conditional。\n- Conditions：Mandatory for S/L-band NR-NTN callbox with RF measurements。\n- Dependency：Requires [[R&S CMX-KM600]]。\n- Error rule：Hard error if quoted without [[R&S CMX-KS627B]]。\n- Not used for [[NB-NTN]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KM606.md"
+              },
+              "score": 1.801724
+             },
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.05918
+             },
+             {
+              "text": "Rohde & Schwarz GmbH & Co KG\n[[Rohde & Schwarz GmbH & Co KG]] 是多份 [[Rohde & Schwarz]] PR frontmatter 中列出的 author，且來源正文稱 R&S® 是其 registered trademark。[[1C111_1e_3GPPPreConfGuide]] 另在頁尾標示 © 2025 Rohde & Schwarz GmbH & Co. KG，81671 Munich, Germany。[[Dual Sim Dual Active]]、[[Extended Logical Channel IDs]]、[[Logical Channels]] 與 [[OCNG (NR)]] 頁尾也標示 `Rohde & Schwarz GmbH & Co. KG ©`，但部分技術筆記未給正式發布日期或文件編號。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Rohde & Schwarz GmbH & Co KG.md"
+              },
+              "score": 0.366589
+             },
+             {
+              "text": "Gatehouse Satcom › 與 Rohde & Schwarz 的合作\n依 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]]：\n\n- [[Gatehouse Satcom]] 與 [[Rohde & Schwarz]] formalized collaboration，以 strengthening validation and testing of [[5G IoT-NTN]] and [[NR-NTN]] technologies。\n- 合作目標是將 [[Gatehouse Satcom]] 的 5G [[NTN]] software expertise 與 [[Rohde & Schwarz]] test and measurement capabilities 結合。\n- [[Gatehouse Satcom]] gains access to the [[R&S CMX500]] platform，作為共同 further develop advanced orbit and channel emulation capabilities for NTN use cases 的一部分。\n- [[Gatehouse Satcom]] contributes end-to-end NTN test results、technical insight and engineering feedback，協助 [[Rohde & Schwarz]] 強化 NTN-focused test capabilities。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Gatehouse Satcom.md"
+              },
+              "score": 1.02766
+             },
+             {
+              "text": "PI for Digital Power › 來源列出的外部連結\n| 類別 | 連結標題 / 可見文字 | URL | 日期 / 期間 |\n|---|---|---|---|\n| [[PDN impedance]] / [[Power Integrity]] guide | Mastering PDN Impedance: A Comprehensive Guide for Power Integrity Design | `https://www.allpcb.com/allelectrohub/mastering-pdn-impedance-a-comprehensive-guide-for-power-integrity-design` | 來源未標示 |\n| Active ultra-high current [[PDN]] impedance measurement | Ultrafast Impedance Measurement of Active Ultra-High Current PDNs｜Signal Integrity Journal | `https://www.signalintegrityjournal.com/articles/3798-ultrafast-impedance-measurement-of-active-ultra-high-current-pdns` | 來源未標示 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/PI for Digital Power.md"
+              },
+              "score": 0.462145
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 測量原理\n- [[R&S ZNA]] 使用 two-tone stimulus signal。\n- 儀器量測 DUT input 與 output 的兩個 signals 之 phase difference。\n- Group delay 由 phase difference 與 frequency offset 計算。\n- 兩個 signals 間的 frequency offset Δf 是 aperture。\n- [[R&S ZNA]] 具備用於量測不同 frequency signals 之 phase 的 frontend。\n- Calibration 只需要 unknown through mixer。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 0.253798
+             },
+             {
+              "text": "R&S ZNA › R&S®ZNA-B15 RFFE GPIO interface 規格摘錄\n- Models .02 and .03 提供 two independent MIPI RFFE busses。\n- Connector type：25-pin D-Sub，female。\n- RFFE port 1 / 2 的 VIO、DATA、CLK 電壓範圍為 0 V to +2 V，1 mV step，maximum current 20 mA。\n- CLK configurable clock rate：31.25 kHz to 26 MHz。\n- GPIO 1 to GPIO 8：voltage range –5 V to +10 V；typ. –6 V to +12 V；voltage step size 5 mV；maximum current 20 mA。\n- GPIO 9 and 10：voltage range –5 V to +10 V；typ. –6 V to +12 V；voltage step size 5 mV；maximum current 100 mA。\n- Model .03 提供 voltage and current measurement with switchable source resistance；32 internal ADC channels 可同時量測每個 RFFE 與 GPIO pin 的 voltage and current。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 6.482603
+             },
+             {
+              "text": "德宏\n[[德宏]] 是 [[AI Server PCB test image 25]]（Nov., 2025）在「AI伺服器PCB原物料台日韓供應鏈」中列於[[原材料]] / [[玻纖布]]的公司名稱；[[HSD PCB image 15]] 在註記中把德宏列於「石英布」，[[HSD PCB image 18]] 與 [[HSD PCB image 8]] 則把德宏列於 [[Q-Glass]]（石英纖維 / 未來）「領先佈局」。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/德宏.md"
+              },
+              "score": 1.95995
+             },
+             {
+              "text": "OCP Regional Summit\n[[OCP Regional Summit]] 是 [[AI Server PCB test image 76]] 與 [[Switch server- optical switch image 1]] 頁尾 / 圖下文字中出現的活動名稱；這些來源只標示 `OCP Regional Summit 2023 Prague`，未提供完整日期或活動主辦資訊。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/OCP Regional Summit.md"
+              },
+              "score": 3.836937
+             },
+             {
+              "text": "矽力-KY › 來源中的說法\n- [[Power IC - Power Management IC image 2]]（2024/05；取得於 2026-09-04）在表中寫作「矽力-KY*」。\n- [[Power IC - Power Management IC image 2]]（2024/05；取得於 2026-09-04）將 [[矽力-KY]] 的 AI 核心受惠題材列為 [[48V 供電]]、[[資料中心]]。\n- [[Power IC - Power Management IC image 2]]（2024/05；取得於 2026-09-04）將 [[矽力-KY]] 的受惠程度列為「極高」。\n- [[Power IC - Power Management IC image 2]]（2024/05；取得於 2026-09-04）說明 [[矽力-KY]]「技術天花板最高，直接受惠 AI 伺服器供電架構從 12V 轉 48V 的變革」。\n- [[Power IC - Power Management IC image 2]]（2024/05；取得於 2026-09-04）頁尾註記寫「矽力-KY 為境外公司，以上為台股概念股整理，非投資建議」。\n- [[Power IC - Power Management IC image 3]]（來源未標示日期；取得於 2026-09-04）在「矽基（Si）功率半導體與電源管理 IC」大分類下，將圖上寫作「矽力*-KY（6415）」的名稱列於「PMIC 電源管理 IC」。\n- [[Power IC - Power Management IC]]（原文未標示日期；raw converted 2026-09-17）在 PMIC 區塊將 [[矽力-KY]] 寫為「高階類比IC龍頭／AI伺服器與多相電源管理領先者」。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/矽力-KY.md"
+              },
+              "score": 0.842638
+             },
+             {
+              "text": "R&S CMX-KA401 › 來源中的配置資料\n| 來源 | Description | Conditions |\n|---|---|---|\n| [[CMX_Configuration_Guide_Audio-Testing]] | Advanced audio measurement / generator and playback；SAP Kurztext: IP Analysis | Add for OTT voice quality、injected customer WAV files UL/DL、VoIP wave injection、E2E audio delay、IP streaming、playback/record、non-realtime IMS e.g. SlowIQ；requires [[R&S CMX-KA100]] + [[R&S CMX-KA180]]；not required for basic POLQA |\n| [[CMX_Configuration_Guide]] | CMX Audio Test Test Feature Set 2 | NGeCall context 中支援 Audio player and recorder function with ZG180A；對 TS17240 In-Band Modem over IP Tests 為 mandatory |\n| [[CMX500_Features_CSW9-20-0_en_32]] | CMX application test audio, feature set 2 | features overview；order no. 1222.8125.xx |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA401.md"
+              },
+              "score": 2.8259
+             },
+             {
+              "text": "vault-cli.ps1 › 限制與注意事項\n- [[Drop README]] 明示 conversion 是 lossy；因此轉出 markdown 不應被視為原始檔的完整無損替代。\n- [[Market README]] 只提供 Market convert 的操作示例，未說明 [[vault-cli.ps1]] 的版本、程式碼位置、支援的文件轉換引擎、OCR 能力或失敗重試機制。\n- [[Productions README]] 只提供 Productions convert 的操作示例，未說明 [[vault-cli.ps1]] 在產品 datasheet、規格表或 option 表上的抽取品質、OCR 能力或表格保真度。\n- 原文未標示 audio transcription 上傳到 [[Google]] 的隱私、權限與資料保留條件。\n- 原文只提供 [[ffmpeg]] 抽音訊範例，未說明支援的 video / audio codec 或容器格式。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/vault-cli.ps1.md"
+              },
+              "score": 1.134847
+             },
+             {
+              "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 13.499206
+             },
+             {
+              "text": "Christian Mokry › 來源中的角色\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Christian Mokry.md"
+              },
+              "score": 1.05343
+             },
+             {
+              "text": "R&S CMX-KM606\n[[R&S CMX-KM606]] 是 [[R&S CMX500]] 的 NR NTN measurements software option；依 [[CMX_Configuration_Guide_NR-NTN]]，它用於 S-band and L-band [[NR-NTN]] RF measurements，且需要 [[R&S CMX-KM600]] 與 [[R&S CMX-KS627B]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KM606.md"
+              },
+              "score": 1.754182
+             },
+             {
+              "text": "EMITE\n[[EMITE]] 是位於西班牙的 OTA Test Systems 公司；[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 稱其與 [[Rohde & Schwarz]] 合作，將 [[R&S CMX500]] 最新測試能力整合到 EMITE over-the-air chambers，以支援 [[Wi-Fi 7]] 與 [[5G RedCap]] OTA measurements。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/EMITE.md"
+              },
+              "score": 0.474527
+             },
+             {
+              "text": "Rohde & Schwarz GmbH & Co KG › 來源中的列名\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- frontmatter `author` 欄列出 [[Rohde & Schwarz GmbH & Co KG]]。\n- 正文末段寫明：R&S® is a registered trademark of Rohde & Schwarz GmbH & Co. KG。\n- 來源未展開公司法律登記資訊、地址、股權結構或組織層級。\n\n依 [[SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices]]：\n\n- frontmatter `author` 欄列出 [[Rohde & Schwarz GmbH & Co KG]]。\n- 正文末段同樣寫明：R&S® is a registered trademark of Rohde & Schwarz GmbH & Co. KG。\n- 來源正文以 [[Rohde & Schwarz]] 品牌 / 公司名稱描述與 [[SPEAG]] 的合作、[[R&S CMX500 OBT]] 與 [[DASY8-3D]] 的整合。\n\n依 [[1C111_1e_3GPPPreConfGuide]]：\n\n- R&S® 是 [[Rohde & Schwarz GmbH & Co KG]] 的 registered trademark。\n- Trade names 為其 owners 的 trademarks。\n- 文件頁尾標示：© 2025 Rohde & Schwarz GmbH & Co. KG，81671 Munich, Germany。\n- 文件頁尾也描述 [[Rohde & Schwarz]] electronics group 的 business fields 包含 test and measurement、broadcast and media、secure communications、cybersecurity、monitoring and network testing。\n- 來源稱 [[Rohde & Schwarz]] 成立超過 80 年，總部位於 Munich, Germany，並在超過 70 個國家設有 sales and service network。\n- 來源列出 website、training、customer support 與 ISO 9001 certified quality management 線索。\n\n依 [[Dual Sim Dual Active]]：\n\n- markdown 頁尾標示 `COMPANY CONFIDENTIAL`。\n- 頁尾列出 `Rohde & Schwarz GmbH & Co. KG ©`。\n- 本來源是 [[Dual SIM Dual Active]] / [[Multi-USIM operation]] 技術筆記，未標示正式發布日期、文件編號、作者或版本。\n\n依 [[Extended Logical Channel IDs]]：\n\n- markdown 頁尾標示 `COMPANY CONFIDENTIAL`。\n- 頁尾列出 `Rohde & Schwarz GmbH & Co. KG ©`。\n- 本來源是 [[Extended Logical Channel ID]] / [[3GPP TS 38.321]] / [[MAC Control Element]] 技術筆記，未標示正式發布日期、文件編號、作者或版本。\n- 來源本身只支撐頁尾 copyright / confidential 標示，不支撐公司法律資訊或產品承諾。\n\n依 [[Logical Channels]]：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Rohde & Schwarz GmbH & Co KG.md"
+              },
+              "score": 0.356388
+             },
+             {
+              "text": "PI for Digital Power › 關鍵實體與概念\n- [[Power Integrity 外部資料清單]]：本來源最直接支撐的新概念頁，用來保存這份 OneNote 連結索引本身。\n- [[Power Integrity]]：來源標題與頁名顯示主題聚焦 digital power 的 power integrity；但來源未擷取設計方法、規格、量測流程或案例正文。\n- [[PDN]]、[[PDN impedance]]：兩個連結標題都與 power distribution network impedance 相關；本頁只記錄連結存在。\n- [[ALLPCB]]：第一個連結的網域 / 標題來源；本來源未提供作者、發布日期或文章內容。\n- [[Signal Integrity Journal]]：第二個連結的媒體 / 期刊名稱；本來源未提供作者、發布日期或文章內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/PI for Digital Power.md"
+              },
+              "score": 0.349995
+             },
+             {
+              "text": "衛星酬載群延遲量測\n[[衛星酬載群延遲量測]]是用來判定 satellite communications transmission path phase distortions、frequency converter / transponder channel band edge distortion 與 transmission path quality 的測試方法集合。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 0.240373
+             },
+             {
+              "text": "德宏 › 來源中的說法\n- [[AI Server PCB test image 25]]（Nov., 2025；取得於 2026-09-04）在[[玻纖布]]分類列出德宏。\n- [[HSD PCB image 15]]（來源未標示日期；取得於 2026-09-04）在玻纖布圖卡註記中寫「石英布:德宏(5475)」。\n- [[HSD PCB image 18]]（來源未標示日期；取得於 2026-09-04）在 [[Q-Glass]]（石英纖維 / 未來）區塊寫：「極致電氣特性，鎖定 6G 與次世代算力（德宏 領先佈局）。」\n- [[HSD PCB image 8]]（來源未標示日期；converted 2026-09-04）在 [[Q-Glass]]（石英纖維 / 未來）區塊同樣寫：「極致電氣特性，鎖定 6G 與次世代算力（德宏 領先佈局）。」",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/德宏.md"
+              },
+              "score": 1.624176
+             },
+             {
+              "text": "OCP Regional Summit › 未決事項\n- [[AI Server PCB test image 76]] 未標示完整活動日期。\n- [[Switch server- optical switch image 1]] 未標示完整活動日期。\n- 兩份來源均未標示活動主辦單位、正式議程或照片來源。\n- 兩份來源均未說明 `Prague` 是活動地點、照片來源地、簡報標題的一部分或其他語境。\n- 兩份來源均未說明末尾 `2` 是頁碼、照片編號、活動場次或其他語境。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/OCP Regional Summit.md"
+              },
+              "score": 3.0015
+             },
+             {
+              "text": "力智 › 限制與不可推論事項\n- [[Power IC - Power Management IC image 1]] 與 [[Power IC - Power Management IC image 3]] 未標示日期，因此不能把這兩份來源的列名寫成特定時間點的市場現況。\n- [[Power IC - Power Management IC image 2]] 的資料更新為 2024/05；其「極高」分級、排序、供應鏈說法與題材說明都只能視為 2024/05 圖上說法。\n- [[Power IC - Power Management IC]] 未標示 Threads 原文發布日期，且未提供「華碩集團」的股權、集團關係或官方佐證；此說法只能保留為來源文字。\n- [[Power IC - Power Management IC image 1]]、[[Power IC - Power Management IC image 2]]、[[Power IC - Power Management IC image 3]] 與 [[Power IC - Power Management IC]] 未提供 [[力智]] 的完整公司名稱、PMIC 型號、DrMOS 型號、SPS 型號、VCore 方案規格、客戶占比、營收、出貨量或認證文件。\n- [[AI DC PDU HVDC]] 補充「力智電子」與 `uPI Semi` URL，但未提供法律全名、公司登記資料、產品型號、HVDC PDU / PSU / BBU / CBU 參與角色、客戶、出貨或營收證據。\n- [[Power IC - Power Management IC image 2]] 提到 [[NVIDIA]] 與美系大廠供應鏈，但未提供合約、NVIDIA 官方供應商名單、採購金額或出貨資料；不可單獨用於確認交易關係。\n- 來源是概念股 / 受惠程度整理表與 OneNote 彙整頁，不構成投資建議或供應鏈驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/力智.md"
+              },
+              "score": 3.307166
+             },
+             {
+              "text": "R&S CMX-KA401\n[[R&S CMX-KA401]] 是 [[R&S CMX500]] 的 advanced audio measurement / generator and playback software option；[[CMX_Configuration_Guide_Audio-Testing]] 中將它列為 OTT voice quality、customer WAV injection、VoIP wave injection、E2E audio delay、IP streaming、playback/record 與 non-realtime IMS 等 scope 的 conditional option。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA401.md"
+              },
+              "score": 2.366505
+             },
+             {
+              "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 9.778871
+             },
+             {
+              "text": "Christian Mokry\n[[Christian Mokry]] 是多份 [[Rohde & Schwarz]] 新聞稿中列出的 Press & media contact，職稱為 PR Manager Test & measurement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Christian Mokry.md"
+              },
+              "score": 0.842344
+             },
+             {
+              "text": "R&S CMX-KF690\n[[R&S CMX-KF690]] 是 [[CMX_Configuration_Guide_Audio-Testing]] 中列出的 POLQA Measurements xLAPI automation scripts package，包含 4 pre-coded scripts；來源明示它不 enable POLQA。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KF690.md"
+              },
+              "score": 0.681189
+             },
+             {
+              "text": "Rohde & Schwarz GmbH & Co KG › 與 Rohde & Schwarz 的關係\n本頁只記錄來源文字中的 legal / trademark name。來源正文同時以 [[Rohde & Schwarz]] 作為公司 / 品牌名稱，描述其 Test & Measurement、Technology Systems、Networks & Cybersecurity Divisions，以及 2024/2025 fiscal year 財務與員工資訊；[[1C111_1e_3GPPPreConfGuide]] 則提供 electronics group 的 business fields 與公司概述。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Rohde & Schwarz GmbH & Co KG.md"
+              },
+              "score": 0.335579
+             },
+             {
+              "text": "PI for Digital Power › 重點摘要\n- 來源 frontmatter 顯示 `converted: 2026-09-16`，原始 OneNote / drop 路徑標題含 `AI DC PDU (2026-8-3)`；本頁不推論該日期等同外部文章發布日。\n- 來源是 copied markdown，明示 nothing was extracted, rewritten or stripped out。\n- 來源只列出兩個外部連結：一篇 [[ALLPCB]] 的 PDN impedance guide，以及一篇 [[Signal Integrity Journal]] 的 active ultra-high current PDNs ultrafast impedance measurement 文章。\n- 由於來源未擷取外部連結正文，本次 ingest 只建立索引型來源摘要；不得把連結標題中的技術主張改寫成已驗證事實。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/PI for Digital Power.md"
+              },
+              "score": 0.32928
+             },
+             {
+              "text": "衛星酬載群延遲量測 › 方法選擇\n依 [[Satellite_payload_testing_app-bro_en_5215-2120-92_v0200]]：\n\n- [[R&S FSW]] + [[R&S SMW200A]] 建議用於 complete payload testing。\n- [[R&S ZNA]] 建議用於 component level testing。\n- Spectrum analyzer + signal generator 的 measuring principle 是產生 multi-carrier signal，量測 carriers 之間的 phase shift / difference，再計算 group delay。\n- VNA 的 measuring principle 是產生 two-tone signal，並在 reference 與 measurement receivers 中量測 carriers 之間的 phase。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/衛星酬載群延遲量測.md"
+              },
+              "score": 0.2326
+             },
+             {
+              "text": "德宏 › 列名整理\n| 來源 | 日期 / 期間 | 圖上分類 | 圖上文字 | 限制 |\n|---|---|---|---|---|\n| [[AI Server PCB test image 25]] | Nov., 2025；取得於 2026-09-04 | [[原材料]] / [[玻纖布]] | 德宏 | 未說明產品規格、供應客戶、出貨期間或列名完整性。 |\n| [[HSD PCB image 15]] | 來源未標示日期；取得於 2026-09-04 | [[玻纖布]]圖卡註記 | 石英布:德宏(5475) | 未說明石英布是否屬於玻纖布、替代材料或另類材料。 |\n| [[HSD PCB image 18]] | 來源未標示日期；取得於 2026-09-04 | [[Q-Glass]] / 石英纖維 | 德宏 領先佈局 | 未說明「領先佈局」是產能、研發、投資、供應關係或作者描述。 |\n| [[HSD PCB image 8]] | 來源未標示日期；converted 2026-09-04 | [[Q-Glass]] / 石英纖維 | 德宏 領先佈局 | 與 [[HSD PCB image 18]] 在此欄位一致，但不可視為獨立市場驗證。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/德宏.md"
+              },
+              "score": 1.490494
+             },
+             {
+              "text": "OCP Regional Summit › 可追溯限制\n- [[AI Server PCB test image 76]] 與 [[Switch server- optical switch image 1]] 未提供 [[OCP Regional Summit]] 的完整活動日期、議程、主辦單位、展位、簡報標題或演講者。\n- 兩份來源均未說明照片是否拍攝於會場、取自會議簡報、來自媒體照片或其他來源。\n- 兩份來源中末尾 `2` 用途無法辨識，不可寫成頁碼、照片編號或會議場次。\n- [[Switch server- optical switch image 1]] 與 [[AI Server PCB test image 76]] 高度重疊，不可視為彼此獨立的市場驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/OCP Regional Summit.md"
+              },
+              "score": 1.996516
+             },
+             {
+              "text": "NVIDIA › NVIDIA 800 VDC blog 摘錄\n- [[Power delivery unit]]（raw 路徑含 2026-8-3；converted 2026-09-16）稱：**NVIDIA is leading the transition to 800 VDC data center power infrastructure to support 1 MW IT racks and beyond, starting in 2027.**\n- [[Power delivery unit]]（raw 路徑含 2026-8-3；converted 2026-09-16）稱，為加速 adoption，NVIDIA 正與 data center electrical ecosystem 的 key industry partners 合作。\n- [[Power delivery unit]] 來源附上 NVIDIA developer blog URL：`https://developer.nvidia.com/blog/nvidia-800-v-hvdc-architecture-will-power-the-next-generation-of-ai-factories/`。\n- [[Power delivery unit]] 未擷取完整 blog 正文；目前只能引用 OneNote 中抄出的段落與 partner list。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/NVIDIA.md"
+              },
+              "score": 3.33527
+             },
+             {
+              "text": "R&S CMX-KA401 › 使用限制\n- KA401 需要 KA100 + KA180。\n- `SAP Kurztext: IP Analysis` 不等於 [[R&S CMX-KA150]] deep IP traffic analysis；來源明示 KA150 不可替代 KA180，也不是 voice/audio measurement。\n- 本頁只記錄 configuration guide / features overview；實際 supported OTT apps、WAV format、latency measurement method 與 script interface 需另查正式文件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA401.md"
+              },
+              "score": 0.483627
+             },
+             {
+              "text": "R&S CMX-KF690 › 來源中的配置資料\n| Description | Mandatory | Conditions |\n|---|---|---|\n| POLQA Measurements — xLAPI automation scripts for POLQA 4 pre-coded scripts | Conditional | Add only when POLQA xLAPI automation scripts are specifically requested；does not enable POLQA；requires full enabler stack KS600B + KA100 + KA180 + KA181；basic-tier scripts，KS600B sufficient，no KS600M/X required |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KF690.md"
+              },
+              "score": 0.601455
+             },
+             {
+              "text": "b.  What does “minimal human intervention” mean in your context—which decisions",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-c733beba88ba4b3a",
+                "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+                "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+                "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "section": 37,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.675834
+             },
+             {
+              "text": "# Signal integrity flow of high speed PCB/PCBA\nIL/Xtalk/Eye diagram\nTDR Impedance\nStackup Planner\nTL Calculator",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-74f44a4409e2b694",
+                "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+                "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+                "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "section": 104,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 17.791897
+             },
+             {
+              "text": "![https://cdn.rohde-schwarz.com/pws/product/n_1/nrq6/NRQ6_48940_05_lightbox_landscape.jpg](Picture2.jpg)",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ae261ae2c6ea49d8",
+                "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+                "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+                "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "section": 53,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 15.977504
+             },
+             {
+              "text": "For product brochure, see PD 5214.0601.12 and www.rohde-schwarz.com",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-bb00f7ed66cf3a5d",
+                "original_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+                "sha256": "bb00f7ed66cf3a5d5e0de6726bb22640f7873382a3abbbb5b905cb98d9c0c856",
+                "raw_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+               "section": 122,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 15.977504
+             }
+            ],
+            "text": "In the provided evidence, an eye diagram is treated as a high-speed PCB/PCBA signal-integrity item evaluated alongside insertion loss and crosstalk, because the raw source lists “IL/Xtalk/Eye diagram” under “Signal integrity flow of high speed PCB/PCBA.” [66]\nUnderstanding it affects material/stackup selection decisions, because R&S PCB test solutions list Eye diagram together with IL, DK/DF, roughness, impedance, Xtalk, and TL modeling under Material/Stackup selection for PCB Fabricator and System House [13].\nUnderstanding it also affects high-speed PCB/PCBA signal-integrity workflow decisions, because the R&S SerDes/SI/PI material lists IL, Xtalk, Eye diagram, TDR Impedance, Stackup Planner, and TL Calculator in the same signal-integrity flow [8][66].\nUnderstanding it affects receiver/product validation decisions, because fiber-weave-induced intra-pair skew is stated to degrade the differential eye diagram seen by the receiver [9].\nUnderstanding it affects PCIe redriver output acceptance decisions, because the source states that PCIe redriver output eye opening must be greater than or equal to the listed eye-opening values [10].\nThe cited PCIe context measures minimum eye width and eye height after equalization and before 3-tap DFE blocks [10].\nIn Rohde & Schwarz product-related context, R&S PCB test solutions cover material measurement, material/stackup selection, signal-integrity modeling/testing, sampling testing, and process monitoring for PCB Fabricator and System House [13][15].\nR&S product mapping links R&S ZNA and R&S ZNB to PCB IL and TDR measurements, but the passages do not directly state an R&S product or option code specifically for eye-diagram measurement [27][29].\n【推論】Because the raw SI flow places Eye diagram next to IL, Xtalk, TDR Impedance, Stackup Planner, and TL Calculator, understanding the eye diagram helps decide whether the product-related measurement focus should be channel loss/crosstalk, impedance/TDR, or stackup/transmission-line modeling. [66]",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+             },
+             "score": 1.433208
+            },
+            {
+             "text": "PCIe Gen5 high-speed PCB layout › Dk / Df 與 fiber weave skew\n- [[snla426]]（June 2023）說 routing differential signals 時，每條 trace 會因 [[fiberglass weave]] 與 [[epoxy]] 的 static permittivity（εr）差異，而經歷不同 dielectric constants 與 signal velocities。\n- [[snla426]]（June 2023）說 fiberglass weave 的 εr 約為 6，epoxy 的 εr 約為 3。\n- [[snla426]]（June 2023）說 fiber glass laminate 中的 holes 或 openings 會造成 εr 與 loss tangent（Df）差異。\n- [[snla426]]（June 2023）說 εr 與 Df 差異會在 signal bandwidth 的不同頻率上造成 transmission media 的 [[return loss]] 或 [[insertion loss]] resonance / anti-resonance。\n- [[snla426]]（June 2023）說 differential pair 兩條 signal 若經過不同 fiberglass / epoxy 比例，會產生 [[intra-pair skew]]，並劣化 receiver 看到的 differential eye diagram。\n- [[snla426]]（June 2023）說 fiber weave skew 會造成 duty cycle distortion、AC common-mode voltage noise 與 EMI issues。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+             },
+             "score": 4.396566
+            },
+            {
+             "text": "PCIe Gen5 high-speed PCB layout › Eye opening requirements\n| Generation | Extrapolated Eye Height after EQ | Minimum Eye Width after EQ | 來源 | 日期 |\n|---|---:|---:|---|---|\n| [[PCIe Gen3]] | 25 mV | 0.3 UI（37.5 ps） | [[snla426]] | June 2023 |\n| [[PCIe Gen4]] | 15 ± 1.5 mV | 0.3 UI（18.75 ± 0.55 ps） | [[snla426]] | June 2023 |\n| [[PCIe Gen5]] | 15 ± 1.5 mV | 0.3 UI（9.375 ± 0.5 ps） | [[snla426]] | June 2023 |\n\n- [[snla426]]（June 2023）說 minimum eye width 與 eye height 在 post-equalization、3-tap DFE blocks 之前量測。\n- [[snla426]]（June 2023）說 PCIe redriver output 的 eye opening 需要大於或等於表列 eye opening 數值。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md"
+             },
+             "score": 4.374945
+            },
+            {
+             "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 3.853109
+            },
+            {
+             "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+             },
+             "score": 1.394948
+            },
+            {
+             "text": "AISeverEcosystem R&S solution mapping › 來源中的 mapping\n| 分類 | 對象 / 企業欄 | 來源中的 R&S Solution | 來源日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| [[伺服器主機板]] / PCBA | [[鴻海]] | [[R&S ZNL]]: PDN Target Z；[[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test、clock jitter test；[[R&S ZNA]]: high speed trace test | 來源未標示正式日期；raw converted 2026-09-17 | 未提供正式 test setup、option、fixture、頻率或 sales kit |\n| [[伺服器電路板]] / [[PCB]] | [[博智]] | [[R&S ZNA]] / [[R&S ZNB]]: IL、TDR | 來源未標示正式日期；raw converted 2026-09-17 | 只對應表內 [[博智]]列，不能推論其他 PCB 廠同樣適用 |\n| [[連接器]] / 線纜 | [[嘉澤]] / [[嘉基]] | [[R&S ZNA]] / [[R&S ZNB]] + [[OSP]]: high speed cable | 來源未標示正式日期；raw converted 2026-09-17 | [[嘉澤]] / [[嘉基]] 同格寫法未決；未提供 cable type、connector type 或 calibration method |\n| [[網通交換機]] | [[智邦]] | [[R&S FSWP]]: jitter / phase noise test；VNA（[[R&S ZNA]] / [[R&S ZNB]]）；EMI pretest | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；不可推論完整 switching test portfolio |\n| [[矽光子]] | [[上詮]] | optical VNA：[[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]；[[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]] | 來源未標示正式日期；raw converted 2026-09-17 | ThinkLands、GOCA、Newkey 與 PSA 未展開；未提供 optical VNA setup 或 module type |\n| [[散熱器]] | [[建準]] | [[MXO]]: motor driver analysis | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 motor driver type、fan / pump 類型或量測條件 |\n| [[電源供應器]] | [[光寶科]] | [[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test；BMS test | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；未提供 HVDC / PSU / BBU 測試配置 |\n| [[GPU]] | [[輝達]] | [[R&S ZNA]]: TDR、[[OSP]] | 來源未標示正式日期；raw converted 2026-09-17 | 不代表 R&S 與 NVIDIA 合作或採購關係；僅是表內 solution mapping |\n| [[CPU]] | [[超微]] | [[R&S ZNA]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 TDR、SI、PI 或其他測項 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+             },
+             "score": 2.758578
+            },
+            {
+             "text": "AISeverEcosystem R&S solution mapping › SI / high-speed channel / interconnect\n- [[R&S ZNA]] 與 [[R&S ZNB]] 在來源中被放入 [[伺服器電路板]] / [[PCB]] 的 IL、TDR，以及 [[連接器]] / 線纜的 high speed cable 測試。\n- [[R&S ZNA]] 也出現在 [[伺服器主機板]] / PCBA 的 high speed trace test、[[GPU]] 的 TDR、[[CPU]]、[[智原]]、[[譜瑞-KY]]等 IC / high-speed transmission context。\n- [[R&S ZNA67EXT]] 出現在 [[智原]] 與 [[旺矽]] 的 solution 欄，但來源未提供實際 frequency range 或 fixture。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+             },
+             "score": 2.470086
+            },
+            {
+             "text": "# Signal integrity flow of high speed PCB/PCBA\nIL/Xtalk/Eye diagram\nTDR Impedance\nStackup Planner\nTL Calculator",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-74f44a4409e2b694",
+               "original_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "sha256": "74f44a4409e2b694065038d44c8327e72b9a3c1ceed3537fc8dc2669826c580d",
+               "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md",
+              "section": 104,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 17.791897
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "product_option_spec",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 4,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/TRI_AMD_RSKR Sharing1.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 4,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/TRI_AMD_RSKR Sharing1.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 5,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/TRI_AMD_RSKR Sharing1.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+             "raw_refs": [
+              "raw/Market/OneNote/snla426.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/R&S PCB test solutions.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+             "raw_refs": [
+              "raw/Market/OneNote/AISeverEcosystem.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

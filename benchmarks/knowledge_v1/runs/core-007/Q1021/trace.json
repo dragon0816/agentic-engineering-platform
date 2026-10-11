@@ -1,0 +1,1491 @@
+{
+ "question": {
+  "id": "Q1021",
+  "text": "What is OFDM, and which product-related measurement decisions depend on understanding it?",
+  "technical": "Wireless Fundamentals",
+  "topic": "OFDM",
+  "product_related": "true"
+ },
+ "session_id": "conversation-6a841f1154704869946f4d1644c35efc",
+ "exchange": {
+  "sent": "What is OFDM, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 149.125,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-6a841f1154704869946f4d1644c35efc",
+    "actor": "leo.chi",
+    "title": "What is OFDM, and which product-related measurement decisions depend on …",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T07:00:29.079777Z",
+    "updated_at": "2026-10-11T07:02:58.043249Z",
+    "messages": [
+     {
+      "message_id": "message-d640964a76f541da915a90fb2c679b5a",
+      "role": "user",
+      "text": "What is OFDM, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-11T07:00:29.096216Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-5168097923e5449195e11fc3255c6090",
+      "role": "assistant",
+      "text": "OFDM is described here as the waveform/grid basis in which frequency-domain subcarriers and time-domain OFDM symbols form the NR resource grid [2]. An NR Resource Element is one subcarrier in one OFDM symbol on one antenna port [3]. OFDM signals are formed as a linear combination of many QAM symbols through an IFFT, which is why they can have high PAPR [46]. In an OFDM system, a cyclic prefix is added to each time-domain OFDM symbol as a guard interval to reduce inter-symbol interference [5]. In 5G NR, numerology μ defines OFDM time-frequency resolution, including OFDM symbol duration and subcarrier spacing [37].\n| Product-related measurement decision | Rohde & Schwarz product facts | Why OFDM understanding matters | Evidence |\n|---|---|---|---|\n| Choose/configure 5G NR FR1 uplink TX measurement capability on R&S CMX500 | R&S CMX-KM600 is necessary for any NR FR1 uplink TX tests; NR FR1 uplink measurements include multi-evaluation, PRACH, SRS and TPC; multi-evaluation supports 3 MHz to 100 MHz channel bandwidth [23]. | NR measurements use an OFDM resource grid of subcarriers and OFDM symbols, and actual allocation, BWP or measurement bandwidth calculations require formal NR specifications [1][2]. | [1][2][23] |\n| Choose CMX500 NR analyzer/generator options and interpret EVM-related specs | R&S CMX-KM600 is the 5G NR analyzer option, and R&S CMX-KW601 is the 5G NR generator option [22]. The CMX-KM600 analyzer condition includes FR1, SCS 30 kHz, 16QAM and 100 MHz bandwidth with EVM < 0.5%; the CMX-KW601 generator condition includes 5G NR PDSCH, full allocation, SCS 30 kHz / 60 kHz, 64QAM and 100 MHz bandwidth with EVM < 0.5% [23]. | SCS, OFDM symbol duration, RB allocation and sample rate are OFDM/numerology-dependent NR configuration items [37][39][43]. | [22][23][37][39][43] |\n| Decide NR EVM test setup, limits and allocation/modulation conditions | EVM is the difference between a reference waveform and a measured waveform [15]. In the cited 5G NR FR1 SA pre-conformance test case, the Test ID sets RB Allocation and modulation scheme, EVM must be checked against specified range, and max-power/min-power EVM measurements are required [15]. EVM limits vary by modulation, including Pi/2-BPSK, QPSK, 16QAM, 64QAM and 256QAM [14]. | RBs and REs are defined on the OFDM grid, so allocation-dependent EVM setup requires OFDM grid vocabulary [3][39]. | [3][14][15][39] |\n| Choose/configure R&S PVT360A 5G NR downlink/uplink measurement options | R&S PVT-KM320 provides 5G NR downlink measurements release 15/16, R&S PVT-KM321 provides 5G NR uplink measurements release 15/16/17, R&S PVT-KM323 is an uplink multicarrier extension, and R&S PVT-KM325 is an uplink MIMO extension [30][31]. FR1 uplink measurements include multi-evaluation, PRACH, SRS and TPC; NR uplink multi-evaluation supports FDD/TDD, NR standalone, intraband contiguous EN-DC and 3 MHz to 100 MHz channel bandwidth [31]. | These are NR physical-layer measurements over the NR OFDM grid, whose time-frequency resolution is set by numerology and SCS [36][37]. | [30][31][36][37] |\n| Decide cyclic prefix / slot-symbol assumptions for NR measurement configuration | Normal CP uses 14 OFDM symbols per slot, while Extended CP uses 12 OFDM symbols per slot; NR Release 15 defines Extended CP only for μ=2 [38]. | CP changes the OFDM symbol/slot structure and therefore affects symbol-level measurement mapping [5][38]. | [5][38] |\n| Choose WLAN TX measurement options where OFDM is explicitly part of the test type | R&S PVT360A WLAN measurements include OFDM / DSSS TX tests for power, modulation, spectrum, OBW, spectrum flatness and transmit spectrum mask [28]. PVT WLAN measurement options include R&S PVT-KM410 for 802.11a/b/g/n/p/ac, KM411 for 802.11ax, KM412 for 802.11be, KM413 for WLAN MIMO extension and KM414 for 802.11bn [28][30]. | The cited WLAN test category explicitly includes OFDM TX tests [28]. | [28][30] |\n| Choose CMX500 WLAN TX measurement options | CMX500 measurement options include R&S CMX-KM350 for WLAN TX measurements IEEE 802.11a/b/g/n/ac, CMX-KM351 for IEEE 802.11ax and CMX-KM352 for IEEE 802.11be [22]. CMX500 features also include WLAN signaling and WLAN TX measurements covering 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn and 2x2 MIMO [20]. | The passages identify WLAN TX measurement products, but do not directly state which of those CMX500 WLAN options are OFDM-specific. | [20][22] |\n【推論】For NR product configuration, OFDM understanding is needed before choosing or configuring CMX500 KM600/KW601 or PVT360A NR measurement options, because the products are specified by NR measurement type, SCS, bandwidth, allocation or EVM conditions, while NR allocation and measurement bandwidth are defined on the OFDM resource grid and require formal NR specifications for exact calculation [1][2][22][23][30][31][37][39].\n【推論】For WLAN product configuration, OFDM understanding is directly relevant to PVT360A WLAN measurements because the source explicitly lists “OFDM / DSSS TX tests”; for CMX500 WLAN options, the passages support WLAN TX measurement capability but do not prove the CMX500 option selection is OFDM-specific [20][22][28][30].\nThe supplied RAW passages do not add a supported OFDM definition or measurement-option specification; they only show a product brochure pointer and Rohde & Schwarz mobile radio testing contact information [66][67][68].\n\n來源：\n[1] Wiki：NR resource grid（來源：`NR Frame Structure.md`）\n[2] Wiki：NR resource grid（來源：`NR Frame Structure.md`）\n[3] Wiki：NR resource grid（來源：`NR Frame Structure.md`）\n[5] Wiki：NR cyclic prefix（來源：`NR Frame Structure.md`）\n[14] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[15] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[20] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[22] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[23] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[28] Wiki：R&S PVT360A（缺來源連結）\n[30] Wiki：R&S PVT360A（缺來源連結）\n[31] Wiki：R&S PVT360A（缺來源連結）\n[36] Wiki：5G NR numerology（來源：`NR Frame Structure.md`、`SSB (NR).md`）\n[37] Wiki：5G NR numerology（來源：`NR Frame Structure.md`、`SSB (NR).md`）\n[38] Wiki：5G NR frame structure（來源：`NR Frame Structure.md`）\n[39] Wiki：5G NR frame structure（來源：`NR Frame Structure.md`）\n[43] Wiki：NR sample rate（來源：`Frequency Ranges, Bands and Bandwidth.md`、`NR Frame Structure.md`）\n[46] Wiki：Low-PAPR sequence（來源：`DMRS.md`）\n[66] `raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md`\n[67] `raw/Productions/cmx500_ntn_customer_questionnaire.md`\n[68] `raw/Productions/cmx500_ntn_customer_questionnaire.md`",
+      "created_at": "2026-10-11T07:02:58.043249Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-5727295f6107449cb49fb8d1527f3c3e",
+       "request_id": "request-5727295f6107449cb49fb8d1527f3c3e",
+       "span_id": "span-5727295f6107449cb49fb8d1527f3c3e",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "OFDM is described here as the waveform/grid basis in which frequency-domain subcarriers and time-domain OFDM symbols form the NR resource grid [2]. An NR Resource Element is one subcarrier in one OFDM symbol on one antenna port [3]. OFDM signals are formed as a linear combination of many QAM symbols through an IFFT, which is why they can have high PAPR [46]. In an OFDM system, a cyclic prefix is added to each time-domain OFDM symbol as a guard interval to reduce inter-symbol interference [5]. In 5G NR, numerology μ defines OFDM time-frequency resolution, including OFDM symbol duration and subcarrier spacing [37].\n| Product-related measurement decision | Rohde & Schwarz product facts | Why OFDM understanding matters | Evidence |\n|---|---|---|---|\n| Choose/configure 5G NR FR1 uplink TX measurement capability on R&S CMX500 | R&S CMX-KM600 is necessary for any NR FR1 uplink TX tests; NR FR1 uplink measurements include multi-evaluation, PRACH, SRS and TPC; multi-evaluation supports 3 MHz to 100 MHz channel bandwidth [23]. | NR measurements use an OFDM resource grid of subcarriers and OFDM symbols, and actual allocation, BWP or measurement bandwidth calculations require formal NR specifications [1][2]. | [1][2][23] |\n| Choose CMX500 NR analyzer/generator options and interpret EVM-related specs | R&S CMX-KM600 is the 5G NR analyzer option, and R&S CMX-KW601 is the 5G NR generator option [22]. The CMX-KM600 analyzer condition includes FR1, SCS 30 kHz, 16QAM and 100 MHz bandwidth with EVM < 0.5%; the CMX-KW601 generator condition includes 5G NR PDSCH, full allocation, SCS 30 kHz / 60 kHz, 64QAM and 100 MHz bandwidth with EVM < 0.5% [23]. | SCS, OFDM symbol duration, RB allocation and sample rate are OFDM/numerology-dependent NR configuration items [37][39][43]. | [22][23][37][39][43] |\n| Decide NR EVM test setup, limits and allocation/modulation conditions | EVM is the difference between a reference waveform and a measured waveform [15]. In the cited 5G NR FR1 SA pre-conformance test case, the Test ID sets RB Allocation and modulation scheme, EVM must be checked against specified range, and max-power/min-power EVM measurements are required [15]. EVM limits vary by modulation, including Pi/2-BPSK, QPSK, 16QAM, 64QAM and 256QAM [14]. | RBs and REs are defined on the OFDM grid, so allocation-dependent EVM setup requires OFDM grid vocabulary [3][39]. | [3][14][15][39] |\n| Choose/configure R&S PVT360A 5G NR downlink/uplink measurement options | R&S PVT-KM320 provides 5G NR downlink measurements release 15/16, R&S PVT-KM321 provides 5G NR uplink measurements release 15/16/17, R&S PVT-KM323 is an uplink multicarrier extension, and R&S PVT-KM325 is an uplink MIMO extension [30][31]. FR1 uplink measurements include multi-evaluation, PRACH, SRS and TPC; NR uplink multi-evaluation supports FDD/TDD, NR standalone, intraband contiguous EN-DC and 3 MHz to 100 MHz channel bandwidth [31]. | These are NR physical-layer measurements over the NR OFDM grid, whose time-frequency resolution is set by numerology and SCS [36][37]. | [30][31][36][37] |\n| Decide cyclic prefix / slot-symbol assumptions for NR measurement configuration | Normal CP uses 14 OFDM symbols per slot, while Extended CP uses 12 OFDM symbols per slot; NR Release 15 defines Extended CP only for μ=2 [38]. | CP changes the OFDM symbol/slot structure and therefore affects symbol-level measurement mapping [5][38]. | [5][38] |\n| Choose WLAN TX measurement options where OFDM is explicitly part of the test type | R&S PVT360A WLAN measurements include OFDM / DSSS TX tests for power, modulation, spectrum, OBW, spectrum flatness and transmit spectrum mask [28]. PVT WLAN measurement options include R&S PVT-KM410 for 802.11a/b/g/n/p/ac, KM411 for 802.11ax, KM412 for 802.11be, KM413 for WLAN MIMO extension and KM414 for 802.11bn [28][30]. | The cited WLAN test category explicitly includes OFDM TX tests [28]. | [28][30] |\n| Choose CMX500 WLAN TX measurement options | CMX500 measurement options include R&S CMX-KM350 for WLAN TX measurements IEEE 802.11a/b/g/n/ac, CMX-KM351 for IEEE 802.11ax and CMX-KM352 for IEEE 802.11be [22]. CMX500 features also include WLAN signaling and WLAN TX measurements covering 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn and 2x2 MIMO [20]. | The passages identify WLAN TX measurement products, but do not directly state which of those CMX500 WLAN options are OFDM-specific. | [20][22] |\n【推論】For NR product configuration, OFDM understanding is needed before choosing or configuring CMX500 KM600/KW601 or PVT360A NR measurement options, because the products are specified by NR measurement type, SCS, bandwidth, allocation or EVM conditions, while NR allocation and measurement bandwidth are defined on the OFDM resource grid and require formal NR specifications for exact calculation [1][2][22][23][30][31][37][39].\n【推論】For WLAN product configuration, OFDM understanding is directly relevant to PVT360A WLAN measurements because the source explicitly lists “OFDM / DSSS TX tests”; for CMX500 WLAN options, the passages support WLAN TX measurement capability but do not prove the CMX500 option selection is OFDM-specific [20][22][28][30].\nThe supplied RAW passages do not add a supported OFDM definition or measurement-option specification; they only show a product brochure pointer and Rohde & Schwarz mobile radio testing contact information [66][67][68].\n\n來源：\n[1] Wiki：NR resource grid（來源：`NR Frame Structure.md`）\n[2] Wiki：NR resource grid（來源：`NR Frame Structure.md`）\n[3] Wiki：NR resource grid（來源：`NR Frame Structure.md`）\n[5] Wiki：NR cyclic prefix（來源：`NR Frame Structure.md`）\n[14] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[15] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[20] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[22] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[23] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[28] Wiki：R&S PVT360A（缺來源連結）\n[30] Wiki：R&S PVT360A（缺來源連結）\n[31] Wiki：R&S PVT360A（缺來源連結）\n[36] Wiki：5G NR numerology（來源：`NR Frame Structure.md`、`SSB (NR).md`）\n[37] Wiki：5G NR numerology（來源：`NR Frame Structure.md`、`SSB (NR).md`）\n[38] Wiki：5G NR frame structure（來源：`NR Frame Structure.md`）\n[39] Wiki：5G NR frame structure（來源：`NR Frame Structure.md`）\n[43] Wiki：NR sample rate（來源：`Frequency Ranges, Bands and Bandwidth.md`、`NR Frame Structure.md`）\n[46] Wiki：Low-PAPR sequence（來源：`DMRS.md`）\n[66] `raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md`\n[67] `raw/Productions/cmx500_ntn_customer_questionnaire.md`\n[68] `raw/Productions/cmx500_ntn_customer_questionnaire.md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-5727295f6107449cb49fb8d1527f3c3e",
+      "request_id": "request-5727295f6107449cb49fb8d1527f3c3e",
+      "span_id": "span-5727295f6107449cb49fb8d1527f3c3e",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-5727295f6107449cb49fb8d1527f3c3e",
+       "request_id": "request-5727295f6107449cb49fb8d1527f3c3e",
+       "span_id": "span-5727295f6107449cb49fb8d1527f3c3e",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "OFDM is described here as the waveform/grid basis in which frequency-domain subcarriers and time-domain OFDM symbols form the NR resource grid [2]. An NR Resource Element is one subcarrier in one OFDM symbol on one antenna port [3]. OFDM signals are formed as a linear combination of many QAM symbols through an IFFT, which is why they can have high PAPR [46]. In an OFDM system, a cyclic prefix is added to each time-domain OFDM symbol as a guard interval to reduce inter-symbol interference [5]. In 5G NR, numerology μ defines OFDM time-frequency resolution, including OFDM symbol duration and subcarrier spacing [37].\n| Product-related measurement decision | Rohde & Schwarz product facts | Why OFDM understanding matters | Evidence |\n|---|---|---|---|\n| Choose/configure 5G NR FR1 uplink TX measurement capability on R&S CMX500 | R&S CMX-KM600 is necessary for any NR FR1 uplink TX tests; NR FR1 uplink measurements include multi-evaluation, PRACH, SRS and TPC; multi-evaluation supports 3 MHz to 100 MHz channel bandwidth [23]. | NR measurements use an OFDM resource grid of subcarriers and OFDM symbols, and actual allocation, BWP or measurement bandwidth calculations require formal NR specifications [1][2]. | [1][2][23] |\n| Choose CMX500 NR analyzer/generator options and interpret EVM-related specs | R&S CMX-KM600 is the 5G NR analyzer option, and R&S CMX-KW601 is the 5G NR generator option [22]. The CMX-KM600 analyzer condition includes FR1, SCS 30 kHz, 16QAM and 100 MHz bandwidth with EVM < 0.5%; the CMX-KW601 generator condition includes 5G NR PDSCH, full allocation, SCS 30 kHz / 60 kHz, 64QAM and 100 MHz bandwidth with EVM < 0.5% [23]. | SCS, OFDM symbol duration, RB allocation and sample rate are OFDM/numerology-dependent NR configuration items [37][39][43]. | [22][23][37][39][43] |\n| Decide NR EVM test setup, limits and allocation/modulation conditions | EVM is the difference between a reference waveform and a measured waveform [15]. In the cited 5G NR FR1 SA pre-conformance test case, the Test ID sets RB Allocation and modulation scheme, EVM must be checked against specified range, and max-power/min-power EVM measurements are required [15]. EVM limits vary by modulation, including Pi/2-BPSK, QPSK, 16QAM, 64QAM and 256QAM [14]. | RBs and REs are defined on the OFDM grid, so allocation-dependent EVM setup requires OFDM grid vocabulary [3][39]. | [3][14][15][39] |\n| Choose/configure R&S PVT360A 5G NR downlink/uplink measurement options | R&S PVT-KM320 provides 5G NR downlink measurements release 15/16, R&S PVT-KM321 provides 5G NR uplink measurements release 15/16/17, R&S PVT-KM323 is an uplink multicarrier extension, and R&S PVT-KM325 is an uplink MIMO extension [30][31]. FR1 uplink measurements include multi-evaluation, PRACH, SRS and TPC; NR uplink multi-evaluation supports FDD/TDD, NR standalone, intraband contiguous EN-DC and 3 MHz to 100 MHz channel bandwidth [31]. | These are NR physical-layer measurements over the NR OFDM grid, whose time-frequency resolution is set by numerology and SCS [36][37]. | [30][31][36][37] |\n| Decide cyclic prefix / slot-symbol assumptions for NR measurement configuration | Normal CP uses 14 OFDM symbols per slot, while Extended CP uses 12 OFDM symbols per slot; NR Release 15 defines Extended CP only for μ=2 [38]. | CP changes the OFDM symbol/slot structure and therefore affects symbol-level measurement mapping [5][38]. | [5][38] |\n| Choose WLAN TX measurement options where OFDM is explicitly part of the test type | R&S PVT360A WLAN measurements include OFDM / DSSS TX tests for power, modulation, spectrum, OBW, spectrum flatness and transmit spectrum mask [28]. PVT WLAN measurement options include R&S PVT-KM410 for 802.11a/b/g/n/p/ac, KM411 for 802.11ax, KM412 for 802.11be, KM413 for WLAN MIMO extension and KM414 for 802.11bn [28][30]. | The cited WLAN test category explicitly includes OFDM TX tests [28]. | [28][30] |\n| Choose CMX500 WLAN TX measurement options | CMX500 measurement options include R&S CMX-KM350 for WLAN TX measurements IEEE 802.11a/b/g/n/ac, CMX-KM351 for IEEE 802.11ax and CMX-KM352 for IEEE 802.11be [22]. CMX500 features also include WLAN signaling and WLAN TX measurements covering 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn and 2x2 MIMO [20]. | The passages identify WLAN TX measurement products, but do not directly state which of those CMX500 WLAN options are OFDM-specific. | [20][22] |\n【推論】For NR product configuration, OFDM understanding is needed before choosing or configuring CMX500 KM600/KW601 or PVT360A NR measurement options, because the products are specified by NR measurement type, SCS, bandwidth, allocation or EVM conditions, while NR allocation and measurement bandwidth are defined on the OFDM resource grid and require formal NR specifications for exact calculation [1][2][22][23][30][31][37][39].\n【推論】For WLAN product configuration, OFDM understanding is directly relevant to PVT360A WLAN measurements because the source explicitly lists “OFDM / DSSS TX tests”; for CMX500 WLAN options, the passages support WLAN TX measurement capability but do not prove the CMX500 option selection is OFDM-specific [20][22][28][30].\nThe supplied RAW passages do not add a supported OFDM definition or measurement-option specification; they only show a product brochure pointer and Rohde & Schwarz mobile radio testing contact information [66][67][68].\n\n來源：\n[1] Wiki：NR resource grid（來源：`NR Frame Structure.md`）\n[2] Wiki：NR resource grid（來源：`NR Frame Structure.md`）\n[3] Wiki：NR resource grid（來源：`NR Frame Structure.md`）\n[5] Wiki：NR cyclic prefix（來源：`NR Frame Structure.md`）\n[14] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[15] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[20] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[22] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[23] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[28] Wiki：R&S PVT360A（缺來源連結）\n[30] Wiki：R&S PVT360A（缺來源連結）\n[31] Wiki：R&S PVT360A（缺來源連結）\n[36] Wiki：5G NR numerology（來源：`NR Frame Structure.md`、`SSB (NR).md`）\n[37] Wiki：5G NR numerology（來源：`NR Frame Structure.md`、`SSB (NR).md`）\n[38] Wiki：5G NR frame structure（來源：`NR Frame Structure.md`）\n[39] Wiki：5G NR frame structure（來源：`NR Frame Structure.md`）\n[43] Wiki：NR sample rate（來源：`Frequency Ranges, Bands and Bandwidth.md`、`NR Frame Structure.md`）\n[46] Wiki：Low-PAPR sequence（來源：`DMRS.md`）\n[66] `raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md`\n[67] `raw/Productions/cmx500_ntn_customer_questionnaire.md`\n[68] `raw/Productions/cmx500_ntn_customer_questionnaire.md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_dWy85Iixz3kv2GyP4Xwja1mV",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "OFDM is described here as the waveform/grid basis in which frequency-domain subcarriers and time-domain OFDM symbols form the NR resource grid [2]. An NR Resource Element is one subcarrier in one OFDM symbol on one antenna port [3]. OFDM signals are formed as a linear combination of many QAM symbols through an IFFT, which is why they can have high PAPR [46]. In an OFDM system, a cyclic prefix is added to each time-domain OFDM symbol as a guard interval to reduce inter-symbol interference [5]. In 5G NR, numerology μ defines OFDM time-frequency resolution, including OFDM symbol duration and subcarrier spacing [37].\n| Product-related measurement decision | Rohde & Schwarz product facts | Why OFDM understanding matters | Evidence |\n|---|---|---|---|\n| Choose/configure 5G NR FR1 uplink TX measurement capability on R&S CMX500 | R&S CMX-KM600 is necessary for any NR FR1 uplink TX tests; NR FR1 uplink measurements include multi-evaluation, PRACH, SRS and TPC; multi-evaluation supports 3 MHz to 100 MHz channel bandwidth [23]. | NR measurements use an OFDM resource grid of subcarriers and OFDM symbols, and actual allocation, BWP or measurement bandwidth calculations require formal NR specifications [1][2]. | [1][2][23] |\n| Choose CMX500 NR analyzer/generator options and interpret EVM-related specs | R&S CMX-KM600 is the 5G NR analyzer option, and R&S CMX-KW601 is the 5G NR generator option [22]. The CMX-KM600 analyzer condition includes FR1, SCS 30 kHz, 16QAM and 100 MHz bandwidth with EVM < 0.5%; the CMX-KW601 generator condition includes 5G NR PDSCH, full allocation, SCS 30 kHz / 60 kHz, 64QAM and 100 MHz bandwidth with EVM < 0.5% [23]. | SCS, OFDM symbol duration, RB allocation and sample rate are OFDM/numerology-dependent NR configuration items [37][39][43]. | [22][23][37][39][43] |\n| Decide NR EVM test setup, limits and allocation/modulation conditions | EVM is the difference between a reference waveform and a measured waveform [15]. In the cited 5G NR FR1 SA pre-conformance test case, the Test ID sets RB Allocation and modulation scheme, EVM must be checked against specified range, and max-power/min-power EVM measurements are required [15]. EVM limits vary by modulation, including Pi/2-BPSK, QPSK, 16QAM, 64QAM and 256QAM [14]. | RBs and REs are defined on the OFDM grid, so allocation-dependent EVM setup requires OFDM grid vocabulary [3][39]. | [3][14][15][39] |\n| Choose/configure R&S PVT360A 5G NR downlink/uplink measurement options | R&S PVT-KM320 provides 5G NR downlink measurements release 15/16, R&S PVT-KM321 provides 5G NR uplink measurements release 15/16/17, R&S PVT-KM323 is an uplink multicarrier extension, and R&S PVT-KM325 is an uplink MIMO extension [30][31]. FR1 uplink measurements include multi-evaluation, PRACH, SRS and TPC; NR uplink multi-evaluation supports FDD/TDD, NR standalone, intraband contiguous EN-DC and 3 MHz to 100 MHz channel bandwidth [31]. | These are NR physical-layer measurements over the NR OFDM grid, whose time-frequency resolution is set by numerology and SCS [36][37]. | [30][31][36][37] |\n| Decide cyclic prefix / slot-symbol assumptions for NR measurement configuration | Normal CP uses 14 OFDM symbols per slot, while Extended CP uses 12 OFDM symbols per slot; NR Release 15 defines Extended CP only for μ=2 [38]. | CP changes the OFDM symbol/slot structure and therefore affects symbol-level measurement mapping [5][38]. | [5][38] |\n| Choose WLAN TX measurement options where OFDM is explicitly part of the test type | R&S PVT360A WLAN measurements include OFDM / DSSS TX tests for power, modulation, spectrum, OBW, spectrum flatness and transmit spectrum mask [28]. PVT WLAN measurement options include R&S PVT-KM410 for 802.11a/b/g/n/p/ac, KM411 for 802.11ax, KM412 for 802.11be, KM413 for WLAN MIMO extension and KM414 for 802.11bn [28][30]. | The cited WLAN test category explicitly includes OFDM TX tests [28]. | [28][30] |\n| Choose CMX500 WLAN TX measurement options | CMX500 measurement options include R&S CMX-KM350 for WLAN TX measurements IEEE 802.11a/b/g/n/ac, CMX-KM351 for IEEE 802.11ax and CMX-KM352 for IEEE 802.11be [22]. CMX500 features also include WLAN signaling and WLAN TX measurements covering 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn and 2x2 MIMO [20]. | The passages identify WLAN TX measurement products, but do not directly state which of those CMX500 WLAN options are OFDM-specific. | [20][22] |\n【推論】For NR product configuration, OFDM understanding is needed before choosing or configuring CMX500 KM600/KW601 or PVT360A NR measurement options, because the products are specified by NR measurement type, SCS, bandwidth, allocation or EVM conditions, while NR allocation and measurement bandwidth are defined on the OFDM resource grid and require formal NR specifications for exact calculation [1][2][22][23][30][31][37][39].\n【推論】For WLAN product configuration, OFDM understanding is directly relevant to PVT360A WLAN measurements because the source explicitly lists “OFDM / DSSS TX tests”; for CMX500 WLAN options, the passages support WLAN TX measurement capability but do not prove the CMX500 option selection is OFDM-specific [20][22][28][30].\nThe supplied RAW passages do not add a supported OFDM definition or measurement-option specification; they only show a product brochure pointer and Rohde & Schwarz mobile radio testing contact information [66][67][68].\n\n來源：\n[1] Wiki：NR resource grid（來源：`NR Frame Structure.md`）\n[2] Wiki：NR resource grid（來源：`NR Frame Structure.md`）\n[3] Wiki：NR resource grid（來源：`NR Frame Structure.md`）\n[5] Wiki：NR cyclic prefix（來源：`NR Frame Structure.md`）\n[14] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[15] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[20] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[22] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[23] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[28] Wiki：R&S PVT360A（缺來源連結）\n[30] Wiki：R&S PVT360A（缺來源連結）\n[31] Wiki：R&S PVT360A（缺來源連結）\n[36] Wiki：5G NR numerology（來源：`NR Frame Structure.md`、`SSB (NR).md`）\n[37] Wiki：5G NR numerology（來源：`NR Frame Structure.md`、`SSB (NR).md`）\n[38] Wiki：5G NR frame structure（來源：`NR Frame Structure.md`）\n[39] Wiki：5G NR frame structure（來源：`NR Frame Structure.md`）\n[43] Wiki：NR sample rate（來源：`Frequency Ranges, Bands and Bandwidth.md`、`NR Frame Structure.md`）\n[46] Wiki：Low-PAPR sequence（來源：`DMRS.md`）\n[66] `raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md`\n[67] `raw/Productions/cmx500_ntn_customer_questionnaire.md`\n[68] `raw/Productions/cmx500_ntn_customer_questionnaire.md`",
+          "evidence": {
+           "raw_citations": 21,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "product_option_spec": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.1.0-k2.1"
+           },
+           "trace": {
+            "trace_id": "trace-ce95ff91d9d9424b9d035bdc57ccc78a",
+            "request_id": "request-ce95ff91d9d9424b9d035bdc57ccc78a",
+            "span_id": "span-ce95ff91d9d9424b9d035bdc57ccc78a",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "What is OFDM, and which product-related measurement decisions depend on understanding it? Include Rohde & Schwarz product-related measurement decisions and cite raw evidence.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "NR resource grid › 使用限制\n- [[NR Frame Structure]] 未提供 full resource grid formalism，例如 common resource blocks、physical resource blocks、virtual resource blocks、BWP 或 ARFCN mapping。\n- Point-A 只以概念文字描述；來源未提供 offsetToPointA、absoluteFrequencyPointA 或 RRC ASN.1 定義。\n- 若要計算實際 allocation、BWP 或 measurement bandwidth，需查正式 [[3GPP TS 38.211]] / [[3GPP TS 38.214]] / RRC specifications。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NR resource grid.md"
+              },
+              "score": 1.366991
+             },
+             {
+              "text": "NR resource grid\n[[NR resource grid]] 是 5G NR 中以 frequency-domain subcarriers 與 time-domain [[OFDM symbol]]s 組成的 resource mapping grid；[[NR Frame Structure]] 在 resource grid 段落定義 [[Resource Element]]、[[Resource Block]] 與 [[Point-A]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NR resource grid.md"
+              },
+              "score": 0.964428
+             },
+             {
+              "text": "NR resource grid › Resource Element\n依 [[NR Frame Structure]]：\n\n- [[Resource Element]] is the unit of a single subcarrier in one OFDM symbol and on one antenna port。\n\n因此 RE 是 frequency、time 與 antenna port 三個維度上的最小 grid unit。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NR resource grid.md"
+              },
+              "score": 0.938062
+             },
+             {
+              "text": "NR resource grid › 與 CSI-RS / DMRS 的關係\n既有 [[3GPP TS 38.211]] 頁面已收錄 [[CSI-RS]] 與 [[Demodulation Reference Signals (DMRS)]] 對 TS 38.211 的引用。這些 reference signal 的 resource mapping 都需要 RE / RB / OFDM symbol 的 grid vocabulary。\n\n本頁只補充 [[NR Frame Structure]] 來源中的 grid 基礎定義，不重述 DMRS 或 CSI-RS mapping tables。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NR resource grid.md"
+              },
+              "score": 0.681783
+             },
+             {
+              "text": "NR cyclic prefix › 基本概念\n依 [[NR Frame Structure]]：\n\n- 在 OFDM system 中，CP is added for each OFDM symbol in time-domain。\n- CP 是把 raw OFDM symbol 最後幾個 samples 複製到 raw OFDM symbol 前方。\n- CP provides a guard interval between two OFDM symbols。\n- CP 用於 eliminate inter-symbol interference, ISI。\n- NR defines two types of cyclic prefix lengths：[[Normal CP]] 與 [[Extended CP]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NR cyclic prefix.md"
+              },
+              "score": 2.069895
+             },
+             {
+              "text": "NR cyclic prefix › Normal CP\n[[Normal CP]] 是 normal short length CP：\n\n- 用於 short delay spread environment。\n- 14 [[OFDM symbol]]s per slot。\n- 來源說 standard CP length of most OFDM symbols is 9/128 × NFFT，approximately 7 percent redundancy overhead。\n- CP of the first OFDM symbol of every half-subframe is longer than all others，以 compensate inequality。\n\n來源列出的 NCP 標準 CP duration：\n\n| μ | Raw OFDM symbol duration | Standard CP duration | Long CP duration | Delay spread estimate |\n|---:|---:|---:|---:|---:|\n| 0 | 66.667 μs | 4.6875 μs | 5.2083 μs | 1406 m |\n| 1 | 33.333 μs | 2.3438 μs | 2.8646 μs | 703 m |\n| 2 | 16.667 μs | 1.1719 μs | 1.6927 μs | 351.6 m |\n| 3 | 8.333 μs | 0.5859 μs | 1.1067 μs | 175.8 m |\n| 4 | 4.167 μs | 0.2930 μs | 0.8138 μs | 87.9 m |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NR cyclic prefix.md"
+              },
+              "score": 1.391923
+             },
+             {
+              "text": "NR cyclic prefix › Extended CP\n[[Extended CP]] 是 extended longer length CP：\n\n- 用於 long delay spread environment。\n- 12 [[OFDM symbol]]s per slot。\n- CP length is same for all OFDM symbols。\n- CP length = NFFT / 4。\n- 來源說 this means 25 percent redundancy overhead。\n- 來源明示：In NR Release 15 the ECP is only defined for numerology μ=2。\n\n來源列出的 ECP CP duration 線索：\n\n| μ | Raw OFDM symbol duration | CP duration | OFDM symbol incl. CP | Slot duration | Delay spread estimate |\n|---:|---:|---:|---:|---:|---:|\n| 0 | 66.667 μs | 16.667 μs | 83.333 μs | 1000 μs | 5000 m |\n| 1 | 33.333 μs | 8.333 μs | 41.667 μs | 500 μs | 2500 m |\n| 2 | 16.667 μs | 4.167 μs | 20.833 μs | 250 μs | 1250 m |\n| 3 | 8.333 μs | 2.083 μs | 10.417 μs | 125 μs | 625 m |\n| 4 | 4.167 μs | 1.042 μs | 5.208 μs | 62.5 μs | 312.5 m |\n\n注意：雖然來源表中列出多個 μ 的 ECP duration，來源同頁明示 NR Release 15 ECP only defined for μ=2；因此不可把表格直接解讀為所有 μ 在 Release 15 均可用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NR cyclic prefix.md"
+              },
+              "score": 1.121115
+             },
+             {
+              "text": "NR cyclic prefix › 與 samples per slot 的關係\n依 [[NR Frame Structure]]：\n\n- Samples per subframe S = NFFT × 15 × 2^μ。\n- Samples per slot = samples per subframe / slots per subframe = NFFT × 15。\n- Useful samples per slot = NFFT × 14 useful OFDM samples。\n- CP 對應的 redundant samples distributed over subframe。\n\n當 14 OFDM symbols per slot 時：\n\n- Redundant samples per subframe = NFFT × 2^μ。\n- Each slot has total NFFT redundant samples。\n\n當 12 OFDM symbols per slot 時：\n\n- Redundant samples per subframe = 3 × NFFT × 2^μ。\n- Each slot has total 3 × NFFT redundant samples。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NR cyclic prefix.md"
+              },
+              "score": 0.657709
+             },
+             {
+              "text": "NR cyclic prefix\n[[NR cyclic prefix]] 是 5G NR OFDM symbol 前方加上的 guard interval；[[NR Frame Structure]] 將其分為 [[Normal CP]] 與 [[Extended CP]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NR cyclic prefix.md"
+              },
+              "score": 0.544093
+             },
+             {
+              "text": "CORESET\n[[CORESET]]（Control Resource Set）是 5G NR 中 [[PDCCH]] 所在的 time-frequency resource area，由 frequency-domain RB group bitmap 與 time-domain OFDM symbol duration 定義。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CORESET.md"
+              },
+              "score": 1.050237
+             },
+             {
+              "text": "CORESET › REG 編號\n依 [[PDCCH (NR)]]，[[Resource Element Group (REG)]] within a CORESET are numbered in increasing order in a time-first manner：\n\n- 從 0 開始。\n- 第一個 REG 對應 CORESET 的 first [[OFDM symbol]] 與 lowest-numbered [[Resource Block]]。\n- CORESET 中的 REG 總數稱為 `NREG`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CORESET.md"
+              },
+              "score": 0.854412
+             },
+             {
+              "text": "CORESET › REG bundle 與 CCE\nCORESET 內的 PDCCH resource hierarchy 為：\n\n- [[Resource Element]]。\n- [[Resource Element Group (REG)]]：one RB during one OFDM symbol，含 9 data REs 與 3 DMRS REs。\n- [[REG bundle]]：L=2、3 或 6 個 consecutively numbered REGs。\n- [[Control Channel Element (CCE)]]：6 REGs。\n- [[Aggregation Level]]：一個 PDCCH 使用的 CCE 數。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CORESET.md"
+              },
+              "score": 0.854412
+             },
+             {
+              "text": "CORESET › 定義\n依 [[PDCCH (NR)]]：\n\n- A CORESET is the area in which PDCCHs are located。\n- CORESET 的 dimension 由以下參數定義：\n  - `frequencyDomainResources`：bitmap，每個 bit 對應 frequency domain 中一組 6 [[Resource Block]]s。\n  - `duration`：1、2 或 3 個 contiguous [[OFDM symbol]]s。\n\n因此 CORESET 同時定義 [[PDCCH]] candidate / allocation 可出現的頻率範圍與時間長度。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CORESET.md"
+              },
+              "score": 0.672743
+             },
+             {
+              "text": "EVM › 1C111 中的 5G NR EVM limits\n依 [[1C111_1e_3GPPPreConfGuide]]，EVM measurement results 必須低於 [[3GPP TS 38.521-1]] Table 6.4.2.1.5-1 的 maximum error percentage，並套用 Table 6.4.2.1.5-2 定義的 Test Tolerance（TT）。來源摘錄的 Average EVM Level limits 為：\n\n| Modulation | Average EVM level limit |\n|---|---|\n| Pi/2-BPSK | 30 + TT % |\n| QPSK | 17.5 + TT % |\n| 16 QAM | 12.5 + TT % |\n| 64 QAM | 8 + TT % |\n| 256 QAM | 3.5 + TT % |\n\nTT 來源摘錄為：\n\n| 條件 | TT |\n|---|---|\n| All except 256QAM | 0% |\n| 256 QAM @ max power | 0.3% |\n| 256 QAM @ min power | 1.1% |\n\n來源範例：DUT on n78、100 MHz BW、PUCCH Test ID 1（QPSK）時，specified maximum EVM 為 **17.5 + 0 %**，且 CMX EVM measurement 位於 3GPP limits 內。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 1.592209
+             },
+             {
+              "text": "EVM › 來源定義\n依 [[WIC Glossary]]（來源正式日期未標示；raw converted 2026-09-17）：\n\n- EVM 展開為 Error Vector Magnitude。\n\n依 [[1C111_1e_3GPPPreConfGuide]]（06.2025）：\n\n- Error Vector Magnitude（EVM）是 reference waveform 與 measured waveform 之間差異的量測。\n- 來源將 EVM 放在 [[3GPP TS 38.521-1]] test case **6.4.2.1 Error Vector Magnitude PUCCH/PUSCH**。\n- Test ID 會設定 RB Allocation 與 modulation scheme。\n- PUCCH subtests 需參考 application note chapter 2.1 notes。\n- Apply configuration 後，需確認 measured DUT EVM 位於 specified range 內。\n- Test case 要求在 DUT max power 與 min power 下量測 EVM。\n- CMX 會先自動設定 max power；完成 max power EVM verification 後，DUT 需使用 TPC Closed Loop settings 設定為 min power。\n\n[[1C111_0e_3GPPPreConfGuide]] 對同一 test case 的定義與限值摘要相同，並支撐既有 EVM 頁面內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 1.275803
+             },
+             {
+              "text": "EVM › 使用限制\n- 本頁不是完整 EVM measurement tutorial，也不是 [[3GPP TS 38.521-1]] 標準全文。\n- [[WIC Glossary]] 只提供縮寫展開；[[1C111_0e_3GPPPreConfGuide]] 與 [[1C111_1e_3GPPPreConfGuide]] 只提供 selected NR-FR1 SA test case 摘要。\n- 不可由此頁推論 FR1、FR2、Wi-Fi、LTE、NR 或 production line test 的所有 EVM limits。\n- 任何正式 pass / fail limit 應回查對應標準、儀器文件、software version 與 test condition。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 1.1757
+             },
+             {
+              "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 9.462097
+             },
+             {
+              "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 7.974386
+             },
+             {
+              "text": "R&S CMX500 › Warranty and service\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n- Base unit warranty：1 year。\n- All other items warranty：1 year。\n- Calibration service plans：up to five years；on demand 為 pay per calibration。\n- Warranty and repair service plans：up to five years；on demand 為 standard price repair。\n- Extended periods：contact [[Rohde & Schwarz]] sales office。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 42,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 7.347164
+             },
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 2.845481
+             },
+             {
+              "text": "R&S CMX500 › Spectrum analysis\n依 [[CMX500_Features_CSW9-20-0_en_32]]，R&S CMX-KM140 提供 spectrum analysis options，包含 frequency sweep measurement（power vs frequency）與 zero span measurement（power vs time）。General settings 包含 external attenuation **-50 dB 至 90 dB**、sweep count **1 至 100**、sweep points **101 至 100001**；frequency sweep RBW **100 Hz 至 10 MHz**，VBW **10 Hz 至 10 MHz**。\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 另提供 FFT spectrum analyzer span 與 FFT length，詳見 ARB 與 FFT spectrum analyzer 章節。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 34,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 2.768175
+             },
+             {
+              "text": "R&S CMX500 › Measurement options\n[[CMX500_specs_en_5216-4127-22_v1100]] 在 ordering information 中提供下列完整 order number：\n\n| Code | Name | Order no. | 來源 |\n|---|---|---|---|\n| R&S CMX-KM350 | WLAN TX measurements IEEE 802.11a/b/g/n/ac | 1222.7135.02 | [[CMX500_specs_en_5216-4127-22_v1100]] |\n| R&S CMX-KM351 | WLAN TX measurements IEEE 802.11ax | 1222.7141.02 | [[CMX500_specs_en_5216-4127-22_v1100]] |\n| R&S CMX-KM352 | WLAN TX measurements IEEE 802.11be | 1222.7158.02 | [[CMX500_specs_en_5216-4127-22_v1100]] |\n| R&S CMX-KM500 | LTE analyzer | 1222.5603.02 | [[CMX500_specs_en_5216-4127-22_v1100]] |\n| R&S CMX-KM600 | 5G NR analyzer | 1222.4013.02 | [[CMX500_specs_en_5216-4127-22_v1100]] |\n| R&S CMX-KW601 | 5G NR generator | 1222.1920.02 | [[CMX500_specs_en_5216-4127-22_v1100]] |\n\n[[CMX500_Features_CSW9-20-0_en_32]] 另列以下 measurement option codes 與 `.xx` order number 後綴：R&S CMX-KM140、R&S CMX-KM353、R&S CMX-KM360、R&S CMX-KM570、R&S CMX-KM600、R&S CMX-KM602、R&S CMX-KM604、R&S CMX-KM670、R&S CMX-KM601、R&S CMX-KM603、R&S CMX-KM605。完整 order number 需以正式 ordering data 或 configure 工具確認。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 29,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 2.214896
+             },
+             {
+              "text": "R&S CMX500 › NR FR1\n依 [[CMX500_Features_CSW9-20-0_en_32]]，R&S CMX-KM600 是 frequency range 1 對 NR uplink signals 執行任何 TX tests 的必要 option。NR FR1 uplink measurements 包含 multi-evaluation、PRACH、SRS、TPC measurement。Multi-evaluation 支援 NR channel bandwidth **3 MHz 到 100 MHz**，可分析 FDD 與 TDD signals、NR standalone signals 與 intraband contiguous EN-DC signals。\n\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，R&S CMX-KM600 option 的 5G NR analyzer 條件為 FR1、SCS 30 kHz、16QAM、temperature range +15 °C to +35 °C；input level –25 dBm to –10 dBm RMS、bandwidth 100 MHz 時 EVM **< 0.5 %**。Frequency measurement uncertainty：**< 20 Hz + drift of timebase**；相對於同一台 CMX500 device 的 downlink signal 進行 frequency error measurements 時，uncertainty 符合 [[3GPP TS 38.521-1]] V18.5.0。\n\nR&S CMX-KW601 option 的 5G NR generator 條件：5G NR PDSCH、full allocation、SCS 30 kHz / 60 kHz、modulation 64QAM、PAR 11.8 dB、temperature +15 °C to +35 °C；ports RF Com 1、RF Com 2、RF Out 1 to RF Out 4；output level –5 dBm、bandwidth 100 MHz 時 EVM **< 0.5 %**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 30,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 2.148269
+             },
+             {
+              "text": "R&S CMX500 › Application tests 與 audio\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n- 未啟用 R&S CMX-KA100 等 application test license 時，IP application test functionality 降到最低；只能使用 standalone mode，不能連接 external servers，也不支援 IP based measurements 或 tools。\n- R&S CMX-KA100 提供 internal IP services 與 IP connection to DUT 測試 applications，包含 DNS、IMS、Message Center、FTP、HTTP、DNS monitor、IP logging、iPerf、Ping、throughput、Max Throughput Wizard、web server。\n- R&S CMX-KA110 增強 KA100，加入 QoS、ePDG、N3IWF、delay measurement、IP tune tool、SMPP / MT SMS advanced settings。\n- R&S CMX-KA150 提供 IP analysis tool，用於監控與分析 DUT uplink / downlink IP traffic。\n- R&S CMX-KA180 提供 audio codecs for 4G and 5G IMS voice call，支援 AMR-NB、AMR-WB、EVS，並包含 [[R&S CMX-ZG180A]] external sound card drivers and configuration settings。\n- R&S CMX-KA181 加入 [[POLQA]]，用於 measuring perceived speech quality；measurement version 為 3，mode 為 full-band 或 narrowband。\n- R&S CMX-KA401 支援 WAV player / recorder、upload/download WAV files、file-based POLQA measurements 與 end-to-end audio delay。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 35,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 2.072086
+             },
+             {
+              "text": "R&S PVT360A\n[[R&S PVT360A]] 是 [[Rohde & Schwarz]] 的 **Performance Vector Tester**，依 [[PVT360A_Features_V8-5-30_en_06]] Version 06 可透過 R&S PVT-KW / KM / KB options 提供多無線標準 waveform playback、TX/RX measurements、spectrum analysis、WLAN MIMO 與 external frontend frequency extension。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 5.403328
+             },
+             {
+              "text": "R&S PVT360A › 規格與數字使用限制\n- [[PVT360A_Features_V8-5-30_en_06]] 是 Features and Functions overview；沒有 tolerance limits 的 data 不可作為 binding specifications。\n- 含 tolerance limits 的 measurement ranges 需查 specifications document **PD 3683.6212.22**。\n- 報價或配置相容性需以正式 ordering data、configuration tool、specifications document 或 Rohde & Schwarz sales / application support 確認。\n- `.xx` order number 後綴不可推導；本頁只照抄來源。\n- R&S PVT options 不可與 [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMX500]] 的 R&S CMP / R&S CMX options 混用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 4.587862
+             },
+             {
+              "text": "R&S PVT360A › 文件依據與版次\n本頁目前依一份 Productions 來源整理：\n\n- [[PVT360A_Features_V8-5-30_en_06]]：**Features and Functions** 文件，文件編號 **1179.6543.02**，**Version 06**，適用 base software version **V8.5.30 or higher**，版權標示 **© 2025 Rohde & Schwarz**。\n\n此文件是 test applications overview；詳細說明需參考 PVT360A help 或 user manuals。含 tolerance limits 的 measurement ranges 需參考 specifications document **PD 3683.6212.22**。因此本頁不得把 Features and Functions 的數字視為 binding specifications。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 4.559279
+             },
+             {
+              "text": "R&S PVT360A › Measurements\n| Option | Order no. | 功能 |\n|---|---:|---|\n| R&S PVT-KM410 | 1214.0341.xx | WLAN SISO measurements 802.11a/b/g/n/p/ac；mandatory |\n| R&S PVT-KM411 | 1214.0358.xx | WLAN 802.11ax SISO extension；需要 R&S PVT-KM410 |\n| R&S PVT-KM412 | 1214.0364.xx | WLAN 802.11be SISO extension；需要 R&S PVT-KM411 |\n| R&S PVT-KM413 | 1214.0370.xx | WLAN measurements, MIMO extension |\n| R&S PVT-KM414 | 1214.4518.xx | WLAN 802.11bn SISO extension；需要 R&S PVT-KM412 與 R&S PVT-KM411 |\n\nWLAN measurements 來源摘錄：\n\n- OFDM / DSSS TX tests 包含 power、modulation、spectrum、OBW、spectrum flatness、transmit spectrum mask。\n- 802.11ax SISO 支援 4096QAM MCS 12/13 measurements；來源註記 4096QAM MCS 12/13 未由 IEEE 規範，但 measurements 支援。\n- 802.11be / 802.11bn SISO input signal settings 支援 bandwidth **5 MHz to 320 MHz**；320 MHz 需要 R&S PVT-KB505 或已停訂 R&S PVT-KB605。\n- True MIMO measurements：最多 4 個 DUT antennas；2x2 MIMO 支援 802.11n、802.11ac、802.11ax、802.11be、802.11bn；4x4 MIMO 僅支援使用 [[PVTflexx]] 搭配兩台 PVT360A instruments。\n- Composite MIMO measurements：DUT antenna signals 外部合併後送入單一 RF port，只能進行 composite modulation accuracy measurements，無法 decode individual spatial streams。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 20,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 1.856277
+             },
+             {
+              "text": "R&S PVT360A › Spectrum analysis\n| Option | Order no. | 功能 |\n|---|---:|---|\n| R&S PVT-KM100 | 1214.3140.xx | I/Q-based spectrum analysis |\n\nSpectrum analysis 提供：\n\n- Frequency sweep measurement：power vs frequency，最多 four traces。\n- Zero span measurement：power vs time，最多 four traces。\n- Marker evaluation、peak search。\n- Two-tone signal third order intercept / TOI results。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 18,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 1.624039
+             },
+             {
+              "text": "R&S PVT360A › Measurement options\n| Option | Order no. | Designation |\n|---|---:|---|\n| R&S PVT-KM100 | 1214.3140.xx | I/Q-based spectrum analysis |\n| R&S PVT-KM300 | 1214.3128.xx | GSM measurements |\n| R&S PVT-KM310 | 1214.0193.xx | LTE measurements, downlink |\n| R&S PVT-KM311 | 1214.0206.xx | LTE and LTE-A measurements, uplink |\n| R&S PVT-KM313 | 1214.0229.xx | NB-IoT measurements, downlink |\n| R&S PVT-KM314 | 1214.0235.xx | NB-IoT measurements, uplink |\n| R&S PVT-KM320 | 1214.0241.xx | 5G NR measurements, downlink, release 15/16 |\n| R&S PVT-KM322 | 1214.0264.xx | 5G NR measurements, downlink, multicarrier extension |\n| R&S PVT-KM326 | 1214.0306.xx | 5G NR measurements, downlink, release 17 extension |\n| R&S PVT-KM321 | 1214.0258.xx | 5G NR measurements, uplink, release 15/16/17 |\n| R&S PVT-KM323 | 1214.0270.xx | 5G NR measurements, uplink, multicarrier extension |\n| R&S PVT-KM325 | 1214.0293.xx | 5G NR measurements, uplink, MIMO extension |\n| R&S PVT-KM400 | 1214.0335.xx | Bluetooth measurements |\n| R&S PVT-KM410 | 1214.0341.xx | WLAN measurement, 802.11a/b/g/n/p/ac |\n| R&S PVT-KM411 | 1214.0358.xx | WLAN measurement, 802.11ax extension |\n| R&S PVT-KM412 | 1214.0364.xx | WLAN measurement, 802.11be extension |\n| R&S PVT-KM413 | 1214.0370.xx | WLAN measurements, MIMO extension |\n| R&S PVT-KM414 | 1214.4518.xx | WLAN measurement, 802.11bn extension |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 23,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 1.607811
+             },
+             {
+              "text": "R&S PVT360A › FR1 uplink measurements\n| Option | Order no. | 功能 |\n|---|---:|---|\n| R&S PVT-KM321 | 1214.0258.xx | 5G NR uplink measurements, release 15/16/17；basic option |\n| R&S PVT-KM323 | 1214.0270.xx | Uplink multicarrier extension |\n| R&S PVT-KM325 | 1214.0293.xx | Uplink MIMO extension |\n\nFR1 uplink measurements 包含 multi-evaluation、PRACH、SRS、TPC。來源指出 NR uplink multi-evaluation 支援 FDD / TDD、NR standalone、intraband contiguous EN-DC，channel bandwidth **3 MHz to 100 MHz**。\n\nUplink CA 支援 number of carriers **1 to 2**；two TX antennas measurement 可提供 per layer、per antenna 或 sum of antennas 的結果，依 measurement result 類型而定。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 1.332621
+             },
+             {
+              "text": "R&S PVT360A › GSM\n來源涵蓋 GSM EDGE R6、GSM R7 EDGEevo / EDGE+ / VAMOS waveform，以及 GSM MS measurements。GSM MS measurements 對 GMSK、8PSK、16QAM-modulated normal bursts 與 access bursts 提供 multi-evaluation measurement，結果包含 modulation、power vs time、spectrum due to modulation、spectrum due to switching、BER 與 list mode per segment results。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 1.179235
+             },
+             {
+              "text": "R&S CMX-KM606 › 使用限制\n- 本頁只由 configuration guide 支撐；來源未提供 [[R&S CMX-KM606]] 的 material number、order number、measurement accuracy、frequency bands beyond S/L wording、bandwidth、EVM、conformance condition 或 release note。\n- 來源明示 [[R&S CMX-KM606]] not used for [[NB-NTN]]；不可把它外推為 NB-NTN measurement option。\n- Binding measurement specifications 需後續引用正式 [[R&S CMX500]] specifications、features / functions 或 option data sheet。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KM606.md"
+              },
+              "score": 1.641945
+             },
+             {
+              "text": "R&S CMX-KM606 › unresolved\n- [[R&S CMX-KM606]] 未在目前既有 [[CMX500_Features_CSW9-20-0_en_32]] 摘錄表中出現；需確認是否為較新 option、未摘錄項目或配置表專用語彙。\n- 來源未提供完整 order number / material number。\n- 來源未列 S-band / L-band 對應的 3GPP operating bands、frequency ranges 或 measurement performance。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KM606.md"
+              },
+              "score": 0.944605
+             },
+             {
+              "text": "5G NR numerology › 與 cyclic prefix 的關係\n[[NR cyclic prefix]] 的來源表格列出：\n\n- [[Normal CP]]：μ=0、1、2、3、4 皆列於來源表格，使用 14 OFDM symbols per slot。\n- [[Extended CP]]：來源明示 NR Release 15 only defined for μ=2，使用 12 OFDM symbols per slot。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR numerology.md"
+              },
+              "score": 1.552806
+             },
+             {
+              "text": "5G NR numerology\n[[5G NR numerology]] 是 5G NR 中以 μ 表示的 OFDM time-frequency resolution 參數，決定 [[Subcarrier Spacing]]、slot duration、subframe 中 slots 數量，以及 [[SSB]] required bandwidth。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR numerology.md"
+              },
+              "score": 1.376078
+             },
+             {
+              "text": "5G NR numerology › 定義\n依 [[NR Frame Structure]]：\n\n- Numerology μ defines the time-frequency resolution。\n- μ 決定 [[OFDM symbol]] time duration 與 [[Subcarrier Spacing]]。\n- NR reference SCS μ=0 是 15 kHz，來源說與 LTE 相同。\n- μ 越高，time resolution 越高。\n- μ 越高，frequency resolution 越低。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR numerology.md"
+              },
+              "score": 1.217515
+             },
+             {
+              "text": "5G NR frame structure › OFDM symbols per slot\n依 [[NR Frame Structure]]：\n\n- [[Normal CP]] 使用 14 [[OFDM symbol]]s per slot。\n- [[Extended CP]] 使用 12 [[OFDM symbol]]s per slot。\n- 來源明示在 NR Release 15 中，[[Extended CP]] only defined for numerology μ=2。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR frame structure.md"
+              },
+              "score": 2.302475
+             },
+             {
+              "text": "5G NR frame structure › 與 resource grid 的關係\nFrame / subframe / slot / symbol 是 time-domain structure；[[NR resource grid]] 則把 time-domain [[OFDM symbol]] 與 frequency-domain subcarriers 組成 grid。\n\n- [[Resource Element]] 是 one subcarrier in one OFDM symbol and on one antenna port。\n- [[Resource Block]] 是 12 consecutive subcarriers。\n- [[Point-A]] 是 resource grid starts toward higher frequencies 的 frequency-domain reference。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR frame structure.md"
+              },
+              "score": 1.883551
+             },
+             {
+              "text": "NR Frame Structure › 重點摘要\n- 來源是一份 Rohde & Schwarz company confidential 技術筆記，題名為 **NR Frame Structure**；raw 轉檔日期為 2026-09-24，但原始文件未標示正式發布日期、作者或文件版次。\n- 來源指出 [[5G NR frame structure]] mainly defined in [[3GPP TS 38.211]] chapter 4；未標示 [[3GPP TS 38.211]] 的 version、release 或 publication date。\n- [[5G NR frame structure]] 中，NR frame duration 固定為 10 ms，且包含 10 個 consecutive subframes，每個 subframe duration 為 1 ms。\n- [[5G NR numerology]] μ 定義 OFDM time-frequency resolution；NR reference SCS μ=0 為 15 kHz，與 LTE 相同。μ 越高，time resolution 越高，但 frequency resolution 越低。\n- 來源列出 μ=0 到 μ=4 的 [[Subcarrier Spacing]]、slots per subframe、slots per frame 與 average slot duration：15/30/60/120/240 kHz，對應 1/2/4/8/16 slots per subframe。\n- [[NR sample rate]] 依 [[3GPP TS 38.211]] chapter 4.1 的最小時間單位 Tc = 1 / (480 kHz × 4096) = 508.63 ps；最高 possible sample rate foreseen by specification 為 1966.08 MS/s。\n- 來源給出 NR sampling rate 公式：sampling rate = NFFT × SCS = NFFT × 2^μ × 15 kHz。\n- 來源指出 sample rates above 491.52 MS/s are currently unrealistic, not really needed and ignored for now；並列出 30.72 到 1966.08 MS/s 對應 maximum bandwidth 25 到 1600 MHz。\n- [[NR cyclic prefix]] 分為 [[Normal CP]] 與 [[Extended CP]]。NCP 為 short CP，14 OFDM symbols per slot；ECP 為 longer CP，12 OFDM symbols per slot。\n- 來源明示在 NR Release 15 中，[[Extended CP]] only defined for numerology μ=2。\n- [[Resource Element]] 定義為 one subcarrier in one OFDM symbol and on one antenna port。\n- [[Resource Block]] 定義為 frequency domain 中 12 consecutive subcarriers；來源列出 RB bandwidth 對 μ=0..4 為 180、360、720、1440、2880 kHz。\n- [[Point-A]] 是 frequency domain 的 common reference point，為 resource grid starts toward higher frequencies 的 absolute frequency，且指 resource grid 第一個 subcarrier 的 center frequency。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/NR Frame Structure.md"
+              },
+              "score": 3.029797
+             },
+             {
+              "text": "NR Frame Structure › 關鍵實體與概念\n- [[3GPP TS 38.211]] — 來源指出 NR frame structure mainly defined in chapter 4，但未提供標準版本。\n- [[5G NR frame structure]] — frame、subframe、slot 與 OFDM symbol 的時間架構。\n- [[5G NR numerology]] — μ、SCS、slots per subframe 與 slot duration 的關係。\n- [[Subcarrier Spacing]] — 來源列出 μ=0..4 對應 15、30、60、120、240 kHz。\n- [[OFDM symbol]] — FFT size、raw OFDM symbol、CP 與 symbol duration 的核心語彙。\n- [[NR sample rate]] — Tc、Ts、NFFT、SCS、sample rate 與 maximum bandwidth 的關係。\n- [[NR cyclic prefix]] — [[Normal CP]] 與 [[Extended CP]] 的總稱。\n- [[Normal CP]] — short CP，14 OFDM symbols per slot，standard CP duration 約為 9/128 × NFFT。\n- [[Extended CP]] — longer CP，12 OFDM symbols per slot，CP length = NFFT/4；Release 15 only defined for μ=2。\n- [[NR resource grid]] — resource element、resource block 與 Point-A 的 frequency-domain grid 概念。\n- [[Resource Element]] — one subcarrier × one OFDM symbol × one antenna port。\n- [[Resource Block]] — 12 consecutive subcarriers。\n- [[Point-A]] — resource grid 的 absolute frequency reference。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/NR Frame Structure.md"
+              },
+              "score": 1.516171
+             },
+             {
+              "text": "NR Frame Structure › 與既有知識的關係\n- [[3GPP TS 38.211]] 既有頁面已收錄 [[CSI-RS]] 與 [[DMRS]] 對 TS 38.211 sections / tables 的引用；本來源新增 chapter 4 的 frame structure、numerology、sample rate、CP 與 resource grid 索引。\n- [[UE channel bandwidth]] 與 [[Maximum transmission bandwidth configuration]] 已依 [[Frequency Ranges, Bands and Bandwidth]] 保存 channel bandwidth、sample rate 與 N_RB 線索；本來源補充較底層的 Tc、Ts、NFFT × SCS sample-rate calculation 與 cyclic prefix sample distribution。\n- [[NR FR1]]、[[NR FR2]] 與 [[FR2-2]] 是 frequency range / carrier bandwidth 分類；本來源不是 frequency-band 清單，而是 physical layer frame / OFDM grid structure 的基礎說明。\n- [[Demodulation Reference Signals (DMRS)]] 與 [[CSI-RS]] 使用 [[Resource Element]] / [[Resource Block]] / [[OFDM symbol]] grid concepts；本來源可作為這些 reference signal resource mapping 的背景頁。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/NR Frame Structure.md"
+              },
+              "score": 0.559112
+             },
+             {
+              "text": "NR sample rate › Sample rate 公式\n來源給出的 NR sample rate calculation：\n\n- Sampling rate in samples/sec = number of samples per raw OFDM symbol / duration of one raw OFDM symbol。\n- Sampling rate = NFFT / (1 / SCS)。\n- Sampling rate = NFFT × SCS。\n- SCS = 2^μ × 15 kHz。\n- 因此 sampling rate = NFFT × 2^μ × 15 kHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NR sample rate.md"
+              },
+              "score": 5.074937
+             },
+             {
+              "text": "NR sample rate\n[[NR sample rate]] 是 5G NR OFDM waveform 中由 NFFT 與 [[Subcarrier Spacing]] 決定的 sampling rate；[[NR Frame Structure]] 以 [[3GPP TS 38.211]] chapter 4.1 的 Tc 定義為起點說明。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NR sample rate.md"
+              },
+              "score": 1.672059
+             },
+             {
+              "text": "Low-PAPR sequence › Transform precoding 與 π/2-BPSK\n依 [[DMRS]]：\n\n- [[DFT-s-OFDM]] 也稱為 [[Transform precoding]]，在 LTE 與 NR 的 UL 中啟用，用於取得 low-PAPR UL transmit signal。\n- Transform precoding 中 modulation symbols 先經 DFT-precoded，再輸入 OFDM modulator。\n- DFT 與 OFDM modulator 的 IFFT block effectively cancels one another，因此移除 OFDM modulator 的 high-PAPR effect。\n- 使用 low-PAPR modulation symbols 可進一步降低 UL transmit signal 的 PAPR。\n- NR 中 UL transmission with transform precoding 啟用 [[π-2-BPSK]] modulation。\n- [[π-2-BPSK]] 產生 low-PAPR waveform，因為 symbol-to-symbol transition 不會穿越 constellation 的 zero-amplitude point。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Low-PAPR sequence.md"
+              },
+              "score": 2.278378
+             },
+             {
+              "text": "Low-PAPR sequence › 背景：為什麼需要 low-PAPR\n依 [[DMRS]]：\n\n- OFDM signals 具有 high peak-to-average power ratio（PAPR），因為由 many random QAM symbols 的 linear combination（IFFT）形成。\n- High-PAPR signal 需要 transmitter back-off power amplifier operating point，以避免 transmit signal 進入 power amplifier saturation region 而 clipped / distorted。\n- Power amplifier 遠離 saturation point 操作時 efficiency drops。\n- DL signals 由連接 power grid 的 base station 傳送，因此 high-PAPR 在 DL 不 critical；NR uses OFDM for DL signals。\n- NR 與 LTE 不同，NR UL 也允許使用 OFDM signals。\n- UL 可能需要 low-PAPR signal，使 [[UE]] power amplifier 更接近 saturation point 並提升 efficiency，降低 UE battery energy 消耗。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Low-PAPR sequence.md"
+              },
+              "score": 1.979808
+             },
+             {
+              "text": "Low-PAPR sequence › Type 1（Release 15）\n依 [[DMRS]]：\n\n- [[Low-PAPR sequence Type 1]] 屬 [[Release 15]]。\n- 使用 [[Zadoff-Chu sequence]] 或 computer-generated sequences；reference：[[3GPP TS 38.211]] Section 5.2.2。\n- 用於 transform precoding enabled 時的 PUSCH DMRS sequences，且 Type 2 的條件不成立時。\n- 也用於 PUCCH format 1 的 DMRS sequences，以及 PUCCH formats 3 and 4 的 DMRS sequences。\n- Small sequences：1 to 5 PRBs，使用 computer-generated 或 Zadoff-Chu sequences。\n- Large sequence：more than 5 PRBs，使用 Zadoff-Chu sequences。\n- Zadoff-Chu sequences based on length `N_ZC_RS`，其中 `N_ZC_RS` 是小於 `M_ZC_RS` 的最大 prime number。\n- 第 `N_ZC_RS` 個 sample 之後，sequence 從 beginning repeat。\n- Sequences depend on group number only，not on `n_ID`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Low-PAPR sequence.md"
+              },
+              "score": 1.20665
+             },
+             {
+              "text": "Low-PAPR sequence › Type 2（Release 16）\n依 [[DMRS]]：\n\n- [[Low-PAPR sequence Type 2]] 屬 [[Release 16]]。\n- [[3GPP TS 38.211]] Section 5.2.3 定義新的 low-PAPR sequences：`low-PAPR Type 2`。\n- Type 2 使用 pseudo-noise 或 computer-generated sequences。\n- `n_ID` is not effective。\n- 用於 transform precoding enabled 時的 PUSCH DMRS sequences，且以下條件全部成立：\n  - PUSCH modulated with [[π-2-BPSK]]。\n  - PUSCH transmission is not a `msg3` transmission。\n  - Scheduling is not using `DCI format 0_0` in a common search space。\n- Type 2 low-PAPR sequence generated from the DFT of the [[π-2-BPSK]] modulated computer generated sequences（CGS）or gold sequences。\n- DFT operation may cause some sequence samples to be zero，因此 channel estimation 需要 special handling。\n- Small sequences：1 to 4 PRBs，使用 computer-generated sequences。\n- 有些 sequences 由 [[3GPP TS 38.211]] Tables 5.2.3.2-2 to 5.2.3.2-4 定義的 computer-generated binary sequences，並以 [[π-2-BPSK]] modulated。\n- Sequences depend on sequence length and group number only，not on `n_ID`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Low-PAPR sequence.md"
+              },
+              "score": 1.04144
+             },
+             {
+              "text": "Christian Mokry › 來源中的角色\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and ETS-Lindgren partner to offer OTA testing solutions for next-gen wireless technologies]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and SmartViser partner to demonstrate test solutions for new EEI regulation]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and Viasat to collaborate on NB-NTN IoT test plan for connectivity via satellite]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz has achieved initial verification of 3GPP Rel. 17 power-saving feature SSSG for 5G NR]]：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Christian Mokry.md"
+              },
+              "score": 1.107993
+             },
+             {
+              "text": "R&S CMX-KM606 › 來源中的描述\n[[CMX_Configuration_Guide_NR-NTN]] 將 [[R&S CMX-KM606]] 列於 NR-NTN software 區段：\n\n- Type：SW。\n- Description：NR NTN measurements — S-band and L-band NR-NTN RF measurements。\n- Mandatory：Conditional。\n- Conditions：Mandatory for S/L-band NR-NTN callbox with RF measurements。\n- Dependency：Requires [[R&S CMX-KM600]]。\n- Error rule：Hard error if quoted without [[R&S CMX-KS627B]]。\n- Not used for [[NB-NTN]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KM606.md"
+              },
+              "score": 1.801724
+             },
+             {
+              "text": "Rohde & Schwarz GmbH & Co KG\n[[Rohde & Schwarz GmbH & Co KG]] 是多份 [[Rohde & Schwarz]] PR frontmatter 中列出的 author，且來源正文稱 R&S® 是其 registered trademark。[[1C111_1e_3GPPPreConfGuide]] 另在頁尾標示 © 2025 Rohde & Schwarz GmbH & Co. KG，81671 Munich, Germany。[[Dual Sim Dual Active]]、[[Extended Logical Channel IDs]]、[[Logical Channels]] 與 [[OCNG (NR)]] 頁尾也標示 `Rohde & Schwarz GmbH & Co. KG ©`，但部分技術筆記未給正式發布日期或文件編號。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Rohde & Schwarz GmbH & Co KG.md"
+              },
+              "score": 0.366589
+             },
+             {
+              "text": "Gatehouse Satcom › 與 Rohde & Schwarz 的合作\n依 [[Gatehouse Satcom and Rohde & Schwarz formalize collaboration to strengthen 5G GEO- and LEO-NTN validation and testing]]：\n\n- [[Gatehouse Satcom]] 與 [[Rohde & Schwarz]] formalized collaboration，以 strengthening validation and testing of [[5G IoT-NTN]] and [[NR-NTN]] technologies。\n- 合作目標是將 [[Gatehouse Satcom]] 的 5G [[NTN]] software expertise 與 [[Rohde & Schwarz]] test and measurement capabilities 結合。\n- [[Gatehouse Satcom]] gains access to the [[R&S CMX500]] platform，作為共同 further develop advanced orbit and channel emulation capabilities for NTN use cases 的一部分。\n- [[Gatehouse Satcom]] contributes end-to-end NTN test results、technical insight and engineering feedback，協助 [[Rohde & Schwarz]] 強化 NTN-focused test capabilities。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Gatehouse Satcom.md"
+              },
+              "score": 1.02766
+             },
+             {
+              "text": "PRACH starting symbol positions › 使用限制\n- 來源為 Rohde & Schwarz company confidential 技術筆記，未標示正式發布日期。\n- raw 轉檔遺失公式符號與部分表格欄位對齊。\n- 本頁不可取代 [[3GPP TS 38.211]] Version 15.9.0 Section 5.3.2 與 Tables 6.3.3.2-2 到 6.3.3.2-4。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PRACH starting symbol positions.md"
+              },
+              "score": 3.566057
+             },
+             {
+              "text": "Keysight\n[[Keysight]]（圖中亦寫作 [[是德科技]]）是在既有 PCB 測試圖像來源中被列為高頻高速 [[PCB]] 測試解決方案相關公司的測試量測廠商名稱；在 [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 中，Keysight 也被描述為大型美國 test & measurement vendor 與 [[R&S CMX500]] 的 wireless device testing 競品供應商。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Keysight.md"
+              },
+              "score": 6.154996
+             },
+             {
+              "text": "EVM\n[[EVM]] 是 Error Vector Magnitude；[[WIC Glossary]] 只提供縮寫展開，[[1C111_0e_3GPPPreConfGuide]] 與 [[1C111_1e_3GPPPreConfGuide]] 則在 5G NR FR1 SA pre-conformance test case 6.4.2.1 中說明 EVM 是 reference waveform 與 measured waveform 之間差異的量測。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 3.992559
+             },
+             {
+              "text": "R&S ZNA › R&S®ZNA-B15 RFFE GPIO interface 規格摘錄\n- Models .02 and .03 提供 two independent MIPI RFFE busses。\n- Connector type：25-pin D-Sub，female。\n- RFFE port 1 / 2 的 VIO、DATA、CLK 電壓範圍為 0 V to +2 V，1 mV step，maximum current 20 mA。\n- CLK configurable clock rate：31.25 kHz to 26 MHz。\n- GPIO 1 to GPIO 8：voltage range –5 V to +10 V；typ. –6 V to +12 V；voltage step size 5 mV；maximum current 20 mA。\n- GPIO 9 and 10：voltage range –5 V to +10 V；typ. –6 V to +12 V；voltage step size 5 mV；maximum current 100 mA。\n- Model .03 提供 voltage and current measurement with switchable source resistance；32 internal ADC channels 可同時量測每個 RFFE 與 GPIO pin 的 voltage and current。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 6.482603
+             },
+             {
+              "text": "R&S CMX-KA401\n[[R&S CMX-KA401]] 是 [[R&S CMX500]] 的 advanced audio measurement / generator and playback software option；[[CMX_Configuration_Guide_Audio-Testing]] 中將它列為 OTT voice quality、customer WAV injection、VoIP wave injection、E2E audio delay、IP streaming、playback/record 與 non-realtime IMS 等 scope 的 conditional option。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA401.md"
+              },
+              "score": 2.366505
+             },
+             {
+              "text": "vault-cli.ps1 › 限制與注意事項\n- [[Drop README]] 明示 conversion 是 lossy；因此轉出 markdown 不應被視為原始檔的完整無損替代。\n- [[Market README]] 只提供 Market convert 的操作示例，未說明 [[vault-cli.ps1]] 的版本、程式碼位置、支援的文件轉換引擎、OCR 能力或失敗重試機制。\n- [[Productions README]] 只提供 Productions convert 的操作示例，未說明 [[vault-cli.ps1]] 在產品 datasheet、規格表或 option 表上的抽取品質、OCR 能力或表格保真度。\n- 原文未標示 audio transcription 上傳到 [[Google]] 的隱私、權限與資料保留條件。\n- 原文只提供 [[ffmpeg]] 抽音訊範例，未說明支援的 video / audio codec 或容器格式。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/vault-cli.ps1.md"
+              },
+              "score": 1.134847
+             },
+             {
+              "text": "Christian Mokry › 來源中的角色\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[Rohde & Schwarz and China Mobile Research Institute jointly demonstrate generative AI user experience testing]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。\n\n依 [[SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices]]：\n\n- Name：Christian Mokry。\n- Role：PR Manager Test & measurement。\n- Phone：+49 89 412913052。\n- Email：press@rohde-schwarz.com。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Christian Mokry.md"
+              },
+              "score": 1.05343
+             },
+             {
+              "text": "R&S CMX-KM606\n[[R&S CMX-KM606]] 是 [[R&S CMX500]] 的 NR NTN measurements software option；依 [[CMX_Configuration_Guide_NR-NTN]]，它用於 S-band and L-band [[NR-NTN]] RF measurements，且需要 [[R&S CMX-KM600]] 與 [[R&S CMX-KS627B]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KM606.md"
+              },
+              "score": 1.754182
+             },
+             {
+              "text": "Rohde & Schwarz GmbH & Co KG › 來源中的列名\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- frontmatter `author` 欄列出 [[Rohde & Schwarz GmbH & Co KG]]。\n- 正文末段寫明：R&S® is a registered trademark of Rohde & Schwarz GmbH & Co. KG。\n- 來源未展開公司法律登記資訊、地址、股權結構或組織層級。\n\n依 [[SPEAG combines CMX500 OBT with the DASY8-3D system for automated SAR testing of 5G NR devices]]：\n\n- frontmatter `author` 欄列出 [[Rohde & Schwarz GmbH & Co KG]]。\n- 正文末段同樣寫明：R&S® is a registered trademark of Rohde & Schwarz GmbH & Co. KG。\n- 來源正文以 [[Rohde & Schwarz]] 品牌 / 公司名稱描述與 [[SPEAG]] 的合作、[[R&S CMX500 OBT]] 與 [[DASY8-3D]] 的整合。\n\n依 [[1C111_1e_3GPPPreConfGuide]]：\n\n- R&S® 是 [[Rohde & Schwarz GmbH & Co KG]] 的 registered trademark。\n- Trade names 為其 owners 的 trademarks。\n- 文件頁尾標示：© 2025 Rohde & Schwarz GmbH & Co. KG，81671 Munich, Germany。\n- 文件頁尾也描述 [[Rohde & Schwarz]] electronics group 的 business fields 包含 test and measurement、broadcast and media、secure communications、cybersecurity、monitoring and network testing。\n- 來源稱 [[Rohde & Schwarz]] 成立超過 80 年，總部位於 Munich, Germany，並在超過 70 個國家設有 sales and service network。\n- 來源列出 website、training、customer support 與 ISO 9001 certified quality management 線索。\n\n依 [[Dual Sim Dual Active]]：\n\n- markdown 頁尾標示 `COMPANY CONFIDENTIAL`。\n- 頁尾列出 `Rohde & Schwarz GmbH & Co. KG ©`。\n- 本來源是 [[Dual SIM Dual Active]] / [[Multi-USIM operation]] 技術筆記，未標示正式發布日期、文件編號、作者或版本。\n\n依 [[Extended Logical Channel IDs]]：\n\n- markdown 頁尾標示 `COMPANY CONFIDENTIAL`。\n- 頁尾列出 `Rohde & Schwarz GmbH & Co. KG ©`。\n- 本來源是 [[Extended Logical Channel ID]] / [[3GPP TS 38.321]] / [[MAC Control Element]] 技術筆記，未標示正式發布日期、文件編號、作者或版本。\n- 來源本身只支撐頁尾 copyright / confidential 標示，不支撐公司法律資訊或產品承諾。\n\n依 [[Logical Channels]]：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Rohde & Schwarz GmbH & Co KG.md"
+              },
+              "score": 0.356388
+             },
+             {
+              "text": "PRACH starting symbol positions\n[[PRACH starting symbol positions]] 是 [[UE]] 可在 defined PRACH time occasions 傳送 [[PRACH]] 的 allowed OFDM starting-symbol positions，用於把 received PRACH mapping 到 correct time occasion。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PRACH starting symbol positions.md"
+              },
+              "score": 2.88174
+             },
+             {
+              "text": "Keysight › 可追溯範圍\n- PCB 測試相關內容只記錄 [[AI Server PCB test image 24]] 與 [[AI Server PCB test image 50]] 圖上出現的 Keysight / 是德科技名稱與相關工具組合。\n- Wireless testing / UXM portfolio 相關內容只記錄 [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 的 R&S battle card 觀點；它不是 Keysight 官方資料。\n- 本頁不推論 Keysight 在 AI server、資料中心、PCB 測試、wireless device testing 或 UXM 市場的市占率、客戶、出貨量或導入狀態。\n- 本頁不把 [[Delta-L 測量軟體]]、[[Delta-L 探頭]] 的合作夥伴自行補成任何公司名稱，因來源未標示具體名稱。\n- [[AI Server PCB test image 50]] 對 `Delta-L 测量软件（来自台作伙伴）` 與 `Delta-L 探头（来自台作伙伴）` 的「台作伙伴」字樣標示為無法完全辨識；本頁保留該未決事項，不把它當作確定公司或正式名稱。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Keysight.md"
+              },
+              "score": 3.883027
+             },
+             {
+              "text": "R&S CMX-KA401 › 來源中的配置資料\n| 來源 | Description | Conditions |\n|---|---|---|\n| [[CMX_Configuration_Guide_Audio-Testing]] | Advanced audio measurement / generator and playback；SAP Kurztext: IP Analysis | Add for OTT voice quality、injected customer WAV files UL/DL、VoIP wave injection、E2E audio delay、IP streaming、playback/record、non-realtime IMS e.g. SlowIQ；requires [[R&S CMX-KA100]] + [[R&S CMX-KA180]]；not required for basic POLQA |\n| [[CMX_Configuration_Guide]] | CMX Audio Test Test Feature Set 2 | NGeCall context 中支援 Audio player and recorder function with ZG180A；對 TS17240 In-Band Modem over IP Tests 為 mandatory |\n| [[CMX500_Features_CSW9-20-0_en_32]] | CMX application test audio, feature set 2 | features overview；order no. 1222.8125.xx |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA401.md"
+              },
+              "score": 1.814158
+             },
+             {
+              "text": "![https://cdn.rohde-schwarz.com/pws/product/n_1/nrq6/NRQ6_48940_05_lightbox_landscape.jpg](Picture2.jpg)",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ae261ae2c6ea49d8",
+                "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+                "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+                "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "section": 53,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 15.977504
+             },
+             {
+              "text": "For product brochure, see PD 5214.0601.12 and www.rohde-schwarz.com",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-bb00f7ed66cf3a5d",
+                "original_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+                "sha256": "bb00f7ed66cf3a5d5e0de6726bb22640f7873382a3abbbb5b905cb98d9c0c856",
+                "raw_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+               "section": 122,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 15.977504
+             },
+             {
+              "text": "Contact: Tim Seyler (tim.seyler@rohde-schwarz.com), Product Manager Mobile Radio Testing",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-3b343d1990f39b17",
+                "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+                "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+                "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 15.977504
+             },
+             {
+              "text": "Contact: Tim Seyler (tim.seyler@rohde-schwarz.com), Product Manager Mobile Radio Testing",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-3b343d1990f39b17",
+                "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+                "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+                "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "section": 27,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 15.977504
+             }
+            ],
+            "text": "OFDM is described here as the waveform/grid basis in which frequency-domain subcarriers and time-domain OFDM symbols form the NR resource grid [2]. An NR Resource Element is one subcarrier in one OFDM symbol on one antenna port [3]. OFDM signals are formed as a linear combination of many QAM symbols through an IFFT, which is why they can have high PAPR [46]. In an OFDM system, a cyclic prefix is added to each time-domain OFDM symbol as a guard interval to reduce inter-symbol interference [5]. In 5G NR, numerology μ defines OFDM time-frequency resolution, including OFDM symbol duration and subcarrier spacing [37].\n| Product-related measurement decision | Rohde & Schwarz product facts | Why OFDM understanding matters | Evidence |\n|---|---|---|---|\n| Choose/configure 5G NR FR1 uplink TX measurement capability on R&S CMX500 | R&S CMX-KM600 is necessary for any NR FR1 uplink TX tests; NR FR1 uplink measurements include multi-evaluation, PRACH, SRS and TPC; multi-evaluation supports 3 MHz to 100 MHz channel bandwidth [23]. | NR measurements use an OFDM resource grid of subcarriers and OFDM symbols, and actual allocation, BWP or measurement bandwidth calculations require formal NR specifications [1][2]. | [1][2][23] |\n| Choose CMX500 NR analyzer/generator options and interpret EVM-related specs | R&S CMX-KM600 is the 5G NR analyzer option, and R&S CMX-KW601 is the 5G NR generator option [22]. The CMX-KM600 analyzer condition includes FR1, SCS 30 kHz, 16QAM and 100 MHz bandwidth with EVM < 0.5%; the CMX-KW601 generator condition includes 5G NR PDSCH, full allocation, SCS 30 kHz / 60 kHz, 64QAM and 100 MHz bandwidth with EVM < 0.5% [23]. | SCS, OFDM symbol duration, RB allocation and sample rate are OFDM/numerology-dependent NR configuration items [37][39][43]. | [22][23][37][39][43] |\n| Decide NR EVM test setup, limits and allocation/modulation conditions | EVM is the difference between a reference waveform and a measured waveform [15]. In the cited 5G NR FR1 SA pre-conformance test case, the Test ID sets RB Allocation and modulation scheme, EVM must be checked against specified range, and max-power/min-power EVM measurements are required [15]. EVM limits vary by modulation, including Pi/2-BPSK, QPSK, 16QAM, 64QAM and 256QAM [14]. | RBs and REs are defined on the OFDM grid, so allocation-dependent EVM setup requires OFDM grid vocabulary [3][39]. | [3][14][15][39] |\n| Choose/configure R&S PVT360A 5G NR downlink/uplink measurement options | R&S PVT-KM320 provides 5G NR downlink measurements release 15/16, R&S PVT-KM321 provides 5G NR uplink measurements release 15/16/17, R&S PVT-KM323 is an uplink multicarrier extension, and R&S PVT-KM325 is an uplink MIMO extension [30][31]. FR1 uplink measurements include multi-evaluation, PRACH, SRS and TPC; NR uplink multi-evaluation supports FDD/TDD, NR standalone, intraband contiguous EN-DC and 3 MHz to 100 MHz channel bandwidth [31]. | These are NR physical-layer measurements over the NR OFDM grid, whose time-frequency resolution is set by numerology and SCS [36][37]. | [30][31][36][37] |\n| Decide cyclic prefix / slot-symbol assumptions for NR measurement configuration | Normal CP uses 14 OFDM symbols per slot, while Extended CP uses 12 OFDM symbols per slot; NR Release 15 defines Extended CP only for μ=2 [38]. | CP changes the OFDM symbol/slot structure and therefore affects symbol-level measurement mapping [5][38]. | [5][38] |\n| Choose WLAN TX measurement options where OFDM is explicitly part of the test type | R&S PVT360A WLAN measurements include OFDM / DSSS TX tests for power, modulation, spectrum, OBW, spectrum flatness and transmit spectrum mask [28]. PVT WLAN measurement options include R&S PVT-KM410 for 802.11a/b/g/n/p/ac, KM411 for 802.11ax, KM412 for 802.11be, KM413 for WLAN MIMO extension and KM414 for 802.11bn [28][30]. | The cited WLAN test category explicitly includes OFDM TX tests [28]. | [28][30] |\n| Choose CMX500 WLAN TX measurement options | CMX500 measurement options include R&S CMX-KM350 for WLAN TX measurements IEEE 802.11a/b/g/n/ac, CMX-KM351 for IEEE 802.11ax and CMX-KM352 for IEEE 802.11be [22]. CMX500 features also include WLAN signaling and WLAN TX measurements covering 802.11a/b/g/n/ac, 802.11ax, 802.11be, 802.11bn and 2x2 MIMO [20]. | The passages identify WLAN TX measurement products, but do not directly state which of those CMX500 WLAN options are OFDM-specific. | [20][22] |\n【推論】For NR product configuration, OFDM understanding is needed before choosing or configuring CMX500 KM600/KW601 or PVT360A NR measurement options, because the products are specified by NR measurement type, SCS, bandwidth, allocation or EVM conditions, while NR allocation and measurement bandwidth are defined on the OFDM resource grid and require formal NR specifications for exact calculation [1][2][22][23][30][31][37][39].\n【推論】For WLAN product configuration, OFDM understanding is directly relevant to PVT360A WLAN measurements because the source explicitly lists “OFDM / DSSS TX tests”; for CMX500 WLAN options, the passages support WLAN TX measurement capability but do not prove the CMX500 option selection is OFDM-specific [20][22][28][30].\nThe supplied RAW passages do not add a supported OFDM definition or measurement-option specification; they only show a product brochure pointer and Rohde & Schwarz mobile radio testing contact information [66][67][68].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "NR resource grid › 使用限制\n- [[NR Frame Structure]] 未提供 full resource grid formalism，例如 common resource blocks、physical resource blocks、virtual resource blocks、BWP 或 ARFCN mapping。\n- Point-A 只以概念文字描述；來源未提供 offsetToPointA、absoluteFrequencyPointA 或 RRC ASN.1 定義。\n- 若要計算實際 allocation、BWP 或 measurement bandwidth，需查正式 [[3GPP TS 38.211]] / [[3GPP TS 38.214]] / RRC specifications。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NR resource grid.md"
+             },
+             "score": 1.366991
+            },
+            {
+             "text": "NR resource grid\n[[NR resource grid]] 是 5G NR 中以 frequency-domain subcarriers 與 time-domain [[OFDM symbol]]s 組成的 resource mapping grid；[[NR Frame Structure]] 在 resource grid 段落定義 [[Resource Element]]、[[Resource Block]] 與 [[Point-A]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NR resource grid.md"
+             },
+             "score": 0.964428
+            },
+            {
+             "text": "NR resource grid › Resource Element\n依 [[NR Frame Structure]]：\n\n- [[Resource Element]] is the unit of a single subcarrier in one OFDM symbol and on one antenna port。\n\n因此 RE 是 frequency、time 與 antenna port 三個維度上的最小 grid unit。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NR resource grid.md"
+             },
+             "score": 0.938062
+            },
+            {
+             "text": "NR cyclic prefix › 基本概念\n依 [[NR Frame Structure]]：\n\n- 在 OFDM system 中，CP is added for each OFDM symbol in time-domain。\n- CP 是把 raw OFDM symbol 最後幾個 samples 複製到 raw OFDM symbol 前方。\n- CP provides a guard interval between two OFDM symbols。\n- CP 用於 eliminate inter-symbol interference, ISI。\n- NR defines two types of cyclic prefix lengths：[[Normal CP]] 與 [[Extended CP]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NR cyclic prefix.md"
+             },
+             "score": 2.069895
+            },
+            {
+             "text": "EVM › 1C111 中的 5G NR EVM limits\n依 [[1C111_1e_3GPPPreConfGuide]]，EVM measurement results 必須低於 [[3GPP TS 38.521-1]] Table 6.4.2.1.5-1 的 maximum error percentage，並套用 Table 6.4.2.1.5-2 定義的 Test Tolerance（TT）。來源摘錄的 Average EVM Level limits 為：\n\n| Modulation | Average EVM level limit |\n|---|---|\n| Pi/2-BPSK | 30 + TT % |\n| QPSK | 17.5 + TT % |\n| 16 QAM | 12.5 + TT % |\n| 64 QAM | 8 + TT % |\n| 256 QAM | 3.5 + TT % |\n\nTT 來源摘錄為：\n\n| 條件 | TT |\n|---|---|\n| All except 256QAM | 0% |\n| 256 QAM @ max power | 0.3% |\n| 256 QAM @ min power | 1.1% |\n\n來源範例：DUT on n78、100 MHz BW、PUCCH Test ID 1（QPSK）時，specified maximum EVM 為 **17.5 + 0 %**，且 CMX EVM measurement 位於 3GPP limits 內。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/EVM.md"
+             },
+             "score": 1.592209
+            },
+            {
+             "text": "EVM › 來源定義\n依 [[WIC Glossary]]（來源正式日期未標示；raw converted 2026-09-17）：\n\n- EVM 展開為 Error Vector Magnitude。\n\n依 [[1C111_1e_3GPPPreConfGuide]]（06.2025）：\n\n- Error Vector Magnitude（EVM）是 reference waveform 與 measured waveform 之間差異的量測。\n- 來源將 EVM 放在 [[3GPP TS 38.521-1]] test case **6.4.2.1 Error Vector Magnitude PUCCH/PUSCH**。\n- Test ID 會設定 RB Allocation 與 modulation scheme。\n- PUCCH subtests 需參考 application note chapter 2.1 notes。\n- Apply configuration 後，需確認 measured DUT EVM 位於 specified range 內。\n- Test case 要求在 DUT max power 與 min power 下量測 EVM。\n- CMX 會先自動設定 max power；完成 max power EVM verification 後，DUT 需使用 TPC Closed Loop settings 設定為 min power。\n\n[[1C111_0e_3GPPPreConfGuide]] 對同一 test case 的定義與限值摘要相同，並支撐既有 EVM 頁面內容。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/EVM.md"
+             },
+             "score": 1.275803
+            },
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 2.845481
+            },
+            {
+             "text": "R&S CMX500 › Measurement options\n[[CMX500_specs_en_5216-4127-22_v1100]] 在 ordering information 中提供下列完整 order number：\n\n| Code | Name | Order no. | 來源 |\n|---|---|---|---|\n| R&S CMX-KM350 | WLAN TX measurements IEEE 802.11a/b/g/n/ac | 1222.7135.02 | [[CMX500_specs_en_5216-4127-22_v1100]] |\n| R&S CMX-KM351 | WLAN TX measurements IEEE 802.11ax | 1222.7141.02 | [[CMX500_specs_en_5216-4127-22_v1100]] |\n| R&S CMX-KM352 | WLAN TX measurements IEEE 802.11be | 1222.7158.02 | [[CMX500_specs_en_5216-4127-22_v1100]] |\n| R&S CMX-KM500 | LTE analyzer | 1222.5603.02 | [[CMX500_specs_en_5216-4127-22_v1100]] |\n| R&S CMX-KM600 | 5G NR analyzer | 1222.4013.02 | [[CMX500_specs_en_5216-4127-22_v1100]] |\n| R&S CMX-KW601 | 5G NR generator | 1222.1920.02 | [[CMX500_specs_en_5216-4127-22_v1100]] |\n\n[[CMX500_Features_CSW9-20-0_en_32]] 另列以下 measurement option codes 與 `.xx` order number 後綴：R&S CMX-KM140、R&S CMX-KM353、R&S CMX-KM360、R&S CMX-KM570、R&S CMX-KM600、R&S CMX-KM602、R&S CMX-KM604、R&S CMX-KM670、R&S CMX-KM601、R&S CMX-KM603、R&S CMX-KM605。完整 order number 需以正式 ordering data 或 configure 工具確認。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 29,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 2.214896
+            },
+            {
+             "text": "R&S CMX500 › NR FR1\n依 [[CMX500_Features_CSW9-20-0_en_32]]，R&S CMX-KM600 是 frequency range 1 對 NR uplink signals 執行任何 TX tests 的必要 option。NR FR1 uplink measurements 包含 multi-evaluation、PRACH、SRS、TPC measurement。Multi-evaluation 支援 NR channel bandwidth **3 MHz 到 100 MHz**，可分析 FDD 與 TDD signals、NR standalone signals 與 intraband contiguous EN-DC signals。\n\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，R&S CMX-KM600 option 的 5G NR analyzer 條件為 FR1、SCS 30 kHz、16QAM、temperature range +15 °C to +35 °C；input level –25 dBm to –10 dBm RMS、bandwidth 100 MHz 時 EVM **< 0.5 %**。Frequency measurement uncertainty：**< 20 Hz + drift of timebase**；相對於同一台 CMX500 device 的 downlink signal 進行 frequency error measurements 時，uncertainty 符合 [[3GPP TS 38.521-1]] V18.5.0。\n\nR&S CMX-KW601 option 的 5G NR generator 條件：5G NR PDSCH、full allocation、SCS 30 kHz / 60 kHz、modulation 64QAM、PAR 11.8 dB、temperature +15 °C to +35 °C；ports RF Com 1、RF Com 2、RF Out 1 to RF Out 4；output level –5 dBm、bandwidth 100 MHz 時 EVM **< 0.5 %**。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 30,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 2.148269
+            },
+            {
+             "text": "R&S PVT360A › Measurements\n| Option | Order no. | 功能 |\n|---|---:|---|\n| R&S PVT-KM410 | 1214.0341.xx | WLAN SISO measurements 802.11a/b/g/n/p/ac；mandatory |\n| R&S PVT-KM411 | 1214.0358.xx | WLAN 802.11ax SISO extension；需要 R&S PVT-KM410 |\n| R&S PVT-KM412 | 1214.0364.xx | WLAN 802.11be SISO extension；需要 R&S PVT-KM411 |\n| R&S PVT-KM413 | 1214.0370.xx | WLAN measurements, MIMO extension |\n| R&S PVT-KM414 | 1214.4518.xx | WLAN 802.11bn SISO extension；需要 R&S PVT-KM412 與 R&S PVT-KM411 |\n\nWLAN measurements 來源摘錄：\n\n- OFDM / DSSS TX tests 包含 power、modulation、spectrum、OBW、spectrum flatness、transmit spectrum mask。\n- 802.11ax SISO 支援 4096QAM MCS 12/13 measurements；來源註記 4096QAM MCS 12/13 未由 IEEE 規範，但 measurements 支援。\n- 802.11be / 802.11bn SISO input signal settings 支援 bandwidth **5 MHz to 320 MHz**；320 MHz 需要 R&S PVT-KB505 或已停訂 R&S PVT-KB605。\n- True MIMO measurements：最多 4 個 DUT antennas；2x2 MIMO 支援 802.11n、802.11ac、802.11ax、802.11be、802.11bn；4x4 MIMO 僅支援使用 [[PVTflexx]] 搭配兩台 PVT360A instruments。\n- Composite MIMO measurements：DUT antenna signals 外部合併後送入單一 RF port，只能進行 composite modulation accuracy measurements，無法 decode individual spatial streams。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 20,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S PVT360A.md"
+             },
+             "score": 1.856277
+            },
+            {
+             "text": "R&S PVT360A › Measurement options\n| Option | Order no. | Designation |\n|---|---:|---|\n| R&S PVT-KM100 | 1214.3140.xx | I/Q-based spectrum analysis |\n| R&S PVT-KM300 | 1214.3128.xx | GSM measurements |\n| R&S PVT-KM310 | 1214.0193.xx | LTE measurements, downlink |\n| R&S PVT-KM311 | 1214.0206.xx | LTE and LTE-A measurements, uplink |\n| R&S PVT-KM313 | 1214.0229.xx | NB-IoT measurements, downlink |\n| R&S PVT-KM314 | 1214.0235.xx | NB-IoT measurements, uplink |\n| R&S PVT-KM320 | 1214.0241.xx | 5G NR measurements, downlink, release 15/16 |\n| R&S PVT-KM322 | 1214.0264.xx | 5G NR measurements, downlink, multicarrier extension |\n| R&S PVT-KM326 | 1214.0306.xx | 5G NR measurements, downlink, release 17 extension |\n| R&S PVT-KM321 | 1214.0258.xx | 5G NR measurements, uplink, release 15/16/17 |\n| R&S PVT-KM323 | 1214.0270.xx | 5G NR measurements, uplink, multicarrier extension |\n| R&S PVT-KM325 | 1214.0293.xx | 5G NR measurements, uplink, MIMO extension |\n| R&S PVT-KM400 | 1214.0335.xx | Bluetooth measurements |\n| R&S PVT-KM410 | 1214.0341.xx | WLAN measurement, 802.11a/b/g/n/p/ac |\n| R&S PVT-KM411 | 1214.0358.xx | WLAN measurement, 802.11ax extension |\n| R&S PVT-KM412 | 1214.0364.xx | WLAN measurement, 802.11be extension |\n| R&S PVT-KM413 | 1214.0370.xx | WLAN measurements, MIMO extension |\n| R&S PVT-KM414 | 1214.4518.xx | WLAN measurement, 802.11bn extension |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S PVT360A.md"
+             },
+             "score": 1.607811
+            },
+            {
+             "text": "R&S PVT360A › FR1 uplink measurements\n| Option | Order no. | 功能 |\n|---|---:|---|\n| R&S PVT-KM321 | 1214.0258.xx | 5G NR uplink measurements, release 15/16/17；basic option |\n| R&S PVT-KM323 | 1214.0270.xx | Uplink multicarrier extension |\n| R&S PVT-KM325 | 1214.0293.xx | Uplink MIMO extension |\n\nFR1 uplink measurements 包含 multi-evaluation、PRACH、SRS、TPC。來源指出 NR uplink multi-evaluation 支援 FDD / TDD、NR standalone、intraband contiguous EN-DC，channel bandwidth **3 MHz to 100 MHz**。\n\nUplink CA 支援 number of carriers **1 to 2**；two TX antennas measurement 可提供 per layer、per antenna 或 sum of antennas 的結果，依 measurement result 類型而定。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S PVT360A.md"
+             },
+             "score": 1.332621
+            },
+            {
+             "text": "5G NR numerology\n[[5G NR numerology]] 是 5G NR 中以 μ 表示的 OFDM time-frequency resolution 參數，決定 [[Subcarrier Spacing]]、slot duration、subframe 中 slots 數量，以及 [[SSB]] required bandwidth。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR numerology.md"
+             },
+             "score": 1.376078
+            },
+            {
+             "text": "5G NR numerology › 定義\n依 [[NR Frame Structure]]：\n\n- Numerology μ defines the time-frequency resolution。\n- μ 決定 [[OFDM symbol]] time duration 與 [[Subcarrier Spacing]]。\n- NR reference SCS μ=0 是 15 kHz，來源說與 LTE 相同。\n- μ 越高，time resolution 越高。\n- μ 越高，frequency resolution 越低。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR numerology.md"
+             },
+             "score": 1.217515
+            },
+            {
+             "text": "5G NR frame structure › OFDM symbols per slot\n依 [[NR Frame Structure]]：\n\n- [[Normal CP]] 使用 14 [[OFDM symbol]]s per slot。\n- [[Extended CP]] 使用 12 [[OFDM symbol]]s per slot。\n- 來源明示在 NR Release 15 中，[[Extended CP]] only defined for numerology μ=2。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR frame structure.md"
+             },
+             "score": 2.302475
+            },
+            {
+             "text": "5G NR frame structure › 與 resource grid 的關係\nFrame / subframe / slot / symbol 是 time-domain structure；[[NR resource grid]] 則把 time-domain [[OFDM symbol]] 與 frequency-domain subcarriers 組成 grid。\n\n- [[Resource Element]] 是 one subcarrier in one OFDM symbol and on one antenna port。\n- [[Resource Block]] 是 12 consecutive subcarriers。\n- [[Point-A]] 是 resource grid starts toward higher frequencies 的 frequency-domain reference。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G NR frame structure.md"
+             },
+             "score": 1.883551
+            },
+            {
+             "text": "NR sample rate › Sample rate 公式\n來源給出的 NR sample rate calculation：\n\n- Sampling rate in samples/sec = number of samples per raw OFDM symbol / duration of one raw OFDM symbol。\n- Sampling rate = NFFT / (1 / SCS)。\n- Sampling rate = NFFT × SCS。\n- SCS = 2^μ × 15 kHz。\n- 因此 sampling rate = NFFT × 2^μ × 15 kHz。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NR sample rate.md"
+             },
+             "score": 5.074937
+            },
+            {
+             "text": "Low-PAPR sequence › 背景：為什麼需要 low-PAPR\n依 [[DMRS]]：\n\n- OFDM signals 具有 high peak-to-average power ratio（PAPR），因為由 many random QAM symbols 的 linear combination（IFFT）形成。\n- High-PAPR signal 需要 transmitter back-off power amplifier operating point，以避免 transmit signal 進入 power amplifier saturation region 而 clipped / distorted。\n- Power amplifier 遠離 saturation point 操作時 efficiency drops。\n- DL signals 由連接 power grid 的 base station 傳送，因此 high-PAPR 在 DL 不 critical；NR uses OFDM for DL signals。\n- NR 與 LTE 不同，NR UL 也允許使用 OFDM signals。\n- UL 可能需要 low-PAPR signal，使 [[UE]] power amplifier 更接近 saturation point 並提升 efficiency，降低 UE battery energy 消耗。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Low-PAPR sequence.md"
+             },
+             "score": 1.979808
+            },
+            {
+             "text": "For product brochure, see PD 5214.0601.12 and www.rohde-schwarz.com",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-bb00f7ed66cf3a5d",
+               "original_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+               "sha256": "bb00f7ed66cf3a5d5e0de6726bb22640f7873382a3abbbb5b905cb98d9c0c856",
+               "raw_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/CMW-Z10_dat-sw_en_5214-0601-22_v0600.md",
+              "section": 122,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 15.977504
+            },
+            {
+             "text": "Contact: Tim Seyler (tim.seyler@rohde-schwarz.com), Product Manager Mobile Radio Testing",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3b343d1990f39b17",
+               "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 15.977504
+            },
+            {
+             "text": "Contact: Tim Seyler (tim.seyler@rohde-schwarz.com), Product Manager Mobile Radio Testing",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-3b343d1990f39b17",
+               "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+              "section": 27,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 15.977504
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "product_option_spec",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 42,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 34,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 29,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMX500.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/NR resource grid.md",
+             "raw_refs": [
+              "raw/Knowledge/NR Frame Structure.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/NR cyclic prefix.md",
+             "raw_refs": [
+              "raw/Knowledge/NR Frame Structure.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/EVM.md",
+             "raw_refs": [
+              "raw/Market/OneNote/1C111_0e_3GPPPreConfGuide.md",
+              "raw/Market/OneNote/1C111_1e_3GPPPreConfGuide.md",
+              "raw/Market/OneNote/FWA CPE SmallCell/FWA CPE.md",
+              "raw/Market/OneNote/FWA CPE SmallCell/WIC Glossary.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S PVT360A.md",
+             "raw_refs": []
+            },
+            {
+             "wiki_page": "wiki/concepts/5G NR numerology.md",
+             "raw_refs": [
+              "raw/Knowledge/NR Frame Structure.md",
+              "raw/Knowledge/SSB (NR).md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/5G NR frame structure.md",
+             "raw_refs": [
+              "raw/Knowledge/NR Frame Structure.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/NR sample rate.md",
+             "raw_refs": [
+              "raw/Knowledge/Frequency Ranges, Bands and Bandwidth.md",
+              "raw/Knowledge/NR Frame Structure.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Low-PAPR sequence.md",
+             "raw_refs": [
+              "raw/Knowledge/DMRS.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

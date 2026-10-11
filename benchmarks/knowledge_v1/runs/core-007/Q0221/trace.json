@@ -1,0 +1,1536 @@
+{
+ "question": {
+  "id": "Q0221",
+  "text": "Map the chain from a Aerospace / Defense market requirement to a measurable parameter and then to a required capability of Signaling / Non-signaling Tester.",
+  "market": "Aerospace / Defense",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-b0d85f0f64ca410eb944a35a750ad58e",
+ "exchange": {
+  "sent": "Map the chain from a Aerospace / Defense market requirement to a measurable parameter and then to a required capability of Signaling / Non-signaling Tester.",
+  "http_status": 200,
+  "seconds": 282.671,
+  "timed_out": false,
+  "reply": {
+   "ok": false,
+   "conversation": {
+    "session_id": "conversation-b0d85f0f64ca410eb944a35a750ad58e",
+    "actor": "leo.chi",
+    "title": "Map the chain from a Aerospace / Defense market requirement to a measura…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T06:19:16.959820Z",
+    "updated_at": "2026-10-11T06:23:59.613885Z",
+    "messages": [
+     {
+      "message_id": "message-0af9a207dec34bcf8e95d7505f22bbf8",
+      "role": "user",
+      "text": "Map the chain from a Aerospace / Defense market requirement to a measurable parameter and then to a required capability of Signaling / Non-signaling Tester.",
+      "created_at": "2026-10-11T06:19:17.163220Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-a51353657c2048798272f82c66dfaf2e",
+      "role": "assistant",
+      "text": "已查到可引用的部分資料：\n\n### Supported facts\n| Layer | Supported fact |\n|---|---|\n| Aerospace / Defense context | The source is an Aerospace & Defense Test presentation by Randy Schnell, titled “Making Deployed 5G Private Networks more Resilient.” [3][63] |\n| Market requirement | The listed mission / market drivers include tactical edge connectivity needs, smart jamming and improved EW tactics, complex RF environments and contested spectrum, growing private 5G adoption, autonomous systems and drones requiring low latency, tactical private 5G networks on military bases, and secure command-and-control network demand. [8] |\n| Threat model | Smart jamming is described as an adaptive RF jamming threat in mission-critical / military wireless communications. [50] |\n| Resilience approach | The resilience problem is mapped to 5G handover signaling and 5G frequency-hopping / legacy FHSS behavior. [6][58] |\n| Test-design parameter | The test design uses UE-reported supported bands and focuses on handover interruption intervals defined in 3GPP TS 38.300. [3][58] |\n| Measurable outcomes | The sources identify handover interruption, RTT, iPerf, and WebRTC QoS as measured quantities for the mitigation direction. [54] |\n| Video / application reliability parameter | The presentation says throughput and WebRTC statistics supported video-call reliability, but it did not provide concrete throughput, jitter, packet loss, bandwidth, jammer profile, or modem values. [3][5] |\n| Signaling tester capability facts | R&S CMX500 is described as a universal one-box network emulation and measurement test solution supporting LTE, NR FR1, NR FR2, NSA, SA, FDD, and TDD. [11][13] |\n| Signaling / application capability facts | R&S CMX500 features include NR FR1 / FR2 signaling, LTE signaling, fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, application test, IP traffic analysis, and automation interfaces. [11] |\n| Callbox workflow facts | The CMX500 callbox source positions it for quick call setup, RF testing, mobility testing, application testing, network slicing, IP throughput, security analysis, IMS services, power consumption, and speech quality. [24] |\n| Non-signaling capability facts | The CMX500 callbox source says GPRF generator signal types include ARB, CW, Dual Tone, replay `.wv` files, up to four GPRF generator instances in parallel, and ARB Sequencer. [19] |\n| Non-signaling RF capability facts | The CMX500 RF generator frequency range is 400 MHz to 8000 MHz with 0.1 Hz frequency resolution, 1000 MHz instantaneous bandwidth, and 250 MHz RF bandwidth. [16] |\n| Non-signaling recording / replay fact | The IQ recorder can record up to 4 Gbyte to a file and save files as `.wv` for replay. [19] |\n| Limitation | The sources do not provide jammer waveform, jammer power, tracking delay, hop prediction capability, attack success rate, jammer dwell time, hop pattern, or statistical outcome values. [5][7][56] |\n### Inferred chain map\n| Aerospace / Defense market requirement | Measurable parameter | Required Signaling Tester capability | Required Non-signaling Tester capability |\n|---|---|---|---|\n| 【推論】For resilient tactical/private 5G under smart jamming and EW, the measurable test focus should be inter-frequency handover behavior, especially handover interruption, RTT, iPerf, and WebRTC QoS, because the sources map the mitigation to 5G handover / handover-frequency-hopping and identify those measurements. [6][8][54][58] | Handover interruption interval, RTT, iPerf throughput, WebRTC QoS. [54] | 5G NR network emulation with LTE / NR FR1 / NR FR2 signaling, SA / NSA operation, mobility testing, IP throughput, and application testing. [11][13][24] | RF / GPRF generation for controlled RF stress using CW, ARB, Dual Tone, `.wv` replay, multiple generator instances, IQ record / replay, and RF generation across 400 MHz to 8000 MHz. [16][19] |\n| 【推論】For maintaining command-and-control or video-like mission applications under contested RF conditions, the measurable parameters should include throughput and WebRTC statistics, because the source uses those to support video-call reliability but notes that concrete jitter, packet loss, latency, and bandwidth values are absent. [3][5][8] | Throughput and WebRTC statistics; numeric jitter, packet loss, latency, and bandwidth are not provided. [3][5] | Application testing, IP traffic analysis, throughput measurement, and callbox workflows for quick call setup and application testing. [11][24] | Non-signaling impairment / interferer generation can be approached with GPRF ARB, CW, Dual Tone, replay `.wv`, and AWGN-related waveform libraries, but the sources do not specify a validated smart-jammer waveform or profile. [19][56] |\n| 【推論】For frequency-agile operation using UE-supported bands, the measurable parameter chain should include UE capability / supported-band handling and carrier-frequency changes, because the source says the test design uses UE capabilities and maps resilience to 5G handover plus frequency-hopping behavior. [3][58] | UE-reported supported bands and handover interruption intervals. [3][58] | NR signaling support and network-emulation capability across NR FR1 / NR FR2, with mobility testing workflows. [11][13][24] | Frequency-agile RF generation requires frequency coverage and resolution; the cited CMX500 RF generator supports 400 MHz to 8000 MHz with 0.1 Hz resolution. [16] |\n\n來源：\n[3] Wiki：2025-12-19 Making Deployed 5G Private Networks more Resilient（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`）\n[5] Wiki：2025-12-19 Making Deployed 5G Private Networks more Resilient（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`）\n[6] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[7] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[8] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[11] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[13] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[16] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[19] Wiki：CMX500_Callbox（來源：`1C111_1e_3GPPPreConfGuide.md`、`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`…）\n[24] Wiki：CMX500_Callbox（來源：`1C111_1e_3GPPPreConfGuide.md`、`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`…）\n[50] Wiki：Smart Jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`、`Counter UAV tech.md`）\n[54] Wiki：Smart Jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`、`Counter UAV tech.md`）\n[56] Wiki：Smart Jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`、`Counter UAV tech.md`）\n[58] Wiki：Frequency hopping for 5G resilience（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[63] Wiki：Randy Schnell（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`）\n\n尚未證實：direct_relationship。因此不能把上列資料當成完整的推薦或比較。",
+      "created_at": "2026-10-11T06:23:59.613885Z",
+      "status": "failed",
+      "trace": {
+       "trace_id": "trace-952305affd744aa2a6d9cc780ff3e2dd",
+       "request_id": "request-952305affd744aa2a6d9cc780ff3e2dd",
+       "span_id": "span-952305affd744aa2a6d9cc780ff3e2dd",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": false,
+    "answer": "已查到可引用的部分資料：\n\n### Supported facts\n| Layer | Supported fact |\n|---|---|\n| Aerospace / Defense context | The source is an Aerospace & Defense Test presentation by Randy Schnell, titled “Making Deployed 5G Private Networks more Resilient.” [3][63] |\n| Market requirement | The listed mission / market drivers include tactical edge connectivity needs, smart jamming and improved EW tactics, complex RF environments and contested spectrum, growing private 5G adoption, autonomous systems and drones requiring low latency, tactical private 5G networks on military bases, and secure command-and-control network demand. [8] |\n| Threat model | Smart jamming is described as an adaptive RF jamming threat in mission-critical / military wireless communications. [50] |\n| Resilience approach | The resilience problem is mapped to 5G handover signaling and 5G frequency-hopping / legacy FHSS behavior. [6][58] |\n| Test-design parameter | The test design uses UE-reported supported bands and focuses on handover interruption intervals defined in 3GPP TS 38.300. [3][58] |\n| Measurable outcomes | The sources identify handover interruption, RTT, iPerf, and WebRTC QoS as measured quantities for the mitigation direction. [54] |\n| Video / application reliability parameter | The presentation says throughput and WebRTC statistics supported video-call reliability, but it did not provide concrete throughput, jitter, packet loss, bandwidth, jammer profile, or modem values. [3][5] |\n| Signaling tester capability facts | R&S CMX500 is described as a universal one-box network emulation and measurement test solution supporting LTE, NR FR1, NR FR2, NSA, SA, FDD, and TDD. [11][13] |\n| Signaling / application capability facts | R&S CMX500 features include NR FR1 / FR2 signaling, LTE signaling, fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, application test, IP traffic analysis, and automation interfaces. [11] |\n| Callbox workflow facts | The CMX500 callbox source positions it for quick call setup, RF testing, mobility testing, application testing, network slicing, IP throughput, security analysis, IMS services, power consumption, and speech quality. [24] |\n| Non-signaling capability facts | The CMX500 callbox source says GPRF generator signal types include ARB, CW, Dual Tone, replay `.wv` files, up to four GPRF generator instances in parallel, and ARB Sequencer. [19] |\n| Non-signaling RF capability facts | The CMX500 RF generator frequency range is 400 MHz to 8000 MHz with 0.1 Hz frequency resolution, 1000 MHz instantaneous bandwidth, and 250 MHz RF bandwidth. [16] |\n| Non-signaling recording / replay fact | The IQ recorder can record up to 4 Gbyte to a file and save files as `.wv` for replay. [19] |\n| Limitation | The sources do not provide jammer waveform, jammer power, tracking delay, hop prediction capability, attack success rate, jammer dwell time, hop pattern, or statistical outcome values. [5][7][56] |\n### Inferred chain map\n| Aerospace / Defense market requirement | Measurable parameter | Required Signaling Tester capability | Required Non-signaling Tester capability |\n|---|---|---|---|\n| 【推論】For resilient tactical/private 5G under smart jamming and EW, the measurable test focus should be inter-frequency handover behavior, especially handover interruption, RTT, iPerf, and WebRTC QoS, because the sources map the mitigation to 5G handover / handover-frequency-hopping and identify those measurements. [6][8][54][58] | Handover interruption interval, RTT, iPerf throughput, WebRTC QoS. [54] | 5G NR network emulation with LTE / NR FR1 / NR FR2 signaling, SA / NSA operation, mobility testing, IP throughput, and application testing. [11][13][24] | RF / GPRF generation for controlled RF stress using CW, ARB, Dual Tone, `.wv` replay, multiple generator instances, IQ record / replay, and RF generation across 400 MHz to 8000 MHz. [16][19] |\n| 【推論】For maintaining command-and-control or video-like mission applications under contested RF conditions, the measurable parameters should include throughput and WebRTC statistics, because the source uses those to support video-call reliability but notes that concrete jitter, packet loss, latency, and bandwidth values are absent. [3][5][8] | Throughput and WebRTC statistics; numeric jitter, packet loss, latency, and bandwidth are not provided. [3][5] | Application testing, IP traffic analysis, throughput measurement, and callbox workflows for quick call setup and application testing. [11][24] | Non-signaling impairment / interferer generation can be approached with GPRF ARB, CW, Dual Tone, replay `.wv`, and AWGN-related waveform libraries, but the sources do not specify a validated smart-jammer waveform or profile. [19][56] |\n| 【推論】For frequency-agile operation using UE-supported bands, the measurable parameter chain should include UE capability / supported-band handling and carrier-frequency changes, because the source says the test design uses UE capabilities and maps resilience to 5G handover plus frequency-hopping behavior. [3][58] | UE-reported supported bands and handover interruption intervals. [3][58] | NR signaling support and network-emulation capability across NR FR1 / NR FR2, with mobility testing workflows. [11][13][24] | Frequency-agile RF generation requires frequency coverage and resolution; the cited CMX500 RF generator supports 400 MHz to 8000 MHz with 0.1 Hz resolution. [16] |\n\n來源：\n[3] Wiki：2025-12-19 Making Deployed 5G Private Networks more Resilient（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`）\n[5] Wiki：2025-12-19 Making Deployed 5G Private Networks more Resilient（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`）\n[6] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[7] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[8] Wiki：5G private network resilience against smart jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[11] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[13] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[16] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[19] Wiki：CMX500_Callbox（來源：`1C111_1e_3GPPPreConfGuide.md`、`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`…）\n[24] Wiki：CMX500_Callbox（來源：`1C111_1e_3GPPPreConfGuide.md`、`CMX500_Callbox.md`、`CMX500_Features_CSW9-20-0_en_32.md`…）\n[50] Wiki：Smart Jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`、`Counter UAV tech.md`）\n[54] Wiki：Smart Jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`、`Counter UAV tech.md`）\n[56] Wiki：Smart Jamming（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`、`Counter UAV tech.md`）\n[58] Wiki：Frequency hopping for 5G resilience（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`、`5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md`）\n[63] Wiki：Randy Schnell（來源：`2025-12-19 Making Deployed 5G Private Networks more Resilient.md`）\n\n尚未證實：direct_relationship。因此不能把上列資料當成完整的推薦或比較。",
+    "status": "failed",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-952305affd744aa2a6d9cc780ff3e2dd",
+      "request_id": "request-952305affd744aa2a6d9cc780ff3e2dd",
+      "span_id": "span-952305affd744aa2a6d9cc780ff3e2dd",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-952305affd744aa2a6d9cc780ff3e2dd",
+       "request_id": "request-952305affd744aa2a6d9cc780ff3e2dd",
+       "span_id": "span-952305affd744aa2a6d9cc780ff3e2dd",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.1.0-k2.1"
+       },
+       "trace": {
+        "trace_id": "trace-952305affd744aa2a6d9cc780ff3e2dd",
+        "request_id": "request-952305affd744aa2a6d9cc780ff3e2dd",
+        "span_id": "span-952305affd744aa2a6d9cc780ff3e2dd",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "Map the chain from a Aerospace / Defense market requirement to a measurable parameter and then to a required capability of Signaling / Non-signaling Tester.",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "2025-12-19 Making Deployed 5G Private Networks more Resilient › 與既有知識的關係\n- 與 [[DUT]]：來源明確以 unmodified 5G DUT 為限制條件；技術方法必須放在 network / infrastructure / orchestration，而不是修改 DUT 本身。\n- 與 [[R&S CMX500]]：既有頁面整理 [[R&S CMX500]] 作為 Radio Communication Tester、NR / LTE / WLAN signaling、fading、application test 與 automation 平台。本來源只提到 CMX customers 與 5G test setup，沒有明示硬體型號、option 或配置，因此不能把測試結果歸因為正式 CMX500 規格或能力。\n- 與 [[Beamforming]]：來源 roadmap 提到 2025–2028 mmWave phased arrays available for field testing；這可作為 [[Beamforming]] / [[相控陣列天線]] 待讀資料線索，但不提供 beamforming 技術定義或量測方法。\n- 與 [[Counter-UAV 技術]]：來源 mid-term roadmap 提到 early [[ISAC]] deployment for drone detection & perimeter defense；這與 counter-UAV sensing 主題相鄰，但來源未提供 counter-UAV 系統、sensor spec 或效能數據。\n- 與 [[5G NTN validation and testing]]、[[NTN propagation emulation and fading]]：本來源處理 private / tactical 5G resilience 與 jamming，不是 NTN channel emulation 或 satellite validation；兩者都屬 contested / non-terrestrial / mission-critical 連線可靠性脈絡，但不可混用測試條件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+          },
+          "score": 3.596489
+         },
+         {
+          "text": "2025-12-19 Making Deployed 5G Private Networks more Resilient › 實體\n- [[Randy Schnell]] — 來源封面列名 Business Development Manager，Aerospace & Defense Test。\n- [[Rohde & Schwarz]] — raw 來源路徑與 company restricted 簡報語境顯示為 R&S 內部資料；投影片 call to action 提到 re-engage CMX customers。\n- [[R&S CMX500]] — 來源未直接寫出 CMX500，但提到 CMX customers；本頁只保守連到既有 CMX 測試儀脈絡，不推論此測試一定使用 CMX500。\n- [[Lockheed Martin]]、[[Raytheon]]、[[Northrop Grumman]]、[[L3Harris]]、[[BAE]] — Defense Prime Investment 投影片列出的 prime / program context；投資金額、年度與引用來源在 OCR 中不完整。\n- [[Nokia]]、[[Verizon]] — 來源在 5G.MIL scaling / integration demos / partnerships 脈絡提到。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+          },
+          "score": 1.812107
+         },
+         {
+          "text": "2025-12-19 Making Deployed 5G Private Networks more Resilient › 重點摘要\n這份來源是由 [[Randy Schnell]] 製作 / 主講的 company restricted 簡報，題為 Making Deployed 5G Private Networks more Resilient；raw frontmatter 顯示原檔為 `2025-12-19 Making Deployed 5G Private Networks more Resilient.pptx`，轉檔日期為 2026-09-17。來源正文沒有另外標示正式發布日期；本頁以檔名 / raw title 的 2025-12-19 作為來源日期線索。\n\n簡報主張的核心問題是：在不修改 [[DUT]] 的前提下，能否利用 legacy [[Frequency hopping for 5G resilience]] / [[FHSS]] 能力，讓 unmodified 5G DUT connection 對 [[Smart Jamming]] 更具韌性。\n\n主要內容如下：\n\n- 任務背景：tactical edge connectivity 對資料與低延遲需求提高，[[Smart Jamming]] 與 electronic warfare（[[EW]]）威脅增加，private [[5G]] networks 在 military bases / tactical environments 的採用升高。\n- 技術映射：來源將問題映射到 5G handover（[[HO]]）signaling 與 frequency-hopping（[[FH]]）signaling；測試設計需使用 [[UE]] capabilities message 回報的 supported bands，並關注 [[3GPP TS 38.300]] 定義的 handover interruption intervals。\n- 測試結果：來源聲稱 both modems showed sufficient performance for running video call；throughput 與 [[WebRTC]] statistics 支撐 video-call reliability 維持，但投影片 OCR 未提供具體 throughput、jitter、packet loss、bandwidth、jammer profile 或 modem 型號數值。\n- 現有 defense / Future-G program 脈絡：來源列出 [[5G.MIL]]、[[Raytheon OXYGEN]]、[[L3Harris Tactical Network Demo]]、[[DoD EMS Superiority Strategy]]、[[FutureG ISAC]] / spectrum sharing 等項目，說明 FHSS / frequency-agile operation 與 5G / 6G coexistence 的整合方向。\n- 時程展望：來源給出 short term 2025–2028、mid term 2028–2032、long term 2032–2035+ 三段式展望，包含 5G tactical networks scale-out、mmWave phased arrays field testing、5G/6G-capable SD radios、early ISAC for drone detection / perimeter defense、URLLC for autonomy、full 6G with integrated sensing、AI-native battlefield connectivity 與 spectrum-aware autonomy。\n- Call to action：重新接觸既有 CMX customers，尤其 DOW customers；與 integrators 溝通；保持 tactical patience；提早 engage BDM organization；跨團隊分享 lessons learned。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+          },
+          "score": 1.139246
+         },
+         {
+          "text": "2025-12-19 Making Deployed 5G Private Networks more Resilient › 概念\n- [[5G private network resilience against smart jamming]] — 本來源的核心市場 / 技術問題節點。\n- [[Smart Jamming]] — 來源描述 tactical edge / contested spectrum 下的 adaptive jammer / smart-jammer threat。\n- [[Frequency hopping for 5G resilience]] — 來源提出以 legacy FH / FHSS 能力支援 5G resilience 的方法方向。\n- [[FHSS]] — 來源的 defense program table 中以 anti-jam / tactical radios / frequency-agile operation 脈絡出現。\n- [[5G Handover]]、[[HO interruption interval]]、[[UE capabilities]]、[[3GPP TS 38.300]] — 測試設計關鍵語彙。\n- [[WebRTC]] — 結果投影片用來評估 video-call reliability 的統計語彙。\n- [[FutureG ISAC]]、[[ISAC]]、[[URLLC]]、[[spectrum-aware autonomy]] — roadmap / future outlook 語彙。\n- [[EW]]、[[Counter-UAV 技術]]、[[UAV 通訊]] — 與 smart jamming、drone detection、perimeter defense 與 contested RF environment 相關的既有主題。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+          },
+          "score": 0.141635
+         },
+         {
+          "text": "2025-12-19 Making Deployed 5G Private Networks more Resilient › 原文未解的問題\n- 來源正文未標示正式發布日期；只有 raw title / 檔名含 2025-12-19，raw converted 為 2026-09-17。\n- 簡報投影片多張圖片沒有 OCR 出完整測試架構；hardware configuration、jamming source / emulation、measurement points、modem 型號、頻段、頻寬與天線配置皆未完整可讀。\n- Defense Prime Investment 的年投資金額區間、來源 URL 與資料口徑未完整標示；不可當作可引用市場規模數字。\n- Outcome 只說 both modems sufficient for video call，沒有 throughput、WebRTC jitter、packet loss、latency、MOS、jammer dwell time、hop pattern 或統計表數值。\n- References 提到 VTC IEEE 2025 paper、whitepaper 與 `5G hardening against smart jammer attacks, PD 3610.1591.52, Version 01.00`，但這些文件正文未在本來源中擷取。\n- [[3GPP TS 38.300]] 只被提到 message definitions / HO interruption intervals；來源未標示版本、release 或引用章節。\n- 來源未說明 legacy FH capabilities 的實作位置、是否符合 3GPP standard、是否需要 network-side customization、是否會影響 regulatory compliance。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+          },
+          "score": 0.085869
+         },
+         {
+          "text": "5G private network resilience against smart jamming › 技術映射\n來源將 resilience 問題映射到兩類 5G / FH 行為：\n\n1. Mapping to [[5G Handover]] signaling。\n2. Mapping to 5G frequency-hopping signaling / legacy [[FHSS]] capabilities。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 將此具體化為 [[Handover frequency hopping]]：使用 [[5G Handover]] 在多個 cells / carrier frequencies 之間切換，使 jammer 必須 constantly listen and readjust to every change。來源說 prerequisite 是 highly reliable inter-frequency handovers，以便在 constantly changing carrier frequency 時仍維持 dependable communications link。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+          },
+          "score": 2.913774
+         },
+         {
+          "text": "5G private network resilience against smart jamming › unresolved\n- [[3GPP TS 38.300]] 的引用版本與 handover interruption interval 章節未標示。\n- [[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 沒有 modem A / B 型號、chipset 或 firmware。\n- 白皮書沒有實體 smart jammer 測試條件；jammer waveform、jammer power、tracking delay、hop prediction capability 與 attack success rate 未標示。\n- Defense Prime Investment 與 program examples 缺少完整外部文件與資料口徑。\n- 來源引用 [[3GPP TS 23.501]] V15.4.0（2018-12）做 QoS table，但是否需用 newer release 做正式 mission-critical assessment 未裁決。\n- Future work 包含 MOS、more random frequencies、dual connectivity、multi-connectivity 與 [[DAPS]] handovers；本來源尚未提供結果。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+          },
+          "score": 2.550637
+         },
+         {
+          "text": "5G private network resilience against smart jamming › Mission context 與 industry drivers\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 列出的 mission / market drivers 包含：\n\n- tactical edge connectivity needs；\n- rise of smart jamming and improved [[EW]] tactics；\n- complex RF environment 與 contested spectrum；\n- growing adoption of private 5G networks；\n- autonomous systems and drones requiring low latency；\n- expansion of tactical private 5G networks on military bases；\n- demand for secure command-and-control networks；\n- strategic partnerships，例如來源提到 Nokia + L3Harris in 2024；\n- multi-year contracts，例如來源提到 Northrop Grumman 5G battlefield networking in 2024。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 另稱 United States Department of Defense has recently embarked on a strategy leveraging both public and private 5G networks，並說 5G could become the de-facto communications network between NATO members。此為 white paper statement；來源未附完整 DoD / NATO 文件引用。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+          },
+          "score": 2.169886
+         },
+         {
+          "text": "5G private network resilience against smart jamming › 與既有頁面的關係\n- [[DUT]]：本概念的限制條件是 unmodified 5G DUT。\n- [[Handover frequency hopping]]：白皮書中最具體的 implementation。\n- [[Frequency hopping for 5G resilience]]：本概念的主要技術方向。\n- [[Smart Jamming]]：本概念要處理的 threat model。\n- [[R&S CMX500]]：白皮書明示測試使用 CMX500 作為 network emulator；但該 Market source 不是 CMX500 binding specifications。\n- [[Counter-UAV 技術]]：簡報 mid-term roadmap 提到 drone detection 與 perimeter defense，但不是 counter-UAV 系統評估來源。\n- [[Beamforming]]：簡報短期 roadmap 提到 mmWave phased arrays field testing，但沒有 beamforming 定義或測試方法。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+          },
+          "score": 2.017324
+         },
+         {
+          "text": "5G private network resilience against smart jamming › Program / roadmap 脈絡\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 把 private 5G resilience 放入 defense / Future-G roadmap：\n\n| 期間 | 來源說法 |\n|---|---|\n| 2025–2028 | widespread deployment of 5G tactical networks；mmWave phased arrays available for field testing；hybrid commercial / military networks such as 5G.MIL-style architectures |\n| 2028–2032 | 5G/6G-capable software-defined radios replacing multi-radio tactical stacks；early [[ISAC]] deployment for drone detection and perimeter defense；[[URLLC]] services for autonomy |\n| 2032–2035+ | full 6G networks with integrated sensing；AI-native battlefield connectivity；high-precision location sensing and spectrum-aware autonomy |\n\n來源也列出 [[5G.MIL]]、[[Raytheon OXYGEN]]、[[L3Harris Tactical Network Demo]]、[[DoD EMS Superiority Strategy]] 與 [[FutureG ISAC]] / spectrum sharing programs，作為 FHSS 與 5G convergence 的 program examples。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+          },
+          "score": 1.215318
+         },
+         {
+          "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 5.990915
+         },
+         {
+          "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 4.451712
+         },
+         {
+          "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 4.03711
+         },
+         {
+          "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx | WLAN SISO signaling |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx | 802.11ax station testing |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx | 802.11be station testing |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx | 802.11bn station testing |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx | 802.11ax AP testing |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx | 802.11be AP testing |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx | 802.11bn AP testing |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx | 2x2 MIMO support |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx | Enterprise security support |\n| R&S CMX-KS500B / M / X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx | 僅 LTE standalone 需要；NR NSA LTE anchor cells 包含於 NR signaling options |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx | D2C fixed / variable delay |\n| R&S CMX-KS600B / M / X | NR signaling enabler, Rel. 15 | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx | 包含 5G NR SA option 2、NSA option 3、DL 2x2/4x4 MIMO、one CC、UL 256QAM |\n| R&S CMX-KS610B / M / X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx | UL 2x2 MIMO、CA up to 9 CC |\n| R&S CMX-KS611B / M / X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx | SUL / Rel. 16 features |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 25,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 3.813784
+         },
+         {
+          "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS612B / M / X | NR signaling extension, CA 10 to 12 CC | 1222.6574.xx / 1222.6580.xx / 1222.6597.xx | CA 10 to 12 CC |\n| R&S CMX-KS613B / X | Multi-SIM enabler | 1222.9580.xx / 1222.9596.xx | Basic / expert |\n| R&S CMX-KS617B / M / X | NR signaling extension, Rel. 17, RedCap | 1222.6600.xx / 1222.6616.xx / 1222.6622.xx | RedCap |\n| R&S CMX-KS618B / X | NR signaling extension, Rel. 18, eRedCap | 1222.9609.xx / 1222.9621.xx | eRedCap |\n| R&S CMX-KS627B / M / X | NR signaling extension, Rel. 17, NTN | 1222.8690.xx / 1222.8702.xx / 1222.8719.xx | NTN |\n| R&S CMX-KS628B / X | NR signaling extension, Rel. 18, NTN | 1222.9638.xx / 1222.9650.xx | NTN |\n| R&S CMX-KS629B / X | NR signaling extension, Rel. 19, NTN | 1223.0086.xx / 1223.0092.xx | NTN |\n| R&S CMX-KS637B / M / X | NR signaling extension, Rel. 17 w/o RedCap & NTN | 1222.8777.xx / 1222.8783.xx / 1222.8790.xx | Rel. 17 without RedCap & NTN |\n| R&S CMX-KS638B / X | NR signaling extension w/o eRedCap & NTN Rel. 18 | 1222.9667.xx / 1222.9680.xx | Rel. 18 without eRedCap & NTN |\n| R&S CMX-KS527B / X | NB-NTN signaling, Rel. 17 | 1222.9738.xx / 1222.9744.xx | NB-IoT options set 中 basic / expert |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 26,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 3.732181
+         },
+         {
+          "text": "R&S CMX500 › RF generator\n| 項目                                | 規格                                                                                                                                                                     |\n| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| Frequency range                   | 400 MHz to 8000 MHz                                                                                                                                                    |\n| Frequency resolution              | 0.1 Hz                                                                                                                                                                 |\n| Instantaneous bandwidth           | 1000 MHz，non-contiguous                                                                                                                                                |\n| RF bandwidth                      | 250 MHz                                                                                                                                                                |\n| RF Com 1 / RF Com 2 output level  | 400 MHz to 6300 MHz：CW –120 dBm to +2 dBm，PEP up to +2 dBm，overrange up to +10 dBm；6300 MHz to 8000 MHz：CW –120 dBm to 0 dBm                                           |\n| RF Out 1 to RF Out 4 output level | 400 MHz to 7375 MHz：CW –120 dBm to +8 dBm，PEP up to +8 dBm，overrange up to +15 dBm；7375 MHz to 8000 MHz：CW –120 dBm to +4 dBm，PEP up to +4 dBm，overrange up to +15 dBm |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 17,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 2.930365
+         },
+         {
+          "text": "R&S CMX500 › Base unit 與主要訂購資訊\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n| 項目 | Type / code | Order No. | 原文說明 |\n|---|---|---|---|\n| CMX500 Radio communication tester | CMX500 | 1201.0002K70 | accessories 包含 power cords、operating manual (getting started)、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters |\n| CMX500 basic assembly | R&S CMX-PB70H | 1222.0676.09 | basic assembly |\n| R&S CMX accelerator unit | R&S CMX-B200A | 1222.0747.02 | accelerated digital signal processing capabilities |\n| R&S CMX processing unit | R&S CMX-B300C | 1222.0801.04 | generic high-performance computing platform for advanced data processing |\n| R&S CMX IF unit | R&S CMX-B500A | 1222.0924.02 | IF frequency range vector signal analysis and ARB based generator |\n| R&S CMX RF unit | R&S CMX-B600B | 1222.0953.03 | FR1 frequency range vector signal analysis and ARB based generator |\n\n[[CMX500_Features_CSW9-20-0_en_32]] 使用 generic code [[R&S CMX-B500x]] 與 [[R&S CMX-B600x]]；[[CMX500_specs_en_5216-4127-22_v1100]] 在 ordering information 中列出具體 orderable unit 為 [[R&S CMX-B500A]] 與 [[R&S CMX-B600B]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 2.653324
+         },
+         {
+          "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n以下 order number 後綴 `.xx` 均照 Features and Functions 原文抄錄；完整後綴不可推導。\n\nB、M、X options 彼此相依；使用 M option 需要對應 B option；使用 X option 需要對應 B 與 M options，部分 X options 沒有 M option。Basic RedCap installations（R&S CMX-KS617/618B，無 M/X）不需要 R&S CMX-KS600B。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 27,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMX500.md"
+          },
+          "score": 2.062014
+         },
+         {
+          "text": "CMX500_Callbox › 重點摘要\n- High end-to-end throughput 部分稱 1024 DL QAM available in FR1、10.6 Gbps with 5CC SA verified、1CC FR1 + 8CC FR2、10 Gbps E2E testing，並列出 [[R&S CMX-KS610B]]、[[R&S CMX-KS637B]] 與 [[R&S CMX-KA100]]。\n- Non-signaling / GPRF 部分稱 GPRF Generator signal types 包含 ARB、CW、Dual Tone、Replay `.wv` files、up to 4 GPRF Generator instances in parallel、ARB Sequencer，且標示 no license required；但 technology-specific R&S provided ARB files 與 WinIQSim2 waveforms 由 KWxxx licenses enable。\n- GPRF / ARB file 部分列出 KW libraries：GNSS [[R&S CMX-KW220]]、BT [[R&S CMX-KW310]]、WLAN KW350/KW351/KW352/KW353、GSM KW420、WCDMA KW440、LTE KW500、NB-IoT KW250、LTE C-V2X KW570、NR Rel 15/16 KW601、NR Rel 17 KW602 + KW601、NR C-V2X KW670、AWGN KW120；另有 [[R&S CMX-KW101]] Create ARB on CMX，coming with CSW 9.10。\n- IQ recorder 部分稱可 record up to 4 Gbyte to a file、save files as `.wv` for replay、使用 same IQ stream + RF parameters as signaling、2 per RFU、1 per IFU、FR1 specialist 可 8 instances in parallel。\n- Standalone TX measurements 部分列出 [[R&S CMX-KM500]] LTE Measurements 與 [[R&S CMX-KM600]] NR FR1 Measurements, Single Carrier。\n- QDART support 部分稱 CMX500 officially listed for 5G Sub-6 / 2G–4G，WLAN internally verified and currently in process to get listed in Qualcomm help files。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX500_Callbox.md"
+          },
+          "score": 2.168955
+         },
+         {
+          "text": "CMX500_Callbox › 與既有知識的關係\n- 本來源補充 [[R&S CMX500]] 正式 specifications / features 以外的 callbox sales / training 視角；其內容多為 use-case、workflow、roadmap 或 demo claim，不可替代 [[CMX500_specs_en_5216-4127-22_v1100]] 或 [[CMX500_Features_CSW9-20-0_en_32]] 的 binding specifications。\n- 本來源對 [[5G NR FR1 SA pre-conformance testing]] 補充 GUI one-click / wizard / 25 TCs / 1C111 app note 的簡報敘事；既有 [[1C111_1e_3GPPPreConfGuide]] 仍是具體 workflow 與限制的主要來源。\n- 本來源對 [[CMX500 Sequencer Test Packages]] 補充 manual-to-automated pre-conformance、TC count chart 與 WiFi RF pre-conformance update 的簡報圖表；正式 verified status 仍以 [[Sequencer-CMX-Test_Packages_Database]] 為主。\n- 本來源對 [[CMX500 NTN one-box tester]] 補充 multi-orbit、complete channel emulation in one box 與 NTN orbit live graphics 的簡報說法；PR 與 configuration guide 仍需分別追溯。\n- 本來源對 [[WLAN offloading with Voice over WLAN]] 補充 application testing 清單中的 WLAN offloading / ATSSS 與 desense / WiFi7 parallel testing 情境。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX500_Callbox.md"
+          },
+          "score": 1.596039
+         },
+         {
+          "text": "CMX500_Callbox\n[[CMX500_Callbox]] 是由 `CMX500_Callbox.pptx` 轉出的 company restricted 簡報來源，介紹 [[R&S CMX500]] 作為 callbox 的定位、R&D / pre-conformance / application / mobility / NTN / WLAN / non-signaling use cases 與相關 option 線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX500_Callbox.md"
+          },
+          "score": 1.389105
+         },
+         {
+          "text": "CMX500_Callbox › 重點摘要\n- Desense / interference 部分描述 WLAN + cellular in one box enables interference / desense testing against all LTE/NR bands with real connections，並列出 WiFi 4096QAM、6 GHz band 320 MHz BW、EN-DC + WiFi7、LTE + NR + WiFi measurements in parallel。\n- 3GPP features 部分列出 Rel-15 SUL、Rel-16 UL TX Switching、Rel-17 extensions、Rel-17 PEI、Rel-17 1024 DL QAM、MIMO Nx6/nx8，並宣稱 10.6 Gbps with 5CC SA verified。\n- Multi-SIM 部分描述 DSDS / DSDA：1 DUT、2 SIM slots、2 parallel connections、1 CMX；DSDS 通常 one TX / 2 RX、2 SIMs standby、一次一個 active connection；DSDA 為 two TRX、2 SIMs active connection at a time；option 線索為 [[R&S CMX-KS600B]] NR Signaling SA/NSA 與 [[R&S CMX-KS613B]] Multi-SIM Enabler。\n- Callbox example use cases 包含 R&D verification of new bands、sensitivity testing、RedCap、de-sense testing、3GPP pre-conformance、SRS measurements、UL MIMO and UL CA RF measurements、UL TX Switching、Multi-SIM、high e2e TP testing 與 non-signaling verification。\n- RedCap 部分稱 [[R&S CMX-KS617B]] NR R17 Signaling 用於 RedCap standalone，並列出 early identification via MSG1/MSG3、RedCap initial UL/DL BWP、NCD-SSB、LTE↔NR handover、eDRX、FR1/FR2 supported、Rel. Power Saving、UE measurement relaxation、PEI、PDCCH skipping。\n- SRS / UL MIMO / UL TX Switching 部分稱 CMX supports all SRS modes / configurations，SRS measurements 可量測 TX power、EVM 等，[[R&S CMX-KS610B]] 用於 SRS carrier switching；UL MIMO RF measurements 提到 [[R&S CMX-KM604]] NR FR1 measurements MIMO、PC 1.5、29 dBm theoretical sum power for 2 TX antennas、UL FPTX、TX diversity、DFTS-OFDM。\n- NTN 部分稱 comprehensive support for NR-NTN，multi-orbit：LEO、MEO、GEO、GSO，complete channel emulation in one box，live graphics for NTN orbits and parameters，NB-NTN coming end of `25，option 線索為 [[R&S CMX-KS627B]] NR Signaling Extension Rel-17。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX500_Callbox.md"
+          },
+          "score": 1.155933
+         },
+         {
+          "text": "CMX500_Callbox › 原文未解的問題\n- 來源投影片中日期 **05.01.2026** 未標示格式；不可判定為 2026-01-05 或 2026-05-01。\n- 來源 frontmatter 只標示 converted 2026-09-17；原始簡報發布日期、作者、版本與 software release 未標示。\n- Slide 21 的「25 TCs」未列出 test case IDs，也未說明是否僅限 manual NR SA FR1 GUI pre-conformance。\n- Slide 31 RF Pre-Conformance TC Count 圖表的 category 7.1、7.4、7.6、8.3000000000000007 未展開為標準章節或 package 名稱。\n- Slide 23 / 52 說 NR-NTN、NSA、LTE coming；來源未標示該 roadmap 對應 software release 或實際可用日期。\n- Slide 69 說 LTE+LTE DSDA coming soon；Slide 42 的 supported combinations 圖上也列 LTE+LTE DSDA，兩者 scope / 時點未明。\n- Slide 70 說 NB-NTN coming end of `25；來源日期格式未定，且未提供 option code / release note / availability 證據。\n- Slide 71 的 10.6 Gbps with 5CC SA verified、1CC FR1 + 8CC FR2、10 Gbps E2E testing 未提供 test setup、DUT、band combination、software release 或 report。\n- GPRF Generator 標示 no license required，但 ARB libraries / WinIQSim2 waveforms 又列出 KWxxx licenses；需區分 base GPRF signal generation 與 technology-specific protected ARB files。\n- QDART WLAN support 標示 internally verified / currently in process to get listed in Qualcomm help files，尚非正式 listed claim。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX500_Callbox.md"
+          },
+          "score": 0.917735
+         },
+         {
+          "text": "CMX500_Callbox › 重點摘要\n- 來源 frontmatter 顯示原始檔為 `CMX500_Callbox.pptx`，由 markitdown 轉出，converted date 為 2026-09-17；投影片中另出現日期 **05.01.2026**，但日期格式未標示。\n- 簡報將測試階段分為 [[Go-NoGo Testing]]、[[Non-Sig Testing]]、[[Conformance Testing]] 與 [[R&D Testing]]，並以 [[R&S CMX500]] callbox 作為可快速建立 call、進行 RF testing、mobility testing 與 application testing 的平台。\n- Callbox focus 包含 [[RF Testing]]、[[3GPP pre-conformance]]、[[Mobility Testing]]、[[Application Testing]]、[[Network Slicing]]、[[IP Throughput]]、[[Security Analysis]]、[[Backend Service]]、[[IMS Services]]、[[WLAN offloading with Voice over WLAN]]、[[ATSSS]]、[[Power Consumption]]、[[XR Responsiveness & L4S]]、[[eCall]] / [[NGeCall]] 與 [[Speech Quality]]。\n- 來源描述 [[CMsquares]] 為 web based、all-in-one configuration、all tools in one place、modern UI 的介面，並列出 live views、app testing、NTN live views、sequencer、log analysis 與 one-click RF testing。\n- [[RF SA Preconformance]] 部分宣稱可在 GUI 中快速開始 manual 3GPP RF pre-conformance，並提到 automatic configuration of parameters per TC、25 TCs、dynamic workspace per TC、NR-NTN / NSA / LTE coming、release 時有 comprehensive App Note，連結為 `https://www.rohde-schwarz.com/appnote/1C111`。\n- [[CMSequencer]] 部分描述可由 manual 快速切換到 automated pre-conformance，使用 same technology specific license，並引用 `Sequencer-CMX-Test_Packages_Database.xlsx`；來源圖表列出 RF pre-conformance TC count：category 7.1 為 3GPP 43、7.4 為 68、7.6 為 134、8.3 為 3GPP 159 / RED 33 / WiFi 92。\n- R&D automation / RF pathloss calibration 部分描述 predefined blocks、mix & match、PL from signaling measurements + reports、GPRF measurements 與 NRP Power Meter；來源 notes 稱 NRP slightly more precise、GPRF 會包含 connector + additional RF path、golden device 最容易但 least precise。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMX500_Callbox.md"
+          },
+          "score": 0.742765
+         },
+         {
+          "text": "R&S CMW100 K06 › 規格資料的使用限制\n[[CMW100-K06_specs_en_5214-8348-22_v0500]] 對規格類型定義如下：\n\n- Specifications with limits 代表 warranted product performance，以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等標示。\n- Non-traceable specifications with limits 標示為 n. trc.，因缺乏可追溯至 national metrology standards 的 measuring equipment，產品性能不保證。\n- Specifications without limits 代表指定參數的 warranted product performance，通常為 dimensions 或 setting parameter resolution 等無偏差或偏差可忽略的值。\n- Typical data 標示為 typ.，若標示為 `<`、`>` 或 range，代表生產時約 80% instruments 可達到的 performance；否則代表 mean value。\n- Nominal values 標示為 nom.，不進行 statistical evaluation，生產時不測試該參數。\n- Measured values 標示為 meas.，以個別 samples 的 measurement results 描述 expected product performance。\n- Uncertainties 以 coverage factor 2 定義，依 GUM 規則計算，納入 environmental conditions、aging、wear and tear。\n- Non-traceable specifications with limits、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 保證。\n- Data without tolerance limits is not binding；Subject to change。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+          },
+          "score": 5.812818
+         },
+         {
+          "text": "R&S CMW100 K06 › Delivered accessory 與 computer requirement\nDelivered accessory：External Rohde & Schwarz AC adapter 1210.7812.00。External Rohde & Schwarz AC adapter 必須用於將 CMW100 連接到 AC mains。\n\nAC adapter：rated voltage 100 V to 240 V AC ±10 %；rated frequency 50 Hz to 60 Hz ±5 %；rated current max. 1.4 A；output voltage 24 V DC ±3 %；output current max. 5 A；no-load power consumption approx. 0.15 W；dimensions 167 mm × 67 mm × 35 mm；weight approx. 0.62 kg。\n\nUSB 3.0 cable：3 m USB 3.0 type A to type B cable included in order no. 1210.7629.03；2 m USB 3.0 type A to type B cable included in order no. 1210.7629.13。\n\n[[R&S CMW100 K06]] 只能搭配 standard computer 操作；computer 不包含在供貨內。Required CMW100 software 必須安裝於 computer；可免費下載或作為 accessory R&S®CMW100-Z33 訂購。\n\nComputer minimum requirements：Intel Core i3 third generation、8 Gbyte RAM、64 Gbyte free space HDD or SSD、minimum resolution 1024 × 768 pixel、Windows 7 Professional 64 bit 或 higher Windows versions 64 bit supporting English language、1 × USB 3.0 motherboard-mounted socket。\n\nComputer recommended requirements：Intel Core i7 quad-core fourth generation、16 Gbyte RAM、128 Gbyte free space SSD。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 29,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+          },
+          "score": 5.129957
+         },
+         {
+          "text": "CMW100-K06_specs_en_5214-8348-22_v0500 › 與既有知識的關係\n- 既有 [[R&S CMP180]] 與 [[R&S CMP200]] 頁面是 CMP 系列 Radio Communication Tester 的 Features and Functions 來源摘要；本來源則是 CMW100 Model K06 的 specifications，包含硬體 RF path、RF generator/analyzer、power meter、spectrum analyzer、各通訊標準 RF test 規格與 ordering information。\n- [[R&S CMW-Z10]] 是 RF Shield Box accessory；本來源未提供 [[R&S CMW100 K06]] 與 [[R&S CMW-Z10]] 或 [[R&S CMW-Z11]] 的相容性清單，不可自行推論搭配關係。\n- 本來源明示 software options / functionalities 相關規格另包含在 Features and Functions 文件；因此本來源中的 option / package 資訊主要作為 specifications 與 ordering information 的抄錄，不替代 Features and Functions 文件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMW100-K06_specs_en_5214-8348-22_v0500.md"
+          },
+          "score": 1.37951
+         },
+         {
+          "text": "CMW100-K06_specs_en_5214-8348-22_v0500 › 重點摘要\n- 文件名稱：CMW100 Communications Manufacturing Test Set Specifications，Model K06。\n- 文件版次 / 日期：Version 05.00，September 2025；文件頁尾標示 PD 5214.8348.22，Version 05.00，September 2025 (ch)。\n- 適用資料：除非另有說明，規格資料適用於 [[R&S CMW100 K06]]。\n- 產品資料適用條件包含 ambient temperature 下儲存 3 小時、30 分鐘 warm-up operation、符合指定 environmental conditions、遵守 recommended calibration interval、已執行 internal path correction adjustment。\n- 4000 MHz 以上頻率的規格值僅適用於配備 R&S®CMW-K046 option 的 [[R&S CMW100 K06]]；ordering information 另列 Extended frequency range, 4 GHz to 6 GHz：R&S®CMW-PK461，order no. 1210.7129.02。\n- General functions：支援 simultaneous receiver and transmitter；RF generator/analyzer 提供 RF 1 to RF 8 共 8 個 SnapN DUT input/output；RF generator 另有 TX AUX 1 個 SnapN RF output。\n- RF generator 標準 frequency range 為 70 MHz to 4000 MHz；搭配 R&S®CMW-K046 option 為 70 MHz to 6000 MHz；frequency resolution 為 0.1 Hz。\n- RF analyzer / power meter / FFT spectrum analyzer / RF spectrum analyzer 多處規格在 4 GHz 以上均依 R&S®CMW-K046 option 擴展至 6000 MHz。\n- [[R&S CMW100 K06]] 支援 GSM、NB-IoT、WCDMA、LTE、Bluetooth、WLAN、LR-WPAN、TD-SCDMA、CDMA2000、NR sub-6G 等 production test 相關 RF generator / analyzer 規格。\n- Ordering information 明列 base unit CMW100 order no. 1201.0002K06、hardware kit R&S®CMW-PS16、calibration value documentation、measurement packages、waveform packages與 recommended extras。\n- [[R&S CMW100 K06]] 只能搭配 standard computer 操作；computer 不包含在供貨內；required CMW100 software 可免費下載或作為 accessory R&S®CMW100-Z33 訂購。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/CMW100-K06_specs_en_5214-8348-22_v0500.md"
+          },
+          "score": 1.011703
+         },
+         {
+          "text": "R&S NTN signaling solutions\n[[R&S NTN signaling solutions]] 是 [[Rohde & Schwarz]] 在 [[cmx500_ntn_customer_questionnaire]] 中用來描述其 [[Non-Terrestrial Network]]（[[NTN]]）signaling 測試相關 solution offering 的名稱；目前此頁只由客戶需求問卷支撐，不能視為正式規格頁。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+          },
+          "score": 2.065
+         },
+         {
+          "text": "R&S NTN signaling solutions › unresolved\n- 來源未標示 [[R&S NTN signaling solutions]] 的正式產品名稱、料號、license code、version 或 delivery package。\n- 來源未說明「CMX」是否只指 [[R&S CMX500]]。\n- 來源未提供 supported bands、supported satellite gateways、supported satellite operators、release support、UE simulator support 或 constellation scale 的正式 capability limits。\n- 來源只列 customer discovery questions；不能推論 [[Rohde & Schwarz]] 已具備每一項被問到的功能。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+          },
+          "score": 1.757941
+         },
+         {
+          "text": "R&S NTN signaling solutions › 文件依據與版次\n| 來源 | 文件類型 | 日期 / 版次 | 用途 |\n|---|---|---|---|\n| [[cmx500_ntn_customer_questionnaire]] | customer questionnaire | Last Update: August 19, 2026；正式文件版次來源未標示 | 蒐集 NTN signaling solution 需求、測試場景與 deployment planning |\n\n來源未標示正式 document number、version、ordering information 或 specifications；因此本頁只整理問卷中明示的 solution discovery 範圍。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+          },
+          "score": 0.111662
+         },
+         {
+          "text": "R&S NTN signaling solutions › 與 R&S CMX500 的關係\n[[cmx500_ntn_customer_questionnaire]] 的檔名含 `cmx500`，正文也提到「CMX500 environment」。但來源未列 [[R&S CMX500]] 的硬體規格、option code、NTN feature matrix 或 ordering information。\n\n因此：\n\n- 可說：此問卷與 [[R&S CMX500]] / CMX environment 的 NTN signaling use case discovery 有關。\n- 不可說：此問卷證明某個 [[R&S CMX500]] option 已支援某 release、band、orbit、satellite gateway interface、payload type 或 constellation scale。\n- 正式規格仍需引用 [[CMX500_specs_en_5216-4127-22_v1100]]、[[CMX500_Features_CSW9-20-0_en_32]] 或其他正式 product / feature 文件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+          },
+          "score": 0.104546
+         },
+         {
+          "text": "R&S NTN signaling solutions › 來源中的 solution positioning\n[[cmx500_ntn_customer_questionnaire]] 的開頭說明：\n\n- 文件目的在了解客戶對 [[NTN]] communication technology 的 specific needs and challenges。\n- 蒐集到的 insights 會協助 [[Rohde & Schwarz]] tailor a solution。\n- 問卷不要求所有題目都必答，因為並非所有問題都適用於每個客戶情境。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+          },
+          "score": 0.081788
+         },
+         {
+          "text": "R&S NTN signaling solutions › 需求蒐集範圍\n來源中的問題涵蓋：\n\n- Service offerings：客戶預計透過 NTN 提供 [[IoT]]、broadband、voice 或其他 applications。\n- Test environment：live network environment（包含 satellite gateway）或 simulated environment。\n- Deployment timeline：NTN service deployment timeline、key milestones、deadlines。\n- Test layer：RF、Protocol、Application Testing。\n- Technology：[[NB-NTN]]、[[NR-NTN]]、[[Direct-to-Cell]] / [[DTC]] / [[D2C]]。\n- 3GPP release：[[3GPP Rel. 17]]、[[3GPP Rel. 18]]、[[3GPP Rel. 19]] 及其 timeline。\n- Device platform：NTN devices 使用的 chipset 或 hardware platform。\n- Service link bands：S/L/Ku/Ka-Band。\n- Gateway integration：是否把 CMX 連接到 [[satellite gateway]]，在 real live satellite network 測試；若是，需提供 gateway bands。\n- Satellite orbit：[[LEO]]、[[MEO]]、[[GEO]]、[[GSO]]。\n- Payload type：[[transparent satellite payload]] 或 [[regenerative satellite payload]]。\n- DTC operator：LTE-DTC 與 NR-DTC 需要的 satellite operator。\n- Network complexity：cellular cells 與 satellite cells 的組合。\n- Long-term tests：是否需要 hundreds of satellites，例如 [[LEO]] scenario。\n- UE：specific device model 或 generic UE simulator。\n- Performance metrics：throughput、battery lifetime、latency 等。\n- QoS：不同 traffic type 的 prioritization 或 guaranteed bandwidth。\n- Mobility：stationary、pedestrian、vehicular 或其他 UE mobility pattern。\n- Handover / beam switching：satellite-UE handovers、beam switching、seamless handovers、optimized beam switching。\n- Constellation workflow：是否有興趣 configuring and visualizing constellations，並在 [[R&S CMX500]] environment 中部署其中一部分。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+          },
+          "score": 0.052422
+         },
+         {
+          "text": "cmx500_ntn_customer_questionnaire\n這份來源是 [[Rohde & Schwarz]] 的 [[R&S NTN signaling solutions]] customer questionnaire，用來蒐集客戶在 [[Non-Terrestrial Network]]（[[NTN]]）signaling 測試、network configuration、QoS、mobility 與 deployment planning 上的需求；文件標示 Last Update: August 19, 2026，但未標示正式文件編號或版次。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+          },
+          "score": 2.079359
+         },
+         {
+          "text": "cmx500_ntn_customer_questionnaire › 關鍵實體與概念\n- [[R&S NTN signaling solutions]]：來源中的 solution 名稱，針對 [[NTN]] signaling / communication technology 的客戶需求蒐集。\n- [[R&S CMX500]]：來源在 deployment 題目中提到 CMX500 environment，也在檔名中出現 cmx500；本來源不可用來補充正式 CMX500 規格。\n- [[Tim Seyler]]：來源列為 contact，並標示 Product Manager Mobile Radio Testing。\n- [[NTN signaling customer discovery]]：本問卷形成的需求訪談框架，涵蓋 services、live/simulated testing、timeline、test layer、technology、satellite orbit、payload、network complexity、long-term tests、UE、QoS、mobility、handover / beam switching 與 constellation deployment。\n- [[NB-NTN]]、[[NR-NTN]]、[[Direct-to-Cell]] / [[DTC]] / [[D2C]]：來源要求客戶指出相關 technology。\n- [[3GPP Rel. 17]]、[[3GPP Rel. 18]]、[[3GPP Rel. 19]]：來源要求客戶指出 NB-/NR-NTN 相關 3GPP release 與 timeline。\n- [[LEO]]、[[MEO]]、[[GEO]]、[[GSO]]：來源要求客戶說明 NTN services 使用的 satellite orbit。\n- [[transparent satellite payload]]、[[regenerative satellite payload]]：來源要求客戶說明 satellite payload 類型。\n- [[satellite gateway]]：來源詢問是否將 CMX 連接到 satellite gateway，在真實 live satellite network 中測試，以及 gateway 使用哪些 bands。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+          },
+          "score": 0.130606
+         },
+         {
+          "text": "cmx500_ntn_customer_questionnaire › 與既有知識的關係\n- 既有 [[R&S CMX500]] 頁主要依 [[CMX500_specs_en_5216-4127-22_v1100]] 與 [[CMX500_Features_CSW9-20-0_en_32]] 整理正式 specifications / features；本來源是 customer questionnaire，不能取代正式 specifications，也不能補推硬體、頻段、options 或測試能力。\n- 既有 [[Tim Seyler]] 頁只從 [[AIW_Products_Customer_Questionnaire]] 確認 contact 與 email；本來源新增其在 NTN questionnaire 中的角色文字：Product Manager Mobile Radio Testing。\n- 既有 [[NGeCall over LTE]] 與 [[CMW500 to CMX500 OBT license swap]] 屬於 emergency call / license swap 脈絡；本來源屬 NTN signaling solution discovery，應分開處理。\n- 來源提到 [[NB-NTN]]、[[NR-NTN]]、[[Direct-to-Cell]]，與既有 [[R&S CMX500]] 頁中的 NTN-related options 方向相鄰，但本來源沒有列 option code 或 supported release scope。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+          },
+          "score": 0.087011
+         },
+         {
+          "text": "cmx500_ntn_customer_questionnaire › 重點摘要\n- 文件標題語境為「GETTING STARTED — ROHDE & SCHWARZ NTN SIGNALING SOLUTIONS」，目的在協助 [[Rohde & Schwarz]] 了解客戶針對 [[NTN]] communication technology 的需求與挑戰，並據此 tailoring a solution。\n- 文件明示並非所有問題都一定適用，客戶不必回答全部問題。\n- Contact 標示為 [[Tim Seyler]]（`tim.seyler@rohde-schwarz.com`），角色為 Product Manager Mobile Radio Testing。\n- 產品 / solution 相關型號口徑：來源檔名含 `cmx500`，正文提到「connect the CMX to a satellite gateway」與「CMX500 environment」；但來源未列 [[R&S CMX500]] 的正式規格、硬體配置、option code 或 ordering information。\n- 文件版次：來源未標示正式 version / document number；僅標示 Last Update: August 19, 2026。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+          },
+          "score": 0.084922
+         },
+         {
+          "text": "cmx500_ntn_customer_questionnaire › 原文未解的問題\n- 來源未標示正式文件編號、document version 或 PDF 版次；僅有 Last Update: August 19, 2026。\n- 來源未明確定義 [[R&S NTN signaling solutions]] 的產品邊界、硬體配置、software options、license codes、交付內容或相容性矩陣。\n- 來源正文同時使用「CMX」與「CMX500 environment」；未說明是否所有問題皆限定於 [[R&S CMX500]]，或是否涵蓋其他 CMX / mobile radio testing products。\n- 來源未列任何支援的 NTN bands、satellite operator、3GPP release coverage、payload implementation、UE model、satellite gateway interface 或 constellation scale 的既定能力。\n- 題號有重複：Service Offerings and Network Configuration 中第 4 題與 Technical Specifications 中第 4 題重複；Quality of Service and Mobility 中第 11 題與前一節第 11 題重複。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cmx500_ntn_customer_questionnaire.md"
+          },
+          "score": 0.082378
+         },
+         {
+          "text": "NTN IoT device testing requirements › CMW500 Rel.17 NB-NTN test solution 線索\n來源指出 May 2023：[[R&S CMW500]] Signaling Tester Extension to Rel.17 NTN。來源列出 [[R&S CMW500]] 支援：\n\n- MLAPI。\n- all protocol stack extensions and IEs。\n- GEO / GSO / LEO / MEO emulation。\n- Testcase scenarios：single / multi cell、SIB31 and SIB32 support、fixed delay up to 540 ms、variable delay、Doppler +/- 50 kHz（LEO）、RF measurements view、Registration / IP / NIP / PSM / cDRX / E2E。\n\nNB-NTN Rel.17 Test Solution products 包含：\n\n- CMW500 Mobile Radio Tester Hardware。\n- [[R&S CMW-KP030]] NB-IoT FRAMEWORK。\n- [[R&S CMW-KR317]] REL.17 NB-IOT STACK EXTENSION。\n- [[R&S CMW-KU317]] REL.17 NB-NTN SAMPLE SCENARIOS。\n- [[R&S CMW-KK307]] REL.17 3GPP PCT Testcases。\n- GNSS 需要 additional [[R&S SMBV100B]]。\n\n來源也描述 lab-based all-in-one NB-NTN simulation 包含 CMW500、SMBV100B、GNSS Signal Generator、NB-NTN R&D Testcase、Satellite Control Module、Doppler / Delay module driver、Doppler / Delay module、Stack / PHY layer、TRX、RF frontend、Signaling FPGA。Simulation inputs / parameters 包含 constellation、DUT location、UTC time、SIB31、SIB32 params、Doppler、dynamic delay projection、NTN config、time alignment、delay config、IQ data。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 12,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN IoT device testing requirements.md"
+          },
+          "score": 5.279016
+         },
+         {
+          "text": "NTN IoT device testing requirements › NTN topology\n來源列出的 [[NTN topology]] 包含：\n\n- [[Satellite Access Node]]（SAN）。\n- NTN payload。\n- Feeder Link。\n- Service Link。\n- Gateway。\n- Non-NTN Infrastructure。\n- gNB functions。\n- [[User Equipment]]（UE）。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 13,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN IoT device testing requirements.md"
+          },
+          "score": 3.439416
+         },
+         {
+          "text": "NTN IoT device testing requirements › connection、segmentation 與 mobility\n來源描述 NTN IoT long / short connections 流程：\n\n- Deep sleep。\n- GNSS acquisition。\n- SIB acquisition。\n- PRACH。\n\nUE 使用 GNSS position 與 SIB info 來 precompensate timing advance 與 UL frequency。UL segmented transmission is possible，但 drawback 是 re-acquisition of GNSS + SIB and precompensation 增加 energy consumption。UE capability / network config 包含 minimum supported gap length between segments；`ntn-SegmentedPrecompensationGaps` 可為 1 symbol、1 slot、1 subframe。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n\n來源列出的 NTN mobility scenarios 包含：\n\n- Cell selection / cell reselection。\n- Intra-satellite / inter-beam handover。\n- Inter-satellite handover / inter-satellite dual connectivity。\n- NTN – terrestrial handover / dual connectivity。\n- NR-NTN connection。\n- Target or simultaneous dual connectivity NR-NTN connection。\n- Target or simultaneous dual connectivity terrestrial connection。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN IoT device testing requirements.md"
+          },
+          "score": 2.123957
+         },
+         {
+          "text": "NTN IoT device testing requirements › NTN market / ecosystem 線索\n來源指出：\n\n- 5G NTN addressable revenue of $35B worldwide by 2035，Source: [[GSMA Intelligence]]。\n- NTN-IoT expands global reach for IoT use cases across land、sea、air。\n- 5G NTN-NR provides extended coverage that complements terrestrial networks。\n- NTN-IoT operates for both GEO and LEO altitudes, but predominantly GEO。\n- 8% of IoT market is addressable by NTN-IoT。\n- NTN-IoT mainly uses S/L bands。\n- Direct link to smartphones for mission critical and low data services predominantly operates at LEO altitude。\n- Fixed / mobile broadband services on VSATs use >10 GHz。\n\n這些是 market forecast / presentation claims；未提供完整 GSMA Intelligence report citation、page、model 或 confidence interval。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN IoT device testing requirements.md"
+          },
+          "score": 2.097295
+         },
+         {
+          "text": "NTN IoT device testing requirements › 來源日期與範圍\n- 主要來源：[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]。\n- 來源正式日期：來源未標示。\n- 來源內含 MWC23 learnings、Aug 2022 / Mar 2023 / Jun 2023 PR 線索、May 2023 CMW500 Rel.17 NTN extension、2023-05 NB-NTN status CMW500 與 2035 revenue forecast。\n- 本頁是 Market / solution overview，不是 3GPP NTN specification、R&S product datasheet 或 certification test plan。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN IoT device testing requirements.md"
+          },
+          "score": 1.331033
+         },
+         {
+          "text": "NTN IoT device testing requirements › 使用限制\n- 本頁不是 3GPP NTN standard、NB-NTN certification plan 或 R&S formal order configuration。\n- CMW500 NTN product codes 的 formal order numbers、software versions、release status 與目前可供性未由本來源完整證明。\n- Delay、Doppler、SINR、RSRP、fixed delay up to 540 ms、Doppler +/- 50 kHz 等數字需回標準或正式 app note 驗證。\n- Market forecast 與 project examples 需回 GSMA Intelligence、operator / satellite company PR 或 regulatory filings 驗證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 15,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN IoT device testing requirements.md"
+          },
+          "score": 1.254614
+         },
+         {
+          "text": "NTN IoT device testing requirements › 與既有知識的關係\n- [[5G NTN validation and testing]] 目前主要整理 R&S / Gatehouse、MediaTek、Viasat 等 PR 層級 validation / demo / certification plan；本頁補入 NTN NB-IoT device-level technical requirements 與 CMW500 Rel.17 NB-NTN solution-overview 線索。\n- [[NTN propagation emulation and fading]] 已整理 PR 中 space-to-ground effects vs terrestrial impairments 的區分；本頁補入 delay、Doppler、fading、weather effects、low SNR、SIB31 / SIB32 與 UE precompensation。\n- [[R&S CMW500]] 的正式規格仍需回 [[CMW_dat-sw_en_5213-9211-22_v1700]]；本頁的 CMW500 NTN 延伸內容來自 Market presentation，不能視為正式 datasheet。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 14,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/NTN IoT device testing requirements.md"
+          },
+          "score": 1.070271
+         },
+         {
+          "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 重點摘要\n- 來源將 [[Keysight]] 描述為大型美國 test & measurement vendor，總部在 Santa Rosa, California, USA，員工數約 **16,800+**，在 semiconductor、aerospace / defense、cloud 與 wireless testing 具有強市場存在。\n- 來源主張 [[Keysight]] mobile communications strategy 越來越 software-led 與 AI-driven，但 [[Keysight UXM]] portfolio 分散於多個 hardware SKUs：[[Keysight E7515P]]、[[Keysight E7515W]]、[[Keysight E7515B]]、[[Keysight E7515E]]、[[Keysight E7515R]]。\n- 來源列出 [[Keysight]] portfolio 包含 UXM 5G Wireless Test Platforms、[[ProbSim]] channel emulators、[[Nemo]] field test tools、[[RaySim]] digital twin engine、[[Atlas]] AI-powered device test、C-V2X 與 cybersecurity tools。\n- 來源把 R&S positioning 表述為：[[R&S CMX500]] 在 one instrument 中整合 [[NR FR1]]、[[NR FR2]]、[[Wi-Fi]]、[[Fading]]、IP throughput、RF analysis、[[NTN]]、[[RedCap]] 與 end-to-end signaling；而 Keysight 需分散於多個 UXM models、add-on software 與 external tools。\n- 來源主張 [[R&S CMX500]] 的差異化包含 one-platform architecture、integrated fading + IP + application testing、unified software ecosystem（[[CMsquares]]、[[R&S CMsequencer]]、AI Script Assistant）、measurement leadership、FR3 / 6G path、cellular + Wi-Fi in one platform，以及 NTN / RedCap / operator certification leadership。\n- 來源對 [[Keysight]] 的弱點敘述包含 hardware fragmentation、multi-tool workflow、advanced testing external dependencies、limited legacy、Wi-Fi only on selected models、FR3 / 6G roadmap relies on add-ons。\n- 來源的 quick comparison table 將 R&S / CMX500 描述為 one platform：FR1 + FR2 + FR3 + WLAN + fading + IP + NTN + LTE + RedCap；將 Keysight 描述為 multiple UXM SKUs + external tools。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+          },
+          "score": 4.178107
+         },
+         {
+          "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 對 Keysight 的主要主張\n| 主題 | 來源對 Keysight 的說法 | 限制 |\n|---|---|---|\n| Portfolio | UXM 5G Wireless Test Platforms E7515B/W/P/E/R、ProbSim、Nemo、RaySim、Atlas、C-V2X、cybersecurity tools | 未提供 Keysight 官方 datasheet 或版本 |\n| Architecture | Multi-Box UXM approach；不同 UXM 有不同 NR bandwidth、RF ports、Rel-17 support、WLAN capability、IP throughput、FR2 readiness | 未列各 SKU 的完整規格條件 |\n| Software model | Atlas + Channel Studio + RaySim + Nemo + WLAN tools + UXM-specific features；no unified automation environment | 這是 R&S battle card 觀點，需 Keysight 官方資料驗證 |\n| Support model | tiered KeysightCare model：Assured、Enhanced、Application Software Support；optional warranty / calibration assurance plan | 未提供 KeysightCare 文件版次或服務條款 |\n| Wi-Fi | Wi-Fi signaling only on selected models：E7515W、E7515P | 未提供 Keysight WLAN option / configuration 文件 |\n| RedCap | E7515R is dedicated RedCap / IoT model | 未提供 E7515R 官方規格或 order data |\n| FR3 / 6G | UXM-P bandwidth options + RaySim + future hardware / software；multi-component approach | future hardware / software 未標示日期、型號或 release status |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+          },
+          "score": 2.66056
+         },
+         {
+          "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › Keysight 相關\n- [[Keysight]] — 本 battle card 的競品公司。\n- [[Keysight UXM]] — 來源中的 UXM 5G Wireless Test Platforms 總稱。\n- [[Keysight E7515P]] — 來源稱 high-end wideband / 5G platform with Wi-Fi as additional capability；quick table 稱 E7515P up to 15 GHz。\n- [[Keysight E7515W]] — 來源稱 Wi-Fi 7 / connectivity platform。\n- [[Keysight E7515B]] — 來源稱 standard / mid-tier 5G UXM。\n- [[Keysight E7515E]] — 來源稱 value / mid-tier 5G UXM。\n- [[Keysight E7515R]] — 來源稱 RedCap / IoT-only SKU。\n- [[ProbSim]] — channel emulator；來源在 integrated vs external fading landmine 中列名。\n- [[RaySim]] — digital twin / ray tracing engine；來源說 advanced fading、digital twin、FR3 / 6G scenarios 可能需要 RaySim。\n- [[Channel Studio]] — channel modeling / fading 相關 external tool。\n- [[Nemo]] — field test tools；來源列於 Keysight fragmented toolchain。\n- [[Atlas]] — AI-powered device test / test management；來源列於 Keysight fragmented toolchain。\n- [[KeysightCare]] — 來源說 Keysight support model 使用 tiered KeysightCare：Assured、Enhanced、Application Software Support，以及 optional warranty / calibration assurance plan。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+          },
+          "score": 1.453322
+         },
+         {
+          "text": "Smart Jamming\n[[Smart Jamming]] 是 mission-critical / military wireless communications 中的 adaptive RF jamming threat；目前來源把它描述為能追蹤通訊頻率、在特定時刻發射 noise、造成 service disruption 且 difficult to detect 的攻擊方式。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Smart Jamming.md"
+          },
+          "score": 0.0
+         },
+         {
+          "text": "Smart Jamming › 來源中的定義與語境\n依 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]]（檔名 / raw title 含 2025-12-19；raw converted 2026-09-17）：\n\n- mission context 包含 rise of smart jamming and improved [[EW]] tactics。\n- problem statement 指向 current vulnerability of 5G [[DUT]] connections under smart-jamming。\n- source problem question 是：是否能在不修改 [[DUT]] 的前提下，使用 legacy [[Frequency hopping for 5G resilience]] / [[FHSS]] capabilities 強化連線。\n- outcome 語境稱，在 smart-jammer pressure 下，both modems showed sufficient performance for running video call；但簡報沒有完整數值。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]]（Version 01.00，August 2025）提供更具體描述：newer, cheaper and more powerful [[RF]] equipment for consumer use, like [[SDR]] devices, can easily be converted into smart jammers；這些 devices can track the used frequency of the communications and transmit noise at specific moments to disrupt the communications while being difficult to track。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Smart Jamming.md"
+          },
+          "score": 0.0
+         },
+         {
+          "text": "Smart Jamming › 與一般 jamming 的區分限制\n目前來源可以支持以下敘述：\n\n- smart jamming 與 [[SDR]] accessibility 相關；來源把 cheaper / more powerful consumer RF equipment 視為 threat enabler。\n- smart jammer 被描述為會追蹤 used frequency，而非只做固定頻率或寬頻干擾。\n- smart jammer 在 specific moments 發射 noise，因此其 detection / tracking 較困難。\n\n但來源仍沒有提供正式 taxonomy，不能區分其是否屬於 broadband noise jammer、spot jammer、swept jammer、protocol-aware jammer、reactive jammer 或 AI-assisted jammer。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Smart Jamming.md"
+          },
+          "score": 0.0
+         },
+         {
+          "text": "Smart Jamming › 對 5G private networks 的影響\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 中的 operator expectation mismatch 是：operators expect commercial-grade throughput under adversarial conditions。也就是 private 5G / tactical edge 期待維持 throughput 與 video-call reliability，但 smart jamming / [[EW]] 使連線服務連續性變成問題。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 則把影響放在 mission-critical use cases：emergencies、disasters、military operations、essential public services 與 potentially NATO / DoD public-private 5G networks。來源強調 reliability is of upmost importance and should not be compromised in such an accessible way。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Smart Jamming.md"
+          },
+          "score": 0.0
+         },
+         {
+          "text": "Smart Jamming › Mitigation direction\n兩份來源的主要 mitigation direction 都是 [[Frequency hopping for 5G resilience]]。白皮書將其具體化為 [[Handover frequency hopping]]：\n\n- 使用 [[5G Handover]] 在 n41、n78、n79 等不同 carrier frequency / cell 間切換；\n- 讓 jammer 必須 constantly listen and readjust to every change；\n- 若 procedure completed at a high frequency rate，jammer would not be able to keep up；\n- dynamic target-cell activation 可隱藏 next hop information。\n\n使用限制：白皮書沒有實體 jammer 對抗實驗細節，主要量測 handover interruption、RTT、iPerf 與 [[WebRTC]] QoS。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Smart Jamming.md"
+          },
+          "score": 0.0
+         },
+         {
+          "text": "Smart Jamming › 與既有頁面的關係\n- [[5G private network resilience against smart jamming]] 是本概念在 private 5G / tactical network 場景下的主頁。\n- [[Handover frequency hopping]] 是目前來源中最具體的 mitigation implementation。\n- [[Counter-UAV 技術]] 中的 [[RF Jammers]]、[[GPS Spoofers]] 與 detection / neutralization 技術同樣屬 contested RF / countermeasure 脈絡，但 [[Counter UAV tech]] 未描述 5G smart jamming。\n- [[UAV 通訊]] 與 [[UAV 通訊頻段]] 涉及 UAV C2 / telemetry / payload links；不可由 UAV 頻段表推論 smart jammer 的 5G 攻擊頻段。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Smart Jamming.md"
+          },
+          "score": 0.0
+         },
+         {
+          "text": "Smart Jamming › unresolved\n- 來源未定義 smart jammer 的完整技術分類、訊號特徵或 detection criteria。\n- 來源未提供 jammer profile、jammer power、距離、頻段、掃頻 / 跳頻策略、dwell time 或 attack timeline。\n- 來源未說明 smart-jamming test 是否使用實體 jammer、emulation、channel emulator 或 network-side impairment injection。\n- [[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 的實驗並未提供 jammer reacquisition time 或 jamming success probability，因此不能量化 anti-jam security gain。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Smart Jamming.md"
+          },
+          "score": 0.0
+         },
+         {
+          "text": "Frequency hopping for 5G resilience › 使用限制\n- 不可把本來源解讀為 3GPP 已標準化某種 5G FHSS anti-jam waveform。\n- 不可由 legacy FH capabilities 推論具體 tactical radio、SINCGARS / SRW 實作或 [[R&S CMX500]] option。\n- 不可把 video-call outcome 當作所有 smart-jamming 情境的保證；簡報本身說 this does not mean invulnerability。\n- [[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 是 Market white paper，不是 binding product specifications；頁尾寫明 data without tolerance limits is not binding。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Frequency hopping for 5G resilience.md"
+          },
+          "score": 2.029815
+         },
+         {
+          "text": "Frequency hopping for 5G resilience › 與 5G handover 的映射\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 把方法映射到：\n\n- [[5G Handover]] signaling procedure；\n- 5G frequency-hopping / frequency agility behavior；\n- UE-reported band support；\n- [[HO interruption interval]]，並標註 message definitions / intervals per [[3GPP TS 38.300]]。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 進一步說明：5G operates on a fixed frequency for each cell；雖然已有 limited form of frequency hopping，但它 confined to the cell bandwidth and resource block allocation。白皮書提出利用 inter-frequency handover 在不同 cells / carriers 間切換，讓 5G 表現得像 frequency hopping。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Frequency hopping for 5G resilience.md"
+          },
+          "score": 2.001785
+         },
+         {
+          "text": "Frequency hopping for 5G resilience › 與 FHSS 的關係\n兩份來源都使用 legacy FH capabilities、frequency-hopping、FHSS、frequency-agile operation 等語彙。本頁不把它們裁決為同一技術實作：\n\n- [[FHSS]] 在簡報中主要出現在 defense program table。\n- [[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 的實作是 handover-based inter-frequency carrier switching。\n- 白皮書沒有提供 hop sequence、spreading code、synchronization、dwell time、jammer reacquisition time 或 PHY-layer FH waveform details。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Frequency hopping for 5G resilience.md"
+          },
+          "score": 1.557381
+         },
+         {
+          "text": "Frequency hopping for 5G resilience › Defense program context\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 列出多個 FHSS / 5G integration examples：\n\n| Program / effort | 來源中的 FHSS role | 來源中的 5G integration |\n|---|---|---|\n| [[5G.MIL]] | LPX LPI/LPD waveform，FH-type | Hybrid 5G + tactical waveform switching |\n| [[Raytheon OXYGEN]] | Tactical MANET needing FHSS anti-jam | 5G sidelink extended to tactical radios |\n| [[L3Harris Tactical Network Demo]] | FHSS tactical radios such as SINCGARS / HQ / SRW | SDRs + 5G gateways integration |\n| [[DoD EMS Superiority Strategy]] | FH agile operation for contested EW | 5G included in EMS-aware backbone |\n| [[FutureG ISAC]] / spectrum sharing | Freq-agile operation for shared spectrum | 5G / 6G coexistence in contested bands |\n\n使用限制：來源未提供 program official documents、dates、contracts、technical architectures 或 measured performance；此表是簡報中的 program mapping，不可視為完整市場證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Frequency hopping for 5G resilience.md"
+          },
+          "score": 1.378178
+         },
+         {
+          "text": "PARPRO › 來源中的資訊\n- [[Space Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）列出 URL：`https://www.parpro.com.tw/solutions/aerospace-defense/`。\n- URL path 顯示 `aerospace-defense`，但本次 ingest 未擷取網頁正文、頁面標題、產品、服務、認證、客戶、產線、供應鏈位置或日期。\n- 來源在該 URL 後嵌入多張 `Space Supply Chain image 1.jpg` 到 `Space Supply Chain image 10.png` 圖片；本次 raw 未提供 OCR，不能確認圖片是否來自 [[PARPRO]] 網站或 Teams 轉貼材料。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/PARPRO.md"
+          },
+          "score": 1.318964
+         },
+         {
+          "text": "事欣科\n[[事欣科]]是 [[Space Supply Chain]] 中 Yahoo 股市文章連結標題括號內出現的公司名稱；本 vault 目前尚未擷取該新聞正文或公司公告。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/事欣科.md"
+          },
+          "score": 0.943275
+         },
+         {
+          "text": "Randy Schnell\n[[Randy Schnell]] 是 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 封面列名的 Business Development Manager，Aerospace & Defense Test。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Randy Schnell.md"
+          },
+          "score": 2.090287
+         },
+         {
+          "text": "PARPRO › unresolved\n- 需要擷取 `https://www.parpro.com.tw/solutions/aerospace-defense/` 正文。\n- 需要確認 [[PARPRO]] 的正式公司名稱、所在地、產品線、產業分類與認證。\n- 需要 OCR 來源中與該 URL 相鄰的圖片，確認是否為 PARPRO aerospace & defense 內容。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/PARPRO.md"
+          },
+          "score": 0.164027
+         },
+         {
+          "text": "https://www.parpro.com.tw/solutions/aerospace-defense/",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-6ae422456b68416f",
+            "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+            "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+            "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 23.758653
+         },
+         {
+          "text": "<!-- Slide number: 1 -->\n# Making Deployed 5G Private Networks more Resilient\nRandy Schnell\nBusiness Development Manager\nAerospace & Defense Test",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-ee03d2faf62e9553",
+            "original_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+            "sha256": "ee03d2faf62e95530401e678c264a927c21cc58e47bb7aadc133b34233fc6940",
+            "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 19.139055
+         },
+         {
+          "text": "non-signaling\nwith signaling",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-6f4e9ea1141f0dd1",
+            "original_ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+            "sha256": "6f4e9ea1141f0dd1b05cf4e085ab51bd7dcd7db37f1ff9d1d0a6974ab9025692",
+            "raw_ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+           "section": 93,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 17.605508
+         },
+         {
+          "text": "Non-signaling",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-094dfa34f112d59b",
+            "original_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+            "sha256": "094dfa34f112d59b36ac5657e84e88379ec21b54fd169328c309f062cf839f95",
+            "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+           "section": 315,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 16.818487
+         }
+        ],
+        "text": "### Supported facts\n| Layer | Supported fact |\n|---|---|\n| Aerospace / Defense context | The source is an Aerospace & Defense Test presentation by Randy Schnell, titled “Making Deployed 5G Private Networks more Resilient.” [3][63] |\n| Market requirement | The listed mission / market drivers include tactical edge connectivity needs, smart jamming and improved EW tactics, complex RF environments and contested spectrum, growing private 5G adoption, autonomous systems and drones requiring low latency, tactical private 5G networks on military bases, and secure command-and-control network demand. [8] |\n| Threat model | Smart jamming is described as an adaptive RF jamming threat in mission-critical / military wireless communications. [50] |\n| Resilience approach | The resilience problem is mapped to 5G handover signaling and 5G frequency-hopping / legacy FHSS behavior. [6][58] |\n| Test-design parameter | The test design uses UE-reported supported bands and focuses on handover interruption intervals defined in 3GPP TS 38.300. [3][58] |\n| Measurable outcomes | The sources identify handover interruption, RTT, iPerf, and WebRTC QoS as measured quantities for the mitigation direction. [54] |\n| Video / application reliability parameter | The presentation says throughput and WebRTC statistics supported video-call reliability, but it did not provide concrete throughput, jitter, packet loss, bandwidth, jammer profile, or modem values. [3][5] |\n| Signaling tester capability facts | R&S CMX500 is described as a universal one-box network emulation and measurement test solution supporting LTE, NR FR1, NR FR2, NSA, SA, FDD, and TDD. [11][13] |\n| Signaling / application capability facts | R&S CMX500 features include NR FR1 / FR2 signaling, LTE signaling, fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, application test, IP traffic analysis, and automation interfaces. [11] |\n| Callbox workflow facts | The CMX500 callbox source positions it for quick call setup, RF testing, mobility testing, application testing, network slicing, IP throughput, security analysis, IMS services, power consumption, and speech quality. [24] |\n| Non-signaling capability facts | The CMX500 callbox source says GPRF generator signal types include ARB, CW, Dual Tone, replay `.wv` files, up to four GPRF generator instances in parallel, and ARB Sequencer. [19] |\n| Non-signaling RF capability facts | The CMX500 RF generator frequency range is 400 MHz to 8000 MHz with 0.1 Hz frequency resolution, 1000 MHz instantaneous bandwidth, and 250 MHz RF bandwidth. [16] |\n| Non-signaling recording / replay fact | The IQ recorder can record up to 4 Gbyte to a file and save files as `.wv` for replay. [19] |\n| Limitation | The sources do not provide jammer waveform, jammer power, tracking delay, hop prediction capability, attack success rate, jammer dwell time, hop pattern, or statistical outcome values. [5][7][56] |\n### Inferred chain map\n| Aerospace / Defense market requirement | Measurable parameter | Required Signaling Tester capability | Required Non-signaling Tester capability |\n|---|---|---|---|\n| 【推論】For resilient tactical/private 5G under smart jamming and EW, the measurable test focus should be inter-frequency handover behavior, especially handover interruption, RTT, iPerf, and WebRTC QoS, because the sources map the mitigation to 5G handover / handover-frequency-hopping and identify those measurements. [6][8][54][58] | Handover interruption interval, RTT, iPerf throughput, WebRTC QoS. [54] | 5G NR network emulation with LTE / NR FR1 / NR FR2 signaling, SA / NSA operation, mobility testing, IP throughput, and application testing. [11][13][24] | RF / GPRF generation for controlled RF stress using CW, ARB, Dual Tone, `.wv` replay, multiple generator instances, IQ record / replay, and RF generation across 400 MHz to 8000 MHz. [16][19] |\n| 【推論】For maintaining command-and-control or video-like mission applications under contested RF conditions, the measurable parameters should include throughput and WebRTC statistics, because the source uses those to support video-call reliability but notes that concrete jitter, packet loss, latency, and bandwidth values are absent. [3][5][8] | Throughput and WebRTC statistics; numeric jitter, packet loss, latency, and bandwidth are not provided. [3][5] | Application testing, IP traffic analysis, throughput measurement, and callbox workflows for quick call setup and application testing. [11][24] | Non-signaling impairment / interferer generation can be approached with GPRF ARB, CW, Dual Tone, replay `.wv`, and AWGN-related waveform libraries, but the sources do not specify a validated smart-jammer waveform or profile. [19][56] |\n| 【推論】For frequency-agile operation using UE-supported bands, the measurable parameter chain should include UE capability / supported-band handling and carrier-frequency changes, because the source says the test design uses UE capabilities and maps resilience to 5G handover plus frequency-hopping behavior. [3][58] | UE-reported supported bands and handover interruption intervals. [3][58] | NR signaling support and network-emulation capability across NR FR1 / NR FR2, with mobility testing workflows. [11][13][24] | Frequency-agile RF generation requires frequency coverage and resolution; the cited CMX500 RF generator supports 400 MHz to 8000 MHz with 0.1 Hz resolution. [16] |",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "2025-12-19 Making Deployed 5G Private Networks more Resilient › 重點摘要\n這份來源是由 [[Randy Schnell]] 製作 / 主講的 company restricted 簡報，題為 Making Deployed 5G Private Networks more Resilient；raw frontmatter 顯示原檔為 `2025-12-19 Making Deployed 5G Private Networks more Resilient.pptx`，轉檔日期為 2026-09-17。來源正文沒有另外標示正式發布日期；本頁以檔名 / raw title 的 2025-12-19 作為來源日期線索。\n\n簡報主張的核心問題是：在不修改 [[DUT]] 的前提下，能否利用 legacy [[Frequency hopping for 5G resilience]] / [[FHSS]] 能力，讓 unmodified 5G DUT connection 對 [[Smart Jamming]] 更具韌性。\n\n主要內容如下：\n\n- 任務背景：tactical edge connectivity 對資料與低延遲需求提高，[[Smart Jamming]] 與 electronic warfare（[[EW]]）威脅增加，private [[5G]] networks 在 military bases / tactical environments 的採用升高。\n- 技術映射：來源將問題映射到 5G handover（[[HO]]）signaling 與 frequency-hopping（[[FH]]）signaling；測試設計需使用 [[UE]] capabilities message 回報的 supported bands，並關注 [[3GPP TS 38.300]] 定義的 handover interruption intervals。\n- 測試結果：來源聲稱 both modems showed sufficient performance for running video call；throughput 與 [[WebRTC]] statistics 支撐 video-call reliability 維持，但投影片 OCR 未提供具體 throughput、jitter、packet loss、bandwidth、jammer profile 或 modem 型號數值。\n- 現有 defense / Future-G program 脈絡：來源列出 [[5G.MIL]]、[[Raytheon OXYGEN]]、[[L3Harris Tactical Network Demo]]、[[DoD EMS Superiority Strategy]]、[[FutureG ISAC]] / spectrum sharing 等項目，說明 FHSS / frequency-agile operation 與 5G / 6G coexistence 的整合方向。\n- 時程展望：來源給出 short term 2025–2028、mid term 2028–2032、long term 2032–2035+ 三段式展望，包含 5G tactical networks scale-out、mmWave phased arrays field testing、5G/6G-capable SD radios、early ISAC for drone detection / perimeter defense、URLLC for autonomy、full 6G with integrated sensing、AI-native battlefield connectivity 與 spectrum-aware autonomy。\n- Call to action：重新接觸既有 CMX customers，尤其 DOW customers；與 integrators 溝通；保持 tactical patience；提早 engage BDM organization；跨團隊分享 lessons learned。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+         },
+         "score": 1.139246
+        },
+        {
+         "text": "2025-12-19 Making Deployed 5G Private Networks more Resilient › 原文未解的問題\n- 來源正文未標示正式發布日期；只有 raw title / 檔名含 2025-12-19，raw converted 為 2026-09-17。\n- 簡報投影片多張圖片沒有 OCR 出完整測試架構；hardware configuration、jamming source / emulation、measurement points、modem 型號、頻段、頻寬與天線配置皆未完整可讀。\n- Defense Prime Investment 的年投資金額區間、來源 URL 與資料口徑未完整標示；不可當作可引用市場規模數字。\n- Outcome 只說 both modems sufficient for video call，沒有 throughput、WebRTC jitter、packet loss、latency、MOS、jammer dwell time、hop pattern 或統計表數值。\n- References 提到 VTC IEEE 2025 paper、whitepaper 與 `5G hardening against smart jammer attacks, PD 3610.1591.52, Version 01.00`，但這些文件正文未在本來源中擷取。\n- [[3GPP TS 38.300]] 只被提到 message definitions / HO interruption intervals；來源未標示版本、release 或引用章節。\n- 來源未說明 legacy FH capabilities 的實作位置、是否符合 3GPP standard、是否需要 network-side customization、是否會影響 regulatory compliance。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+         },
+         "score": 0.085869
+        },
+        {
+         "text": "5G private network resilience against smart jamming › 技術映射\n來源將 resilience 問題映射到兩類 5G / FH 行為：\n\n1. Mapping to [[5G Handover]] signaling。\n2. Mapping to 5G frequency-hopping signaling / legacy [[FHSS]] capabilities。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 將此具體化為 [[Handover frequency hopping]]：使用 [[5G Handover]] 在多個 cells / carrier frequencies 之間切換，使 jammer 必須 constantly listen and readjust to every change。來源說 prerequisite 是 highly reliable inter-frequency handovers，以便在 constantly changing carrier frequency 時仍維持 dependable communications link。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 4,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+         },
+         "score": 2.913774
+        },
+        {
+         "text": "5G private network resilience against smart jamming › unresolved\n- [[3GPP TS 38.300]] 的引用版本與 handover interruption interval 章節未標示。\n- [[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 沒有 modem A / B 型號、chipset 或 firmware。\n- 白皮書沒有實體 smart jammer 測試條件；jammer waveform、jammer power、tracking delay、hop prediction capability 與 attack success rate 未標示。\n- Defense Prime Investment 與 program examples 缺少完整外部文件與資料口徑。\n- 來源引用 [[3GPP TS 23.501]] V15.4.0（2018-12）做 QoS table，但是否需用 newer release 做正式 mission-critical assessment 未裁決。\n- Future work 包含 MOS、more random frequencies、dual connectivity、multi-connectivity 與 [[DAPS]] handovers；本來源尚未提供結果。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 9,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+         },
+         "score": 2.550637
+        },
+        {
+         "text": "5G private network resilience against smart jamming › Mission context 與 industry drivers\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 列出的 mission / market drivers 包含：\n\n- tactical edge connectivity needs；\n- rise of smart jamming and improved [[EW]] tactics；\n- complex RF environment 與 contested spectrum；\n- growing adoption of private 5G networks；\n- autonomous systems and drones requiring low latency；\n- expansion of tactical private 5G networks on military bases；\n- demand for secure command-and-control networks；\n- strategic partnerships，例如來源提到 Nokia + L3Harris in 2024；\n- multi-year contracts，例如來源提到 Northrop Grumman 5G battlefield networking in 2024。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 另稱 United States Department of Defense has recently embarked on a strategy leveraging both public and private 5G networks，並說 5G could become the de-facto communications network between NATO members。此為 white paper statement；來源未附完整 DoD / NATO 文件引用。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+         },
+         "score": 2.169886
+        },
+        {
+         "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S CMX500.md"
+         },
+         "score": 5.990915
+        },
+        {
+         "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S CMX500.md"
+         },
+         "score": 4.03711
+        },
+        {
+         "text": "R&S CMX500 › RF generator\n| 項目                                | 規格                                                                                                                                                                     |\n| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| Frequency range                   | 400 MHz to 8000 MHz                                                                                                                                                    |\n| Frequency resolution              | 0.1 Hz                                                                                                                                                                 |\n| Instantaneous bandwidth           | 1000 MHz，non-contiguous                                                                                                                                                |\n| RF bandwidth                      | 250 MHz                                                                                                                                                                |\n| RF Com 1 / RF Com 2 output level  | 400 MHz to 6300 MHz：CW –120 dBm to +2 dBm，PEP up to +2 dBm，overrange up to +10 dBm；6300 MHz to 8000 MHz：CW –120 dBm to 0 dBm                                           |\n| RF Out 1 to RF Out 4 output level | 400 MHz to 7375 MHz：CW –120 dBm to +8 dBm，PEP up to +8 dBm，overrange up to +15 dBm；7375 MHz to 8000 MHz：CW –120 dBm to +4 dBm，PEP up to +4 dBm，overrange up to +15 dBm |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 17,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S CMX500.md"
+         },
+         "score": 2.930365
+        },
+        {
+         "text": "CMX500_Callbox › 重點摘要\n- High end-to-end throughput 部分稱 1024 DL QAM available in FR1、10.6 Gbps with 5CC SA verified、1CC FR1 + 8CC FR2、10 Gbps E2E testing，並列出 [[R&S CMX-KS610B]]、[[R&S CMX-KS637B]] 與 [[R&S CMX-KA100]]。\n- Non-signaling / GPRF 部分稱 GPRF Generator signal types 包含 ARB、CW、Dual Tone、Replay `.wv` files、up to 4 GPRF Generator instances in parallel、ARB Sequencer，且標示 no license required；但 technology-specific R&S provided ARB files 與 WinIQSim2 waveforms 由 KWxxx licenses enable。\n- GPRF / ARB file 部分列出 KW libraries：GNSS [[R&S CMX-KW220]]、BT [[R&S CMX-KW310]]、WLAN KW350/KW351/KW352/KW353、GSM KW420、WCDMA KW440、LTE KW500、NB-IoT KW250、LTE C-V2X KW570、NR Rel 15/16 KW601、NR Rel 17 KW602 + KW601、NR C-V2X KW670、AWGN KW120；另有 [[R&S CMX-KW101]] Create ARB on CMX，coming with CSW 9.10。\n- IQ recorder 部分稱可 record up to 4 Gbyte to a file、save files as `.wv` for replay、使用 same IQ stream + RF parameters as signaling、2 per RFU、1 per IFU、FR1 specialist 可 8 instances in parallel。\n- Standalone TX measurements 部分列出 [[R&S CMX-KM500]] LTE Measurements 與 [[R&S CMX-KM600]] NR FR1 Measurements, Single Carrier。\n- QDART support 部分稱 CMX500 officially listed for 5G Sub-6 / 2G–4G，WLAN internally verified and currently in process to get listed in Qualcomm help files。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 4,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/CMX500_Callbox.md"
+         },
+         "score": 2.168955
+        },
+        {
+         "text": "CMX500_Callbox › 重點摘要\n- 來源 frontmatter 顯示原始檔為 `CMX500_Callbox.pptx`，由 markitdown 轉出，converted date 為 2026-09-17；投影片中另出現日期 **05.01.2026**，但日期格式未標示。\n- 簡報將測試階段分為 [[Go-NoGo Testing]]、[[Non-Sig Testing]]、[[Conformance Testing]] 與 [[R&D Testing]]，並以 [[R&S CMX500]] callbox 作為可快速建立 call、進行 RF testing、mobility testing 與 application testing 的平台。\n- Callbox focus 包含 [[RF Testing]]、[[3GPP pre-conformance]]、[[Mobility Testing]]、[[Application Testing]]、[[Network Slicing]]、[[IP Throughput]]、[[Security Analysis]]、[[Backend Service]]、[[IMS Services]]、[[WLAN offloading with Voice over WLAN]]、[[ATSSS]]、[[Power Consumption]]、[[XR Responsiveness & L4S]]、[[eCall]] / [[NGeCall]] 與 [[Speech Quality]]。\n- 來源描述 [[CMsquares]] 為 web based、all-in-one configuration、all tools in one place、modern UI 的介面，並列出 live views、app testing、NTN live views、sequencer、log analysis 與 one-click RF testing。\n- [[RF SA Preconformance]] 部分宣稱可在 GUI 中快速開始 manual 3GPP RF pre-conformance，並提到 automatic configuration of parameters per TC、25 TCs、dynamic workspace per TC、NR-NTN / NSA / LTE coming、release 時有 comprehensive App Note，連結為 `https://www.rohde-schwarz.com/appnote/1C111`。\n- [[CMSequencer]] 部分描述可由 manual 快速切換到 automated pre-conformance，使用 same technology specific license，並引用 `Sequencer-CMX-Test_Packages_Database.xlsx`；來源圖表列出 RF pre-conformance TC count：category 7.1 為 3GPP 43、7.4 為 68、7.6 為 134、8.3 為 3GPP 159 / RED 33 / WiFi 92。\n- R&D automation / RF pathloss calibration 部分描述 predefined blocks、mix & match、PL from signaling measurements + reports、GPRF measurements 與 NRP Power Meter；來源 notes 稱 NRP slightly more precise、GPRF 會包含 connector + additional RF path、golden device 最容易但 least precise。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/CMX500_Callbox.md"
+         },
+         "score": 0.742765
+        },
+        {
+         "text": "Smart Jamming\n[[Smart Jamming]] 是 mission-critical / military wireless communications 中的 adaptive RF jamming threat；目前來源把它描述為能追蹤通訊頻率、在特定時刻發射 noise、造成 service disruption 且 difficult to detect 的攻擊方式。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Smart Jamming.md"
+         },
+         "score": 0.0
+        },
+        {
+         "text": "Smart Jamming › Mitigation direction\n兩份來源的主要 mitigation direction 都是 [[Frequency hopping for 5G resilience]]。白皮書將其具體化為 [[Handover frequency hopping]]：\n\n- 使用 [[5G Handover]] 在 n41、n78、n79 等不同 carrier frequency / cell 間切換；\n- 讓 jammer 必須 constantly listen and readjust to every change；\n- 若 procedure completed at a high frequency rate，jammer would not be able to keep up；\n- dynamic target-cell activation 可隱藏 next hop information。\n\n使用限制：白皮書沒有實體 jammer 對抗實驗細節，主要量測 handover interruption、RTT、iPerf 與 [[WebRTC]] QoS。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Smart Jamming.md"
+         },
+         "score": 0.0
+        },
+        {
+         "text": "Smart Jamming › unresolved\n- 來源未定義 smart jammer 的完整技術分類、訊號特徵或 detection criteria。\n- 來源未提供 jammer profile、jammer power、距離、頻段、掃頻 / 跳頻策略、dwell time 或 attack timeline。\n- 來源未說明 smart-jamming test 是否使用實體 jammer、emulation、channel emulator 或 network-side impairment injection。\n- [[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 的實驗並未提供 jammer reacquisition time 或 jamming success probability，因此不能量化 anti-jam security gain。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 7,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Smart Jamming.md"
+         },
+         "score": 0.0
+        },
+        {
+         "text": "Frequency hopping for 5G resilience › 與 5G handover 的映射\n[[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 把方法映射到：\n\n- [[5G Handover]] signaling procedure；\n- 5G frequency-hopping / frequency agility behavior；\n- UE-reported band support；\n- [[HO interruption interval]]，並標註 message definitions / intervals per [[3GPP TS 38.300]]。\n\n[[5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100]] 進一步說明：5G operates on a fixed frequency for each cell；雖然已有 limited form of frequency hopping，但它 confined to the cell bandwidth and resource block allocation。白皮書提出利用 inter-frequency handover 在不同 cells / carriers 間切換，讓 5G 表現得像 frequency hopping。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Frequency hopping for 5G resilience.md"
+         },
+         "score": 2.001785
+        },
+        {
+         "text": "Randy Schnell\n[[Randy Schnell]] 是 [[2025-12-19 Making Deployed 5G Private Networks more Resilient]] 封面列名的 Business Development Manager，Aerospace & Defense Test。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/Randy Schnell.md"
+         },
+         "score": 2.090287
+        }
+       ],
+       "assessment": {
+        "status": "missing",
+        "facets": [
+         {
+          "name": "market_segment",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 3,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+           }
+          ],
+          "attempts": 1
+         },
+         {
+          "name": "technical_knowledge",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 3,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/R&S CMX500.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/entities/R&S CMX500.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": true,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+         "raw_refs": [
+          "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/5G private network resilience against smart jamming.md",
+         "raw_refs": [
+          "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+          "raw/Market/OneNote/5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S CMX500.md",
+         "raw_refs": [
+          "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+          "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/CMX500_Callbox.md",
+         "raw_refs": [
+          "raw/Market/OneNote/1C111_1e_3GPPPreConfGuide.md",
+          "raw/Market/OneNote/CMX500_Callbox.md",
+          "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+          "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+          "raw/Productions/Sequencer-CMX-Test_Packages_Database.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/Smart Jamming.md",
+         "raw_refs": [
+          "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+          "raw/Market/OneNote/5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md",
+          "raw/Market/OneNote/UAV/Counter UAV tech.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/Frequency hopping for 5G resilience.md",
+         "raw_refs": [
+          "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+          "raw/Market/OneNote/5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/Randy Schnell.md",
+         "raw_refs": [
+          "raw/Market/OneNote/2025-12-19 Making Deployed 5G Private Networks more Resilient.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-f280ba39bbe947b7adf7ba2fab87e3d2",
+      "task_sha256": "5d2ac9d7614712ca87163bd44904d6f878db8e222c7ffc0ada6c204ed97e1ab1",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.10.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "failed",
+     "retry_count": 1,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validation_failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "sequence": 4,
+       "kind": "retrying",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 5,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 6,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 7,
+       "kind": "validation_failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "sequence": 8,
+       "kind": "failed",
+       "evidence_ref": "bridge_facet_assessment"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "failed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": "host_check_failed"
+    },
+    "evidence": {
+     "raw_citations": 15,
+     "facet_status": "missing",
+     "missing_facets": [],
+     "relation_status": "missing",
+     "retrieval_attempts": {
+      "market_segment": 1,
+      "technical_knowledge": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

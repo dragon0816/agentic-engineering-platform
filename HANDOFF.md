@@ -43,15 +43,19 @@ answerable coverage 0.30 -> 0.40, FAIL and contradictions about flat, overreach
 items 35 -> 63. Kept under the owner's rule. To roll back, move 1.9.0 back from
 `disabled/`, move 1.10.0 out, and restart Agent Web.
 
-Knowledge pipeline (2026-10-11, latest): stage K1 of
-`docs/phases/KNOWLEDGE_PIPELINE_RELEASE.zh-TW.md` is done (spec
-`docs/phases/KNOWLEDGE_K1.md`). host.json now has `knowledge_pipeline` with the
-test vault `k-test` (backup `host.json.bak-20261011-103013-before-knowledge-pipeline`).
-Owner mode is live (DECISIONS 2026-10-11): no grants.json needed for the owner;
-`local_owner_grants: false` restores strict grants. Live sandbox with three
-ingested sources: `workspace/knowledge-sandboxes/sb-k1-5-live-20261011t023216-bb69`.
-Next: owner-mode step 2 (Approve button for model-chosen side effects), browser
-check of the Knowledge tab, then K2 (layered bilingual index; legacy Raw adoption).
+Knowledge pipeline (2026-10-11, latest): K1 done (`docs/phases/KNOWLEDGE_K1.md`);
+K2 (`docs/phases/KNOWLEDGE_K2.md`) built but its query change was not accepted.
+- host.json `knowledge_pipeline` has vaults `k-test` and `rs-k`, sandbox root
+  `%LOCALAPPDATA%\AEP\sb`. Owner mode is live (DECISIONS 2026-10-11).
+- Sandbox `%LOCALAPPDATA%\AEP\sb\sb-k2-index-10cd71` is a copy of rs-k with all
+  2,007 pages enriched (bilingual summary, aliases, categories) and the layered
+  index written. The published rs-k 1.0.2 is untouched and is what Agent Web serves.
+- K2.4 (index-led query and ingest) was measured in `runs/core-007` and was worse
+  than core-005; it is reverted (405e9d7). Agent Web restarted on the revert.
+- The candidate manifest `engineering__rs-knowledge__1.1.0-k2.1.json` was removed
+  from the workspace (copy in `.scratch/`); `.scratch/k25_bind.py candidate|restore`
+  re-binds the sandbox for another run (it backs up host.json first).
+- Next: the owner chooses A/B/C in `runs/core-007/review.zh-TW.md`; then K3.
 
 Knowledge state (2026-10-10, latest): Skill 1.10.0 is live. A no-support retry check
 plus Skill 1.11.0 was tried in `runs/core-006`, came out worse and was rolled back

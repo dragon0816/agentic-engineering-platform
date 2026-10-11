@@ -1625,6 +1625,19 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   (2026-10-11): tab, sandbox list, open, Raw with Plan ingest, lint and
   convert preview all render; no errors. Sandbox buttons still use the
   default button style (cosmetic).
-- [ ] Legacy Raw of the published vault needs adoption (`knowledge.migrate`)
-  before the pipeline can ingest it (K2).
-- [ ] K2-K6 per the plan.
+- [x] K2.1 Legacy Raw adoption step in the pipeline (84a6681); rs-k's 508 Raw
+  were already adopted. Sandbox root moved out of the workspace for long
+  Windows paths (c257368).
+- [x] K2.2-K2.3 Layered bilingual index and frontmatter enrichment (cb30be5).
+  Live on sandbox `sb-k2-index-10cd71`: 2,007 pages enriched in 51 model calls
+  (59 min, 4 failed batches retried), 88 index pages, 0 pages unassigned.
+  Sources are grouped by Raw area, not year (30 of 508 have a date).
+- [x] K2.4 query and ingest follow the index (e097aa0) -> **reverted** (405e9d7)
+  after K2.5.
+- [x] K2.5 benchmark core-007 on candidate `rs-knowledge@1.1.0-k2.1`: answerable
+  coverage 0.395 -> 0.349, PASS 16 -> 11 of 22, median 156 -> 166 s, p90
+  233 -> 283 s. Not accepted; live binding restored. Review:
+  `benchmarks/knowledge_v1/runs/core-007/review.zh-TW.md`.
+- [ ] K2 next step: owner to choose A (data only), B (index hits appended), or
+  C (index for ingest only, continue to K3).
+- [ ] K3-K6 per the plan.

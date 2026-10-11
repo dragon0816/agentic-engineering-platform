@@ -1,0 +1,1449 @@
+{
+ "question": {
+  "id": "Q0131",
+  "text": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+  "market": "Wireless Communication",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-4f930f6308c44fe6a2b4e305e5c7a470",
+ "exchange": {
+  "sent": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+  "http_status": 200,
+  "seconds": 124.844,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-4f930f6308c44fe6a2b4e305e5c7a470",
+    "actor": "leo.chi",
+    "title": "How do changes in Wi-Fi 7/8 technology affect the measurement capability…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T06:15:04.456705Z",
+    "updated_at": "2026-10-11T06:17:09.156786Z",
+    "messages": [
+     {
+      "message_id": "message-34baa0b673e04f2f902481c40ff23ba5",
+      "role": "user",
+      "text": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Signal Generator / Signal Analyzer?",
+      "created_at": "2026-10-11T06:15:04.468386Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-362ffba5ab3142c1b9b33a37626d7b75",
+      "role": "assistant",
+      "text": "Short answer: Wi‑Fi 7/8 pushes signal generator / analyzer capability from ordinary WLAN testing toward wider instantaneous bandwidth, lower EVM floors for 4096QAM, multi-RF-chain / MIMO / MLO operation, and deeper spectrum/emissions and signaling analysis, while Wi‑Fi 8 adds dRU and UEQM-specific analysis burdens.[1][2][15][24][25]\n| Area | Impact on required Signal Generator / Signal Analyzer capability |\n|---|---|\n| Bandwidth | Wi‑Fi 7 key throughput elements include 320 MHz channel bandwidth, and Wi‑Fi 8 is described as retaining Wi‑Fi 7 core PHY parameters including channel bandwidths up to 320 MHz.[2][24] Therefore the analyzer and generator need WLAN 320 MHz-class capability; examples in the passages include CMX500 WLAN 802.11be analyzer performance at 320 MHz and CMP180 WLAN 802.11be analyzer/generator performance at 320 MHz.[40][45] A 480 MHz WLAN waveform is only described as a potential Wi‑Fi 8 candidate / discussion item, not a formal Wi‑Fi 8 channel bandwidth, but it implies that future-proof test setups may need 500 MHz-class waveform verification capability; CMP180 is described as supporting bandwidths up to 500 MHz and demonstrating 480 MHz waveform loopback verification.[4][5][8] |\n| Modulation / EVM | Wi‑Fi 7 includes 4096QAM, and Wi‑Fi 8 retains 4096QAM as a core PHY parameter.[2][24] This increases the need for low residual EVM in both analysis and generation; cited WLAN analyzer examples include CMX500 802.11be EVM of –49 dB measured at 160 MHz and –47 dB measured at 320 MHz, and CMP180 802.11be analyzer EVM of –46 dB measured at 320 MHz or –48 dB with CMP-KB805, while CMP180 802.11be generator EVM is listed as < –43 dB at 320 MHz.[40][45] |\n| MIMO / multi-link | Wi‑Fi 7 lists up to 16 spatial streams and MLO as key throughput components, and MLO is also retained in Wi‑Fi 8.[2][24] Wi‑Fi 7 OTA development needs measurements of antennas and RF transmitter/receiver characteristics under real-world signaling conditions, and because MLO is a key Wi‑Fi 7 feature, a test environment with multiple RF chains is important.[25] CMX500 WLAN options include 802.11bn support and True MIMO 2x2 for 802.11n/ac/ax/be/bn signals, while CMP180 has WLAN true MIMO 2x2/4x4 and 5x5/6x6 measurement options listed.[40][47] |\n| Wi‑Fi 8 dRU / UEQM analysis | Wi‑Fi 8 introduces / emphasizes dRU and UEQM: dRU is used to overcome PSD limits, and dRU measurements verify uplink transmit-power boost and connection-reliability improvement.[1][15] UEQM allows each MIMO link to use a different modulation scheme in difficult reception scenarios, and UEQM analysis evaluates whether the device adapts modulation correctly according to specified MCS combinations.[1][15] This means the analyzer must not only demodulate a packet, but also analyze per-link / per-MCS adaptation behavior for Wi‑Fi 8 signaling tests.[15] |\n| Spectrum / emissions | Spectrum measurement remains necessary because unwanted-emissions items include occupied bandwidth, ACLR, operating-band unwanted emissions / SEM, transmitter spurious emissions, and transmitter intermodulation, with transmitter intermodulation noting that an additional signal generator is required.[68] CMX500 spectrum analysis options include frequency sweep power-vs-frequency, zero-span power-vs-time, RBW 100 Hz to 10 MHz, VBW 10 Hz to 10 MHz, and FFT spectrum analyzer spans up to 500 MHz with CMX-B600B broadband mode or 1 GHz with CMX-B500A IF unit only.[38][39] |\n| Signaling vs non-signaling / OTA | Wi‑Fi 8 RF signaling tests are described as CMX500 signaling-mode tests for prototype Wi‑Fi 8 / IEEE 802.11bn WLAN device PHY features.[18][23] Wi‑Fi 7 OTA MIMO stress testing is described as over-the-air, signaling-mode, realistic multipath testing of antenna, RF transmitter/receiver, and multi-antenna performance for IEEE 802.11be stations and access points.[27][28] |\n【推論】For Wi‑Fi 7/8, a practical signal analyzer/generator target should be at least 320 MHz WLAN bandwidth with EVM headroom suitable for 4096QAM, because Wi‑Fi 7 and Wi‑Fi 8 cite 320 MHz and 4096QAM, and instrument examples specify 320 MHz WLAN EVM performance.[2][24][40][45]\n【推論】If preparing for discussed Wi‑Fi 8 extensions rather than only cited retained parameters, 500 MHz-class generation/analysis becomes relevant because 480 MHz is described as a potential candidate waveform and CMP180’s 500 MHz capability is tied to that loopback demonstration.[4][5][48][52]\n【推論】Because MLO, spatial streams, dRU, and UEQM all involve multiple links, RF chains, resource allocations, or per-link modulation behavior, Wi‑Fi 7/8 testing increasingly needs multi-channel/MIMO signaling analysis rather than only single-link SISO RF measurements.[1][15][24][25][40][47]\n\n來源：\n[1] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[2] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[4] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[5] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[8] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[15] Wiki：Wi-Fi 8 RF signaling tests（來源：`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[18] Wiki：Wi-Fi 8 RF signaling tests（來源：`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[23] Wiki：Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[24] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[25] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[27] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[28] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[38] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[39] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[40] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[45] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[47] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[48] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[52] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[68] `raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md`",
+      "created_at": "2026-10-11T06:17:09.156786Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-1bd7769d581f4422af1e5e80e21178a5",
+       "request_id": "request-1bd7769d581f4422af1e5e80e21178a5",
+       "span_id": "span-1bd7769d581f4422af1e5e80e21178a5",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "Short answer: Wi‑Fi 7/8 pushes signal generator / analyzer capability from ordinary WLAN testing toward wider instantaneous bandwidth, lower EVM floors for 4096QAM, multi-RF-chain / MIMO / MLO operation, and deeper spectrum/emissions and signaling analysis, while Wi‑Fi 8 adds dRU and UEQM-specific analysis burdens.[1][2][15][24][25]\n| Area | Impact on required Signal Generator / Signal Analyzer capability |\n|---|---|\n| Bandwidth | Wi‑Fi 7 key throughput elements include 320 MHz channel bandwidth, and Wi‑Fi 8 is described as retaining Wi‑Fi 7 core PHY parameters including channel bandwidths up to 320 MHz.[2][24] Therefore the analyzer and generator need WLAN 320 MHz-class capability; examples in the passages include CMX500 WLAN 802.11be analyzer performance at 320 MHz and CMP180 WLAN 802.11be analyzer/generator performance at 320 MHz.[40][45] A 480 MHz WLAN waveform is only described as a potential Wi‑Fi 8 candidate / discussion item, not a formal Wi‑Fi 8 channel bandwidth, but it implies that future-proof test setups may need 500 MHz-class waveform verification capability; CMP180 is described as supporting bandwidths up to 500 MHz and demonstrating 480 MHz waveform loopback verification.[4][5][8] |\n| Modulation / EVM | Wi‑Fi 7 includes 4096QAM, and Wi‑Fi 8 retains 4096QAM as a core PHY parameter.[2][24] This increases the need for low residual EVM in both analysis and generation; cited WLAN analyzer examples include CMX500 802.11be EVM of –49 dB measured at 160 MHz and –47 dB measured at 320 MHz, and CMP180 802.11be analyzer EVM of –46 dB measured at 320 MHz or –48 dB with CMP-KB805, while CMP180 802.11be generator EVM is listed as < –43 dB at 320 MHz.[40][45] |\n| MIMO / multi-link | Wi‑Fi 7 lists up to 16 spatial streams and MLO as key throughput components, and MLO is also retained in Wi‑Fi 8.[2][24] Wi‑Fi 7 OTA development needs measurements of antennas and RF transmitter/receiver characteristics under real-world signaling conditions, and because MLO is a key Wi‑Fi 7 feature, a test environment with multiple RF chains is important.[25] CMX500 WLAN options include 802.11bn support and True MIMO 2x2 for 802.11n/ac/ax/be/bn signals, while CMP180 has WLAN true MIMO 2x2/4x4 and 5x5/6x6 measurement options listed.[40][47] |\n| Wi‑Fi 8 dRU / UEQM analysis | Wi‑Fi 8 introduces / emphasizes dRU and UEQM: dRU is used to overcome PSD limits, and dRU measurements verify uplink transmit-power boost and connection-reliability improvement.[1][15] UEQM allows each MIMO link to use a different modulation scheme in difficult reception scenarios, and UEQM analysis evaluates whether the device adapts modulation correctly according to specified MCS combinations.[1][15] This means the analyzer must not only demodulate a packet, but also analyze per-link / per-MCS adaptation behavior for Wi‑Fi 8 signaling tests.[15] |\n| Spectrum / emissions | Spectrum measurement remains necessary because unwanted-emissions items include occupied bandwidth, ACLR, operating-band unwanted emissions / SEM, transmitter spurious emissions, and transmitter intermodulation, with transmitter intermodulation noting that an additional signal generator is required.[68] CMX500 spectrum analysis options include frequency sweep power-vs-frequency, zero-span power-vs-time, RBW 100 Hz to 10 MHz, VBW 10 Hz to 10 MHz, and FFT spectrum analyzer spans up to 500 MHz with CMX-B600B broadband mode or 1 GHz with CMX-B500A IF unit only.[38][39] |\n| Signaling vs non-signaling / OTA | Wi‑Fi 8 RF signaling tests are described as CMX500 signaling-mode tests for prototype Wi‑Fi 8 / IEEE 802.11bn WLAN device PHY features.[18][23] Wi‑Fi 7 OTA MIMO stress testing is described as over-the-air, signaling-mode, realistic multipath testing of antenna, RF transmitter/receiver, and multi-antenna performance for IEEE 802.11be stations and access points.[27][28] |\n【推論】For Wi‑Fi 7/8, a practical signal analyzer/generator target should be at least 320 MHz WLAN bandwidth with EVM headroom suitable for 4096QAM, because Wi‑Fi 7 and Wi‑Fi 8 cite 320 MHz and 4096QAM, and instrument examples specify 320 MHz WLAN EVM performance.[2][24][40][45]\n【推論】If preparing for discussed Wi‑Fi 8 extensions rather than only cited retained parameters, 500 MHz-class generation/analysis becomes relevant because 480 MHz is described as a potential candidate waveform and CMP180’s 500 MHz capability is tied to that loopback demonstration.[4][5][48][52]\n【推論】Because MLO, spatial streams, dRU, and UEQM all involve multiple links, RF chains, resource allocations, or per-link modulation behavior, Wi‑Fi 7/8 testing increasingly needs multi-channel/MIMO signaling analysis rather than only single-link SISO RF measurements.[1][15][24][25][40][47]\n\n來源：\n[1] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[2] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[4] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[5] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[8] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[15] Wiki：Wi-Fi 8 RF signaling tests（來源：`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[18] Wiki：Wi-Fi 8 RF signaling tests（來源：`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[23] Wiki：Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[24] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[25] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[27] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[28] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[38] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[39] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[40] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[45] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[47] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[48] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[52] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[68] `raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-1bd7769d581f4422af1e5e80e21178a5",
+      "request_id": "request-1bd7769d581f4422af1e5e80e21178a5",
+      "span_id": "span-1bd7769d581f4422af1e5e80e21178a5",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-1bd7769d581f4422af1e5e80e21178a5",
+       "request_id": "request-1bd7769d581f4422af1e5e80e21178a5",
+       "span_id": "span-1bd7769d581f4422af1e5e80e21178a5",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Short answer: Wi‑Fi 7/8 pushes signal generator / analyzer capability from ordinary WLAN testing toward wider instantaneous bandwidth, lower EVM floors for 4096QAM, multi-RF-chain / MIMO / MLO operation, and deeper spectrum/emissions and signaling analysis, while Wi‑Fi 8 adds dRU and UEQM-specific analysis burdens.[1][2][15][24][25]\n| Area | Impact on required Signal Generator / Signal Analyzer capability |\n|---|---|\n| Bandwidth | Wi‑Fi 7 key throughput elements include 320 MHz channel bandwidth, and Wi‑Fi 8 is described as retaining Wi‑Fi 7 core PHY parameters including channel bandwidths up to 320 MHz.[2][24] Therefore the analyzer and generator need WLAN 320 MHz-class capability; examples in the passages include CMX500 WLAN 802.11be analyzer performance at 320 MHz and CMP180 WLAN 802.11be analyzer/generator performance at 320 MHz.[40][45] A 480 MHz WLAN waveform is only described as a potential Wi‑Fi 8 candidate / discussion item, not a formal Wi‑Fi 8 channel bandwidth, but it implies that future-proof test setups may need 500 MHz-class waveform verification capability; CMP180 is described as supporting bandwidths up to 500 MHz and demonstrating 480 MHz waveform loopback verification.[4][5][8] |\n| Modulation / EVM | Wi‑Fi 7 includes 4096QAM, and Wi‑Fi 8 retains 4096QAM as a core PHY parameter.[2][24] This increases the need for low residual EVM in both analysis and generation; cited WLAN analyzer examples include CMX500 802.11be EVM of –49 dB measured at 160 MHz and –47 dB measured at 320 MHz, and CMP180 802.11be analyzer EVM of –46 dB measured at 320 MHz or –48 dB with CMP-KB805, while CMP180 802.11be generator EVM is listed as < –43 dB at 320 MHz.[40][45] |\n| MIMO / multi-link | Wi‑Fi 7 lists up to 16 spatial streams and MLO as key throughput components, and MLO is also retained in Wi‑Fi 8.[2][24] Wi‑Fi 7 OTA development needs measurements of antennas and RF transmitter/receiver characteristics under real-world signaling conditions, and because MLO is a key Wi‑Fi 7 feature, a test environment with multiple RF chains is important.[25] CMX500 WLAN options include 802.11bn support and True MIMO 2x2 for 802.11n/ac/ax/be/bn signals, while CMP180 has WLAN true MIMO 2x2/4x4 and 5x5/6x6 measurement options listed.[40][47] |\n| Wi‑Fi 8 dRU / UEQM analysis | Wi‑Fi 8 introduces / emphasizes dRU and UEQM: dRU is used to overcome PSD limits, and dRU measurements verify uplink transmit-power boost and connection-reliability improvement.[1][15] UEQM allows each MIMO link to use a different modulation scheme in difficult reception scenarios, and UEQM analysis evaluates whether the device adapts modulation correctly according to specified MCS combinations.[1][15] This means the analyzer must not only demodulate a packet, but also analyze per-link / per-MCS adaptation behavior for Wi‑Fi 8 signaling tests.[15] |\n| Spectrum / emissions | Spectrum measurement remains necessary because unwanted-emissions items include occupied bandwidth, ACLR, operating-band unwanted emissions / SEM, transmitter spurious emissions, and transmitter intermodulation, with transmitter intermodulation noting that an additional signal generator is required.[68] CMX500 spectrum analysis options include frequency sweep power-vs-frequency, zero-span power-vs-time, RBW 100 Hz to 10 MHz, VBW 10 Hz to 10 MHz, and FFT spectrum analyzer spans up to 500 MHz with CMX-B600B broadband mode or 1 GHz with CMX-B500A IF unit only.[38][39] |\n| Signaling vs non-signaling / OTA | Wi‑Fi 8 RF signaling tests are described as CMX500 signaling-mode tests for prototype Wi‑Fi 8 / IEEE 802.11bn WLAN device PHY features.[18][23] Wi‑Fi 7 OTA MIMO stress testing is described as over-the-air, signaling-mode, realistic multipath testing of antenna, RF transmitter/receiver, and multi-antenna performance for IEEE 802.11be stations and access points.[27][28] |\n【推論】For Wi‑Fi 7/8, a practical signal analyzer/generator target should be at least 320 MHz WLAN bandwidth with EVM headroom suitable for 4096QAM, because Wi‑Fi 7 and Wi‑Fi 8 cite 320 MHz and 4096QAM, and instrument examples specify 320 MHz WLAN EVM performance.[2][24][40][45]\n【推論】If preparing for discussed Wi‑Fi 8 extensions rather than only cited retained parameters, 500 MHz-class generation/analysis becomes relevant because 480 MHz is described as a potential candidate waveform and CMP180’s 500 MHz capability is tied to that loopback demonstration.[4][5][48][52]\n【推論】Because MLO, spatial streams, dRU, and UEQM all involve multiple links, RF chains, resource allocations, or per-link modulation behavior, Wi‑Fi 7/8 testing increasingly needs multi-channel/MIMO signaling analysis rather than only single-link SISO RF measurements.[1][15][24][25][40][47]\n\n來源：\n[1] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[2] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[4] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[5] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[8] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[15] Wiki：Wi-Fi 8 RF signaling tests（來源：`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[18] Wiki：Wi-Fi 8 RF signaling tests（來源：`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[23] Wiki：Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[24] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[25] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[27] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[28] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[38] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[39] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[40] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[45] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[47] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[48] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[52] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[68] `raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_7Yo6YyKsPAHMQwgULMYTnPTo",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "Short answer: Wi‑Fi 7/8 pushes signal generator / analyzer capability from ordinary WLAN testing toward wider instantaneous bandwidth, lower EVM floors for 4096QAM, multi-RF-chain / MIMO / MLO operation, and deeper spectrum/emissions and signaling analysis, while Wi‑Fi 8 adds dRU and UEQM-specific analysis burdens.[1][2][15][24][25]\n| Area | Impact on required Signal Generator / Signal Analyzer capability |\n|---|---|\n| Bandwidth | Wi‑Fi 7 key throughput elements include 320 MHz channel bandwidth, and Wi‑Fi 8 is described as retaining Wi‑Fi 7 core PHY parameters including channel bandwidths up to 320 MHz.[2][24] Therefore the analyzer and generator need WLAN 320 MHz-class capability; examples in the passages include CMX500 WLAN 802.11be analyzer performance at 320 MHz and CMP180 WLAN 802.11be analyzer/generator performance at 320 MHz.[40][45] A 480 MHz WLAN waveform is only described as a potential Wi‑Fi 8 candidate / discussion item, not a formal Wi‑Fi 8 channel bandwidth, but it implies that future-proof test setups may need 500 MHz-class waveform verification capability; CMP180 is described as supporting bandwidths up to 500 MHz and demonstrating 480 MHz waveform loopback verification.[4][5][8] |\n| Modulation / EVM | Wi‑Fi 7 includes 4096QAM, and Wi‑Fi 8 retains 4096QAM as a core PHY parameter.[2][24] This increases the need for low residual EVM in both analysis and generation; cited WLAN analyzer examples include CMX500 802.11be EVM of –49 dB measured at 160 MHz and –47 dB measured at 320 MHz, and CMP180 802.11be analyzer EVM of –46 dB measured at 320 MHz or –48 dB with CMP-KB805, while CMP180 802.11be generator EVM is listed as < –43 dB at 320 MHz.[40][45] |\n| MIMO / multi-link | Wi‑Fi 7 lists up to 16 spatial streams and MLO as key throughput components, and MLO is also retained in Wi‑Fi 8.[2][24] Wi‑Fi 7 OTA development needs measurements of antennas and RF transmitter/receiver characteristics under real-world signaling conditions, and because MLO is a key Wi‑Fi 7 feature, a test environment with multiple RF chains is important.[25] CMX500 WLAN options include 802.11bn support and True MIMO 2x2 for 802.11n/ac/ax/be/bn signals, while CMP180 has WLAN true MIMO 2x2/4x4 and 5x5/6x6 measurement options listed.[40][47] |\n| Wi‑Fi 8 dRU / UEQM analysis | Wi‑Fi 8 introduces / emphasizes dRU and UEQM: dRU is used to overcome PSD limits, and dRU measurements verify uplink transmit-power boost and connection-reliability improvement.[1][15] UEQM allows each MIMO link to use a different modulation scheme in difficult reception scenarios, and UEQM analysis evaluates whether the device adapts modulation correctly according to specified MCS combinations.[1][15] This means the analyzer must not only demodulate a packet, but also analyze per-link / per-MCS adaptation behavior for Wi‑Fi 8 signaling tests.[15] |\n| Spectrum / emissions | Spectrum measurement remains necessary because unwanted-emissions items include occupied bandwidth, ACLR, operating-band unwanted emissions / SEM, transmitter spurious emissions, and transmitter intermodulation, with transmitter intermodulation noting that an additional signal generator is required.[68] CMX500 spectrum analysis options include frequency sweep power-vs-frequency, zero-span power-vs-time, RBW 100 Hz to 10 MHz, VBW 10 Hz to 10 MHz, and FFT spectrum analyzer spans up to 500 MHz with CMX-B600B broadband mode or 1 GHz with CMX-B500A IF unit only.[38][39] |\n| Signaling vs non-signaling / OTA | Wi‑Fi 8 RF signaling tests are described as CMX500 signaling-mode tests for prototype Wi‑Fi 8 / IEEE 802.11bn WLAN device PHY features.[18][23] Wi‑Fi 7 OTA MIMO stress testing is described as over-the-air, signaling-mode, realistic multipath testing of antenna, RF transmitter/receiver, and multi-antenna performance for IEEE 802.11be stations and access points.[27][28] |\n【推論】For Wi‑Fi 7/8, a practical signal analyzer/generator target should be at least 320 MHz WLAN bandwidth with EVM headroom suitable for 4096QAM, because Wi‑Fi 7 and Wi‑Fi 8 cite 320 MHz and 4096QAM, and instrument examples specify 320 MHz WLAN EVM performance.[2][24][40][45]\n【推論】If preparing for discussed Wi‑Fi 8 extensions rather than only cited retained parameters, 500 MHz-class generation/analysis becomes relevant because 480 MHz is described as a potential candidate waveform and CMP180’s 500 MHz capability is tied to that loopback demonstration.[4][5][48][52]\n【推論】Because MLO, spatial streams, dRU, and UEQM all involve multiple links, RF chains, resource allocations, or per-link modulation behavior, Wi‑Fi 7/8 testing increasingly needs multi-channel/MIMO signaling analysis rather than only single-link SISO RF measurements.[1][15][24][25][40][47]\n\n來源：\n[1] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[2] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[4] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[5] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[8] Wiki：Wi-Fi 8（來源：`WiFi8.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`、`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[15] Wiki：Wi-Fi 8 RF signaling tests（來源：`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[18] Wiki：Wi-Fi 8 RF signaling tests（來源：`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[23] Wiki：Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`、`Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md`）\n[24] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[25] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[27] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[28] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[38] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[39] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[40] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[45] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[47] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[48] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[52] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[68] `raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md`",
+          "evidence": {
+           "raw_citations": 20,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.1.0-k2.1"
+           },
+           "trace": {
+            "trace_id": "trace-5de64669b5ec499ca4e1a80896987041",
+            "request_id": "request-5de64669b5ec499ca4e1a80896987041",
+            "span_id": "span-5de64669b5ec499ca4e1a80896987041",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "How do changes in Wi-Fi 7/8 technology affect the measurement capability required from Signal Generator / Signal Analyzer? Include impacts on bandwidth, modulation/EVM, MIMO/multi-link, spectrum/emissions, and signal generation/analyzer requirements.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "Wi-Fi 8 › 新增 / 強調的 PHY 與 MAC layer technologies\n[[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]] 舉例列出：\n\n- [[distributed resource units]]（dRU）：用於 overcome power spectral density（PSD）limits；dRU measurements 可驗證 uplink transmit power boost 與 connection reliability improvement。\n- [[unequal modulation]]（UEQM）：在 difficult reception scenarios 中允許 each [[MIMO]] link 使用 different modulation scheme；UEQM analysis 可評估 device 是否依 specified MCS combinations 正確 adapt modulation。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+              },
+              "score": 5.850501
+             },
+             {
+              "text": "Wi-Fi 8 › 延續自 Wi-Fi 7 的 core PHY parameters\n依 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]，[[Wi-Fi 8]] 保留下列 [[Wi-Fi 7]] core physical layer parameters：\n\n| 項目 | 來源說法 |\n|---|---|\n| supported frequencies | up to 7.125 GHz |\n| channel bandwidth | up to 320 MHz |\n| modulation | 4096QAM |\n| multi-link | [[MLO]] |\n\n以上是 PR 中對 Wi-Fi 8 的簡述，不等同於完整 IEEE 802.11bn normative specification。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+              },
+              "score": 4.228994
+             },
+             {
+              "text": "Wi-Fi 8 › 使用限制\n- 本頁目前由 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]、[[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 與 [[WiFi8]] 支撐。\n- [[WiFi8]] 是 OneNote link hub，不是文章正文、datasheet、configuration guide、IEEE standard text 或 certification document。\n- PR / demonstration statement 不等同於 IEEE standard text、datasheet、configuration guide 或 certification document。\n- 來源未標示 [[IEEE 802.11bn]] draft version、standard version、final ratification date 或 IEEE document number。\n- 來源未列出完整 [[Wi-Fi 8]] PHY / MAC feature set、band plan、regulatory conditions、test requirements 或 interoperability criteria。\n- 480 MHz waveform 僅能記為 MWC 2024 PR 中的 potential candidate，不可寫成 Wi-Fi 8 正式規格。\n- 320 MHz channel bandwidth 僅能記為較晚 R&S / Broadcom PR 對 retained core PHY parameter 的說法，不可替代 IEEE 802.11bn 正式文件。\n- 不可從 [[WiFi8]] 的連結標題推論 [[Broadcom]]、[[MediaTek]]、[[ASUS]] 或 [[Filogic 8000]] 的產品規格、上市時間、供應關係或認證狀態。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+              },
+              "score": 3.208227
+             },
+             {
+              "text": "Wi-Fi 8 › 480 MHz waveform candidate 說法\n[[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 稱：\n\n- [[R&S CMP180]] supports bandwidths up to 500 MHz。\n- [[R&S CMP180]] will demonstrate its ability to verify a [[WLAN]] waveform with **480 MHz bandwidth** in loopback mode。\n- 該 480 MHz waveform 被稱為 potential waveform candidate for the yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] standard。\n\n此說法目前只能作為 MWC 2024 PR 的 candidate / discussion 記錄；不得推論 480 MHz 已成為 [[IEEE 802.11bn]] 標準通道頻寬。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+              },
+              "score": 1.483378
+             },
+             {
+              "text": "Wi-Fi 8 › 來源中的技術定位\n依 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]：\n\n- [[IEEE 802.11bn]] amendment introduces advancements focused on consistent, high-quality connectivity across dense environments。\n- 目標應用包含 growing number of connected devices、VR/AR、8K streaming、industrial IoT。\n- [[Wi-Fi 8]] builds upon [[Wi-Fi 7]] foundation。\n- 來源明示 final IEEE standard ratification 尚未完成；[[Rohde & Schwarz]] 的測試是在 ratification 前展示。\n\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- [[Wi-Fi 8]] / [[IEEE 802.11bn]] 在 MWC 2024 語境下仍是 yet-to-be-defined standard。\n- 來源稱 even wider channel bandwidths are in discussion。\n- [[R&S CMP180]] 將展示 **480 MHz bandwidth** 的 [[WLAN]] waveform loopback mode verification，並稱該 waveform 是 [[Wi-Fi 8]] potential waveform candidate。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+              },
+              "score": 1.433727
+             },
+             {
+              "text": "Wi-Fi 8\n[[Wi-Fi 8]] 是 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]] 中對 [[IEEE 802.11bn]] amendment 的市場 / 技術稱呼；該來源描述其重點從提高 throughput 轉向 ultra-high reliability（[[UHR]]）connectivity performance。較早的 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 則把 [[IEEE 802.11bn]] 稱為 yet-to-be-defined，並提到 wider channel bandwidths are in discussion 與 480 MHz WLAN waveform potential candidate。\n\n⚠️ [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]（MWC 2024；發布日期來源未標示）說 [[Wi-Fi 8]] / [[IEEE 802.11bn]] 尚未定義，且 even wider channel bandwidths are in discussion，並稱 480 MHz [[WLAN]] waveform 是 potential waveform candidate，但既有頁面 [[Wi-Fi 8]] 說依 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]] Wi‑Fi 8 保留 up to 320 MHz channel bandwidth。判斷：前者是較早期 discussion / candidate，後者是較晚 PR 的 implemented signaling-test description；先並列，不把 480 MHz 寫成 Wi‑Fi 8 正式規格。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+              },
+              "score": 1.399022
+             },
+             {
+              "text": "Wi-Fi 8 › CES 2026 外部待讀連結\n[[WiFi8]]（raw converted 2026-09-17）是 OneNote link hub，列出與 [[CES 2026]]、[[Broadcom]]、[[ASUS]]、[[MediaTek]]、[[Filogic 8000]] 與 [[Wi-Fi 8]] 相關的外部文章連結。該來源只提供連結標題與 URL，未擷取正文，因此目前只能支撐 [[Wi-Fi 8 外部資料清單]]，不能作為標準內容、晶片規格、路由器展示或量產時程的證據。\n\n可追溯的連結線索包括：\n\n- Tom's Hardware 標題提到 [[Broadcom]] two dual-band [[Wi-Fi 8]] chips。\n- TechNews / The Verge 標題提到 [[Wi-Fi 8]] router / CES before most users have switched to [[Wi-Fi 7]]。\n- RCR Wireless 標題提到 [[MediaTek]] previews [[Filogic 8000]] at [[CES 2026]]。\n- EDN 標題提到 [[Wi-Fi 8]] silicon 與 AI touch。\n- Network World 標題提到 [[Wi-Fi 8]] prioritizes reliability over speed gains。\n\n以上均為待讀線索，不新增本頁的技術規格主張。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+              },
+              "score": 1.049601
+             },
+             {
+              "text": "Wi-Fi 8 › 與 R&S CMX500 / CMP180 的關係\n[[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]] 稱 [[R&S CMX500]] 已加入 newly added [[Wi-Fi 8]] / [[IEEE 802.11bn]] testing capabilities，並將在 [[MWC Barcelona 2026]] 驗證 [[Broadcom]] prototype [[Wi-Fi 8]] device。\n\n[[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 則在較早 MWC 2024 語境中，把 [[R&S CMP180]] 的 480 MHz [[WLAN]] waveform loopback demonstration 描述為 potential [[Wi-Fi 8]] candidate，並將 [[R&S CMP180]] 定位為 future-proof R&D / production tester。\n\n這兩種說法層次不同：[[R&S CMX500]] 來源是 Wi‑Fi 8 RF signaling tests / prototype device demonstration；[[R&S CMP180]] 來源是 480 MHz waveform loopback / candidate demonstration。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+              },
+              "score": 0.885473
+             },
+             {
+              "text": "WiFi8 › 關鍵實體與概念\n- [[Wi-Fi 8]] — 本 link hub 的主題；來源只列連結，未提供 [[IEEE 802.11bn]] draft version、規格、測試條件或 ratification 狀態。\n- [[Wi-Fi 7]] — 多個連結標題將 [[Wi-Fi 8]] 與 [[Wi-Fi 7]] 對照，但未擷取正文。\n- [[Broadcom]] — Tom's Hardware 與 The Verge 連結標題 / URL 中出現，但來源未擷取 Broadcom article 正文。\n- [[MediaTek]] — RCR Wireless 與 The Verge 連結標題 / URL 中出現，但來源未擷取正文。\n- [[ASUS]] — The Verge URL 中出現，但來源未擷取正文。\n- [[Filogic 8000]] — RCR Wireless 連結標題中出現；尚無正文支撐產品規格、上市時程或 [[Wi-Fi 8]] 支援範圍。\n- [[CES 2026]] — 多個連結標題 / URL 中出現，作為時間 / 活動語境線索。\n- [[Wi-Fi 8 外部資料清單]] — 本來源可支撐的知識層級是待讀資料索引。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/WiFi8.md"
+              },
+              "score": 2.263563
+             },
+             {
+              "text": "WiFi8 › 重點摘要\n這份來源是 raw converted 於 2026-09-17 的 OneNote link hub，主題是 [[Wi-Fi 8]]，內容只列出六個外部連結，未擷取外部文章正文。\n\n可從來源原文直接確認的內容：\n\n- 原始 OneNote / markdown 標題為 `WiFi8`。\n- `converted: 2026-09-17`。\n- 來源明示：`Copied from WiFi8.md unchanged -- nothing was extracted, rewritten or stripped out.`\n- 連結標題與 URL 指向 [[Broadcom]]、[[ASUS]]、[[MediaTek]]、[[CES 2026]]、[[Filogic 8000]]、[[Wi-Fi 7]] 與 [[Wi-Fi 8]] 相關外部文章。\n- 這些外部連結正文尚未被擷取；因此本頁只作為 [[Wi-Fi 8 外部資料清單]] 的索引，不把連結標題當成已驗證技術或市場主張。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/WiFi8.md"
+              },
+              "score": 2.16931
+             },
+             {
+              "text": "WiFi8 › 連結清單\n以下逐字保留來源中的外部連結標題 / URL 線索；日期只記錄來源可見文字，不補推發布日期：\n\n1. `Broadcom announces two dual-band Wi-Fi 8 chips — performance bifurcation introduced with Wi-Fi 7 lives on with the next gen | Tom's Hardware`\n   - URL: `https://www.tomshardware.com/networking/routers/broadcom-announces-two-dual-band-wi-fi-8-chips-performance-bifurcation-introduced-with-wi-fi-7-lives-on-with-the-next-gen`\n   - 只可作為待讀連結，不能由標題推論 [[Broadcom]] 已發布哪些正式晶片規格。\n\n2. `Wi-Fi 7` 連到 TechNews URL，後接文字：`還沒普及，Wi-Fi 8 路由器已在 CES 2026 搶先亮相 | TechNews 科技新報`\n   - URL: `https://technews.tw/2026/01/07/wi-fi-8-is-appearing-at-ces-before-most-of-us-have-switched-to-wi-fi-7/`\n   - URL path 含 `2026/01/07`，但本來源未擷取文章正文；不補推其發布時間或內容細節。\n\n3. `Wi-Fi 8 is appearing at CES before most of us have switched to Wi-Fi 7 | The Verge`\n   - URL: `https://www.theverge.com/tech/856883/ces-2026-wi-fi-8-asus-broadcom-mediatek`\n   - 連結標題 / URL 同時出現 [[CES 2026]]、[[ASUS]]、[[Broadcom]] 與 [[MediaTek]]，但未擷取正文，不可推論展示產品、規格或合作關係。\n\n4. `Wi-Fi 8 takes shape as MediaTek previews Filogic 8000 at CES 2026`\n   - URL: `https://www.rcrwireless.com/20260105/network-infrastructure/wi-fi/mediatek`\n   - URL path 含 `20260105`，標題出現 [[MediaTek]]、[[Filogic 8000]] 與 [[CES 2026]]；但正文未擷取，不可推論 [[Filogic 8000]] 規格、量產或商用狀態。\n\n5. `CES 2026: Wi-Fi 8 silicon on the horizon with an AI touch - EDN`\n   - URL: `https://www.edn.com/ces-2026-wi-fi-8-silicon-on-the-horizon-with-an-ai-touch/#google_vignette`\n   - 只可視為 [[CES 2026]]、[[Wi-Fi 8]] 與 silicon / AI touch 類外部待讀文章線索。\n\n6. `Wi-Fi 8 in 2026: Next-gen wireless standard prioritizes reliability over speed gains | Network World`\n   - URL: `https://www.networkworld.com/article/4112600/wi-fi-8-in-2026-next-gen-wireless-standard-prioritizes-reliability-over-speed-gains.html`\n   - 標題與既有 [[Wi-Fi 8]] 頁中 ultra-high reliability 方向相近，但正文未擷取，不能作為獨立驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/WiFi8.md"
+              },
+              "score": 1.517177
+             },
+             {
+              "text": "WiFi8 › 原文未解的問題\n- 外部文章正文未擷取；無法確認各篇文章的發布日期、作者、更新時間與引用來源。\n- [[Broadcom]] 是否正式發布 two dual-band [[Wi-Fi 8]] chips、晶片型號、規格、客戶與 availability 均未由本來源支撐。\n- [[MediaTek]] [[Filogic 8000]] 的產品定位、規格、量產時間與 [[Wi-Fi 8]] 支援範圍未由本來源支撐。\n- [[ASUS]] 在 [[CES 2026]] 的 [[Wi-Fi 8]] router 展示內容、型號、晶片供應商與上市狀態未由本來源支撐。\n- [[Wi-Fi 8]] 是否在 2026 年有正式標準版本、draft 版本或 certification timeline，來源未標示。\n- 連結標題中 reliability over speed gains 的說法與既有 [[Wi-Fi 8]] / [[UHR]] 頁面方向相近，但需要擷取正文後才能比較與引用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/WiFi8.md"
+              },
+              "score": 0.515624
+             },
+             {
+              "text": "WiFi8 › 與既有知識的關係\n- 既有 [[Wi-Fi 8]] 頁目前主要由 Rohde & Schwarz / Broadcom PR 與 MWC 2024 相關 PR 支撐，記錄 [[IEEE 802.11bn]]、[[UHR]]、320 MHz / 480 MHz candidate 等說法與限制。\n- 本來源新增的是 [[CES 2026]] 與多家媒體 / 技術媒體文章的待讀連結，不新增已驗證的 [[Wi-Fi 8]] 規格主張。\n- 既有 [[Broadcom]] 頁已有 R&S / Broadcom prototype [[Wi-Fi 8]] device 的 PR 語境；本來源只新增 Tom's Hardware / The Verge 待讀連結線索，不可據此補寫晶片規格。\n- 既有 [[MediaTek]] 頁已有 NTN、Edge AI、Genio 與天璣系列來源；本來源只新增 RCR Wireless / The Verge 待讀連結線索，不能據此寫入 [[Filogic 8000]] 規格。\n- 既有 [[ASUS]] 頁與 Tinker Board AI 開發板相關；本來源只因 The Verge URL 出現 `asus` 而形成待讀線索，不足以更新 ASUS 的產品主張。\n- 新增 [[Filogic 8000]] 頁僅保存一筆來自連結標題的待讀產品線索，並明示規格與商用狀態未由本來源支撐。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/WiFi8.md"
+              },
+              "score": 0.429992
+             },
+             {
+              "text": "Wi-Fi 8 RF signaling tests › 來源中的測試情境\n依 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]：\n\n- [[Rohde & Schwarz]] 在 final IEEE standard ratification 前，已將 first [[Wi-Fi 8]] RF tests in signaling mode 實作到 [[R&S CMX500]] one-box signaling tester。\n- 測試展示使用 [[Broadcom]] prototype next-generation WLAN device。\n- 展示地點為 [[MWC Barcelona 2026]]，[[Rohde & Schwarz]] booth 5A80。\n- 來源稱 [[R&S CMX500]] 可 showcase physical layer features unique to [[Wi-Fi 8]]。\n- 來源將 [[R&S CMX500]] 定位為 multi-technology multi-channel signaling tester，以及 future-ready platform for cellular and non-cellular standards。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md"
+              },
+              "score": 5.110354
+             },
+             {
+              "text": "Wi-Fi 8 RF signaling tests › Wi-Fi 8 測試重點\n來源描述 [[IEEE 802.11bn]] / [[Wi-Fi 8]] 的重點從 sheer speed 轉向 [[UHR]] performance。相關測試重點包括：\n\n| 測試 / feature | 來源說法 |\n|---|---|\n| [[distributed resource units]] / dRU measurements | 用於驗證 device boosting uplink transmit power 與 improving connection reliability 的 effectiveness；來源提到 dRU 可 overcome PSD limits。 |\n| [[unequal modulation]] / UEQM analysis | 在 difficult reception scenarios 中允許 each MIMO link 使用不同 modulation scheme；測試可評估 device 是否以 specified MCS combinations 正確 adapt modulation。 |\n| comprehensive signaling mode tests | 來源稱可 cover a broad range of Wi‑Fi 8 features 並執行 in-depth analysis of performance characteristics。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md"
+              },
+              "score": 4.601386
+             },
+             {
+              "text": "Wi-Fi 8 RF signaling tests › 與 Wi-Fi 7 OTA 測試的區分\n本頁不同於 [[Wi-Fi 7 OTA MIMO stress testing]]：\n\n- [[Wi-Fi 7 OTA MIMO stress testing]] 目前由 Bluetest / EMITE OTA chamber PR 支撐，聚焦 [[Wi-Fi 7]] / [[IEEE 802.11be]] over-the-air chamber workflow。\n- [[Wi-Fi 8 RF signaling tests]] 目前由 [[Rohde & Schwarz]] / [[Broadcom]] PR 支撐，聚焦 [[R&S CMX500]] signaling mode、[[Wi-Fi 8]] PHY features 與 prototype Broadcom WLAN device。\n- 本來源未說明 OTA chamber、reverberation chamber、anechoic chamber、antenna performance 或 MIMO stress testing setup。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md"
+              },
+              "score": 4.592303
+             },
+             {
+              "text": "Wi-Fi 8 RF signaling tests › 使用限制\n- 本頁目前只由 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]] 支撐。\n- 來源是 PR / demonstration statement，不是 datasheet、configuration guide、IEEE standard text 或 certification document。\n- 不可從本來源推論 [[R&S CMX500]] 的 Wi‑Fi 8 option code、license、software version、hardware configuration、RF chain count、test case list 或 measurement uncertainty。\n- 不可從本來源推論 [[Broadcom]] prototype device 的正式產品名稱、量產狀態、客戶、driver version、chipset SKU 或商用 availability。\n- 來源未標示 [[IEEE 802.11bn]] draft version、final ratification date 或正式標準版本。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md"
+              },
+              "score": 1.638939
+             },
+             {
+              "text": "Wi-Fi 8 RF signaling tests\n[[Wi-Fi 8 RF signaling tests]] 是 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]] 中描述的 [[R&S CMX500]] signaling mode 測試能力，用於驗證 prototype [[Wi-Fi 8]] / [[IEEE 802.11bn]] WLAN device 的 physical layer features。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md"
+              },
+              "score": 0.530988
+             },
+             {
+              "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 關鍵實體與概念\n- [[Rohde & Schwarz]] — 新聞稿發布者與 [[R&S CMX500]] 供應商。\n- [[R&S CMX500]] — multi-technology multi-channel one-box signaling tester；本來源新增 [[Wi-Fi 8]] / [[IEEE 802.11bn]] RF signaling mode 測試語境。\n- [[Broadcom]] — 提供 prototype next-generation WLAN / [[Wi-Fi 8]] device 供展示驗證。\n- [[Wi-Fi 8]] — 對應 [[IEEE 802.11bn]] amendment，來源稱其聚焦 [[UHR]]。\n- [[Wi-Fi 8 RF signaling tests]] — 本來源的核心測試能力宣稱。\n- [[IEEE 802.11bn]] — Wi-Fi 8 amendment；來源未標示標準版次或 ratification 狀態細節，只說 ahead of final ratification。\n- [[UHR]] — Ultra-high reliability；來源稱為 Wi-Fi 8 的性能焦點。\n- [[distributed resource units]] — Wi-Fi 8 PHY feature；來源寫作 dRU。\n- [[unequal modulation]] — Wi-Fi 8 technology；來源寫作 UEQM。\n- [[MLO]] — Wi-Fi 7 / Wi-Fi 8 延續的 Multi-Link-Operation。\n- [[MWC Barcelona 2026]] — 展示場域。\n- [[Christian Mokry]] — Press & media contact。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+              },
+              "score": 7.623172
+             },
+             {
+              "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 與既有知識的關係\n- 既有 [[R&S CMX500]] 頁已依 [[CMX500_Features_CSW9-20-0_en_32]] 記錄 WLAN signaling 802.11bn options 與 WLAN TX measurement option family；本新聞稿提供 PR / demonstration 層級的 [[Wi-Fi 8]] RF signaling tests 與 Broadcom prototype device 展示語境。\n- 既有 [[Wi-Fi 7 OTA MIMO stress testing]]、[[Wi-Fi 7 and 5G RedCap OTA measurements]] 與 [[4G 5G NR WLAN OTA MIMO stress testing]] 聚焦 Wi‑Fi 7 / IEEE 802.11be、OTA chamber integration 與 Bluetest / EMITE；本來源轉向 [[Wi-Fi 8]] / [[IEEE 802.11bn]] RF signaling tests，不是 OTA chamber 測試。\n- 既有 [[Broadcom]] 頁主要收錄 Broadcom 在 switch、PCIe switch 與 TPU roadmap 圖表中的列名；本來源新增 Broadcom 作為 prototype Wi-Fi 8 device 提供方 / 展示合作方的 PR 語境。\n- 本來源屬於 [[Productions]] 資料，但不是 datasheet / configuration guide；不可用來取代 [[CMX500_specs_en_5216-4127-22_v1100]] 或 [[CMX500_Features_CSW9-20-0_en_32]] 的正式規格與 option ordering data。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+              },
+              "score": 3.787232
+             },
+             {
+              "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 重點摘要\n- 來源未標示發布日期；raw frontmatter `created: 2026-09-11`，本文 ingest 日期為 2026-09-15。\n- [[Rohde & Schwarz]] 宣稱在最終 IEEE standard ratification 之前，已將 first [[Wi-Fi 8 RF signaling tests]] 實作到 [[R&S CMX500]] one-box signaling tester。\n- 展示情境：[[MWC Barcelona 2026]]，[[Rohde & Schwarz]] booth 5A80，Fira Gran Via Barcelona，hall 5。\n- 測試對象：[[Broadcom]] prototype next-generation WLAN device / prototype [[Wi-Fi 8]] device。\n- [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的焦點被描述為從 sheer speed 轉向 ultra-high reliability（[[UHR]]）performance。\n- 來源稱 [[Wi-Fi 8]] 延續 [[Wi-Fi 7]] 的 core PHY parameters：supported frequencies up to 7.125 GHz、channel bandwidths up to 320 MHz、4096QAM modulation、[[MLO]]。\n- 來源列出 [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的新 testing hurdles，包括 [[distributed resource units]]（dRU）與 [[unequal modulation]]（UEQM）。\n- dRU measurements 被描述為可驗證 device boosting uplink transmit power 與 improving connection reliability 的 effectiveness。\n- UEQM analysis 被描述為可評估 test device 是否能依 specified modulation coding scheme（MCS）combinations 正確 adapt modulation。\n- [[R&S CMX500]] 被定位為 modular、powerful one-box signaling tester，支援 [[LTE]]、[[NR]] SA/NSA、[[NR-NTN]]、[[NB-NTN]]、Direct-to-Cell（[[D2C]] / [[DTC]]）與 WLAN including [[Wi‑Fi 7]] and [[Wi‑Fi 8]]。\n- Press & media contact：[[Christian Mokry]]，PR Manager Test & measurement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+              },
+              "score": 3.56843
+             },
+             {
+              "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity › 原文未解的問題\n- 來源未標示新聞稿發布日期；raw frontmatter 只有 `created: 2026-09-11`。\n- 來源未標示 [[R&S CMX500]] 的 software version、CSW version、firmware version、option code、license requirement 或 hardware configuration。\n- 來源未標示 [[Wi-Fi 8 RF signaling tests]] 的 test case list、measurement uncertainty、pass/fail criteria、standard draft version 或 conformance applicability。\n- 來源未標示 [[Broadcom]] prototype next-generation WLAN device 的型號、chipset、reference design、driver / firmware version、frequency band support 或是否為 commercial product。\n- 來源未說明 first Wi‑Fi 8 RF signaling tests 的「first」比較範圍、驗證方法或第三方確認。\n- 來源未標示 [[IEEE 802.11bn]] final ratification 時程、draft 版本或引用的 IEEE 文件編號。\n- 來源未列出 dRU / UEQM 測試的完整 measurement parameters、MCS combinations、channel models、uplink power conditions 或 PSD limit details。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+              },
+              "score": 1.459727
+             },
+             {
+              "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity\n這是 [[Rohde & Schwarz]] 新聞稿，說明 [[R&S CMX500]] one-box signaling tester 已加入首批 [[Wi-Fi 8]] / [[IEEE 802.11bn]] RF signaling mode 測試能力，並將在 [[MWC Barcelona 2026]] 與 [[Broadcom]] prototype next-generation WLAN device 共同展示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+              },
+              "score": 0.884099
+             },
+             {
+              "text": "Wi-Fi 7 OTA MIMO stress testing › Wi-Fi 7 技術背景\n[[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]] 列出的 [[Wi-Fi 7]] / [[IEEE 802.11be]] throughput-related components 包含：\n\n| 技術項目 | 來源說法 |\n|---|---|\n| 320 MHz channel bandwidth | key component facilitating higher throughput |\n| up to 16 spatial streams | key component facilitating higher throughput |\n| 4096 QAM modulation | key component facilitating higher throughput |\n| [[MLO]] | key component；also key feature making multiple RF chains important |\n\n[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 提供 solution-level update：[[Bluetest]] earlier integrated WLAN testing capabilities 現在支援 [[Wi-Fi 7]] bandwidth up to **320 MHz**。\n\n[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 則以背景段落描述 [[IEEE 802.11be]] / [[Wi-Fi 7]] 是 next generation Wi-Fi technology，面向 extremely high data throughput、tens of gigabits per second、low latency、ultra-high-definition video streaming、virtual reality 與 augmented reality applications。\n\n以上皆為來源對 Wi-Fi 7 與整合測試能力的敘述，不等同於 [[R&S CMX500]]、[[R&S CMX500 OBT]]、[[Bluetest Flow]]、[[Bluetest]] RTS 或 [[EMITE]] chambers 對所有 feature combination 的完整規格保證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+              },
+              "score": 4.575356
+             },
+             {
+              "text": "Wi-Fi 7 OTA MIMO stress testing › 為什麼需要 OTA 與 multiple RF chains\n[[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]] 指出，在 WLAN devices development 期間，需要在 real-world conditions in signaling mode 下量測 antennas 以及 RF transmitter / receiver characteristics。由於 [[MLO]] 是 [[Wi-Fi 7]] key feature，提供 multiple RF chains 的 test environment 很關鍵。\n\n同一來源同時將 [[R&S CMX500]] 描述為 multi-technology multi-channel signaling tester；其 flexibility、support for multiple radio technologies 與 embedded IP test capabilities 使其可用於 broad range of Wi-Fi 7-specific tests。\n\n[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 進一步把 Wi-Fi 7 OTA 測試放入更廣的 [[4G 5G NR WLAN OTA MIMO stress testing]] 情境：同一 [[R&S CMX500 OBT]] / [[Bluetest]] RTS workflow 同時涵蓋 WiFi、[[LTE]]、5G SA / NSA 的 radio and antenna performance validation。\n\n[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 沒有使用 MIMO stress testing 一詞，也沒有提供 RF chains、spatial streams 或 chamber reflection model；它的貢獻是確認另一個 OTA chamber vendor [[EMITE]] 也將 [[R&S CMX500]] 整合到 [[Wi-Fi 7]] OTA measurement solution 中。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+              },
+              "score": 3.83334
+             },
+             {
+              "text": "Wi-Fi 7 OTA MIMO stress testing › 可追溯範圍與限制\n- 本頁目前由 [[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]]、[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 與 [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 支撐。\n- 本頁不推論 [[R&S CMX500]] 或 [[R&S CMX500 OBT]] 實際支援的 RF chains 數量、spatial streams 數量、MLO link combination、software option code 或 hardware configuration。\n- 本頁不推論 [[Bluetest RTS65]]、其他 Bluetest RTS chambers 或 [[EMITE]] OTA chambers 的完整規格、measurement uncertainty、校準流程或 certification applicability。\n- 本頁不把新聞稿中的 solution positioning 視為 conformance test coverage 或正式規格。\n- [[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 標示 [[Bluetest Flow]] v1.18，但未提供 release date、release notes、license requirement 或相容性矩陣。\n- [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 使用 full compliance with [[IEEE 802.11be]] 的語句，但未展開 compliance 的測試項目、標準版本、認證機構或是否等同正式 conformance / certification testing。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+              },
+              "score": 2.884978
+             },
+             {
+              "text": "Wi-Fi 7 OTA MIMO stress testing\n[[Wi-Fi 7 OTA MIMO stress testing]] 是在 over-the-air、signaling mode 與 realistic multipath RF conditions 下，對 [[IEEE 802.11be]] stations 與 access points 的 antenna、RF transmitter / receiver 與 multi-antenna performance 進行壓力測試的測試情境。新匯入的 [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 補充另一個 partner integration 視角：[[EMITE]] OTA chambers 可整合 [[R&S CMX500]] 最新測試能力，用於 [[Wi-Fi 7]] 與 [[5G RedCap]] device performance assessment。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+              },
+              "score": 1.837512
+             },
+             {
+              "text": "Wi-Fi 7 OTA MIMO stress testing › 來源中的測試架構\n[[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]]（來源未標示發布日期；raw created 2026-09-11）描述的架構為：\n\n- [[R&S CMX500]] one-box signaling tester 提供 integrated [[Wi-Fi 7]] test functionality。\n- [[Bluetest Flow]] control software / integrated test environment 整合 [[R&S CMX500]] 的 [[Wi-Fi 7]] test functionality。\n- [[Bluetest]] reverberation test systems（RTS），例如 [[Bluetest RTS65]]，提供 reverberation chamber OTA environment。\n- 測試對象為 [[IEEE 802.11be]] stations 與 access points。\n- 測試目標為 MIMO stress testing under realistic conditions。\n\n[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]]（來源未標示發布日期；raw created 2026-09-11）補充：\n\n- [[Bluetest]] expanded its earlier integrated testing capabilities for [[WLAN]] stations and access points（[[IEEE 802.11]] a/b/g/n/ac/ax/be）。\n- [[Wi-Fi 7]] 現在支援 bandwidth up to **320 MHz**。\n- 此能力與 [[R&S CMX500 OBT]]、[[Bluetest Flow]] v1.18 與 [[Bluetest]] RTS 組成 single tester and reverberation test system 的 integrated path。\n\n[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]]（來源未標示發布日期；raw created 2026-09-11）補充：\n\n- [[EMITE]] over-the-air chambers 可 combined with the latest sophisticated testing features of [[R&S CMX500]]。\n- 整合 enables support of [[LTE]]、[[NR FR1]]、[[NR FR2]]、full compliance with [[IEEE 802.11be]] and [[5G RedCap]]。\n- [[R&S CMX500]] 被描述為支援 non-cellular technologies including latest [[Wi-Fi 7]]，all in a single instrument。\n- [[EMITE]] customers obtain a comprehensive environment for accurately assessing performance of [[Wi-Fi 7]] as well as [[5G RedCap]] devices。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+              },
+              "score": 1.652098
+             },
+             {
+              "text": "Wi-Fi 7 網通設備代工製造 › 核心技術規格\n| 規格 / 技術 | 來源說法 | 日期 |\n|---|---|---|\n| [[IEEE 802.11be]] / [[Wi-Fi 7]] | 目前網通代工產業最重要的規格升級驅動力 | 2026-09-15 |\n| 320 MHz channel bandwidth | 僅限 6 GHz 頻段，是 Wi-Fi 6 的兩倍；來源稱台灣已於 2026 年全面開放 6 GHz 頻段 5925–6425 MHz | 2026-09-15 |\n| 4096-QAM / 4K-QAM | 在訊號品質良好、短距離情境下可再提升約 20% 傳輸效率 | 2026-09-15 |\n| [[MLO]] | Multi-Link Operation，多鏈路聚合；允許裝置同時使用 2.4 GHz、5 GHz、6 GHz 中的多個頻段 | 2026-09-15 |\n| STR | MLO 的同時收發實作方式；來源以 [[Qualcomm Networking Pro 系列]]為代表 | 2026-09-15 |\n| eMLSR | MLO 的切換式收發實作方式；來源以 [[Intel BE200]]為代表 | 2026-09-15 |\n| Thermal throttling | 高階路由器晶片發熱量提高，來源稱溫度超過約 85°C 即可能觸發降階，4K-QAM 可能降回 1024-QAM | 2026-09-15 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 網通設備代工製造.md"
+              },
+              "score": 4.127936
+             },
+             {
+              "text": "Wi-Fi 7 網通設備代工製造\n[[Wi-Fi 7 網通設備代工製造]]是 2026 年台灣無線通訊代工製造市場中，以 [[IEEE 802.11be]]、6 GHz、320 MHz channel bandwidth、[[MLO]] 與電信商 CPE / FWA 升級為主要驅動的網通 ODM / OEM 主題。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 網通設備代工製造.md"
+              },
+              "score": 2.241595
+             },
+             {
+              "text": "Wi-Fi 7 網通設備代工製造 › 台灣 ODM / OEM 廠商版圖\n| 廠商 | 主力產品線 | 2026 年來源說法 | 受惠程度 | 日期 |\n|---|---|---|---|---|\n| [[智易]] / Alpha Networks | Wi-Fi 7 路由器、5G FWA CPE、10G PON、Cable Modem | 2025 年營收 529.76 億元，年增 8%；Wi-Fi 7 出貨占比約 30% | 高，電信直供 | 2026-09-15 |\n| [[智邦]] / Accton | 高速交換器、雲端網通設備、低軌衛星回傳設備 | 2026 年 5 月合併營收 286.23 億元，年增逾 50%，受惠 AI 基礎建設與衛星訂單 | 高，AI + 衛星雙引擎 | 2026-09-15 |\n| [[中磊]] / Gemtek | 電信 CPE、5G 小型基地台、Wi-Fi 系統 | 電信直供比重提升，產品組合朝高階 FWA / Wi-Fi 7 升級 | 高，電信直供 | 2026-09-15 |\n| [[啟碁]] / Wistron NeWeb | Wi-Fi 路由器、5G / 低軌衛星終端、基地台 | 切入衛星通訊終端設備，具相位陣列天線製造能力 | 高，衛星 + 網通雙線 | 2026-09-15 |\n| [[建漢]] / Compal Broadband Networks | Cable / DSL 寬頻路由器 ODM | 北美大廠仍為主要客戶，逐步拓展歐洲、日本市場 | 中度受惠 | 2026-09-15 |\n| [[友訊]] / D-Link | 家用 / 電競路由器、Wi-Fi 6 / 7 分享器 | 2026 年第一季營收約 34.4 億元，部分產品線持續在台生產 | 中度受惠 | 2026-09-15 |\n| [[合勤控]] / Zyxel | 企業級網通設備、資安整合閘道器 | 家用產品線多已下放中國生產，高階企業產品保留台灣產線 | 中度受惠 | 2026-09-15 |\n| [[正文]] / Gemtek / AboCom | 低軌衛星用戶端 CPE、企業通訊設備、陣列天線關鍵組件 | 天線端研發中，尚未大量出貨；同時佈局衛星終端 | 中度受惠，成長中 | 2026-09-15 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 網通設備代工製造.md"
+              },
+              "score": 2.133593
+             },
+             {
+              "text": "Wi-Fi 7 網通設備代工製造 › 商業模式與競爭結構\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）稱下游客戶集中於品牌商與全球電信營運商，品牌商例子包含 [[Netgear]]、[[Linksys]]、[[TP-Link]]。\n- 同一來源稱電信業具寡占特性、服務差異化程度低，容易引發價格戰。\n- 同一來源稱因美國對中國網通品牌的禁令與小型基地台需求增加，台灣網通廠逐步從透過品牌商供貨轉型為直接供應電信營運商。\n- 同一來源稱 [[智易]]、[[中磊]]、[[啟碁]]在直供電信商轉型中受惠較明顯。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 網通設備代工製造.md"
+              },
+              "score": 1.15875
+             },
+             {
+              "text": "Wi-Fi 7 網通設備代工製造 › 相關來源\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]] — 2026-09-15 的台灣無線通訊代工製造市場分析，第二章整理 Wi-Fi 7 技術規格、台灣網通 ODM / OEM 廠商版圖與商業模式。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 網通設備代工製造.md"
+              },
+              "score": 0.264181
+             },
+             {
+              "text": "Wi-Fi 7 網通設備代工製造 › 風險與限制\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）稱市面上仍存在大量僅雙頻、未支援 6 GHz 的低規格 Wi-Fi 7 產品，可能稀釋真正高階產品的 ASP 與毛利率提升空間。\n- 同一來源稱高階路由器晶片發熱與 thermal throttling 對散熱設計、產線良率與品保提出更高要求。\n- 同一來源稱投資與經營觀察重點包含電信商 CapEx 週期、庫存水位、記憶體與 PCB 原物料成本能否轉嫁下游，以及 Wi-Fi 7 滲透率是否真正推升 ASP 與毛利率。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 網通設備代工製造.md"
+              },
+              "score": 0.252939
+             },
+             {
+              "text": "Wi-Fi 7 網通設備代工製造 › 來源中的說法\n- [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]]（2026-09-15）將既有 [[Wi-Fi]] 網通設備代工列為台灣無線通訊代工產業的雙引擎之一。\n- 同一來源稱 2026 年台灣網通代工受惠於 [[Wi-Fi 7]] 規格升級、電信商 [[5G FWA]] 與寬頻升速換機潮持續放量。\n- 同一來源稱台灣是全球寬頻路由器、電信級 [[CPE]] 與企業級網通設備的主要生產基地，營運模式包含 [[OBM]]、[[OEM]]、[[ODM]]與近年興起的直供電信商模式。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 網通設備代工製造.md"
+              },
+              "score": 0.246015
+             },
+             {
+              "text": "Wi-Fi 7 網通設備代工製造 › 可追溯範圍\n- 本頁只支持 [[2026台灣無線通訊代工製造產業_技術規格與市場分析報告]] 中的 2026-09-15 報告說法。\n- 本頁不把受惠程度改寫為投資建議、評級、採購優先順序或 R&S 往來關係。\n- 本頁不自行補上各廠商的完整財報、營收期間、客戶合約、出貨量、市占率或產品料號。\n- 來源對 6 GHz 開放、營收數字、Wi-Fi 7 出貨占比與財務資料未提供逐項引用，本頁只記錄來源說法。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 網通設備代工製造.md"
+              },
+              "score": 0.226625
+             },
+             {
+              "text": "R&S CMX500 › NR FR1\n依 [[CMX500_Features_CSW9-20-0_en_32]]，R&S CMX-KM600 是 frequency range 1 對 NR uplink signals 執行任何 TX tests 的必要 option。NR FR1 uplink measurements 包含 multi-evaluation、PRACH、SRS、TPC measurement。Multi-evaluation 支援 NR channel bandwidth **3 MHz 到 100 MHz**，可分析 FDD 與 TDD signals、NR standalone signals 與 intraband contiguous EN-DC signals。\n\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，R&S CMX-KM600 option 的 5G NR analyzer 條件為 FR1、SCS 30 kHz、16QAM、temperature range +15 °C to +35 °C；input level –25 dBm to –10 dBm RMS、bandwidth 100 MHz 時 EVM **< 0.5 %**。Frequency measurement uncertainty：**< 20 Hz + drift of timebase**；相對於同一台 CMX500 device 的 downlink signal 進行 frequency error measurements 時，uncertainty 符合 [[3GPP TS 38.521-1]] V18.5.0。\n\nR&S CMX-KW601 option 的 5G NR generator 條件：5G NR PDSCH、full allocation、SCS 30 kHz / 60 kHz、modulation 64QAM、PAR 11.8 dB、temperature +15 °C to +35 °C；ports RF Com 1、RF Com 2、RF Out 1 to RF Out 4；output level –5 dBm、bandwidth 100 MHz 時 EVM **< 0.5 %**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 30,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 16.648341
+             },
+             {
+              "text": "R&S CMX500 › ARB 與 FFT spectrum analyzer\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n- Modulation source：arbitrary waveform generator（ARB）。\n- ARB 先決條件：[[R&S CMX-B500A]] 或 [[R&S CMX-B600B]]，以及 [[R&S CMX-KW601]] options。\n- ARB with [[R&S CMX-B600B]]：memory size **16 Gbyte**；I/Q word length **32 bit**；marker word length **8 bit**；sample length **up to 1.5 Gsample**；maximum sample rate **1.25 GHz**；maximum possible RF bandwidth **1 GHz**，取決於 arbitrary waveform file。\n- FFT spectrum analyzer frequency span：10 MHz、20 MHz、40 MHz、160 MHz、250 MHz；with [[R&S CMX-B600B]] RF unit in broadband mode **500 MHz**；[[R&S CMX-B500A]] IF unit only **1 GHz**。\n- FFT length：1k、2k、4k、8k、16k；detector：peak、RMS。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 12.309063
+             },
+             {
+              "text": "R&S CMX500 › Spectrum analysis\n依 [[CMX500_Features_CSW9-20-0_en_32]]，R&S CMX-KM140 提供 spectrum analysis options，包含 frequency sweep measurement（power vs frequency）與 zero span measurement（power vs time）。General settings 包含 external attenuation **-50 dB 至 90 dB**、sweep count **1 至 100**、sweep points **101 至 100001**；frequency sweep RBW **100 Hz 至 10 MHz**，VBW **10 Hz 至 10 MHz**。\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 另提供 FFT spectrum analyzer span 與 FFT length，詳見 ARB 與 FFT spectrum analyzer 章節。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 34,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 10.282689
+             },
+             {
+              "text": "R&S CMX500 › WLAN\n依 [[CMX500_Features_CSW9-20-0_en_32]]，R&S CMX-KM350 為 WLAN measurements necessary option，支援 802.11a/b/g/n/ac。R&S CMX-KM351 支援 802.11ax 且需要 R&S CMX-KM350；R&S CMX-KM352 支援 802.11be 且需要 R&S CMX-KM351；R&S CMX-KM353 支援 802.11bn 且需要 R&S CMX-KM352 與 R&S CMX-KM351。R&S CMX-KM360 提供 True MIMO measurements，2x2 MIMO 適用於 802.11n、802.11ac、802.11ax、802.11be、802.11bn signals。\n\n依 [[CMX500_specs_en_5216-4127-22_v1100]] 的 analyzer 摘錄：\n\n- R&S CMX-KM350 WLAN IEEE 802.11a/b/g/n/ac analyzer：input level –25 dBm to –10 dBm RMS；bandwidth 20/22/40/160 MHz；EVM **< –46 dB**，條件包含 channel estimation payload、burst length > 16 symbols、average > 20 packets、+15 °C to +35 °C。\n- R&S CMX-KM351 WLAN IEEE 802.11ax analyzer：input level –25 dBm to –10 dBm RMS；bandwidth 160 MHz；EVM **< –46 dB**。\n- R&S CMX-KM352 WLAN IEEE 802.11be analyzer：input level –25 dBm to –10 dBm RMS；bandwidth 160 MHz：**–49 dB meas.**；bandwidth 320 MHz：**–47 dB meas.**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 33,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 9.667212
+             },
+             {
+              "text": "R&S CMX500 › IF analyzer\n| 項目 | 規格 |\n|---|---|\n| Connector | 3 × IF In，port 1、port 2、port 3，SMA |\n| Frequency range | 4 GHz to 20 GHz，inclusive modulation bandwidth |\n| Frequency resolution | < 0.1 Hz |\n| Absolute maximum | 0 V DC、+25 dBm |\n| Expected nominal power setting range | 4 GHz to 20 GHz，PEP，for ADC full scale：–5 dBm to +15 dBm |\n| Level uncertainty | +15 °C to +35 °C、no overranging：4 GHz to 20 GHz，P > –45 dBm RMS：< 1.5 dB，< 0.5 dB typ. |\n| Bandwidth | up to 1 GHz |\n| IF In to IF In isolation | –30 dB nom. |\n| Harmonic response | second harmonic > 45 dB nom.；third harmonic > 70 dB nom. |\n\nDisplayed average noise level 條件：+15 °C to +35 °C、ENP < –35 dBm。4 GHz to 16 GHz，except 9.0 GHz to 12.5 GHz：**< –152 dBm (1 Hz)**；16 GHz to 17 GHz：**< –150 dBm (1 Hz)**。\n\nIF analyzer EVM 條件：5G NR PUSCH、channel bandwidth 100 MHz、full allocation、SCS 60 kHz / 120 kHz、modulation 64QAM、PAR 11.8 dB、port 1、+15 °C to +35 °C、within ±5 °C from last I/Q alignment procedure temperature。EVM：4 GHz to 6 GHz、P –38 dBm to 0 dBm RMS：**< –38 dB meas.**；6 GHz to 14 GHz、P –32 dBm to 0 dBm RMS：**< –38 dB meas.**；14 GHz to 17 GHz：**< –38 dB meas.**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 9.504523
+             },
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 8.595271
+             },
+             {
+              "text": "R&S CMX500 › IF generator\n| 項目 | 規格 |\n|---|---|\n| Connector | 3 × IF Out，port 1、port 2、port 3，SMA |\n| Frequency range | 6 GHz to 20 GHz，inclusive modulation bandwidth |\n| Frequency resolution | < 0.1 Hz |\n| Frequency uncertainty | same as timebase + frequency resolution |\n| Frequency settling time | < 300 µs |\n| Maximum reverse power | 0 V DC、+25 dBm |\n| Output level range | 6 GHz to 20 GHz，PEP，for best SNR/IMD performance：–20 dBm to +2 dBm；overrange up to +10 dBm |\n| Output level resolution | 0.1 dB |\n| Output level uncertainty | +15 °C to +35 °C、no overranging、within ±5 °C from last level alignment procedure temperature：6 GHz to 20 GHz < 1.5 dB；< 0.5 dB typ. |\n| Output level repeatability | after 1 h warm-up time、same level and frequency、no temperature change、insignificant time change：< 0.1 dB |\n| IF ports isolation | IF In x to IF Out y：–60 dB nom.；IF Out x to IF Out y：–30 dB nom. |\n| Second harmonics attenuation | 6 GHz to 20 GHz：> 35 dB nom. |\n| Third harmonics attenuation | 6 GHz to 20 GHz：> 45 dB nom. |\n\nIF generator EVM 條件：5G NR PDSCH、channel bandwidth 100 MHz、full allocation、SCS 60 kHz / 120 kHz、modulation 64QAM、temperature +15 °C to +35 °C、within ±5 °C from last level alignment procedure temperature、PAR 11.8 dB。EVM 摘錄：6 GHz to 10 GHz、P –28 dBm to –10 dBm RMS：**< –40 dB meas.**；10 GHz to 14 GHz：**< –37 dB meas.**；14 GHz to 17 GHz、P –26 dBm to –10 dBm RMS：**< –37 dB meas.**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 8.411289
+             },
+             {
+              "text": "R&S CMX500 › R&S CMX-B200A accelerator unit\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX-B200A]] 提供 accelerated digital signal processing capabilities，並包含 two high-speed digital I/Q interfaces：\n\n| 項目 | 規格 |\n|---|---|\n| Ports | DIG. IQ HS 1、DIG. IQ HS 2 |\n| Direction | full duplex |\n| Connector | QSFP+ |\n| Level | CML |\n| Data rate | 40 Gbps |\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，每個 accelerator unit 可 fading 的最大 cells 數包含：1 NR cell 8x8 MIMO；1 NR cell 16x4 MIMO, 50 MHz bandwidth；2 NR cells 4x4 MIMO；4 NR cells 2x2 MIMO；2 LTE cells 8x4 MIMO；4 LTE cells 2x2 或 4x4 MIMO。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 8.027987
+             },
+             {
+              "text": "R&S CMP180 › Selected measurement performance\n依 [[CMP180 Specifications Version 08.00]]：\n\n| Option | 功能 | 規格摘錄 |\n|---|---|---|\n| R&S CMP-KM600 | 5G NR analyzer | EVM FR1 bandwidth 100 MHz, SCS 30 kHz, 16QAM, level > –20 dBm：< 0.5% |\n| R&S CMP-KM305 | UWB production measurements | center frequency offset < 0.005 ppm；chip clock error < 0.02 ppm；NRMSE < 5%；relative AVG pulse level < 0.1 dB |\n| R&S CMP-KM351 | WLAN IEEE 802.11ax analyzer | bandwidth 160 MHz < –46 dB meas.；with R&S CMP-KB805 < –49 dB meas. |\n| R&S CMP-KW351 | WLAN IEEE 802.11ax generator | bandwidth 160 MHz < –45 dB |\n| R&S CMP-KM352 | WLAN IEEE 802.11be analyzer | 160 MHz < –46 dB meas.；with R&S CMP-KB805 < –49 dB meas.；320 MHz < –46 dB meas.；320 MHz with R&S CMP-KB805 < –48 dB meas. |\n| R&S CMP-KW352 | WLAN IEEE 802.11be generator | 160 MHz < –45 dB；320 MHz < –43 dB |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 8.971618
+             },
+             {
+              "text": "R&S CMP180 › Measurement options\n| Designation | Type | Order no. |\n|---|---|---|\n| NR FR1 measurements, multi-carrier | R&S CMP-KM602 | 1212.2630.02 |\n| NR FR1 measurements, MIMO | R&S CMP-KM604 | 1212.3189.02 |\n| NR C-V2X measurements, PC5 | R&S CMP-KM670 | 1212.2324.02 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 8.336263
+             },
+             {
+              "text": "R&S CMP180 › Measurement options\n| Designation | Type | Order no. |\n|---|---|---|\n| Non-cellular measurements pack 1 | R&S CMP-PKM30 | 1212.3689.02 |\n| Cellular measurements pack 1 | R&S CMP-PKM40 | 1212.3695.02 |\n| Advanced path loss measurements（serial number ≥ 102160） | R&S CMP-KM115 | 1212.2201.02 |\n| Advanced path loss measurements（serial number < 102160） | R&S CMP-U115 | 1212.4291.02 |\n| Spectrum analyzer | R&S CMP-KM140 | 1212.4410.02 |\n| Signal analysis base software | R&S CMP-KM150 | 1212.3972.02 |\n| Signal analysis, digital | R&S CMP-KM152 | 1212.3989.02 |\n| NB-IoT measurements | R&S CMP-KM250 | 1212.2218.02 |\n| LP-IoT measurements, Zigbee | R&S CMP-KM280 | 1212.2224.02 |\n| Ultra-wideband production measurements | R&S CMP-KM305 | 1212.4304.02 |\n| UWB IEEE 802.15.4ab production measurements | R&S CMP-KM306 | 1212.4691.02 |\n| Bluetooth measurements, Classic / Low Energy up to Rel. 5.3 | R&S CMP-KM310 | 1212.2230.02 |\n| Bluetooth HDT measurements Rel. 7.0 | R&S CMP-KM317 | 1212.4591.02 |\n| WLAN IEEE 802.11a/b/g/n/ac SISO measurements | R&S CMP-KM350 | 1212.2247.02 |\n| WLAN IEEE 802.11ax SISO measurements | R&S CMP-KM351 | 1212.2253.02 |\n| WLAN IEEE 802.11be SISO measurements | R&S CMP-KM352 | 1212.2260.02 |\n| WLAN true MIMO 2x2 and 4x4 measurements | R&S CMP-KM360 | 1212.2276.02 |\n| WLAN true MIMO 5x5 and 6x6 measurements | R&S CMP-KM361 | 1212.4685.02 |\n| WLAN packet error rate acknowledgement measurements | R&S CMP-KM365 | 1212.4562.02 |\n| GSM measurements | R&S CMP-KM420 | 1212.2282.02 |\n| WCDMA measurements | R&S CMP-KM440 | 1212.2299.02 |\n| CDMA2000 1xRTT measurements | R&S CMP-KM480 | 1212.2730.02 |\n| LTE measurements | R&S CMP-KM500 | 1212.2301.02 |\n| LTE C-V2X measurements, PC5 | R&S CMP-KM570 | 1212.2318.02 |\n| NR FR1 measurements, single carrier | R&S CMP-KM600 | 1212.2101.02 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 8.238575
+             },
+             {
+              "text": "R&S CMP180 › ARB modulation source\n依 [[CMP180 Specifications Version 08.00]]：\n\n| 項目 | 規格 |\n|---|---|\n| Memory size | 8 Gbyte/channel |\n| Word length | I/Q 32 bit；marker 8 bit |\n| Sample length | up to 800 Msample |\n| Maximum sample rate | 312.5 MHz；with R&S CMP-K185：625 MHz |\n| Maximum possible RF bandwidth | 250 MHz；with R&S CMP-K185：500 MHz |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 6.677554
+             },
+             {
+              "text": "R&S CMP180 › Base unit 與硬體配置\n依 [[CMP180 Specifications Version 08.00]] ordering information：\n\n| Designation | Type | Order no. |\n|---|---|---|\n| Radio communication tester, including power cables and getting started guide | CMP180 | 1201.0002K18 |\n| CMP180 basic assembly | R&S CMP-PB18I | 1212.1986.10 |\n| Single instrument interface | R&S CMP-B40J | 1212.3372.11 |\n| Multi-instrument interface | R&S CMP-B41J | 1212.3389.11 |\n| RF unit 250（basic function, 6 GHz/250 MHz） | R&S CMP-B802I | 1212.3408.10 |\n| RF unit 500（basic function, 6 GHz/250 MHz） | R&S CMP-B805I | 1212.3414.10 |\n| Performance uprating for RF unit 500 | R&S CMP-KB805 | 1212.3866.02 |\n\n依 [[CMP180 Features and Functions Version 09]] 的 RF unit 描述：\n\n- **R&S CMP-B802x**：僅支援 **250 MHz bandwidth**。\n- **R&S CMP-B805x**：支援 **250 MHz bandwidth**，可用 **R&S CMP-K185** 啟用 **500 MHz**。\n\n依 [[CMP180 Specifications Version 08.00]]：\n\n- RF generator/analyzer no. 1：**8 × SnapN**，RF input/output to DUT，RF 1.1 to RF 1.8。\n- RF generator/analyzer no. 2：**8 × SnapN**，RF input/output to DUT，RF 2.1 to RF 2.8；requires **R&S CMP-K102** or **R&S CMP-K105** software license key。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 6.607598
+             },
+             {
+              "text": "R&S CMP180 › 產品定位\n[[R&S CMP180]] 是 Radio Communication Tester。依 [[CMP180 Features and Functions Version 09]]，文件涵蓋 global options、Bluetooth、CDMA2000、GSM、LP-IoT、LTE、NB-IoT、NR、spectrum analysis、UWB、WCDMA、WLAN、[[R&S VSE]] options 與 ordering information。\n\n依 [[CMP180 Specifications Version 08.00]]，CMP180 支援 simultaneous receiver and transmitter testing，並提供 RF generator/analyzer no. 1 與可選 RF generator/analyzer no. 2 的多埠 RF 測試架構。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 5.521754
+             },
+             {
+              "text": "R&S CMP180 › Receiver test functions\n- RF generator signal is split and forwarded to 8 output ports each。\n- every output can be switched off separately。\n- collective output level setting for connectors RF 1.1 to RF 1.8 and RF 2.1 to RF 2.8。\n- frequency-dependent attenuation（FDA）table for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 4.805676
+             },
+             {
+              "text": "R&S CMP180 › Frequency range 與 bandwidth\n依 [[CMP180 Features and Functions Version 09]]：\n\n- 未安裝 **R&S CMP-K168** 時 maximum 為 **6 GHz**。\n- **R&S CMP-B802B/H**、**R&S CMP-B805B/H** 最高 **8 GHz**。\n- **R&S CMP-B802I**、**R&S CMP-B805I and higher** 最高 **8 GHz TX / 8.25 GHz RX**。\n\n依 [[CMP180 Specifications Version 08.00]]：\n\n- **R&S CMP-K168** 在 ordering information 中定義為 **Extended frequency range, from 6 GHz to 8 GHz**。\n- RF generator 表格列出 frequency range **400 MHz to 8000 MHz**，並標示 **6000 MHz to 8000 MHz** requires **R&S CMP-K168**。\n- RF generator 搭配 **R&S CMP-K168** 與 **R&S CMP-B805I option** 的 overrange 為 **6000 MHz to 8250 MHz**，maximum center frequency **8000 MHz**。\n- RF analyzer 表格列出 frequency range **400 MHz to 8000 MHz**，並標示 **6000 MHz to 8000 MHz** requires **R&S CMP-K168**。\n- RF analyzer 搭配 **R&S CMP-K168** 與 **R&S CMP-B805I option** 的 overrange 為 **6000 MHz to 8500 MHz**，maximum center frequency **8250 MHz**。\n- IF bandwidth：基本 **250 MHz**；requires **R&S CMP-K185** 為 **500 MHz**。\n- **R&S CMP-K185** ordering information：only available if **R&S CMP-B805I or higher option** is installed。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 4.804781
+             },
+             {
+              "text": "R&S SMW200A › 產品定位與架構\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]（Version 31.00，May 2026）與 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（Version 06.00，May 2024）：\n\n- [[R&S SMW200A]] 可從 single-path vector signal generator 擴充到 multichannel [[MIMO]] receiver tester。\n- 支援最多 `8` 個 signal sources 與最多 `64` 個 fading channels。\n- 可連接 [[R&S SGT100A]] signal generator modules，提供最多 `8` 條 RF paths。\n- 最多可在 `2` 個 internal baseband modules 上配置 `8` 個 baseband generators，具 real-time coder 與 ARB。\n- 單機可配置最多兩個 internal RF paths：RF path A 為 mandatory，RF path B 為 optional second RF path。\n- Baseband section 分成 standard baseband section 與 wideband baseband section；standard baseband 最高 `160 MHz` RF modulation bandwidth，wideband baseband 最高 `2 GHz` RF modulation bandwidth。\n- 可選 integrated fading section，channel emulation bandwidth 最高 `800 MHz`；最多可安裝 `4` 個 fading modules，提供最多 `64` 個 logical faders。\n- 單一儀器可實作 MIMO fading scenarios：`2x2`、`3x3`、`4x4`、`8x4`、`4x8`、`2x4x4`。\n- Path-specific、baseband-specific 與 fading/MIMO software options 採 floating license concept；若同一 feature 需同時在兩個 paths 或兩個 baseband generators 使用，通常需安裝兩份對應 option。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 11.112414
+             },
+             {
+              "text": "R&S SMW200A › Signal routing and baseband main module\n| Code | Name / description | Order No. | 原文說明 / 限制 |\n|---|---|---:|---|\n| `R&S®SMW-B13` | Signal routing and baseband main module，one I/Q path to RF section | `1413.2807.02` | Standard baseband section；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13T` | Signal routing and baseband main module，two I/Q paths to RF section | `1413.3003.02` | Standard baseband section；若要安裝 RF path B 需 `B13T` 或 `B13XT`；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13XT` | Wideband baseband main module，two I/Q paths to RF section | `1413.8005.02` | Wideband baseband section；RF modulation bandwidth up to `2 GHz`。 |\n\n- Standard baseband section：`R&S®SMW-B13` 或 `R&S®SMW-B13T`；RF modulation bandwidth 最高 `160 MHz`；可安裝 `R&S®SMW-B10` standard baseband generator 與 `R&S®SMW-B14` fading simulator。\n- Wideband baseband section：`R&S®SMW-B13XT`；RF modulation bandwidth 最高 `2 GHz`；可安裝 `R&S®SMW-B9` / `R&S®SMW-B9F` wideband baseband generator 與 `R&S®SMW-B15` fading simulator and signal processor。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 8.051614
+             },
+             {
+              "text": "R&S SMW200A\n[[R&S SMW200A]] 是 Rohde & Schwarz 的 vector signal generator；依 `R&S®SMW200A Vector Signal Generator Specifications` `Version 31.00`（`May 2026`），RF path A 可覆蓋 `100 kHz to 67 GHz`，RF path B 可覆蓋至 `44 GHz`，並可由 single-path vector signal generator 擴充到 multichannel MIMO receiver tester（來源：[[SMW200A_specs_en_3606-8037-22_v3100]]）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 8.01398
+             },
+             {
+              "text": "R&S SMW200A › RF path A frequency options\n| Code | Frequency range | Order No. | 原文說明 / 限制 |\n|---|---|---:|---|\n| `R&S®SMW-B1003` | `100 kHz to 3 GHz` | `1428.4700.02` | Includes electronic attenuator。 |\n| `R&S®SMW-B1006` | `100 kHz to 6 GHz` | `1428.4800.02` | Includes electronic attenuator。 |\n| `R&S®SMW-B1007` | `100 kHz to 7.5 GHz` | `1428.7700.02` | Includes electronic attenuator。 |\n| `R&S®SMW-B1012` | `100 kHz to 12.75 GHz` | `1428.4900.02` | Includes electronic attenuator。 |\n| `R&S®SMW-B1020` | `100 kHz to 20 GHz` | `1428.5107.02` | Includes mechanical step attenuator。 |\n| `R&S®SMW-B1031` | `100 kHz to 31.8 GHz` | `1428.5307.02` | May 2024 configuration guide 與 May 2026 specifications 皆明列完整 order number；includes mechanical step attenuator。 |\n| `R&S®SMW-B1040` | `100 kHz to 40 GHz` | `1428.8506.02` | Includes mechanical step attenuator。 |\n| `R&S®SMW-B1040N` | `100 kHz to 40 GHz`，I/Q modulation bandwidth and minimum pulse width limited | `1428.8606.02` | Includes mechanical step attenuator。 |\n| `R&S®SMW-B1044` | `100 kHz to 44 GHz` | `1428.5507.02` | 只能與 `R&S®SMW-B2044` 組合；includes mechanical step attenuator。 |\n| `R&S®SMW-B1044N` | `100 kHz to 44 GHz`，I/Q modulation bandwidth and minimum pulse width limited | `1428.5407.02` | 只能與 `R&S®SMW-B2044N` 組合；includes mechanical step attenuator。 |\n| `R&S®SMW-B1044O` | `100 kHz to 44 GHz`，I/Q modulation bandwidth and minimum pulse width limited | `1442.0144.02` | 只能與 `R&S®SMW-B2044O` 組合；不相容 `R&S®SMW-B13` / `R&S®SMW-B13T`。 |\n| `R&S®SMW-B1056` | `100 kHz to 56 GHz` | `1438.9357.02` | Includes mechanical step attenuator。 |\n| `R&S®SMW-B1056N` | `100 kHz to 56 GHz`，I/Q modulation bandwidth and minimum pulse width limited | `1438.9457.02` | Includes mechanical step attenuator。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 6.123873
+             },
+             {
+              "text": "R&S SMW200A › 主要 RF performance（Version 31.00，May 2026）\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]：\n\n- Frequency range：依 RF path frequency option，RF path A 最高 `100 kHz to 67 GHz`；RF path B 最高 `100 kHz to 44 GHz`。\n- Overrange：`67 GHz to 72 GHz`。\n- Resolution of setting：`0.001 Hz`。\n- Resolution of synthesis：`0.053 nHz nominal`，條件 `f = 1 GHz`。\n- Frequency setting time：依 frequency option 為 `< 1.2 ms` 至 `< 1.8 ms`；with `R&S®SMW-B711/-B721` 為 `< 4.0 ms`。條件包含 GUI update stopped、I/Q optimization mode fast、after IEC/IEEE bus delimiter、HUMS off。\n- Frequency setting time in list mode：依 frequency option為 `< 0.8 ms` 至 `< 1.4 ms`；with `R&S®SMW-B711/-B721`、run mode live 為 `< 4.0 ms`。\n- Level setting range：`100 kHz ≤ f < 1 MHz` 為 `–145 dBm to +8 dBm`；`1 MHz ≤ f < 3 MHz` 為 `–145 dBm to +13 dBm`；`3 MHz ≤ f ≤ 67 GHz` 為 `–145 dBm to +30 dBm`。\n- Standard performance SSB phase noise 條件：CW，carrier offset `20 kHz`，measurement bandwidth `1 Hz`，level `10 dBm` 或 maximum specified output power 兩者較低者；`f = 1 GHz` 為 `< –134 dBc`，typ. `–140 dBc`。\n- `R&S®SMW-B711/-B721` ultra low phase noise 在 `1 GHz`、`10 kHz offset` 下為 `–144 dBc`，typ. `–150 dBc`；在 `67 GHz`、`10 kHz offset` 下為 `–105 dBc`，typ. `–111 dBc`。\n- Pulse modulation 需 `R&S®SMW-K22`；一般 on/off ratio `> 80 dB`，部分高頻條件例外為 `> 65 dB`。\n- Pulse rise/fall time（10 % / 90 % of RF amplitude）：低頻 frequency options fast transition `< 10 ns`；多數 20 GHz 以上 options fast transition `< 15 ns`；smoothed transition 多數條件 `< 200 ns`。\n- Internal baseband I/Q、wideband baseband (`R&S®SMW-B13XT`)、I/Q wideband on：`f > 2.5 GHz` 時 `±1 GHz`；RF modulation bandwidth 可達 `2 GHz`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 5.947635
+             },
+             {
+              "text": "R&S SMW200A › RF、baseband enhancement 與 noise options\n| Code | Name / description | Order No. | 原文 requires / 重點 |\n|---|---|---:|---|\n| `R&S®SMW-K544` | User-defined frequency response correction | `1414.3707.02` | Requires `R&S®SMW-B13/-B13T/-B13XT`。 |\n| `R&S®SMW-K546` | Digital Doherty | `1414.6487.02` | Requires two `K541`、two baseband generators、two RF paths、`R&S®SMW-B90`。 |\n| `R&S®SMW-K548` | Crest factor reduction | `1414.6641.02` | Requires `R&S®SMW-B9/-B10`。 |\n| `R&S®SMW-K551` | Slow I/Q | `1413.9724.02` | Requires `B10` + `K18` 或 `B9` + `K19`。 |\n| `R&S®SMW-K555` | Bandwidth extension | `1414.6229.02` | Requires two `B9`、two `K527`；clock rate up to `4.8 GHz`；bandwidth up to `4 GHz`。 |\n| `R&S®SMW-K575` | RF linearization | `1434.8379.02` | Requires at least one `B10` or `B9`。 |\n| `R&S®SMW-K556` | Customized digital input | `1434.8310.02` | 每個 option 需一個 `B9`；HS DIG I/Q；data rate `50 Gbit/s`。 |\n| `R&S®SMW-K810` | Enhanced noise generation | `1414.6341.02` | Requires `R&S®SMW-K62`。 |\n| `R&S®SMW-K811` | Notched signals | `1414.6364.02` | Requires `B10` or `B9`；最多 `25` 個 band-stop filters。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 20,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 5.827994
+             },
+             {
+              "text": "R&S SMW200A › RF path B frequency options\nRF path B 是 optional second RF path。若 RF path B 配備 `R&S®SMW-B20xx` frequency option，baseband main module 必須安裝 `R&S®SMW-B13T` 或 `R&S®SMW-B13XT`。\n\n| Code | Frequency range | Order No. | 原文說明 / requires |\n|---|---|---:|---|\n| `R&S®SMW-B2003` | `100 kHz to 3 GHz` | `1428.5707.02` | Requires `R&S®SMW-B13T` or `R&S®SMW-B13XT`；includes electronic attenuator。 |\n| `R&S®SMW-B2006` | `100 kHz to 6 GHz` | `1428.5807.02` | Requires `R&S®SMW-B13T` or `R&S®SMW-B13XT`；includes electronic attenuator。 |\n| `R&S®SMW-B2007` | `100 kHz to 7.5 GHz` | `1428.7900.02` | Requires `R&S®SMW-B13T` or `R&S®SMW-B13XT`；includes electronic attenuator。 |\n| `R&S®SMW-B2012` | `100 kHz to 12.75 GHz` | `1438.8950.02` | Requires `R&S®SMW-B13T` or `R&S®SMW-B13XT`；configuration guide 說 requires `R&S®SMW-B94L`；includes electronic attenuator。 |\n| `R&S®SMW-B2020` | `100 kHz to 20 GHz` | `1428.6103.02` | Requires `R&S®SMW-B13T` or `R&S®SMW-B13XT`；includes mechanical step attenuator。 |\n| `R&S®SMW-B2031` | `100 kHz to 31.8 GHz` | `1438.8750.02` | Requires `R&S®SMW-B13T` or `R&S®SMW-B13XT`；includes mechanical step attenuator。 |\n| `R&S®SMW-B2044` | `100 kHz to 44 GHz` | `1438.8350.02` | Requires `R&S®SMW-B13T` or `R&S®SMW-B13XT`；includes mechanical step attenuator。 |\n| `R&S®SMW-B2044N` | `100 kHz to 44 GHz`，I/Q modulation bandwidth and minimum pulse width limited | `1438.8550.02` | Requires `R&S®SMW-B13XT` and `R&S®SMW-B94L`。 |\n| `R&S®SMW-B2044O` | `100 kHz to 44 GHz`，I/Q modulation bandwidth and minimum pulse width limited | `1442.0444.02` | Requires `R&S®SMW-B13XT` and `R&S®SMW-B94L`。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 5.416886
+             },
+             {
+              "text": "R&S SMW200A › Standard baseband\n| Code | Name / description | Order No. | 原文重點 |\n|---|---|---:|---|\n| `R&S®SMW-B10` | Standard baseband generator with ARB（64 Msample）and digital modulation（real-time），`120 MHz RF bandwidth` | `1413.1200.02` | Requires `R&S®SMW-B13` or `R&S®SMW-B13T`；可安裝一個或兩個。 |\n| `R&S®SMW-K16` | Differential analog I/Q outputs | `1413.3384.02` | `B13T` 下可安裝兩次。 |\n| `R&S®SMW-K18` | Digital baseband output | `1413.3432.02` | Standard digital baseband output 至少需此 option。 |\n| `R&S®SMW-K501` | Extended sequencing | `1413.9218.02` | Requires `R&S®SMW-B10`。 |\n| `R&S®SMW-K511` | ARB memory extension to `512 Msample` | `1413.6860.02` | Requires `R&S®SMW-B10`。 |\n| `R&S®SMW-K512` | ARB memory extension to `1 Gsample` | `1413.6919.02` | Requires `R&S®SMW-K511`。 |\n| `R&S®SMW-K522` | Baseband extension to `160 MHz RF bandwidth` | `1413.6960.02` | Requires `R&S®SMW-B10`。 |\n\n- `R&S®SMW-B10` arbitrary waveform mode：waveform length `1 sample to 64 Msample`；with `K511` 到 `512 Msample`；with `K512` 到 `1 Gsample`。\n- `R&S®SMW-B10` sample rate：`400 Hz to 150 MHz`；with `K522` 為 `400 Hz to 200 MHz`。\n- `R&S®SMW-B10` RF bandwidth：最大 sample rate 時 `120 MHz`；with `K522` 為 `160 MHz`；reduced sample rate 時 `0.8 · sample rate`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 4.797982
+             },
+             {
+              "text": "R&S SMBV100B\n[[R&S SMBV100B]] 是 Rohde & Schwarz 的 vector signal generator，依 PD 3607.8201.22 Specifications Version 13.01（August 2025）支援 8 kHz to 3 GHz 或 8 kHz to 6 GHz RF frequency range、最高 1 GHz RF modulation bandwidth、internal baseband / I/Q generation、digital standards、GNSS/avionics options、HUMS 與 legacy command emulation。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 12.865769
+             },
+             {
+              "text": "R&S SMBV100B › Signal performance for selected standards\n- 3GPP FDD with R&S®SMBVB-K42：Error vector magnitude，1 DPCH，RMS，< 0.8 %，0.3 % measured；test frequency 1800 MHz to 2200 MHz。\n- 3GPP FDD ACLR 條件：test model 1、64 DPCH、1800 MHz to 2200 MHz、average channel power ≤ 0 dBm、I/Q input gain +4 dB、optimization mode high quality、temperature range +18 °C to +33 °C；5 MHz offset > 69 dB，typ. 72 dB；10 MHz offset > 71 dB，typ. 74 dB。\n- Custom digital modulation with R&S®SMBVB-K520 real-time mode：2FSK / 4FSK deviation error at symbol rate up to 2 MHz 為 0.4 % measured，up to 10 MHz 為 1.2 % measured；QPSK/OQPSK/π/4-DQPSK/8PSK/16QAM/32QAM/64QAM EVM at symbol rate up to 5 MHz 為 0.5 % RMS measured，up to 20 MHz 為 0.7 % RMS measured。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 26,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 9.151823
+             },
+             {
+              "text": "R&S SMBV100B › Spectral purity\n- Harmonics：CW、I/Q mode（full-scale DC input）、level ≤ +13 dBm、1 MHz < f ≤ 6 GHz：< –30 dBc；not valid in I/Q wideband mode。\n- Nonharmonics：CW、I/Q mode、level > +10 dBm or maximum specified output power 取較低者、offset > 10 kHz from carrier、outside modulation spectrum、reference frequency internal：f ≤ 750 MHz < –80 dBc；750 MHz < f ≤ 1500 MHz < –76 dBc；1500 MHz < f ≤ 3 GHz < –70 dBc；3 GHz < f ≤ 6 GHz < –64 dBc。\n- Subharmonics：f ≤ 3.00 GHz：< nonharmonic specification；3 GHz < f ≤ 6 GHz：< –75 dBc，< –90 dBc meas.\n- Wideband noise，CW，carrier offset 30 MHz、measurement bandwidth 1 Hz、level setting characteristic auto、level = +10 dBm、15 MHz ≤ f ≤ 6 GHz：< –146 dBc，–153 dBc typ.\n- Wideband noise，I/Q modulation with full-scale internal single carrier signal，level = +10 dBm，I/Q input gain +4 dB：20 MHz ≤ f ≤ 80 MHz < –139 dBc；80 MHz < f ≤ 200 MHz < –135 dBc；200 MHz < f ≤ 1 GHz < –141 dBc；1 GHz < f ≤ 3 GHz < –142 dBc；3 GHz < f ≤ 6 GHz < –140 dBc。\n- SSB phase noise：carrier offset 20 kHz、measurement bandwidth 1 Hz、level +10 dBm：f = 100 MHz CW < –142 dBc，–150 dBc typ.；f = 100 MHz I/Q < –121 dBc，–140 dBc typ.；f = 1 GHz < –126 dBc，–132 dBc typ.；f = 2 GHz < –120 dBc，–126 dBc typ.；f = 3 GHz < –116 dBc，–123 dBc typ.；f = 4 GHz < –114 dBc，–120 dBc typ.；f = 6 GHz < –110 dBc，–117 dBc typ.\n- 來源概述另列 SSB phase noise at 1 GHz, 20 kHz offset < –134 dBc（meas.）；本頁將它視為 measured marketing value，不取代 detailed specification table。\n- RMS jitter standard CW：f = 155 MHz，100 Hz to 1.5 MHz，49 fs meas.；f = 622 MHz，1 kHz to 5 MHz，12 fs meas.；f = 1 GHz，1 Hz to 10 MHz，11 ps meas.；f = 2.488 GHz，5 kHz to 20 MHz，26 fs meas.\n- Residual FM：CW，RMS at f = 1 GHz；300 Hz to 3 kHz weighted（ITU-T）< 2 Hz，0.22 Hz typ.；20 Hz to 23 kHz < 4 Hz，1.9 Hz typ.\n- Residual AM：CW，f > 10 MHz，RMS 20 Hz to 20 kHz，level = 12 dBm：< 0.02 %。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 7.575289
+             },
+             {
+              "text": "R&S SMBV100B › Analog modulation、sources 與 pulse\n- AM/FM/φM 由 R&S®SMBVB-K720 option 提供。\n- Simultaneous modulation：AM 與 I/Q modulation 不相容；FM 與 φM 不相容；pulse modulation 與 AM/IQ 為 compatible with limitations；FM/φM 與 I/Q 為 compatible with limitations。\n- Amplitude modulation：specifications apply for f > 200 kHz；level setting characteristic auto；level（PEP）= 0 dBm；modulation source internal、external、internal + external；AM depth 0 % to 100 %，resolution 0.1 %。\n- AM depth error：fmod = 1 kHz and m < 80 %；f ≤ 80 MHz：<（1 % of reading + 1 %）；f > 80 MHz：<（3 % of reading + 1 %）。\n- AM distortion at fmod = 1 kHz：f ≤ 80 MHz、m = 30 % < 0.25 %；f ≤ 80 MHz、m = 80 % < 0.5 %；f > 80 MHz、m = 30 % < 1.5 %；f > 80 MHz、m = 80 % < 3 %。\n- Frequency modulation：specifications apply for f > 200 kHz；external coupling AC/DC；FM modes low noise、high bandwidth；maximum deviation high bandwidth N × 10 MHz，low noise N × 1 MHz。\n- Phase modulation：specifications valid for f > 200 kHz and main PLL bandwidth normal；φM modes high deviation、high bandwidth、low noise；maximum deviation high bandwidth N × 1 rad、high deviation N × 40 rad、low noise N × 10 rad。\n- Modulation input EXT for AM/FM/φM：rear panel MOD EXT，BNC female；input impedance selectable >100 kΩ、600 Ω、50 Ω nominal；input sensitivity 1 V nominal；damage voltage ±7 V。\n- Pulse modulation：R&S®SMBVB-K22 option；modulation source external；with R&S®SMBVB-K23 option 可 external、internal。\n- Pulse modulation on/off ratio：> 80 dB，> 92 dB typ.\n- Pulse modulation rise/fall time：transition type fast < 15 ns，< 5 ns meas.；transition type smoothed < 200 ns；條件為 10 % to 90 % of RF amplitude、f > 80 MHz。\n- Pulse repetition frequency：0 Hz to 25 MHz。\n- Pulse generator：R&S®SMBVB-K23 option；pulse modes single pulse、double pulse；period 40 ns to 100 s；width 10 ns to 1 s；resolution 10 ns。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 7.239817
+             },
+             {
+              "text": "[Wi-Fi 8](https://www.rohde-schwarz.com/us/solutions/wireless-communications-testing/wireless-standards/wlan-wi-fi/wi-fi-8-testing/wi-fi-8-testing_258504.html \"Wi-Fi 8\") builds upon the foundation of Wi-Fi 7, retaining core physical layer parameters like supported frequencies up to 7.125 GHz, channel bandwidths up to 320 MHz and 4096QAM modulation, as well as Multi-Link-Operation (MLO). However, to achieve its UHR goals, IEEE 802.11bn introduces a suite of innovative PHY and MAC layer technologies that present new testing hurdles. At MWC 2026, visitors can experience how to address key testing challenges associated with Wi-Fi 8 with the enhanced testing capabilities of the CMX500 one-box signaling tester, one of the most versatile mobile device test platforms in the market, which supports many of the demanding features of Wi-Fi 7 and Wi-Fi 8 today.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-f833664f4958cbb4",
+                "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+                "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+                "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 27.907809
+             },
+             {
+              "text": "Speed & Capacity\nVoice & Services\nFWA CPE\nAggregation\nMassive MIMO\nVoIP / IMS\nWi-Fi 6/Wi-Fi 7 offloading\nNetwork slicing features for CPEs",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-930719e012588eec",
+                "original_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+                "sha256": "930719e012588eec7cb2f397159386a87d1a5920c6edc93e0410be578603327b",
+                "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+               "section": 325,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 26.14322
+             },
+             {
+              "text": "While the market for the sixth generation of Wi-Fi, IEEE 802.11ax, is still growing, the development of Wi-Fi 7, or IEEE 802.11be, is in full swing. Wi-Fi 7 is the next generation of Wi-Fi technology, designed for extremely high data throughput. With tens of gigabits of data per second and low latency, it meets the growing demand for ultra-high-definition video streaming, virtual reality and augmented reality applications. Key elements to achieve higher throughput are an increased channel bandwidth of 320 MHz, up to 16 spatial streams and 4096 QAM modulation. In addition, for a yet-to-be-defined Wi-Fi 8 (IEEE 802.11bn) standard, even wider channel bandwidths are in discussion. Rohde & Schwarz meets these challenging characteristics with its solutions for testing Wi-Fi 7 and beyond, showcased at MWC Barcelona.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-d0a8f03c4120b8e2",
+                "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+                "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+                "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 25.677895
+             },
+             {
+              "text": "| 6.6.2 Unwanted emissions - Occupied bandwidth | -- |  |\n| 6.6.3 Unwanted emissions - Adjacent Channel Leakage Power Ratio (ACLR) |  | -- |\n| 6.6.4 Unwanted emissions - Operating band unwanted emissions (SEM) |  | -- |\n| 6.6.5 Unwanted emissions - Transmitter spurious emissions | -- |  |\n| 6.7 Transmitter intermodulation | -- |  (additional signal generator required) |",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-78bf3069c4d9ec56",
+                "original_ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+                "sha256": "78bf3069c4d9ec56257898ce4889bcdb258402fa1db341a7ff4cbf02487e94f6",
+                "raw_ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+               "section": 62,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 25.659115
+             }
+            ],
+            "text": "Short answer: Wi‑Fi 7/8 pushes signal generator / analyzer capability from ordinary WLAN testing toward wider instantaneous bandwidth, lower EVM floors for 4096QAM, multi-RF-chain / MIMO / MLO operation, and deeper spectrum/emissions and signaling analysis, while Wi‑Fi 8 adds dRU and UEQM-specific analysis burdens.[1][2][15][24][25]\n| Area | Impact on required Signal Generator / Signal Analyzer capability |\n|---|---|\n| Bandwidth | Wi‑Fi 7 key throughput elements include 320 MHz channel bandwidth, and Wi‑Fi 8 is described as retaining Wi‑Fi 7 core PHY parameters including channel bandwidths up to 320 MHz.[2][24] Therefore the analyzer and generator need WLAN 320 MHz-class capability; examples in the passages include CMX500 WLAN 802.11be analyzer performance at 320 MHz and CMP180 WLAN 802.11be analyzer/generator performance at 320 MHz.[40][45] A 480 MHz WLAN waveform is only described as a potential Wi‑Fi 8 candidate / discussion item, not a formal Wi‑Fi 8 channel bandwidth, but it implies that future-proof test setups may need 500 MHz-class waveform verification capability; CMP180 is described as supporting bandwidths up to 500 MHz and demonstrating 480 MHz waveform loopback verification.[4][5][8] |\n| Modulation / EVM | Wi‑Fi 7 includes 4096QAM, and Wi‑Fi 8 retains 4096QAM as a core PHY parameter.[2][24] This increases the need for low residual EVM in both analysis and generation; cited WLAN analyzer examples include CMX500 802.11be EVM of –49 dB measured at 160 MHz and –47 dB measured at 320 MHz, and CMP180 802.11be analyzer EVM of –46 dB measured at 320 MHz or –48 dB with CMP-KB805, while CMP180 802.11be generator EVM is listed as < –43 dB at 320 MHz.[40][45] |\n| MIMO / multi-link | Wi‑Fi 7 lists up to 16 spatial streams and MLO as key throughput components, and MLO is also retained in Wi‑Fi 8.[2][24] Wi‑Fi 7 OTA development needs measurements of antennas and RF transmitter/receiver characteristics under real-world signaling conditions, and because MLO is a key Wi‑Fi 7 feature, a test environment with multiple RF chains is important.[25] CMX500 WLAN options include 802.11bn support and True MIMO 2x2 for 802.11n/ac/ax/be/bn signals, while CMP180 has WLAN true MIMO 2x2/4x4 and 5x5/6x6 measurement options listed.[40][47] |\n| Wi‑Fi 8 dRU / UEQM analysis | Wi‑Fi 8 introduces / emphasizes dRU and UEQM: dRU is used to overcome PSD limits, and dRU measurements verify uplink transmit-power boost and connection-reliability improvement.[1][15] UEQM allows each MIMO link to use a different modulation scheme in difficult reception scenarios, and UEQM analysis evaluates whether the device adapts modulation correctly according to specified MCS combinations.[1][15] This means the analyzer must not only demodulate a packet, but also analyze per-link / per-MCS adaptation behavior for Wi‑Fi 8 signaling tests.[15] |\n| Spectrum / emissions | Spectrum measurement remains necessary because unwanted-emissions items include occupied bandwidth, ACLR, operating-band unwanted emissions / SEM, transmitter spurious emissions, and transmitter intermodulation, with transmitter intermodulation noting that an additional signal generator is required.[68] CMX500 spectrum analysis options include frequency sweep power-vs-frequency, zero-span power-vs-time, RBW 100 Hz to 10 MHz, VBW 10 Hz to 10 MHz, and FFT spectrum analyzer spans up to 500 MHz with CMX-B600B broadband mode or 1 GHz with CMX-B500A IF unit only.[38][39] |\n| Signaling vs non-signaling / OTA | Wi‑Fi 8 RF signaling tests are described as CMX500 signaling-mode tests for prototype Wi‑Fi 8 / IEEE 802.11bn WLAN device PHY features.[18][23] Wi‑Fi 7 OTA MIMO stress testing is described as over-the-air, signaling-mode, realistic multipath testing of antenna, RF transmitter/receiver, and multi-antenna performance for IEEE 802.11be stations and access points.[27][28] |\n【推論】For Wi‑Fi 7/8, a practical signal analyzer/generator target should be at least 320 MHz WLAN bandwidth with EVM headroom suitable for 4096QAM, because Wi‑Fi 7 and Wi‑Fi 8 cite 320 MHz and 4096QAM, and instrument examples specify 320 MHz WLAN EVM performance.[2][24][40][45]\n【推論】If preparing for discussed Wi‑Fi 8 extensions rather than only cited retained parameters, 500 MHz-class generation/analysis becomes relevant because 480 MHz is described as a potential candidate waveform and CMP180’s 500 MHz capability is tied to that loopback demonstration.[4][5][48][52]\n【推論】Because MLO, spatial streams, dRU, and UEQM all involve multiple links, RF chains, resource allocations, or per-link modulation behavior, Wi‑Fi 7/8 testing increasingly needs multi-channel/MIMO signaling analysis rather than only single-link SISO RF measurements.[1][15][24][25][40][47]",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "Wi-Fi 8 › 新增 / 強調的 PHY 與 MAC layer technologies\n[[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]] 舉例列出：\n\n- [[distributed resource units]]（dRU）：用於 overcome power spectral density（PSD）limits；dRU measurements 可驗證 uplink transmit power boost 與 connection reliability improvement。\n- [[unequal modulation]]（UEQM）：在 difficult reception scenarios 中允許 each [[MIMO]] link 使用 different modulation scheme；UEQM analysis 可評估 device 是否依 specified MCS combinations 正確 adapt modulation。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+             },
+             "score": 5.850501
+            },
+            {
+             "text": "Wi-Fi 8 › 延續自 Wi-Fi 7 的 core PHY parameters\n依 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]，[[Wi-Fi 8]] 保留下列 [[Wi-Fi 7]] core physical layer parameters：\n\n| 項目 | 來源說法 |\n|---|---|\n| supported frequencies | up to 7.125 GHz |\n| channel bandwidth | up to 320 MHz |\n| modulation | 4096QAM |\n| multi-link | [[MLO]] |\n\n以上是 PR 中對 Wi-Fi 8 的簡述，不等同於完整 IEEE 802.11bn normative specification。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+             },
+             "score": 4.228994
+            },
+            {
+             "text": "Wi-Fi 8 › 480 MHz waveform candidate 說法\n[[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 稱：\n\n- [[R&S CMP180]] supports bandwidths up to 500 MHz。\n- [[R&S CMP180]] will demonstrate its ability to verify a [[WLAN]] waveform with **480 MHz bandwidth** in loopback mode。\n- 該 480 MHz waveform 被稱為 potential waveform candidate for the yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] standard。\n\n此說法目前只能作為 MWC 2024 PR 的 candidate / discussion 記錄；不得推論 480 MHz 已成為 [[IEEE 802.11bn]] 標準通道頻寬。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+             },
+             "score": 1.483378
+            },
+            {
+             "text": "Wi-Fi 8 › 來源中的技術定位\n依 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]]：\n\n- [[IEEE 802.11bn]] amendment introduces advancements focused on consistent, high-quality connectivity across dense environments。\n- 目標應用包含 growing number of connected devices、VR/AR、8K streaming、industrial IoT。\n- [[Wi-Fi 8]] builds upon [[Wi-Fi 7]] foundation。\n- 來源明示 final IEEE standard ratification 尚未完成；[[Rohde & Schwarz]] 的測試是在 ratification 前展示。\n\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- [[Wi-Fi 8]] / [[IEEE 802.11bn]] 在 MWC 2024 語境下仍是 yet-to-be-defined standard。\n- 來源稱 even wider channel bandwidths are in discussion。\n- [[R&S CMP180]] 將展示 **480 MHz bandwidth** 的 [[WLAN]] waveform loopback mode verification，並稱該 waveform 是 [[Wi-Fi 8]] potential waveform candidate。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+             },
+             "score": 1.433727
+            },
+            {
+             "text": "Wi-Fi 8 › 與 R&S CMX500 / CMP180 的關係\n[[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]] 稱 [[R&S CMX500]] 已加入 newly added [[Wi-Fi 8]] / [[IEEE 802.11bn]] testing capabilities，並將在 [[MWC Barcelona 2026]] 驗證 [[Broadcom]] prototype [[Wi-Fi 8]] device。\n\n[[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 則在較早 MWC 2024 語境中，把 [[R&S CMP180]] 的 480 MHz [[WLAN]] waveform loopback demonstration 描述為 potential [[Wi-Fi 8]] candidate，並將 [[R&S CMP180]] 定位為 future-proof R&D / production tester。\n\n這兩種說法層次不同：[[R&S CMX500]] 來源是 Wi‑Fi 8 RF signaling tests / prototype device demonstration；[[R&S CMP180]] 來源是 480 MHz waveform loopback / candidate demonstration。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+             },
+             "score": 0.885473
+            },
+            {
+             "text": "Wi-Fi 8 RF signaling tests › Wi-Fi 8 測試重點\n來源描述 [[IEEE 802.11bn]] / [[Wi-Fi 8]] 的重點從 sheer speed 轉向 [[UHR]] performance。相關測試重點包括：\n\n| 測試 / feature | 來源說法 |\n|---|---|\n| [[distributed resource units]] / dRU measurements | 用於驗證 device boosting uplink transmit power 與 improving connection reliability 的 effectiveness；來源提到 dRU 可 overcome PSD limits。 |\n| [[unequal modulation]] / UEQM analysis | 在 difficult reception scenarios 中允許 each MIMO link 使用不同 modulation scheme；測試可評估 device 是否以 specified MCS combinations 正確 adapt modulation。 |\n| comprehensive signaling mode tests | 來源稱可 cover a broad range of Wi‑Fi 8 features 並執行 in-depth analysis of performance characteristics。 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md"
+             },
+             "score": 4.601386
+            },
+            {
+             "text": "Wi-Fi 8 RF signaling tests\n[[Wi-Fi 8 RF signaling tests]] 是 [[Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity]] 中描述的 [[R&S CMX500]] signaling mode 測試能力，用於驗證 prototype [[Wi-Fi 8]] / [[IEEE 802.11bn]] WLAN device 的 physical layer features。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md"
+             },
+             "score": 0.530988
+            },
+            {
+             "text": "Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity\n這是 [[Rohde & Schwarz]] 新聞稿，說明 [[R&S CMX500]] one-box signaling tester 已加入首批 [[Wi-Fi 8]] / [[IEEE 802.11bn]] RF signaling mode 測試能力，並將在 [[MWC Barcelona 2026]] 與 [[Broadcom]] prototype next-generation WLAN device 共同展示。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+             },
+             "score": 0.884099
+            },
+            {
+             "text": "Wi-Fi 7 OTA MIMO stress testing › Wi-Fi 7 技術背景\n[[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]] 列出的 [[Wi-Fi 7]] / [[IEEE 802.11be]] throughput-related components 包含：\n\n| 技術項目 | 來源說法 |\n|---|---|\n| 320 MHz channel bandwidth | key component facilitating higher throughput |\n| up to 16 spatial streams | key component facilitating higher throughput |\n| 4096 QAM modulation | key component facilitating higher throughput |\n| [[MLO]] | key component；also key feature making multiple RF chains important |\n\n[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 提供 solution-level update：[[Bluetest]] earlier integrated WLAN testing capabilities 現在支援 [[Wi-Fi 7]] bandwidth up to **320 MHz**。\n\n[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 則以背景段落描述 [[IEEE 802.11be]] / [[Wi-Fi 7]] 是 next generation Wi-Fi technology，面向 extremely high data throughput、tens of gigabits per second、low latency、ultra-high-definition video streaming、virtual reality 與 augmented reality applications。\n\n以上皆為來源對 Wi-Fi 7 與整合測試能力的敘述，不等同於 [[R&S CMX500]]、[[R&S CMX500 OBT]]、[[Bluetest Flow]]、[[Bluetest]] RTS 或 [[EMITE]] chambers 對所有 feature combination 的完整規格保證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+             },
+             "score": 4.575356
+            },
+            {
+             "text": "Wi-Fi 7 OTA MIMO stress testing › 為什麼需要 OTA 與 multiple RF chains\n[[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]] 指出，在 WLAN devices development 期間，需要在 real-world conditions in signaling mode 下量測 antennas 以及 RF transmitter / receiver characteristics。由於 [[MLO]] 是 [[Wi-Fi 7]] key feature，提供 multiple RF chains 的 test environment 很關鍵。\n\n同一來源同時將 [[R&S CMX500]] 描述為 multi-technology multi-channel signaling tester；其 flexibility、support for multiple radio technologies 與 embedded IP test capabilities 使其可用於 broad range of Wi-Fi 7-specific tests。\n\n[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 進一步把 Wi-Fi 7 OTA 測試放入更廣的 [[4G 5G NR WLAN OTA MIMO stress testing]] 情境：同一 [[R&S CMX500 OBT]] / [[Bluetest]] RTS workflow 同時涵蓋 WiFi、[[LTE]]、5G SA / NSA 的 radio and antenna performance validation。\n\n[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 沒有使用 MIMO stress testing 一詞，也沒有提供 RF chains、spatial streams 或 chamber reflection model；它的貢獻是確認另一個 OTA chamber vendor [[EMITE]] 也將 [[R&S CMX500]] 整合到 [[Wi-Fi 7]] OTA measurement solution 中。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+             },
+             "score": 3.83334
+            },
+            {
+             "text": "Wi-Fi 7 OTA MIMO stress testing\n[[Wi-Fi 7 OTA MIMO stress testing]] 是在 over-the-air、signaling mode 與 realistic multipath RF conditions 下，對 [[IEEE 802.11be]] stations 與 access points 的 antenna、RF transmitter / receiver 與 multi-antenna performance 進行壓力測試的測試情境。新匯入的 [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 補充另一個 partner integration 視角：[[EMITE]] OTA chambers 可整合 [[R&S CMX500]] 最新測試能力，用於 [[Wi-Fi 7]] 與 [[5G RedCap]] device performance assessment。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+             },
+             "score": 1.837512
+            },
+            {
+             "text": "Wi-Fi 7 OTA MIMO stress testing › 來源中的測試架構\n[[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]]（來源未標示發布日期；raw created 2026-09-11）描述的架構為：\n\n- [[R&S CMX500]] one-box signaling tester 提供 integrated [[Wi-Fi 7]] test functionality。\n- [[Bluetest Flow]] control software / integrated test environment 整合 [[R&S CMX500]] 的 [[Wi-Fi 7]] test functionality。\n- [[Bluetest]] reverberation test systems（RTS），例如 [[Bluetest RTS65]]，提供 reverberation chamber OTA environment。\n- 測試對象為 [[IEEE 802.11be]] stations 與 access points。\n- 測試目標為 MIMO stress testing under realistic conditions。\n\n[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]]（來源未標示發布日期；raw created 2026-09-11）補充：\n\n- [[Bluetest]] expanded its earlier integrated testing capabilities for [[WLAN]] stations and access points（[[IEEE 802.11]] a/b/g/n/ac/ax/be）。\n- [[Wi-Fi 7]] 現在支援 bandwidth up to **320 MHz**。\n- 此能力與 [[R&S CMX500 OBT]]、[[Bluetest Flow]] v1.18 與 [[Bluetest]] RTS 組成 single tester and reverberation test system 的 integrated path。\n\n[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]]（來源未標示發布日期；raw created 2026-09-11）補充：\n\n- [[EMITE]] over-the-air chambers 可 combined with the latest sophisticated testing features of [[R&S CMX500]]。\n- 整合 enables support of [[LTE]]、[[NR FR1]]、[[NR FR2]]、full compliance with [[IEEE 802.11be]] and [[5G RedCap]]。\n- [[R&S CMX500]] 被描述為支援 non-cellular technologies including latest [[Wi-Fi 7]]，all in a single instrument。\n- [[EMITE]] customers obtain a comprehensive environment for accurately assessing performance of [[Wi-Fi 7]] as well as [[5G RedCap]] devices。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+             },
+             "score": 1.652098
+            },
+            {
+             "text": "R&S CMX500 › ARB 與 FFT spectrum analyzer\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n- Modulation source：arbitrary waveform generator（ARB）。\n- ARB 先決條件：[[R&S CMX-B500A]] 或 [[R&S CMX-B600B]]，以及 [[R&S CMX-KW601]] options。\n- ARB with [[R&S CMX-B600B]]：memory size **16 Gbyte**；I/Q word length **32 bit**；marker word length **8 bit**；sample length **up to 1.5 Gsample**；maximum sample rate **1.25 GHz**；maximum possible RF bandwidth **1 GHz**，取決於 arbitrary waveform file。\n- FFT spectrum analyzer frequency span：10 MHz、20 MHz、40 MHz、160 MHz、250 MHz；with [[R&S CMX-B600B]] RF unit in broadband mode **500 MHz**；[[R&S CMX-B500A]] IF unit only **1 GHz**。\n- FFT length：1k、2k、4k、8k、16k；detector：peak、RMS。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 12.309063
+            },
+            {
+             "text": "R&S CMX500 › Spectrum analysis\n依 [[CMX500_Features_CSW9-20-0_en_32]]，R&S CMX-KM140 提供 spectrum analysis options，包含 frequency sweep measurement（power vs frequency）與 zero span measurement（power vs time）。General settings 包含 external attenuation **-50 dB 至 90 dB**、sweep count **1 至 100**、sweep points **101 至 100001**；frequency sweep RBW **100 Hz 至 10 MHz**，VBW **10 Hz 至 10 MHz**。\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 另提供 FFT spectrum analyzer span 與 FFT length，詳見 ARB 與 FFT spectrum analyzer 章節。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 34,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 10.282689
+            },
+            {
+             "text": "R&S CMX500 › WLAN\n依 [[CMX500_Features_CSW9-20-0_en_32]]，R&S CMX-KM350 為 WLAN measurements necessary option，支援 802.11a/b/g/n/ac。R&S CMX-KM351 支援 802.11ax 且需要 R&S CMX-KM350；R&S CMX-KM352 支援 802.11be 且需要 R&S CMX-KM351；R&S CMX-KM353 支援 802.11bn 且需要 R&S CMX-KM352 與 R&S CMX-KM351。R&S CMX-KM360 提供 True MIMO measurements，2x2 MIMO 適用於 802.11n、802.11ac、802.11ax、802.11be、802.11bn signals。\n\n依 [[CMX500_specs_en_5216-4127-22_v1100]] 的 analyzer 摘錄：\n\n- R&S CMX-KM350 WLAN IEEE 802.11a/b/g/n/ac analyzer：input level –25 dBm to –10 dBm RMS；bandwidth 20/22/40/160 MHz；EVM **< –46 dB**，條件包含 channel estimation payload、burst length > 16 symbols、average > 20 packets、+15 °C to +35 °C。\n- R&S CMX-KM351 WLAN IEEE 802.11ax analyzer：input level –25 dBm to –10 dBm RMS；bandwidth 160 MHz；EVM **< –46 dB**。\n- R&S CMX-KM352 WLAN IEEE 802.11be analyzer：input level –25 dBm to –10 dBm RMS；bandwidth 160 MHz：**–49 dB meas.**；bandwidth 320 MHz：**–47 dB meas.**。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 33,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 9.667212
+            },
+            {
+             "text": "R&S CMP180 › Selected measurement performance\n依 [[CMP180 Specifications Version 08.00]]：\n\n| Option | 功能 | 規格摘錄 |\n|---|---|---|\n| R&S CMP-KM600 | 5G NR analyzer | EVM FR1 bandwidth 100 MHz, SCS 30 kHz, 16QAM, level > –20 dBm：< 0.5% |\n| R&S CMP-KM305 | UWB production measurements | center frequency offset < 0.005 ppm；chip clock error < 0.02 ppm；NRMSE < 5%；relative AVG pulse level < 0.1 dB |\n| R&S CMP-KM351 | WLAN IEEE 802.11ax analyzer | bandwidth 160 MHz < –46 dB meas.；with R&S CMP-KB805 < –49 dB meas. |\n| R&S CMP-KW351 | WLAN IEEE 802.11ax generator | bandwidth 160 MHz < –45 dB |\n| R&S CMP-KM352 | WLAN IEEE 802.11be analyzer | 160 MHz < –46 dB meas.；with R&S CMP-KB805 < –49 dB meas.；320 MHz < –46 dB meas.；320 MHz with R&S CMP-KB805 < –48 dB meas. |\n| R&S CMP-KW352 | WLAN IEEE 802.11be generator | 160 MHz < –45 dB；320 MHz < –43 dB |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP180.md"
+             },
+             "score": 8.971618
+            },
+            {
+             "text": "R&S CMP180 › Measurement options\n| Designation | Type | Order no. |\n|---|---|---|\n| Non-cellular measurements pack 1 | R&S CMP-PKM30 | 1212.3689.02 |\n| Cellular measurements pack 1 | R&S CMP-PKM40 | 1212.3695.02 |\n| Advanced path loss measurements（serial number ≥ 102160） | R&S CMP-KM115 | 1212.2201.02 |\n| Advanced path loss measurements（serial number < 102160） | R&S CMP-U115 | 1212.4291.02 |\n| Spectrum analyzer | R&S CMP-KM140 | 1212.4410.02 |\n| Signal analysis base software | R&S CMP-KM150 | 1212.3972.02 |\n| Signal analysis, digital | R&S CMP-KM152 | 1212.3989.02 |\n| NB-IoT measurements | R&S CMP-KM250 | 1212.2218.02 |\n| LP-IoT measurements, Zigbee | R&S CMP-KM280 | 1212.2224.02 |\n| Ultra-wideband production measurements | R&S CMP-KM305 | 1212.4304.02 |\n| UWB IEEE 802.15.4ab production measurements | R&S CMP-KM306 | 1212.4691.02 |\n| Bluetooth measurements, Classic / Low Energy up to Rel. 5.3 | R&S CMP-KM310 | 1212.2230.02 |\n| Bluetooth HDT measurements Rel. 7.0 | R&S CMP-KM317 | 1212.4591.02 |\n| WLAN IEEE 802.11a/b/g/n/ac SISO measurements | R&S CMP-KM350 | 1212.2247.02 |\n| WLAN IEEE 802.11ax SISO measurements | R&S CMP-KM351 | 1212.2253.02 |\n| WLAN IEEE 802.11be SISO measurements | R&S CMP-KM352 | 1212.2260.02 |\n| WLAN true MIMO 2x2 and 4x4 measurements | R&S CMP-KM360 | 1212.2276.02 |\n| WLAN true MIMO 5x5 and 6x6 measurements | R&S CMP-KM361 | 1212.4685.02 |\n| WLAN packet error rate acknowledgement measurements | R&S CMP-KM365 | 1212.4562.02 |\n| GSM measurements | R&S CMP-KM420 | 1212.2282.02 |\n| WCDMA measurements | R&S CMP-KM440 | 1212.2299.02 |\n| CDMA2000 1xRTT measurements | R&S CMP-KM480 | 1212.2730.02 |\n| LTE measurements | R&S CMP-KM500 | 1212.2301.02 |\n| LTE C-V2X measurements, PC5 | R&S CMP-KM570 | 1212.2318.02 |\n| NR FR1 measurements, single carrier | R&S CMP-KM600 | 1212.2101.02 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 13,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP180.md"
+             },
+             "score": 8.238575
+            },
+            {
+             "text": "R&S CMP180 › ARB modulation source\n依 [[CMP180 Specifications Version 08.00]]：\n\n| 項目 | 規格 |\n|---|---|\n| Memory size | 8 Gbyte/channel |\n| Word length | I/Q 32 bit；marker 8 bit |\n| Sample length | up to 800 Msample |\n| Maximum sample rate | 312.5 MHz；with R&S CMP-K185：625 MHz |\n| Maximum possible RF bandwidth | 250 MHz；with R&S CMP-K185：500 MHz |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP180.md"
+             },
+             "score": 6.677554
+            },
+            {
+             "text": "R&S CMP180 › Frequency range 與 bandwidth\n依 [[CMP180 Features and Functions Version 09]]：\n\n- 未安裝 **R&S CMP-K168** 時 maximum 為 **6 GHz**。\n- **R&S CMP-B802B/H**、**R&S CMP-B805B/H** 最高 **8 GHz**。\n- **R&S CMP-B802I**、**R&S CMP-B805I and higher** 最高 **8 GHz TX / 8.25 GHz RX**。\n\n依 [[CMP180 Specifications Version 08.00]]：\n\n- **R&S CMP-K168** 在 ordering information 中定義為 **Extended frequency range, from 6 GHz to 8 GHz**。\n- RF generator 表格列出 frequency range **400 MHz to 8000 MHz**，並標示 **6000 MHz to 8000 MHz** requires **R&S CMP-K168**。\n- RF generator 搭配 **R&S CMP-K168** 與 **R&S CMP-B805I option** 的 overrange 為 **6000 MHz to 8250 MHz**，maximum center frequency **8000 MHz**。\n- RF analyzer 表格列出 frequency range **400 MHz to 8000 MHz**，並標示 **6000 MHz to 8000 MHz** requires **R&S CMP-K168**。\n- RF analyzer 搭配 **R&S CMP-K168** 與 **R&S CMP-B805I option** 的 overrange 為 **6000 MHz to 8500 MHz**，maximum center frequency **8250 MHz**。\n- IF bandwidth：基本 **250 MHz**；requires **R&S CMP-K185** 為 **500 MHz**。\n- **R&S CMP-K185** ordering information：only available if **R&S CMP-B805I or higher option** is installed。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP180.md"
+             },
+             "score": 4.804781
+            },
+            {
+             "text": "| 6.6.2 Unwanted emissions - Occupied bandwidth | -- |  |\n| 6.6.3 Unwanted emissions - Adjacent Channel Leakage Power Ratio (ACLR) |  | -- |\n| 6.6.4 Unwanted emissions - Operating band unwanted emissions (SEM) |  | -- |\n| 6.6.5 Unwanted emissions - Transmitter spurious emissions | -- |  |\n| 6.7 Transmitter intermodulation | -- |  (additional signal generator required) |",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-78bf3069c4d9ec56",
+               "original_ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+               "sha256": "78bf3069c4d9ec56257898ce4889bcdb258402fa1db341a7ff4cbf02487e94f6",
+               "raw_ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+              "section": 62,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 25.659115
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "technical_knowledge",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 5,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 8,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 7,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 8.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/Wi-Fi 8.md",
+             "raw_refs": [
+              "raw/Market/OneNote/FWA CPE SmallCell/WiFi8.md",
+              "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+              "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Wi-Fi 8 RF signaling tests.md",
+             "raw_refs": [
+              "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+              "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md",
+             "raw_refs": [
+              "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+              "raw/Productions/PR/Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md",
+              "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMP180.md",
+             "raw_refs": [
+              "raw/Productions/CMP180_Features_V11-9_en_09.md",
+              "raw/Productions/CMP180_specs_en_3609-7348-22_v0800.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

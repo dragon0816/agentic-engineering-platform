@@ -1,0 +1,1314 @@
+{
+ "question": {
+  "id": "Q0051",
+  "text": "What are the most important signal integrity capabilities for applications in Wireless Communication?",
+  "market": "Wireless Communication",
+  "product": "Oscilloscope",
+  "type": "basic",
+  "difficulty": "L1"
+ },
+ "session_id": "conversation-9aad203b7d3c4b238955d7feb87dc65e",
+ "exchange": {
+  "sent": "What are the most important signal integrity capabilities for applications in Wireless Communication?",
+  "http_status": 200,
+  "seconds": 140.5,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-9aad203b7d3c4b238955d7feb87dc65e",
+    "actor": "leo.chi",
+    "title": "What are the most important signal integrity capabilities for applicatio…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T06:12:35.007718Z",
+    "updated_at": "2026-10-11T06:14:54.892348Z",
+    "messages": [
+     {
+      "message_id": "message-ec05d2043bfe4a14ab3a2632fd1268ae",
+      "role": "user",
+      "text": "What are the most important signal integrity capabilities for applications in Wireless Communication?",
+      "created_at": "2026-10-11T06:12:35.021462Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-da6e34bb704646179ce3977853505102",
+      "role": "assistant",
+      "text": "Wireless-standard vector signal analysis is a supported capability, because R&S VSE supports mobile and wireless communications standards and is used for 5G NR, LTE, O-RAN U-Plane / PCAP analysis and beamforming measurements [1][2].\n5G NR signal analysis is supported with presets for 5G NR test models and support of all 5G NR measurements [1].\nLTE and 5G NR downlink/uplink measurement options are identified for VSE as VSE-K100, VSE-K104 and VSE-K144 [3].\nO-RAN signal analysis is supported with VSE-K175, including predefined test signals according to the WG4.CONF.0 test specification [1][3].\nO-RAN U-Plane analysis is supported because the O-RAN PCAP Converter can convert captured Ethernet streams into VSE file format and VSE analyzes U-Plane data in uplink and downlink [1].\nBeamforming measurement capability is supported because VSE-K146 can display phase and magnitude difference in the summary for beamforming measurements [1][3].\nBitstream and channel-decoder-result extraction is supported because VSE can extract channel decoder results and bitstreams of 5G and LTE uplink and downlink signals [1].\nEVM measurement is a key supported RF quality capability because EVM is defined as the difference between a reference waveform and a measured waveform in 5G NR FR1 SA pre-conformance testing [40][41].\nFor 5G NR EVM testing, measurement results must be below the 3GPP TS 38.521-1 maximum error percentage with the applicable test tolerance [42].\nCMX500 supports LTE, NR FR1, NR FR2, NSA, SA, FDD and TDD device testing as a universal one-box network emulation and measurement test solution [9][13].\nCMX500 includes vector signal analysis and ARB generator capability for FR2 transmitter and receiver RF parametric testing [9].\nCMX500 can perform 5G NR receiver tests under 3GPP fading propagation conditions using internal baseband fading emulation [9].\nCMP180 supports production and wireless communication device testing with configurable multiport RF generator/analyzer, communication-standard measurement options, waveform options and R&S VSE analysis capability [18].\nCMP180 supports simultaneous receiver and transmitter testing and provides a multiport RF test architecture with RF generator/analyzer no. 1 and optional RF generator/analyzer no. 2 [21].\nCMP180 RF analyzer capabilities include 250 MHz IF bandwidth, or 500 MHz with R&S CMP-K185 [23].\nCMP180 RF analyzer capabilities include 0.1 Hz frequency resolution, expected nominal power setting range from –47 dBm to +38 dBm, level uncertainty down to ±0.3 dB from 400 MHz to 5000 MHz under stated conditions, and RX DANL below –157 dBm from 400 MHz to 6500 MHz under stated conditions [23].\nFSWX supports spectrum, noise measurement, phase noise and modulation-quality EVM cross-correlation [50].\nFSWX provides extended spurious-free dynamic range and improved displayed average noise level for finding hidden spurs [50].\nFSWX multipath wideband phase-coherent receivers can perform simultaneous signal analysis and spectrum analysis with independent receivers [50].\nFSWX can compare amplitude, frequency and phase between ports, including simultaneous H/V antenna polarization or device input/output measurements [50].\nFSWX supports image-free I/Q and vector signal analysis using preselected capture and analysis to avoid unwanted-signal interference [50].\nFSWX signal analysis bandwidth reaches up to 4 GHz per RF input and up to 8 GHz on RF input A with the listed bandwidth options [51].\nHigh-speed digital signal-integrity validation capabilities in the corpus include interface test with scopes, BERTs, AWGs and switch matrices [36][38].\nHigh-speed digital signal-integrity validation capabilities also include RefClk and PLL jitter performance testing with phase noise analyzers and signal generators [36][38].\nPower Distribution Network validation is listed as a signal-integrity-related test block using scopes and network analyzers [36][38].\nADC/DAC frontend performance validation is listed with spectrum analyzers and signal generators [36][38].\nHigh-speed PCB/PCBA signal-integrity flow includes insertion loss, crosstalk, eye diagram, TDR impedance, stackup planner and transmission-line calculator [36][38].\n【推論】For wireless communication applications, the corpus supports combining wireless-standard vector signal analysis, EVM, O-RAN/beamforming analysis, multiport RF analysis, wideband spectrum analysis, jitter/clock validation and PCB channel validation as the main signal-integrity capability set, because these capabilities are separately documented for wireless test products and SI/PI validation flows.[1][2][18][23][36][38][40][50]\n\n來源：\n[1] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[2] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[3] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[9] Wiki：CMX500_specs_en_5216-4127-22_v1100（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[13] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[18] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[21] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[23] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[36] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[38] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[40] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[41] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[42] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[50] Wiki：R&S FSWX（來源：`FSWX_specs_en_3684-1314-22_v1200.md`）\n[51] Wiki：R&S FSWX（來源：`FSWX_specs_en_3684-1314-22_v1200.md`）",
+      "created_at": "2026-10-11T06:14:54.892348Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-8dcb5fabe24749d0a26bdf8184e5fdff",
+       "request_id": "request-8dcb5fabe24749d0a26bdf8184e5fdff",
+       "span_id": "span-8dcb5fabe24749d0a26bdf8184e5fdff",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "Wireless-standard vector signal analysis is a supported capability, because R&S VSE supports mobile and wireless communications standards and is used for 5G NR, LTE, O-RAN U-Plane / PCAP analysis and beamforming measurements [1][2].\n5G NR signal analysis is supported with presets for 5G NR test models and support of all 5G NR measurements [1].\nLTE and 5G NR downlink/uplink measurement options are identified for VSE as VSE-K100, VSE-K104 and VSE-K144 [3].\nO-RAN signal analysis is supported with VSE-K175, including predefined test signals according to the WG4.CONF.0 test specification [1][3].\nO-RAN U-Plane analysis is supported because the O-RAN PCAP Converter can convert captured Ethernet streams into VSE file format and VSE analyzes U-Plane data in uplink and downlink [1].\nBeamforming measurement capability is supported because VSE-K146 can display phase and magnitude difference in the summary for beamforming measurements [1][3].\nBitstream and channel-decoder-result extraction is supported because VSE can extract channel decoder results and bitstreams of 5G and LTE uplink and downlink signals [1].\nEVM measurement is a key supported RF quality capability because EVM is defined as the difference between a reference waveform and a measured waveform in 5G NR FR1 SA pre-conformance testing [40][41].\nFor 5G NR EVM testing, measurement results must be below the 3GPP TS 38.521-1 maximum error percentage with the applicable test tolerance [42].\nCMX500 supports LTE, NR FR1, NR FR2, NSA, SA, FDD and TDD device testing as a universal one-box network emulation and measurement test solution [9][13].\nCMX500 includes vector signal analysis and ARB generator capability for FR2 transmitter and receiver RF parametric testing [9].\nCMX500 can perform 5G NR receiver tests under 3GPP fading propagation conditions using internal baseband fading emulation [9].\nCMP180 supports production and wireless communication device testing with configurable multiport RF generator/analyzer, communication-standard measurement options, waveform options and R&S VSE analysis capability [18].\nCMP180 supports simultaneous receiver and transmitter testing and provides a multiport RF test architecture with RF generator/analyzer no. 1 and optional RF generator/analyzer no. 2 [21].\nCMP180 RF analyzer capabilities include 250 MHz IF bandwidth, or 500 MHz with R&S CMP-K185 [23].\nCMP180 RF analyzer capabilities include 0.1 Hz frequency resolution, expected nominal power setting range from –47 dBm to +38 dBm, level uncertainty down to ±0.3 dB from 400 MHz to 5000 MHz under stated conditions, and RX DANL below –157 dBm from 400 MHz to 6500 MHz under stated conditions [23].\nFSWX supports spectrum, noise measurement, phase noise and modulation-quality EVM cross-correlation [50].\nFSWX provides extended spurious-free dynamic range and improved displayed average noise level for finding hidden spurs [50].\nFSWX multipath wideband phase-coherent receivers can perform simultaneous signal analysis and spectrum analysis with independent receivers [50].\nFSWX can compare amplitude, frequency and phase between ports, including simultaneous H/V antenna polarization or device input/output measurements [50].\nFSWX supports image-free I/Q and vector signal analysis using preselected capture and analysis to avoid unwanted-signal interference [50].\nFSWX signal analysis bandwidth reaches up to 4 GHz per RF input and up to 8 GHz on RF input A with the listed bandwidth options [51].\nHigh-speed digital signal-integrity validation capabilities in the corpus include interface test with scopes, BERTs, AWGs and switch matrices [36][38].\nHigh-speed digital signal-integrity validation capabilities also include RefClk and PLL jitter performance testing with phase noise analyzers and signal generators [36][38].\nPower Distribution Network validation is listed as a signal-integrity-related test block using scopes and network analyzers [36][38].\nADC/DAC frontend performance validation is listed with spectrum analyzers and signal generators [36][38].\nHigh-speed PCB/PCBA signal-integrity flow includes insertion loss, crosstalk, eye diagram, TDR impedance, stackup planner and transmission-line calculator [36][38].\n【推論】For wireless communication applications, the corpus supports combining wireless-standard vector signal analysis, EVM, O-RAN/beamforming analysis, multiport RF analysis, wideband spectrum analysis, jitter/clock validation and PCB channel validation as the main signal-integrity capability set, because these capabilities are separately documented for wireless test products and SI/PI validation flows.[1][2][18][23][36][38][40][50]\n\n來源：\n[1] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[2] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[3] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[9] Wiki：CMX500_specs_en_5216-4127-22_v1100（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[13] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[18] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[21] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[23] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[36] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[38] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[40] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[41] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[42] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[50] Wiki：R&S FSWX（來源：`FSWX_specs_en_3684-1314-22_v1200.md`）\n[51] Wiki：R&S FSWX（來源：`FSWX_specs_en_3684-1314-22_v1200.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-8dcb5fabe24749d0a26bdf8184e5fdff",
+      "request_id": "request-8dcb5fabe24749d0a26bdf8184e5fdff",
+      "span_id": "span-8dcb5fabe24749d0a26bdf8184e5fdff",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-8dcb5fabe24749d0a26bdf8184e5fdff",
+       "request_id": "request-8dcb5fabe24749d0a26bdf8184e5fdff",
+       "span_id": "span-8dcb5fabe24749d0a26bdf8184e5fdff",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Wireless-standard vector signal analysis is a supported capability, because R&S VSE supports mobile and wireless communications standards and is used for 5G NR, LTE, O-RAN U-Plane / PCAP analysis and beamforming measurements [1][2].\n5G NR signal analysis is supported with presets for 5G NR test models and support of all 5G NR measurements [1].\nLTE and 5G NR downlink/uplink measurement options are identified for VSE as VSE-K100, VSE-K104 and VSE-K144 [3].\nO-RAN signal analysis is supported with VSE-K175, including predefined test signals according to the WG4.CONF.0 test specification [1][3].\nO-RAN U-Plane analysis is supported because the O-RAN PCAP Converter can convert captured Ethernet streams into VSE file format and VSE analyzes U-Plane data in uplink and downlink [1].\nBeamforming measurement capability is supported because VSE-K146 can display phase and magnitude difference in the summary for beamforming measurements [1][3].\nBitstream and channel-decoder-result extraction is supported because VSE can extract channel decoder results and bitstreams of 5G and LTE uplink and downlink signals [1].\nEVM measurement is a key supported RF quality capability because EVM is defined as the difference between a reference waveform and a measured waveform in 5G NR FR1 SA pre-conformance testing [40][41].\nFor 5G NR EVM testing, measurement results must be below the 3GPP TS 38.521-1 maximum error percentage with the applicable test tolerance [42].\nCMX500 supports LTE, NR FR1, NR FR2, NSA, SA, FDD and TDD device testing as a universal one-box network emulation and measurement test solution [9][13].\nCMX500 includes vector signal analysis and ARB generator capability for FR2 transmitter and receiver RF parametric testing [9].\nCMX500 can perform 5G NR receiver tests under 3GPP fading propagation conditions using internal baseband fading emulation [9].\nCMP180 supports production and wireless communication device testing with configurable multiport RF generator/analyzer, communication-standard measurement options, waveform options and R&S VSE analysis capability [18].\nCMP180 supports simultaneous receiver and transmitter testing and provides a multiport RF test architecture with RF generator/analyzer no. 1 and optional RF generator/analyzer no. 2 [21].\nCMP180 RF analyzer capabilities include 250 MHz IF bandwidth, or 500 MHz with R&S CMP-K185 [23].\nCMP180 RF analyzer capabilities include 0.1 Hz frequency resolution, expected nominal power setting range from –47 dBm to +38 dBm, level uncertainty down to ±0.3 dB from 400 MHz to 5000 MHz under stated conditions, and RX DANL below –157 dBm from 400 MHz to 6500 MHz under stated conditions [23].\nFSWX supports spectrum, noise measurement, phase noise and modulation-quality EVM cross-correlation [50].\nFSWX provides extended spurious-free dynamic range and improved displayed average noise level for finding hidden spurs [50].\nFSWX multipath wideband phase-coherent receivers can perform simultaneous signal analysis and spectrum analysis with independent receivers [50].\nFSWX can compare amplitude, frequency and phase between ports, including simultaneous H/V antenna polarization or device input/output measurements [50].\nFSWX supports image-free I/Q and vector signal analysis using preselected capture and analysis to avoid unwanted-signal interference [50].\nFSWX signal analysis bandwidth reaches up to 4 GHz per RF input and up to 8 GHz on RF input A with the listed bandwidth options [51].\nHigh-speed digital signal-integrity validation capabilities in the corpus include interface test with scopes, BERTs, AWGs and switch matrices [36][38].\nHigh-speed digital signal-integrity validation capabilities also include RefClk and PLL jitter performance testing with phase noise analyzers and signal generators [36][38].\nPower Distribution Network validation is listed as a signal-integrity-related test block using scopes and network analyzers [36][38].\nADC/DAC frontend performance validation is listed with spectrum analyzers and signal generators [36][38].\nHigh-speed PCB/PCBA signal-integrity flow includes insertion loss, crosstalk, eye diagram, TDR impedance, stackup planner and transmission-line calculator [36][38].\n【推論】For wireless communication applications, the corpus supports combining wireless-standard vector signal analysis, EVM, O-RAN/beamforming analysis, multiport RF analysis, wideband spectrum analysis, jitter/clock validation and PCB channel validation as the main signal-integrity capability set, because these capabilities are separately documented for wireless test products and SI/PI validation flows.[1][2][18][23][36][38][40][50]\n\n來源：\n[1] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[2] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[3] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[9] Wiki：CMX500_specs_en_5216-4127-22_v1100（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[13] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[18] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[21] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[23] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[36] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[38] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[40] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[41] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[42] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[50] Wiki：R&S FSWX（來源：`FSWX_specs_en_3684-1314-22_v1200.md`）\n[51] Wiki：R&S FSWX（來源：`FSWX_specs_en_3684-1314-22_v1200.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_maJ6QQK9n3MSiB7jVZaPQmtR",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "Wireless-standard vector signal analysis is a supported capability, because R&S VSE supports mobile and wireless communications standards and is used for 5G NR, LTE, O-RAN U-Plane / PCAP analysis and beamforming measurements [1][2].\n5G NR signal analysis is supported with presets for 5G NR test models and support of all 5G NR measurements [1].\nLTE and 5G NR downlink/uplink measurement options are identified for VSE as VSE-K100, VSE-K104 and VSE-K144 [3].\nO-RAN signal analysis is supported with VSE-K175, including predefined test signals according to the WG4.CONF.0 test specification [1][3].\nO-RAN U-Plane analysis is supported because the O-RAN PCAP Converter can convert captured Ethernet streams into VSE file format and VSE analyzes U-Plane data in uplink and downlink [1].\nBeamforming measurement capability is supported because VSE-K146 can display phase and magnitude difference in the summary for beamforming measurements [1][3].\nBitstream and channel-decoder-result extraction is supported because VSE can extract channel decoder results and bitstreams of 5G and LTE uplink and downlink signals [1].\nEVM measurement is a key supported RF quality capability because EVM is defined as the difference between a reference waveform and a measured waveform in 5G NR FR1 SA pre-conformance testing [40][41].\nFor 5G NR EVM testing, measurement results must be below the 3GPP TS 38.521-1 maximum error percentage with the applicable test tolerance [42].\nCMX500 supports LTE, NR FR1, NR FR2, NSA, SA, FDD and TDD device testing as a universal one-box network emulation and measurement test solution [9][13].\nCMX500 includes vector signal analysis and ARB generator capability for FR2 transmitter and receiver RF parametric testing [9].\nCMX500 can perform 5G NR receiver tests under 3GPP fading propagation conditions using internal baseband fading emulation [9].\nCMP180 supports production and wireless communication device testing with configurable multiport RF generator/analyzer, communication-standard measurement options, waveform options and R&S VSE analysis capability [18].\nCMP180 supports simultaneous receiver and transmitter testing and provides a multiport RF test architecture with RF generator/analyzer no. 1 and optional RF generator/analyzer no. 2 [21].\nCMP180 RF analyzer capabilities include 250 MHz IF bandwidth, or 500 MHz with R&S CMP-K185 [23].\nCMP180 RF analyzer capabilities include 0.1 Hz frequency resolution, expected nominal power setting range from –47 dBm to +38 dBm, level uncertainty down to ±0.3 dB from 400 MHz to 5000 MHz under stated conditions, and RX DANL below –157 dBm from 400 MHz to 6500 MHz under stated conditions [23].\nFSWX supports spectrum, noise measurement, phase noise and modulation-quality EVM cross-correlation [50].\nFSWX provides extended spurious-free dynamic range and improved displayed average noise level for finding hidden spurs [50].\nFSWX multipath wideband phase-coherent receivers can perform simultaneous signal analysis and spectrum analysis with independent receivers [50].\nFSWX can compare amplitude, frequency and phase between ports, including simultaneous H/V antenna polarization or device input/output measurements [50].\nFSWX supports image-free I/Q and vector signal analysis using preselected capture and analysis to avoid unwanted-signal interference [50].\nFSWX signal analysis bandwidth reaches up to 4 GHz per RF input and up to 8 GHz on RF input A with the listed bandwidth options [51].\nHigh-speed digital signal-integrity validation capabilities in the corpus include interface test with scopes, BERTs, AWGs and switch matrices [36][38].\nHigh-speed digital signal-integrity validation capabilities also include RefClk and PLL jitter performance testing with phase noise analyzers and signal generators [36][38].\nPower Distribution Network validation is listed as a signal-integrity-related test block using scopes and network analyzers [36][38].\nADC/DAC frontend performance validation is listed with spectrum analyzers and signal generators [36][38].\nHigh-speed PCB/PCBA signal-integrity flow includes insertion loss, crosstalk, eye diagram, TDR impedance, stackup planner and transmission-line calculator [36][38].\n【推論】For wireless communication applications, the corpus supports combining wireless-standard vector signal analysis, EVM, O-RAN/beamforming analysis, multiport RF analysis, wideband spectrum analysis, jitter/clock validation and PCB channel validation as the main signal-integrity capability set, because these capabilities are separately documented for wireless test products and SI/PI validation flows.[1][2][18][23][36][38][40][50]\n\n來源：\n[1] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[2] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[3] Wiki：R&S VSE（來源：`R&S portfolio for O-RU testing.md`）\n[9] Wiki：CMX500_specs_en_5216-4127-22_v1100（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[13] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[18] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[21] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[23] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[36] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[38] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[40] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[41] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[42] Wiki：EVM（來源：`1C111_0e_3GPPPreConfGuide.md`、`1C111_1e_3GPPPreConfGuide.md`、`FWA CPE.md`…）\n[50] Wiki：R&S FSWX（來源：`FSWX_specs_en_3684-1314-22_v1200.md`）\n[51] Wiki：R&S FSWX（來源：`FSWX_specs_en_3684-1314-22_v1200.md`）",
+          "evidence": {
+           "raw_citations": 15,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.1.0-k2.1"
+           },
+           "trace": {
+            "trace_id": "trace-1793a1c0df4d4a31b852558d091acba2",
+            "request_id": "request-1793a1c0df4d4a31b852558d091acba2",
+            "span_id": "span-1793a1c0df4d4a31b852558d091acba2",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "What are the most important signal integrity capabilities for applications in Wireless Communication? Please answer with citations from the RS Knowledge corpus.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "R&S VSE › 來源中的定位\n依 [[R&S portfolio for O-RU testing]]（August 2023）：\n\n- Slide 8 的 VIAVI + R&S O-RU Tester solution 中列出 [[R&S VSE]]。\n- Slide 14 標題為 `R&S®VSE Signal analysis software`，描述為 PC analysis software。\n- Slide 14 key facts：\n  - Supports mobile and wireless communications standards。\n  - Fast measurements with parallel analysis。\n  - Supporting floating licenses。\n  - Control multiple instruments from one PC。\n- Slide 15 說 5G NR signal analysis 支援 presets for 5G NR Test models 與 support of all 5G NR measurements。\n- Slide 26 說 3GPP Receiver characteristic testing requires throughput calculation，且 BLER 與 Tput parameters implemented to VSE software。\n- Slide 35 說 signal analysis with option VSE-K175 有 pre-defined test signals according to WG4.CONF.0 test specification。\n- Slide 36 說 VSE software can extract channel decoder results and bitstream of 5G and LTE uplink and downlink signals；beamforming measurements 可用 VSE-K146 在 summary 顯示 phase and magnitude difference。\n- Slide 38 說 O-RAN PCAP Converter 可把 captured Ethernet stream 轉成 VSE file format，VSE analyzes the U-Plane data in UL and DL。\n- Slide 46 / 48 的 configurations 列出 VSE Basic Edition、FSPC license dongle、VSE-K144、VSE-K146、VSE-K175、VSE-K100、VSE-K104 等項目。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S VSE.md"
+              },
+              "score": 1.73174
+             },
+             {
+              "text": "R&S VSE\n[[R&S VSE]]（Vector Signal Explorer）是 Rohde & Schwarz 的 PC signal analysis software；在 [[R&S portfolio for O-RU testing]] 中用於 5G NR、LTE、O-RAN U-Plane / PCAP analysis 與 beamforming measurements 的分析端。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S VSE.md"
+              },
+              "score": 0.96008
+             },
+             {
+              "text": "R&S VSE › 來源列出的 options / items\n依 [[R&S portfolio for O-RU testing]] Slide 46–48：\n\n| Item | 來源說法 |\n|---|---|\n| VSE | Vector Signal Explorer Software / VSE Basic Edition |\n| FSPC | License dongle, PC SW |\n| VSE-K144 | 5G-NR DL/UL Measurements |\n| VSE-K146 | 5G-NR MIMO&Beamforming DL Measurements；optional，例如 with RTP |\n| VSE-K175 | O-RAN Measurements |\n| VSE-K100 | LTE FDD DL/UL Measurements；optional |\n| VSE-K104 | LTE TDD DL/UL Measurements；optional |\n\nSlide 48 明列：\n\n- FSPC material `1310.0002.03`。\n- VSE material `1345.1011.06`。\n- VSE-K144 material `1309.9574.06`。\n- VSE-K175 material `1350.7020.06`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S VSE.md"
+              },
+              "score": 0.569486
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100 › 產品與硬體\n- [[R&S CMX500]] — Radio Communication Tester；base unit order no. **1201.0002K70**。\n- [[R&S CMX-PB70H]] — CMX500 basic assembly；order no. **1222.0676.09**。\n- [[R&S CMX-B200A]] — accelerator unit；order no. **1222.0747.02**；提供 accelerated digital signal processing capabilities 與 two high-speed digital I/Q interfaces。\n- [[R&S CMX-B300C]] — processing unit；order no. **1222.0801.04**；需要 [[R&S CMX-PB70H]]，提供 high-performance computing platform、LAN DAU、internal LAN 與 USB 3.0 DAU interface。\n- [[R&S CMX-B500A]] — IF unit；order no. **1222.0924.02**；提供 IF frequency range 的 vector signal analysis 與 ARB based generator functionality。\n- [[R&S CMX-B600B]] — RF unit；order no. **1222.0953.03**；提供 FR1 frequency range 的 vector signal analysis 與 ARB based generator functionality。\n- [[R&S CMXHEAD30]] — remote radio head；order no. **1201.0002K73**；搭配 [[R&S CMXH-B73A]] hardware unit，order no. **1430.9106.02**。\n- [[R&S CMXHEAD50]] — remote radio head；order no. **1201.0002K76**；搭配 [[R&S CMXH-B73B]] hardware unit，order no. **1430.9106.03**。\n- [[R&S CMXHEAD50-Evo]] — HEAD50-Evo setup 使用 [[R&S CMXH-B73C]]、[[R&S CMXH-B74A]] 與 [[R&S CMXH-B76A]]。\n- [[R&S CMX-RF42E]] — Active RF frontend for NR FR2 extension；order no. **1441.3004K02**。\n- [[R&S CM-Z30A]] — remote radio head connection cable，length 3 m；order no. **1212.1040.02**。\n- [[R&S CMX-ZG100A]] — monitor；order no. **1222.3100.02**。\n- [[R&S CMX-Z101A]] — monitor mount；order no. **1222.3098.02**。\n- [[R&S ZZA-KN7]] — 19 inch adapter，7 HU，1/1；order no. **1175.3062.00**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 5.144736
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100 › Ordering information 摘錄\n| 項目 | Type / code | Order No. | 原文說明 |\n|---|---|---|---|\n| CMX500 Radio communication tester | CMX500 | 1201.0002K70 | accessories 包含 power cords、operating manual、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters |\n| CMX500 basic assembly | R&S CMX-PB70H | 1222.0676.09 | basic assembly |\n| Accelerator unit | R&S CMX-B200A | 1222.0747.02 | accelerated digital signal processing |\n| Processing unit | R&S CMX-B300C | 1222.0801.04 | generic high-performance computing platform |\n| IF unit | R&S CMX-B500A | 1222.0924.02 | IF vector signal analysis and ARB based generator |\n| RF unit | R&S CMX-B600B | 1222.0953.03 | FR1 vector signal analysis and ARB based generator |\n| WLAN TX measurements 802.11a/b/g/n/ac | R&S CMX-KM350 | 1222.7135.02 | analyzer option |\n| WLAN TX measurements 802.11ax | R&S CMX-KM351 | 1222.7141.02 | analyzer option |\n| WLAN TX measurements 802.11be | R&S CMX-KM352 | 1222.7158.02 | analyzer option |\n| LTE analyzer | R&S CMX-KM500 | 1222.5603.02 | analyzer option |\n| 5G NR analyzer | R&S CMX-KM600 | 1222.4013.02 | analyzer option |\n| 5G NR generator | R&S CMX-KW601 | 1222.1920.02 | generator option |\n| Remote radio head | R&S CMXHEAD30 | 1201.0002K73 | mmWave extension with CMXHEAD30 |\n| Hardware unit | R&S CMXH-B73A | 1430.9106.02 | for CMXHEAD30 |\n| Remote radio head | R&S CMXHEAD50 | 1201.0002K76 | mmWave extension with CMXHEAD50 / CMXHEAD50-Evo |\n| Hardware unit | R&S CMXH-B73B | 1430.9106.03 | for CMXHEAD50 |\n| Advanced TRX unit for signaling | R&S CMXH-B73C | 1430.9106.04 | for CMXHEAD50-Evo |\n| High-class synthesizer | R&S CMXH-B74A | 1430.7555.02 | for CMXHEAD50-Evo |\n| Housing for R&S CMXH-B74A | R&S CMXH-B76A | 1430.7710.02 | housing |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 3.048097
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100\n這份來源是 [[R&S CMX500]] Radio Communication Tester 的 **Specifications** 文件，文件編號 **PD 5216.4127.22**，文件版本 **Version 11.00**，文件日期 **August 2025**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 2.353892
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100 › 測試主題與技術\n- [[5G NR]]、[[NR FR1]]、[[NR FR2]]、[[LTE]]、[[NSA]]、[[SA]]、[[FDD]]、[[TDD]]、[[Fading]]、[[ARB generator]]、[[Vector signal analysis]]、[[FFT spectrum analyzer]]、[[EVM]]、[[Displayed average noise level]]、[[Remote radio head]]。\n- 引用標準包含 [[3GPP TS 38.521-1]]、[[3GPP TS 38.521-2]] 與 Guide to the Expression of Uncertainty in Measurement（GUM）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 1.580431
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100 › 與既有知識的關係\n- 本來源是 [[R&S CMX500]] 的正式 Specifications 文件，補足 [[CMX500_Features_CSW9-20-0_en_32]] 未提供的 base unit order number、hardware unit order number、具體 [[R&S CMX-B500A]] / [[R&S CMX-B600B]] 型號、FR1/FR2 RF 規格、環境條件、尺寸重量、電源與 service / warranty 資訊。\n- [[CMX500_Features_CSW9-20-0_en_32]] 是 Features and Functions overview，文件版本 Version 32，對應 CSW 9.20.0 and higher；本來源是 Specifications Version 11.00（August 2025）。兩者層次不同，應在 [[R&S CMX500]] 產品頁並列使用。\n- 本來源提到 external local oscillator EVM 測試使用 [[R&S SMA100B]] RF and microwave signal generator 與 R&S SMA-B711 ultra low phase noise option；這與既有 [[R&S SMA100B]] 頁可互相追溯。\n- 本來源列出 [[R&S CMX-RF42E]] 的獨立 specifications 文件 **PD 3609.7719.22**，但未提供該文件的版次或日期。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 0.950748
+             },
+             {
+              "text": "CMX500_specs_en_5216-4127-22_v1100 › 重點摘要\n- [[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援 3GPP [[5G NR]] technology，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD 與 TDD device testing。\n- [[R&S CMX500]] 配置包含 OBT lite、OBT、OBT plus、OBT FR1 specialist、OBT FR2 specialist，主要差異在 [[R&S CMX-B200A]] accelerator unit、[[R&S CMX-B500A]] IF unit、[[R&S CMX-B600B]] RF unit 的數量。\n- [[NR FR1]] 與 [[LTE]] 測試使用 integrated RF units；[[R&S CMX-B600B]] RF unit 的 frequency range 為 **400 MHz to 8000 MHz**。\n- [[NR FR2]] 測試可搭配 [[R&S CMXHEAD30]]、[[R&S CMXHEAD50]] 或 [[R&S CMXHEAD50-Evo]] remote radio head；remote radio head 在 IF 與 5G NR FR2 frequency ranges 間執行 upconversion / downconversion。\n- 適用的 radiated chamber test environments 包含 [[R&S CMQ500]] shielding cube 與 [[R&S ATS800R]] CATR rack based antenna test system。\n- [[R&S CMX500]] 內建 vector signal analysis 與 ARB generator，可做 FR2 transmitters / receivers RF parametric testing；5G NR receiver tests 可在 3GPP fading propagation conditions 下使用 internal baseband fading emulation。\n- Product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘，符合指定 environmental conditions，遵守 recommended calibration interval，且已執行所有適用的 internal automatic adjustments。\n- 文件區分 specifications with limits、non-traceable specifications with limits、specifications without limits、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n- 文件聲明：**Data without tolerance limits is not binding**；**Subject to change**。\n- 版權：© 2019–2025 [[Rohde & Schwarz]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+              },
+              "score": 0.827486
+             },
+             {
+              "text": "R&S CMX500 › Base unit 與主要訂購資訊\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n| 項目 | Type / code | Order No. | 原文說明 |\n|---|---|---|---|\n| CMX500 Radio communication tester | CMX500 | 1201.0002K70 | accessories 包含 power cords、operating manual (getting started)、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters |\n| CMX500 basic assembly | R&S CMX-PB70H | 1222.0676.09 | basic assembly |\n| R&S CMX accelerator unit | R&S CMX-B200A | 1222.0747.02 | accelerated digital signal processing capabilities |\n| R&S CMX processing unit | R&S CMX-B300C | 1222.0801.04 | generic high-performance computing platform for advanced data processing |\n| R&S CMX IF unit | R&S CMX-B500A | 1222.0924.02 | IF frequency range vector signal analysis and ARB based generator |\n| R&S CMX RF unit | R&S CMX-B600B | 1222.0953.03 | FR1 frequency range vector signal analysis and ARB based generator |\n\n[[CMX500_Features_CSW9-20-0_en_32]] 使用 generic code [[R&S CMX-B500x]] 與 [[R&S CMX-B600x]]；[[CMX500_specs_en_5216-4127-22_v1100]] 在 ordering information 中列出具體 orderable unit 為 [[R&S CMX-B500A]] 與 [[R&S CMX-B600B]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 7.612123
+             },
+             {
+              "text": "R&S CMX500 › R&S CMX-B200A accelerator unit\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX-B200A]] 提供 accelerated digital signal processing capabilities，並包含 two high-speed digital I/Q interfaces：\n\n| 項目 | 規格 |\n|---|---|\n| Ports | DIG. IQ HS 1、DIG. IQ HS 2 |\n| Direction | full duplex |\n| Connector | QSFP+ |\n| Level | CML |\n| Data rate | 40 Gbps |\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，每個 accelerator unit 可 fading 的最大 cells 數包含：1 NR cell 8x8 MIMO；1 NR cell 16x4 MIMO, 50 MHz bandwidth；2 NR cells 4x4 MIMO；4 NR cells 2x2 MIMO；2 LTE cells 8x4 MIMO；4 LTE cells 2x2 或 4x4 MIMO。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 5.388346
+             },
+             {
+              "text": "R&S CMX500 › RF generator\nOutput level uncertainties 適用於 continuous wave，不適用於 overrange；wideband applications 可能產生 additional uncertainties。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 19,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.474673
+             },
+             {
+              "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.216122
+             },
+             {
+              "text": "R&S CMX500 › IF unit：R&S CMX-B500A\n[[R&S CMX-B500A]] 是 [[R&S CMX500]] 的 IF unit option；依 [[CMX500_specs_en_5216-4127-22_v1100]]，它提供 IF frequency range 的 vector signal analysis 與 ARB based generator functionality。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 2.708639
+             },
+             {
+              "text": "R&S CMX500 › RF unit：R&S CMX-B600B\n[[R&S CMX-B600B]] 是 [[R&S CMX500]] 的 RF unit option；依 [[CMX500_specs_en_5216-4127-22_v1100]]，它提供 FR1 frequency range 的 vector signal analysis 與 ARB based generator functionality。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 2.708639
+             },
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 2.405799
+             },
+             {
+              "text": "R&S CMX500 › Application tests 與 audio\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n- 未啟用 R&S CMX-KA100 等 application test license 時，IP application test functionality 降到最低；只能使用 standalone mode，不能連接 external servers，也不支援 IP based measurements 或 tools。\n- R&S CMX-KA100 提供 internal IP services 與 IP connection to DUT 測試 applications，包含 DNS、IMS、Message Center、FTP、HTTP、DNS monitor、IP logging、iPerf、Ping、throughput、Max Throughput Wizard、web server。\n- R&S CMX-KA110 增強 KA100，加入 QoS、ePDG、N3IWF、delay measurement、IP tune tool、SMPP / MT SMS advanced settings。\n- R&S CMX-KA150 提供 IP analysis tool，用於監控與分析 DUT uplink / downlink IP traffic。\n- R&S CMX-KA180 提供 audio codecs for 4G and 5G IMS voice call，支援 AMR-NB、AMR-WB、EVS，並包含 [[R&S CMX-ZG180A]] external sound card drivers and configuration settings。\n- R&S CMX-KA181 加入 [[POLQA]]，用於 measuring perceived speech quality；measurement version 為 3，mode 為 full-band 或 narrowband。\n- R&S CMX-KA401 支援 WAV player / recorder、upload/download WAV files、file-based POLQA measurements 與 end-to-end audio delay。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 35,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 2.39147
+             },
+             {
+              "text": "R&S CMP180\n[[R&S CMP180]] 是 [[Rohde & Schwarz]] 的 **Radio Communication Tester**，用於 production / wireless communication device 測試，依文件可配置多埠 RF generator/analyzer、通訊標準 measurement options、waveform options 與 [[R&S VSE]] 分析能力。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 7.048783
+             },
+             {
+              "text": "R&S CMP180 › R&S VSE integration\n依 [[CMP180 Features and Functions Version 09]]：\n\n- [[R&S VSE]] 是 high-performance analysis software，支援 [[R&S CMP180]] 作為 supported instrument。\n- 如果 VSE client license 由 CMP180 提供，需 **R&S CMP-KM150** signal analysis base software。\n- R&S CMP-KM152 提供 signal analysis digital。\n\n依 [[CMP180 Specifications Version 08.00]]：\n\n| Designation | Type | Order no. |\n|---|---|---|\n| Signal analysis base software | R&S CMP-KM150 | 1212.3972.02 |\n| Signal analysis, digital | R&S CMP-KM152 | 1212.3989.02 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 18,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 3.334586
+             },
+             {
+              "text": "R&S CMP180 › 文件依據與版本\n本頁目前依兩份 Productions 來源整理：\n\n- [[CMP180 Features and Functions Version 09]]：文件識別碼 **1179.5118.02**，**Version 09**，對應 software **V11.9 or higher**，版權標示 © 2026；此文件是 test applications overview，並明示量測範圍與 tolerance limits 需參考 specifications document **PD 3609.7348.22**。\n- [[CMP180 Specifications Version 08.00]]：文件識別碼 **PD 3609.7348.22**，**Version 08.00**，日期 **March 2026**；此文件提供 specifications、general data、ordering information、warranty 與 service。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 2.591593
+             },
+             {
+              "text": "R&S CMP180 › 產品定位\n[[R&S CMP180]] 是 Radio Communication Tester。依 [[CMP180 Features and Functions Version 09]]，文件涵蓋 global options、Bluetooth、CDMA2000、GSM、LP-IoT、LTE、NB-IoT、NR、spectrum analysis、UWB、WCDMA、WLAN、[[R&S VSE]] options 與 ordering information。\n\n依 [[CMP180 Specifications Version 08.00]]，CMP180 支援 simultaneous receiver and transmitter testing，並提供 RF generator/analyzer no. 1 與可選 RF generator/analyzer no. 2 的多埠 RF 測試架構。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 2.17802
+             },
+             {
+              "text": "R&S CMP180 › Receiver test functions\n- RF generator signal is split and forwarded to 8 output ports each。\n- every output can be switched off separately。\n- collective output level setting for connectors RF 1.1 to RF 1.8 and RF 2.1 to RF 2.8。\n- frequency-dependent attenuation（FDA）table for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 2.14833
+             },
+             {
+              "text": "R&S CMP180 › RF analyzer 主要規格\n依 [[CMP180 Specifications Version 08.00]]：\n\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Frequency resolution |  | 0.1 Hz |\n| IF bandwidth | RF x.1 to RF x.8 | 250 MHz；with R&S CMP-K185：500 MHz |\n| Maximum input DC level |  | 0 V DC |\n| Expected nominal power setting range | ADC full scale, 400 MHz to 8000 MHz | –47 dBm to +38 dBm |\n\nLevel range：\n\n| Reference level | RMS | PEP |\n|---|---|---|\n| < +10 dBm | max. +20 dBm | max. +28 dBm |\n| ≥ +10 dBm | max. +30 dBm | max. +38 dBm |\n\nOther RF analyzer data：\n\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Inherent spurious response | no input signal, reference level –20 dBm, 400 MHz to 8000 MHz | –85 dBFS typ. |\n| Inherent spurious response | no input signal, reference level –20 dBm, 3750 MHz | –75 dBFS typ. |\n| Level uncertainty | with R&S CMP-B802I or R&S CMP-B805I option, 95% confidence level, +15 °C to +35 °C, 400 MHz to 5000 MHz | ±0.3 dB |\n| Level uncertainty | same, 5000 MHz to 8000 MHz | ±0.4 dB |\n| Level linearity | fixed expected nominal power setting, level range 0 dB to –40 dB | < 0.1 dB |\n| Port switching time | to within 0.1 dB | < 10 µs |\n| Level repeatability | typical after 1 h warm-up time | < 0.01 dB |\n| RX DANL | +15 °C to +35 °C, 400 MHz to 6500 MHz | < –157 dBm（1 Hz） |\n| RX DANL | +15 °C to +35 °C, 6500 MHz to 7800 MHz | < –155 dBm（1 Hz） |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 1.923736
+             },
+             {
+              "text": "R&S CMP180 › Measurement options\n| Designation | Type | Order no. |\n|---|---|---|\n| Non-cellular measurements pack 1 | R&S CMP-PKM30 | 1212.3689.02 |\n| Cellular measurements pack 1 | R&S CMP-PKM40 | 1212.3695.02 |\n| Advanced path loss measurements（serial number ≥ 102160） | R&S CMP-KM115 | 1212.2201.02 |\n| Advanced path loss measurements（serial number < 102160） | R&S CMP-U115 | 1212.4291.02 |\n| Spectrum analyzer | R&S CMP-KM140 | 1212.4410.02 |\n| Signal analysis base software | R&S CMP-KM150 | 1212.3972.02 |\n| Signal analysis, digital | R&S CMP-KM152 | 1212.3989.02 |\n| NB-IoT measurements | R&S CMP-KM250 | 1212.2218.02 |\n| LP-IoT measurements, Zigbee | R&S CMP-KM280 | 1212.2224.02 |\n| Ultra-wideband production measurements | R&S CMP-KM305 | 1212.4304.02 |\n| UWB IEEE 802.15.4ab production measurements | R&S CMP-KM306 | 1212.4691.02 |\n| Bluetooth measurements, Classic / Low Energy up to Rel. 5.3 | R&S CMP-KM310 | 1212.2230.02 |\n| Bluetooth HDT measurements Rel. 7.0 | R&S CMP-KM317 | 1212.4591.02 |\n| WLAN IEEE 802.11a/b/g/n/ac SISO measurements | R&S CMP-KM350 | 1212.2247.02 |\n| WLAN IEEE 802.11ax SISO measurements | R&S CMP-KM351 | 1212.2253.02 |\n| WLAN IEEE 802.11be SISO measurements | R&S CMP-KM352 | 1212.2260.02 |\n| WLAN true MIMO 2x2 and 4x4 measurements | R&S CMP-KM360 | 1212.2276.02 |\n| WLAN true MIMO 5x5 and 6x6 measurements | R&S CMP-KM361 | 1212.4685.02 |\n| WLAN packet error rate acknowledgement measurements | R&S CMP-KM365 | 1212.4562.02 |\n| GSM measurements | R&S CMP-KM420 | 1212.2282.02 |\n| WCDMA measurements | R&S CMP-KM440 | 1212.2299.02 |\n| CDMA2000 1xRTT measurements | R&S CMP-KM480 | 1212.2730.02 |\n| LTE measurements | R&S CMP-KM500 | 1212.2301.02 |\n| LTE C-V2X measurements, PC5 | R&S CMP-KM570 | 1212.2318.02 |\n| NR FR1 measurements, single carrier | R&S CMP-KM600 | 1212.2101.02 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 1.744753
+             },
+             {
+              "text": "R&S CMP180 › Base unit 與硬體配置\n依 [[CMP180 Specifications Version 08.00]] ordering information：\n\n| Designation | Type | Order no. |\n|---|---|---|\n| Radio communication tester, including power cables and getting started guide | CMP180 | 1201.0002K18 |\n| CMP180 basic assembly | R&S CMP-PB18I | 1212.1986.10 |\n| Single instrument interface | R&S CMP-B40J | 1212.3372.11 |\n| Multi-instrument interface | R&S CMP-B41J | 1212.3389.11 |\n| RF unit 250（basic function, 6 GHz/250 MHz） | R&S CMP-B802I | 1212.3408.10 |\n| RF unit 500（basic function, 6 GHz/250 MHz） | R&S CMP-B805I | 1212.3414.10 |\n| Performance uprating for RF unit 500 | R&S CMP-KB805 | 1212.3866.02 |\n\n依 [[CMP180 Features and Functions Version 09]] 的 RF unit 描述：\n\n- **R&S CMP-B802x**：僅支援 **250 MHz bandwidth**。\n- **R&S CMP-B805x**：支援 **250 MHz bandwidth**，可用 **R&S CMP-K185** 啟用 **500 MHz**。\n\n依 [[CMP180 Specifications Version 08.00]]：\n\n- RF generator/analyzer no. 1：**8 × SnapN**，RF input/output to DUT，RF 1.1 to RF 1.8。\n- RF generator/analyzer no. 2：**8 × SnapN**，RF input/output to DUT，RF 2.1 to RF 2.8；requires **R&S CMP-K102** or **R&S CMP-K105** software license key。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 1.54998
+             },
+             {
+              "text": "R&S portfolio for O-RU testing › 重點摘要\n- 來源把 [[O-RU testing]] 放在 [[3GPP TS 38.141-1]] / [[3GPP TS 38.141-2]] base station conformance、[[O-RAN WG4 Conformance Testing]]、以及 O-RAN 3GPP conformance testing feasibility 的交界處。\n- Slide 2 描述 [[Open RAN]] network：[[O-RU]]、[[O-DU]]、[[O-CU]]、core network，並標示 S、C/U、M planes、[[eCPRI]]、[[PTP]]、[[NetConf]]、O-FH Split 7-2x 與 Ethernet。\n- Notes 說 O-RAN implements Control, User and Synchronization Plane Specification，並依 [[eCPRI]] Specification v2.0 封裝 / 解封裝 transported packets 中的 I/Q radio samples。\n- Slide 6 總結 measurement setups：\n  - [[O-RAN WG4 Conformance Testing]]：O-RAN O-RU Conformance（O-RAN.WG4.CONF）。\n  - [[3GPP BTS Pre-Conformance]]：complementary but not a substitute，含 Tx / Rx characteristics。\n  - [[3GPP TS 38.141]] / [[3GPP TS 36.141]]：BTS conformance，Tx characteristics Ch. 6、Rx characteristics Ch. 7、Rx performance Ch. 8。\n  - O-RAN.WG4.3GPP-Conformance-Testing TR：3GPP Conformance Feasibility。\n- Slide 8 的 solution diagram 是 [[VIAVI O-RU Tester]] + R&S signal generation / analysis 的整合方案：[[R&S VSE]]、[[R&S SMW200A]] / [[R&S SMBV100B]]、[[R&S FSW]] / [[R&S FSVA3000]]、Ethernet switch、PTP-GM、O-RU TMA、interconnection unit 與 O-RU DUT。\n- Slide 10 說 R&S provides the signal generation and analysis interfaces to the VIAVI O-RU tester，並主張 R&S hardware solutions offer full test capability for [[3GPP TS 38.141-1]] conducted and [[3GPP TS 38.141-2]] radiated conformance tests。\n- Slide 18 說 38.141 base station conformance testing covers transmitter and receiver characteristics as well as receiver performance under noise and fading conditions，並以 integrated test case wizard 簡化 wanted signal、leveling、interferer simulation、fading 與 triggering 設定。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/R&S portfolio for O-RU testing.md"
+              },
+              "score": 1.405937
+             },
+             {
+              "text": "R&S portfolio for O-RU testing › 原文未解的問題\n- 來源是 PPTX 轉出的 lossy markdown，圖片、checkbox、表格符號與連線圖可能遺失；原 PPTX 才是 source of truth。\n- 來源未標示完整 R&S document number、classification、revision history 或正式 publication status。\n- Slide 1 標示 August 2023；後續 O-RAN WG4.CONF、3GPP TS 38.141 與 R&S firmware / option 支援狀態可能已變更。\n- Slide 8 標示 `ORAN-WG4.CONF-v06.00`，但未提供正式文件全文或 test case ID 完整清單。\n- Slide 19 說 O-RAN 3GPP Conformance Testing Feasibility technical report currently under review；未標示最終發布版本。\n- Slide 21 的 `lowest common denominator` approach 仍在 standardization discussion；不可視為已定案測試方法。\n- Slide 24 句子在 `timing signals provided to this equipment and` 處截斷。\n- Slide 26 說 VSE sensitivity level has been improved，但未標示 software version、license、數值或驗證條件。\n- Slide 48 表中有疑似 OCR / 表格錯位：`FSV3030` description 寫 `FSV3007 SIGNAL ANALYZER 30GHZ`，`FSVA3030` description 寫 `FSVA3007 SIGNAL ANALYZER 30GHZ`，且 `FSV3-B200` material 似乎與 `FSV3-B400` order number 混用；需回原 PPTX /報價工具確認。\n- Slide 51 寫 `PWS is recognized like CATR`，疑似 `PWC` / `PWS` OCR 或原文拼寫問題。\n- 來源未提供 VIAVI O-RU Tester 的正式產品型號、版本、license 或 VIAVI 官方文件。\n- 來源未完整列出 O-RAN beamforming testcases 的 pass / fail criteria、TER 定義、calibration method 或 measurement uncertainty。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/R&S portfolio for O-RU testing.md"
+              },
+              "score": 1.052455
+             },
+             {
+              "text": "O-RAN WG4 Conformance Testing › Beamforming 測試線索\n- Slide 40 列出 ORAN BFM testcases，包含 FR1 FDD conducted signal tests、FR1 TDD conducted signal tests、No Beamforming、Predefined-beam Beamforming、Weight-based Dynamic Beamforming、Attribute-based Dynamic Beamforming、Channel-Information-based Beamforming。\n- Slide 42 說 ORAN Conformance Test Specification chapter 3.2.3.2ff 涉及 analog beamforming（TD）and/or digital beamforming（FD），one beam per section at a time，至少 two antenna ports must be measured。\n- 詳見 [[O-RAN Beamforming Measurements]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/O-RAN WG4 Conformance Testing.md"
+              },
+              "score": 1.086896
+             },
+             {
+              "text": "O-RAN WG4 Conformance Testing › 來源中的定位\n依 [[R&S portfolio for O-RU testing]]（August 2023）：\n\n- Slide 6 將 O-RAN O-RU Conformance 標示為 `O-RAN.WG4.CONF`。\n- Slide 8 的 solution diagram 標示 `O-RAN WG4 CUSM Conformance Test (ORAN-WG4.CONF-v06.00)`。\n- Slide 33 說對多數 tests，single antenna port is tested at a time，one port analyzer and generator configuration is sufficient。\n- Slide 34 說 standard test signals are defined in O-RAN.WG4.CONF test specification，且 test signals 會依 O-RU capability 與 test case 變化。\n- Slide 35 說 signal analysis with VSE-K175 有 pre-defined test signals according to WG4.CONF.0 test specification；signal generation with SMW-K175 可依 O-RAN.WG4.CONF test case number 產生。\n- Slide 36 說多數 UC-Plane test cases 的 test requirement 是 payload binary sequences（bitstream）match；[[R&S VSE]] 可 extract channel decoder results and bitstream of 5G and LTE uplink and downlink signals。\n- Slide 37 說 [[R&S SMW200A]] 的 SMW-K175 可做 LTE / 5G NR U-Plane generation，configure & generate required 5G/LTE downlink signal，並 save IQ Data in frequency domain U-Plane format。\n- Slide 38 說 O-RAN PCAP Converter 是 free of charge R&S tool，可把 captured Ethernet stream 轉成 VSE file format，讓 VSE 分析 UL / DL U-Plane data。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/O-RAN WG4 Conformance Testing.md"
+              },
+              "score": 0.926933
+             },
+             {
+              "text": "O-RAN WG4 Conformance Testing\n[[O-RAN WG4 Conformance Testing]] 是 [[O-RAN Alliance]] WG4 對 [[O-RU]] 的 C/U/S/M plane、U-Plane signal generation / analysis、test signals、beamforming 與 conformance 測試規格脈絡；目前主要由 [[R&S portfolio for O-RU testing]]（August 2023）支撐。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/O-RAN WG4 Conformance Testing.md"
+              },
+              "score": 0.893426
+             },
+             {
+              "text": "Rethink 5G Testing solution overview 5G RedCap NTN FWA › 重點摘要\n- 來源主題是 Rethink 5G testing：如何針對 suitable use cases and markets 實作 ultimate 5G device experience，並把 testing focus 從 single tools 轉為 complete use cases。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- Wireless communication equipment shipment forecast 以 2022 為基準列出：Base Station RUs 0.01 Bn、Smartphones 1.2 Bn、Cellular IoT modules 0.4 Bn、Wi‑Fi devices 4.4 Bn、Bluetooth devices 5.1 Bn；CAGR4 分別為 +5%、+4%、+19%、+8%、+8%，資料來源列 [[IDC]]、[[Berg Insight]]、[[Murata]]。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- 5G global ecosystem Q2CY2023 snapshot 指出 5G ecosystem 相較 LTE 仍在 early stages，列出 chipsets 110 / commercial 104、devices 1820 / commercial 1546、operators 532 / commercial 254、5G connections 約 1B、5G SA 41、mmW 128 / commercial 47、FWA CPE 203。來源標示 [[GSA Gambod]] and [[Ericsson Mobile Data]], Q2 2023。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- LTE / 5G connection forecast 顯示 5G 從 2020 年 160.267 增至 2028 年 4974.568，同期 LTE 從 4751.87 於 2022 年達 5157.401 後逐年下降到 2028 年 3583.092；單位與資料來源在萃取片段未完整標示。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- 5G device value chain 包含 [[Network operator]]、[[Device manufacturer]]、[[Test house]]、[[Chip vendor]]，測試階段 / 場域涵蓋 Lab、R&D、Production、Operations、Use cases；測試類型涵蓋 RF、Signaling、Application、OTA、Pre-conformance、Conformance approval、Carrier acceptance、Non-signaling RF、Signaling Protocol、Service and repair。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rethink 5G Testing solution overview 5G RedCap NTN FWA.md"
+              },
+              "score": 2.968974
+             },
+             {
+              "text": "5G FR2 RSE 測試 › FCC / ANSI C63.26 口徑\n依 [[RSE Test System TS8996 (1)]]：\n\n- ANSI C63.26 RSE frequency ranges：\n  - RF signal <10 GHz: 10th harmonic, max. 40 GHz。\n  - RF signal <30 GHz: 5th harmonic, max. 100 GHz。\n  - RF signal >30 GHz: 5th harmonic, max. 200 GHz。\n- FCC 47 CFR Part 30, KDB 842590 and ANSI C63.26：\n  - 30 MHz up to 5th harmonic / 100 GHz（devices <30 GHz）或 200 GHz（devices >30 GHz）。\n  - Limit -13 dBm。\n  - Method: TRP。\n  - Early exit criteria for EIRP, TRP only for failing frequencies。\n  - Test distance formula 在來源中 OCR 為 `≥ 2D2/`，公式不完整，需回查原文。\n- 來源稱 FCC requires 30 MHz to 5th harmonic / 200 GHz and semi anechoic chamber → [[R&S TS8996]]。\n\n⚠️ [[RSE Test System TS8996 (1)]]（07/2025）說 FCC 5G FR2 RSE requirement starts at 30 MHz up to 5th harmonic / 100 GHz or 200 GHz，但既有頁面 [[FCC 無線設備法規測試]] 說 5G NR FR2 FCC analyzer frequency range 是 9 kHz–200 GHz。判斷：兩者可能分別是 test requirement lower bound 與 analyzer / general spectrum investigation range 口徑；未回查 47 CFR、KDB 842590 與 ANSI C63.26 前並列保留。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FR2 RSE 測試.md"
+              },
+              "score": 1.403194
+             },
+             {
+              "text": "5G FR2 RSE 測試\n[[5G FR2 RSE 測試]]是針對 5G FR2 devices 的 [[Radiated Spurious Emissions]] 測試主題；[[RSE Test System TS8996 (1)]]（07/2025）把它拆成 3GPP / FCC / ETSI requirements、TS8980 / TS8996 分工、FR2 signal conditioning、above-40-GHz extension 與 [[R&S ELEKTRA]] test workflow。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FR2 RSE 測試.md"
+              },
+              "score": 1.344114
+             },
+             {
+              "text": "5G FR2 RSE 測試 › Signal conditioning and frequency extension\n依 [[RSE Test System TS8996 (1)]]：\n\n- 5G FR2 carrier can be between 24.25 GHz and 50 GHz。\n- UE Power class 3: max. TRP 23 dBm + antenna gain + crest factor。\n- Without level adaptation, preamplifiers can overload and produce wrong results。\n- [[TS-PRE1850]]：18 GHz to 40 GHz；40–50 GHz extension with [[TS-PRE-B1]]。\n- 41 GHz to 325 GHz extension 使用 [[TC-RSE60]] / 90 / 140 / 220 / 325 receive units 與 [[TC-MX60]] / 90 / 140 / 220 / 325 multiplier units。\n- TC-RSE units sensitivity EIRP（RMS detector）at 1 m test distance：< -40 dBm/MHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FR2 RSE 測試.md"
+              },
+              "score": 1.162364
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽\n[[SerDes 與 SI PI 測試概覽]] 是依 [[0 Digital Test - What are SIPI and Serdes]] 建立的 high-speed digital 測試主題頁，用來連接 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]]、[[PCB]] / [[PCBA]] 與相關驗證儀器類型。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 1.165947
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 0.900189
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 與既有知識的關係\n- [[SerDes]] 已記錄 die-to-die、SoC IP 與封裝示意圖中的 SerDes 語彙；本頁補充 R&S 簡報中 SerDes 與 SI / PI / validation challenges 的測試場景。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]] 與 [[TDR 阻抗測量]] 可承接 Slide 20–21 中對 high speed PCB / PCBA signal integrity flow 與 PCB test solutions 的列名。\n- [[Power Integrity 外部資料清單]] 保存既有 OneNote link hub 中的 PDN impedance 待讀資料；本頁只加入 Slide 11 明示的 [[Power Distribution Network]] 測試區塊。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 0.886066
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 0.878453
+             },
+             {
+              "text": "SerDes 與 SI PI 測試概覽 › 可追溯限制\n- 本來源是 lossy markdown derivative，多數圖像未 OCR；不可把未擷取的圖片內容當成已驗證主張。\n- Slide 11 的頁腳日期 **6/13/2025** 與封面日期 **2026.3.4** 並存，未能判定何者是內容日期。\n- 本頁不推論 R&S 具備所有列名儀器或方案，也不把儀器類型轉換成正式 product configuration。\n- 本頁不提供 [[Signal Integrity]]、[[Power Integrity]] 或 [[SerDes]] 的標準定義；只保存來源明示的測試區塊與儀器類型。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+              },
+              "score": 0.841925
+             },
+             {
+              "text": "EVM\n[[EVM]] 是 Error Vector Magnitude；[[WIC Glossary]] 只提供縮寫展開，[[1C111_0e_3GPPPreConfGuide]] 與 [[1C111_1e_3GPPPreConfGuide]] 則在 5G NR FR1 SA pre-conformance test case 6.4.2.1 中說明 EVM 是 reference waveform 與 measured waveform 之間差異的量測。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "EVM › 來源定義\n依 [[WIC Glossary]]（來源正式日期未標示；raw converted 2026-09-17）：\n\n- EVM 展開為 Error Vector Magnitude。\n\n依 [[1C111_1e_3GPPPreConfGuide]]（06.2025）：\n\n- Error Vector Magnitude（EVM）是 reference waveform 與 measured waveform 之間差異的量測。\n- 來源將 EVM 放在 [[3GPP TS 38.521-1]] test case **6.4.2.1 Error Vector Magnitude PUCCH/PUSCH**。\n- Test ID 會設定 RB Allocation 與 modulation scheme。\n- PUCCH subtests 需參考 application note chapter 2.1 notes。\n- Apply configuration 後，需確認 measured DUT EVM 位於 specified range 內。\n- Test case 要求在 DUT max power 與 min power 下量測 EVM。\n- CMX 會先自動設定 max power；完成 max power EVM verification 後，DUT 需使用 TPC Closed Loop settings 設定為 min power。\n\n[[1C111_0e_3GPPPreConfGuide]] 對同一 test case 的定義與限值摘要相同，並支撐既有 EVM 頁面內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "EVM › 1C111 中的 5G NR EVM limits\n依 [[1C111_1e_3GPPPreConfGuide]]，EVM measurement results 必須低於 [[3GPP TS 38.521-1]] Table 6.4.2.1.5-1 的 maximum error percentage，並套用 Table 6.4.2.1.5-2 定義的 Test Tolerance（TT）。來源摘錄的 Average EVM Level limits 為：\n\n| Modulation | Average EVM level limit |\n|---|---|\n| Pi/2-BPSK | 30 + TT % |\n| QPSK | 17.5 + TT % |\n| 16 QAM | 12.5 + TT % |\n| 64 QAM | 8 + TT % |\n| 256 QAM | 3.5 + TT % |\n\nTT 來源摘錄為：\n\n| 條件 | TT |\n|---|---|\n| All except 256QAM | 0% |\n| 256 QAM @ max power | 0.3% |\n| 256 QAM @ min power | 1.1% |\n\n來源範例：DUT on n78、100 MHz BW、PUCCH Test ID 1（QPSK）時，specified maximum EVM 為 **17.5 + 0 %**，且 CMX EVM measurement 位於 3GPP limits 內。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "EVM › 與 min power 的關係\n依 [[1C111_1e_3GPPPreConfGuide]]：\n\n- [[3GPP TS 38.521-1]] Table 6.3.1.3-1 定義 minimum power（Pmin）。\n- Channel BW 3–20 MHz 的 minimum output power 為 -40 dBm。\n- Channel BW 25–100 MHz 的 minimum output power 為 -40 + 10log10(BW/20)。\n- 256QAM Test IDs 的 target power 為 **Pmin + 10 dB**。\n- 來源另以 100 MHz BW 說明 min power according to Table 6.3.1.3-1 略低於 33 dB；此處照來源摘要保留單位字樣，不自行改寫。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "EVM › 與既有測試脈絡的關係\n- [[FWA CPE]] 與 [[FWA CPE 測試與驗證]] 中的戶外高階 mmWave ODU DVT 項目列出 FR2 EVM，但來源未提供 EVM limit、測試配置或標準章節。\n- [[Small Cell BTS 測試資料清單]] 保存 base station Tx / Rx / OTA tests 檔名，但附件未擷取，因此不能補充 EVM 測項。\n- [[1C111_1e_3GPPPreConfGuide]] 補入的是 NR-FR1 SA UE pre-conformance EVM PUCCH/PUSCH 脈絡，不等同 FR2、Wi-Fi、LTE、base station 或 production-line EVM limits。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "EVM › 使用限制\n- 本頁不是完整 EVM measurement tutorial，也不是 [[3GPP TS 38.521-1]] 標準全文。\n- [[WIC Glossary]] 只提供縮寫展開；[[1C111_0e_3GPPPreConfGuide]] 與 [[1C111_1e_3GPPPreConfGuide]] 只提供 selected NR-FR1 SA test case 摘要。\n- 不可由此頁推論 FR1、FR2、Wi-Fi、LTE、NR 或 production line test 的所有 EVM limits。\n- 任何正式 pass / fail limit 應回查對應標準、儀器文件、software version 與 test condition。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "EVM › unresolved\n- EVM 的完整公式、filtering、averaging、reference waveform 產生方式與 test equipment uncertainty 未由 [[WIC Glossary]] 提供。\n- [[1C111_1e_3GPPPreConfGuide]] 只摘錄 selected 3GPP conformance limits；完整 tables 需回查 [[3GPP TS 38.521-1]]。\n- [[FWA CPE]] 中 FR2 EVM 的標準依據與測試條件未標示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EVM.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "CMX500 SRS RF measurements › 使用限制\n- 本頁同時使用 [[CMX500_Callbox]]（Market / company restricted sales-training 簡報）與 [[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]]（Knowledge / company confidential 技術筆記）。兩者都不能取代正式 [[R&S CMX500]] specifications、feature list、release note 或 3GPP 標準原文。\n- 「supports all」屬 [[CMX500_Callbox]] 來源用語，需以正式 feature list、release note、3GPP scope 與 configurator 驗證。\n- [[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]] 引用 [[3GPP TS 38.214]] 但未標示版本；所有 xTyR、guard period、slot resource 限制需以正式 3GPP TS 38.214 對應版本核對。\n- Receiver pre-adder / selection 的 implementation、receiver-chain allocation、calibration、measurement accuracy 與 UI / API 設定仍缺 formal source。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 SRS RF measurements.md"
+              },
+              "score": 1.909041
+             },
+             {
+              "text": "CMX500 SRS RF measurements › Guard period 與 1T4R 限制\n依 [[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]]，Tx switching transient time 需要兩個 SRS transmissions 之間的 minimum guard period：\n\n| SCS | Guard period |\n|---:|---:|\n| 15 kHz | 1 symbol |\n| 30 kHz | 1 symbol |\n| 60 kHz | 2 symbols |\n| 120 kHz | 2 symbols |\n\n來源註明：UE 在 guard period 期間不傳送任何其他 signal。\n\n來源並指出：由於一個 slot 最多可為 UE configure 6 symbols，1T4R antenna switching 因 guard period 資源不足，無法在一個 slot 內達成。此處是 [[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]] 對 [[3GPP TS 38.214]] antenna switching timing / resource 的說法；尚未由正式 3GPP 原文頁驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 SRS RF measurements.md"
+              },
+              "score": 1.450235
+             },
+             {
+              "text": "CMX500 SRS RF measurements › SRS antenna switching 技術背景\n依 [[Antenna Switching and Receiver Pre-adder_Selection for Multi-port SRS]]：\n\n- [[SRS antenna switching]] 讓 [[UE]] 可以將 SRS transmissions route 到其他可用 antenna ports。\n- 若 UE 支援此 feature，[[gNB]] 可要求 UE 在不同 symbols across all downlink receive antennas 傳送 SRS，以 better calibrate [[MIMO]] channel 並 improve downlink SNR。\n- 在 [[MIMO]] setup 中，UE 可能有比某個 physical signal 的 logical ports 更多的 physical antennas；UE 因此需要把 logical ports mapping 到可用 physical antennas 的 subset。\n- UE 可能在不同 [[OFDM symbol]] 中以不同 physical antennas 傳送，因此需要隨時間切換 logical-to-physical port mapping。\n- 來源稱 3GPP Release 15 的一個 use case 是 different SRS resources 的 SRS logical ports 在不同 OFDM symbols 中 transmission，以便從 UE 所有 physical transmit antennas 進行 channel sounding。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 SRS RF measurements.md"
+              },
+              "score": 1.3227
+             },
+             {
+              "text": "R&S FSWX › 產品定位與架構\n- 產品定位：multiport signal and spectrum analyzer。\n- 內部 multipath architecture 支援 1-port 與 2-port instruments。\n- 可用於 spectrum、noise measurement、phase noise、modulation quality（EVM）的 [[Cross-correlation]]。\n- 提供 extended [[Spurious free dynamic range]]（SFDR）。\n- 改善 [[Displayed average noise level]]（DANL）以尋找 hidden spurs。\n- 可在 high-power carrier 存在時量測 distortion 與 noise。\n- 可針對 EVM 要求嚴苛的 components 做 characterization。\n- Multipath wideband phase coherent receivers 可使用 independent receivers 同時進行 signal analysis 與 spectrum analysis。\n- 可在 spectrum 任意位置、相同或不同頻率同時觀察 signals。\n- 可同時量測 antenna 的 H 或 V polarizations、device input 與 output，並直接比較 ports 之間的 amplitude、frequency、phase。\n- Image free I/Q and vector signal analysis 使用 preselected capture and analysis，避免 unwanted signals 干擾量測。\n- Operating system：Linux based operating system，目標為 high security 與 long-term support。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWX.md"
+              },
+              "score": 2.094051
+             },
+             {
+              "text": "R&S FSWX › Signal analysis bandwidth\n| 項目 | 規格 / 條件 |\n|---|---|\n| 每個 RF input | 最高 4 GHz bandwidth |\n| RF input A | 最高 8 GHz bandwidth |\n| Standard I/Q data maximum signal analysis bandwidth | 40 MHz（nom.） |\n| R&S FSW31/32-B100 | 100 MHz（nom.） |\n| R&S FSW31/32-B320 | 320 MHz（nom.） |\n| R&S FSW31/32-B600 | 600 MHz（nom.） |\n| R&S FSW31/32-B1G2 | 1.2 GHz（nom.） |\n| R&S FSW31/32-B2G | 2 GHz（nom.） |\n| R&S FSW31/32-B4G | f < 7.5 GHz：2 GHz（nom.）；f ≥ 7.5 GHz：4 GHz（nom.） |\n| R&S FSW31/32-B6G | f < 7.5 GHz：2 GHz（nom.）；f < 14 GHz：4 GHz（nom.）；f ≥ 14 GHz、RF input A only：6 GHz（nom.） |\n| R&S FSW31/32-B8G | f < 7.5 GHz：2 GHz（nom.）；f < 14 GHz：4 GHz（nom.）；f ≥ 14 GHz、RF input A only：8 GHz（nom.） |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWX.md"
+              },
+              "score": 2.076692
+             },
+             {
+              "text": "R&S FSWX\nR&S FSWX 是 Rohde & Schwarz 的 multiport Signal and Spectrum Analyzer 系列，依 Version 12.00（May 2026）提供 [[R&S FSWX3026]] 與 [[R&S FSWX3044]]，可配置 1 或 2 個 RF inputs，且每個 RF input 有完整 RF receive path。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWX.md"
+              },
+              "score": 1.959357
+             },
+             {
+              "text": "R&S FSWX › Firmware / licence options（摘錄）\n| Option code | 名稱 | Order No. | Requires / 原文說明 |\n|---|---|---|---|\n| R&S FSW3-KR110 | User defined frequency correction | 1347.8113.02 | 來源未標示 |\n| R&S FSW3-KR200 | External frontend control | 1347.8107.02 | 支援 [[R&S FE110SR]]、[[R&S FE170SR]] |\n| R&S FSW3-KM100 | I/Q spectrum analyzer | 1347.7600.02 | 來源未標示 |\n| R&S FSW3-KM101 | Vector signal analysis | 1347.7846.02 | 來源未標示 |\n| R&S FSW3-KM102 | Multi-modulation analysis | 1347.7852.02 | 需要 R&S FSW3-KM101 |\n| R&S FSW3-KM103 | BER PRBS Measurements | 1347.7869.02 | 需要 R&S FSW3-KM101 |\n| R&S FSW3-KM105 | Cross-correlation for I/Q spectrum analyzer | 1349.2170.02 | 需要 R&S FSW3-KM100 |\n| R&S FSW3-KM107 | Analog demodulation application | 1347.7646.02 | 來源未標示 |\n| R&S FSW3-KM112 | OFDM vector signal analysis | 1348.5930.02 | 來源未標示 |\n| R&S FSW3-KM113 | Cross-correlation for OFDM vector signal analysis | 3852.5400.02 | 需要 R&S FSW3-KM112 |\n| R&S FSW3-KM118 | Amplifier measurements | 1347.7675.02 | 來源未標示 |\n| R&S FSW3-KM119 | Frequency response measurements | 1347.7698.02 | 需要 R&S FSW3-KM118 |\n| R&S FSW3-KM120 | Direct DPD measurements | 1347.7681.02 | 需要 R&S FSW3-KM118 |\n| R&S FSW3-KM121 | Memory-polynomial DPD measurements | 1347.8388.02 | 需要 R&S FSW3-KM118 |\n| R&S FSW3-KM125 | Noise figure measurement application | 1347.7723.02 | 來源未標示 |\n| R&S FSW3-KM126 | Cross-correlation for noise figure measurement application | 1347.7730.02 | 需要 R&S FSW3-KM125 |\n| R&S FSW3-KM129 | Phase noise measurement application | 1347.7752.02 | 來源未標示 |\n| R&S FSW3-KM130 | Cross-correlation for phase noise | 1347.7769.02 | 需要 R&S FSW3-KM129 |\n| R&S FSW3-KM135 | Cross-application control and triggering | 1349.2129.02 | 來源未標示 |\n| R&S FSW3-KM310 | EUTRA/LTE FDD downlink | 1347.7969.02 | 來源未標示 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWX.md"
+              },
+              "score": 1.809456
+             },
+             {
+              "text": "Satellite Applications Catapult › 來源中的資訊\n- [[Space Supply Chain]]（來源正文未標示正式發布日期；raw converted 2026-09-17）列出連結文字 `Space Capabilities Catalogue - Satellite Applications Catapult`，URL 為 `https://sa.catapult.org.uk/space-capabilities-catalogue/`。\n- 本次 ingest 未擷取該外部網頁正文、更新日期、catalogue 版本、分類規則、公司名單、capabilities 條目或資料來源。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Satellite Applications Catapult.md"
+              },
+              "score": 0.73056
+             },
+             {
+              "text": "PI for Digital Power › 來源列出的外部連結\n| 類別 | 連結標題 / 可見文字 | URL | 日期 / 期間 |\n|---|---|---|---|\n| [[PDN impedance]] / [[Power Integrity]] guide | Mastering PDN Impedance: A Comprehensive Guide for Power Integrity Design | `https://www.allpcb.com/allelectrohub/mastering-pdn-impedance-a-comprehensive-guide-for-power-integrity-design` | 來源未標示 |\n| Active ultra-high current [[PDN]] impedance measurement | Ultrafast Impedance Measurement of Active Ultra-High Current PDNs｜Signal Integrity Journal | `https://www.signalintegrityjournal.com/articles/3798-ultrafast-impedance-measurement-of-active-ultra-high-current-pdns` | 來源未標示 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/PI for Digital Power.md"
+              },
+              "score": 0.462145
+             },
+             {
+              "text": "Amphenol Communications Solutions › Full-spectrum data center connectivity brochure 補充\n- [[full-spectrum-data-center-connectivity-brochure]] 列出 [[Amphenol OverPass Cable Systems]]，稱其提供 broad range of next gen capabilities，讓 high-speed signal transmission 從 ASIC packages 到 system endpoints across the system。\n- [[full-spectrum-data-center-connectivity-brochure]] 列出 [[ExtremePort OSFP Connectors]]，稱 OSFP connectors and cages have 60 contacts per port and a 0.6 mm pitch form factor optimized for signal integrity、thermal management and multi-lane pluggable architecture。\n- [[full-spectrum-data-center-connectivity-brochure]] 列出 [[Amphenol XtremePass]]，稱 XtremePass 448G connector solution delivers best-in-class SI performance while maximizing density on the substrate，supports scalable form factors from 32DP to 128DP，並跨 Ethernet、NVLink、PCIe 與 InfiniBand systems。\n- [[full-spectrum-data-center-connectivity-brochure]] featured products 包含 [[OSFP Cable Assemblies]]、[[Sentry HD High-Speed Backplane Connector]] 與 [[Celerity 224 Gb-s BGA Mezzanine Connectors]]。\n- [[full-spectrum-data-center-connectivity-brochure]] optical / fiber 區段列出 [[Amphenol XPO-LPO]]、[[1.6T OSFP Transceivers]]、[[Amphenol Co-packaged Optics]]、[[LEAP On-Board Transceiver]]、[[300G CXP2 Active Optical Cable]] 與 [[CommScope Rapid Fiber Connect Platform]]。\n- [[full-spectrum-data-center-connectivity-brochure]] power / cooling 區段列出 [[Amphenol BarKlip I-O products]]、[[60 A Universal AC Input Connector and Cable Assemblies]]、[[M-CRPS +54V Connectors and Cable Assemblies]]、[[PwrBlade ULTRA HD+ Cable Assembly]]、[[OSFP-RHS 224G Cold Plate and Cage Assembly]]、[[Amphenol Liquid Cooling Leakage Detection Sensor Cable Assembly]] 與 [[Liquid Cooling Quick Disconnect Connectors]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Amphenol Communications Solutions.md"
+              },
+              "score": 2.119349
+             },
+             {
+              "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx | WLAN SISO signaling |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx | 802.11ax station testing |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx | 802.11be station testing |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx | 802.11bn station testing |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx | 802.11ax AP testing |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx | 802.11be AP testing |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx | 802.11bn AP testing |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx | 2x2 MIMO support |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx | Enterprise security support |\n| R&S CMX-KS500B / M / X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx | 僅 LTE standalone 需要；NR NSA LTE anchor cells 包含於 NR signaling options |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx | D2C fixed / variable delay |\n| R&S CMX-KS600B / M / X | NR signaling enabler, Rel. 15 | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx | 包含 5G NR SA option 2、NSA option 3、DL 2x2/4x4 MIMO、one CC、UL 256QAM |\n| R&S CMX-KS610B / M / X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx | UL 2x2 MIMO、CA up to 9 CC |\n| R&S CMX-KS611B / M / X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx | SUL / Rel. 16 features |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 7.468254
+             },
+             {
+              "text": "無線裝置法規符合性測試 › unresolved\n- 來源未標示正式發布日期與文件版次。\n- 三類 approval testing 的地域、產品類別與 certification body 適用條件未展開。\n- 來源未提供 CE / FCC technical documentation 的完整法條引用。\n- 來源未提供 mobile subscriptions 表格的單位與 Ericsson 原始 URL。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線裝置法規符合性測試.md"
+              },
+              "score": 3.312341
+             },
+             {
+              "text": "NCC › 衛星 / 通訊監理語境中的 NCC\n- [[低軌衛星通信終端設備技術規範與相關檢測]]（來源標示 111年08月）列出 NCC 電信事業申請衛星固定通信用無線電頻率核配有關事項草案、NCC 衛星地球電臺設置使用管理辦法部分條文修正草案，以及 NCC 衛星地球電臺設備技術規範草案總說明。\n- 上述語境應連到 [[國家通訊傳播委員會]]，不應與交換機光器件圖上的 NCC 混用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/NCC.md"
+              },
+              "score": 6.160196
+             },
+             {
+              "text": "VIAVI O-RU Tester › 與 R&S portfolio 的關係\n依兩份來源：\n\n- [[VIAVI O-RU Tester]] / [[VIAVI TM500 O-RU Tester]] 主要承擔 O-DU emulation、O-RAN FH、M / C / U / S plane、test scripts、O-RU test manager / TMA 與 automation context。\n- R&S 提供 RF signal generation、signal analysis、VSE、power supply、oscilloscope、RF switch / OSP、PVT360A single-box VSA/VSG 或 standalone VSA/VSG equipment。\n- 2025 來源將 setup 分為：\n  - [[R&S PVT360A O-RU testing]]：release / regression / quality check / production / FR1 subset。\n  - VSA/VSG setup：complete WG4 and 3GPP conformance testing / R&D / FR1 / FR2 / LTE / NB-IoT。\n  - [[O-RU NES testing]]：RTO6 + VSE/VSA + power supply + VIAVI TM500 O-RU Tester。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/VIAVI O-RU Tester.md"
+              },
+              "score": 1.765984
+             },
+             {
+              "text": "WIC Glossary › 重點摘要\n- 來源正式發布日期未標示；frontmatter 只標示 converted: 2026-09-17。\n- 來源是 glossary，不是規格書、標準文件或產品 datasheet；其價值在於提供內部術語解釋與同義詞線索。\n- 來源列出行動通訊世代與技術縮寫：[[2G]]、[[3G]]、[[4G]]、[[5G]]、[[CDMA2000]]、[[1xEV-DO]]、[[1xRTT]]、[[LTE Advanced]]、[[NR]]、[[WCDMA]]、[[GSM]]。\n- 來源列出通訊測試常用角色與設備語彙：[[DUT]]、[[MS]]、[[BS]]、[[BTS]]、[[UE]]、[[R&S CMW500]]、[[CMW setup]]、[[CMW subnet]]、[[CMW subnet node]]、[[R&S CONTEST]]。\n- 來源列出控制與測試軟體語彙：[[AT command]]、[[EMMI]]、[[EMMI command]]、[[API]]、[[ATE]]、[[ATS]]、[[BIST]]、[[SFT]]、[[ASRL]]、[[DigIConf]]。\n- 來源列出無線通訊與協定縮寫：[[ARFCN]]、[[BCCH]]、[[BLER]]、[[CQI]]、[[CS]]、[[CSD]]、[[DL]]、[[UL]]、[[DRB]]、[[EPC]]、[[EPS]]、[[EUTRA]]、[[EUTRAN]]、[[EN-DC]]、[[eMTC]]。\n- 來源列出 RF / 測試與電氣語彙：[[50Ω]]、[[VSWR]]、[[BNC]]、[[BB]]、[[BW]]、[[CATR]]、[[CW]]、[[DFT]]、[[DGPS]]、[[EVM]]、[[EMC]]、[[AC]]、[[DC]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/WIC Glossary.md"
+              },
+              "score": 10.171943
+             },
+             {
+              "text": "R&S CMW500 › 重要限制\n- 來源明示：[[R&S CMW500]] 有時只支援部分測試，某些測試需要進一步設備。\n- 多個 CEN/TS 17240 IVS 測試需要外部 HMI interaction、ignition switched OFF 控制、manufacturer specific AT command、IVS debugging tool、prepared TestUSIM 或 handset；這些不完全由 KA09x software 控制。\n- CTP 1.1.10.1-IMS limited service condition 標示 Partly Available；需 Prepared TestUSIM with Forbidden PLMN 001 02，且 attach reject by network not supported yet。\n- CTP 1.1.17.2-IMS call-back abnormal termination 標示 Not available。\n- 3GPP TS 34.229-1 21.3 標示 Not available。\n- 來源註明 legacy CS domain eCall with inband-modem 到 [[NGeCall over LTE]] / IMS 的 transition 尚未由 EU commission 最終決定，因此部分涉及 handover 的 test cases 尚未實作。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW500.md"
+              },
+              "score": 7.632716
+             },
+             {
+              "text": "Satellite Applications Catapult\n[[Satellite Applications Catapult]]是 [[Space Supply Chain]] 中 `Space Capabilities Catalogue` 外部連結 URL 所指向的組織 / 網站名稱線索；本 vault 目前尚未擷取該 catalogue 正文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Satellite Applications Catapult.md"
+              },
+              "score": 0.639563
+             },
+             {
+              "text": "PI for Digital Power › 關鍵實體與概念\n- [[Power Integrity 外部資料清單]]：本來源最直接支撐的新概念頁，用來保存這份 OneNote 連結索引本身。\n- [[Power Integrity]]：來源標題與頁名顯示主題聚焦 digital power 的 power integrity；但來源未擷取設計方法、規格、量測流程或案例正文。\n- [[PDN]]、[[PDN impedance]]：兩個連結標題都與 power distribution network impedance 相關；本頁只記錄連結存在。\n- [[ALLPCB]]：第一個連結的網域 / 標題來源；本來源未提供作者、發布日期或文章內容。\n- [[Signal Integrity Journal]]：第二個連結的媒體 / 期刊名稱；本來源未提供作者、發布日期或文章內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/PI for Digital Power.md"
+              },
+              "score": 0.349995
+             },
+             {
+              "text": "![](Picture4.jpg)\nWireless communication tester\nEMI test receiver\nSignal & spectrum analyzer\nWireless communication tester",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-4a179a13677acd8f",
+                "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+                "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+               "section": 175,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 22.798077
+             },
+             {
+              "text": "answer, no answer, declined, busy, CF before\nringing, CF after ringing, communication\ndeflection",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-bc47a8ad4da77a6a",
+                "original_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+                "sha256": "bc47a8ad4da77a6a089ea08b2b75fe59aa587cc8078122be2a034703929593e5",
+                "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+               "section": 3061,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 22.230018
+             },
+             {
+              "text": "Please note that not all questions may be relevant to your situation. You don’t have to answer all of them.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-3b343d1990f39b17",
+                "original_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+                "sha256": "3b343d1990f39b17ff8365af8d50a622343215f24638a1967189f8ac5d3ec33c",
+                "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/cmx500_ntn_customer_questionnaire.md",
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 17.477216
+             },
+             {
+              "text": "[Space Capabilities Catalogue - Satellite Applications Catapult](https://sa.catapult.org.uk/space-capabilities-catalogue/)",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-6ae422456b68416f",
+                "original_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "sha256": "6ae422456b68416f9b973f5aa4e40338bdd570f8ca1ff01afc1f9718774b14d1",
+                "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Satellite/Space Supply Chain.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.788606
+             }
+            ],
+            "text": "Wireless-standard vector signal analysis is a supported capability, because R&S VSE supports mobile and wireless communications standards and is used for 5G NR, LTE, O-RAN U-Plane / PCAP analysis and beamforming measurements [1][2].\n5G NR signal analysis is supported with presets for 5G NR test models and support of all 5G NR measurements [1].\nLTE and 5G NR downlink/uplink measurement options are identified for VSE as VSE-K100, VSE-K104 and VSE-K144 [3].\nO-RAN signal analysis is supported with VSE-K175, including predefined test signals according to the WG4.CONF.0 test specification [1][3].\nO-RAN U-Plane analysis is supported because the O-RAN PCAP Converter can convert captured Ethernet streams into VSE file format and VSE analyzes U-Plane data in uplink and downlink [1].\nBeamforming measurement capability is supported because VSE-K146 can display phase and magnitude difference in the summary for beamforming measurements [1][3].\nBitstream and channel-decoder-result extraction is supported because VSE can extract channel decoder results and bitstreams of 5G and LTE uplink and downlink signals [1].\nEVM measurement is a key supported RF quality capability because EVM is defined as the difference between a reference waveform and a measured waveform in 5G NR FR1 SA pre-conformance testing [40][41].\nFor 5G NR EVM testing, measurement results must be below the 3GPP TS 38.521-1 maximum error percentage with the applicable test tolerance [42].\nCMX500 supports LTE, NR FR1, NR FR2, NSA, SA, FDD and TDD device testing as a universal one-box network emulation and measurement test solution [9][13].\nCMX500 includes vector signal analysis and ARB generator capability for FR2 transmitter and receiver RF parametric testing [9].\nCMX500 can perform 5G NR receiver tests under 3GPP fading propagation conditions using internal baseband fading emulation [9].\nCMP180 supports production and wireless communication device testing with configurable multiport RF generator/analyzer, communication-standard measurement options, waveform options and R&S VSE analysis capability [18].\nCMP180 supports simultaneous receiver and transmitter testing and provides a multiport RF test architecture with RF generator/analyzer no. 1 and optional RF generator/analyzer no. 2 [21].\nCMP180 RF analyzer capabilities include 250 MHz IF bandwidth, or 500 MHz with R&S CMP-K185 [23].\nCMP180 RF analyzer capabilities include 0.1 Hz frequency resolution, expected nominal power setting range from –47 dBm to +38 dBm, level uncertainty down to ±0.3 dB from 400 MHz to 5000 MHz under stated conditions, and RX DANL below –157 dBm from 400 MHz to 6500 MHz under stated conditions [23].\nFSWX supports spectrum, noise measurement, phase noise and modulation-quality EVM cross-correlation [50].\nFSWX provides extended spurious-free dynamic range and improved displayed average noise level for finding hidden spurs [50].\nFSWX multipath wideband phase-coherent receivers can perform simultaneous signal analysis and spectrum analysis with independent receivers [50].\nFSWX can compare amplitude, frequency and phase between ports, including simultaneous H/V antenna polarization or device input/output measurements [50].\nFSWX supports image-free I/Q and vector signal analysis using preselected capture and analysis to avoid unwanted-signal interference [50].\nFSWX signal analysis bandwidth reaches up to 4 GHz per RF input and up to 8 GHz on RF input A with the listed bandwidth options [51].\nHigh-speed digital signal-integrity validation capabilities in the corpus include interface test with scopes, BERTs, AWGs and switch matrices [36][38].\nHigh-speed digital signal-integrity validation capabilities also include RefClk and PLL jitter performance testing with phase noise analyzers and signal generators [36][38].\nPower Distribution Network validation is listed as a signal-integrity-related test block using scopes and network analyzers [36][38].\nADC/DAC frontend performance validation is listed with spectrum analyzers and signal generators [36][38].\nHigh-speed PCB/PCBA signal-integrity flow includes insertion loss, crosstalk, eye diagram, TDR impedance, stackup planner and transmission-line calculator [36][38].\n【推論】For wireless communication applications, the corpus supports combining wireless-standard vector signal analysis, EVM, O-RAN/beamforming analysis, multiport RF analysis, wideband spectrum analysis, jitter/clock validation and PCB channel validation as the main signal-integrity capability set, because these capabilities are separately documented for wireless test products and SI/PI validation flows.[1][2][18][23][36][38][40][50]",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "R&S VSE › 來源中的定位\n依 [[R&S portfolio for O-RU testing]]（August 2023）：\n\n- Slide 8 的 VIAVI + R&S O-RU Tester solution 中列出 [[R&S VSE]]。\n- Slide 14 標題為 `R&S®VSE Signal analysis software`，描述為 PC analysis software。\n- Slide 14 key facts：\n  - Supports mobile and wireless communications standards。\n  - Fast measurements with parallel analysis。\n  - Supporting floating licenses。\n  - Control multiple instruments from one PC。\n- Slide 15 說 5G NR signal analysis 支援 presets for 5G NR Test models 與 support of all 5G NR measurements。\n- Slide 26 說 3GPP Receiver characteristic testing requires throughput calculation，且 BLER 與 Tput parameters implemented to VSE software。\n- Slide 35 說 signal analysis with option VSE-K175 有 pre-defined test signals according to WG4.CONF.0 test specification。\n- Slide 36 說 VSE software can extract channel decoder results and bitstream of 5G and LTE uplink and downlink signals；beamforming measurements 可用 VSE-K146 在 summary 顯示 phase and magnitude difference。\n- Slide 38 說 O-RAN PCAP Converter 可把 captured Ethernet stream 轉成 VSE file format，VSE analyzes the U-Plane data in UL and DL。\n- Slide 46 / 48 的 configurations 列出 VSE Basic Edition、FSPC license dongle、VSE-K144、VSE-K146、VSE-K175、VSE-K100、VSE-K104 等項目。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S VSE.md"
+             },
+             "score": 1.73174
+            },
+            {
+             "text": "R&S VSE\n[[R&S VSE]]（Vector Signal Explorer）是 Rohde & Schwarz 的 PC signal analysis software；在 [[R&S portfolio for O-RU testing]] 中用於 5G NR、LTE、O-RAN U-Plane / PCAP analysis 與 beamforming measurements 的分析端。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S VSE.md"
+             },
+             "score": 0.96008
+            },
+            {
+             "text": "R&S VSE › 來源列出的 options / items\n依 [[R&S portfolio for O-RU testing]] Slide 46–48：\n\n| Item | 來源說法 |\n|---|---|\n| VSE | Vector Signal Explorer Software / VSE Basic Edition |\n| FSPC | License dongle, PC SW |\n| VSE-K144 | 5G-NR DL/UL Measurements |\n| VSE-K146 | 5G-NR MIMO&Beamforming DL Measurements；optional，例如 with RTP |\n| VSE-K175 | O-RAN Measurements |\n| VSE-K100 | LTE FDD DL/UL Measurements；optional |\n| VSE-K104 | LTE TDD DL/UL Measurements；optional |\n\nSlide 48 明列：\n\n- FSPC material `1310.0002.03`。\n- VSE material `1345.1011.06`。\n- VSE-K144 material `1309.9574.06`。\n- VSE-K175 material `1350.7020.06`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S VSE.md"
+             },
+             "score": 0.569486
+            },
+            {
+             "text": "CMX500_specs_en_5216-4127-22_v1100 › 重點摘要\n- [[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援 3GPP [[5G NR]] technology，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD 與 TDD device testing。\n- [[R&S CMX500]] 配置包含 OBT lite、OBT、OBT plus、OBT FR1 specialist、OBT FR2 specialist，主要差異在 [[R&S CMX-B200A]] accelerator unit、[[R&S CMX-B500A]] IF unit、[[R&S CMX-B600B]] RF unit 的數量。\n- [[NR FR1]] 與 [[LTE]] 測試使用 integrated RF units；[[R&S CMX-B600B]] RF unit 的 frequency range 為 **400 MHz to 8000 MHz**。\n- [[NR FR2]] 測試可搭配 [[R&S CMXHEAD30]]、[[R&S CMXHEAD50]] 或 [[R&S CMXHEAD50-Evo]] remote radio head；remote radio head 在 IF 與 5G NR FR2 frequency ranges 間執行 upconversion / downconversion。\n- 適用的 radiated chamber test environments 包含 [[R&S CMQ500]] shielding cube 與 [[R&S ATS800R]] CATR rack based antenna test system。\n- [[R&S CMX500]] 內建 vector signal analysis 與 ARB generator，可做 FR2 transmitters / receivers RF parametric testing；5G NR receiver tests 可在 3GPP fading propagation conditions 下使用 internal baseband fading emulation。\n- Product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘，符合指定 environmental conditions，遵守 recommended calibration interval，且已執行所有適用的 internal automatic adjustments。\n- 文件區分 specifications with limits、non-traceable specifications with limits、specifications without limits、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n- 文件聲明：**Data without tolerance limits is not binding**；**Subject to change**。\n- 版權：© 2019–2025 [[Rohde & Schwarz]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md"
+             },
+             "score": 0.827486
+            },
+            {
+             "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 3.216122
+            },
+            {
+             "text": "R&S CMP180\n[[R&S CMP180]] 是 [[Rohde & Schwarz]] 的 **Radio Communication Tester**，用於 production / wireless communication device 測試，依文件可配置多埠 RF generator/analyzer、通訊標準 measurement options、waveform options 與 [[R&S VSE]] 分析能力。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP180.md"
+             },
+             "score": 7.048783
+            },
+            {
+             "text": "R&S CMP180 › 產品定位\n[[R&S CMP180]] 是 Radio Communication Tester。依 [[CMP180 Features and Functions Version 09]]，文件涵蓋 global options、Bluetooth、CDMA2000、GSM、LP-IoT、LTE、NB-IoT、NR、spectrum analysis、UWB、WCDMA、WLAN、[[R&S VSE]] options 與 ordering information。\n\n依 [[CMP180 Specifications Version 08.00]]，CMP180 支援 simultaneous receiver and transmitter testing，並提供 RF generator/analyzer no. 1 與可選 RF generator/analyzer no. 2 的多埠 RF 測試架構。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP180.md"
+             },
+             "score": 2.17802
+            },
+            {
+             "text": "R&S CMP180 › RF analyzer 主要規格\n依 [[CMP180 Specifications Version 08.00]]：\n\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Frequency resolution |  | 0.1 Hz |\n| IF bandwidth | RF x.1 to RF x.8 | 250 MHz；with R&S CMP-K185：500 MHz |\n| Maximum input DC level |  | 0 V DC |\n| Expected nominal power setting range | ADC full scale, 400 MHz to 8000 MHz | –47 dBm to +38 dBm |\n\nLevel range：\n\n| Reference level | RMS | PEP |\n|---|---|---|\n| < +10 dBm | max. +20 dBm | max. +28 dBm |\n| ≥ +10 dBm | max. +30 dBm | max. +38 dBm |\n\nOther RF analyzer data：\n\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Inherent spurious response | no input signal, reference level –20 dBm, 400 MHz to 8000 MHz | –85 dBFS typ. |\n| Inherent spurious response | no input signal, reference level –20 dBm, 3750 MHz | –75 dBFS typ. |\n| Level uncertainty | with R&S CMP-B802I or R&S CMP-B805I option, 95% confidence level, +15 °C to +35 °C, 400 MHz to 5000 MHz | ±0.3 dB |\n| Level uncertainty | same, 5000 MHz to 8000 MHz | ±0.4 dB |\n| Level linearity | fixed expected nominal power setting, level range 0 dB to –40 dB | < 0.1 dB |\n| Port switching time | to within 0.1 dB | < 10 µs |\n| Level repeatability | typical after 1 h warm-up time | < 0.01 dB |\n| RX DANL | +15 °C to +35 °C, 400 MHz to 6500 MHz | < –157 dBm（1 Hz） |\n| RX DANL | +15 °C to +35 °C, 6500 MHz to 7800 MHz | < –155 dBm（1 Hz） |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP180.md"
+             },
+             "score": 1.923736
+            },
+            {
+             "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+             },
+             "score": 0.900189
+            },
+            {
+             "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+             },
+             "score": 0.878453
+            },
+            {
+             "text": "EVM\n[[EVM]] 是 Error Vector Magnitude；[[WIC Glossary]] 只提供縮寫展開，[[1C111_0e_3GPPPreConfGuide]] 與 [[1C111_1e_3GPPPreConfGuide]] 則在 5G NR FR1 SA pre-conformance test case 6.4.2.1 中說明 EVM 是 reference waveform 與 measured waveform 之間差異的量測。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/EVM.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "EVM › 來源定義\n依 [[WIC Glossary]]（來源正式日期未標示；raw converted 2026-09-17）：\n\n- EVM 展開為 Error Vector Magnitude。\n\n依 [[1C111_1e_3GPPPreConfGuide]]（06.2025）：\n\n- Error Vector Magnitude（EVM）是 reference waveform 與 measured waveform 之間差異的量測。\n- 來源將 EVM 放在 [[3GPP TS 38.521-1]] test case **6.4.2.1 Error Vector Magnitude PUCCH/PUSCH**。\n- Test ID 會設定 RB Allocation 與 modulation scheme。\n- PUCCH subtests 需參考 application note chapter 2.1 notes。\n- Apply configuration 後，需確認 measured DUT EVM 位於 specified range 內。\n- Test case 要求在 DUT max power 與 min power 下量測 EVM。\n- CMX 會先自動設定 max power；完成 max power EVM verification 後，DUT 需使用 TPC Closed Loop settings 設定為 min power。\n\n[[1C111_0e_3GPPPreConfGuide]] 對同一 test case 的定義與限值摘要相同，並支撐既有 EVM 頁面內容。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/EVM.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "EVM › 1C111 中的 5G NR EVM limits\n依 [[1C111_1e_3GPPPreConfGuide]]，EVM measurement results 必須低於 [[3GPP TS 38.521-1]] Table 6.4.2.1.5-1 的 maximum error percentage，並套用 Table 6.4.2.1.5-2 定義的 Test Tolerance（TT）。來源摘錄的 Average EVM Level limits 為：\n\n| Modulation | Average EVM level limit |\n|---|---|\n| Pi/2-BPSK | 30 + TT % |\n| QPSK | 17.5 + TT % |\n| 16 QAM | 12.5 + TT % |\n| 64 QAM | 8 + TT % |\n| 256 QAM | 3.5 + TT % |\n\nTT 來源摘錄為：\n\n| 條件 | TT |\n|---|---|\n| All except 256QAM | 0% |\n| 256 QAM @ max power | 0.3% |\n| 256 QAM @ min power | 1.1% |\n\n來源範例：DUT on n78、100 MHz BW、PUCCH Test ID 1（QPSK）時，specified maximum EVM 為 **17.5 + 0 %**，且 CMX EVM measurement 位於 3GPP limits 內。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/EVM.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "R&S FSWX › 產品定位與架構\n- 產品定位：multiport signal and spectrum analyzer。\n- 內部 multipath architecture 支援 1-port 與 2-port instruments。\n- 可用於 spectrum、noise measurement、phase noise、modulation quality（EVM）的 [[Cross-correlation]]。\n- 提供 extended [[Spurious free dynamic range]]（SFDR）。\n- 改善 [[Displayed average noise level]]（DANL）以尋找 hidden spurs。\n- 可在 high-power carrier 存在時量測 distortion 與 noise。\n- 可針對 EVM 要求嚴苛的 components 做 characterization。\n- Multipath wideband phase coherent receivers 可使用 independent receivers 同時進行 signal analysis 與 spectrum analysis。\n- 可在 spectrum 任意位置、相同或不同頻率同時觀察 signals。\n- 可同時量測 antenna 的 H 或 V polarizations、device input 與 output，並直接比較 ports 之間的 amplitude、frequency、phase。\n- Image free I/Q and vector signal analysis 使用 preselected capture and analysis，避免 unwanted signals 干擾量測。\n- Operating system：Linux based operating system，目標為 high security 與 long-term support。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSWX.md"
+             },
+             "score": 2.094051
+            },
+            {
+             "text": "R&S FSWX › Signal analysis bandwidth\n| 項目 | 規格 / 條件 |\n|---|---|\n| 每個 RF input | 最高 4 GHz bandwidth |\n| RF input A | 最高 8 GHz bandwidth |\n| Standard I/Q data maximum signal analysis bandwidth | 40 MHz（nom.） |\n| R&S FSW31/32-B100 | 100 MHz（nom.） |\n| R&S FSW31/32-B320 | 320 MHz（nom.） |\n| R&S FSW31/32-B600 | 600 MHz（nom.） |\n| R&S FSW31/32-B1G2 | 1.2 GHz（nom.） |\n| R&S FSW31/32-B2G | 2 GHz（nom.） |\n| R&S FSW31/32-B4G | f < 7.5 GHz：2 GHz（nom.）；f ≥ 7.5 GHz：4 GHz（nom.） |\n| R&S FSW31/32-B6G | f < 7.5 GHz：2 GHz（nom.）；f < 14 GHz：4 GHz（nom.）；f ≥ 14 GHz、RF input A only：6 GHz（nom.） |\n| R&S FSW31/32-B8G | f < 7.5 GHz：2 GHz（nom.）；f < 14 GHz：4 GHz（nom.）；f ≥ 14 GHz、RF input A only：8 GHz（nom.） |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSWX.md"
+             },
+             "score": 2.076692
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/entities/R&S VSE.md",
+             "raw_refs": [
+              "raw/Market/OneNote/R&S portfolio for O-RU testing.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/CMX500_specs_en_5216-4127-22_v1100.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMP180.md",
+             "raw_refs": [
+              "raw/Productions/CMP180_Features_V11-9_en_09.md",
+              "raw/Productions/CMP180_specs_en_3609-7348-22_v0800.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+             "raw_refs": [
+              "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/EVM.md",
+             "raw_refs": [
+              "raw/Market/OneNote/1C111_0e_3GPPPreConfGuide.md",
+              "raw/Market/OneNote/1C111_1e_3GPPPreConfGuide.md",
+              "raw/Market/OneNote/FWA CPE SmallCell/FWA CPE.md",
+              "raw/Market/OneNote/FWA CPE SmallCell/WIC Glossary.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S FSWX.md",
+             "raw_refs": [
+              "raw/Productions/FSWX_specs_en_3684-1314-22_v1200.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

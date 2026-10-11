@@ -1,0 +1,72 @@
+{
+ "id": "Q0911",
+ "grader": "1.2",
+ "coverage": 0.062,
+ "points": [
+  {
+   "n": 1,
+   "point": "Vault 的實際 RFIC/半導體案例：Samsung Foundry RF/Analog Enablement Group，DUT 為 5G SoC including VCO，使用 FSWP50（analyzer）+ SMW200A 44GHz / SGS100A（signal generator）",
+   "verified": true,
+   "label": "missing",
+   "why": "No Samsung Foundry/VCO case; uses different FSW setup"
+  },
+  {
+   "n": 2,
+   "point": "該案例的量測在 probe station 上進行，並搭配自動化 VCO tuning 軟體，顯示儀器位於晶片級 characterization / validation 這一步",
+   "verified": true,
+   "label": "partial",
+   "why": "Mentions DUT/component validation bench, but not probe station or VCO tuning software"
+  },
+  {
+   "n": 3,
+   "point": "測試區塊對儀器類別的 mapping：RefClk 與 PLL jitter performance 由 phase noise analyzers 與 signal generators 負責",
+   "verified": true,
+   "label": "missing",
+   "why": "No RefClk/PLL jitter mapping"
+  },
+  {
+   "n": 4,
+   "point": "ADC / DAC frontend performance 由 spectrum analyzers 與 signal generators 負責，是 signal generator / analyzer 在高速數位 / 混訊晶片驗證中的另一個落點",
+   "verified": true,
+   "label": "missing",
+   "why": "No ADC/DAC frontend mapping"
+  },
+  {
+   "n": 5,
+   "point": "RFIC 的 bare board / socket / transmission line 評估這一段，來源明示的 fit 是 VNAs，而非 signal generator / analyzer",
+   "verified": true,
+   "label": "missing",
+   "why": "No VNA fit for bare board/socket/transmission line"
+  },
+  {
+   "n": 6,
+   "point": "2026.7 DDT success stories 把 SoC testing 對應到 FSWP、SMA100B（RF and Microwave Signal Generator）與 ZNA67",
+   "verified": true,
+   "label": "missing",
+   "why": "No DDT SoC testing mapping to FSWP/SMA100B/ZNA67"
+  },
+  {
+   "n": 7,
+   "point": "Vault 明示不推論這些儀器在各應用中的角色分工（stimulus / analysis / phase noise / VNA / automation），因此「流程位置」只能到 mapping 層級",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Assigns stimulus/analysis roles beyond allowed mapping level"
+  },
+  {
+   "n": 8,
+   "point": "Samsung 案例被歸納為可包裝成 RF / analog enablement 測試方案，但軟體正式名稱與版本未標示",
+   "verified": true,
+   "label": "missing",
+   "why": "No Samsung RF/analog enablement packaging or software-name caveat"
+  }
+ ],
+ "contradicted": 1,
+ "invented": [
+  "Stimulus into RFIC / DUT | Before or at DUT input",
+  "RF / modulated signal validation from RFIC / DUT | At DUT output / measurement side",
+  "Receiver-side validation | Generator drives the DUT receiver path",
+  "Transmitter / emissions validation | Analyzer measures DUT transmit output or emissions",
+  "5G NR software option `R&S®SMW200A-/SMBV100B-K144`",
+  "Receiver spurious emissions test case 7.6"
+ ]
+}
