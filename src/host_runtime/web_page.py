@@ -834,6 +834,12 @@ tr:last-child td { border-bottom: none; }
             <button id="kp-enrich" type="button">Write bilingual summaries</button>
             <button id="kp-index" type="button">Build layered index</button>
           </div><div id="kp-index-result" class="note"></div></div>
+        <div class="card"><h3>Merge and publish</h3>
+          <div class="kp-actions">
+            <button id="kp-merge-preview" type="button">Preview merge</button>
+            <button id="kp-merge" type="button">Merge into a candidate</button>
+            <button id="kp-publish" type="button" disabled>Publish candidate</button>
+          </div><div id="kp-merge-result"></div></div>
         <div class="card"><h3>Lint</h3>
           <div class="kp-actions"><button id="kp-lint" type="button">Run lint</button></div>
           <div id="kp-lint-result"></div></div>
@@ -3614,6 +3620,70 @@ el("kp-upload").addEventListener("click", () => kpRun("Adding to drop", async ()
 el("kp-preview").addEventListener("click", () => kpRun("Previewing", () => kpConvert("dry_run")));
 el("kp-convert").addEventListener("click", () => kpRun("Converting", () => kpConvert("apply")));
 el("kp-lint").addEventListener("click", () => kpRun("Linting", kpLint));
+let kpCandidate = null;
+function kpMergeShow(report) {
+  const box = el("kp-merge-result"); box.replaceChildren();
+  box.append(text(report.changes.length + " changed pages, " + report.conflicts.length
+    + " conflicts" + (report.kept_removed.length ? ", " + report.kept_removed.length
+    + " removals kept back" : "") + "."));
+  const list = document.createElement("ul");
+  for (const change of report.changes) {
+    const li = document.createElement("li");
+    li.append(text(change.change + ": " + change.path + (change.parts.length
+      ? " (" + change.parts.join(", ") + ")" : "") + (change.proposal ? " — proposal" : "")));
+    list.append(li);
+  }
+  for (const conflict of report.conflicts) {
+    const li = document.createElement("li");
+    const key = conflict.path + "#" + conflict.part;
+    const pick = document.createElement("select"); pick.dataset.key = key;
+    for (const [value, label] of [["", "choose…"], ["sandbox", "keep sandbox"],
+                                  ["published", "keep published"]]) {
+      const option = document.createElement("option"); option.value = value;
+      option.append(text(label)); pick.append(option);
+    }
+    const detail = document.createElement("details");
+    const summary = document.createElement("summary"); summary.append(text("compare"));
+    const sandbox = document.createElement("pre"); sandbox.append(text(conflict.sandbox));
+    const published = document.createElement("pre"); published.append(text(conflict.published));
+    detail.append(summary, text("Sandbox:"), sandbox, text("Published:"), published);
+    li.append(text("conflict: " + key + " "), pick, detail); list.append(li);
+  }
+  box.append(list);
+  if (report.candidate_root) {
+    box.append(text("Candidate written: " + report.candidate_root + "; sourced lines lost: "
+      + report.lost_sourced_lines + "; lint findings that grew: "
+      + (Object.entries(report.lint_worse).map(([k, n]) => k + " +" + n).join(", ") || "none")));
+  }
+}
+function kpResolutions() {
+  const chosen = {};
+  for (const pick of el("kp-merge-result").querySelectorAll("select[data-key]")) {
+    if (pick.value) chosen[pick.dataset.key] = pick.value;
+  }
+  return chosen;
+}
+el("kp-merge-preview").addEventListener("click", () => kpRun("Comparing", async () => {
+  kpMergeShow(await pipeline("merge", {sandbox_id: kpSandbox.sandbox_id}));
+}));
+el("kp-merge").addEventListener("click", () => kpRun("Merging", async () => {
+  const report = await pipeline("merge", {sandbox_id: kpSandbox.sandbox_id, mode: "apply",
+                                          resolutions: kpResolutions()});
+  kpCandidate = {base: report.base_name, root: report.candidate_root};
+  kpMergeShow(report); el("kp-publish").disabled = false;
+}));
+el("kp-publish").addEventListener("click", () => kpRun("Publishing", async () => {
+  if (!kpCandidate || !confirm("Publish " + kpCandidate.root + " as the new version of "
+      + kpCandidate.base + "? The Agent answers from it after a restart.")) return;
+  const reply = await call("/api/knowledge/pipeline/publish",
+    {base: kpCandidate.base, candidate_root: kpCandidate.root});
+  if (!reply.ok) {
+    const problem = new Error(reply.code); problem.code = reply.code; throw problem;
+  }
+  el("kp-publish").disabled = true;
+  el("kp-merge-result").append(text(" Published " + (reply.data.version || "")
+    + " at " + reply.data.vault_root + ". Restart the Agent to answer from it."));
+}));
 el("kp-enrich").addEventListener("click", () => kpRun("Writing bilingual summaries", async () => {
   let report;
   do {

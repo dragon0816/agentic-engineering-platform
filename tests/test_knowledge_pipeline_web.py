@@ -79,3 +79,17 @@ def test_only_pipeline_steps_can_be_called_and_the_token_is_required(
 def test_the_page_has_the_knowledge_tab() -> None:
     assert 'id="nav-knowledge"' in PAGE and 'id="panel-knowledge"' in PAGE
     assert "/api/knowledge/pipeline/call" in PAGE
+
+
+def test_publish_is_a_person_route_that_needs_the_host_file(
+    served_pipeline: tuple[AgentWebServer, Path],
+) -> None:
+    server, _ = served_pipeline
+    url = base(server) + "/api/knowledge/pipeline/publish"
+    body = {"base": "k-test", "candidate_root": "x"}
+    assert fetch(url, body=body).status == 401
+    reply = fetch(url, token=server.token, body=body)
+    # This server was started without host.json, so it has nothing to switch.
+    assert json.loads(reply.body) == {"ok": False, "code": "publish_unavailable"}
+    assert _step(server, "publish", {})["code"] == "unknown_pipeline_step"
+    assert "/api/knowledge/pipeline/publish" in PAGE and 'id="kp-merge"' in PAGE

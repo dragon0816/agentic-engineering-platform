@@ -142,6 +142,7 @@ from host_runtime.conversations import (
 )
 from host_runtime.host import HostRuntime, build_telegram, choice_sources, load_authorization
 from host_runtime.knowledge_harness import KnowledgeHarness, knowledge_source_lines
+from host_runtime.knowledge_publish import PublishError, publish_candidate
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.profiles import ProfileError, activate_profile
 from host_runtime.reference_sets import (
@@ -2513,6 +2514,19 @@ class AgentWeb:
             return {"ok": False, "code": failure.code if failure else "pipeline_step_failed"}
         return {"ok": True, "data": capability.data}
 
+    def publish_knowledge(self, base: str, candidate_root: str) -> dict[str, Any]:
+        """Publish a merged candidate as the base's new version (K3.4). Only a
+        person's confirmed click reaches this; the model has no such tool."""
+        if self.config_path is None or self.runtime.config.knowledge_pipeline is None:
+            return {"ok": False, "code": "publish_unavailable"}
+        with self._one_at_a_time:
+            try:
+                result = publish_candidate(self.config_path, self.runtime.layout, base,
+                                           candidate_root, self.runtime.actor)
+            except PublishError as error:
+                return {"ok": False, "code": error.code}
+        return {"ok": True, "restart_required": True, "data": result.model_dump(mode="json")}
+
     def ask_knowledge(self, request: KnowledgeAskRequest) -> dict[str, Any]:
         """Ask one exact installed Knowledge version through Bridge policy."""
         with telemetry.run("knowledge_query", attributes={"ingress": "agent_web"}):
@@ -2710,6 +2724,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/workflows/run",
             "/api/knowledge/ask",
             "/api/knowledge/pipeline/call",
+            "/api/knowledge/pipeline/publish",
             "/api/settings/model",
             "/api/settings/telegram",
             "/api/mcp/save",
@@ -2764,6 +2779,13 @@ class _Handler(BaseHTTPRequestHandler):
             except Exception as failure:  # noqa: BLE001 - a page shows everything
                 result = {"ok": False, "code": f"pipeline_error:{type(failure).__name__}"}
             self._json(200, result)
+            return
+        if path == "/api/knowledge/pipeline/publish":
+            if not isinstance(body, dict):
+                self._json(400, {"ok": False, "code": "publish_request_invalid"})
+                return
+            self._json(200, self.server.web.publish_knowledge(
+                str(body.get("base") or ""), str(body.get("candidate_root") or "")))
             return
         if path in ("/api/drafts/install", "/api/drafts/delete"):
             if not isinstance(body, dict):
