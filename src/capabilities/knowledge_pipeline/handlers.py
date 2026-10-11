@@ -20,6 +20,8 @@ from capabilities.knowledge_pipeline.contracts import (
     ConvertRequest,
     DropAdded,
     DropAddRequest,
+    IndexBuildRequest,
+    IndexEnrichRequest,
     IngestApplyRequest,
     IngestPlanRequest,
     LintRequest,
@@ -65,6 +67,11 @@ INGEST_APPLY_SPEC = _spec("ingest-apply", "Apply a stored ingest plan to a sandb
 LINT_SPEC = _spec("lint", "Static lint and open conflicts of a sandbox wiki", "read")
 ADOPT_SPEC = _spec("adopt", "Adopt Raw from earlier tooling in a sandbox so it can be ingested",
                    "write")
+INDEX_ENRICH_SPEC = _spec("index-enrich",
+                          "Write bilingual aliases, summary and categories into sandbox pages",
+                          "write", "medium")
+INDEX_BUILD_SPEC = _spec("index-build", "Preview or write the layered index of a sandbox",
+                         "write")
 DROP_ADD_SPEC = _spec("drop-add", "Put one original into a sandbox drop folder", "write")
 SANDBOX_CONTENTS_SPEC = _spec("sandbox-contents", "List originals, Raw and plans of a sandbox",
                               "read")
@@ -188,4 +195,26 @@ class AdoptHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = AdoptRequest.model_validate(inputs)
         result: Contract = await _run(lambda: self.pipeline.adopt(request.sandbox_id, request.mode))
+        return result
+
+
+class IndexEnrichHandler:
+    def __init__(self, pipeline: KnowledgePipeline) -> None:
+        self.pipeline = pipeline
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        request = IndexEnrichRequest.model_validate(inputs)
+        result: Contract = await _run(
+            lambda: self.pipeline.index_enrich(request.sandbox_id, request.limit))
+        return result
+
+
+class IndexBuildHandler:
+    def __init__(self, pipeline: KnowledgePipeline) -> None:
+        self.pipeline = pipeline
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        request = IndexBuildRequest.model_validate(inputs)
+        result: Contract = await _run(
+            lambda: self.pipeline.index_build(request.sandbox_id, request.mode))
         return result

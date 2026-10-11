@@ -82,6 +82,8 @@ from capabilities.knowledge_pipeline.contracts import (
     ConvertRequest,
     DropAdded,
     DropAddRequest,
+    IndexBuildRequest,
+    IndexEnrichRequest,
     IngestApplyRequest,
     IngestPlanRequest,
     LintRequest,
@@ -96,6 +98,8 @@ from capabilities.knowledge_pipeline.handlers import (
     ADOPT_SPEC,
     CONVERT_SPEC,
     DROP_ADD_SPEC,
+    INDEX_BUILD_SPEC,
+    INDEX_ENRICH_SPEC,
     INGEST_APPLY_SPEC,
     INGEST_PLAN_SPEC,
     LINT_SPEC,
@@ -106,6 +110,8 @@ from capabilities.knowledge_pipeline.handlers import (
     AdoptHandler,
     ConvertHandler,
     DropAddHandler,
+    IndexBuildHandler,
+    IndexEnrichHandler,
     IngestApplyHandler,
     IngestPlanHandler,
     LintHandler,
@@ -264,6 +270,7 @@ from knowledge.evolution import (
     KnowledgeManifest,
     KnowledgeQueryRequest,
 )
+from knowledge.layered_index import EnrichReport, IndexReport
 from knowledge.market_matrix import MarketMatrixRecord, MarketMatrixRequest
 from knowledge.office import office_extractors
 from knowledge.pipeline import (
@@ -1879,6 +1886,9 @@ def _register_knowledge_pipeline(
         (INGEST_APPLY_SPEC, IngestApplyHandler(pipeline), IngestApplyRequest, IngestApplyResult),
         (LINT_SPEC, LintHandler(pipeline), LintRequest, LintSummary),
         (ADOPT_SPEC, AdoptHandler(pipeline), AdoptRequest, AdoptSummary),
+        (INDEX_ENRICH_SPEC, IndexEnrichHandler(pipeline), IndexEnrichRequest,
+         EnrichReport),
+        (INDEX_BUILD_SPEC, IndexBuildHandler(pipeline), IndexBuildRequest, IndexReport),
         (DROP_ADD_SPEC, DropAddHandler(pipeline), DropAddRequest, DropAdded),
         (SANDBOX_CONTENTS_SPEC, SandboxContentsHandler(pipeline), SandboxRef,
          SandboxContents),

@@ -139,3 +139,17 @@ def test_adopt_makes_legacy_raw_ingestible_without_touching_its_bytes(tmp_path: 
     assert applied.raw_adopted == 1
     assert "raw/notes/a.md" in pipeline.contents(sandbox).raw
     assert (root / "raw/notes/a.md").read_bytes() == legacy
+
+
+def test_index_steps_run_in_the_sandbox(tmp_path: Path) -> None:
+    from test_layered_index import _answer, _Model
+
+    pipeline, base = _pipeline(tmp_path, _Model(_answer))  # type: ignore[arg-type]
+    before = _snapshot(base)
+    sandbox = pipeline.create_sandbox("k-test", "index", "a").sandbox_id
+    first = pipeline.index_enrich(sandbox, limit=1)
+    assert first.done == 1
+    assert pipeline.index_build(sandbox).pages >= 1  # preview
+    built = pipeline.index_build(sandbox, mode="apply")
+    assert "index.md" in built.written
+    assert _snapshot(base) == before

@@ -96,3 +96,13 @@ class SandboxDiscarded(Contract):
 class AdoptRequest(Contract):
     sandbox_id: Text
     mode: Literal["dry_run", "apply"] = "dry_run"
+
+
+class IndexEnrichRequest(Contract):
+    sandbox_id: Text
+    limit: int = Field(default=60, ge=1, le=200)
+
+
+class IndexBuildRequest(Contract):
+    sandbox_id: Text
+    mode: Literal["dry_run", "apply"] = "dry_run"

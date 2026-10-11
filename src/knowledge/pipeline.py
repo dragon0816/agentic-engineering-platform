@@ -20,6 +20,7 @@ from pydantic import Field
 
 from common.base import Contract
 from knowledge.conflicts import decisions_text
+from knowledge.layered_index import EnrichReport, IndexReport, LayeredIndex
 from knowledge.lint import scan
 from knowledge.migrate import adopt
 from knowledge.planning import DEFAULT_CONVENTIONS, IngestPlanner
@@ -274,6 +275,19 @@ class KnowledgePipeline:
                                      problems=tuple(p.code for p in outcome.problems))
         return IngestApplyResult(sandbox_id=sandbox_id, plan_id=plan_id, status="applied",
                                  written=outcome.written, backed_up=outcome.backed_up)
+
+    # -- layered index (K2) ----------------------------------------------------
+
+    def index_enrich(self, sandbox_id: str, limit: int = 60) -> EnrichReport:
+        """Bilingual aliases, summary and categories for up to `limit` pages not
+        yet enriched; call again until `remaining` is 0."""
+        if self.model is None or self.alias is None:
+            raise PipelineError("no_model")
+        return LayeredIndex(self._open(sandbox_id), self.model, self.alias).enrich(limit=limit)
+
+    def index_build(self, sandbox_id: str,
+                    mode: Literal["dry_run", "apply"] = "dry_run") -> IndexReport:
+        return LayeredIndex(self._open(sandbox_id)).build(mode=mode)
 
     # -- adopt ---------------------------------------------------------------
 

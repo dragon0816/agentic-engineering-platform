@@ -829,6 +829,11 @@ tr:last-child td { border-bottom: none; }
           <div id="kp-raw" class="kp-list"></div></div>
         <div class="card"><h3>Ingest plan</h3>
           <div id="kp-plan" class="empty">Choose Plan ingest on a Raw document.</div></div>
+        <div class="card"><h3>Layered index</h3>
+          <div class="kp-actions">
+            <button id="kp-enrich" type="button">Write bilingual summaries</button>
+            <button id="kp-index" type="button">Build layered index</button>
+          </div><div id="kp-index-result" class="note"></div></div>
         <div class="card"><h3>Lint</h3>
           <div class="kp-actions"><button id="kp-lint" type="button">Run lint</button></div>
           <div id="kp-lint-result"></div></div>
@@ -3609,6 +3614,21 @@ el("kp-upload").addEventListener("click", () => kpRun("Adding to drop", async ()
 el("kp-preview").addEventListener("click", () => kpRun("Previewing", () => kpConvert("dry_run")));
 el("kp-convert").addEventListener("click", () => kpRun("Converting", () => kpConvert("apply")));
 el("kp-lint").addEventListener("click", () => kpRun("Linting", kpLint));
+el("kp-enrich").addEventListener("click", () => kpRun("Writing bilingual summaries", async () => {
+  let report;
+  do {
+    report = await pipeline("index-enrich", {sandbox_id: kpSandbox.sandbox_id, limit: 60});
+    el("kp-index-result").textContent = "Enriched " + report.done + " more; "
+      + report.remaining + " pages remain.";
+  } while (report.remaining > 0 && report.done > 0);
+}));
+el("kp-index").addEventListener("click", () => kpRun("Building the index", async () => {
+  const preview = await pipeline("index-build", {sandbox_id: kpSandbox.sandbox_id});
+  const counts = Object.entries(preview.categories).map(([k, n]) => k + " " + n).join(", ");
+  if (!confirm("Write " + preview.written.length + " index pages? " + counts)) return;
+  await pipeline("index-build", {sandbox_id: kpSandbox.sandbox_id, mode: "apply"});
+  el("kp-index-result").textContent = "Index written: " + counts;
+}));
 el("kp-adopt").addEventListener("click", () => kpRun("Checking legacy Raw", async () => {
   const preview = await pipeline("adopt", {sandbox_id: kpSandbox.sandbox_id, mode: "dry_run"});
   if (!preview.raw_adopted) { el("kp-adopt-result").textContent = "Nothing to adopt."; return; }
