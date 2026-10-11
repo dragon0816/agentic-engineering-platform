@@ -20,6 +20,9 @@ class KnowledgePipelineHostBinding(Contract):
     """Trusted host wiring for the pipeline (host.json `knowledge_pipeline`)."""
 
     vaults: tuple[PipelineVault, ...] = Field(min_length=1)
+    # Where sandboxes live; default <workspace>/knowledge-sandboxes. A shorter
+    # folder keeps long Raw paths under the Windows path limit.
+    sandbox_root: Text | None = None
 
     @model_validator(mode="after")
     def unique_names(self) -> Self:

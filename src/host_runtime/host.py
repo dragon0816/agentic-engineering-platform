@@ -1865,7 +1865,9 @@ def _register_knowledge_pipeline(
                  if model is not None and alias is not None and endpoint is not None
                  and endpoint.capabilities.vision else None)
     pipeline = KnowledgePipeline(
-        Sandboxes(layout.workspace_root),
+        Sandboxes(layout.workspace_root, root=(
+            Path(config.knowledge_pipeline.sandbox_root)
+            if config.knowledge_pipeline.sandbox_root else None)),
         {item.name: Path(item.root) for item in config.knowledge_pipeline.vaults},
         extractors=office_extractors(), model=model, alias=alias, describer=describer)
     local = ExecutionDependencies(central_required=False)

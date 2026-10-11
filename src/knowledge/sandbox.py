@@ -11,6 +11,7 @@ Nothing here writes to the base vault.
 from __future__ import annotations
 
 import json
+import os
 import re
 import shutil
 import uuid
@@ -27,7 +28,10 @@ DISCARDED = ".discarded"
 RECORD = "sandbox.json"
 SCHEMA = "aep.knowledge-sandbox.v1"
 # Working state of a base vault that a copy must not inherit.
-_SKIPPED = {".ingest-backup", ".plans", ".condense-cache", RECORD}
+_SKIPPED = {".ingest-backup", ".ingest-snapshot", ".plans", ".condense-cache", ".git", RECORD}
+# Windows refuses longer paths unless long paths are enabled system-wide
+# (rs-k has 188-character Raw asset paths; k2 live run, 2026-10-11).
+MAX_PATH = 259
 _ID = re.compile(r"^sb-[a-z0-9-]{1,80}$")
 
 
@@ -56,10 +60,10 @@ def _slug(text: str) -> str:
 
 
 class Sandboxes:
-    """The sandboxes of one workspace."""
+    """The sandboxes of one workspace, or of a configured shorter folder."""
 
-    def __init__(self, workspace_root: Path) -> None:
-        self.root = Path(workspace_root) / ROOT_NAME
+    def __init__(self, workspace_root: Path, *, root: Path | None = None) -> None:
+        self.root = Path(root) if root is not None else Path(workspace_root) / ROOT_NAME
 
     def _folder(self, sandbox_id: str) -> Path:
         if not _ID.fullmatch(sandbox_id or ""):
@@ -75,8 +79,15 @@ class Sandboxes:
         except VaultError:
             raise SandboxError("base_not_a_vault") from None
         stamp = datetime.now(UTC)
-        sandbox_id = f"sb-{_slug(label)}-{stamp.strftime('%Y%m%dt%H%M%S')}-{uuid.uuid4().hex[:4]}"
+        # Short on purpose: every byte of the id is in every copied path.
+        sandbox_id = f"sb-{_slug(label)[:16].strip('-')}-{uuid.uuid4().hex[:6]}"
         folder = self._folder(sandbox_id)
+        longest = max((len(os.path.relpath(os.path.join(d, f), base.root))
+                       for d, dirs, files in os.walk(base.root)
+                       if not set(Path(d).relative_to(base.root).parts) & _SKIPPED
+                       for f in files), default=0)
+        if os.name == "nt" and len(str(folder)) + 1 + longest > MAX_PATH:
+            raise SandboxError("path_too_long")
         self.root.mkdir(parents=True, exist_ok=True)
         shutil.copytree(base.root, folder,
                         ignore=lambda _dir, names: [n for n in names if n in _SKIPPED])

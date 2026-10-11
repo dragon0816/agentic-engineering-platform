@@ -78,6 +78,16 @@ def test_ids_that_leave_the_sandboxes_root_are_refused(tmp_path: Path, bad: str)
         boxes.open(bad)
 
 
+def test_working_state_is_not_copied_and_ids_stay_short(tmp_path: Path) -> None:
+    base = _base(tmp_path)
+    (base / ".ingest-snapshot/old").mkdir(parents=True)
+    (base / ".ingest-snapshot/old/x.md").write_text("x", encoding="utf-8")
+    boxes = Sandboxes(tmp_path / "workspace", root=tmp_path / "sb")
+    info = boxes.create("k-test", base, label="A very long sandbox label indeed", actor="a")
+    assert len(info.sandbox_id) <= 26 and (tmp_path / "sb" / info.sandbox_id).is_dir()
+    assert not (tmp_path / "sb" / info.sandbox_id / ".ingest-snapshot").exists()
+
+
 def test_a_base_that_is_not_a_vault_is_refused(tmp_path: Path) -> None:
     (tmp_path / "empty").mkdir()
     with pytest.raises(SandboxError, match="base_not_a_vault"):
