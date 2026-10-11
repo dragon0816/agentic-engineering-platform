@@ -1909,7 +1909,9 @@ def _register_knowledge_pipeline(
         drop_roots={item.name: Path(item.drop_root)
                     for item in config.knowledge_pipeline.vaults if item.drop_root},
         questions_roots={item.name: Path(item.questions_root)
-                         for item in config.knowledge_pipeline.vaults if item.questions_root})
+                         for item in config.knowledge_pipeline.vaults if item.questions_root},
+        maintainers={item.name: tuple(item.maintainers)
+                     for item in config.knowledge_pipeline.vaults})
     local = ExecutionDependencies(central_required=False)
     for spec, handler, request, response in (
         (SANDBOX_CREATE_SPEC, SandboxCreateHandler(pipeline), SandboxCreateRequest, SandboxRecord),

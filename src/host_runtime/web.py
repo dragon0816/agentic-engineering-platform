@@ -151,7 +151,12 @@ from host_runtime.host import HostRuntime, build_telegram, choice_sources, load_
 from host_runtime.knowledge_bench import latest as latest_benchmark
 from host_runtime.knowledge_bench import run_benchmark
 from host_runtime.knowledge_harness import KnowledgeHarness, harness_skill, knowledge_source_lines
-from host_runtime.knowledge_publish import PublishError, publish_candidate
+from host_runtime.knowledge_publish import (
+    PublishError,
+    publish_candidate,
+    refresh_from_project,
+)
+from host_runtime.knowledge_push import latest_push, run_push
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.profiles import ProfileError, activate_profile
 from host_runtime.reference_sets import (
@@ -190,6 +195,7 @@ from knowledge.market_matrix import (
     MarketMatrixRequest,
     assess_market_cell,
 )
+from knowledge.pipeline import KnowledgePipeline
 from knowledge.procedure import KnowledgeProcedure
 from knowledge.query import cited_numbers
 from knowledge.sandbox import SandboxError, Sandboxes
@@ -2572,6 +2578,65 @@ class AgentWeb:
         thread.start()
         return {"ok": True, "run_id": run_id}
 
+    def _pipeline(self) -> KnowledgePipeline | None:
+        """The pipeline for merge and push; no model is needed for either."""
+        binding = self.runtime.config.knowledge_pipeline
+        boxes = self._sandboxes()
+        if binding is None or boxes is None:
+            return None
+        return KnowledgePipeline(
+            boxes, {item.name: Path(item.root) for item in binding.vaults},
+            questions_roots={item.name: Path(item.questions_root)
+                             for item in binding.vaults if item.questions_root},
+            maintainers={item.name: tuple(item.maintainers) for item in binding.vaults})
+
+    def start_push(self, sandbox_id: str, sets: list[str],
+                   resolutions: dict[str, str]) -> dict[str, Any]:
+        """Merge, benchmark and, when the gate passes, write into the project
+        vault, in the background (collaboration C4)."""
+        pipeline = self._pipeline()
+        if pipeline is None:
+            return {"ok": False, "code": "knowledge_pipeline_disabled"}
+        try:
+            info, _ = pipeline.sandboxes.open(sandbox_id)
+        except SandboxError as error:
+            return {"ok": False, "code": error.code}
+        if not pipeline.may_push(info.base_name, self.runtime.actor):
+            return {"ok": False, "code": "not_a_maintainer"}
+        chosen = {key: value for key, value in resolutions.items()
+                  if value in ("sandbox", "published")}
+        push_id = f"push-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}"
+        skill = harness_skill(self.runtime.agent.gateway.router.commands.skills)
+        thread = threading.Thread(target=run_push, daemon=True, args=(pipeline,), kwargs={
+            "ask": lambda request, catalog: self.knowledge_harness.ask(request, catalog=catalog),
+            "sandbox_id": sandbox_id, "actor": self.runtime.actor, "sets": tuple(sets),
+            "resolutions": chosen, "skill": skill, "push_id": push_id,
+            "questions_fallback": pipeline.questions_roots.get(info.base_name)})
+        thread.start()
+        return {"ok": True, "push_id": push_id}
+
+    def push_status(self, sandbox_id: str) -> dict[str, Any]:
+        boxes = self._sandboxes()
+        if boxes is None:
+            return {"ok": False, "code": "knowledge_pipeline_disabled"}
+        try:
+            _, sandbox = boxes.open(sandbox_id)
+        except SandboxError as error:
+            return {"ok": False, "code": error.code}
+        return {"ok": True, "push": latest_push(sandbox)}
+
+    def refresh_knowledge(self, base: str) -> dict[str, Any]:
+        """Stage the project vault as the Agent's next Knowledge version."""
+        if self.config_path is None:
+            return {"ok": False, "code": "refresh_unavailable"}
+        with self._one_at_a_time:
+            try:
+                result = refresh_from_project(self.config_path, self.runtime.layout, base,
+                                              self.runtime.actor)
+            except PublishError as error:
+                return {"ok": False, "code": error.code}
+        return {"ok": True, "restart_required": True, "data": result.model_dump(mode="json")}
+
     def benchmark_status(self, sandbox_id: str) -> dict[str, Any]:
         boxes = self._sandboxes()
         if boxes is None:
@@ -2723,6 +2788,9 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.readiness())
         elif parsed.path == "/api/knowledge/pipeline":
             self._json(200, web.knowledge_pipeline())
+        elif parsed.path == "/api/knowledge/push":
+            query = parse_qs(parsed.query)
+            self._json(200, web.push_status((query.get("sandbox_id") or [""])[0]))
         elif parsed.path == "/api/knowledge/benchmark":
             query = parse_qs(parsed.query)
             self._json(200, web.benchmark_status((query.get("sandbox_id") or [""])[0]))
@@ -2784,6 +2852,8 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/knowledge/pipeline/call",
             "/api/knowledge/pipeline/publish",
             "/api/knowledge/benchmark/start",
+            "/api/knowledge/push/start",
+            "/api/knowledge/refresh",
             "/api/settings/model",
             "/api/settings/telegram",
             "/api/mcp/save",
@@ -2838,6 +2908,21 @@ class _Handler(BaseHTTPRequestHandler):
             except Exception as failure:  # noqa: BLE001 - a page shows everything
                 result = {"ok": False, "code": f"pipeline_error:{type(failure).__name__}"}
             self._json(200, result)
+            return
+        if path == "/api/knowledge/push/start":
+            if not isinstance(body, dict) or not isinstance(body.get("sets"), list) \
+                    or not isinstance(body.get("resolutions", {}), dict):
+                self._json(400, {"ok": False, "code": "push_request_invalid"})
+                return
+            self._json(200, self.server.web.start_push(
+                str(body.get("sandbox_id") or ""), [str(x) for x in body["sets"]],
+                {str(k): str(v) for k, v in dict(body.get("resolutions") or {}).items()}))
+            return
+        if path == "/api/knowledge/refresh":
+            if not isinstance(body, dict):
+                self._json(400, {"ok": False, "code": "refresh_request_invalid"})
+                return
+            self._json(200, self.server.web.refresh_knowledge(str(body.get("base") or "")))
             return
         if path == "/api/knowledge/benchmark/start":
             if not isinstance(body, dict) or not isinstance(body.get("sets"), list):

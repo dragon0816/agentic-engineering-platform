@@ -105,3 +105,61 @@ def publish_candidate(config_path: Path, layout: HostLayout, base: str, candidat
     updated = CompanyHostConfiguration.model_validate(data)
     write_atomically(config_path, updated.model_dump_json(indent=2).encode("utf-8") + b"\n")
     return PublishResult(base=base, vault_root=str(target), version=version, backup=str(backup))
+
+
+_REFRESH_SKIP = {"drop", ".ingest-backup", ".ingest-snapshot", ".plans", ".condense-cache",
+                 ".git", ".obsidian", ".trash", "pushes"}
+
+
+def refresh_from_project(config_path: Path, layout: HostLayout, base: str, actor: str,
+                         *, now: datetime | None = None) -> PublishResult:
+    """Stage the project vault as the next version of the Knowledge the Agent
+    answers from (collaboration C4): a digest-checked local copy, never the
+    shared folder itself. One person's confirmed click; restart applies it."""
+    config = CompanyHostConfiguration.model_validate_json(
+        config_path.read_text(encoding="utf-8-sig"))
+    pipeline = config.knowledge_pipeline
+    entry = next((v for v in pipeline.vaults if v.name == base), None) if pipeline else None
+    if entry is None or entry.knowledge_asset is None:
+        raise PublishError("no_knowledge_asset")
+    data = json.loads(config.model_dump_json())
+    binding = next((item for item in data["knowledge"]
+                    if item["asset"]["name"] == entry.knowledge_asset), None)
+    if binding is None:
+        raise PublishError("no_knowledge_binding")
+    asset = binding["asset"]
+    version = _next_version(asset["version"])
+    stamp = (now or datetime.now(UTC)).strftime("%Y%m%d-%H%M%S")
+    current = Path(binding["vault_root"]).resolve()
+    stem = re.sub(r"-v\d[\w.-]*$", "", current.name)
+    target = current.parent / f"{stem}-v{version}"
+    stem_name = f"{asset['namespace']}__{asset['name']}"
+    old_manifest = layout.knowledge / f"{stem_name}__{asset['version']}.json"
+    manifest_path = layout.knowledge / f"{stem_name}__{version}.json"
+    if not old_manifest.is_file() or manifest_path.exists() or target.exists():
+        raise PublishError("version_exists")
+    project = Path(entry.root)
+    try:
+        Vault(project)
+    except VaultError:
+        raise PublishError("project_not_a_vault") from None
+    backup = config_path.with_name(f"{config_path.name}.bak-{stamp}-before-knowledge-refresh")
+    shutil.copy2(config_path, backup)
+    shutil.copytree(project, target,
+                    ignore=lambda _dir, names: [n for n in names if n in _REFRESH_SKIP])
+    vault = Vault(target)
+    manifest = json.loads(old_manifest.read_text(encoding="utf-8"))
+    day = stamp[:8]
+    manifest["metadata"]["identity"]["version"] = version
+    manifest["metadata"]["validation_refs"] = [f"refreshed-from-project-{base}-{day}"]
+    manifest["metadata"]["business_approval"] = {
+        "status": "approved", "reviewer": actor, "evidence": f"refreshed-by-{actor}-{day}"}
+    manifest.update(vault_ref=str(target), raw_sha256=raw_digest(vault),
+                    decisions_sha256=decision_digest(vault), content_sha256=knowledge_digest(vault))
+    manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False) + "\n",
+                             encoding="utf-8")
+    binding["asset"]["version"] = version
+    binding["vault_root"] = str(target)
+    updated = CompanyHostConfiguration.model_validate(data)
+    write_atomically(config_path, updated.model_dump_json(indent=2).encode("utf-8") + b"\n")
+    return PublishResult(base=base, vault_root=str(target), version=version, backup=str(backup))

@@ -93,3 +93,21 @@ def test_publish_is_a_person_route_that_needs_the_host_file(
     assert json.loads(reply.body) == {"ok": False, "code": "publish_unavailable"}
     assert _step(server, "publish", {})["code"] == "unknown_pipeline_step"
     assert "/api/knowledge/pipeline/publish" in PAGE and 'id="kp-merge"' in PAGE
+
+
+def test_push_and_refresh_routes_need_the_token_and_a_sandbox(
+    served_pipeline: tuple[AgentWebServer, Path],
+) -> None:
+    server, _ = served_pipeline
+    body = {"sandbox_id": "sb-missing-000000", "sets": [], "resolutions": {}}
+    assert fetch(base(server) + "/api/knowledge/push/start", body=body).status == 401
+    reply = json.loads(fetch(base(server) + "/api/knowledge/push/start", token=server.token,
+                             body=body).body)
+    assert reply == {"ok": False, "code": "unknown_sandbox"}
+    status = json.loads(fetch(base(server) + "/api/knowledge/push?sandbox_id=sb-missing-000000",
+                              token=server.token).body)
+    assert status == {"ok": False, "code": "unknown_sandbox"}
+    refresh = json.loads(fetch(base(server) + "/api/knowledge/refresh", token=server.token,
+                               body={"base": "k-test"}).body)
+    assert refresh == {"ok": False, "code": "refresh_unavailable"}
+    assert 'id="kp-push"' in PAGE and "/api/knowledge/push/start" in PAGE

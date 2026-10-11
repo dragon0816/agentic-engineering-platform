@@ -75,3 +75,29 @@ def test_only_a_candidate_of_that_base_can_be_published(tmp_path: Path) -> None:
         publish_candidate(path, layout, "rs-k", str(base), "leo.chi")
     with pytest.raises(PublishError, match="unknown_base_vault"):
         publish_candidate(path, layout, "other", str(base), "leo.chi")
+
+
+def test_refresh_stages_the_project_vault_as_the_agents_next_version(tmp_path: Path) -> None:
+    from host_runtime.knowledge_publish import refresh_from_project
+
+    path, _, base = _host(tmp_path)
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["knowledge_pipeline"]["vaults"][0]["knowledge_asset"] = "rs-knowledge"
+    path.write_text(json.dumps(data), encoding="utf-8")
+    (base / "drop/big.pdf").write_bytes(b"%PDF original")  # originals are not staged
+    before = _snapshot(base)
+    config = CompanyHostConfiguration.model_validate_json(path.read_text(encoding="utf-8"))
+    layout = HostLayout.under(config.workspace_root)
+    result = refresh_from_project(path, layout, "rs-k", "leo.chi")
+    target = Path(result.vault_root)
+    assert result.version == "1.1.0" and target.name == "base-v1.1.0"
+    assert (target / "wiki/concepts/EVM.md").is_file() and not (target / "drop").exists()
+    assert _snapshot(base) == before  # the shared project folder is only read
+    updated = CompanyHostConfiguration.model_validate_json(path.read_text(encoding="utf-8"))
+    assert updated.knowledge[0].asset.version == "1.1.0"
+    assert updated.knowledge_pipeline is not None
+    assert Path(updated.knowledge_pipeline.vaults[0].root) == base  # still the project vault
+    new = KnowledgeManifest.model_validate_json(
+        (layout.knowledge / "engineering__rs-knowledge__1.1.0.json").read_text(encoding="utf-8"))
+    KnowledgeCatalog().register(new, Vault(target))
+    assert refresh_from_project(path, layout, "rs-k", "leo.chi").version == "1.2.0"

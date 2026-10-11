@@ -18,6 +18,9 @@ class PipelineVault(Contract):
     drop_root: Text | None = None  # default <root>/drop
     questions_root: Text | None = None  # default <root>/checks/questions
     maintainers: tuple[Text, ...] = ()  # who may push
+    # The Knowledge asset the Agent answers from that this project feeds, e.g.
+    # rs-knowledge; "Refresh" stages the project vault as its next version.
+    knowledge_asset: Symbol | None = None
 
 
 class KnowledgePipelineHostBinding(Contract):

@@ -153,12 +153,14 @@ class KnowledgePipeline:
         describer: Describer | None = None,
         drop_roots: dict[str, Path] | None = None,
         questions_roots: dict[str, Path] | None = None,
+        maintainers: dict[str, tuple[str, ...]] | None = None,
     ) -> None:
         self.sandboxes = sandboxes
         self.bases = dict(bases)
         # Where each project vault collects originals; default <vault>/drop.
         self.drop_roots = {name: (drop_roots or {}).get(name, root / "drop")
                            for name, root in self.bases.items()}
+        self.maintainers = dict(maintainers or {})
         # Where each project vault keeps its question sets; default checks/questions.
         self.questions_roots = {
             name: (questions_roots or {}).get(name, root / "checks" / "questions")
@@ -481,7 +483,8 @@ class KnowledgePipeline:
         if merged.conflicts:
             raise PipelineError("unresolved_conflicts")
         stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%S")
-        target = self.sandboxes.root / CANDIDATES / f"{info.base_name}-{stamp}"
+        target = (self.sandboxes.root / CANDIDATES
+                  / f"{info.base_name}-{stamp}-{uuid.uuid4().hex[:4]}")
         shutil.copytree(published.root, target,
                         ignore=lambda _dir, names: [n for n in names if n in _CANDIDATE_SKIP])
         for rel, data in merged.files.items():
@@ -494,7 +497,44 @@ class KnowledgePipeline:
         worse = {key: after[key] - before.get(key, 0) for key in after
                  if after[key] > before.get(key, 0)}
         return report.model_copy(update={
-            "candidate_root": str(target), "lost_sourced_lines": lost, "lint_worse": worse})
+            "candidate_root": str(target), "lost_sourced_lines": lost, "lint_worse": worse,
+            "written": tuple(sorted(merged.files))})
+
+    # -- push (collaboration C4) -----------------------------------------------
+
+    def may_push(self, base: str, actor: str) -> bool:
+        """Co-developers listed for the project may push; an empty list means
+        whoever runs this Agent (OneDrive sharing still decides who can write)."""
+        allowed = self.maintainers.get(base, ())
+        return not allowed or actor in allowed
+
+    def write_push(self, base: str, candidate_root: str, written: tuple[str, ...],
+                   push_id: str) -> str:
+        """Copy the merged files from the candidate into the project vault in
+        place; every file replaced is backed up first under
+        `.ingest-backup/<push id>/`. Returns the backup folder."""
+        if base not in self.bases:
+            raise PipelineError("unknown_base_vault")
+        project = self.bases[base].resolve()
+        candidate = Path(candidate_root).resolve()
+        if candidate.parent != (self.sandboxes.root / CANDIDATES).resolve():
+            raise PipelineError("not_a_candidate")
+        backup = project / ".ingest-backup" / push_id
+        for rel in written:
+            clean = normalize(rel)
+            source, target = (candidate / clean).resolve(), (project / clean).resolve()
+            if candidate not in source.parents or project not in target.parents:
+                raise PipelineError("outside_vault")
+            if target.is_file():
+                saved = backup / clean
+                saved.parent.mkdir(parents=True, exist_ok=True)
+                saved.write_bytes(target.read_bytes())
+        for rel in written:
+            clean = normalize(rel)
+            target = project / clean
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes((candidate / clean).read_bytes())
+        return str(backup)
 
     def lint(self, sandbox_id: str) -> LintSummary:
         report = scan(self._open(sandbox_id))
@@ -530,6 +570,7 @@ class MergeReport(Contract):
     candidate_root: str | None = None
     lost_sourced_lines: int = 0
     lint_worse: dict[str, int] = Field(default_factory=dict)
+    written: tuple[str, ...] = ()  # the files a push copies into the project vault
 
 
 def _lint_counts(vault: Vault) -> dict[str, int]:

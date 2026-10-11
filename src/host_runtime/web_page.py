@@ -869,6 +869,16 @@ tr:last-child td { border-bottom: none; }
             <button class="go" id="kp-bench" type="button">Run benchmark</button>
             <span class="note" id="kp-bench-state"></span></div>
           <div id="kp-bench-result"></div></div>
+        <div class="card"><h3>Push to the project vault</h3>
+          <p class="note">Push merges this sandbox into the project vault as it is now, runs
+            the question sets ticked under Benchmark on the merged result, and writes only
+            when no question regresses and the score is not lower. Conflicts are chosen
+            under "Merge and publish" below (Preview merge).</p>
+          <div class="kp-actions">
+            <button class="go" id="kp-push" type="button">Push</button>
+            <button id="kp-refresh-agent" type="button">Refresh the Agent's Knowledge</button>
+            <span class="note" id="kp-push-state"></span></div>
+          <div id="kp-push-result"></div></div>
         <div class="card"><h3>Merge and publish</h3>
           <div class="kp-actions">
             <button id="kp-merge-preview" type="button">Preview merge</button>
@@ -3581,6 +3591,37 @@ async function kpOpen(item) {
   await kpLoadRules();
   await kpLoadPull();
   await kpLoadBench();
+  await kpPushShow();
+}
+
+let kpPushTimer = null;
+async function kpPushShow() {
+  const reply = await call("/api/knowledge/push?sandbox_id="
+    + encodeURIComponent(kpSandbox.sandbox_id));
+  const push = reply.ok ? reply.push : null;
+  const box = el("kp-push-result"); box.replaceChildren();
+  if (!push) { el("kp-push-state").textContent = "Not pushed yet."; return; }
+  const bench = push.benchmark || {};
+  el("kp-push-state").textContent = push.push_id + ": " + push.status
+    + (push.reason ? " \u2014 " + push.reason : "");
+  const lines = [
+    "Files: " + push.written.length + (push.proposals.length
+      ? "; proposals (outside the scope): " + push.proposals.join(", ") : ""),
+    "Benchmark: merged " + (bench.sandbox_score ?? "-") + " / project vault "
+      + (bench.project_score ?? "-") + " of " + (bench.total ?? "-")
+      + ((bench.regressions || []).length ? "; regressions: " + bench.regressions.join(", ") : ""),
+    push.conflicts.length ? "Conflicts to choose: " + push.conflicts.join(", ") : "",
+    push.backup ? "Backup: " + push.backup : "",
+  ].filter(Boolean);
+  const list = document.createElement("ul");
+  for (const line of lines) {
+    const li = document.createElement("li"); li.append(text(line)); list.append(li);
+  }
+  box.append(list);
+  clearTimeout(kpPushTimer);
+  if (["merging", "benchmarking", "writing"].includes(push.status)) {
+    kpPushTimer = setTimeout(() => kpPushShow().catch(() => {}), 5000);
+  }
 }
 
 function kpChecks(box, items, checked) {
@@ -3780,6 +3821,27 @@ el("kp-upload").addEventListener("click", () => kpRun("Adding to drop", async ()
 el("kp-preview").addEventListener("click", () => kpRun("Previewing", () => kpConvert("dry_run")));
 el("kp-convert").addEventListener("click", () => kpRun("Converting", () => kpConvert("apply")));
 el("kp-lint").addEventListener("click", () => kpRun("Linting", kpLint));
+el("kp-push").addEventListener("click", () => kpRun("Starting the push", async () => {
+  const sets = kpTicked(el("kp-bench-sets"));
+  if (!confirm("Push " + kpSandbox.label + " into the project vault? It is written only if the "
+      + "benchmark (" + (sets.join(", ") || "no question sets") + ") shows no regression.")) return;
+  const reply = await call("/api/knowledge/push/start", {sandbox_id: kpSandbox.sandbox_id, sets,
+                                                         resolutions: kpResolutions()});
+  if (!reply.ok) {
+    const problem = new Error(reply.code); problem.code = reply.code; throw problem;
+  }
+  setTimeout(() => kpPushShow().catch(() => {}), 1500);
+}));
+el("kp-refresh-agent").addEventListener("click", () => kpRun("Refreshing", async () => {
+  if (!confirm("Stage the project vault " + kpSandbox.base_name + " as the Agent's next "
+      + "Knowledge version? It answers from it after a restart.")) return;
+  const reply = await call("/api/knowledge/refresh", {base: kpSandbox.base_name});
+  if (!reply.ok) {
+    const problem = new Error(reply.code); problem.code = reply.code; throw problem;
+  }
+  el("kp-push-state").textContent = "Staged " + reply.data.version + " at "
+    + reply.data.vault_root + ". Restart the Agent to answer from it.";
+}));
 el("kp-pull").addEventListener("click", () => kpRun("Pulling", async () => {
   const folders = kpTicked(el("kp-pull-folders"));
   if (!folders.length) { kpStatus("Choose at least one folder.", true); return; }
