@@ -39,7 +39,12 @@ from pydantic import Field, JsonValue, ValidationError
 from agent.gateway import HostTool, HostToolOutcome
 from agent.skills import SkillManifest
 from capabilities.coding_change.workspaces import containing_root, workspace_note
-from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
+from capabilities.runtime import (
+    CapabilityGrant,
+    CapabilityInvocation,
+    InstalledCapabilities,
+    LocalPolicy,
+)
 from capabilities.workflow_author.conversation import assemble
 from common.assets import AssetIdentity, FixedInput, WorkflowManifest, WorkflowStep
 from common.base import Contract, Symbol, Text
@@ -58,7 +63,7 @@ from workflow.engine import InstalledWorkflows, WorkflowEngine, WorkflowRunSnaps
 from workflow.harness import run_workflow_checked
 
 CandidateStatus = Literal["draft", "previewed", "installed"]
-ApprovalKind = Literal["run", "install", "install_skill"]
+ApprovalKind = Literal["run", "install", "install_skill", "capability"]
 ApprovalStatus = Literal["pending", "approved", "rejected", "failed"]
 MAX_DATA_CHARS = 4_000
 MAX_DRAFT_CHARS = 14_000
@@ -115,6 +120,12 @@ def _core(version: str) -> tuple[int, int, int]:
 
 def _key(identity: AssetIdentity) -> str:
     return f"{identity.namespace}/{identity.name}@{identity.version}"
+
+
+def _call_digest(key: str, arguments: dict[str, JsonValue]) -> str:
+    """The approved call exactly: a changed target or argument is a new request."""
+    payload = json.dumps([key, arguments], sort_keys=True, ensure_ascii=False, default=str)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
 def _now() -> str:
@@ -494,6 +505,50 @@ class ChatAuthoring:
             summary=summary[:600], created_at=_now(),
         ))
 
+    def request_capability(
+        self, actor: str, session_id: str | None, target: AssetIdentity,
+        arguments: dict[str, JsonValue],
+    ) -> ApprovalRequest:
+        """A side effect the conversation model chose itself (owner mode): it
+        runs, as the person, only when they approve it."""
+        key = _key(target)
+        shown = json.dumps(arguments, ensure_ascii=False)
+        return self._save_approval(ApprovalRequest(
+            approval_id=f"ap-{datetime.now(UTC):%Y%m%d-%H%M%S}-{secrets.token_hex(3)}",
+            actor=actor, session_id=session_id, kind="capability", candidate_id="capability",
+            digest=_call_digest(key, arguments), workflow=key, arguments=arguments,
+            summary=f"Run {key} once with {shown}"[:600], created_at=_now(),
+        ))
+
+    def capability_approval_tool_data(
+        self, context: RequestContext, target: AssetIdentity,
+        arguments: dict[str, JsonValue],
+    ) -> dict[str, JsonValue]:
+        request = self.request_capability(context.actor, context.session_id, target, arguments)
+        return {
+            "approval_id": request.approval_id, "summary": request.summary,
+            "next": "Nothing ran yet. Tell the person it waits for their approval button; "
+                    "after they approve, the result appears in this conversation.",
+        }
+
+    def _run_capability(self, item: ApprovalRequest, actor: str) -> ApprovalRequest:
+        if _call_digest(item.workflow, item.arguments) != item.digest:
+            return self._save_approval(item.model_copy(update={
+                "status": "failed", "decided_at": _now(),
+                "result": {"failure": "the request changed after it was made; ask again"}}))
+        namespace, _, rest = item.workflow.partition("/")
+        name, _, version = rest.partition("@")
+        target = AssetIdentity(namespace=namespace, name=name, version=version)
+        result = asyncio.run(self._bridge().execute(CapabilityInvocation(
+            context=self._context(actor, self.namespace, item.session_id, "run"),
+            target=target, arguments=item.arguments)))
+        status: ApprovalStatus = "approved" if result.status == "succeeded" else "failed"
+        return self._save_approval(item.model_copy(update={
+            "status": status, "decided_at": _now(),
+            "result": {"status": result.status,
+                       "data": json.loads(json.dumps(result.data, default=str)),
+                       "failure": None if result.failure is None else result.failure.code}}))
+
     def decide(self, approval_id: str, actor: str, approve: bool) -> ApprovalRequest:
         """The owner's decision, from a button the model cannot press."""
         item = self.approval(approval_id, actor)
@@ -504,6 +559,8 @@ class ChatAuthoring:
                 "status": "rejected", "decided_at": _now()}))
         if item.kind == "install_skill":
             return self._decide_skill(item, actor)
+        if item.kind == "capability":
+            return self._run_capability(item, actor)
         candidate = self.candidate(item.candidate_id, actor)
         if digest(candidate.draft) != item.digest:
             return self._save_approval(item.model_copy(update={
@@ -985,6 +1042,9 @@ def approval_text(item: ApprovalRequest) -> str:
     result = item.result if isinstance(item.result, dict) else {}
     if item.status == "failed":
         return f"【未執行】{item.summary}。原因：{result.get('failure')}"
+    if item.kind == "capability":
+        detail = json.dumps(result.get("data"), ensure_ascii=False)
+        return f"【已核准並執行】{item.workflow} 結果：{result.get('status')}\n{detail[:2000]}"
     if item.kind == "install_skill":
         return (f"【已核准安裝 Skill】{result.get('installed_as')}"
                 f"（digest {result.get('digest')}）。主機重新啟動後生效。")

@@ -368,6 +368,10 @@ class Gateway:
         # The Knowledge Harness the tool route runs (harness unification U5):
         # (question, vault asset) -> the Harness result. Set by the host.
         self.knowledge_harness: Callable[[str, AssetIdentity], dict[str, Any]] | None = None
+        # Owner mode (2026-10-11): a side effect the model chose itself becomes
+        # an approval request the person decides with a button.
+        self.capability_approval: Callable[
+            [RequestContext, AssetIdentity, dict[str, JsonValue]], dict[str, Any]] | None = None
 
     def _vault_tools(
         self,
@@ -852,6 +856,13 @@ class Gateway:
                     arguments=invocation_arguments,
                 )
             )
+            if (result.failure is not None and result.failure.code == "approval_required"
+                    and self.capability_approval is not None):
+                pending = await asyncio.to_thread(
+                    self.capability_approval, context, binding.target, invocation_arguments)
+                return ConversationToolExecution(
+                    call_id=call.call_id, name=call.name,
+                    host=HostToolOutcome(status="awaiting_approval", data=pending))
             return ConversationToolExecution(
                 call_id=call.call_id,
                 name=call.name,

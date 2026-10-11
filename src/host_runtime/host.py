@@ -1805,6 +1805,7 @@ def build_runtime(
     )
     mcp = McpHub(place.workspace_root, gateway.bridge.installed, lambda: gateway.bridge.policy,
                  checked.device.registered_by, store_secret=windows_user_environment)
+    gateway.capability_approval = chat_authoring.capability_approval_tool_data
     gateway.host_tools = lambda: (*chat_authoring.tools(), *bridge_tools(gateway.bridge),
                                   *mcp.tools(gateway.bridge))
     try:
