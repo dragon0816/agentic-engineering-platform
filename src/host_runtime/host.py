@@ -450,6 +450,33 @@ def _configured_grants(layout: HostLayout) -> tuple[CapabilityGrant, ...]:
         raise HostError("grants_invalid", layout.grants) from error
 
 
+OWNER_GRANT_REF = "device-owner"
+
+
+def _owner_grants(
+    membership: BridgeMembership | None, installed: InstalledCapabilities, layout: HostLayout,
+) -> tuple[CapabilityGrant, ...]:
+    """Every installed capability for the device owner (owner 2026-10-11): on a
+    local host what this computer may do, its owner may do. A grant written in
+    grants.json for the same capability is kept as written."""
+    if membership is None:
+        return ()
+    owner = next((b.actor for b in membership.bindings if b.status == "active"), None)
+    if owner is None:
+        return ()
+    written = {(g.actor, g.asset.key) for g in _configured_grants(layout)}
+    return tuple(
+        CapabilityGrant(
+            actor=owner, asset=spec.identity,
+            permissions=spec.policy.required_permissions,
+            policy_refs=spec.policy.policy_refs or (OWNER_GRANT_REF,),
+            approval_ref=OWNER_GRANT_REF,
+        )
+        for spec in installed.discover()
+        if (owner, spec.identity.key) not in written
+    )
+
+
 def _decided_grants(
     authorization: DeviceAuthorization, installed: InstalledCapabilities
 ) -> tuple[CapabilityGrant, ...]:
@@ -1007,13 +1034,15 @@ def build_gateway(
     grants = (
         _decided_grants(authorization, installed)
         if authorization is not None
-        else _configured_grants(layout)
+        else _configured_grants(layout) + (
+            _owner_grants(membership, installed, layout) if config.local_owner_grants else ())
     )
     if profile is not None:
         permitted = {item.key for item in profile.allowed_capabilities}
         grants = tuple(item for item in grants if item.asset.key in permitted)
     try:
-        policy = LocalPolicy(grants)
+        policy = LocalPolicy(
+            grants, owner_mode=authorization is None and config.local_owner_grants)
     except ValueError as error:
         raise HostError("grants_invalid", layout.grants) from error
     bridge = BridgeExecutor(installed, policy, timeout_seconds=config.capability_timeout_seconds)

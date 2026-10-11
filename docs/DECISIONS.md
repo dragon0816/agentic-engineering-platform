@@ -2077,3 +2077,20 @@ Rejected alternatives:
 - Two parallel language copies as authoritative pages: they drift, and translation errors would become evidence. Use bilingual aliases and summaries, and retrieval-only derived translations if needed.
 
 Plan: `docs/phases/KNOWLEDGE_PIPELINE_RELEASE.zh-TW.md` (K1-K6).
+
+## 2026-10-11: Owner mode — what this computer may do, its owner may do
+
+Decision (owner chose option 1): on a local host, one without the shared platform's member decisions, authorization follows the person.
+- **Owner holds everything.** The device owner (the active membership binding) holds every installed capability. No `grants.json` entry is needed; one written there is kept as written.
+- **A person's request runs.** A request the person makes runs without a recorded approval: an Agent Web button, the CLI, or a Workflow they installed or started (`CapabilityInvocation.origin = "person"`). Writing steps should offer a dry run or preview first, as the Knowledge pipeline does.
+- **A model's side effect waits.** A side effect the conversation model chose by itself (`origin = "model"`, set by the Gateway) is not run. The Bridge returns `approval_required`. Showing an Approve button in the conversation that runs it as the person is the next step.
+- **Reads run** whoever asks.
+- **The switch.** `host.json` `local_owner_grants` (default `true`). `false` restores the strict rules: an explicit grant with an `approval_ref` per side-effecting capability. A host with control-plane member decisions keeps the strict rules regardless.
+
+Reason: the owner found per-capability grants and approval references a burden on their own computer. The risk the approvals guard against is the model acting on its own, for example on instructions hidden in an ingested document. Owner mode keeps that guard and drops the bookkeeping. The capability-spec rule is unchanged (a side effect must declare an approval policy); in owner mode a person's request satisfies it.
+
+Rejected alternatives:
+- Removing confirmation for model-initiated writes too (option 2): ingested PDFs, web pages and slides can carry instructions.
+- Keeping `grants.json` mandatory: the bookkeeping the owner asked to remove.
+
+Tests: `tests/test_owner_policy.py` covers owner mode. The shared host fixtures in `tests/test_host_wiring.py` set `local_owner_grants: false`, so the existing grant tests still verify the strict rules.

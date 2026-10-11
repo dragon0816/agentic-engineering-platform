@@ -1,7 +1,7 @@
 """Explicit host-installed handlers and policy, distinct from Platform Registry assets."""
 
 from dataclasses import dataclass
-from typing import Protocol
+from typing import Literal, Protocol
 
 from pydantic import Field, JsonValue, TypeAdapter
 
@@ -42,6 +42,9 @@ class CapabilityInvocation(Contract):
     context: RequestContext
     target: AssetIdentity
     arguments: dict[str, JsonValue] = Field(default_factory=dict)
+    # Who asked (owner 2026-10-11): a person (a button, the CLI, a Workflow they
+    # installed or started) or the conversation model choosing a tool itself.
+    origin: Literal["person", "model"] = "person"
 
 
 class CapabilityHandler(Protocol):
@@ -109,9 +112,17 @@ class CapabilityGrant(Contract):
 
 
 class LocalPolicy:
-    """Small default-deny policy for a trusted local host, not an identity/RBAC server."""
+    """Small default-deny policy for a trusted local host, not an identity/RBAC server.
 
-    def __init__(self, grants: tuple[CapabilityGrant, ...] = ()) -> None:
+    `owner_mode` (a local host without the shared platform's member decisions,
+    owner 2026-10-11): the device owner holds every installed capability, a
+    person's own request needs no recorded approval, and a side effect the
+    conversation model chose by itself waits for the person to confirm it."""
+
+    def __init__(
+        self, grants: tuple[CapabilityGrant, ...] = (), *, owner_mode: bool = False,
+    ) -> None:
+        self.owner_mode = owner_mode
         self._grants: dict[tuple[str, tuple[str, str, str]], CapabilityGrant] = {}
         for grant in grants:
             checked = CapabilityGrant.model_validate(grant)
@@ -126,6 +137,11 @@ class LocalPolicy:
         checked = CapabilityGrant.model_validate(grant)
         self._grants.setdefault((checked.actor, checked.asset.key), checked)
 
+    def confirmation_needed(self, spec: CapabilitySpec, origin: str) -> bool:
+        """In owner mode, a side effect the model chose itself is not run until
+        the person confirms it; reads, and anything a person asked for, run."""
+        return self.owner_mode and origin == "model" and spec.side_effect != "read"
+
     def authorize(self, context: RequestContext, spec: CapabilitySpec) -> ExecutionAuthorization:
         grant = self._grants.get((context.actor, spec.identity.key))
         if grant is None:
@@ -134,7 +150,7 @@ class LocalPolicy:
             return ExecutionAuthorization()
         if not set(spec.policy.policy_refs).issubset(grant.policy_refs):
             return ExecutionAuthorization()
-        if spec.policy.approval_required and grant.approval_ref is None:
+        if spec.policy.approval_required and grant.approval_ref is None and not self.owner_mode:
             return ExecutionAuthorization()
         return ExecutionAuthorization(
             allowed=True,

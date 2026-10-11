@@ -847,6 +847,7 @@ class Gateway:
             result = await self.bridge.execute(
                 CapabilityInvocation(
                     context=context,
+                    origin="model",
                     target=binding.target,
                     arguments=invocation_arguments,
                 )

@@ -109,6 +109,9 @@ class BridgeExecutor:
         binding = self.installed.get(call.target)
         if binding is None:
             return self._failure(call, "capability_not_installed", unavailable=True)
+        confirm = getattr(self.policy, "confirmation_needed", None)
+        if confirm is not None and confirm(binding.spec, call.origin):
+            return self._failure(call, "approval_required")
         authorization = self.policy.authorize(call.context, binding.spec)
         if not authorization.allowed:
             return self._failure(call, "permission_denied")

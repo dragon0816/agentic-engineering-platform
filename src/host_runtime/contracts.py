@@ -486,6 +486,12 @@ class CompanyHostConfiguration(Contract):
     # Sandboxed Knowledge convert/ingest/lint (docs/phases/KNOWLEDGE_K1.md):
     # the base vaults people may copy into a personal sandbox.
     knowledge_pipeline: KnowledgePipelineHostBinding | None = None
+    # Owner mode (owner 2026-10-11): on a host without the shared platform's
+    # member decisions, the device owner holds every installed capability, a
+    # person's own request needs no recorded approval, and a side effect the
+    # conversation model chose itself waits for the person. False keeps the
+    # strict grants.json rules (an explicit, approved grant per capability).
+    local_owner_grants: StrictBool = True
     # Web steps of generated Workflows (docs/phases/SOP_TO_WORKFLOW.md W2):
     # the origins they may open and the browser profile they use.
     web: WebHostBinding | None = None

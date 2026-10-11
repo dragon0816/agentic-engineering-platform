@@ -171,6 +171,9 @@ def workspace(
             "device": device(),
             "workspace_root": str(root),
             "namespace": "engineering",
+            # These fixtures exercise the strict grants.json rules; owner mode
+            # (the product default, owner 2026-10-11) is tested on its own.
+            "local_owner_grants": False,
             **(config_changes or {}),
         }
     )
