@@ -2129,3 +2129,17 @@ vault and the K2 sandbox return identical passages on the 36 core questions (180
 Rejected for now: index lines taking search slots (core-007); a category-only
 `index.md` as query navigation (core-008). Still open: bilingual lines as an addition
 to the flat list.
+
+## 2026-10-11: K3 ingest rules live in the vault; one approval publishes a merge
+
+Decision (owner), spec `docs/phases/KNOWLEDGE_K3.md`:
+1. The ingest schema (`CLAUDE.md`) and the per-category rules
+   (`skills/ingest-<category>/SKILL.md`, chosen by the source's Raw folder) live in the
+   vault, so domain owners edit them in Obsidian without a platform release. Rejected:
+   packaging them as platform Skill assets (each change would need a reinstall).
+2. Rules follow the owner's four data categories (Market, Productions, Knowledge,
+   Competitor); merge-review scope follows the 5 markets x 4 product lines matrix through
+   `index_categories`, and out-of-domain or shared-page changes are marked "proposal",
+   not blocked.
+3. Publishing a merged Knowledge version needs one person's confirm click; per-domain
+   approval was not required.

@@ -62,7 +62,8 @@ at least `title`, `type` and `updated`. Link pages with [[Page Name]] — bare p
 names, never paths and never a .md suffix. State only what the source supports,
 keep the source's own terms, and when a source contradicts an existing page,
 write a line starting with ⚠️ on the affected page that says which source says
-what. Decisions listed as settled are final: never reinstate a rejected claim."""
+what and when. Decisions listed as settled are final: never reinstate a rejected
+claim. Pages under wiki/paths/ are written by people: never create or change them."""
 
 CATEGORY_PROMPT = """A source is about to be ingested into a large wiki. Below are the categories
 of its index and the source text. Pick the categories whose pages you would need

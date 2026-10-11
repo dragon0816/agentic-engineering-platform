@@ -34,10 +34,10 @@ from knowledge.raw import (
     load_document,
 )
 from knowledge.sandbox import Sandboxes, SandboxInfo
+from knowledge.schema import ingest_conventions
 from knowledge.vault import Vault, WritePlan, normalize
 from models.contracts import ModelClient
 
-SCHEMA_FILE = "CLAUDE.md"
 PLANS = ".plans"
 MAX_FINDINGS = 50
 # One dropped original; the Agent Web upload limit is smaller.
@@ -85,6 +85,8 @@ class IngestPlanResult(Contract):
     problems: tuple[str, ...] = ()
     failure_code: str | None = None
     schema_source: Literal["vault", "built_in"] = "built_in"
+    # The category rules (skills/<name>/SKILL.md) added for this source, if any.
+    skill: str | None = None
 
 
 class IngestApplyResult(Contract):
@@ -214,10 +216,6 @@ class KnowledgePipeline:
 
     # -- ingest --------------------------------------------------------------
 
-    def _conventions(self, vault: Vault) -> tuple[str, Literal["vault", "built_in"]]:
-        schema = vault.read(SCHEMA_FILE).strip()
-        return (schema, "vault") if schema else (DEFAULT_CONVENTIONS, "built_in")
-
     def plan_ingest(self, sandbox_id: str, raw_ref: str) -> IngestPlanResult:
         if self.model is None or self.alias is None:
             raise PipelineError("no_model")
@@ -226,13 +224,14 @@ class KnowledgePipeline:
                      None)
         if entry is None:
             raise PipelineError("unknown_raw")
-        conventions, schema_source = self._conventions(vault)
-        planner = IngestPlanner(self.model, vault, alias=self.alias, conventions=conventions,
+        rules = ingest_conventions(vault, entry.raw_ref, DEFAULT_CONVENTIONS)
+        planner = IngestPlanner(self.model, vault, alias=self.alias, conventions=rules.text,
                                 max_output_tokens=PLAN_MAX_OUTPUT_TOKENS)
         outcome = planner.plan(load_document(vault, entry), today=date.today().isoformat(),
                                decisions=decisions_text(vault))
         base = IngestPlanResult(sandbox_id=sandbox_id, raw_ref=entry.raw_ref,
-                                status=outcome.status, schema_source=schema_source,
+                                status=outcome.status, schema_source=rules.schema_source,
+                                skill=rules.skill,
                                 problems=tuple(p.code for p in outcome.problems),
                                 failure_code=outcome.failure.code if outcome.failure else None)
         if outcome.plan is None or outcome.status != "planned":

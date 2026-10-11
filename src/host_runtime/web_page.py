@@ -3558,7 +3558,7 @@ async function kpPlan(rawRef) {
   const box = el("kp-plan"); box.className = ""; box.replaceChildren();
   const head = document.createElement("p");
   head.append(text(rawRef + ": " + plan.status + (plan.summary ? " \u2014 " + plan.summary : "")
-    + " (schema: " + plan.schema_source + ")"));
+    + " (schema: " + plan.schema_source + (plan.skill ? ", rules: " + plan.skill : "") + ")"));
   box.append(head);
   if (plan.problems.length) box.append(text("Problems: " + plan.problems.join(", ")));
   box.append(table(["Page", "Change", "Characters"], plan.pages,

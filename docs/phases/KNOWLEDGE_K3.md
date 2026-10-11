@@ -102,9 +102,8 @@ K3.1 schema + category skill selection (vault-resident) → K3.2 section operati
 deletion guard → K3.3 three-way merge preview with conflicts → K3.4 publish as a new
 version (confirmed) → K3.5 live run on `rs-k` with the owner's schema.
 
-## Owner decisions needed
+## Owner decisions (2026-10-11)
 
-1. Schema and skills in the vault (proposal 1), rather than as platform Skill assets.
-2. Rules by data category and scope by matrix cell (proposal 2).
-3. Publishing a merged version switches what Agent Web answers from. Is one confirm
-   click by the owner enough, or does each domain owner also need to approve?
+1. Schema and skills live in the vault (proposal 1).
+2. Rules by data category, scope by matrix cell (proposal 2).
+3. Publishing a merged version needs one person's approval (one confirm click).
