@@ -29,6 +29,16 @@ from common.execution import Failure, TraceIdentifiers
 from knowledge.layered_index import index_entries, is_navigation
 from knowledge.modelcalls import failure_from_exception
 from knowledge.raw import RawDocument, one_line_ending
+from knowledge.sections import (
+    HUMAN_AREAS,
+    OPS,
+    SectionError,
+    apply_op,
+    correction_of,
+    lost_lines,
+    parse,
+    sourced_lines,
+)
 from knowledge.vault import (
     SOURCES_AREA,
     IndexEntry,
@@ -99,8 +109,11 @@ Answer with JSON only, in this shape:
   "summary": "one sentence, for a person, on what this ingest does",
   "pages": [
     {{"path": "wiki/sources/<Title>.md",
-      "content": "the whole page, frontmatter included"}},
-    {{"path": "wiki/entities/<Name>.md", "content": "the whole page"}}
+      "content": "the whole new page, frontmatter included"}},
+    {{"path": "wiki/entities/<Existing>.md", "op": "append_to_section",
+      "heading": "相關來源", "content": "- [[<Title>]] — what it adds"}},
+    {{"path": "wiki/entities/<Existing>.md", "op": "set_frontmatter",
+      "fields": {{"updated": "{today}"}}}}
   ],
   "index_entries": [{{"section": "Sources|Entities|Concepts|Syntheses",
                       "line": "- [[Page]] — one line."}}],
@@ -109,9 +122,17 @@ Answer with JSON only, in this shape:
 }}
 
 Rules:
-- `content` is the complete file, frontmatter included; a page that already
-  exists is replaced by what you write, so write the whole page again, never a
-  diff.
+- A new page is one object with `content`: the complete file, frontmatter included.
+- Never rewrite an existing page (those under "existing pages you may update").
+  Change it with operations, one object each, applied in order:
+  `add_section` (new `## heading` with `content`), `append_to_section` (lines added
+  at the end of the section named by `heading`), `replace_section` (the section's
+  new body) and `set_frontmatter` (`fields` to set; never `title`). `heading` is the
+  heading text without `## `; `content` is the body without the heading.
+- Never remove a line that links a source page or a ⚠️ line. A `replace_section`
+  that must correct one adds `"correction": {{"reason": "...", "source": "[[Source
+  page]]"}}`; otherwise the whole plan is refused.
+- Never write under wiki/paths/: those pages are written by people.
 - Exactly one page under wiki/sources/ summarises this source.
 - `contradictions` lists real contradictions with existing pages, one sentence
   each; leave it empty when there are none. When you find one, also write a ⚠️
@@ -262,6 +283,7 @@ class IngestPlanner:
         self.max_output_tokens = max_output_tokens
         self.condense_over = condense_over
         self.chunk_chars = chunk_chars
+        self._sources: set[str] | None = None
 
     def cache_key(self, text: str) -> str:
         """Everything the condensed text depends on: the rendered source, the
@@ -331,7 +353,7 @@ class IngestPlanner:
         except _ModelFailed as failed:
             return self._failed(source_ref, failed, relevant, condensed, cache_hit)
         try:
-            plan = self._plan_from(answer, document)
+            plan, edit_problems = self._plan_from(answer, document)
         except ValidationError as error:
             failure = Failure(code="plan_shape", message=f"{error.error_count()} field errors")
             return self._failed(
@@ -339,29 +361,74 @@ class IngestPlanner:
             )
         plan = ensure_provenance(plan)
         outcome = self.vault.apply(plan)  # a dry run: validation only, nothing written
+        problems = (*edit_problems, *outcome.problems)
         return PlanningOutcome(
-            status="planned" if outcome.accepted else "invalid",
+            status="invalid" if problems else "planned",
             source_ref=source_ref,
             plan=plan,
-            problems=outcome.problems,
+            problems=problems,
             relevant=relevant,
             condensed=condensed,
             cache_hit=cache_hit,
         )
 
-    def _plan_from(self, answer: JsonValue, document: RawDocument) -> WritePlan:
-        """The strict plan. Whether a page is created or updated is a fact the
-        vault knows, so it is decided here, never guessed by the model."""
+    def _plan_from(
+        self, answer: JsonValue, document: RawDocument
+    ) -> tuple[WritePlan, tuple[PlanProblem, ...]]:
+        """The strict plan and the section-edit problems. Whether a page is
+        created or updated is a fact the vault knows, so it is decided here,
+        never guessed by the model. Section operations on one page are applied
+        in order to its current text; the result is one whole page for the
+        vault, checked against the deletion guard (K3.2)."""
         proposal = IngestProposal.model_validate(answer)
-        pages = []
+        problems: list[PlanProblem] = []
+        pages: list[PlannedPage] = []
+        edited: dict[str, int] = {}  # path -> its position in pages
+        allowed: dict[str, set[str]] = {}  # sourced lines a correction may remove
         for item in proposal.pages:
             path = item.get("path")
-            action = "update" if isinstance(path, str) and self._exists(path) else "create"
-            pages.append(
-                PlannedPage.model_validate(
-                    {"path": path, "content": item.get("content", ""), "action": action}
-                )
-            )
+            exists = isinstance(path, str) and self._exists(path)
+            op = item.get("op")
+            if isinstance(path, str) and normalize(path).startswith(HUMAN_AREAS):
+                problems.append(PlanProblem(code="human_page", path=path))
+                continue
+            if op is None or op == "create":
+                pages.append(PlannedPage.model_validate({
+                    "path": path, "content": item.get("content", ""),
+                    "action": "update" if exists else "create"}))
+                continue
+            if not isinstance(path, str) or not exists or op not in OPS:
+                problems.append(PlanProblem(
+                    code="section_operation", path=str(path),
+                    detail="unknown operation" if op not in OPS else "page does not exist"))
+                continue
+            key = normalize(path)
+            current = pages[edited[key]].content if key in edited else self.vault.read(key)
+            try:
+                updated = apply_op(current, dict(item))
+            except SectionError as error:
+                problems.append(PlanProblem(code="section_operation", path=path,
+                                            detail=str(error)[:200]))
+                continue
+            if op == "replace_section" and correction_of(dict(item)) is not None:
+                parsed = parse(current)
+                body = parsed.sections[parsed.find(str(item.get("heading") or ""))][1]
+                allowed.setdefault(key, set()).update(
+                    sourced_lines("\n".join(body), self._source_titles()))
+            if key in edited:
+                pages[edited[key]] = pages[edited[key]].model_copy(update={"content": updated})
+            else:
+                edited[key] = len(pages)
+                pages.append(PlannedPage(path=key, action="update", content=updated))
+        for page in pages:
+            if page.action != "update":
+                continue
+            lost = [line for line in lost_lines(self.vault.read(page.path), page.content,
+                                                self._source_titles())
+                    if line not in allowed.get(normalize(page.path), set())]
+            if lost:
+                problems.append(PlanProblem(code="drops_sourced_line", path=page.path,
+                                            detail=f"{len(lost)}: {lost[0][:160]}"))
         return WritePlan(
             source=document.source,
             summary=proposal.summary,
@@ -375,7 +442,13 @@ class IngestPlanner:
                 for note in proposal.contradictions
                 if note.strip() and note.strip().lower() not in _NO_CONTRADICTION
             ),
-        )
+        ), tuple(problems)
+
+    def _source_titles(self) -> set[str]:
+        if self._sources is None:
+            self._sources = {title.casefold() for path, title in self.vault.wiki_pages()
+                             if path.startswith(SOURCES_AREA)}
+        return self._sources
 
     def _exists(self, path: str) -> bool:
         try:

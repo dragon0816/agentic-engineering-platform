@@ -66,6 +66,10 @@ PlanProblemCode = Literal[
     "create_exists",
     "update_missing",
     "unwritable_target",
+    # K3.2 section edits and the deletion guard (knowledge.sections)
+    "section_operation",
+    "drops_sourced_line",
+    "human_page",
 ]
 
 
