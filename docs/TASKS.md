@@ -1647,4 +1647,22 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   `wiki/index/`. Offline: live and sandbox retrieval identical, 180 of 180.
 - [ ] Optional: measure bilingual index lines for query as an addition to the
   flat list (not a replacement).
-- [ ] K3-K6 per the plan.
+- [x] K3 spec `docs/phases/KNOWLEDGE_K3.md`; owner decisions recorded (rules in the
+  vault, rules by category / scope by matrix cell, one approval publishes).
+- [x] K3.1 vault schema plus the category skill chosen by Raw folder (ce40335).
+- [x] K3.2 section operations and the sourced-line deletion guard (f676d36).
+- [x] K3.3 three-way merge into a new candidate vault, conflicts, proposals (a1066cc);
+  schema and skills merge too (195eb6c).
+- [x] K3.4 publish a candidate as a new version from Agent Web, one confirm (fe4c5b5).
+- [x] K3.5 live run (2026-10-11) on sandbox `sb-k3-live-9eb4bd` with the owner's
+  CLAUDE.md (plus the bilingual alias rule) and four ingest skills. Competitor
+  (Keysight battle card, new), Market and Productions (re-ingest of existing Raw)
+  planned with the right category rules, no guard refusals, applied; merge: 25
+  changed pages, 0 conflicts, 0 sourced lines lost, no lint growth. Existing pages
+  changed only by section (e.g. Keysight: `updated` plus one source line).
+  Candidate `%LOCALAPPDATA%\AEP\sb\candidatess-k-20261011T102952` (not published).
+- [ ] Owner review of the K3.5 pages, then publish or discard.
+- [ ] Knowledge source blocked: `OCNG (NR) .pdf` stops at `description_failed`
+  (3 of 7 images fail twice, cause not yet diagnosed; K4 image work).
+- [ ] Cosmetic: pages edited by section are rewritten with LF line endings.
+- [ ] K4-K6 per the plan.

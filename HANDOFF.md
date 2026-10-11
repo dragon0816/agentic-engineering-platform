@@ -58,10 +58,15 @@ K2 (`docs/phases/KNOWLEDGE_K2.md`) built but its query change was not accepted.
 - Option A was run (`runs/core-008`): also worse; see the addendum in the
   core-007 review. Live binding restored.
 - Option C adopted: layered index for ingest; query reads the flat list from
-  `wiki/index/all.md`, so merging the layered index leaves query unchanged
-  (offline check 180/180 identical). Next: K3 (Karpathy schema Skill from the
-  owner's RS_Knowledge CLAUDE.md and domain skills; section-level writes;
-  sandbox merge).
+  `wiki/index/all.md` (offline check 180/180 identical).
+- K3 done in code (spec `docs/phases/KNOWLEDGE_K3.md`): vault schema plus category
+  skill, section operations with the sourced-line guard, three-way merge into a
+  candidate (`knowledge-pipeline/merge`), publish from Agent Web
+  (`/api/knowledge/pipeline/publish`, one confirm, host.json backed up, restart).
+- K3.5 live: sandbox `sb-k3-live-9eb4bd`, candidate
+  `%LOCALAPPDATA%\AEP\sb\candidatess-k-20261011T102952` waiting for the owner's
+  review; nothing published. OCNG PDF blocked by image description failures.
+- Next: owner review and publish decision; then K4 (Excel, HTML, .ppt, images).
 
 Knowledge state (2026-10-10, latest): Skill 1.10.0 is live. A no-support retry check
 plus Skill 1.11.0 was tried in `runs/core-006`, came out worse and was rolled back
