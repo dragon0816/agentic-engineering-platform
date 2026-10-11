@@ -2094,3 +2094,10 @@ Rejected alternatives:
 - Keeping `grants.json` mandatory: the bookkeeping the owner asked to remove.
 
 Tests: `tests/test_owner_policy.py` covers owner mode. The shared host fixtures in `tests/test_host_wiring.py` set `local_owner_grants: false`, so the existing grant tests still verify the strict rules.
+
+## 2026-10-11: K2 layered bilingual index — owner agreed
+
+The owner agreed to the three points in `docs/phases/KNOWLEDGE_K2.md`:
+- **Categories:** 5 markets, 4 product lines, technical, companies, and sources by year.
+- **Cost:** about 100 company-model calls to write bilingual `aliases` and `summary` for all pages.
+- **Scope:** all K2 changes stay in a sandbox of `rs-k` until the K3 merge.

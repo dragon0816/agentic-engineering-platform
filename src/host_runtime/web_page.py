@@ -823,7 +823,10 @@ tr:last-child td { border-bottom: none; }
             <button class="go" id="kp-convert" type="button">Convert</button>
           </div>
           <div id="kp-drop"></div><div id="kp-converted"></div></div>
-        <div class="card"><h3>Raw</h3><div id="kp-raw" class="kp-list"></div></div>
+        <div class="card"><h3>Raw</h3>
+          <div class="kp-actions"><button id="kp-adopt" type="button">Adopt legacy Raw</button>
+            <span class="note" id="kp-adopt-result"></span></div>
+          <div id="kp-raw" class="kp-list"></div></div>
         <div class="card"><h3>Ingest plan</h3>
           <div id="kp-plan" class="empty">Choose Plan ingest on a Raw document.</div></div>
         <div class="card"><h3>Lint</h3>
@@ -3606,6 +3609,16 @@ el("kp-upload").addEventListener("click", () => kpRun("Adding to drop", async ()
 el("kp-preview").addEventListener("click", () => kpRun("Previewing", () => kpConvert("dry_run")));
 el("kp-convert").addEventListener("click", () => kpRun("Converting", () => kpConvert("apply")));
 el("kp-lint").addEventListener("click", () => kpRun("Linting", kpLint));
+el("kp-adopt").addEventListener("click", () => kpRun("Checking legacy Raw", async () => {
+  const preview = await pipeline("adopt", {sandbox_id: kpSandbox.sandbox_id, mode: "dry_run"});
+  if (!preview.raw_adopted) { el("kp-adopt-result").textContent = "Nothing to adopt."; return; }
+  if (!confirm("Adopt " + preview.raw_adopted + " Raw files from earlier tooling? "
+    + "Their bytes stay untouched; a ledger records them.")) return;
+  const done = await pipeline("adopt", {sandbox_id: kpSandbox.sandbox_id, mode: "apply"});
+  el("kp-adopt-result").textContent = "Adopted " + done.raw_adopted + ", drifted "
+    + done.raw_drifted + ", unresolved pages " + done.pages_unresolved + ".";
+  await kpOpen(kpSandbox);
+}));
 el("kp-discard").addEventListener("click", () => {
   if (!kpSandbox || !confirm("Discard this sandbox? It is moved aside, not deleted.")) return;
   kpRun("Discarding", async () => {

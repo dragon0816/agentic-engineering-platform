@@ -21,6 +21,7 @@ from pydantic import Field
 from common.base import Contract
 from knowledge.conflicts import decisions_text
 from knowledge.lint import scan
+from knowledge.migrate import adopt
 from knowledge.planning import DEFAULT_CONVENTIONS, IngestPlanner
 from knowledge.raw import (
     Describer,
@@ -104,6 +105,17 @@ class SandboxContents(Contract):
     drop: tuple[str, ...] = ()
     raw: tuple[str, ...] = ()
     plans: tuple[PlanRecord, ...] = ()
+
+
+class AdoptSummary(Contract):
+    sandbox_id: str
+    mode: Literal["dry_run", "apply"]
+    raw_adopted: int = 0
+    raw_drifted: int = 0
+    raw_skipped: int = 0
+    pages_migrated: int = 0
+    pages_unresolved: int = 0
+    written: int = 0
 
 
 class LintSummary(Contract):
@@ -262,6 +274,22 @@ class KnowledgePipeline:
                                      problems=tuple(p.code for p in outcome.problems))
         return IngestApplyResult(sandbox_id=sandbox_id, plan_id=plan_id, status="applied",
                                  written=outcome.written, backed_up=outcome.backed_up)
+
+    # -- adopt ---------------------------------------------------------------
+
+    def adopt(self, sandbox_id: str,
+              mode: Literal["dry_run", "apply"] = "dry_run") -> AdoptSummary:
+        """Adopt Raw written by earlier tooling (no platform provenance) so it can
+        be ingested: a ledger records each file's content hash; Raw bytes stay
+        untouched (knowledge.migrate)."""
+        vault = self._open(sandbox_id)
+        stamp = datetime.now(UTC).strftime("%Y%m%d-%H%M%S-%f")
+        report = adopt(vault, mode=mode, today=date.today(), stamp=stamp)
+        return AdoptSummary(
+            sandbox_id=sandbox_id, mode=mode, raw_adopted=len(report.raw_adopted),
+            raw_drifted=len(report.raw_drifted), raw_skipped=len(report.raw_skipped),
+            pages_migrated=len(report.pages_migrated),
+            pages_unresolved=len(report.pages_unresolved), written=len(report.written))
 
     # -- lint ----------------------------------------------------------------
 

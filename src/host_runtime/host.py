@@ -78,6 +78,7 @@ from capabilities.excel_blocks.handlers import (
 )
 from capabilities.files import READ_FILE_SPEC, ReadFileHandler, ReadFileInput, ReadFileOutput
 from capabilities.knowledge_pipeline.contracts import (
+    AdoptRequest,
     ConvertRequest,
     DropAdded,
     DropAddRequest,
@@ -92,6 +93,7 @@ from capabilities.knowledge_pipeline.contracts import (
     SandboxRef,
 )
 from capabilities.knowledge_pipeline.handlers import (
+    ADOPT_SPEC,
     CONVERT_SPEC,
     DROP_ADD_SPEC,
     INGEST_APPLY_SPEC,
@@ -101,6 +103,7 @@ from capabilities.knowledge_pipeline.handlers import (
     SANDBOX_CREATE_SPEC,
     SANDBOX_DISCARD_SPEC,
     SANDBOX_LIST_SPEC,
+    AdoptHandler,
     ConvertHandler,
     DropAddHandler,
     IngestApplyHandler,
@@ -264,6 +267,7 @@ from knowledge.evolution import (
 from knowledge.market_matrix import MarketMatrixRecord, MarketMatrixRequest
 from knowledge.office import office_extractors
 from knowledge.pipeline import (
+    AdoptSummary,
     ConvertResult,
     IngestApplyResult,
     IngestPlanResult,
@@ -1872,6 +1876,7 @@ def _register_knowledge_pipeline(
         (INGEST_PLAN_SPEC, IngestPlanHandler(pipeline), IngestPlanRequest, IngestPlanResult),
         (INGEST_APPLY_SPEC, IngestApplyHandler(pipeline), IngestApplyRequest, IngestApplyResult),
         (LINT_SPEC, LintHandler(pipeline), LintRequest, LintSummary),
+        (ADOPT_SPEC, AdoptHandler(pipeline), AdoptRequest, AdoptSummary),
         (DROP_ADD_SPEC, DropAddHandler(pipeline), DropAddRequest, DropAdded),
         (SANDBOX_CONTENTS_SPEC, SandboxContentsHandler(pipeline), SandboxRef,
          SandboxContents),

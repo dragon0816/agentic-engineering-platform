@@ -124,3 +124,18 @@ def test_drop_add_contents_and_discard(tmp_path: Path) -> None:
     pipeline.discard_sandbox(sandbox)
     assert pipeline.sandboxes.list() == ()
     assert _snapshot(base) == before
+
+
+def test_adopt_makes_legacy_raw_ingestible_without_touching_its_bytes(tmp_path: Path) -> None:
+    pipeline, base = _pipeline(tmp_path, PlanningModel(answers()))
+    sandbox = pipeline.create_sandbox("k-test", "legacy", "a").sandbox_id
+    root = pipeline.sandboxes.open(sandbox)[1].root
+    legacy = (root / "raw/notes/a.md").read_bytes()
+    assert "raw/notes/a.md" not in pipeline.contents(sandbox).raw  # not yet adopted
+    preview = pipeline.adopt(sandbox)
+    assert preview.mode == "dry_run" and preview.raw_adopted == 1
+    assert "raw/notes/a.md" not in pipeline.contents(sandbox).raw  # a dry run records nothing
+    applied = pipeline.adopt(sandbox, mode="apply")
+    assert applied.raw_adopted == 1
+    assert "raw/notes/a.md" in pipeline.contents(sandbox).raw
+    assert (root / "raw/notes/a.md").read_bytes() == legacy

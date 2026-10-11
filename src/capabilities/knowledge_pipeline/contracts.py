@@ -88,3 +88,8 @@ class SandboxRef(Contract):
 class SandboxDiscarded(Contract):
     sandbox_id: Text
     discarded: bool = True
+
+
+class AdoptRequest(Contract):
+    sandbox_id: Text
+    mode: Literal["dry_run", "apply"] = "dry_run"

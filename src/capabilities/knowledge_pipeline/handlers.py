@@ -16,6 +16,7 @@ from typing import Any
 
 from capabilities.contracts import CapabilitySpec
 from capabilities.knowledge_pipeline.contracts import (
+    AdoptRequest,
     ConvertRequest,
     DropAdded,
     DropAddRequest,
@@ -62,6 +63,8 @@ INGEST_PLAN_SPEC = _spec("ingest-plan", "Plan the wiki writes for one Raw docume
 INGEST_APPLY_SPEC = _spec("ingest-apply", "Apply a stored ingest plan to a sandbox wiki", "write",
                           "medium")
 LINT_SPEC = _spec("lint", "Static lint and open conflicts of a sandbox wiki", "read")
+ADOPT_SPEC = _spec("adopt", "Adopt Raw from earlier tooling in a sandbox so it can be ingested",
+                   "write")
 DROP_ADD_SPEC = _spec("drop-add", "Put one original into a sandbox drop folder", "write")
 SANDBOX_CONTENTS_SPEC = _spec("sandbox-contents", "List originals, Raw and plans of a sandbox",
                               "read")
@@ -176,3 +179,13 @@ class SandboxDiscardHandler:
         request = SandboxRef.model_validate(inputs)
         await _run(lambda: self.pipeline.discard_sandbox(request.sandbox_id))
         return SandboxDiscarded(sandbox_id=request.sandbox_id)
+
+
+class AdoptHandler:
+    def __init__(self, pipeline: KnowledgePipeline) -> None:
+        self.pipeline = pipeline
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        request = AdoptRequest.model_validate(inputs)
+        result: Contract = await _run(lambda: self.pipeline.adopt(request.sandbox_id, request.mode))
+        return result
