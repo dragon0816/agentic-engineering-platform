@@ -203,3 +203,12 @@ def test_the_host_offers_the_procedure_of_exactly_one_harness_knowledge_skill() 
     second = harness.model_copy(update={"alias": "another_candidate"})
     skills.register(second)
     assert _harness_knowledge_procedure(skills)() is None   # ambiguous: offer none
+
+
+def test_the_vault_question_asks_for_the_persons_question_without_added_instructions() -> None:
+    # core-005 (2026-10-12): the conversation model appended "cite Raw evidence",
+    # a focus or a ranking request, which narrowed or collapsed the answers.
+    question = VAULT_QUESTION_SCHEMA["properties"]["question"]  # type: ignore[index]
+    description = str(question["description"])  # type: ignore[index]
+    assert "own words" in description and "unchanged" in description
+    assert "citations" in description and "ranking" in description

@@ -86,11 +86,19 @@ TOOL_PROGRESS: ContextVar[Callable[[str, ToolProgressState], None] | None] = Con
 )
 
 
-#: The only field the model fills on a Knowledge vault tool.
+#: The only field the model fills on a Knowledge vault tool. The installed
+#: Knowledge Skill decides retrieval, citation and answer form; a request the
+#: model appended ("cite Raw evidence", "focus on X", "rank them") narrowed or
+#: collapsed answers in knowledge_v1 core-005 (2026-10-12).
 VAULT_QUESTION_SCHEMA: dict[str, JsonValue] = {
     "type": "object",
     "properties": {"question": {
-        "type": "string", "description": "The question to answer from this vault",
+        "type": "string", "description": (
+            "The person's question to answer from this vault, in their own words. "
+            "Pass it unchanged when it stands alone; otherwise only make it "
+            "self-contained from the conversation. Add no instructions about "
+            "citations, evidence type, focus, products, ranking or format: the "
+            "vault cites its own evidence."),
     }},
     "required": ["question"],
     "additionalProperties": False,
