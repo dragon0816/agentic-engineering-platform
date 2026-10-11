@@ -121,3 +121,11 @@ def test_the_knowledge_tab_offers_pull_and_benchmark() -> None:
     for hook in ('id="kp-pull"', 'id="kp-bench"', "/api/knowledge/benchmark/start",
                  '"question-sets"', '"drop-folders"'):
         assert hook in PAGE
+
+
+def test_a_product_line_sandbox_runs_its_own_and_the_shared_sets() -> None:
+    names = ["productions", "vna", "oscilloscope", "market_vna", "productions_vna"]
+    assert default_sets(names, ("Productions/VNA",)) == ("productions", "vna",
+                                                         "productions_vna")
+    assert default_sets(names, ("Productions/VNA", "Market")) == (
+        "productions", "vna", "market_vna", "productions_vna")

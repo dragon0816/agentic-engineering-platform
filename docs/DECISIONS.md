@@ -2171,3 +2171,14 @@ regresses and its merged result scores no lower than the vault (a regression blo
 The first live pushes go to a copy of RS_Knowledge.
 
 Rejected: an SVN-style push lock with a timeout.
+
+## 2026-10-11: Category rules layer from general to specific
+
+Decision: every skill whose `applies_to` folder holds a source applies, ordered from the
+general to the specific (`raw/Productions` then `raw/Productions/VNA`), instead of only
+the most specific one. Product lines under a category (owner question: four product
+lines, each with its own skill) then share one `ingest-productions` and add only their
+own rules. Question-set defaults count every folder of a pulled path.
+
+Rejected: most-specific-only selection (K3.1), which would force each product line's
+skill to repeat the shared rules and let them drift apart.

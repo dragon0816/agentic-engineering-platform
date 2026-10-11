@@ -55,3 +55,17 @@ def test_ingest_sends_the_schema_and_the_category_rules(tmp_path: Path) -> None:
     assert planned.skill == "ingest-notes"
     system = next(r for r in model.requests if r.output_contract == PLAN_CONTRACT).messages[0].text
     assert system.startswith("schema") and system.endswith("Notes rules.")
+
+
+def test_a_product_line_skill_adds_to_the_shared_category_rules(tmp_path: Path) -> None:
+    root = _base(tmp_path)
+    _skill(root, "ingest-productions", "raw/Productions", "Never invent an option code.")
+    _skill(root, "ingest-vna", "raw/Productions/VNA", "List port count and frequency range.")
+    _skill(root, "ingest-oscilloscope", "raw/Productions/Oscilloscope", "Bandwidth first.")
+    rules = ingest_conventions(Vault(root), "raw/Productions/VNA/zna.md", "built-in")
+    assert rules.skill == "ingest-productions + ingest-vna"
+    shared = rules.text.index("Never invent an option code.")
+    assert shared < rules.text.index("List port count")  # general before specific
+    assert "Bandwidth first." not in rules.text
+    assert ingest_conventions(Vault(root), "raw/Productions/x.md", "b").skill == (
+        "ingest-productions")

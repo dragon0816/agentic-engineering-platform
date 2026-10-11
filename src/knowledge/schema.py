@@ -41,13 +41,16 @@ def _front(text: str) -> tuple[dict[str, str], str]:
     return fields, body
 
 
-def category_skill(vault: Vault, raw_ref: str) -> tuple[str, str] | None:
-    """(name, rules) of the skill whose `applies_to` folder holds `raw_ref`."""
+def category_skills(vault: Vault, raw_ref: str) -> list[tuple[str, str]]:
+    """(name, rules) of every skill whose `applies_to` folder holds `raw_ref`,
+    from the general to the specific: `raw/Productions` before
+    `raw/Productions/VNA`. A product line's skill adds to the shared rules of
+    its category instead of replacing them (owner, 2026-10-11)."""
     folder = vault.root / SKILLS_DIR
     if not folder.is_dir():
-        return None
+        return []
     ref = normalize(raw_ref)
-    best: tuple[int, str, str] | None = None
+    found: list[tuple[int, str, str]] = []
     for path in sorted(folder.glob(f"*/{SKILL_FILE}")):
         rel = path.relative_to(vault.root).as_posix()
         try:
@@ -55,11 +58,15 @@ def category_skill(vault: Vault, raw_ref: str) -> tuple[str, str] | None:
         except (VaultError, UnicodeDecodeError):
             continue
         scope = normalize(fields.get("applies_to", "")).rstrip("/")
-        if not scope or not ref.startswith(scope + "/"):
-            continue
-        if best is None or len(scope) > best[0]:
-            best = (len(scope), fields.get("name") or path.parent.name, body.strip())
-    return (best[1], best[2]) if best else None
+        if scope and ref.startswith(scope + "/"):
+            found.append((len(scope), fields.get("name") or path.parent.name, body.strip()))
+    return [(name, rules) for _, name, rules in sorted(found, key=lambda item: item[0])]
+
+
+def category_skill(vault: Vault, raw_ref: str) -> tuple[str, str] | None:
+    """The most specific skill for `raw_ref`, if any."""
+    found = category_skills(vault, raw_ref)
+    return found[-1] if found else None
 
 
 def ingest_conventions(vault: Vault, raw_ref: str, built_in: str) -> Conventions:
@@ -68,9 +75,10 @@ def ingest_conventions(vault: Vault, raw_ref: str, built_in: str) -> Conventions
     schema = vault.read(SCHEMA_FILE).strip() if vault.exists(SCHEMA_FILE) else ""
     if not schema:
         return Conventions(built_in, "built_in")
-    found = category_skill(vault, raw_ref)
-    if found is None:
+    found = category_skills(vault, raw_ref)
+    if not found:
         return Conventions(schema, "vault")
-    name, rules = found
-    return Conventions(f"{schema}\n\n---\n\n# Rules for this source's category ({name})\n\n"
-                       f"{rules}", "vault", name)
+    text = schema + "".join(
+        f"\n\n---\n\n# Rules for this source's category ({name})\n\n{rules}"
+        for name, rules in found)
+    return Conventions(text, "vault", " + ".join(name for name, _ in found))

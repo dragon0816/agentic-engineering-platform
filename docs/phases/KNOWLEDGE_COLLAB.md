@@ -67,6 +67,24 @@ A sandbox works like a git branch with a pull request:
 - The next Convert and Ingest use the edited rules.
 - Rule changes merge back with the pages at Push (K3, 195eb6c).
 
+### Product lines under a category (owner question, 2026-10-11)
+
+A category may have sub-folders with their own rules, for example the four product
+lines under `Productions/`:
+- `drop/Productions/VNA/` converts to `raw/Productions/VNA/`.
+- `skills/ingest-vna/SKILL.md` declares `applies_to: raw/Productions/VNA`.
+- **Rules layer from the general to the specific.** A VNA source gets `CLAUDE.md`,
+  then `ingest-productions` (the rules every product line shares, such as never
+  inventing an option code), then `ingest-vna` (only what is VNA-specific). Shared rules
+  are written once, not copied into four skills.
+- A product line's sandbox pulls only its folder. Its question sets are
+  `productions/` (shared), `vna/`, and combinations such as `market_vna/`.
+- Naming: the product-line folders should match the K2 index's four product
+  categories, so index, question sets and ownership line up.
+- People: one owner per product line (drop folder, skill, question set), one keeper of
+  the shared `ingest-productions` (may be one of them), and a reviewer for shared pages
+  (technical concepts, companies), whose changes arrive as proposals.
+
 ## 5. Benchmark: question sets by folder and folder combination
 
 - The question format is the owner's existing one in `checks/questions/`:
@@ -87,7 +105,8 @@ A sandbox works like a git branch with a pull request:
 - Folder names match categories case-insensitively and singular or plural
   (`market` = `Market`, `production` = `Productions`). The order of the parts does not
   matter.
-- By default a sandbox runs every set whose categories all fall inside its pulled scope.
+- By default a sandbox runs every set whose categories all fall inside its pulled scope;
+  every folder of a pulled path counts (`Productions/VNA` gives `production` and `vna`).
   - Example: a sandbox that pulled Market and Productions runs `market/`,
     `productions/` and `market_productions/`.
   - The maintainer can add or remove sets before running, for example add the general

@@ -96,9 +96,11 @@ def sets(questions: tuple[Question, ...]) -> dict[str, int]:
 
 
 def default_sets(available: list[str] | dict[str, int], scope: tuple[str, ...]) -> tuple[str, ...]:
-    """The sets whose categories all lie in the sandbox's pulled scope; the
-    first folder of each pulled path is its category."""
-    pulled = frozenset(category(folder.split("/")[0]) for folder in scope if folder.strip())
+    """The sets whose categories all lie in the sandbox's pulled scope. Every
+    folder of a pulled path counts: `Productions/VNA` selects `productions/`,
+    `vna/` and `productions_vna/`, not the other product lines' sets."""
+    pulled = frozenset(category(part) for folder in scope for part in folder.split("/")
+                       if part.strip())
     return tuple(name for name in available
                  if name and set_categories(name) and set_categories(name) <= pulled)
 
