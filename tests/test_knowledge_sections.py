@@ -65,7 +65,7 @@ def _planner(tmp_path: Path, pages: list[dict[str, Any]]) -> tuple[IngestPlanner
                       "wiki/sources/CMX500 datasheet.md": "---\ntitle: CMX500 datasheet\n---\nx\n",
                       "wiki/sources/Deck A.md": "---\ntitle: Deck A\n---\nx\n"}.items():
         (vault.root / rel).parent.mkdir(parents=True, exist_ok=True)
-        (vault.root / rel).write_text(text, encoding="utf-8")
+        (vault.root / rel).write_bytes(text.encode("utf-8"))  # LF on every OS
     answer = good_plan_json()
     answer["pages"] = [answer["pages"][0], *pages]
     model = PlanningModel({RELEVANCE_CONTRACT: {"relevant": []}, PLAN_CONTRACT: answer})
@@ -119,3 +119,16 @@ def test_human_pages_and_bad_operations_are_refused(tmp_path: Path) -> None:
     assert outcome.status == "invalid"
     assert [p.code for p in outcome.problems] == [
         "human_page", "section_operation", "section_operation"]
+
+
+def test_a_windows_page_keeps_its_line_endings(tmp_path: Path) -> None:
+    planner, vault = _planner(tmp_path, [
+        {"path": "wiki/entities/CMX500.md", "op": "append_to_section", "heading": "相關來源",
+         "content": "- [[MCP notes]]"}])
+    page = vault.root / "wiki/entities/CMX500.md"
+    page.write_bytes(PAGE.replace("\n", "\r\n").encode("utf-8"))
+    outcome = planner.plan(document(), today="2026-10-11")
+    assert outcome.status == "planned" and outcome.plan is not None
+    written = next(p for p in outcome.plan.pages if p.path == "wiki/entities/CMX500.md").content
+    assert written.count("\r\n") == written.count("\n")
+    assert written.endswith("- [[MCP notes]]\r\n")

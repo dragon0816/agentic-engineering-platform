@@ -25,7 +25,7 @@ from pathlib import Path
 from typing import Literal
 
 from common.base import Contract
-from knowledge.sections import Page, parse
+from knowledge.sections import Page, like_endings, parse
 
 # The schema and category rules (K3.1) merge like pages, so a domain owner's
 # rule change in a sandbox reaches the published vault.
@@ -251,7 +251,8 @@ def three_way(
             text, parts, conflicts = merge_page(rel, bt, st, pt, chosen)
             result.conflicts.extend(conflicts)
             if text != pt:
-                result.files[rel] = text.encode("utf-8")
+                original = (p or b"").decode("utf-8")
+                result.files[rel] = like_endings(text, original).encode("utf-8")
                 result.changes.append(MergeChange(path=rel, change="merged", parts=tuple(parts),
                                                   proposal=proposal))
     return result

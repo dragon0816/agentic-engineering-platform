@@ -35,6 +35,7 @@ from knowledge.sections import (
     SectionError,
     apply_op,
     correction_of,
+    like_endings,
     lost_lines,
     parse,
     sourced_lines,
@@ -420,9 +421,12 @@ class IngestPlanner:
             else:
                 edited[key] = len(pages)
                 pages.append(PlannedPage(path=key, action="update", content=updated))
-        for page in pages:
+        for number, page in enumerate(pages):
             if page.action != "update":
                 continue
+            page = pages[number] = page.model_copy(
+                update={"content": like_endings(  # read() hides CRLF; the bytes do not
+                    page.content, self.vault.read_bytes(page.path).decode("utf-8"))})
             lost = [line for line in lost_lines(self.vault.read(page.path), page.content,
                                                 self._source_titles())
                     if line not in allowed.get(normalize(page.path), set())]

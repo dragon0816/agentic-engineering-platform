@@ -1660,9 +1660,10 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   planned with the right category rules, no guard refusals, applied; merge: 25
   changed pages, 0 conflicts, 0 sourced lines lost, no lint growth. Existing pages
   changed only by section (e.g. Keysight: `updated` plus one source line).
-  Candidate `%LOCALAPPDATA%\AEP\sb\candidatess-k-20261011T102952` (not published).
+  Candidate `%LOCALAPPDATA%\AEP\sb\candidates
+s-k-20261011T102952` (not published).
 - [ ] Owner review of the K3.5 pages, then publish or discard.
 - [ ] Knowledge source blocked: `OCNG (NR) .pdf` stops at `description_failed`
   (3 of 7 images fail twice, cause not yet diagnosed; K4 image work).
-- [ ] Cosmetic: pages edited by section are rewritten with LF line endings.
+- [x] Pages edited by section or merged keep their CRLF line endings (2026-10-11).
 - [ ] K4-K6 per the plan.

@@ -142,3 +142,13 @@ def test_schema_and_category_rules_merge_like_pages(tmp_path: Path) -> None:
     candidate = Path(applied.candidate_root)
     assert "雙語別名" in (candidate / "CLAUDE.md").read_text(encoding="utf-8")
     assert (candidate / "skills/ingest-market/SKILL.md").is_file()
+
+
+def test_a_merged_windows_page_keeps_its_line_endings() -> None:
+    a = _edit(PAGE, "- 頻率到 8 GHz，見 [[Datasheet]]",
+              "- 頻率到 8 GHz，見 [[Datasheet]]\n- 頻寬 400 MHz")
+    b = _edit(PAGE, "- K100，見 [[Datasheet]]", "- K100，見 [[Datasheet]]\n- K200")
+    crlf = {"wiki/p.md": b.replace("\n", "\r\n").encode("utf-8")}
+    merged = three_way({"wiki/p.md": PAGE.encode("utf-8")}, {"wiki/p.md": a.encode("utf-8")}, crlf)
+    text = merged.files["wiki/p.md"].decode("utf-8")
+    assert "- K200\r\n" in text and text.count("\r\n") == text.count("\n")

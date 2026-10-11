@@ -165,6 +165,13 @@ def lost_lines(before: str, after: str, source_titles: set[str]) -> list[str]:
     return [line for line in sourced_lines(before, source_titles) if line not in kept]
 
 
+def like_endings(text: str, original: str) -> str:
+    """`text` with the line endings `original` uses, so a section edit of a
+    Windows (CRLF) page changes only the lines it meant to change."""
+    plain = text.replace("\r\n", "\n")
+    return plain.replace("\n", "\r\n") if "\r\n" in original else plain
+
+
 class Correction(Contract):
     reason: str
     source: str
