@@ -1,0 +1,1350 @@
+{
+ "question": {
+  "id": "Q0231",
+  "text": "How do changes in radar technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "market": "Aerospace / Defense",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-c614c8e57a5148b8af8cf24c37e49371",
+ "exchange": {
+  "sent": "How do changes in radar technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "http_status": 200,
+  "seconds": 178.484,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-c614c8e57a5148b8af8cf24c37e49371",
+    "actor": "leo.chi",
+    "title": "How do changes in radar technology affect the measurement capability req…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T07:45:19.428529Z",
+    "updated_at": "2026-10-11T07:48:17.731765Z",
+    "messages": [
+     {
+      "message_id": "message-a0956326618a4b988df09727688c210a",
+      "role": "user",
+      "text": "How do changes in radar technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+      "created_at": "2026-10-11T07:45:19.436654Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-c582673242394514a2d0402961c93382",
+      "role": "assistant",
+      "text": "Radar is evolving from standalone sensing toward ISAC, where sensing capability is integrated into communications networks [1].\nMFSS may evolve toward joint waveforms such as communications plus radar sensing, or communications methods that provide timing information [3].\nThis means the measurement target can move from only radar echoes to combined communication-and-sensing waveforms [1][3].\nISAC challenges include high bandwidth, radar equation, power density, spectrum coexistence, and waveform design [1].\nTherefore, testers need measurement coverage for wider bandwidth, power-related behavior, coexistence/interference, and waveform quality as radar becomes communication-integrated [1].\nSatellite sensing may be active or passive, imaging or non-imaging, and monostatic, bistatic, or multistatic [1].\nAutomotive radar test configurations already reflect this direction, since AREG-P3 supports monostatic or bistatic frontends, three digital channels, and one object per channel [5].\nTherefore, measurement capability must scale from single-channel/single-object testing toward multi-channel and geometry-aware radar scenarios [1][5].\nRadar echo generation capability must cover dynamic artificial objects, short-range analog stepped delay for distances below 17 m, fully digital implementation up to 3000 m, and FMCW radar with minimum generated distance equal to the radar-under-test air gap [12].\nAdvanced radar scenarios also require Doppler control, since each artificial object can support an individual Doppler frequency shift and velocity settings up to ±500 km/h with 0.001 km/h step size when equipped with the cited options [39].\nTherefore, required non-signaling radar test capability expands from static RF measurement to dynamic target distance, Doppler, velocity, and FMCW echo simulation [12][39].\nFor signaling testers, CMX500 supports NR FR1/FR2 signaling and TX measurements, LTE signaling, NB-IoT/NB-NTN signaling, WLAN signaling, fading, AWGN, BLER, CSI report, throughput measurement, and PER measurement [29].\nCMX500 also has NR NTN signaling extensions for Rel. 17, Rel. 18, and Rel. 19 [34].\nTherefore, as radar becomes integrated with communications and NTN/ISAC concepts, the signaling tester side needs protocol/network-emulation measurements plus RF/TX and channel-condition measurements rather than only RF parametric tests [1][29][34].\nFor non-signaling testers, CMP200 is described as a 5G NR FR2 nonsignaling one-box test solution for RF parametric testing, pure radiated mmWave setups, mixed radiated/conducted IF setups, and mixed radiated/conducted mmWave setups [26][28].\nCMP200 NR FR2 measurements include uplink multi-evaluation results for Modulation, Spectrum, and Power, with settings for 1 to 4 carriers, bands n257/n258/n259/n260/n261/n262, 50/100/200/400 MHz channel bandwidth, 60/120 kHz subcarrier spacing, TDD, and external attenuation [22].\nTherefore, non-signaling tester capability needs to cover mmWave RF parametric measurement, radiated and conducted setups, multi-carrier operation, modulation quality, spectrum, and power as communication-side radar-adjacent waveforms become more complex [22][26][28].\n【推論】As radar evolves into ISAC and MFSS joint communications-plus-radar waveforms, Signaling Testers need network/protocol emulation with TX, fading, BLER, CSI, throughput, PER, and NTN capability, while Non-signaling Testers need waveform, modulation, spectrum, power, and RF parametric capability [1][3][22][29][34].\n【推論】As radar moves toward wider-bandwidth mmWave operation, Non-signaling Testers need higher RF frequency coverage, wider instantaneous bandwidth, IF access, and radiated/conducted mmWave setups [6][7][9][10][28].\n【推論】As radar scenarios move from monostatic single-object testing toward bistatic/multistatic and dynamic sensing, testers need multi-channel or multi-antenna support, dynamic artificial-object generation, distance control, Doppler/velocity simulation, and waveform coexistence analysis [1][5][12][39].\n\n來源：\n[1] Wiki：6G NTN 展望（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[3] Wiki：6G NTN 展望（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[5] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[6] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[7] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[9] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[10] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[12] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[22] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[26] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[28] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[29] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[34] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[39] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）",
+      "created_at": "2026-10-11T07:48:17.731765Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-aafc7dc8222b4c2e87cc1bd49a7503cd",
+       "request_id": "request-aafc7dc8222b4c2e87cc1bd49a7503cd",
+       "span_id": "span-aafc7dc8222b4c2e87cc1bd49a7503cd",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "Radar is evolving from standalone sensing toward ISAC, where sensing capability is integrated into communications networks [1].\nMFSS may evolve toward joint waveforms such as communications plus radar sensing, or communications methods that provide timing information [3].\nThis means the measurement target can move from only radar echoes to combined communication-and-sensing waveforms [1][3].\nISAC challenges include high bandwidth, radar equation, power density, spectrum coexistence, and waveform design [1].\nTherefore, testers need measurement coverage for wider bandwidth, power-related behavior, coexistence/interference, and waveform quality as radar becomes communication-integrated [1].\nSatellite sensing may be active or passive, imaging or non-imaging, and monostatic, bistatic, or multistatic [1].\nAutomotive radar test configurations already reflect this direction, since AREG-P3 supports monostatic or bistatic frontends, three digital channels, and one object per channel [5].\nTherefore, measurement capability must scale from single-channel/single-object testing toward multi-channel and geometry-aware radar scenarios [1][5].\nRadar echo generation capability must cover dynamic artificial objects, short-range analog stepped delay for distances below 17 m, fully digital implementation up to 3000 m, and FMCW radar with minimum generated distance equal to the radar-under-test air gap [12].\nAdvanced radar scenarios also require Doppler control, since each artificial object can support an individual Doppler frequency shift and velocity settings up to ±500 km/h with 0.001 km/h step size when equipped with the cited options [39].\nTherefore, required non-signaling radar test capability expands from static RF measurement to dynamic target distance, Doppler, velocity, and FMCW echo simulation [12][39].\nFor signaling testers, CMX500 supports NR FR1/FR2 signaling and TX measurements, LTE signaling, NB-IoT/NB-NTN signaling, WLAN signaling, fading, AWGN, BLER, CSI report, throughput measurement, and PER measurement [29].\nCMX500 also has NR NTN signaling extensions for Rel. 17, Rel. 18, and Rel. 19 [34].\nTherefore, as radar becomes integrated with communications and NTN/ISAC concepts, the signaling tester side needs protocol/network-emulation measurements plus RF/TX and channel-condition measurements rather than only RF parametric tests [1][29][34].\nFor non-signaling testers, CMP200 is described as a 5G NR FR2 nonsignaling one-box test solution for RF parametric testing, pure radiated mmWave setups, mixed radiated/conducted IF setups, and mixed radiated/conducted mmWave setups [26][28].\nCMP200 NR FR2 measurements include uplink multi-evaluation results for Modulation, Spectrum, and Power, with settings for 1 to 4 carriers, bands n257/n258/n259/n260/n261/n262, 50/100/200/400 MHz channel bandwidth, 60/120 kHz subcarrier spacing, TDD, and external attenuation [22].\nTherefore, non-signaling tester capability needs to cover mmWave RF parametric measurement, radiated and conducted setups, multi-carrier operation, modulation quality, spectrum, and power as communication-side radar-adjacent waveforms become more complex [22][26][28].\n【推論】As radar evolves into ISAC and MFSS joint communications-plus-radar waveforms, Signaling Testers need network/protocol emulation with TX, fading, BLER, CSI, throughput, PER, and NTN capability, while Non-signaling Testers need waveform, modulation, spectrum, power, and RF parametric capability [1][3][22][29][34].\n【推論】As radar moves toward wider-bandwidth mmWave operation, Non-signaling Testers need higher RF frequency coverage, wider instantaneous bandwidth, IF access, and radiated/conducted mmWave setups [6][7][9][10][28].\n【推論】As radar scenarios move from monostatic single-object testing toward bistatic/multistatic and dynamic sensing, testers need multi-channel or multi-antenna support, dynamic artificial-object generation, distance control, Doppler/velocity simulation, and waveform coexistence analysis [1][5][12][39].\n\n來源：\n[1] Wiki：6G NTN 展望（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[3] Wiki：6G NTN 展望（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[5] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[6] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[7] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[9] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[10] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[12] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[22] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[26] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[28] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[29] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[34] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[39] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-aafc7dc8222b4c2e87cc1bd49a7503cd",
+      "request_id": "request-aafc7dc8222b4c2e87cc1bd49a7503cd",
+      "span_id": "span-aafc7dc8222b4c2e87cc1bd49a7503cd",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-aafc7dc8222b4c2e87cc1bd49a7503cd",
+       "request_id": "request-aafc7dc8222b4c2e87cc1bd49a7503cd",
+       "span_id": "span-aafc7dc8222b4c2e87cc1bd49a7503cd",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "Radar is evolving from standalone sensing toward ISAC, where sensing capability is integrated into communications networks [1].\nMFSS may evolve toward joint waveforms such as communications plus radar sensing, or communications methods that provide timing information [3].\nThis means the measurement target can move from only radar echoes to combined communication-and-sensing waveforms [1][3].\nISAC challenges include high bandwidth, radar equation, power density, spectrum coexistence, and waveform design [1].\nTherefore, testers need measurement coverage for wider bandwidth, power-related behavior, coexistence/interference, and waveform quality as radar becomes communication-integrated [1].\nSatellite sensing may be active or passive, imaging or non-imaging, and monostatic, bistatic, or multistatic [1].\nAutomotive radar test configurations already reflect this direction, since AREG-P3 supports monostatic or bistatic frontends, three digital channels, and one object per channel [5].\nTherefore, measurement capability must scale from single-channel/single-object testing toward multi-channel and geometry-aware radar scenarios [1][5].\nRadar echo generation capability must cover dynamic artificial objects, short-range analog stepped delay for distances below 17 m, fully digital implementation up to 3000 m, and FMCW radar with minimum generated distance equal to the radar-under-test air gap [12].\nAdvanced radar scenarios also require Doppler control, since each artificial object can support an individual Doppler frequency shift and velocity settings up to ±500 km/h with 0.001 km/h step size when equipped with the cited options [39].\nTherefore, required non-signaling radar test capability expands from static RF measurement to dynamic target distance, Doppler, velocity, and FMCW echo simulation [12][39].\nFor signaling testers, CMX500 supports NR FR1/FR2 signaling and TX measurements, LTE signaling, NB-IoT/NB-NTN signaling, WLAN signaling, fading, AWGN, BLER, CSI report, throughput measurement, and PER measurement [29].\nCMX500 also has NR NTN signaling extensions for Rel. 17, Rel. 18, and Rel. 19 [34].\nTherefore, as radar becomes integrated with communications and NTN/ISAC concepts, the signaling tester side needs protocol/network-emulation measurements plus RF/TX and channel-condition measurements rather than only RF parametric tests [1][29][34].\nFor non-signaling testers, CMP200 is described as a 5G NR FR2 nonsignaling one-box test solution for RF parametric testing, pure radiated mmWave setups, mixed radiated/conducted IF setups, and mixed radiated/conducted mmWave setups [26][28].\nCMP200 NR FR2 measurements include uplink multi-evaluation results for Modulation, Spectrum, and Power, with settings for 1 to 4 carriers, bands n257/n258/n259/n260/n261/n262, 50/100/200/400 MHz channel bandwidth, 60/120 kHz subcarrier spacing, TDD, and external attenuation [22].\nTherefore, non-signaling tester capability needs to cover mmWave RF parametric measurement, radiated and conducted setups, multi-carrier operation, modulation quality, spectrum, and power as communication-side radar-adjacent waveforms become more complex [22][26][28].\n【推論】As radar evolves into ISAC and MFSS joint communications-plus-radar waveforms, Signaling Testers need network/protocol emulation with TX, fading, BLER, CSI, throughput, PER, and NTN capability, while Non-signaling Testers need waveform, modulation, spectrum, power, and RF parametric capability [1][3][22][29][34].\n【推論】As radar moves toward wider-bandwidth mmWave operation, Non-signaling Testers need higher RF frequency coverage, wider instantaneous bandwidth, IF access, and radiated/conducted mmWave setups [6][7][9][10][28].\n【推論】As radar scenarios move from monostatic single-object testing toward bistatic/multistatic and dynamic sensing, testers need multi-channel or multi-antenna support, dynamic artificial-object generation, distance control, Doppler/velocity simulation, and waveform coexistence analysis [1][5][12][39].\n\n來源：\n[1] Wiki：6G NTN 展望（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[3] Wiki：6G NTN 展望（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[5] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[6] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[7] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[9] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[10] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[12] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[22] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[26] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[28] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[29] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[34] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[39] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_H3Fkan0cISaiBW2RLJdpqkcR",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "Radar is evolving from standalone sensing toward ISAC, where sensing capability is integrated into communications networks [1].\nMFSS may evolve toward joint waveforms such as communications plus radar sensing, or communications methods that provide timing information [3].\nThis means the measurement target can move from only radar echoes to combined communication-and-sensing waveforms [1][3].\nISAC challenges include high bandwidth, radar equation, power density, spectrum coexistence, and waveform design [1].\nTherefore, testers need measurement coverage for wider bandwidth, power-related behavior, coexistence/interference, and waveform quality as radar becomes communication-integrated [1].\nSatellite sensing may be active or passive, imaging or non-imaging, and monostatic, bistatic, or multistatic [1].\nAutomotive radar test configurations already reflect this direction, since AREG-P3 supports monostatic or bistatic frontends, three digital channels, and one object per channel [5].\nTherefore, measurement capability must scale from single-channel/single-object testing toward multi-channel and geometry-aware radar scenarios [1][5].\nRadar echo generation capability must cover dynamic artificial objects, short-range analog stepped delay for distances below 17 m, fully digital implementation up to 3000 m, and FMCW radar with minimum generated distance equal to the radar-under-test air gap [12].\nAdvanced radar scenarios also require Doppler control, since each artificial object can support an individual Doppler frequency shift and velocity settings up to ±500 km/h with 0.001 km/h step size when equipped with the cited options [39].\nTherefore, required non-signaling radar test capability expands from static RF measurement to dynamic target distance, Doppler, velocity, and FMCW echo simulation [12][39].\nFor signaling testers, CMX500 supports NR FR1/FR2 signaling and TX measurements, LTE signaling, NB-IoT/NB-NTN signaling, WLAN signaling, fading, AWGN, BLER, CSI report, throughput measurement, and PER measurement [29].\nCMX500 also has NR NTN signaling extensions for Rel. 17, Rel. 18, and Rel. 19 [34].\nTherefore, as radar becomes integrated with communications and NTN/ISAC concepts, the signaling tester side needs protocol/network-emulation measurements plus RF/TX and channel-condition measurements rather than only RF parametric tests [1][29][34].\nFor non-signaling testers, CMP200 is described as a 5G NR FR2 nonsignaling one-box test solution for RF parametric testing, pure radiated mmWave setups, mixed radiated/conducted IF setups, and mixed radiated/conducted mmWave setups [26][28].\nCMP200 NR FR2 measurements include uplink multi-evaluation results for Modulation, Spectrum, and Power, with settings for 1 to 4 carriers, bands n257/n258/n259/n260/n261/n262, 50/100/200/400 MHz channel bandwidth, 60/120 kHz subcarrier spacing, TDD, and external attenuation [22].\nTherefore, non-signaling tester capability needs to cover mmWave RF parametric measurement, radiated and conducted setups, multi-carrier operation, modulation quality, spectrum, and power as communication-side radar-adjacent waveforms become more complex [22][26][28].\n【推論】As radar evolves into ISAC and MFSS joint communications-plus-radar waveforms, Signaling Testers need network/protocol emulation with TX, fading, BLER, CSI, throughput, PER, and NTN capability, while Non-signaling Testers need waveform, modulation, spectrum, power, and RF parametric capability [1][3][22][29][34].\n【推論】As radar moves toward wider-bandwidth mmWave operation, Non-signaling Testers need higher RF frequency coverage, wider instantaneous bandwidth, IF access, and radiated/conducted mmWave setups [6][7][9][10][28].\n【推論】As radar scenarios move from monostatic single-object testing toward bistatic/multistatic and dynamic sensing, testers need multi-channel or multi-antenna support, dynamic artificial-object generation, distance control, Doppler/velocity simulation, and waveform coexistence analysis [1][5][12][39].\n\n來源：\n[1] Wiki：6G NTN 展望（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[3] Wiki：6G NTN 展望（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[5] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[6] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[7] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[9] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[10] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[12] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[22] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[26] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[28] Wiki：R&S CMP200（來源：`CMP200_specs_en_5216-4391-22_v0800.md`）\n[29] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[34] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[39] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）",
+          "evidence": {
+           "raw_citations": 14,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.1.0-k2.1"
+           },
+           "trace": {
+            "trace_id": "trace-04f1dadebb8a4f47ae9d41d3bcefb1d6",
+            "request_id": "request-04f1dadebb8a4f47ae9d41d3bcefb1d6",
+            "span_id": "span-04f1dadebb8a4f47ae9d41d3bcefb1d6",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "How do changes in radar technology affect the measurement capability required from Signaling / Non-signaling Tester? Focus on required measurement capabilities as radar evolves.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "6G NTN 展望 › ISAC\n[[ISAC]] 將 sensing capability 整合進 communications network。\n\n- satellite sensing 可為 active / passive、imaging / non-imaging、monostatic / bistatic / multistatic。\n- ISAC 可能支援 drones、transportation、refrigerated logistics、rural sensing 等 multi-operator collaboration use cases。\n- challenge 包含 high bandwidth、radar equation、power density、spectrum coexistence 與 waveform design。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/6G NTN 展望.md"
+              },
+              "score": 6.728535
+             },
+             {
+              "text": "6G NTN 展望 › 3GPP timeline to 6G NTN\n來源說：\n\n- 3GPP 於 2023 年 12 月承諾開發 6G specifications。\n- Rel. 20 預期啟動 6G use cases / service requirements / technology studies。\n- 6G system-level 與 RAN-level technical specifications 預期在 Rel. 21 開始。\n- 6G normative phase 預期持續到 2028 年底。\n- Timeline 與 [[WRC-27]]、[[WRC-31]]、IMT-2030、Olympic games 2028 / 2030 等外部節點對齊。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/6G NTN 展望.md"
+              },
+              "score": 2.144545
+             },
+             {
+              "text": "6G NTN 展望 › Multi-function satellite services（MFSS）\n[[MFSS]] 是將 communications、navigation、earth observation、monitoring、sensing 等 satellite services 整合的概念。\n\n- Phase 1：同一 satellite 整合多個獨立 hardware / services。\n- Phase 2：可能整合 joint waveform，例如 communications + radar sensing，或 communications method 提供 timing information。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/6G NTN 展望.md"
+              },
+              "score": 1.921231
+             },
+             {
+              "text": "6G NTN 展望 › Two-stage network access model\n來源引述 [[6G-TakeOff]] 提出 UE network access 的 two-stage model：\n\n| Stage | 功能 |\n|---|---|\n| Anchor part | 提供 downlink synchronization signals、system information、uplink random access；適合 camping、first access、initial connectivity。 |\n| Dynamic part | 由 non-permanently visible dynamic cells 組成；較適合 connected mode，UE initial access 後由 network handover 到 dynamic node。 |\n\n此模型的動機是降低 UE 在 idle mode 長時間掃描 dynamic network nodes 的 power consumption。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/6G NTN 展望.md"
+              },
+              "score": 1.580814
+             },
+             {
+              "text": "R&S AREG800A › Automotive radar production configurations\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- [[R&S AREG-P1]] radar mini configuration / [[R&S AREG-DBP1]] base unit option：one digital channel，one object per channel，5 GHz instantaneous bandwidth，near object range possibility，analog IF output interfaces，remote control interfaces，[[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option one frontend per channel required。\n- [[R&S AREG-P2]] radar golden configuration / [[R&S AREG-DBP2]] base unit option：two digital channels。\n- [[R&S AREG-P3]] radar pro configuration / [[R&S AREG-DBP3]] base unit option：搭配 [[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option；frontend 支援 monostatic 或 bistatic；three digital channels；one object per channel。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 31,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 5.400635
+             },
+             {
+              "text": "R&S AREG800A › R&S AREG8-24S / R&S AREG8-24D\n- RF frequency range：`24.0 GHz to 24.25 GHz`。\n- RF instantaneous bandwidth：`250 MHz`。\n- IF center frequency：`825 MHz for 250 MHz bandwidth`。\n- Maximum number supported：`4`；one IF path per [[R&S AREG8-24S]] / [[R&S AREG8-24D]] option required。\n- Absolute maximum RX power at frontend：`0 dBm (nom.)`。\n- Maximum TX power at frontend：`≥ 15 dBm (meas.)`。\n- RF transfer characteristics measurement conditions：with diplexer between RX and TX，frequency step size `2.5 MHz`，measurement bandwidth `1 kHz`，window function normal gate（Hann），type bandpass filter。\n- Amplitude flatness：[[R&S AREG8-B9]]，`< ±2 dB in 250 MHz bandwidth (meas.)`。\n- Group delay flatness：[[R&S AREG8-B9]]，`< ±1.0 ns in 250 MHz bandwidth (meas.)`。\n- Antennas：[[R&S AREG8-24S]] 為 1 combined TX/RX antenna（circulator）；[[R&S AREG8-24D]] 為 1 TX and 1 RX antenna，lateral antenna。\n- Antenna type and gain：WR42 rectangular horn antenna。\n- Antenna polarization：linear，vertical polarization。\n- AUX IF output measurement port：max. `0 dBm`。\n- AUX IF output gain：`12 dB (nom.)`。\n- AUX IF output frequency range：`700 MHz to 950 MHz`。\n- RX power output measurement port：max. `0 dBm`。\n- RX power output gain：`12 dB (nom.)`。\n- RX power output frequency range：`700 MHz to 950 MHz`。\n- AUX IF input max level：[[R&S AREG8-24D]] `10 dBm (meas.)`；[[R&S AREG8-24S]] `–5 dBm (meas.)`，to prevent R&S AREG receiver damage。\n- AUX IF input recommended maximum level：[[R&S AREG8-24S]] `< –17 dBm (meas.)`；[[R&S AREG8-24D]] `< –5 dBm (meas.)`。\n- AUX IF input frequency range：`700 MHz to 950 MHz with 250 MHz`。\n- AUX IF input gain：from AUX IF input to TX waveguide output，`20 dB (nom.)`。\n- Connectors：RX IF OUT、TX IF IN 與 RX power 為 SMA female；Control 為 26-pin ODU Mini-Snap series L, coding A, push-pull connector。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 28,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 4.13575
+             },
+             {
+              "text": "R&S AREG800A › R&S AREG8-81WS / R&S AREG8-81WD\n- RF frequency range：`76.0 GHz to 81.0 GHz`。\n- RF instantaneous bandwidth：`1 GHz`、`2 GHz`、`5 GHz`。\n- RF center frequency step size：`100 MHz`。\n- IF center frequency：1 GHz bandwidth `1.6 GHz`；2 GHz bandwidth `1.7 GHz`；5 GHz bandwidth `3.2 GHz`。\n- Maximum number supported：`4`；one IF path per [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] option required。\n- Absolute maximum RX power at frontend：`–7 dBm`。\n- Maximum TX power at frontend：`≥ 15 dBm (meas.)`。\n- Antennas：[[R&S AREG8-81WS]] 為 1 combined TX/RX antenna（circulator）；[[R&S AREG8-81WD]] 為 1 TX and 1 RX antenna。\n- Antenna type and gain：WR12 rectangular horn antenna。\n- Antenna polarization：linear，vertical polarization。\n- AUX IF output measurement port：max. `0 dBm`。\n- AUX IF output gain：`12 dB (nom.)`。\n- AUX IF output frequency range：`0.7 GHz to 5.7 GHz`。\n- RX power output measurement port：max. `0 dBm`。\n- RX power output gain：`10 dB (nom.)`。\n- RX power output frequency range：`0.7 GHz to 5.7 GHz`。\n- AUX IF input maximum level：[[R&S AREG8-81WD]] `10 dBm (meas.)`；[[R&S AREG8-81WS]] `–10 dBm (meas.)`，to prevent AREG800A receiver damage。\n- AUX IF input recommended maximum level：[[R&S AREG8-81WS]] `< –18 dBm (meas.)`；[[R&S AREG8-81WD]] `< –5 dBm (meas.)`。\n- AUX IF input frequency range：`0.7 GHz to 5.7 GHz with 5 GHz`。\n- AUX IF input gain：from AUX IF input to TX waveguide output，`17 dB (nom.)`。\n- Connectors：RX IF OUT、TX IF IN 與 RX power 為 SMA female；Control 為 26-pin ODU Mini-Snap series L, coding A, push-pull connector。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 26,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 3.569423
+             },
+             {
+              "text": "R&S AREG800A › Production base units\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n| 代碼 | 名稱 | Order No. | 原文的一句說明 |\n|---|---|---|---|\n| [[R&S AREG-DBP1]] | [[R&S AREG-P1]] radar mini | `1437.9676P02` | Production base unit option / radar mini configuration |\n| [[R&S AREG-DBP2]] | [[R&S AREG-P2]] radar golden | `1437.9682P02` | Production base unit option / radar golden configuration |\n| [[R&S AREG-DBP3]] | [[R&S AREG-P3]] radar pro | `1437.9699P02` | Production base unit option / radar pro configuration |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 41,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 3.3807
+             },
+             {
+              "text": "R&S AREG800A › R&S AREG8-81S / R&S AREG8-81D\n- RF frequency range：`76.0 GHz to 81.0 GHz`。\n- RF instantaneous bandwidth：`1 GHz`；with [[R&S AREG8-B9]] and [[R&S AREG8-K527]]：`2 GHz`；另列 `4 GHz`。\n- RF center frequency step size：`100 MHz`。\n- IF center frequency：1 GHz bandwidth `1.6 GHz`；2 GHz bandwidth `1.7 GHz`；4 GHz bandwidth `2.7 GHz`。\n- Maximum number supported：`4`；one IF path per [[R&S AREG8-81S]] / [[R&S AREG8-81D]] option required。\n- Absolute maximum RX power at frontend RX waveguide port：`–7 dBm`。\n- Maximum TX power at frontend TX waveguide port：`≥ 15 dBm (meas.)`。\n- Antennas：[[R&S AREG8-81S]] 為 1 combined TX/RX antenna，circulator integrated into frontend module；[[R&S AREG8-81D]] 為 1 TX and 1 RX antenna，lateral antenna spacing `32 mm`。\n- Antenna type and gain：WR12 rectangular horn antenna，`10 dBi (nom.)`。\n- Antenna polarization：linear，vertical polarization；horizontal polarization possible by rotating frontend module。\n- AUX IF output with [[R&S AREG8-K740]]：auxiliary receive signal IF output at AREG800A base unit；AUX IF output measurement port max. `0 dBm`；AUX IF output gain `12 dB (nom.)`；AUX IF output frequency range `0.7 GHz to 4.7 GHz`。\n- RX power output with [[R&S AREG8-K740]]：RX power connector at AREG800A mmWave frontend module；RX power output measurement port max. `0 dBm`；RX power output gain `12 dB (nom.)`；RX power output frequency range `0.7 GHz to 4.7 GHz`。\n- AUX IF input with [[R&S AREG8-K741]]：[[R&S AREG8-81D]] maximum level `10 dBm (meas.)`；[[R&S AREG8-81S]] maximum level `–10 dBm (meas.)` to prevent AREG800A receiver damage due to TX/RX isolation with circulator；recommended maximum level [[R&S AREG8-81S]] `< –18 dBm (meas.)`、[[R&S AREG8-81D]] `< –5 dBm (meas.)`；frequency range `0.7 GHz to 5.7 GHz with 4 GHz instantaneous bandwidth`；gain from AUX IF input to TX waveguide output `20 dB (nom.)`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 23,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 3.254322
+             },
+             {
+              "text": "R&S AREG800A › AUX IF input / output\n- [[R&S AREG8-K740]]：AUX IF output port for radar signal analysis and EIRP measurements；IF output ports available on base unit。\n- [[R&S AREG8-K741]]：AUX IF input port for superimposing interferers；IF input ports available on base unit。\n- AUX IF output frequency range：[[R&S AREG8-B9]] 為 `1.1 GHz to 2.1 GHz`；[[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 2.7 GHz`；來源另列 [[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 5.7 GHz`，需回查是否漏列 [[R&S AREG8-K528]]。\n- AUX IF output measurement port output gain：from RX IF input to AUX IF output at AREG800A base unit，`0 dB (nom.)`；max. `0 dBm`。\n- AUX IF input maximum level：from AUX IF input to TX IF output at AREG800A base unit，`10 dBm (meas.)`。\n- AUX IF input recommended level：from AUX IF input to TX IF output at AREG800A base unit，`–3 dBm (meas.)`。\n- AUX IF input frequency range：[[R&S AREG8-B9]]，`0.7 GHz to 5.7 GHz`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 18,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 2.887851
+             },
+             {
+              "text": "R&S AREG800A › 文件與適用條件\n- 來源文件：[[AREG800A_specs_en_3609-8015-22_v0900]]。\n- 文件編號：`PD 3609.8015.22`。\n- 文件版本：`Version 09.00`。\n- 文件日期：`September 2025（LA）`。\n- 文件名稱：`AREG800A Automotive Radar Echo Generator`。\n- Copyright：`© 2021–2025 Rohde & Schwarz`。\n- 資料註記：無 tolerance limits 的資料不具 binding 效力；資料 `subject to change`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 於環境溫度儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格定義（Version 09.00, September 2025）：\n\n- `Specifications with limits`：以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示保證產品性能。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：表示保證產品性能，通常為 dimensions 或 setting parameter resolution 等值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依 GUM 計算。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 2.82624
+             },
+             {
+              "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 2.654178
+             },
+             {
+              "text": "R&S CMP180\n[[R&S CMP180]] 是 [[Rohde & Schwarz]] 的 **Radio Communication Tester**，用於 production / wireless communication device 測試，依文件可配置多埠 RF generator/analyzer、通訊標準 measurement options、waveform options 與 [[R&S VSE]] 分析能力。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 4.546109
+             },
+             {
+              "text": "R&S CMP180 › Measurement options\n依 [[CMP180 Features and Functions Version 09]] 與 [[CMP180 Specifications Version 08.00]]，CMP180 支援多種 measurement options。Version 08.00 ordering information 的完整 order number 節錄如下：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 2.720096
+             },
+             {
+              "text": "R&S CMP180 › Measurement options\n| Designation | Type | Order no. |\n|---|---|---|\n| Non-cellular measurements pack 1 | R&S CMP-PKM30 | 1212.3689.02 |\n| Cellular measurements pack 1 | R&S CMP-PKM40 | 1212.3695.02 |\n| Advanced path loss measurements（serial number ≥ 102160） | R&S CMP-KM115 | 1212.2201.02 |\n| Advanced path loss measurements（serial number < 102160） | R&S CMP-U115 | 1212.4291.02 |\n| Spectrum analyzer | R&S CMP-KM140 | 1212.4410.02 |\n| Signal analysis base software | R&S CMP-KM150 | 1212.3972.02 |\n| Signal analysis, digital | R&S CMP-KM152 | 1212.3989.02 |\n| NB-IoT measurements | R&S CMP-KM250 | 1212.2218.02 |\n| LP-IoT measurements, Zigbee | R&S CMP-KM280 | 1212.2224.02 |\n| Ultra-wideband production measurements | R&S CMP-KM305 | 1212.4304.02 |\n| UWB IEEE 802.15.4ab production measurements | R&S CMP-KM306 | 1212.4691.02 |\n| Bluetooth measurements, Classic / Low Energy up to Rel. 5.3 | R&S CMP-KM310 | 1212.2230.02 |\n| Bluetooth HDT measurements Rel. 7.0 | R&S CMP-KM317 | 1212.4591.02 |\n| WLAN IEEE 802.11a/b/g/n/ac SISO measurements | R&S CMP-KM350 | 1212.2247.02 |\n| WLAN IEEE 802.11ax SISO measurements | R&S CMP-KM351 | 1212.2253.02 |\n| WLAN IEEE 802.11be SISO measurements | R&S CMP-KM352 | 1212.2260.02 |\n| WLAN true MIMO 2x2 and 4x4 measurements | R&S CMP-KM360 | 1212.2276.02 |\n| WLAN true MIMO 5x5 and 6x6 measurements | R&S CMP-KM361 | 1212.4685.02 |\n| WLAN packet error rate acknowledgement measurements | R&S CMP-KM365 | 1212.4562.02 |\n| GSM measurements | R&S CMP-KM420 | 1212.2282.02 |\n| WCDMA measurements | R&S CMP-KM440 | 1212.2299.02 |\n| CDMA2000 1xRTT measurements | R&S CMP-KM480 | 1212.2730.02 |\n| LTE measurements | R&S CMP-KM500 | 1212.2301.02 |\n| LTE C-V2X measurements, PC5 | R&S CMP-KM570 | 1212.2318.02 |\n| NR FR1 measurements, single carrier | R&S CMP-KM600 | 1212.2101.02 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 2.43776
+             },
+             {
+              "text": "R&S CMP180 › Measurement options\n| Designation | Type | Order no. |\n|---|---|---|\n| NR FR1 measurements, multi-carrier | R&S CMP-KM602 | 1212.2630.02 |\n| NR FR1 measurements, MIMO | R&S CMP-KM604 | 1212.3189.02 |\n| NR C-V2X measurements, PC5 | R&S CMP-KM670 | 1212.2324.02 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 2.182699
+             },
+             {
+              "text": "R&S CMP180 › 產品定位\n[[R&S CMP180]] 是 Radio Communication Tester。依 [[CMP180 Features and Functions Version 09]]，文件涵蓋 global options、Bluetooth、CDMA2000、GSM、LP-IoT、LTE、NB-IoT、NR、spectrum analysis、UWB、WCDMA、WLAN、[[R&S VSE]] options 與 ordering information。\n\n依 [[CMP180 Specifications Version 08.00]]，CMP180 支援 simultaneous receiver and transmitter testing，並提供 RF generator/analyzer no. 1 與可選 RF generator/analyzer no. 2 的多埠 RF 測試架構。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 2.17802
+             },
+             {
+              "text": "R&S CMP180 › Waveform 與 R&S WinIQSIM2 options\n依 [[CMP180 Features and Functions Version 09]]，CMP180 支援 waveform creator、standard-specific waveform playback 與 [[R&S VSE]] analysis options。\n\n依 [[CMP180 Specifications Version 08.00]] ordering information，software predefined waveform options 包括：\n\n- Non-cellular waveforms for ARB generator pack 1：R&S CMP-PKV30，1212.3708.02。\n- Cellular waveforms for ARB generator pack 1：R&S CMP-PKV40，1212.3714.02。\n- GPRF waveforms：R&S CMP-KV210，1212.4427.02。\n- GNSS waveforms：R&S CMP-KV220，1212.2330.02。\n- NB-IoT waveforms：R&S CMP-KV250，1212.2347.02。\n- LP-IoT waveforms, Zigbee / SigFox：R&S CMP-KV280，1212.2353.02。\n- UWB production waveforms：R&S CMP-KV305，1212.4327.02。\n- NG-UWB production waveforms：R&S CMP-KV306，1212.4704.02。\n- Bluetooth waveforms / HDT Rel. 7.0：R&S CMP-KV310 / R&S CMP-KV317。\n- WLAN IEEE 802.11a/b/g/n/ac、802.11ax、802.11be：R&S CMP-KV350 / K-V351 / K-V352。\n- GSM、WCDMA、CDMA2000、LTE、LTE C-V2X、NR Rel. 15/16、NR Rel. 17、NR C-V2X。\n\n[[R&S WinIQSIM2]] waveform options include waveform creator **R&S CMP-KW101** and AWGN / GNSS / NB-IoT / LP-IoT / Bluetooth / WLAN / GSM / WCDMA / CDMA2000 / LTE / NR waveform options.",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 17,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 1.834126
+             },
+             {
+              "text": "R&S CMP180 › Base unit 與硬體配置\n依 [[CMP180 Specifications Version 08.00]] ordering information：\n\n| Designation | Type | Order no. |\n|---|---|---|\n| Radio communication tester, including power cables and getting started guide | CMP180 | 1201.0002K18 |\n| CMP180 basic assembly | R&S CMP-PB18I | 1212.1986.10 |\n| Single instrument interface | R&S CMP-B40J | 1212.3372.11 |\n| Multi-instrument interface | R&S CMP-B41J | 1212.3389.11 |\n| RF unit 250（basic function, 6 GHz/250 MHz） | R&S CMP-B802I | 1212.3408.10 |\n| RF unit 500（basic function, 6 GHz/250 MHz） | R&S CMP-B805I | 1212.3414.10 |\n| Performance uprating for RF unit 500 | R&S CMP-KB805 | 1212.3866.02 |\n\n依 [[CMP180 Features and Functions Version 09]] 的 RF unit 描述：\n\n- **R&S CMP-B802x**：僅支援 **250 MHz bandwidth**。\n- **R&S CMP-B805x**：支援 **250 MHz bandwidth**，可用 **R&S CMP-K185** 啟用 **500 MHz**。\n\n依 [[CMP180 Specifications Version 08.00]]：\n\n- RF generator/analyzer no. 1：**8 × SnapN**，RF input/output to DUT，RF 1.1 to RF 1.8。\n- RF generator/analyzer no. 2：**8 × SnapN**，RF input/output to DUT，RF 2.1 to RF 2.8；requires **R&S CMP-K102** or **R&S CMP-K105** software license key。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 1.54998
+             },
+             {
+              "text": "R&S CMP180 › Selected measurement performance\n依 [[CMP180 Specifications Version 08.00]]：\n\n| Option | 功能 | 規格摘錄 |\n|---|---|---|\n| R&S CMP-KM600 | 5G NR analyzer | EVM FR1 bandwidth 100 MHz, SCS 30 kHz, 16QAM, level > –20 dBm：< 0.5% |\n| R&S CMP-KM305 | UWB production measurements | center frequency offset < 0.005 ppm；chip clock error < 0.02 ppm；NRMSE < 5%；relative AVG pulse level < 0.1 dB |\n| R&S CMP-KM351 | WLAN IEEE 802.11ax analyzer | bandwidth 160 MHz < –46 dB meas.；with R&S CMP-KB805 < –49 dB meas. |\n| R&S CMP-KW351 | WLAN IEEE 802.11ax generator | bandwidth 160 MHz < –45 dB |\n| R&S CMP-KM352 | WLAN IEEE 802.11be analyzer | 160 MHz < –46 dB meas.；with R&S CMP-KB805 < –49 dB meas.；320 MHz < –46 dB meas.；320 MHz with R&S CMP-KB805 < –48 dB meas. |\n| R&S CMP-KW352 | WLAN IEEE 802.11be generator | 160 MHz < –45 dB；320 MHz < –43 dB |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 1.394749
+             },
+             {
+              "text": "R&S CMP200 › Waveform options\n依 [[CMP200_Features_V8-14-22_en_09]]：\n\n| Code | Technology / 原文說明 | Order no. |\n|---|---|---:|\n| R&S CMP-KW101 | Waveform creator | 1212.3672.xx |\n| R&S CMP-KW280 | LP-IoT waveform playback | 1212.2499.xx |\n| R&S CMP-KW300 | UWB up to 802.15.4z | 1212.1892.xx |\n| R&S CMP-KW301 | NG-UWB 802.15.4ab | 1212.4640.xx |\n| R&S CMP-KW601 | NR, release 15/16 | 1212.1163.02 |\n| R&S CMP-KW602 | NR, release 17 | 1212.3843.xx |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 3.487738
+             },
+             {
+              "text": "R&S CMP200 › NR FR2 options 與 measurements\n依 [[CMP200_Features_V8-14-22_en_09]] 與 [[CMP200_specs_en_5216-4391-22_v0800]]：\n\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---:|---|\n| R&S CMP-KM601 | NR FR2 measurements, singlecarrier / NR mmWave measurements | 1212.1140.02 | NR FR2 measurements basic option |\n| R&S CMP-KM603 | NR FR2 measurements, multicarrier / multi-carrier | 1212.2647.02 | 超過 1 carrier 需要此 option |\n| R&S CMP-KM605 | NR FR2 measurements, two RX antennas / switched MIMO | 1212.3195.02 | Two RX antennas / switched MIMO |\n| R&S CMP-KW601 | NR mmWave waveform playback | 1212.1163.02 | Enables R&S WinIQSIM2 waveforms for ARB generator |\n\nNR FR2 multi-evaluation measurement 提供含 PUSCH 的 uplink signals 測試，measurement results 包含 Modulation、Spectrum、Power。Common settings 包含 number of carriers 1 to 4、operating band n257/n258/n259/n260/n261/n262、channel bandwidth 50/100/200/400 MHz、subcarrier spacing 60/120 kHz、duplex mode TDD、external attenuation –50 dB to 90 dB。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 3.059518
+             },
+             {
+              "text": "R&S CMP200 › Specifications data sheet\n本頁硬體、IF、RRH、UWB head、ordering、mechanical、environmental 與 conformance 相關主張主要來自 [[CMP200_specs_en_5216-4391-22_v0800]]：\n\n- 文件名稱：**CMP200 Radio Communication Tester Specifications Data Sheet**。\n- 文件代碼：**PD 5216.4391.22**。\n- 文件版本：**Version 08.00**。\n- 文件日期：**August 2024**。\n- 版權：**© 2019–2024 Rohde & Schwarz**。\n- 產品：**Rohde & Schwarz CMP200 Radio Communication Tester**。\n- 注意：**Data without tolerance limits is not binding**；**Subject to change**。\n- Recommended calibration interval：CMP200 與 RRH 為 **12 months**；[[R&S CM-Z310A]] UWB head 為 **24 months**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 2.580094
+             },
+             {
+              "text": "R&S CMP200 › Base unit 與 ordering information\n| 項目 | Order No. | 原文說明 |\n|---|---:|---|\n| CMP200 Radio communication tester | 1201.0002K20 | 主機 |\n| R&S CMP-PB20A | 1212.0209.02 | Basic assembly |\n| R&S CMP-B500A | 1212.0444.02 | IF unit |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 2.545913
+             },
+             {
+              "text": "R&S CMP200 › Product data 使用限制\n依 [[CMP200_specs_en_5216-4391-22_v0800]]：\n\n- Product data 適用條件為 ambient temperature 儲存 3 小時後 warm-up operation 30 分鐘、符合指定 environmental conditions、遵守 recommended calibration interval，且如適用需完成 all internal automatic adjustments。\n- Specifications with limits 代表保證的 product performance，以 `<`、`≤`、`>`、`≥`、`±`、maximum、limit of、minimum 等形式標示。\n- Non-traceable specifications with limits（n. trc.）依 limits 測試，但因 measuring equipment 不可追溯至 national metrology standards，Rohde & Schwarz 不保證其 performance。\n- Typical data（typ.）、nominal values（nom.）、measured values（meas.）均不由 Rohde & Schwarz 保證。\n- Uncertainties 採 coverage factor 2，依 GUM 計算。\n- 3GPP 標準中 chip rates 以 Mcps 表示，bit rates / symbol rates 以 Gbps、Mbps、kbps、Msps、ksps 表示，sample rates 以 Msample/s 表示；這些不是 SI units。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 2.257311
+             },
+             {
+              "text": "R&S CMP200\n[[R&S CMP200]] 是 [[Rohde & Schwarz]] 的 **Radio Communication Tester**；依 [[CMP200_specs_en_5216-4391-22_v0800]]，它與 [[R&S CMPHEAD30]] / [[R&S CMPHEAD50]] remote radio head 組成 5G NR FR2（mmWave）nonsignaling one-box test solution，並依 [[CMP200_Features_V8-14-22_en_09]] 透過 options 提供 [[NR FR2]]、[[UWB]]、[[LP-IoT]]、UWB PHY test plans、waveform playback/generation 與 [[R&S VSE]] analysis 相關功能。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 2.23107
+             },
+             {
+              "text": "R&S CMP200 › R&S VSE options\n[[R&S VSE]] 是 high-performance analysis software，supported instruments 清單包含 [[R&S CMP200]]。若由 CMP200 提供 VSE licenses，需要 VSE base software option **R&S CMP-KM150**。\n\n| Code | CMP200 designation | CMP200 order no. | Dongle type | Dongle order no. | 相依關係 |\n|---|---|---:|---|---:|---|\n| R&S CMP-KM150 | Signal analysis base software | 1212.3972.xx | R&S VSE | 1345.1105.xx | 由 CMP200 提供 VSE licenses 時需要 |\n| R&S CMP-KM152 | Signal analysis digital | 1212.3989.xx | R&S VSE-K70 | 1320.7522.xx | 來源未標示 |\n| R&S CMP-KM160 | WLAN 802.11a/b/g meas. | 1212.4340.xx | R&S VSE-K91 | 1320.7597.xx | 來源未標示 |\n| R&S CMP-KM162 | WLAN 802.11BE measurement | 1212.4362.xx | R&S VSE-K91BE | 1345.1428.xx | 需要 R&S CMP-KM160 |\n| R&S CMP-KM180 | OFDM signal analysis app. | 1212.4356.xx | R&S VSE-K96 | 1320.7922.xx | 來源未標示 |\n| R&S CMP-KM580 | OneWeb reverse link meas. | 1212.4085.xx | R&S VSE-K201 | 1345.2001.xx | 來源未標示 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 17,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 1.826381
+             },
+             {
+              "text": "R&S CMP200 › 產品定位\n依 [[CMP200_specs_en_5216-4391-22_v0800]]，[[R&S CMP200]] 與 [[R&S CMPHEAD30]] / [[R&S CMPHEAD50]] remote radio head（RRH）形成 5G NR FR2（mmWave）nonsignaling one-box test solution，目標應用為：\n\n- R&D 的 RF parametric testing。\n- Manufacturing 的 high-volume RF parametric testing。\n- Fully assembled smart devices 的 pure radiated mmWave setup。\n- 具 IF interface 的 mmWave RF integrated circuits 的 mixed radiated mmWave / conducted IF setup。\n- 具 mmWave interface 的 mmWave RF integrated circuits 的 mixed radiated mmWave / conducted mmWave setup。\n\nCMP200 本體提供 IF frequency range 的 vector signal analysis 與 ARB-based generator functionality；[[R&S CMPHEAD30]] / [[R&S CMPHEAD50]] 作為 compact remote radio head，負責 upconversion / downconversion 至 5G NR FR2 frequencies。分離式 one-box tester + RRH 架構可在 mmWave frequency range 使用較短 RF cable lengths，以改善 radiated test environments 的 link budget。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 1.542079
+             },
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 12.390053
+             },
+             {
+              "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 6.364918
+             },
+             {
+              "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 5.757787
+             },
+             {
+              "text": "R&S CMX500 › Base unit 與主要訂購資訊\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n| 項目 | Type / code | Order No. | 原文說明 |\n|---|---|---|---|\n| CMX500 Radio communication tester | CMX500 | 1201.0002K70 | accessories 包含 power cords、operating manual (getting started)、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters |\n| CMX500 basic assembly | R&S CMX-PB70H | 1222.0676.09 | basic assembly |\n| R&S CMX accelerator unit | R&S CMX-B200A | 1222.0747.02 | accelerated digital signal processing capabilities |\n| R&S CMX processing unit | R&S CMX-B300C | 1222.0801.04 | generic high-performance computing platform for advanced data processing |\n| R&S CMX IF unit | R&S CMX-B500A | 1222.0924.02 | IF frequency range vector signal analysis and ARB based generator |\n| R&S CMX RF unit | R&S CMX-B600B | 1222.0953.03 | FR1 frequency range vector signal analysis and ARB based generator |\n\n[[CMX500_Features_CSW9-20-0_en_32]] 使用 generic code [[R&S CMX-B500x]] 與 [[R&S CMX-B600x]]；[[CMX500_specs_en_5216-4127-22_v1100]] 在 ordering information 中列出具體 orderable unit 為 [[R&S CMX-B500A]] 與 [[R&S CMX-B600B]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 5.306648
+             },
+             {
+              "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx | WLAN SISO signaling |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx | 802.11ax station testing |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx | 802.11be station testing |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx | 802.11bn station testing |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx | 802.11ax AP testing |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx | 802.11be AP testing |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx | 802.11bn AP testing |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx | 2x2 MIMO support |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx | Enterprise security support |\n| R&S CMX-KS500B / M / X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx | 僅 LTE standalone 需要；NR NSA LTE anchor cells 包含於 NR signaling options |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx | D2C fixed / variable delay |\n| R&S CMX-KS600B / M / X | NR signaling enabler, Rel. 15 | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx | 包含 5G NR SA option 2、NSA option 3、DL 2x2/4x4 MIMO、one CC、UL 256QAM |\n| R&S CMX-KS610B / M / X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx | UL 2x2 MIMO、CA up to 9 CC |\n| R&S CMX-KS611B / M / X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx | SUL / Rel. 16 features |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.813784
+             },
+             {
+              "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS612B / M / X | NR signaling extension, CA 10 to 12 CC | 1222.6574.xx / 1222.6580.xx / 1222.6597.xx | CA 10 to 12 CC |\n| R&S CMX-KS613B / X | Multi-SIM enabler | 1222.9580.xx / 1222.9596.xx | Basic / expert |\n| R&S CMX-KS617B / M / X | NR signaling extension, Rel. 17, RedCap | 1222.6600.xx / 1222.6616.xx / 1222.6622.xx | RedCap |\n| R&S CMX-KS618B / X | NR signaling extension, Rel. 18, eRedCap | 1222.9609.xx / 1222.9621.xx | eRedCap |\n| R&S CMX-KS627B / M / X | NR signaling extension, Rel. 17, NTN | 1222.8690.xx / 1222.8702.xx / 1222.8719.xx | NTN |\n| R&S CMX-KS628B / X | NR signaling extension, Rel. 18, NTN | 1222.9638.xx / 1222.9650.xx | NTN |\n| R&S CMX-KS629B / X | NR signaling extension, Rel. 19, NTN | 1223.0086.xx / 1223.0092.xx | NTN |\n| R&S CMX-KS637B / M / X | NR signaling extension, Rel. 17 w/o RedCap & NTN | 1222.8777.xx / 1222.8783.xx / 1222.8790.xx | Rel. 17 without RedCap & NTN |\n| R&S CMX-KS638B / X | NR signaling extension w/o eRedCap & NTN Rel. 18 | 1222.9667.xx / 1222.9680.xx | Rel. 18 without eRedCap & NTN |\n| R&S CMX-KS527B / X | NB-NTN signaling, Rel. 17 | 1222.9738.xx / 1222.9744.xx | NB-IoT options set 中 basic / expert |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 26,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.732181
+             },
+             {
+              "text": "R&S CMX500 › R&S CMX-B200A accelerator unit\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX-B200A]] 提供 accelerated digital signal processing capabilities，並包含 two high-speed digital I/Q interfaces：\n\n| 項目 | 規格 |\n|---|---|\n| Ports | DIG. IQ HS 1、DIG. IQ HS 2 |\n| Direction | full duplex |\n| Connector | QSFP+ |\n| Level | CML |\n| Data rate | 40 Gbps |\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，每個 accelerator unit 可 fading 的最大 cells 數包含：1 NR cell 8x8 MIMO；1 NR cell 16x4 MIMO, 50 MHz bandwidth；2 NR cells 4x4 MIMO；4 NR cells 2x2 MIMO；2 LTE cells 8x4 MIMO；4 LTE cells 2x2 或 4x4 MIMO。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.326332
+             },
+             {
+              "text": "R&S CMX500 › RF generator\n| 項目                                | 規格                                                                                                                                                                     |\n| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |\n| Frequency range                   | 400 MHz to 8000 MHz                                                                                                                                                    |\n| Frequency resolution              | 0.1 Hz                                                                                                                                                                 |\n| Instantaneous bandwidth           | 1000 MHz，non-contiguous                                                                                                                                                |\n| RF bandwidth                      | 250 MHz                                                                                                                                                                |\n| RF Com 1 / RF Com 2 output level  | 400 MHz to 6300 MHz：CW –120 dBm to +2 dBm，PEP up to +2 dBm，overrange up to +10 dBm；6300 MHz to 8000 MHz：CW –120 dBm to 0 dBm                                           |\n| RF Out 1 to RF Out 4 output level | 400 MHz to 7375 MHz：CW –120 dBm to +8 dBm，PEP up to +8 dBm，overrange up to +15 dBm；7375 MHz to 8000 MHz：CW –120 dBm to +4 dBm，PEP up to +4 dBm，overrange up to +15 dBm |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 17,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 2.930365
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 2.46928
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n這份來源是 [[R&S AREG800A]] Automotive Radar Echo Generator 的 specifications，文件編號 `PD 3609.8015.22`，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`，文件標題為 `AREG800A Automotive Radar Echo Generator`，Copyright `© 2021–2025 Rohde & Schwarz`。\n\n[[R&S AREG800A]] 的 echo generator type 為 `dynamic artificial object generation`。Echo generation concept 分為：\n\n- `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n- `digital`：針對 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 `air gap value`；maximum generated distance 為 `3000 m`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 在環境溫度下儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格資料定義：\n\n- `Specifications with limits`：代表保證的產品效能，以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 的方式指定與測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：代表保證的產品效能，通常為 dimensions 或 setting parameter resolution 等無偏差或偏差可忽略的值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依據 GUM 計算，納入 environmental conditions、aging、wear and tear。\n- `Data without tolerance limits is not binding`；文件 `subject to change`。\n\n主要能力與限制：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.810442
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n- Base unit instantaneous IF bandwidth 依 option 為 `1 GHz`、`2 GHz` 或 `5 GHz`；overrange 分別為 `1.2 GHz (meas.)`、`2.2 GHz (meas.)`、`5.2 GHz (meas.)`。\n- AREG800A base unit IF frequency range：[[R&S AREG8-B9]] 為 `1.1 GHz to 2.1 GHz`；[[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 2.7 GHz`；來源另列 [[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 5.7 GHz`，但 5 GHz bandwidth ordering information 顯示還涉及 [[R&S AREG8-K528]]，此處未自行推論修正。\n- RF frequency bands：[[R&S AREG8-24S]] / [[R&S AREG8-24D]] 為 `24 GHz to 24.25 GHz`；[[R&S AREG8-81S]] / [[R&S AREG8-81D]] 與 [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]]、[[R&S QAT100]] 為 `76 GHz to 81 GHz`；[[R&S FE44S]] 為 `24 GHz to 44 GHz`。\n- 每台 [[R&S AREG800A]] base unit 支援 conventional mmWave frontends 最多 4 個，[[R&S QAT100]] 最多 8 個，[[R&S FE44S]] 最多 8 個 external frontends（4 個 TX、4 個 RX，共 4 pairs）。\n- Artificial object distance 可依 option 涵蓋 `< 17 m to 3000 m (meas.)`、`< 4 m to 3000 m (meas.)`、`≥ air gap to 3000 m (meas.)`；production frontend 組合列為 FMCW `≥ air gap to 350 m (meas.)`，non FMCW `< 17 m to 350 m (meas.)`。\n- Radial velocity：每個 artificial object 支援 individual Doppler frequency shift；with [[R&S AREG8-B9]] and [[R&S AREG8-B63]] velocity setting range 為 `±500 km/h`，velocity step size 為 `0.001 km/h`。\n- Remote control interfaces 包含 Ethernet 與 [[R&S AREG8-K986]] GPIB；remote control command set 為 `SCPI`。\n- HiL interface option 為 [[R&S AREG8-K109]]；open-standard protocol support 為 open simulation interface（OSI）；time synchronization protocol 為 `gPTP`、`NTP`。\n- Base unit `AREG800A` Order No. `1437.4400.02`，包含 power cable 與 quick start guide。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.133257
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG-MFP]]、[[R&S AREG-BFP]] — production frontend options，支援 monostatic 或 bistatic。\n- [[Automotive radar echo generation]]、[[FMCW radar]]、[[Radar cross-section]]、[[Doppler frequency shift]]、[[Hardware-in-the-loop]]、[[Open Simulation Interface]]、[[SCPI]]、[[Air gap]] — 本來源涉及的技術概念。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.010399
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 讀圖補充\n以下內容來自讀圖補充，可信度低於正文，不用於推翻正文。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 0.896535
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG800A]] — Automotive Radar Echo Generator；本來源主要產品實體。\n- [[Rohde & Schwarz]] — 製造商與文件發布者。\n- [[R&S AREG8-B9]] — Digital baseband，1 GHz IF bandwidth、1 IF path、1 individual artificial object；Order No. `1437.8011.02`。\n- [[R&S AREG8-B63]] — Analog stepped delay line，用於 short object generation；Order No. `1437.8205.02`。\n- [[R&S AREG8-K527]] — Baseband extension from 1 GHz to 2 GHz IF bandwidth；Order No. `1437.9882.02`。\n- [[R&S AREG8-K528]] — Baseband extension from 2 GHz to 5 GHz IF bandwidth；Order No. `1437.9799.02`。\n- [[R&S AREG8-K570]] — Activation of second IF path；Order No. `1437.9899.02`。\n- [[R&S AREG8-K812]] — One additional artificial object；Order No. `1437.9853.02`。\n- [[R&S AREG8-K813]] — Extended Doppler frequency shift up to 10 MHz；Order No. `1437.9901.02`。\n- [[R&S AREG8-K814]] — Near object range for FMCW；Order No. `1437.9776.02`。\n- [[R&S AREG8-K740]] — Analog IF output interfaces；Order No. `1437.9830.02`。\n- [[R&S AREG8-K741]] — Analog IF input interface；Order No. `1437.9847.02`。\n- [[R&S AREG8-K109]] — Hardware-in-the-loop control interface；Order No. `1437.9860.02`。\n- [[R&S AREG8-K549]] — Synchronization interface；Order No. `1437.9876.02`。\n- [[R&S AREG8-K986]] — Remote control GPIB；Order No. `1437.9818.02`。\n- [[R&S AREG8-B97]] — System alignment backend；Order No. `1437.9001.02`。\n- [[R&S AREG-P1]] / [[R&S AREG-DBP1]]、[[R&S AREG-P2]] / [[R&S AREG-DBP2]]、[[R&S AREG-P3]] / [[R&S AREG-DBP3]] — automotive radar production configurations / production base unit options。\n- [[R&S AREG8-24S]]、[[R&S AREG8-24D]]、[[R&S AREG8-81S]]、[[R&S AREG8-81D]]、[[R&S AREG8-81WS]]、[[R&S AREG8-81WD]]、[[R&S FE44S]] — 支援的 mmWave 或 external frontends。\n- [[R&S QAT100]]、[[R&S QAT-B2]]、[[R&S QAT-Z50]] — advanced antenna array 及其相關 option/accessory。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 0.659539
+             },
+             {
+              "text": "R&S FSWP26 › 基本定位\n- 產品名稱：R&S®FSWP Phase Noise Analyzer and VCO Tester。\n- 型號：R&S®FSWP26。\n- 主要功能：[[Phase noise measurement]]、[[AM noise measurement]]、[[Baseband noise measurement]]、[[VCO characterization]]、[[Transient analysis]]、[[Allan deviation]] / [[Allan variance]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWP26.md"
+              },
+              "score": 4.167214
+             },
+             {
+              "text": "R&S FSWP26 › Base unit\n| 項目 | 代碼 / 型號 | Order No. | 原文說明 |\n|---|---|---|---|\n| Phase noise analyzer and VCO tester, 1 MHz to 26.5 GHz | R&S®FSWP26 | 1322.8003.27 | Phase noise analyzer and VCO tester, 1 MHz to 26.5 GHz |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWP26.md"
+              },
+              "score": 3.044774
+             },
+             {
+              "text": "R&S FSWP26 › Additive phase noise options\n| Option code | 名稱 | Order No. | 原文說明 |\n|---|---|---|---|\n| R&S®FSWP-B64 | Additive phase noise measurements | 1322.9900.27 | retrofittable，for R&S®FSWP26；frequency range 10 MHz to 18 GHz；contact service center |\n\n- Additive phase noise measurements with internal signal source frequency range：R&S®FSWP26 為 9.95 MHz to 18 GHz。\n- Signal source output connector：N female。\n- Additive phase noise measurements with external signal source frequency range：R&S®FSWP26 為 100 MHz to 18 GHz。\n- Auxiliary LO inputs required；R&S®FSWP-B64 option 儀器標準配備 auxiliary LO inputs 的起始 serial number：R&S®FSWP26 為 101222。\n- Auxiliary LO input connector：SMA female，50 Ω nominal；maximum input level +20 dBm。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWP26.md"
+              },
+              "score": 2.42146
+             },
+             {
+              "text": "R&S FSWP26\nR&S FSWP26 是 Rohde & Schwarz 的 Phase Noise Analyzer and VCO Tester，依 Version 09.01（January 2026）規格書支援 DC coupled 1 MHz to 26.5 GHz 與 AC coupled 10 MHz to 26.5 GHz RF input frequency range。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWP26.md"
+              },
+              "score": 2.351287
+             },
+             {
+              "text": "R&S FSWP26 › Baseband noise measurement\n- Level measurement range：RF input < +8 dBm；baseband input < +4 dBm。\n- Level measurement uncertainty，+20 °C to +30 °C：\n  - 10 mHz < f in < 1 MHz：< 2 dB nominal。\n  - 1 MHz ≤ f in ≤ 30 MHz：< 2.5 dB nominal。\n- Units：dBm (1 Hz)、dBμV (1 Hz)、dBV (1 Hz)、V (√Hz)。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWP26.md"
+              },
+              "score": 1.895798
+             },
+             {
+              "text": "R&S FSWP26 › VCO characterization\n- Sweep parameters：DC tune voltage V tune、DC auxiliary voltage V aux、DC supply voltage V supply、DC supply current I supply。\n- Measurement parameters：frequency、RF power、DC supply current、tuning sensitivity。\n- Frequency resolution：100 mHz to 100 kHz，steps of 1, 10, …。\n- RF power measurement range：\n  - 1 MHz ≤ signal frequency ≤ 100 MHz：–15 dBm to +27 dBm。\n  - signal frequency > 100 MHz：–20 dBm to +27 dBm。\n- VCO level measurement uncertainty，條件為 –20 dBm ≤ signal level ≤ 15 dBm，+20 °C to +30 °C：\n  - 1 MHz ≤ signal frequency < 8 GHz：< 1 dB。\n  - 8 GHz ≤ signal frequency < 18 GHz：< 2 dB。\n  - signal frequency ≥ 18 GHz：< 3 dB。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWP26.md"
+              },
+              "score": 1.667086
+             },
+             {
+              "text": "R&S FSWP26 › Phase noise measurements\n- Measurement results：SSB phase noise、spurious signals、integrated RMS phase deviation、residual FM、time jitter。\n- Offset frequency range：\n  - carrier frequency ≤ maximum input frequency − 1 GHz：1 µHz to max. input frequency − carrier frequency。\n  - carrier frequency ≥ maximum input frequency − 1 GHz：1 µHz to 1 GHz。\n- Signal level range：\n  - level setting = high：−20 dBm to +30 dBm nominal。\n  - level setting = low：−40 dBm to +30 dBm nominal。\n  - level setting = low 且 I/Q lowpass ≤ 10 MHz：−50 dBm to +30 dBm nominal。\n- Number of traces：6。\n- Phase noise measurement uncertainty 條件：DUT phase noise ≥ 10 dB above phase noise sensitivity of R&S®FSWP。\n  - 1 µHz ≤ offset < 10 mHz：1.5 dB nominal。\n  - 10 mHz ≤ offset < 1 MHz：< 1.2 dB，σ = 0.4 dB。\n  - 1 MHz ≤ offset ≤ 30 MHz：< 1.5 dB，σ = 0.5 dB。\n  - 30 MHz < offset：< 3 dB，σ = 1.0 dB。\n- Phase noise measurement uncertainty specified values 適用於 offset frequencies ≤ 30 % of signal frequency。\n- DUT phase noise 若高於 R&S®FSWP phase noise sensitivity 6 dB 至 10 dB，uncertainty 增加 1 dB。\n- Phase noise level measurement uncertainty，條件為 −20 dBm ≤ signal level ≤ 15 dBm，+20 °C to +30 °C：\n  - 1 MHz ≤ signal frequency < 8 GHz：< 1 dB。\n  - 8 GHz ≤ signal frequency < 18 GHz：< 2 dB。\n  - 18 GHz ≤ signal frequency：< 3 dB。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWP26.md"
+              },
+              "score": 1.497565
+             },
+             {
+              "text": "R&S FSWP26 › AM noise measurements\n- Offset frequency range：\n  - input signal ≤ 100 MHz：1 µHz to 40 % of carrier frequency。\n  - input signal > 100 MHz：1 µHz to 40 MHz。\n- AM noise measurement uncertainty 條件：DUT AM noise ≥ 15 dB above AM noise sensitivity of R&S®FSWP。\n  - 1 µHz < offset < 10 mHz：2 dB nominal。\n  - 10 mHz < offset < 1 MHz：< 2 dB，σ = 0.67 dB。\n  - 1 MHz ≤ offset ≤ 30 MHz：< 2.5 dB，σ = 0.83 dB。\n- AM noise level measurement uncertainty，條件為 −20 dBm ≤ signal level ≤ +15 dBm，+20 °C to +30 °C：\n  - 1 MHz ≤ signal frequency < 8 GHz：< 1 dB。\n  - 8 GHz ≤ signal frequency < 18 GHz：< 2 dB。\n  - 18 GHz ≤ signal frequency：< 3 dB。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWP26.md"
+              },
+              "score": 1.403661
+             },
+             {
+              "text": "R&S FSPN50 › 基本定位\n- 產品名稱：R&S®FSPN Phase Noise Analyzer and VCO Tester。\n- 型號：R&S®FSPN50。\n- 主要功能：[[Phase noise measurement]]、[[AM noise measurement]]、[[Baseband noise measurement]]、[[VCO characterization]]、[[Transient analysis]]、[[Allan deviation]] / [[Allan variance]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSPN50.md"
+              },
+              "score": 4.37488
+             },
+             {
+              "text": "R&S FSPN50 › 其他 I/O 與平台規格\n- Baseband input：BNC female，50 Ω（nom.），input frequency range DC to 30 MHz，maximum input level ±2 V。\n- V output：BNC female，50 Ω（nom.），0 V to 16 V，0 mA to 2000 mA。\n- aux output：–10 V to +10 V，±100 mA。\n- tune output：–10 V to +28 V，±20 mA。\n- Probe power supply：+15 V DC、–12.6 V DC、ground，maximum current 150 mA（nom.）。\n- Trigger input：BNC female，50 Ω（nom.）。\n- Power sensor connector：7-pin LEMOSA female for R&S®NRP-Zxx power sensors。\n- Reference input 1 MHz to 50 MHz：BNC female，50 Ω（nom.），1 Hz steps，required level > 0 dBm。\n- Reference input 100 MHz / 1 GHz：SMA female，50 Ω（nom.），required level 0 dBm to 10 dBm。\n- Reference output 10 MHz：BNC female，50 Ω（nom.），level 10 dBm（nom.）。\n- Reference output 100 MHz：SMA female，50 Ω（nom.），level 6 dBm（nom.）。\n- Reference output 640 MHz：SMA female，50 Ω（nom.），level 16 dBm（nom.）。\n- IEC/IEEE bus control：IEC 625-2（IEEE-488.2），command set SCPI 1997.0，24-pin Amphenol female。\n- LAN：10/100/1000BASE-T，RJ-45。\n- External monitor：DVI-D、DisplayPort Rev 1.1。\n- USB：7 ports，type A plug，version 2.0。\n- Display：30.7 cm（12.1 inch）WXGA color touchscreen，1280 × 800 pixel。\n- Data storage：internal standard solid state disk ≥ 128 Gbyte；external supports USB 2.0 compatible memory devices。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSPN50.md"
+              },
+              "score": 3.044313
+             },
+             {
+              "text": "R&S FSPN50\nR&S FSPN50 是 Rohde & Schwarz 的 Phase Noise Analyzer and VCO Tester，依 Version 03.00（September 2025）規格書支援 DC coupled 1 MHz to 50 GHz 與 AC coupled 10 MHz to 50 GHz RF input frequency range。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSPN50.md"
+              },
+              "score": 2.276151
+             },
+             {
+              "text": "R&S FSPN50 › Baseband noise measurement\n- Level measurement range：RF input < +8 dBm；baseband input < +4 dBm。\n- Level measurement uncertainty，+20 °C to +30 °C：10 mHz < f_in < 1 MHz 為 < 2 dB nominal；1 MHz ≤ f_in ≤ 30 MHz 為 < 2.5 dB nominal。\n- Units：dBm (1 Hz)、dBμV (1 Hz)、dBV (1 Hz)、V (√Hz)。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSPN50.md"
+              },
+              "score": 2.192807
+             },
+             {
+              "text": "R&S FSPN50 › Base unit\n| 項目 | 代碼 / 型號 | Order No. | 原文說明 |\n|---|---|---|---|\n| Phase noise analyzer and VCO tester，1 MHz to 50 GHz | R&S®FSPN50 | 1322.8003.49 | 來源摘要訂購列未明確抄到型號字串；此頁依其他規格段落的 R&S®FSPN50 型號建立，訂購列需回查原始 PDF |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 17,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSPN50.md"
+              },
+              "score": 1.725258
+             },
+             {
+              "text": "R&S FSPN50 › VCO characterization\n- Sweep parameters：DC tune voltage (V_tune)、DC auxiliary voltage (V_aux)、DC supply voltage (V_supply)、DC supply current (I_supply)。\n- Measurement parameters：frequency、RF power、DC supply current、tuning sensitivity。\n- Frequency resolution：100 mHz to 100 kHz，steps of 1, 10, …。\n- VCO RF power measurement range：1 MHz ≤ signal frequency ≤ 100 MHz 時 –15 dBm to +27 dBm；signal frequency > 100 MHz 時 –20 dBm to +27 dBm。\n- VCO level measurement uncertainty，條件為 –20 dBm ≤ signal level ≤ 15 dBm，+20 °C to +30 °C：1 MHz ≤ signal frequency < 8 GHz 時 < 1 dB，8 GHz ≤ signal frequency < 18 GHz 時 < 2 dB，signal frequency ≥ 18 GHz 時 < 3 dB。\n- V_tune：–10 V to +28 V，1 mV resolution，setting uncertainty ±(0.2% of reading + 8 mV) measured。\n- V_aux：–10 V to +10 V，1 mV resolution，setting uncertainty ±(0.1% of reading + 2 mV) measured。\n- V_supply：0 to 16 V，1 mV resolution，setting uncertainty ±(0.1% of reading + 1 mV) measured。\n- I_supply：10 mA to 2000 mA，1 mA resolution，setting uncertainty ±(0.5% of reading + 0.5 mA) measured。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSPN50.md"
+              },
+              "score": 1.708277
+             },
+             {
+              "text": "R&S FSPN50 › Transient analysis\n- Measurement parameters：narrow mode / wide mode 為 frequency；narrow mode additionally 為 phase。\n- Frequency transient bandwidth：narrow mode 40 MHz；wide mode 256 MHz to 8 GHz。\n- RF input level range：narrow mode −20 dBm to +20 dBm；wide mode 256 MHz to 6 GHz 為 −15 dBm to +20 dBm，6 GHz to 7 GHz 為 −10 dBm to +20 dBm，7 GHz to 8 GHz 為 0 dBm to +20 dBm。\n- Frequency uncertainty：±(resolution + reference frequency accuracy)。\n- Phase uncertainty：DUT signal locked to target frequency 時為 `0.05° + 0.1° × f/GHz`。\n- Time span：1 µs to 16 s；time resolution：> 20 ns。\n- Measurement trigger：free run、external、frequency；external trigger polarity positive / negative，3.3 V TTL level；pretrigger delay `(–1) × time span` to 16 s。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSPN50.md"
+              },
+              "score": 1.606986
+             },
+             {
+              "text": "R&S FSPN50 › Phase noise measurements\n- Measurement results：SSB phase noise、spurious signals、integrated RMS phase deviation、residual FM、time jitter。\n- Offset frequency range：carrier frequency ≤ maximum input frequency − 1 GHz 時為 1 µHz to max. input frequency − carrier frequency；carrier frequency ≥ maximum input frequency − 1 GHz 時為 1 µHz to 1 GHz。\n- Signal level range：level setting = high 時 –20 dBm to +30 dBm；level setting = low 時 –40 dBm to +30 dBm。\n- Number of traces：6。\n- Phase noise measurement uncertainty 條件：DUT phase noise ≥ 15 dB above phase noise sensitivity of R&S®FSPN；1 µHz ≤ offset < 10 mHz 為 1.5 dB nominal，10 mHz ≤ offset < 1 MHz 為 < 1.5 dB，1 MHz ≤ offset ≤ 30 MHz 為 < 2 dB，offset > 30 MHz 為 < 3 dB。\n- DUT phase noise 若介於 R&S®FSPN phase noise sensitivity 以上 6 dB 到 15 dB，uncertainty 加 1 dB。\n- Level measurement uncertainty 條件：–20 dBm ≤ signal level ≤ 15 dBm，+20 °C to +30 °C；1 MHz ≤ signal frequency < 8 GHz 時 < 1 dB，8 GHz ≤ signal frequency < 18 GHz 時 < 2 dB，18 GHz ≤ signal frequency 時 < 3 dB。\n- Spurious level：f_in < 1 GHz 且 10 Hz ≤ offset < 1 kHz 時 < –90 dBc，1 kHz ≤ offset ≤ 30 MHz 時 < –100 dBc；f_in ≥ 1 GHz 時分別加 20 log(f_in/GHz)。Offset frequencies > 30 MHz 的 spurious levels 不保證，但 typical 符合 30 MHz offset 的相同規格。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSPN50.md"
+              },
+              "score": 1.501261
+             },
+             {
+              "text": "R&S CMW500 › 文件與適用範圍\n- 來源：[[CMW_dat-sw_en_5213-9211-22_v1700]]。\n- 文件編號：PD 5213.9211.22。\n- 文件版次：Version 17.00。\n- 文件日期：April 2023。\n- 文件名稱：R&S®CMW Wideband Radio Communication Tester。\n- 規格適用於 [[R&S CMW500]] 搭配 40/80 MHz bandwidth unit：R&S®CMW-H570A/B、R&S®CMW-H100A/D；以及 160 MHz bandwidth unit：R&S®CMW-H570H、R&S®CMW-H100H，除非原文另有說明。\n- NGeCall capability 來源：[[CMW-KA096_PanEUNGeCall_TC_Status]]；表格日期 / 狀態標示 Oct. 2024，文件版次來源未標示。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW500.md"
+              },
+              "score": 2.993551
+             },
+             {
+              "text": "R&S CMW500 › NGeCall over LTE capability\n[[CMW-KA096_PanEUNGeCall_TC_Status]]（Oct. 2024）指出，[[R&S CMW500]] 可作為 standalone setup，搭配 [[R&S CMW-KA096]] 或 [[R&S CMWrun KT111]] 進行 [[NGeCall over LTE]] 測試能力對照。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW500.md"
+              },
+              "score": 2.402247
+             },
+             {
+              "text": "R&S CMW500 › 版本基準\n| 項目 | 來源標示版本 / 條件 |\n|---|---|\n| R&S®CMW500 | >= V4.0.110 |\n| R&S®CMW-KA096 | >= V4.0.0 |\n| CMWrun application CMW-KT111 | >= V1.9.11 |\n| capability list 狀態 | Oct. 2024 |\n| 文件版次 | 來源未標示 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW500.md"
+              },
+              "score": 2.233305
+             },
+             {
+              "text": "R&S CMW500 › 訂購資訊\n| 項目 | Type | Order No. | 原文說明 |\n|---|---|---:|---|\n| Wideband radio communication tester | R&S®CMW500 | 1201.0002K50 | Base unit accessories: power cord, operating manual (quick start guide) |\n\n來源指出更多 available options 的 ordering information 需參考 product brochure PD 5214.2833.12 或 local Rohde & Schwarz expert；本 data sheet 未列完整 option order no.。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW500.md"
+              },
+              "score": 1.782749
+             },
+             {
+              "text": "R&S CMW500\nR&S CMW500 是 Rohde & Schwarz 的 Wideband radio communication tester；[[CMW_dat-sw_en_5213-9211-22_v1700]]（Version 17.00，April 2023）列出的訂購型號為 R&S®CMW500，Order No. 1201.0002K50；[[CMW-KA096_PanEUNGeCall_TC_Status]]（Oct. 2024，文件版次來源未標示）補充其搭配 [[R&S CMW-KA096]] 或 [[R&S CMWrun KT111]] 時的 [[NGeCall over LTE]] 測試支援狀態。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW500.md"
+              },
+              "score": 1.705796
+             },
+             {
+              "text": "R&S CMW500 › Interfaces、環境、機構與電源\n- RF connectors：front panel SnapN female，50 Ω，compatible with N female connectors。\n- RF1 COM、RF2 COM：combined RF input and RF output；RF1 OUT：RF output。\n- Front panel LAN：Ethernet RJ-45 connector，1000 Mbps。\n- LAN REMOTE：Ethernet RJ-45 connector，1000 Mbps。\n- USB REMOTE：USB 2.0 type B connector。\n- Operating temperature range：+5 °C to +45 °C。\n- Storage temperature range：-25 °C to +60 °C。\n- Dimensions：465.1 mm × 197.3 mm × 517.0 mm。\n- Weight：single tester nonsignaling approx. 14 kg；with typical options approx. 18 kg。\n- Rated voltage：100 V to 240 V AC ±10 %。\n- Rated frequency：50 Hz to 60 Hz ±5 %。\n- Rated power：依 power supply model 最大 850 VA 或 1050 VA。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW500.md"
+              },
+              "score": 1.532757
+             },
+             {
+              "text": "non-signaling\nwith signaling",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-6f4e9ea1141f0dd1",
+                "original_ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+                "sha256": "6f4e9ea1141f0dd1b05cf4e085ab51bd7dcd7db37f1ff9d1d0a6974ab9025692",
+                "raw_ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+               "section": 93,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 17.605508
+             },
+             {
+              "text": "Non-signaling",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-094dfa34f112d59b",
+                "original_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+                "sha256": "094dfa34f112d59b36ac5657e84e88379ec21b54fd169328c309f062cf839f95",
+                "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+               "section": 315,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.818487
+             },
+             {
+              "text": "Rohde & Schwarz, in collaboration with Broadcom, will display its [CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC Barcelona 2026 with newly added Wi-Fi 8 (IEEE 802.11bn) testing capabilities. The setup at the Rohde & Schwarz booth (5A80) will validate a prototype Wi-Fi 8 device from Broadcom, showcasing physical layer features unique to Wi-Fi 8.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-f833664f4958cbb4",
+                "original_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+                "sha256": "f833664f4958cbb42375016a15e1872d68a146ce02d3bc6e740c04770883157e",
+                "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.632846
+             },
+             {
+              "text": "Christoph Pointner, Senior Vice President of Mobile Radio Testers at Rohde & Schwarz, said: “Integrating our CMX500 OBT with Bluetest’s RTS technology allows mobile device manufacturers to leverage its advanced multi-technology and multi-channel signaling testing capabilities. It unlocks the potential of our tester within Bluetest’s industry-leading reverberation test systems.”",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-20f22e12a8b3ec5d",
+                "original_ref": "raw/Productions/PR/Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md",
+                "sha256": "20f22e12a8b3ec5de36f6d2d3d5606fa4592a038851c6bf3dbe193ba76121f2e",
+                "raw_ref": "raw/Productions/PR/Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/PR/Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md",
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.599648
+             }
+            ],
+            "text": "Radar is evolving from standalone sensing toward ISAC, where sensing capability is integrated into communications networks [1].\nMFSS may evolve toward joint waveforms such as communications plus radar sensing, or communications methods that provide timing information [3].\nThis means the measurement target can move from only radar echoes to combined communication-and-sensing waveforms [1][3].\nISAC challenges include high bandwidth, radar equation, power density, spectrum coexistence, and waveform design [1].\nTherefore, testers need measurement coverage for wider bandwidth, power-related behavior, coexistence/interference, and waveform quality as radar becomes communication-integrated [1].\nSatellite sensing may be active or passive, imaging or non-imaging, and monostatic, bistatic, or multistatic [1].\nAutomotive radar test configurations already reflect this direction, since AREG-P3 supports monostatic or bistatic frontends, three digital channels, and one object per channel [5].\nTherefore, measurement capability must scale from single-channel/single-object testing toward multi-channel and geometry-aware radar scenarios [1][5].\nRadar echo generation capability must cover dynamic artificial objects, short-range analog stepped delay for distances below 17 m, fully digital implementation up to 3000 m, and FMCW radar with minimum generated distance equal to the radar-under-test air gap [12].\nAdvanced radar scenarios also require Doppler control, since each artificial object can support an individual Doppler frequency shift and velocity settings up to ±500 km/h with 0.001 km/h step size when equipped with the cited options [39].\nTherefore, required non-signaling radar test capability expands from static RF measurement to dynamic target distance, Doppler, velocity, and FMCW echo simulation [12][39].\nFor signaling testers, CMX500 supports NR FR1/FR2 signaling and TX measurements, LTE signaling, NB-IoT/NB-NTN signaling, WLAN signaling, fading, AWGN, BLER, CSI report, throughput measurement, and PER measurement [29].\nCMX500 also has NR NTN signaling extensions for Rel. 17, Rel. 18, and Rel. 19 [34].\nTherefore, as radar becomes integrated with communications and NTN/ISAC concepts, the signaling tester side needs protocol/network-emulation measurements plus RF/TX and channel-condition measurements rather than only RF parametric tests [1][29][34].\nFor non-signaling testers, CMP200 is described as a 5G NR FR2 nonsignaling one-box test solution for RF parametric testing, pure radiated mmWave setups, mixed radiated/conducted IF setups, and mixed radiated/conducted mmWave setups [26][28].\nCMP200 NR FR2 measurements include uplink multi-evaluation results for Modulation, Spectrum, and Power, with settings for 1 to 4 carriers, bands n257/n258/n259/n260/n261/n262, 50/100/200/400 MHz channel bandwidth, 60/120 kHz subcarrier spacing, TDD, and external attenuation [22].\nTherefore, non-signaling tester capability needs to cover mmWave RF parametric measurement, radiated and conducted setups, multi-carrier operation, modulation quality, spectrum, and power as communication-side radar-adjacent waveforms become more complex [22][26][28].\n【推論】As radar evolves into ISAC and MFSS joint communications-plus-radar waveforms, Signaling Testers need network/protocol emulation with TX, fading, BLER, CSI, throughput, PER, and NTN capability, while Non-signaling Testers need waveform, modulation, spectrum, power, and RF parametric capability [1][3][22][29][34].\n【推論】As radar moves toward wider-bandwidth mmWave operation, Non-signaling Testers need higher RF frequency coverage, wider instantaneous bandwidth, IF access, and radiated/conducted mmWave setups [6][7][9][10][28].\n【推論】As radar scenarios move from monostatic single-object testing toward bistatic/multistatic and dynamic sensing, testers need multi-channel or multi-antenna support, dynamic artificial-object generation, distance control, Doppler/velocity simulation, and waveform coexistence analysis [1][5][12][39].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "6G NTN 展望 › ISAC\n[[ISAC]] 將 sensing capability 整合進 communications network。\n\n- satellite sensing 可為 active / passive、imaging / non-imaging、monostatic / bistatic / multistatic。\n- ISAC 可能支援 drones、transportation、refrigerated logistics、rural sensing 等 multi-operator collaboration use cases。\n- challenge 包含 high bandwidth、radar equation、power density、spectrum coexistence 與 waveform design。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/6G NTN 展望.md"
+             },
+             "score": 6.728535
+            },
+            {
+             "text": "6G NTN 展望 › Multi-function satellite services（MFSS）\n[[MFSS]] 是將 communications、navigation、earth observation、monitoring、sensing 等 satellite services 整合的概念。\n\n- Phase 1：同一 satellite 整合多個獨立 hardware / services。\n- Phase 2：可能整合 joint waveform，例如 communications + radar sensing，或 communications method 提供 timing information。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/6G NTN 展望.md"
+             },
+             "score": 1.921231
+            },
+            {
+             "text": "R&S AREG800A › Automotive radar production configurations\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- [[R&S AREG-P1]] radar mini configuration / [[R&S AREG-DBP1]] base unit option：one digital channel，one object per channel，5 GHz instantaneous bandwidth，near object range possibility，analog IF output interfaces，remote control interfaces，[[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option one frontend per channel required。\n- [[R&S AREG-P2]] radar golden configuration / [[R&S AREG-DBP2]] base unit option：two digital channels。\n- [[R&S AREG-P3]] radar pro configuration / [[R&S AREG-DBP3]] base unit option：搭配 [[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option；frontend 支援 monostatic 或 bistatic；three digital channels；one object per channel。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 31,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 5.400635
+            },
+            {
+             "text": "R&S AREG800A › R&S AREG8-24S / R&S AREG8-24D\n- RF frequency range：`24.0 GHz to 24.25 GHz`。\n- RF instantaneous bandwidth：`250 MHz`。\n- IF center frequency：`825 MHz for 250 MHz bandwidth`。\n- Maximum number supported：`4`；one IF path per [[R&S AREG8-24S]] / [[R&S AREG8-24D]] option required。\n- Absolute maximum RX power at frontend：`0 dBm (nom.)`。\n- Maximum TX power at frontend：`≥ 15 dBm (meas.)`。\n- RF transfer characteristics measurement conditions：with diplexer between RX and TX，frequency step size `2.5 MHz`，measurement bandwidth `1 kHz`，window function normal gate（Hann），type bandpass filter。\n- Amplitude flatness：[[R&S AREG8-B9]]，`< ±2 dB in 250 MHz bandwidth (meas.)`。\n- Group delay flatness：[[R&S AREG8-B9]]，`< ±1.0 ns in 250 MHz bandwidth (meas.)`。\n- Antennas：[[R&S AREG8-24S]] 為 1 combined TX/RX antenna（circulator）；[[R&S AREG8-24D]] 為 1 TX and 1 RX antenna，lateral antenna。\n- Antenna type and gain：WR42 rectangular horn antenna。\n- Antenna polarization：linear，vertical polarization。\n- AUX IF output measurement port：max. `0 dBm`。\n- AUX IF output gain：`12 dB (nom.)`。\n- AUX IF output frequency range：`700 MHz to 950 MHz`。\n- RX power output measurement port：max. `0 dBm`。\n- RX power output gain：`12 dB (nom.)`。\n- RX power output frequency range：`700 MHz to 950 MHz`。\n- AUX IF input max level：[[R&S AREG8-24D]] `10 dBm (meas.)`；[[R&S AREG8-24S]] `–5 dBm (meas.)`，to prevent R&S AREG receiver damage。\n- AUX IF input recommended maximum level：[[R&S AREG8-24S]] `< –17 dBm (meas.)`；[[R&S AREG8-24D]] `< –5 dBm (meas.)`。\n- AUX IF input frequency range：`700 MHz to 950 MHz with 250 MHz`。\n- AUX IF input gain：from AUX IF input to TX waveguide output，`20 dB (nom.)`。\n- Connectors：RX IF OUT、TX IF IN 與 RX power 為 SMA female；Control 為 26-pin ODU Mini-Snap series L, coding A, push-pull connector。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 28,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 4.13575
+            },
+            {
+             "text": "R&S AREG800A › R&S AREG8-81WS / R&S AREG8-81WD\n- RF frequency range：`76.0 GHz to 81.0 GHz`。\n- RF instantaneous bandwidth：`1 GHz`、`2 GHz`、`5 GHz`。\n- RF center frequency step size：`100 MHz`。\n- IF center frequency：1 GHz bandwidth `1.6 GHz`；2 GHz bandwidth `1.7 GHz`；5 GHz bandwidth `3.2 GHz`。\n- Maximum number supported：`4`；one IF path per [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]] option required。\n- Absolute maximum RX power at frontend：`–7 dBm`。\n- Maximum TX power at frontend：`≥ 15 dBm (meas.)`。\n- Antennas：[[R&S AREG8-81WS]] 為 1 combined TX/RX antenna（circulator）；[[R&S AREG8-81WD]] 為 1 TX and 1 RX antenna。\n- Antenna type and gain：WR12 rectangular horn antenna。\n- Antenna polarization：linear，vertical polarization。\n- AUX IF output measurement port：max. `0 dBm`。\n- AUX IF output gain：`12 dB (nom.)`。\n- AUX IF output frequency range：`0.7 GHz to 5.7 GHz`。\n- RX power output measurement port：max. `0 dBm`。\n- RX power output gain：`10 dB (nom.)`。\n- RX power output frequency range：`0.7 GHz to 5.7 GHz`。\n- AUX IF input maximum level：[[R&S AREG8-81WD]] `10 dBm (meas.)`；[[R&S AREG8-81WS]] `–10 dBm (meas.)`，to prevent AREG800A receiver damage。\n- AUX IF input recommended maximum level：[[R&S AREG8-81WS]] `< –18 dBm (meas.)`；[[R&S AREG8-81WD]] `< –5 dBm (meas.)`。\n- AUX IF input frequency range：`0.7 GHz to 5.7 GHz with 5 GHz`。\n- AUX IF input gain：from AUX IF input to TX waveguide output，`17 dB (nom.)`。\n- Connectors：RX IF OUT、TX IF IN 與 RX power 為 SMA female；Control 為 26-pin ODU Mini-Snap series L, coding A, push-pull connector。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 26,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 3.569423
+            },
+            {
+             "text": "R&S AREG800A › R&S AREG8-81S / R&S AREG8-81D\n- RF frequency range：`76.0 GHz to 81.0 GHz`。\n- RF instantaneous bandwidth：`1 GHz`；with [[R&S AREG8-B9]] and [[R&S AREG8-K527]]：`2 GHz`；另列 `4 GHz`。\n- RF center frequency step size：`100 MHz`。\n- IF center frequency：1 GHz bandwidth `1.6 GHz`；2 GHz bandwidth `1.7 GHz`；4 GHz bandwidth `2.7 GHz`。\n- Maximum number supported：`4`；one IF path per [[R&S AREG8-81S]] / [[R&S AREG8-81D]] option required。\n- Absolute maximum RX power at frontend RX waveguide port：`–7 dBm`。\n- Maximum TX power at frontend TX waveguide port：`≥ 15 dBm (meas.)`。\n- Antennas：[[R&S AREG8-81S]] 為 1 combined TX/RX antenna，circulator integrated into frontend module；[[R&S AREG8-81D]] 為 1 TX and 1 RX antenna，lateral antenna spacing `32 mm`。\n- Antenna type and gain：WR12 rectangular horn antenna，`10 dBi (nom.)`。\n- Antenna polarization：linear，vertical polarization；horizontal polarization possible by rotating frontend module。\n- AUX IF output with [[R&S AREG8-K740]]：auxiliary receive signal IF output at AREG800A base unit；AUX IF output measurement port max. `0 dBm`；AUX IF output gain `12 dB (nom.)`；AUX IF output frequency range `0.7 GHz to 4.7 GHz`。\n- RX power output with [[R&S AREG8-K740]]：RX power connector at AREG800A mmWave frontend module；RX power output measurement port max. `0 dBm`；RX power output gain `12 dB (nom.)`；RX power output frequency range `0.7 GHz to 4.7 GHz`。\n- AUX IF input with [[R&S AREG8-K741]]：[[R&S AREG8-81D]] maximum level `10 dBm (meas.)`；[[R&S AREG8-81S]] maximum level `–10 dBm (meas.)` to prevent AREG800A receiver damage due to TX/RX isolation with circulator；recommended maximum level [[R&S AREG8-81S]] `< –18 dBm (meas.)`、[[R&S AREG8-81D]] `< –5 dBm (meas.)`；frequency range `0.7 GHz to 5.7 GHz with 4 GHz instantaneous bandwidth`；gain from AUX IF input to TX waveguide output `20 dB (nom.)`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 23,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 3.254322
+            },
+            {
+             "text": "R&S AREG800A › AUX IF input / output\n- [[R&S AREG8-K740]]：AUX IF output port for radar signal analysis and EIRP measurements；IF output ports available on base unit。\n- [[R&S AREG8-K741]]：AUX IF input port for superimposing interferers；IF input ports available on base unit。\n- AUX IF output frequency range：[[R&S AREG8-B9]] 為 `1.1 GHz to 2.1 GHz`；[[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 2.7 GHz`；來源另列 [[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 5.7 GHz`，需回查是否漏列 [[R&S AREG8-K528]]。\n- AUX IF output measurement port output gain：from RX IF input to AUX IF output at AREG800A base unit，`0 dB (nom.)`；max. `0 dBm`。\n- AUX IF input maximum level：from AUX IF input to TX IF output at AREG800A base unit，`10 dBm (meas.)`。\n- AUX IF input recommended level：from AUX IF input to TX IF output at AREG800A base unit，`–3 dBm (meas.)`。\n- AUX IF input frequency range：[[R&S AREG8-B9]]，`0.7 GHz to 5.7 GHz`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 18,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 2.887851
+            },
+            {
+             "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 2.654178
+            },
+            {
+             "text": "R&S CMP200 › NR FR2 options 與 measurements\n依 [[CMP200_Features_V8-14-22_en_09]] 與 [[CMP200_specs_en_5216-4391-22_v0800]]：\n\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---:|---|\n| R&S CMP-KM601 | NR FR2 measurements, singlecarrier / NR mmWave measurements | 1212.1140.02 | NR FR2 measurements basic option |\n| R&S CMP-KM603 | NR FR2 measurements, multicarrier / multi-carrier | 1212.2647.02 | 超過 1 carrier 需要此 option |\n| R&S CMP-KM605 | NR FR2 measurements, two RX antennas / switched MIMO | 1212.3195.02 | Two RX antennas / switched MIMO |\n| R&S CMP-KW601 | NR mmWave waveform playback | 1212.1163.02 | Enables R&S WinIQSIM2 waveforms for ARB generator |\n\nNR FR2 multi-evaluation measurement 提供含 PUSCH 的 uplink signals 測試，measurement results 包含 Modulation、Spectrum、Power。Common settings 包含 number of carriers 1 to 4、operating band n257/n258/n259/n260/n261/n262、channel bandwidth 50/100/200/400 MHz、subcarrier spacing 60/120 kHz、duplex mode TDD、external attenuation –50 dB to 90 dB。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 13,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP200.md"
+             },
+             "score": 3.059518
+            },
+            {
+             "text": "R&S CMP200\n[[R&S CMP200]] 是 [[Rohde & Schwarz]] 的 **Radio Communication Tester**；依 [[CMP200_specs_en_5216-4391-22_v0800]]，它與 [[R&S CMPHEAD30]] / [[R&S CMPHEAD50]] remote radio head 組成 5G NR FR2（mmWave）nonsignaling one-box test solution，並依 [[CMP200_Features_V8-14-22_en_09]] 透過 options 提供 [[NR FR2]]、[[UWB]]、[[LP-IoT]]、UWB PHY test plans、waveform playback/generation 與 [[R&S VSE]] analysis 相關功能。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP200.md"
+             },
+             "score": 2.23107
+            },
+            {
+             "text": "R&S CMP200 › 產品定位\n依 [[CMP200_specs_en_5216-4391-22_v0800]]，[[R&S CMP200]] 與 [[R&S CMPHEAD30]] / [[R&S CMPHEAD50]] remote radio head（RRH）形成 5G NR FR2（mmWave）nonsignaling one-box test solution，目標應用為：\n\n- R&D 的 RF parametric testing。\n- Manufacturing 的 high-volume RF parametric testing。\n- Fully assembled smart devices 的 pure radiated mmWave setup。\n- 具 IF interface 的 mmWave RF integrated circuits 的 mixed radiated mmWave / conducted IF setup。\n- 具 mmWave interface 的 mmWave RF integrated circuits 的 mixed radiated mmWave / conducted mmWave setup。\n\nCMP200 本體提供 IF frequency range 的 vector signal analysis 與 ARB-based generator functionality；[[R&S CMPHEAD30]] / [[R&S CMPHEAD50]] 作為 compact remote radio head，負責 upconversion / downconversion 至 5G NR FR2 frequencies。分離式 one-box tester + RRH 架構可在 mmWave frequency range 使用較短 RF cable lengths，以改善 radiated test environments 的 link budget。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP200.md"
+             },
+             "score": 1.542079
+            },
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 12.390053
+            },
+            {
+             "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS612B / M / X | NR signaling extension, CA 10 to 12 CC | 1222.6574.xx / 1222.6580.xx / 1222.6597.xx | CA 10 to 12 CC |\n| R&S CMX-KS613B / X | Multi-SIM enabler | 1222.9580.xx / 1222.9596.xx | Basic / expert |\n| R&S CMX-KS617B / M / X | NR signaling extension, Rel. 17, RedCap | 1222.6600.xx / 1222.6616.xx / 1222.6622.xx | RedCap |\n| R&S CMX-KS618B / X | NR signaling extension, Rel. 18, eRedCap | 1222.9609.xx / 1222.9621.xx | eRedCap |\n| R&S CMX-KS627B / M / X | NR signaling extension, Rel. 17, NTN | 1222.8690.xx / 1222.8702.xx / 1222.8719.xx | NTN |\n| R&S CMX-KS628B / X | NR signaling extension, Rel. 18, NTN | 1222.9638.xx / 1222.9650.xx | NTN |\n| R&S CMX-KS629B / X | NR signaling extension, Rel. 19, NTN | 1223.0086.xx / 1223.0092.xx | NTN |\n| R&S CMX-KS637B / M / X | NR signaling extension, Rel. 17 w/o RedCap & NTN | 1222.8777.xx / 1222.8783.xx / 1222.8790.xx | Rel. 17 without RedCap & NTN |\n| R&S CMX-KS638B / X | NR signaling extension w/o eRedCap & NTN Rel. 18 | 1222.9667.xx / 1222.9680.xx | Rel. 18 without eRedCap & NTN |\n| R&S CMX-KS527B / X | NB-NTN signaling, Rel. 17 | 1222.9738.xx / 1222.9744.xx | NB-IoT options set 中 basic / expert |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 26,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 3.732181
+            },
+            {
+             "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n- Base unit instantaneous IF bandwidth 依 option 為 `1 GHz`、`2 GHz` 或 `5 GHz`；overrange 分別為 `1.2 GHz (meas.)`、`2.2 GHz (meas.)`、`5.2 GHz (meas.)`。\n- AREG800A base unit IF frequency range：[[R&S AREG8-B9]] 為 `1.1 GHz to 2.1 GHz`；[[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 2.7 GHz`；來源另列 [[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 5.7 GHz`，但 5 GHz bandwidth ordering information 顯示還涉及 [[R&S AREG8-K528]]，此處未自行推論修正。\n- RF frequency bands：[[R&S AREG8-24S]] / [[R&S AREG8-24D]] 為 `24 GHz to 24.25 GHz`；[[R&S AREG8-81S]] / [[R&S AREG8-81D]] 與 [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]]、[[R&S QAT100]] 為 `76 GHz to 81 GHz`；[[R&S FE44S]] 為 `24 GHz to 44 GHz`。\n- 每台 [[R&S AREG800A]] base unit 支援 conventional mmWave frontends 最多 4 個，[[R&S QAT100]] 最多 8 個，[[R&S FE44S]] 最多 8 個 external frontends（4 個 TX、4 個 RX，共 4 pairs）。\n- Artificial object distance 可依 option 涵蓋 `< 17 m to 3000 m (meas.)`、`< 4 m to 3000 m (meas.)`、`≥ air gap to 3000 m (meas.)`；production frontend 組合列為 FMCW `≥ air gap to 350 m (meas.)`，non FMCW `< 17 m to 350 m (meas.)`。\n- Radial velocity：每個 artificial object 支援 individual Doppler frequency shift；with [[R&S AREG8-B9]] and [[R&S AREG8-B63]] velocity setting range 為 `±500 km/h`，velocity step size 為 `0.001 km/h`。\n- Remote control interfaces 包含 Ethernet 與 [[R&S AREG8-K986]] GPIB；remote control command set 為 `SCPI`。\n- HiL interface option 為 [[R&S AREG8-K109]]；open-standard protocol support 為 open simulation interface（OSI）；time synchronization protocol 為 `gPTP`、`NTP`。\n- Base unit `AREG800A` Order No. `1437.4400.02`，包含 power cable 與 quick start guide。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+             },
+             "score": 1.133257
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "technical_knowledge",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 12,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/6G NTN 展望.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 28,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S AREG800A.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 26,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S AREG800A.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 23,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S AREG800A.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 18,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S AREG800A.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMP180.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/6G NTN 展望.md",
+             "raw_refs": [
+              "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S AREG800A.md",
+             "raw_refs": [
+              "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMP200.md",
+             "raw_refs": [
+              "raw/Productions/CMP200_specs_en_5216-4391-22_v0800.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+             "raw_refs": [
+              "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

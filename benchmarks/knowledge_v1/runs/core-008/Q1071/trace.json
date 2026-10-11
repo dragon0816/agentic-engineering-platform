@@ -1,0 +1,1363 @@
+{
+ "question": {
+  "id": "Q1071",
+  "text": "What is measurement method, and which product-related measurement decisions depend on understanding it?",
+  "technical": "Technical Document / Paper Understanding",
+  "topic": "measurement method",
+  "product_related": "true"
+ },
+ "session_id": "conversation-ce2036f1c96047a99bbee225a3372147",
+ "exchange": {
+  "sent": "What is measurement method, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 168.187,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-ce2036f1c96047a99bbee225a3372147",
+    "actor": "leo.chi",
+    "title": "What is measurement method, and which product-related measurement decisi…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T08:34:18.526811Z",
+    "updated_at": "2026-10-11T08:37:06.064572Z",
+    "messages": [
+     {
+      "message_id": "message-8f1e09e552244407bdcbae9a0063d87a",
+      "role": "user",
+      "text": "What is measurement method, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-11T08:34:18.623338Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-87bbd2d0a3e9420eb2bd1494c5694aad",
+      "role": "assistant",
+      "text": "The passages do not define “measurement method” as a standalone term, but they use it as the named procedure or metric used to perform a test: for RSE, the reference method is substitution, where the DUT is replaced by a calibrated antenna with a signal generator, the generator level is tuned to the same receive value as the DUT, and EIRP is calculated by adding antenna gain and cable loss [13].\nFor 5G FR2 RSE, sources describe requirements in terms of the TRP method, with EIRP coarse-grid screening followed by TRP fine-grid or final TRP evaluation in some cases [12][25].\nTDR impedance measurement is also described as an impedance-measurement method/function for high-frequency/high-speed PCB testing [15].\n| Decision area | What the passages support |\n|---|---|\n| RSE / ELEKTRA feature and option selection | R&S ELEKTRA supports substitution method for RSE [13], 3D EIRP evaluation [7], ELEMI-OOB burst analysis for ETSI RSE final measurement [5], multi-band measurement [2], and 5G FR2 RSE support including 3D and TRP evaluation [3]. The listed RSE / wireless options include ELEMI-RSE, ELEMI-3D, ELEMI-5GFC, ELEMI-OOB, ELEMI-MBM, ELEMC-WRLS, ELEMC-CELS, ELEMC-5GS, and ELEMC-DRV [8]. |\n| Spectrum analyzer vs EMI receiver | RSE testing can use a spectrum analyzer or EMI receiver; RF analysis needs a spectrum analyzer, while EMC test standards need an EMI receiver [14]. |\n| Test system choice for FR2 RSE vs conformance | The sources distinguish TS8980 for FR2 3GPP validated tests with ATS1800C from TS8996 for ETSI / FCC additional RSE requirements [24]. |\n| Chamber / setup choice | RSE test sites can be FAR with azimuth and optional elevation scan, or SAC with height scan [14]. SAC precalibrated measurement needs correction because effective test distance depends on antenna height, and ELEKTRA can correct that variation automatically [4]. |\n| TRP procedure and grid choice | TRP procedure choice depends on available test setup, measurement equipment, and measurement time [9]. TRP grids include 2-cut, 3-cut, equal angle, equal area, and Fibonacci grids [10]. |\n| 5G FR2 workflow and detector settings | ELEKTRA 5G FR2 workflow includes overview measurement, data reduction, maximization, adjustment, and final measurement; it also supports virtual RMS detectors with 100 MHz and 200 MHz bandwidth [3]. |\n| PCB impedance-measurement product choices | TDR impedance measurement is linked with ENA/PNA platforms, TDR options, calibration kits, and TDR probes in high-frequency/high-speed PCB testing [16]. |\n\n來源：\n[2] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[3] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[4] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[5] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[7] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[8] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[9] Wiki：TRP（來源：`GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md`）\n[10] Wiki：TRP（來源：`GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md`）\n[12] Wiki：Radiated Spurious Emissions（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[13] Wiki：Radiated Spurious Emissions（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[14] Wiki：Radiated Spurious Emissions（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[15] Wiki：TDR 阻抗測量（來源：`AI Server PCB test image 24.md`）\n[16] Wiki：TDR 阻抗測量（來源：`AI Server PCB test image 24.md`）\n[24] Wiki：RSE Test System TS8996 (1)（來源：`RSE Test System TS8996 (1).md`）\n[25] Wiki：RSE Test System TS8996 (1)（來源：`RSE Test System TS8996 (1).md`）",
+      "created_at": "2026-10-11T08:37:06.064572Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-6bf1a95177154e7780fae19ba46a981b",
+       "request_id": "request-6bf1a95177154e7780fae19ba46a981b",
+       "span_id": "span-6bf1a95177154e7780fae19ba46a981b",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "The passages do not define “measurement method” as a standalone term, but they use it as the named procedure or metric used to perform a test: for RSE, the reference method is substitution, where the DUT is replaced by a calibrated antenna with a signal generator, the generator level is tuned to the same receive value as the DUT, and EIRP is calculated by adding antenna gain and cable loss [13].\nFor 5G FR2 RSE, sources describe requirements in terms of the TRP method, with EIRP coarse-grid screening followed by TRP fine-grid or final TRP evaluation in some cases [12][25].\nTDR impedance measurement is also described as an impedance-measurement method/function for high-frequency/high-speed PCB testing [15].\n| Decision area | What the passages support |\n|---|---|\n| RSE / ELEKTRA feature and option selection | R&S ELEKTRA supports substitution method for RSE [13], 3D EIRP evaluation [7], ELEMI-OOB burst analysis for ETSI RSE final measurement [5], multi-band measurement [2], and 5G FR2 RSE support including 3D and TRP evaluation [3]. The listed RSE / wireless options include ELEMI-RSE, ELEMI-3D, ELEMI-5GFC, ELEMI-OOB, ELEMI-MBM, ELEMC-WRLS, ELEMC-CELS, ELEMC-5GS, and ELEMC-DRV [8]. |\n| Spectrum analyzer vs EMI receiver | RSE testing can use a spectrum analyzer or EMI receiver; RF analysis needs a spectrum analyzer, while EMC test standards need an EMI receiver [14]. |\n| Test system choice for FR2 RSE vs conformance | The sources distinguish TS8980 for FR2 3GPP validated tests with ATS1800C from TS8996 for ETSI / FCC additional RSE requirements [24]. |\n| Chamber / setup choice | RSE test sites can be FAR with azimuth and optional elevation scan, or SAC with height scan [14]. SAC precalibrated measurement needs correction because effective test distance depends on antenna height, and ELEKTRA can correct that variation automatically [4]. |\n| TRP procedure and grid choice | TRP procedure choice depends on available test setup, measurement equipment, and measurement time [9]. TRP grids include 2-cut, 3-cut, equal angle, equal area, and Fibonacci grids [10]. |\n| 5G FR2 workflow and detector settings | ELEKTRA 5G FR2 workflow includes overview measurement, data reduction, maximization, adjustment, and final measurement; it also supports virtual RMS detectors with 100 MHz and 200 MHz bandwidth [3]. |\n| PCB impedance-measurement product choices | TDR impedance measurement is linked with ENA/PNA platforms, TDR options, calibration kits, and TDR probes in high-frequency/high-speed PCB testing [16]. |\n\n來源：\n[2] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[3] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[4] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[5] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[7] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[8] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[9] Wiki：TRP（來源：`GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md`）\n[10] Wiki：TRP（來源：`GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md`）\n[12] Wiki：Radiated Spurious Emissions（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[13] Wiki：Radiated Spurious Emissions（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[14] Wiki：Radiated Spurious Emissions（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[15] Wiki：TDR 阻抗測量（來源：`AI Server PCB test image 24.md`）\n[16] Wiki：TDR 阻抗測量（來源：`AI Server PCB test image 24.md`）\n[24] Wiki：RSE Test System TS8996 (1)（來源：`RSE Test System TS8996 (1).md`）\n[25] Wiki：RSE Test System TS8996 (1)（來源：`RSE Test System TS8996 (1).md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-6bf1a95177154e7780fae19ba46a981b",
+      "request_id": "request-6bf1a95177154e7780fae19ba46a981b",
+      "span_id": "span-6bf1a95177154e7780fae19ba46a981b",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-6bf1a95177154e7780fae19ba46a981b",
+       "request_id": "request-6bf1a95177154e7780fae19ba46a981b",
+       "span_id": "span-6bf1a95177154e7780fae19ba46a981b",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The passages do not define “measurement method” as a standalone term, but they use it as the named procedure or metric used to perform a test: for RSE, the reference method is substitution, where the DUT is replaced by a calibrated antenna with a signal generator, the generator level is tuned to the same receive value as the DUT, and EIRP is calculated by adding antenna gain and cable loss [13].\nFor 5G FR2 RSE, sources describe requirements in terms of the TRP method, with EIRP coarse-grid screening followed by TRP fine-grid or final TRP evaluation in some cases [12][25].\nTDR impedance measurement is also described as an impedance-measurement method/function for high-frequency/high-speed PCB testing [15].\n| Decision area | What the passages support |\n|---|---|\n| RSE / ELEKTRA feature and option selection | R&S ELEKTRA supports substitution method for RSE [13], 3D EIRP evaluation [7], ELEMI-OOB burst analysis for ETSI RSE final measurement [5], multi-band measurement [2], and 5G FR2 RSE support including 3D and TRP evaluation [3]. The listed RSE / wireless options include ELEMI-RSE, ELEMI-3D, ELEMI-5GFC, ELEMI-OOB, ELEMI-MBM, ELEMC-WRLS, ELEMC-CELS, ELEMC-5GS, and ELEMC-DRV [8]. |\n| Spectrum analyzer vs EMI receiver | RSE testing can use a spectrum analyzer or EMI receiver; RF analysis needs a spectrum analyzer, while EMC test standards need an EMI receiver [14]. |\n| Test system choice for FR2 RSE vs conformance | The sources distinguish TS8980 for FR2 3GPP validated tests with ATS1800C from TS8996 for ETSI / FCC additional RSE requirements [24]. |\n| Chamber / setup choice | RSE test sites can be FAR with azimuth and optional elevation scan, or SAC with height scan [14]. SAC precalibrated measurement needs correction because effective test distance depends on antenna height, and ELEKTRA can correct that variation automatically [4]. |\n| TRP procedure and grid choice | TRP procedure choice depends on available test setup, measurement equipment, and measurement time [9]. TRP grids include 2-cut, 3-cut, equal angle, equal area, and Fibonacci grids [10]. |\n| 5G FR2 workflow and detector settings | ELEKTRA 5G FR2 workflow includes overview measurement, data reduction, maximization, adjustment, and final measurement; it also supports virtual RMS detectors with 100 MHz and 200 MHz bandwidth [3]. |\n| PCB impedance-measurement product choices | TDR impedance measurement is linked with ENA/PNA platforms, TDR options, calibration kits, and TDR probes in high-frequency/high-speed PCB testing [16]. |\n\n來源：\n[2] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[3] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[4] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[5] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[7] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[8] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[9] Wiki：TRP（來源：`GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md`）\n[10] Wiki：TRP（來源：`GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md`）\n[12] Wiki：Radiated Spurious Emissions（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[13] Wiki：Radiated Spurious Emissions（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[14] Wiki：Radiated Spurious Emissions（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[15] Wiki：TDR 阻抗測量（來源：`AI Server PCB test image 24.md`）\n[16] Wiki：TDR 阻抗測量（來源：`AI Server PCB test image 24.md`）\n[24] Wiki：RSE Test System TS8996 (1)（來源：`RSE Test System TS8996 (1).md`）\n[25] Wiki：RSE Test System TS8996 (1)（來源：`RSE Test System TS8996 (1).md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_XF6nyAdKQvzoxxwJ1hgSIQAI",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "The passages do not define “measurement method” as a standalone term, but they use it as the named procedure or metric used to perform a test: for RSE, the reference method is substitution, where the DUT is replaced by a calibrated antenna with a signal generator, the generator level is tuned to the same receive value as the DUT, and EIRP is calculated by adding antenna gain and cable loss [13].\nFor 5G FR2 RSE, sources describe requirements in terms of the TRP method, with EIRP coarse-grid screening followed by TRP fine-grid or final TRP evaluation in some cases [12][25].\nTDR impedance measurement is also described as an impedance-measurement method/function for high-frequency/high-speed PCB testing [15].\n| Decision area | What the passages support |\n|---|---|\n| RSE / ELEKTRA feature and option selection | R&S ELEKTRA supports substitution method for RSE [13], 3D EIRP evaluation [7], ELEMI-OOB burst analysis for ETSI RSE final measurement [5], multi-band measurement [2], and 5G FR2 RSE support including 3D and TRP evaluation [3]. The listed RSE / wireless options include ELEMI-RSE, ELEMI-3D, ELEMI-5GFC, ELEMI-OOB, ELEMI-MBM, ELEMC-WRLS, ELEMC-CELS, ELEMC-5GS, and ELEMC-DRV [8]. |\n| Spectrum analyzer vs EMI receiver | RSE testing can use a spectrum analyzer or EMI receiver; RF analysis needs a spectrum analyzer, while EMC test standards need an EMI receiver [14]. |\n| Test system choice for FR2 RSE vs conformance | The sources distinguish TS8980 for FR2 3GPP validated tests with ATS1800C from TS8996 for ETSI / FCC additional RSE requirements [24]. |\n| Chamber / setup choice | RSE test sites can be FAR with azimuth and optional elevation scan, or SAC with height scan [14]. SAC precalibrated measurement needs correction because effective test distance depends on antenna height, and ELEKTRA can correct that variation automatically [4]. |\n| TRP procedure and grid choice | TRP procedure choice depends on available test setup, measurement equipment, and measurement time [9]. TRP grids include 2-cut, 3-cut, equal angle, equal area, and Fibonacci grids [10]. |\n| 5G FR2 workflow and detector settings | ELEKTRA 5G FR2 workflow includes overview measurement, data reduction, maximization, adjustment, and final measurement; it also supports virtual RMS detectors with 100 MHz and 200 MHz bandwidth [3]. |\n| PCB impedance-measurement product choices | TDR impedance measurement is linked with ENA/PNA platforms, TDR options, calibration kits, and TDR probes in high-frequency/high-speed PCB testing [16]. |\n\n來源：\n[2] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[3] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[4] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[5] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[7] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[8] Wiki：R&S ELEKTRA（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[9] Wiki：TRP（來源：`GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md`）\n[10] Wiki：TRP（來源：`GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md`）\n[12] Wiki：Radiated Spurious Emissions（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[13] Wiki：Radiated Spurious Emissions（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[14] Wiki：Radiated Spurious Emissions（來源：`RSE Test System TS8996 (1).md`、`Regulatory test for wireless devices with cellular technology.md`）\n[15] Wiki：TDR 阻抗測量（來源：`AI Server PCB test image 24.md`）\n[16] Wiki：TDR 阻抗測量（來源：`AI Server PCB test image 24.md`）\n[24] Wiki：RSE Test System TS8996 (1)（來源：`RSE Test System TS8996 (1).md`）\n[25] Wiki：RSE Test System TS8996 (1)（來源：`RSE Test System TS8996 (1).md`）",
+          "evidence": {
+           "raw_citations": 15,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "product_option_spec": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.1.0-k2.1"
+           },
+           "trace": {
+            "trace_id": "trace-8756606381624d2dab7a59eca7f0f479",
+            "request_id": "request-8756606381624d2dab7a59eca7f0f479",
+            "span_id": "span-8756606381624d2dab7a59eca7f0f479",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "What is measurement method, and which product-related measurement decisions depend on understanding it?",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "R&S ELEKTRA › Substitution method\n依來源：\n\n- RSE measurement including substitution 的 reference method 為 substitution。\n- DUT replaced by a calibrated antenna with signal generator。\n- Signal generator level tuned to same receive value as DUT。\n- EIRP calculated by adding antenna gain and cable loss。\n- Supported by ELEKTRA。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+              },
+              "score": 4.53761
+             },
+             {
+              "text": "R&S ELEKTRA › Multi-band measurement\n依來源：\n\n- ELEKTRA Multi Band Measurement 可 speed up overview measurement by running up to **4 antennas / receivers** in parallel。\n- 可 simultaneously measure up to **4 frequency subranges**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+              },
+              "score": 0.906018
+             },
+             {
+              "text": "R&S ELEKTRA › 5G FR2 test procedure support\n依 [[RSE Test System TS8996 (1)]]：\n\n- ELEKTRA is next generation EMC test SW。\n- For 5G support of RSE measurement procedures with extension for 5G FR2。\n- 支援 3D and TRP evaluation。\n- 支援 5G signaling with [[R&S CMX500]]。\n- Mixers and calibration procedure also supported by EMC32。\n- EMI test sequence adopted to support RSE requirements。\n- Sweeps 可 free run（for FDD）或 gated sweep（triggered by CMX, for TDD）。\n- 支援 elevation positioner。\n- 支援 3D view possibility for overview measurement, maximization and final TRP measurement。\n- Typical test distance: **1 m for >40 GHz** and **3 m for <40 GHz**。\n- Workflow steps 包含 overview measurement、data reduction、maximization、adjustment、final measurement。\n- Virtual RMS detectors with **100 MHz and 200 MHz bandwidth** 可把 lower bandwidth measurement integration over 100 MHz / 200 MHz sliding window，用於平行量測 -13 dBm/MHz 與 -10 dBm/100 MHz limits。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+              },
+              "score": 0.836402
+             },
+             {
+              "text": "R&S ELEKTRA › SAC height-scan correction\n依來源：\n\n- FAR precalibrated measurement 中 antenna height、DUT height、test distance constant，因此 free space loss constant。\n- SAC precalibrated measurement 中 DUT height and horizontal test distance constant，但 effective test distance depends on antenna height。\n- ELEKTRA can correct this test distance variation automatically。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+              },
+              "score": 0.762601
+             },
+             {
+              "text": "R&S ELEKTRA › ELEMI-OOB burst analysis\n依來源：\n\n- [[ELEMI-OOB]] 是 TX burst trigger / burst analysis for RSE final measurement according to ETSI。\n- 適用 unlicensed bands final measurement。\n- Zero span with ≤1 µs resolution, RMS detector。\n- Burst detection with trigger search。\n- Average power of highest burst。\n- Automatic analysis and storage of trace。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+              },
+              "score": 0.759889
+             },
+             {
+              "text": "R&S ELEKTRA › Wireless EMC / EMS extension\n[[RSE Test System TS8996 (1)]] 另列出 wireless EMC / EMS 相關功能：\n\n- Wireless EMC Extension: EMI tests for wireless devices；radiated and conducted emission test according ETSI EN 301 489；signaling also in EMI measurements supported。\n- EMS tests for wireless devices：susceptibility tests according [[TS 134.124]] and ETSI EN 301 489。\n- Signaling options include link quality measurement for wireless devices with data application，例如 BER、BLER、FER、PER。\n- Radiated EMS tests for wireless devices with audio：susceptibility tests according TS 134.124 and ETSI EN 301 489；audio measurement for wireless devices with audio functionality。\n- ELEKTRA option [[ELEMS-ABT]]；uses external audio analyzer or CMW internal audio analyzer；application note available with detailed setup description。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+              },
+              "score": 0.598242
+             },
+             {
+              "text": "R&S ELEKTRA › 3D EIRP Evaluation / ELEMI-3D\n依 [[RSE Test System TS8996 (1)]]：\n\n- 量測 [[EIRP]]（Effective Isotropic Radiated Power）instead of field strength。\n- 支援 SAC and FAR 3D measurement。\n- 支援 elevation positioner。\n- 支援 spherical elevation 或 cylindrical height scan。\n- 支援 3D result presentation。\n- option 名稱為 [[ELEMI-3D]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+              },
+              "score": 0.557521
+             },
+             {
+              "text": "R&S ELEKTRA › RSE options for ELEKTRA\n[[RSE Test System TS8996 (1)]] 列出以下 RSE / wireless options；來源未提供 order number 或 dependency：\n\n| Option | 原文說明 |\n|---|---|\n| [[ELEMI-EAS]] | Base license for EMI test system |\n| [[ELEMI-RSE]] | EMI Extension RSE Measurements |\n| [[ELEMI-3D]] | EMI Extension 3D Result Evaluation |\n| [[ELEMC-WRLS]] | Signalling Extension WLAN / BT |\n| [[ELEMC-CELS]] | Signalling Extension 2G / 3G / 4G |\n| [[ELEMC-5GS]] | Signalling Extension 5G |\n| [[ELEMI-5GFC]] | EMI Extension RSE 5G FR2 measurements |\n| [[ELEMI-OOB]] | TX burst trigger for RSE final measurement according to ETSI |\n| [[ELEMI-MBM]] | Extension multi band measurements |\n| [[ELEMC-DRV]] | Generic drivers |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+              },
+              "score": 0.43855
+             },
+             {
+              "text": "TRP › TRP measurement procedures\n來源列出多種 TRP procedures：\n\n1. Full sphere using reference steps（accurate）。\n2. Full sphere using sparse sampling（overestimate）。\n3. Two cuts + Pattern multiplication（accurate）；Pattern multiplication 是 conditional。\n4. Two/three cuts（overestimate）。\n5. Beam-based directions。\n6. Peak method。\n7. Equal sector with peak average。\n8. Pre-scan。\n\n來源指出 procedure 選擇取決於 available test setup、measurement equipment 與 measurement time。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/TRP.md"
+              },
+              "score": 2.802671
+             },
+             {
+              "text": "TRP › TRP measurement grids\n來源列出 TRP measurement grids：\n\n- 2-cut grid。\n- 3-cut grid。\n- Equal angle grid。\n- Equal area grid。\n- Fibonacci grid。\n\n來源說 TRP measurement grids 參考 [[3GPP TR 37.941]] subsection 6.3.4。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/TRP.md"
+              },
+              "score": 1.324989
+             },
+             {
+              "text": "TRP › 使用限制\n- 本頁只保存 GFM324 對 TRP 的 OTA BS transmitter testing 語境，不是 antenna measurement 標準全文。\n- 不可由本頁推論任一產品、基地台或天線的 TRP 規格。\n- TRP procedure、grid density、uncertainty budget 與 applicability 需回查 [[3GPP TS 38.141-2]]、[[3GPP TR 37.941]] 與 R&S application note 原文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/TRP.md"
+              },
+              "score": 0.653636
+             },
+             {
+              "text": "Radiated Spurious Emissions › RSE 與 EIRP / TRP\n依 [[RSE Test System TS8996 (1)]]：\n\n- [[R&S ELEKTRA]] 支援 3D [[EIRP]] evaluation：量測 Effective Isotropic Radiated Power instead of field strength。\n- 5G FR2 來源多以 [[TRP]] method 表示 test requirement。\n- ETSI 301 908-25 draft 來源描述 two-step method：先用 EIRP coarse grid 找 spurious frequencies，再對 EIRP above limit 的 frequencies 執行 TRP fine grid。\n- Final measurement 可計算 2-cut TRP、3-cut TRP；若 limit exceeded，另執行 full TRP。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Radiated Spurious Emissions.md"
+              },
+              "score": 2.194897
+             },
+             {
+              "text": "Radiated Spurious Emissions › Substitution method\n依 [[RSE Test System TS8996 (1)]]：\n\n- Reference method: substitution。\n- DUT replaced by calibrated antenna with signal generator。\n- Signal generator level tuned to same receive value as DUT。\n- EIRP calculated by adding antenna gain and cable loss。\n- [[R&S ELEKTRA]] supports this method。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Radiated Spurious Emissions.md"
+              },
+              "score": 1.727881
+             },
+             {
+              "text": "Radiated Spurious Emissions › 在 R&S solution mapping 中的位置\n依 [[Regulatory test for wireless devices with cellular technology]]：\n\n- RSE 出現在 CE RED Art 3.2 radio spectrum 與 FCC wireless regulatory testing 語境。\n- 來源將 [[R&S TS8996]] 列為 RSE solution mapping。\n- 來源對 5G FR2 提到 RSE up to 200 GHz、high sensitivity -40 dBm/MHz、special signaling、conditioning for carrier 與 all standards support。\n- RSE test can use spectrum analyzer or EMI receiver；RF analysis need spectrum analyzer，EMC test standards need EMI receiver。\n\n依 [[RSE Test System TS8996 (1)]]：\n\n- RSE has always to be evaluated, also for precertified modules。\n- Basic RSE setup 類似 commercial EMI test。\n- TS8996 supports 2G / 3G / 4G / 5G FR1 / WLAN / BT，並可擴充到 5G FR2 / above 40 GHz。\n- 測試場地可為 FAR with azimuth / optional elevation scan，或 SAC with height scan。\n- 常見 test distance 為 3 m；為提高 sensitivity 可使用 1 m。\n- Signal conditioning 是 RSE 的關鍵，因為 high-power carrier 可能使 receiver / analyzer overload，特別是 near-carrier measurement。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Radiated Spurious Emissions.md"
+              },
+              "score": 0.615753
+             },
+             {
+              "text": "TDR 阻抗測量\n[[TDR 阻抗測量]] 是 [[AI Server PCB test image 24]] 中列為高頻高速 [[PCB]] 測試方案的一項阻抗量測方法 / 功能，來源將其與 ENA / PNA、TDR 選項、校準件與 TDR 探頭連結。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/TDR 阻抗測量.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "TDR 阻抗測量 › 來源中的說法\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）列出 **基于 ENA/PNA 的 Delta-L 损耗、TDR 阻抗测量和 Dk/Df 提取**。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）列出 **ENA / PNA与TDR选项和校准件**。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）列出 **TDR 探头（是德科技或合作伙伴）**。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）在電路板抽樣測試與大批量監控階段皆涉及 [[阻抗變化]] 量測。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/TDR 阻抗測量.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "TDR 阻抗測量 › 可追溯限制\n- 來源未提供 [[TDR]] 的完整展開、波形、測試條件、頻寬、上升時間、探頭型號或校準程序。\n- 來源未標示 [[Keysight ENA]] / [[Keysight PNA]] 所需的 TDR option code。\n- 來源未提供阻抗變化的數值、單位、允收範圍或量產監控規範。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/TDR 阻抗測量.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "TDR 阻抗測量 › 相關來源\n- [[AI Server PCB test image 24]] — 未標示日期的 Keysight 高頻高速 PCB 測試解決方案流程圖。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/TDR 阻抗測量.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "TDR 阻抗測量 › 未決事項\n- [[AI Server PCB test image 24]] 未標示 [[TDR 探頭]] 的具體型號與供應商。\n- [[AI Server PCB test image 24]] 未標示 TDR 阻抗量測的頻寬、校準方式、測試 coupon、測試標準或允收條件。\n- [[AI Server PCB test image 24]] 未標示大批量監控的抽樣頻率、控制界限或品質管理口徑。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/TDR 阻抗測量.md"
+              },
+              "score": 0.0
+             },
+             {
+              "text": "FR2 OTA spatial test metrics › TRP @ Beam Peak metric\n來源文字：\n\n- TRP metric – two antennas required, link + measurement。\n- Lock the beam in best TX beam。\n- Measure power per grid point。\n- Calculate average。\n\n判斷：本來源將 [[TRP]] @ beam peak 描述為固定最佳 TX beam 後，在 sphere grid 上量測 power 並平均；此處是 FR2 UE conformance presentation 的簡化說明，正式 grid / uncertainty / integration method 仍需回查 3GPP 或 application note。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md"
+              },
+              "score": 2.276909
+             },
+             {
+              "text": "FR2 OTA spatial test metrics › EIRP @ Beam Peak / TX Beam Peak metric\n來源文字：\n\n- EIRP metric：In best TX beam peak direction measure power。\n- TX Beam peak metric：Same as EIRP but non-power measurement, e.g. EVM。\n- For chapter 6 the beam peak is Tx beam peak = 100%-tile of EIRP CDF = strongest beam。\n\n因此在此來源中：\n\n- Power measurement at strongest TX beam 可用 [[EIRP]] @ beam peak。\n- 非 power measurement，例如 [[EVM]]，也可使用 TX beam peak direction 作為量測方向。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md"
+              },
+              "score": 0.977013
+             },
+             {
+              "text": "FR2 OTA spatial test metrics › EIRP CDF metric\n來源文字：\n\n- EIRP CDF metric：3D EIRP scan with the same link & measurement antenna, CDF for power。\n- 來源把 spherical coverage 連到 EIRP CDF metric。\n\n判斷：本來源將 [[EIRP]] CDF 作為 TX scan / spherical coverage 類 metric；這補充 [[EIRP]] 既有頁的方向性 radiated power 定義，但不取代 GFM324 的 formal test context。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md"
+              },
+              "score": 0.622468
+             },
+             {
+              "text": "FR2 OTA spatial test metrics › 使用限制\n- 本頁主要依 [[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]] Slide 10 整理，該來源是 2020-11-02 customer presentation 的 lossy derivative，不是 3GPP 標準全文。\n- Slide 10 中部分 test case numbering / labels 可能受 OCR 影響，例如 TX Spurious Emissions 與 6.5.3.1 的排列需回查原始投影片。\n- 本頁只保存 metric taxonomy 與來源語句，不提供測試限值、grid definition、uncertainty、measurement bandwidth、beam management procedure 或 pass/fail criteria。\n- [[EIRP]]、[[TRP]] 與 [[EIS]] 的正式定義與測試程序需回查對應 3GPP、R&S application note 或 chamber / test system 文件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/FR2 OTA spatial test metrics.md"
+              },
+              "score": 0.450395
+             },
+             {
+              "text": "RSE Test System TS8996 (1) › 重點摘要\n- FCC 47 CFR Part 30 / KDB 842590 / ANSI C63.26 對 5G FR2 的來源說法為 **30 MHz up to 5th harmonic / 100 GHz or 200 GHz**，limit **-13 dBm**，method 為 [[TRP]]，並提到 EIRP early exit criteria。\n- ETSI 301 908-25 draft covers 5G FR2 RSE，依 ERC Recommendation 74-01（1998, amended 29 May 2019），並列出 30 MHz to 1 GHz、1 GHz to 7.25 GHz、7.25 GHz to 2nd harmonic 的 TRP limits。\n- 來源把 [[R&S TS8980 Conformance Test Platform]] 與 [[R&S TS8996]] 做區分：FR1 中 TS8980 負責 validated conducted tests，另需 radiated RSE（TS8996）、EMC（TS9982）、OTA（TS8991）；FR2 中 3GPP validated tests with ATS1800C 屬 TS8980，而 ETSI / FCC 額外 RSE 需求屬 TS8996。\n- 來源稱 TS8980 with compact CATR ATS1800C includes RSE 6 GHz to 92 GHz, limit -13 dBm/MHz acc. 3GPP；而 [[R&S TS8996]] up to **220 GHz / 325 GHz** in anechoic chamber。\n- 5G FR2 signal conditioning 18–50 GHz 使用 [[TS-PRE1850]]，18–40 GHz base，40–50 GHz extension with antenna [[TS-PRE-B1]]，可同時測 spurious 與 carrier。\n- 41–325 GHz system extension 包含 receive units [[TC-RSE60]]、[[TC-RSE90]]、[[TC-RSE140]]、[[TC-RSE220]]、[[TC-RSE325]] 與 multiplier units [[TC-MX60]]、[[TC-MX90]]、[[TC-MX140]]、[[TC-MX220]]、[[TC-MX325]]，並以 [[OSP220]]、[[R&S ESW44]] with B21、[[R&S SMB100A]]、[[R&S CMX500]]、[[R&S ELEKTRA]] 組成系統。\n- TC-RSE units 的 sensitivity EIRP 來源標示為 **< -40 dBm/MHz**（RMS detector）at **1 m** test distance。\n- 5G FR2 ELEKTRA procedure 包含 overview measurement、data reduction、maximization、adjustment、final measurement，並支援 virtual RMS detector with 100 MHz / 200 MHz bandwidth。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/RSE Test System TS8996 (1).md"
+              },
+              "score": 1.413044
+             },
+             {
+              "text": "RSE Test System TS8996 (1) › 重點摘要\n- 來源標題為 `Radited Spurious Emission (RSE) Test System TS8996`，頁尾日期標示 **07/2025**；`Radited` 為原文拼字。\n- 基本 RSE setup 類似 commercial EMI test，可用 FAR 搭配 DUT azimuth 與 optional elevation scan，也可用 SAC 搭配 height scan。\n- 基本頻率範圍列為 **30 MHz to 12.75 / 26 GHz / 40 GHz**，使用 spectrum analyzer 或 spectrum analyzer + test receiver；test distance 可為 **3 m**，或為提高 sensitivity 使用 **1 m**。\n- 系統要求 high sensitivity、stable radiated radiocommunication link、signal conditioning，並由 [[R&S ELEKTRA]] 全自動控制。\n- 來源明示 [[R&S TS8996]] 可作 turnkey solution，也可與 EMC test system 或 regulatory test system（[[R&S TS8997]]）組合 / 擴充。\n- 3G / 4G / 5G FR1 的 signal conditioning 使用 [[OSP-B155G]]，頻率範圍 **30 MHz to 8 GHz**；支援 RED carrier up to **30 dBm**、FCC carrier up to **36 dBm**，並支援 5G NSA mode with 2 simultaneous carriers（LTE and 5G）。\n- 1 GHz to 40 GHz 使用 [[TS-PRE2]] 與 [[TS-LNA1840]]；1–18 GHz 需 high sensitivity 與 carrier suppression，18–40 GHz 則把 receiver 放在 anechoic chamber 內並以 fiber optic 控制。\n- 來源稱 typical sensitivity：TX at 3 m 可達 **-30 dBm with 12 dB S/N**（即 -42 dBm，peak detector）；RX at 1 m 可達 **-47 dBm with 12 dB S/N**（即 -59 dBm，peak detector）。\n- [[R&S ELEKTRA]] 提供 RSE 專用功能：3D EIRP evaluation、ELEMI-OOB burst analysis、substitution method、SAC height-scan correction、CMW / CMX signaling、multi-band measurement。\n- [[R&S ELEKTRA]] RSE option list 包含 ELEMI-EAS、ELEMI-RSE、ELEMI-3D、ELEMC-WRLS、ELEMC-CELS、ELEMC-5GS、ELEMI-5GFC、ELEMI-OOB、ELEMI-MBM、ELEMC-DRV。\n- 5G FR2 section 指出 FCC / ANSI C63.26 的 RSE upper frequency 依 fundamental frequency 決定：RF signal <10 GHz 到 10th harmonic max 40 GHz；RF signal <30 GHz 到 5th harmonic max 100 GHz；RF signal >30 GHz 到 5th harmonic max 200 GHz。\n- 3GPP / RAN4 對 5G FR2 的 RSE specification 為 **9 kHz to 2nd harmonic**，test requirement 為 **6 GHz to 2nd harmonic**，limit **-13 dBm**，method 為 [[TRP]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/RSE Test System TS8996 (1).md"
+              },
+              "score": 1.128967
+             },
+             {
+              "text": "RSE Test System TS8996 (1) › 與既有知識的關係\n- 補強既有 [[R&S TS8996]]：先前頁面只來自 wireless regulatory test 簡報中的 solution mapping；本來源提供 TS8996 專屬簡報，增加基本架構、sensitivity、signal conditioning modules、ELEKTRA options、FR2 extension 與 up to 325 GHz 擴充資訊。\n- 補強既有 [[R&S ELEKTRA]]：先前只知道 ELEKTRA 與 TS8996 RSE & customization 同列；本來源提供 ELEKTRA UI、automation、EUT management、3D EIRP、OOB burst analysis、multi-band measurement 與 RSE option list。\n- 補強既有 [[FCC 無線設備法規測試]]：本來源提供 FCC / ANSI C63.26 對 5G FR2 RSE 頻率上限與 30 MHz lower start 的簡報說法，但與既有頁面中的 `9 kHz – 200 GHz` analyzer / regulatory range 口徑不同，需要並列保存。\n- 補強既有 [[CE RED 無線設備法規測試]]：本來源列出 ETSI 301 908-25 draft、ERC Recommendation 74-01 與 FR2 UE RSE TRP limits，並支援 5G FR2 RSE 概念頁。\n- 補強既有 [[R&S TS8980 Conformance Test Platform]]：本來源清楚區分 TS8980 3GPP validated tests 與 TS8996 ETSI / FCC RSE requirements，但未提供 TS8980 formal specifications 或 validation matrix。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/RSE Test System TS8996 (1).md"
+              },
+              "score": 0.654337
+             },
+             {
+              "text": "RSE Test System TS8996 (1) › 關鍵實體與概念\n- [[R&S TS8996]]：RSE test system，本來源補足 basic setup、frequency ranges、signal conditioning、FR2 extension、TS8980 differentiation 與 up to 325 GHz 的 system extension。\n- [[R&S ELEKTRA]]：EMC / RSE automation software，本來源列出 RSE features、UI / EUT management、3D EIRP、OOB burst analysis、signaling 與 options。\n- [[R&S TS8997]]：來源稱 TS8996 可與 regulatory tests（TS8997）combination；仍未提供 TS8997 full name 或規格。\n- [[R&S TS9982 EMS Test System]]：來源在 TS8980 / TS8996 differentiation 中列為 FR1 additional radiated EMC tests；另在 wireless EMS slides 中出現 EMS test system context。\n- [[R&S TS8980 Conformance Test Platform]]：來源將其與 TS8996 區分，FR2 3GPP validated CATR 測試屬 TS8980，ETSI / FCC broader RSE 屬 TS8996。\n- [[R&S CMX500]]：來源作為 signaling / trigger / 5G support 相關儀器，支援 CMW / CMX integrated support for 2G/3G/4G/5G/WLAN/BT。\n- [[Radiated Spurious Emissions]]：本來源核心測試項目。\n- [[5G FR2 RSE 測試]]：本來源最密集的技術 / 法規內容，涵蓋 3GPP、FCC、ETSI、EIRP、TRP、test distance、angular step、signal conditioning 與 ELEKTRA workflow。\n- [[EIRP]]、[[TRP]]、[[Substitution method]]、[[Virtual RMS detector]]、[[Anechoic chamber]]、[[SAC]]、[[FAR]]：來源中的 RSE 測試方法與場地語彙。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/RSE Test System TS8996 (1).md"
+              },
+              "score": 0.446438
+             },
+             {
+              "text": "RSE Test System TS8996 (1) › 原文未解的問題\n- 來源為 PowerPoint lossy derivative，圖片與表格可能因 OCR / conversion 造成拼字或欄位錯位；原始 pptx 才是 source of truth。\n- 來源未提供 TS8996 formal datasheet、order number、完整 BOM、可交付 option structure、系統 uncertainty budget 或 calibration interval。\n- 來源未列 [[R&S ELEKTRA]] software version、正式 option order number、license dependencies 或 release note。\n- `ETSI 301 908-25 (draft)` 未標示 draft version、發布日期或後續是否已 harmonized。\n- FCC Part 30、KDB 842590、ANSI C63.26 與 47 CFR §2.1057 / Part 30 的正式版本未標示。\n- `TS8996 up to 220 GHz / 325 GHz` 來源是簡報說法；需正式 system documentation 確認可交付 configuration、frequency bands、uncertainty 與 calibration method。\n- TC-RSE / TC-MX modules、TS-PRE1850、TS-PRE-B1、OSP-B155G、TS-PRE2、TS-LNA1840、OSP220、OSP-B153B 的正式料號、datasheet 與相容性未標示。\n- Slide 29 的 `Test distance ≥ 2D2/` 顯然缺少公式分母或上標，需回查原投影片或 FCC rule。\n- Slide 30 / 31 的 ETSI 301 908-25 draft limits 與 grid points 需要以正式標準確認。\n- Slide 36 出現兩列 n261，其中第二列 47.2–48.2 GHz 可能應為其他 band；不可未查證即修正。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/RSE Test System TS8996 (1).md"
+              },
+              "score": 0.404777
+             },
+             {
+              "text": "EIRP › 使用限制\n- 本頁只保存 GFM324 對 EIRP 的測試語境定義，不是天線理論或法規標準全文。\n- 不可由本頁推論任一產品、基地台或天線的 EIRP 規格。\n- EIRP limits、measurement uncertainty、antenna gain table 與 calibration method 需回查對應 3GPP / R&S 文件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EIRP.md"
+              },
+              "score": 2.052931
+             },
+             {
+              "text": "EIRP › 在 GFM324 測試中的用途\n來源明示使用 EIRP measurement 的 test cases：\n\n- [[3GPP TS 38.141-2]] 6.2 Radiated transmit power。\n- [[3GPP TS 38.141-2]] 6.5.1 OTA transmitter OFF power（EIRP in beam peak）。\n- [[3GPP TS 38.141-2]] 6.5.2 OTA transmitter transient period。\n\n在 6.2 Radiated transmit power 測試中，來源說 radiated transmit power 定義為 declared beam 在特定 beam peak direction 的 EIRP level，且每個 declared conformance beam direction pair 的 EIRP measurement 必須相對於 manufacturer declared rated beam EIRP value 維持在規定範圍內。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/EIRP.md"
+              },
+              "score": 1.076358
+             },
+             {
+              "text": "Reverberation chamber OTA testing › 使用限制\n- 本頁只記錄來源對 reverberation chamber OTA testing 的描述，不補推完整 OTA test standard、calibration method 或 measurement uncertainty。\n- 來源未標示 [[Bluetest RTS65]] 規格；不可從本頁推論 chamber frequency range、load condition 或可測 DUT 尺寸。\n- 來源未說明 reverberation chamber 測試是否可替代 conformance test、certification test 或 anechoic chamber 測試。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Reverberation chamber OTA testing.md"
+              },
+              "score": 2.609341
+             },
+             {
+              "text": "5G NR Base Station Conformance Testing › Measurement uncertainty 與 calibration\n依 [[5G NR Base station conformance testing - EN - UR_Public]]（2023-06）：\n\n- Conducted measurement uncertainties and test requirements 引用 [[3GPP TS 38.141-1]] section 4.1.2。\n- Transmitter tests 範例：6.2 Base Station output power、6.5.2 EVM、6.5.3 Time alignment error。\n- Receiver tests 範例：7.2 Reference sensitivity level。\n- Performance requirements 範例：PUSCH、PUCCH、PRACH with fading channel。\n- OTA test system acceptable uncertainty 在 [[3GPP TS 38.141-2]] chapter 4.1.2 指定；test requirement combines MU and minimum requirement。\n- OTA uncertainty contributors 摘錄自 [[3GPP TR 37.843]]，包含 probe position、probe pattern knowledge、measurement distance、multiple reflections、mismatch of receiver chain、absolute gain of probe antenna、measurement repeatability / positioning repeatability。\n- OTA measurement chamber specific calibration procedures captured in [[3GPP TR 37.843]]。\n- FR2 OTA test requirements specific and chamber specific calibration procedures are for further study（FFS），potential reuse of FR1 calibration procedures for FR2 is FFS。\n- Calibration measurements with SMW / FSW 可使用 reference antenna gain comparison 或 gain transfer method；SMW 與 FSW 可用 K544 user defined frequency correction / User-Corr.。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 17,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR Base Station Conformance Testing.md"
+              },
+              "score": 4.703846
+             },
+             {
+              "text": "5G NR Base Station Conformance Testing › Conducted conformance testing\n依 [[5G NR Base station conformance testing - EN - UR_Public]]（2023-06），[[3GPP TS 38.141-1]] 的 conducted conformance testing content abstract 包含：\n\n- Chapter 4.1：measurement uncertainties and test requirements。\n- Chapter 4.9.2：test models。\n- Chapter 6：conducted transmitter characteristics。\n- Chapter 7：conducted receiver characteristics。\n- Chapter 8：conducted performance characteristics。\n- Annex A：reference measurement channels。\n- Annex D：measurement system set-ups。\n- Annex G：propagation conditions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR Base Station Conformance Testing.md"
+              },
+              "score": 2.616772
+             },
+             {
+              "text": "5G NR Base Station Conformance Testing › Radiated / OTA conformance testing\n依 [[5G NR Base station conformance testing - EN - UR_Public]]（2023-06），[[3GPP TS 38.141-2]] 的 radiated conformance testing content abstract 包含：\n\n- Chapter 4.1.2：acceptable uncertainty of OTA Test System。\n- Chapter 4.9.2：test models。\n- Chapter 6：radiated transmitter characteristics。\n- Chapter 7：radiated receiver characteristics。\n- Chapter 8：radiated performance characteristics。\n- Annex A：reference measurement channels。\n- Annex E：OTA measurement system set-ups。\n- Annex J：propagation conditions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR Base Station Conformance Testing.md"
+              },
+              "score": 2.307432
+             },
+             {
+              "text": "5G NR Base Station Conformance Testing › unresolved\n- 原始 PPTX 未在本次輸入中提供圖片原檔；markdown 轉檔是 lossy derivative，圖中符號、checkbox、儀器連線與部分文字可能遺失。\n- 來源未標示正式 document number、revision、classification policy 或完整 publication status；檔名含 `UR_Public`，但不可自行推論授權範圍。\n- 來源日期為 2023-06；與 2026 年後 3GPP / R&S product support 狀態可能不同，需回查最新 3GPP specs 與 R&S release notes。\n- Application notes GFM313 / GFM314 / GFM315 / GFM324 / GFM325 尚未 ingest。\n- [[3GPP TS 38.141-1]]、[[3GPP TS 38.141-2]]、[[3GPP TS 38.104]] 與 [[3GPP TR 37.843]] 的正式版本全文尚未 ingest。\n- [[RIB]]、[[TAB connector]]、[[RoAoA]]、[[OSDD]]、[[EIS]]、[[TRP]]、[[CATR]]、[[QDART]] 仍需要正式定義來源。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 21,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR Base Station Conformance Testing.md"
+              },
+              "score": 1.974689
+             },
+             {
+              "text": "5G NR Base Station Conformance Testing › NR test models 與 FRC\n依 [[5G NR Base station conformance testing - EN - UR_Public]]（2023-06）：\n\n- NR test models 標示為 `V17.5.0`。\n- FR1 test model bandwidth 包含 5、10、15、20、25、30、40、50、60、70、80、90、100 MHz。\n- FR2 test model bandwidth 包含 100、200、400 MHz。\n- FR1 duplexing 支援 TDD and FDD；FR2 duplexing 為 TDD。\n- PDSCH Data Source 為 PN23，starting seed 為 all ones。\n- FR1 / FR2 reference measurement channels（FRC）標示為 `V17.5.0`，用於 receiver characterization and performance measurements。\n- FRC duration 為 1 slot，repetition depends on UL/DL allocation。\n- FRC define parameters like modulation or code rate。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR Base Station Conformance Testing.md"
+              },
+              "score": 1.461005
+             },
+             {
+              "text": "5G NR Base Station Conformance Testing › 來源演進\n依 [[Small Cell BTS]]（來源正式日期未標示；raw converted 2026-09-17）：\n\n- OneNote link hub 的 Conformance test 區段列出 `5G NR Base station conformance testing`。\n- 連結指向本機檔案，檔名含 `5G NR Base station conformance testing - EN - UR_Public.pptx`。\n- 當時尚未擷取該簡報正文，只能確認題名 / 檔名存在。\n\n依 [[5G NR Base station conformance testing - EN - UR_Public]]（2023-06）：\n\n- 來源標題為 `5G NR base station conformance testing`。\n- 作者 / 講者列為 Matthias Weilhammer（1GP1）。\n- 簡報日期為 2023-06。\n- 簡報內容涵蓋 conducted conformance testing、radiated conformance testing、measurement uncertainties、OTA background、calibration、OTA chambers and accessories 與 application notes。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G NR Base Station Conformance Testing.md"
+              },
+              "score": 1.140237
+             },
+             {
+              "text": "R&S ATS1800C › Quiet zone 說明\n依 [[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]] Slide 13–14：\n\n- Quiet zone 是 chamber 中 DUT 被近似 uniform amplitude and phase 照射的 volume。\n- 典型 quiet zone specifications：phase variation 10 degrees、amplitude ripple ±0.5 dB、amplitude taper 1 dB。\n- Quiet zone quality 取決於 chamber quality、measurement antenna、reflector precision / surface roughness 與 size limitation。\n- Quiet zone evaluation 使用 complex quiet zone measurement procedure based on TRP and EIRP for 7 points with standard gain horn antenna。\n- Slide 14 example measurement：taper less than 0.7 dB、ripple ±0.35 dB。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ATS1800C.md"
+              },
+              "score": 2.074488
+             },
+             {
+              "text": "R&S ATS1800C › GFM324 / GFM325 補充規格與限制\n依 [[GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests]]（06.2020）與 [[GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests]]（06.2020）：\n\n- In-band frequency range：23.5 GHz 至 44 GHz。\n- Out-of-band frequency range：6 GHz 至 110 GHz。\n- Quiet zone：約 30 cm × 30 cm。\n- Positioner DUT load capacity：8 kg。\n- Feedthroughs：\n  - CATR-CSRF1：1.85 mm female。\n  - CATR-FEED2：2 × 2.4 mm。\n- Measurement devices 位於 chamber rear side。\n- 為降低 path loss，來源建議 measurement devices 靠近 feedthroughs，並使用短 cable。\n- 若 base station modules 超過 quiet zone 或 load capacity 限制，需聯絡 Rohde & Schwarz 取得 customized solution。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ATS1800C.md"
+              },
+              "score": 1.731536
+             },
+             {
+              "text": "R&S ATS1800C › 使用限制\n- 本頁來源為 2020 customer presentation、2020 application notes、2023 簡報與 2025 MWC solution deck，不是 [[R&S ATS1800C]] 正式 datasheet。\n- [[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]] 是 lossy derivative；Slide 21 的 chamber specification 18–90 GHz 與 reflector frequency range 6..90 GHz 需回查原始 PPTX 或正式 datasheet 釐清。\n- `3GPP compliant and CTIA approved` 與 `Validated in QDART` 是 2023-06 簡報說法；正式認證範圍、版本、日期、test plan 與 certificate 未提供。\n- 2023-06 來源列 in-band 23.5 GHz–44.3 GHz、OOB 12 GHz to 90 GHz and beyond；2020 GFM324 / GFM325 列 in-band 23.5 GHz 至 44 GHz、OOB 6 GHz 至 110 GHz；2020 customer presentation 列 chamber frequency 18–90 GHz。這些可能是不同文件口徑或表述精度差異，尚不裁決為規格取代。\n- `Extendable for OOB from (6) 12GHz to 90GHz and beyond` 的括號 `(6)` 可能是圖中文字或轉檔殘留，需回看原始 PPTX / datasheet。\n- [[GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests]] 的 applicability table 對 7.6 與 7.7 標示 TBC；不可推論 ATS1800C 已支援所有 OTA receiver tests。\n- [[MWC2025---WIC-INFRA]] 的 `FR2 compact test system with high-quality quiet zone` 是簡報層級說法，仍需正式資料確認 supported frequency bands、quiet zone uniformity、positioner accuracy 與 accessories。\n- 不可由本頁推論完整 chamber geometry、quiet zone uniformity、positioner accuracy、path loss、calibration method、supported bands 或 accessory list。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 12,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ATS1800C.md"
+              },
+              "score": 1.374416
+             },
+             {
+              "text": "R&S ATS1800C › CATR 結構\n依 [[GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests]]（06.2020）與 [[GFM325_0e_5G_NR_BaseStation_OTA_RX_Tests]]（06.2020）：\n\n- CATR 結構位於 fully shielded chamber 內。\n- 主要元件包含 feed antenna、bidirectional parabolic reflector、3D positioner。\n- CATR reflector 具有極高精度的 surface roughness，用於降低 reflection 引入的 errors。\n- CATR reflector 可在很寬的 frequency range 內提供 accurate measurement results。\n- 圖示元件包含 feed antenna at focus of reflector、blocker、parabolic reflector with blended rolled edges、reflected plane wave、quiet zone for DUT。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ATS1800C.md"
+              },
+              "score": 1.260194
+             },
+             {
+              "text": "R&S ATS1800C › 來源中的定位\n依 [[TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02]]（2020-11-02）：\n\n- Slide 16 的 OTA testing portfolio 將 [[R&S ATS1800C]] 標示為 `FR2 UE conformance & CTIA`、`30 cm QZ`、`RF, RRM, PCT`。\n- Slide 19 標題為 `CATR with ATS1800C`。\n- Slide 20 標題為 `ATS1800C – compact 5G NR mmWave test chamber`。\n- Slide 20 描述其為 very compact and mobile far-field over-the-air test system，based on compact antenna test range technology。\n- Slide 20 說明其具備 state-of-the-art CATR reflector、optimized edges、high-precision surface finishing、high shielding effectiveness >90 dB、large 30 cm and 3GPP compliant quiet zone、spherical 3D positioner 與 built-in hardware triggering functionality。\n- Slide 20 稱其 suitable for conformance testing as specified by 3GPP, CTIA antenna performance testing and device beam characterization。\n- Slide 22 的 FR2 system configuration elements 將 [[R&S ATS1800C]] 與 [[R&S CMW500]] + [[R&S CMX500]]、IF boards & RRHs、RF connection box、[[R&S CMX-RF42]] 同列。\n\n依 [[5G NR Base station conformance testing - EN - UR_Public]]（2023-06）：\n\n- Slide 標題為 `ATS1800C conformance grade catr chamber`。\n- 來源位於 [[5G NR Base Station Conformance Testing]] 的 OTA measurement system set-ups / chamber section。\n- 來源語境連到 [[3GPP TS 38.141-2]] radiated conformance testing、[[CATR]]、OTA chamber types 與 FR2 OTA 測試。\n\n依 [[GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests]]（06.2020）：\n\n- [[R&S ATS1800C]] 是 compact antenna test range（CATR）test system。\n- 設計用於 5G NR antennas、modules、devices（user equipment, UE）的 characterization，涵蓋 R&D 到 conformance tests。\n- 支援 active 與 passive measurements，包括 3D antenna gain patterns、ACLR、EVM、EiRP、TRP、EiS。\n- 適合 FR2 base station conformance transmitter tests。\n- Ordering information：Compact antenna test range OTA test system，Order No. `1534.1800K02`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ATS1800C.md"
+              },
+              "score": 0.774587
+             },
+             {
+              "text": "Index — VNA 網路分析儀 / Vector network analyzers › VNA 網路分析儀 / Vector network analyzers\n- [[Delta-L]] — Delta-L 是 AI Server PCB test 圖中用於高頻高速 PCB 測試流程的損耗量測術語，與 ENA/PNA、TDR、Dk/Df 擷取、測量軟體與探頭一起列出。 / Delta-L is a loss-measurement term in AI Server PCB test diagrams for high-frequency high-speed PCB testing, listed with ENA/PNA, TDR, Dk/Df extraction, measure (aliases: Delta-L, Delta-L 損耗, Delta-L 损耗, Delta-L 測量軟體, Delta-L 测量软件, Delta-L 探頭, Delta-L 探头)\n- [[Digital design test success stories]] — Digital design test success stories 是 2026.7 digital design test 應用案例的簡報層級 mapping，將部分測試應用對應到 R&S FSWP、R&S SMA100B 與 R&S ZNA67。 / Digital design test success stories is a July 2026 slide-level mapping of digital design test applications to instruments including R&S FSWP, R&S SMA100B, and R (aliases: Digital design test success stories, DDT SuccessStories_202607, R&S FSWP, R&S SMA100B, R&S ZNA67)\n- [[Keysight ENA]] — Keysight ENA 是高頻高速 PCB 測試流程圖中列為 ENA／PNA 量測平台之一的 Keysight 產品系列，用於材料量測、Delta-L、TDR 阻抗與 Dk/Df 提取語境。 / Keysight ENA is a Keysight product series listed as one of the ENA/PNA measurement platforms in a high-speed PCB test flow for materials measurement, Delta-L, T (aliases: Keysight ENA, ENA, ENA/PNA)\n- [[Keysight PNA]] — Keysight PNA 是 AI Server PCB 測試圖中列為 ENA/PNA 量測平台之一的 Keysight 產品系列，用於材料量測、Delta-L、TDR 阻抗與 Dk/Df 提取語境。 / Keysight PNA is listed as one of the ENA/PNA measurement platforms in the AI Server PCB test diagram for materials measurement, Delta-L loss, TDR impedance meas (aliases: Keysight PNA, PNA, ENA/PNA)",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/index/product-vna.md"
+              },
+              "score": 4.356363
+             },
+             {
+              "text": "Index — VNA 網路分析儀 / Vector network analyzers › VNA 網路分析儀 / Vector network analyzers\n- [[TDR 阻抗測量]] — TDR 阻抗測量是 AI Server PCB test image 24 中列為高頻高速 PCB 測試方案的一項阻抗量測方法／功能，並與 ENA/PNA、TDR 選項、校準件與 TDR 探頭連結。 / TDR impedance measurement is an impedance-measurement method/function listed in AI Server PCB test image 24 for high-frequency/high-speed PCB testing, linked wi (aliases: TDR 阻抗測量, TDR, Time Domain Reflectometry, 阻抗測量, Keysight ENA, Keysight PNA, ENA, PNA)\n- [[TRI_AMD_RSKR Sharing1]] — Company confidential case sharing 簡報來源，整理 TRI、AMD、LSmtron、Advantest、Meritech 與 Samsung Electronics 相關 high-speed interconnect、PCB、VCO 測試案例。 / A company-confidential case-sharing presentation source covering TRI, AMD, LSmtron, Advantest, Meritech and Samsung Electronics high-speed interconnect, PCB and (aliases: TRI_AMD_RSKR Sharing1, TRI, AMD, LSmtron, Advantest, Meritech, Samsung Electronics, high-speed interconnect)\n- [[TVAC 衛星酬載測試]] — TVAC 衛星酬載測試是在 thermal vacuum chamber 中對 satellite payload 或 components 進行 performance testing，並需處理長線纜、溫漂與 chamber 內校準困難。 / TVAC satellite payload testing performs performance tests on satellite payloads or components in a thermal vacuum chamber, with challenges from long cables, tem (aliases: TVAC 衛星酬載測試, TVAC satellite payload testing, thermal vacuum chamber testing, TVAC)\n- [[UAVEcoChain]] — 由 UAVEcoChain.xlsx 轉出的 lossy markdown，整理台灣 UAV eco-chain 分類、公司角色與部分 R&S solution mapping 線索，另含待分類 IC 公司清單。 / A lossy markdown derivative of UAVEcoChain.xlsx organizing Taiwan UAV eco-chain categories, company-role notes and some R&S solution-mapping leads, plus a separ (aliases: UAVEcoChain, UAVEcoChain.xlsx, UAV eco-chain, 台灣 UAV eco-chain, 台灣無人機供應鏈, R&S solution mapping, R&S SMBV100B, R&S ZNB3000)",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/index/product-vna.md"
+              },
+              "score": 4.126663
+             },
+             {
+              "text": "Index — VNA 網路分析儀 / Vector network analyzers › VNA 網路分析儀 / Vector network analyzers\n- [[Option 表資料品質審查]] — 整理 Rohde & Schwarz 產品 option 抽取表的人工資料品質審查議題，包括 placeholder code、requires/excludes 限制、缺描述 code 與 OCR / 表格錯位。 / Summarizes manual data-quality review issues in extracted Rohde & Schwarz product option tables, including placeholder codes, requires/excludes logic, missing d (aliases: Option table data quality review, review-options, R&S option review, R&S®SMW-B10xx, R&S®ZNAXx-B161, R&S®SMAB-B1xx, R&S®ZNAxx-B41, R&S®FSV3-B1000)\n- [[R&S ZN-Z33]] — R&S ZN-Z33 是 TVAC-compatible automatic calibration unit，可放在 thermal vacuum chamber 內，為 satellite payload test setup 進行最高 40 GHz 的 inline recalibration。 / The R&S ZN-Z33 is a TVAC-compatible automatic calibration unit for inline recalibration inside a thermal vacuum chamber in satellite payload test setups, operat (aliases: R&S ZN-Z33, R&S®ZN-Z33, ZN-Z33, R&S ZN-Z33 automatic calibration unit, model .03)\n- [[R&S ZNA]] — R&S ZNA 是 Rohde & Schwarz 的 Vector Network Analyzer 系列，Version 24.00 規格涵蓋 ZNA26、ZNA43、ZNA50、ZNA67，頻率範圍 10 MHz 至最高 67 GHz。 / The R&S ZNA is a Rohde & Schwarz vector network analyzer series whose Version 24.00 specifications cover the ZNA26, ZNA43, ZNA50 and ZNA67 from 10 MHz up to 67  (aliases: R&S ZNA, R&S®ZNA, ZNA, R&S®ZNA Vector Network Analyzer, R&S ZNA26, R&S ZNA43, R&S ZNA50, R&S ZNA67)\n- [[R&S ZNA26]] — R&S ZNA26 是 R&S ZNA 系列 26.5 GHz Vector Network Analyzer，Version 24.00 規格書列出 2-port 與 4-port base unit、10 MHz to 26.5 GHz 頻率範圍與 3.5 mm test port connector。 / R&S ZNA26 is a 26.5 GHz R&S ZNA series Vector Network Analyzer with 2-port and 4-port base units, 10 MHz to 26.5 GHz frequency range, and 3.5 mm test port conne (aliases: R&S ZNA26, R&S®ZNA26, R&S®ZNA26 2 ports, R&S®ZNA26 4 ports, 1332.4500.22, 1332.4500.24)",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/index/product-vna.md"
+              },
+              "score": 1.723376
+             },
+             {
+              "text": "Index — VNA 網路分析儀 / Vector network analyzers › VNA 網路分析儀 / Vector network analyzers\n- [[高速互連 probing 與 de-embedding 測試案例]] — 此頁從 TRI_AMD_RSKR Sharing1 抽出以 VNA、probe、mount-kit、de-embedding tool 與 local partner 解決高速互連量測問題的案例。 / This page extracts cases from TRI_AMD_RSKR Sharing1 where VNA, probes, mount kits, de-embedding tools, and local partners address high-speed interconnect measur (aliases: 高速互連 probing 與 de-embedding 測試案例, TRI_AMD_RSKR Sharing1, VNA, probe, mount-kit, de-embedding tool, R&S ZNB3044, R&S OSP320)\n- [[高頻高速 PCB 測試解決方案]] — 此頁整理 Keysight 高頻高速 PCB 測試解決方案，涵蓋原材料表徵、材料選擇、電路板抽樣測試與大批量監控。 / This page summarizes Keysight’s high-frequency/high-speed PCB test solution across raw-material characterization, material selection, board sampling tests, and  (aliases: 高頻高速 PCB 測試解決方案, Keysight高频高速PCB测试解决方案, Keysight N1500A, Keysight ENA, Keysight PNA, Keysight PathWave ADS, Materials Measurement Suite, Delta-L 測量軟體)",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/index/product-vna.md"
+              },
+              "score": 1.608203
+             },
+             {
+              "text": "Dk-Df › 可追溯限制\n- [[AI Server PCB test image 24]] 未定義 Dk 與 Df 的完整名稱、測試頻率、測試方法、量測標準或條件。\n- [[AI Server PCB test image 24]] 未提供任何 Dk 或 Df 數值。\n- [[AI Server PCB test image 24]] 未標示材料樣本、基材牌號、層壓板型號或供應商。\n- [[HSD PCB image 15]] 未提供 [[DK]] 或 [[Low DK]] 的數值門檻、測試頻率、測試方法、厚度範圍或標準版本。\n- [[HSD PCB image 15]] 未說明 [[Low DK 玻纖布]] 的主要台廠註記是否等同供應商、主要市場參與者、概念股或其他口徑。\n- [[HSD PCB image 18]] 未提供 [[Low Dk]] / [[Low Df]] 的數值門檻、測試頻率、測試方法、厚度範圍、產品型號、標準版本或價格。\n- [[HSD PCB image 18]] 的「AI/5G 標配」是未標示日期圖卡的說法；不得推論 [[富喬]] 或 [[台玻]] 已量產、出貨或取得特定 AI / 5G 客戶認證。\n- [[snla426]] 的 Df / εr / SDD21 表格是 TI application note 中的 high-speed PCB design reference；來源摘要未提供測試結構、trace geometry、stack-up、銅粗糙度、溫度、濕度或 measurement / simulation 條件。\n- [[snla426]] 中 `Roger` 材料名稱需回查原文確認是否為 Rogers 或特定 laminate product family；本頁照來源摘要保存。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Dk-Df.md"
+              },
+              "score": 2.537063
+             },
+             {
+              "text": "Dk-Df › 未決事項\n- [[AI Server PCB test image 24]] 未標示 Dk/Df 的測試標準、頻率、溫度、材料樣本或校準方法。\n- [[AI Server PCB test image 24]] 未標示 Dk/Df 提取使用的 ENA / PNA 型號與 option code。\n- 既有 [[CCL 產品規格分級]] 來源與 [[AI Server PCB test image 24]] 未提供共同測試條件，因此不同來源中的 Df 不能直接比較。\n- [[HSD PCB image 15]] 未定義 DK 的完整測試條件或數值門檻。\n- [[HSD PCB image 15]] 未說明 Low DK 的「低延遲」是定性描述、材料分類、產品等級或市場用語。\n- [[HSD PCB image 18]] 未標示日期、發布者、報告名稱或資料期間。\n- [[HSD PCB image 18]] 未定義 [[Low Dk]] / [[Low Df]] 的量化門檻、測試條件或產品範圍。\n- [[HSD PCB image 18]] 未說明「AI/5G 標配」的樣本、材料範圍、採用率或期間。\n- [[snla426]] 未提供 Df / SDD21 表格的完整測試條件與 measurement / simulation 方法。\n- [[snla426]] 未提供 Megtron 6、Roger、GETEK、Nelco 4000-6、FR4、Tetra Functional FR4 的正式 material datasheet reference。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Dk-Df.md"
+              },
+              "score": 1.154211
+             },
+             {
+              "text": "LTM cell switch command MAC CE › TA value 與 RACH decision\n依來源：\n\n- 若 command 提供 valid [[Timing Advance]] value，UE 依 network 指示套用該 TA value。\n- 若配置了 [[UE-based TA measurement]] 但 command 未提供 valid TA value，UE 會在可用時套用自己取得的 valid TA value。\n- 只要 valid TA value 可用，UE 收到 command 後執行 [[RACH-less LTM]]。\n- 若沒有 valid TA value，UE 執行 [[RACH-based LTM]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/LTM cell switch command MAC CE.md"
+              },
+              "score": 12.440753
+             },
+             {
+              "text": "5G FWA CPE deployment and testing requirements › Indoor CPE 與 Outdoor CPE tradeoff\n來源指出：\n\n- [[Outdoor CPE]] improves spectrum efficiency，與 [[Indoor CPE]] 相比可服務 2–3 倍更多 households。\n- [[Indoor CPE]] 可能需要 2–3 倍更多 spectrum。\n- mmW extended range could serve customers in range of several kilometers。\n- [[Multi-user MIMO]] allows multiple users to be served at the same time。\n- [[1024QAM]] could increase capacity，especially in stable environments。\n- CPE placement 是 operator overall FWA strategy 的重要面向。\n- Indoor vs Outdoor CPE 會影響 product adoption 與 operator economics。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FWA CPE deployment and testing requirements.md"
+              },
+              "score": 12.629915
+             },
+             {
+              "text": "R&S CMX-KA09x › 使用限制\n- 本頁只記錄新聞稿中的 CMX-KA09x 泛稱；來源未提供正式 product page、order number、license family structure 或 version table。\n- 不可由 CMX-KA09x 推論所有 CMX-KA09* options 的清單或功能範圍。\n- 對 [[R&S CMX-KA098]] 與 [[R&S CMX-KA099]] 的正式 material number、dependencies 與 configuration context，仍應分別引用 [[R&S CMX-KA098]]、[[R&S CMX-KA099]]、[[CMX_Configuration_Guide]]、[[CMX500_Software_Maintenance_PU-Option_Mapping]] 與 capability list。\n- 新聞稿只說 completed PSAP test scenarios；它不是完整 conformance statement、test report 或 technical specifications。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA09x.md"
+              },
+              "score": 1.210961
+             },
+             {
+              "text": "Index — 無線通訊綜合測試儀（signaling / non-signaling） / Wireless communication testers (signaling / non-signaling) › 無線通訊綜合測試儀（signaling / non-signaling） / Wireless communication testers (signaling / non-signaling)\n- [[Index — 無線通訊綜合測試儀（signaling / non-signaling） / Wireless communication testers (signaling / non-signaling) — 概念 / Concepts]] — 89 pages\n- [[Index — 無線通訊綜合測試儀（signaling / non-signaling） / Wireless communication testers (signaling / non-signaling) — 實體 / Entities]] — 85 pages\n- [[Index — 無線通訊綜合測試儀（signaling / non-signaling） / Wireless communication testers (signaling / non-signaling) — 來源 / Sources]] — 74 pages\n- [[Index — 無線通訊綜合測試儀（signaling / non-signaling） / Wireless communication testers (signaling / non-signaling) — 綜合 / Syntheses]] — 3 pages",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/index/product-wireless-tester.md"
+              },
+              "score": 0.575364
+             },
+             {
+              "text": "Index — 訊號產生器／訊號分析儀 / Signal generators / signal analyzers › 訊號產生器／訊號分析儀 / Signal generators / signal analyzers\n- [[Kuiper UT 測試流程]] — Kuiper UT測試流程整理Project Kuiper用戶終端的製造測試、OTA暗室、RF驗證、波束追蹤、環境可靠性、系統整合與現場試驗。 / Kuiper UT test flow summarizes manufacturing tests, OTA chamber tests, RF validation, beam tracking, environmental reliability, system integration, and field tr (aliases: Kuiper UT 測試流程, Kuiper UT Test & Supply Chain, Project Kuiper 用戶終端, FAT, OTA, RF, VNA, EVM)\n- [[MWC2025---WIC-INFRA]] — MWC 2025 mobile network infrastructure 簡報把 MIMO、Beamforming、OTA、頻譜、節能、私網、Open RAN 等趨勢對應到 R&S 測試量測產品組合。 / MWC 2025 mobile network infrastructure presentation maps trends such as MIMO, beamforming, OTA, spectrum, energy saving, private networks, and Open RAN to the R (aliases: MWC2025---WIC-INFRA, Mobile Network Infrastructure, Mobile World Congress 2025 Barcelona, MWC 2025, Rohde & Schwarz, R&S, R&S SMW200A, R&S SGT100A)\n- [[NR-NTN LBS testing]] — Q2 2026 LBS product highlight，涵蓋 TS8991 OTA 5G NR GNSS FR1、第三方 OTA 整合、GNSS record/replay 與 NR-NTN LBS E911 outlook。 / A Q2 2026 LBS product highlight covering TS8991 OTA 5G NR GNSS FR1, third-party OTA integration, GNSS record/replay, and an NR-NTN LBS E911 outlook. (aliases: NR-NTN LBS testing, NR NTN LBS testing, Location Based Services testing, LBS testing, OTA 5G NR GNSS FR1, R&S TS8991, R&S CONTEST, R&S SMBV100B)\n- [[NTN signal generator solutions]] — 整理 3GPP NTN 測試中 R&S SMW200A、R&S FSW 與 software options 用於 component、SAN 與 end-to-end system testing 的 solution-level 框架。 / Organizes the 3GPP NTN solution framework using R&S SMW200A, R&S FSW, and software options for component, SAN, and end-to-end system testing. (aliases: 3GPP NTN Signal Generator Solutions Overview-EN-UR, R&S SMW200A, SMW200A, R&S FSW, FSW, R&S SMW-K555, SMW-K555, K171)",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/index/product-signal-generator-analyzer.md"
+              },
+              "score": 11.002363
+             },
+             {
+              "text": "R&S FSWP › unresolved\n- 來源未列出價格。\n- Options、firmware、supported sensors 與 external mixers 數量多，報價前需回查 [[FSWP_specs_en_3683-7719-22_v0901]] 與 configure 工具確認 requires/excludes、export license 與 retrofittable 狀態。\n- Supported power sensors 中多個項目標示產品已停產，但原文未指明後繼型號。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSWP.md"
+              },
+              "score": 11.165917
+             },
+             {
+              "text": "Keysight\n[[Keysight]]（圖中亦寫作 [[是德科技]]）是在既有 PCB 測試圖像來源中被列為高頻高速 [[PCB]] 測試解決方案相關公司的測試量測廠商名稱；在 [[2026_02_CMX500_Keysight_Sales_Battle_Card]] 中，Keysight 也被描述為大型美國 test & measurement vendor 與 [[R&S CMX500]] 的 wireless device testing 競品供應商。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Keysight.md"
+              },
+              "score": 10.055718
+             },
+             {
+              "text": "NTN propagation emulation and fading › 使用限制\n- 來源是 PR，不是 channel model specification、measurement application note 或 formal datasheet。\n- 來源未提供 propagation emulation 與 fading 的正式模型名稱、3GPP clause、parameter range、implementation architecture、supported bands、supported orbit profiles 或 calibration method。\n- 來源宣稱 only available NTN test solution，但未提供競品清單、比較日期或 benchmark 方法。\n- 不可由本來源推論 [[R&S CMX500]] 的正式 fading option、channel emulator 規格、measurement uncertainty 或 conformance coverage。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN propagation emulation and fading.md"
+              },
+              "score": 18.787245
+             },
+             {
+              "text": "R&S CMX500 › Fading / test scenario / application options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. |\n|---|---|---|\n| R&S CMX-KE500 | LTE fading according to 3GPP TS 36.101 | 1222.6674.xx |\n| R&S CMX-KE501 | LTE fading profiles higher order MIMO | 1222.8131.xx |\n| R&S CMX-KE600 | NR fading according to 3GPP TS 38.101 | 1222.2985.xx |\n| R&S CMX-KE601 | NR fading profiles higher order MIMO | 1222.6980.xx |\n| R&S CMX-KE611 | NR NTN fading profiles according to 3GPP TS 38.101 | 1222.8148.xx |\n| R&S CMX-KE620 | User defined fading profiles for LTE, NR and NTN | 1222.9950.xx |\n| R&S CMX-KE621 | User defined UE antenna pattern import | 1222.9996.xx |\n| R&S CMX-KT600 | ASN.1 import for NR | 1222.8183.xx |\n| R&S CMX-KT620 | DL IQ recorder | 1222.9715.xx |\n| R&S CMX-KC550B | LTE 3GPP RF test scenarios | 1222.9067.xx |\n| R&S CMX-KC660B | NR NSA FR1 3GPP RF test scenarios | 1222.4507.xx |\n| R&S CMX-KC661B | NR SA FR1 3GPP RF test scenarios | 1222.4513.xx |\n| R&S CMX-KC665B | NR-NTN 3GPP RF test scenarios | 1222.8748.xx |\n| R&S CMX-KA100 | CMX application test, feature set 1 | 1222.1595.xx |\n| R&S CMX-KA110 | CMX application test, feature set 2 | 1222.4142.xx |\n| R&S CMX-KA150 | CMX IP traffic analysis | 1222.4159.xx |\n| R&S CMX-KA180 | CMX audio enabler | 1222.4165.xx |\n| R&S CMX-KA181 | CMX audio POLQA measurement | 1222.4936.xx |\n| R&S CMX-KA401 | CMX application test audio, feature set 2 | 1222.8125.xx |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 28,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 5.538529
+             },
+             {
+              "text": "Index — 無線通訊 / Wireless communication — 無線通訊綜合測試儀（signaling / non-signaling） / Wireless communication testers (signaling / non-signaling) (1/2) › 無線通訊 / Wireless communication — 無線通訊綜合測試儀（signaling / non-signaling） / Wireless communication testers (signaling / non-signaling) (1/2)\n- [[R&S CMX-KA180]] — R&S CMX-KA180 是 R&S CMX500 的 CMX Audio Enabler / Application Test FSET 2 voice/audio measurement enabler，任何 voice 或 audio measurement scope 都需要它。 / R&S CMX-KA180 is the R&S CMX500 CMX Audio Enabler / Application Test FSET 2 voice/audio measurement enabler required for any voice or audio measurement scope. (aliases: R&S CMX-KA180, CMX-KA180, CMX Audio Enabler, Application Test FSET 2, voice/audio measurement enabler, 1222.4165.02)\n- [[R&S CMX-KA181]] — R&S CMX-KA181 是 R&S CMX500 的 POLQA Audio Testing / IMS NG-eCall software option，用於 5G/NR IMS/VoNR 或 OTT 的 POLQA audio testing scope。 / R&S CMX-KA181 is an R&S CMX500 POLQA Audio Testing / IMS NG-eCall software option for POLQA audio testing on 5G/NR IMS/VoNR or via OTT. (aliases: R&S CMX-KA181, CMX-KA181, POLQA Audio Testing, IMS NG-eCall, CMX audio POLQA measurement)\n- [[R&S CMX-KA185]] — R&S CMX-KA185 是 User provided Codec voice/audio codec add-on，來源標示 product status 為 Under development。 / R&S CMX-KA185 is a user-provided codec voice/audio codec add-on with source product status marked Under development. (aliases: R&S CMX-KA185, CMX-KA185, User provided Codec, voice/audio codec add-on, Under development)\n- [[R&S CMX-KA401]] — R&S CMX-KA401 是 R&S CMX500 的 advanced audio measurement / generator and playback software option，用於 OTT voice quality、WAV injection、E2E audio delay 等 scope。 / R&S CMX-KA401 is an R&S CMX500 advanced audio measurement / generator and playback software option for scopes such as OTT voice quality, WAV injection and E2E a (aliases: R&S CMX-KA401, CMX-KA401, Advanced audio measurement, generator and playback, CMX Audio Test Test Feature Set 2, CMX application test audio, feature set 2, 1222.8125.xx)",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 34,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/index/market-wireless--product-wireless-tester-1.md"
+              },
+              "score": 18.811022
+             },
+             {
+              "text": "R&S CMX-KA180\n[[R&S CMX-KA180]] 是 [[R&S CMX500]] 的 CMX Audio Enabler / Application Test FSET 2 voice/audio measurement enabler；在 [[CMX_Configuration_Guide_Audio-Testing]] 中，任何 voice 或 audio measurement scope 都需要它。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX-KA180.md"
+              },
+              "score": 1.480354
+             },
+             {
+              "text": "PRS collision priority › Current understanding\n依 [[PRS (NR)]] 的 Current Understanding：\n\n- PRS is not allowed to overlap with SSB OFDM symbols。\n- PDCCH / PDSCH is not PRS aware, i.e. PDCCH / PDSCH rate-matching is not affected by PRS。\n- If PRS collides with PDCCH / PDSCH then PRS has higher priority and PDCCH / PDSCH will be punctured。\n- PDCCH / PDSCH transmission will probably be corrupted。\n- In general, PRS overlap with other signals / channels does not really make sense because collision with other RS or DMRS is very likely, unless spatial separation on different beams is wanted。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PRS collision priority.md"
+              },
+              "score": 13.230124
+             },
+             {
+              "text": "R&S VSE › unresolved\n- [[R&S VSE]] 正式 product page / specifications / release notes 尚未 ingest。\n- O-RAN PCAP Converter 的版本與下載來源未由本來源提供。\n- VSE 與 [[VIAVI O-RU Tester]] 的整合界面、file workflow 與 timing constraints 未完整描述。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S VSE.md"
+              },
+              "score": 1.660952
+             },
+             {
+              "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 10.970896
+             },
+             {
+              "text": "PDCCH OCNG › unresolved\n- 需要回查 [[3GPP TS 38.133]] 與 [[3GPP TS 38.211]]，確認 PDCCH OCNG / dummy PDCCH 是否有正式標準語彙或只是 implementation strategy。\n- 需要確認 `precoderGranularity=allContiguousRBs` 與 `sameAsRegBundle` 對 unused CCE DMRS presence 的正式條件。\n- 需要補充 PDSCH overlap / priority 與 rate matching 的正式來源。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/PDCCH OCNG.md"
+              },
+              "score": 9.312001
+             },
+             {
+              "text": "Clock, CDR, Jitter › 概念\n- [[SerDes Clock CDR Jitter 外部資料清單]] — 保存本 OneNote link hub 的待讀 URL 與使用限制。\n- [[SerDes]] — 來源路徑位於 `Serdes IC IP` 資料夾，且頁名 / URL keywords 與高速介面 clocking / jitter 議題相關；但正文未提供 SerDes 技術細節。\n- [[Clock]] — 來源標題中的詞；URL path 含 `reference-clock`。\n- [[Reference Clock]] — URL path 中的待讀關鍵字；來源未提供技術定義或規格。\n- [[CDR]] — 來源標題中的詞；來源未展開縮寫，也未提供 clock data recovery 架構或規格。\n- [[Jitter]] — 來源標題中的詞；來源未提供 jitter 類型、量測方法、單位或限值。\n- [[TDECQ]] — URL path 中的待讀關鍵字；來源未提供展開、標準、測試方法或數值。\n- [[312 MHz]] — URL path 中的待讀關鍵字；來源未說明它是 reference clock、測試條件、頻率點或其他含義。\n- [[1.6T]] — URL path 中的待讀關鍵字；來源未說明它是資料率、乙太網路世代、系統容量或其他口徑。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Clock, CDR, Jitter.md"
+              },
+              "score": 32.070716
+             },
+             {
+              "text": "Test method\nMeasurement",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-0a6d6df08c738f93",
+                "original_ref": "raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md",
+                "sha256": "0a6d6df08c738f93a1a77e4d5288f72d56b99f6bfc2e418ec9a4572cef95de68",
+                "raw_ref": "raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md",
+               "section": 292,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.416627
+             },
+             {
+              "text": "Test method\nMeasurement",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-84f0ccff28cb329b",
+                "original_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+                "sha256": "84f0ccff28cb329ba83809be58133fb1b917290733c05f3f34a8f44c32526203",
+                "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/CMW_dat-sw_en_5213-9211-22_v1700.md",
+               "section": 518,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.416627
+             },
+             {
+              "text": "RSE EIRP measurement including substitution\nReference method: Substitution\nHardware setup",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-9160602dc3f4e25c",
+                "original_ref": "raw/Market/OneNote/RSE Test System TS8996 (1).md",
+                "sha256": "9160602dc3f4e25c04440a547178fa1a81d94a052d80a003c281cc2c3ded7027",
+                "raw_ref": "raw/Market/OneNote/RSE Test System TS8996 (1).md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/RSE Test System TS8996 (1).md",
+               "section": 74,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 13.770621
+             },
+             {
+              "text": "Expected nominal power setting for\nfull dynamic range\nTest method\nMeasurement",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-0a6d6df08c738f93",
+                "original_ref": "raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md",
+                "sha256": "0a6d6df08c738f93a1a77e4d5288f72d56b99f6bfc2e418ec9a4572cef95de68",
+                "raw_ref": "raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/CMW100-K06_specs_en_5214-8348-22_v0500.md",
+               "section": 286,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 13.460682
+             }
+            ],
+            "text": "The passages do not define “measurement method” as a standalone term, but they use it as the named procedure or metric used to perform a test: for RSE, the reference method is substitution, where the DUT is replaced by a calibrated antenna with a signal generator, the generator level is tuned to the same receive value as the DUT, and EIRP is calculated by adding antenna gain and cable loss [13].\nFor 5G FR2 RSE, sources describe requirements in terms of the TRP method, with EIRP coarse-grid screening followed by TRP fine-grid or final TRP evaluation in some cases [12][25].\nTDR impedance measurement is also described as an impedance-measurement method/function for high-frequency/high-speed PCB testing [15].\n| Decision area | What the passages support |\n|---|---|\n| RSE / ELEKTRA feature and option selection | R&S ELEKTRA supports substitution method for RSE [13], 3D EIRP evaluation [7], ELEMI-OOB burst analysis for ETSI RSE final measurement [5], multi-band measurement [2], and 5G FR2 RSE support including 3D and TRP evaluation [3]. The listed RSE / wireless options include ELEMI-RSE, ELEMI-3D, ELEMI-5GFC, ELEMI-OOB, ELEMI-MBM, ELEMC-WRLS, ELEMC-CELS, ELEMC-5GS, and ELEMC-DRV [8]. |\n| Spectrum analyzer vs EMI receiver | RSE testing can use a spectrum analyzer or EMI receiver; RF analysis needs a spectrum analyzer, while EMC test standards need an EMI receiver [14]. |\n| Test system choice for FR2 RSE vs conformance | The sources distinguish TS8980 for FR2 3GPP validated tests with ATS1800C from TS8996 for ETSI / FCC additional RSE requirements [24]. |\n| Chamber / setup choice | RSE test sites can be FAR with azimuth and optional elevation scan, or SAC with height scan [14]. SAC precalibrated measurement needs correction because effective test distance depends on antenna height, and ELEKTRA can correct that variation automatically [4]. |\n| TRP procedure and grid choice | TRP procedure choice depends on available test setup, measurement equipment, and measurement time [9]. TRP grids include 2-cut, 3-cut, equal angle, equal area, and Fibonacci grids [10]. |\n| 5G FR2 workflow and detector settings | ELEKTRA 5G FR2 workflow includes overview measurement, data reduction, maximization, adjustment, and final measurement; it also supports virtual RMS detectors with 100 MHz and 200 MHz bandwidth [3]. |\n| PCB impedance-measurement product choices | TDR impedance measurement is linked with ENA/PNA platforms, TDR options, calibration kits, and TDR probes in high-frequency/high-speed PCB testing [16]. |",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "R&S ELEKTRA › Multi-band measurement\n依來源：\n\n- ELEKTRA Multi Band Measurement 可 speed up overview measurement by running up to **4 antennas / receivers** in parallel。\n- 可 simultaneously measure up to **4 frequency subranges**。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+             },
+             "score": 0.906018
+            },
+            {
+             "text": "R&S ELEKTRA › 5G FR2 test procedure support\n依 [[RSE Test System TS8996 (1)]]：\n\n- ELEKTRA is next generation EMC test SW。\n- For 5G support of RSE measurement procedures with extension for 5G FR2。\n- 支援 3D and TRP evaluation。\n- 支援 5G signaling with [[R&S CMX500]]。\n- Mixers and calibration procedure also supported by EMC32。\n- EMI test sequence adopted to support RSE requirements。\n- Sweeps 可 free run（for FDD）或 gated sweep（triggered by CMX, for TDD）。\n- 支援 elevation positioner。\n- 支援 3D view possibility for overview measurement, maximization and final TRP measurement。\n- Typical test distance: **1 m for >40 GHz** and **3 m for <40 GHz**。\n- Workflow steps 包含 overview measurement、data reduction、maximization、adjustment、final measurement。\n- Virtual RMS detectors with **100 MHz and 200 MHz bandwidth** 可把 lower bandwidth measurement integration over 100 MHz / 200 MHz sliding window，用於平行量測 -13 dBm/MHz 與 -10 dBm/100 MHz limits。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 11,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+             },
+             "score": 0.836402
+            },
+            {
+             "text": "R&S ELEKTRA › SAC height-scan correction\n依來源：\n\n- FAR precalibrated measurement 中 antenna height、DUT height、test distance constant，因此 free space loss constant。\n- SAC precalibrated measurement 中 DUT height and horizontal test distance constant，但 effective test distance depends on antenna height。\n- ELEKTRA can correct this test distance variation automatically。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+             },
+             "score": 0.762601
+            },
+            {
+             "text": "R&S ELEKTRA › ELEMI-OOB burst analysis\n依來源：\n\n- [[ELEMI-OOB]] 是 TX burst trigger / burst analysis for RSE final measurement according to ETSI。\n- 適用 unlicensed bands final measurement。\n- Zero span with ≤1 µs resolution, RMS detector。\n- Burst detection with trigger search。\n- Average power of highest burst。\n- Automatic analysis and storage of trace。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+             },
+             "score": 0.759889
+            },
+            {
+             "text": "R&S ELEKTRA › 3D EIRP Evaluation / ELEMI-3D\n依 [[RSE Test System TS8996 (1)]]：\n\n- 量測 [[EIRP]]（Effective Isotropic Radiated Power）instead of field strength。\n- 支援 SAC and FAR 3D measurement。\n- 支援 elevation positioner。\n- 支援 spherical elevation 或 cylindrical height scan。\n- 支援 3D result presentation。\n- option 名稱為 [[ELEMI-3D]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+             },
+             "score": 0.557521
+            },
+            {
+             "text": "R&S ELEKTRA › RSE options for ELEKTRA\n[[RSE Test System TS8996 (1)]] 列出以下 RSE / wireless options；來源未提供 order number 或 dependency：\n\n| Option | 原文說明 |\n|---|---|\n| [[ELEMI-EAS]] | Base license for EMI test system |\n| [[ELEMI-RSE]] | EMI Extension RSE Measurements |\n| [[ELEMI-3D]] | EMI Extension 3D Result Evaluation |\n| [[ELEMC-WRLS]] | Signalling Extension WLAN / BT |\n| [[ELEMC-CELS]] | Signalling Extension 2G / 3G / 4G |\n| [[ELEMC-5GS]] | Signalling Extension 5G |\n| [[ELEMI-5GFC]] | EMI Extension RSE 5G FR2 measurements |\n| [[ELEMI-OOB]] | TX burst trigger for RSE final measurement according to ETSI |\n| [[ELEMI-MBM]] | Extension multi band measurements |\n| [[ELEMC-DRV]] | Generic drivers |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 10,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+             },
+             "score": 0.43855
+            },
+            {
+             "text": "TRP › TRP measurement procedures\n來源列出多種 TRP procedures：\n\n1. Full sphere using reference steps（accurate）。\n2. Full sphere using sparse sampling（overestimate）。\n3. Two cuts + Pattern multiplication（accurate）；Pattern multiplication 是 conditional。\n4. Two/three cuts（overestimate）。\n5. Beam-based directions。\n6. Peak method。\n7. Equal sector with peak average。\n8. Pre-scan。\n\n來源指出 procedure 選擇取決於 available test setup、measurement equipment 與 measurement time。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/TRP.md"
+             },
+             "score": 2.802671
+            },
+            {
+             "text": "TRP › TRP measurement grids\n來源列出 TRP measurement grids：\n\n- 2-cut grid。\n- 3-cut grid。\n- Equal angle grid。\n- Equal area grid。\n- Fibonacci grid。\n\n來源說 TRP measurement grids 參考 [[3GPP TR 37.941]] subsection 6.3.4。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/TRP.md"
+             },
+             "score": 1.324989
+            },
+            {
+             "text": "Radiated Spurious Emissions › RSE 與 EIRP / TRP\n依 [[RSE Test System TS8996 (1)]]：\n\n- [[R&S ELEKTRA]] 支援 3D [[EIRP]] evaluation：量測 Effective Isotropic Radiated Power instead of field strength。\n- 5G FR2 來源多以 [[TRP]] method 表示 test requirement。\n- ETSI 301 908-25 draft 來源描述 two-step method：先用 EIRP coarse grid 找 spurious frequencies，再對 EIRP above limit 的 frequencies 執行 TRP fine grid。\n- Final measurement 可計算 2-cut TRP、3-cut TRP；若 limit exceeded，另執行 full TRP。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Radiated Spurious Emissions.md"
+             },
+             "score": 2.194897
+            },
+            {
+             "text": "Radiated Spurious Emissions › Substitution method\n依 [[RSE Test System TS8996 (1)]]：\n\n- Reference method: substitution。\n- DUT replaced by calibrated antenna with signal generator。\n- Signal generator level tuned to same receive value as DUT。\n- EIRP calculated by adding antenna gain and cable loss。\n- [[R&S ELEKTRA]] supports this method。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Radiated Spurious Emissions.md"
+             },
+             "score": 1.727881
+            },
+            {
+             "text": "Radiated Spurious Emissions › 在 R&S solution mapping 中的位置\n依 [[Regulatory test for wireless devices with cellular technology]]：\n\n- RSE 出現在 CE RED Art 3.2 radio spectrum 與 FCC wireless regulatory testing 語境。\n- 來源將 [[R&S TS8996]] 列為 RSE solution mapping。\n- 來源對 5G FR2 提到 RSE up to 200 GHz、high sensitivity -40 dBm/MHz、special signaling、conditioning for carrier 與 all standards support。\n- RSE test can use spectrum analyzer or EMI receiver；RF analysis need spectrum analyzer，EMC test standards need EMI receiver。\n\n依 [[RSE Test System TS8996 (1)]]：\n\n- RSE has always to be evaluated, also for precertified modules。\n- Basic RSE setup 類似 commercial EMI test。\n- TS8996 supports 2G / 3G / 4G / 5G FR1 / WLAN / BT，並可擴充到 5G FR2 / above 40 GHz。\n- 測試場地可為 FAR with azimuth / optional elevation scan，或 SAC with height scan。\n- 常見 test distance 為 3 m；為提高 sensitivity 可使用 1 m。\n- Signal conditioning 是 RSE 的關鍵，因為 high-power carrier 可能使 receiver / analyzer overload，特別是 near-carrier measurement。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Radiated Spurious Emissions.md"
+             },
+             "score": 0.615753
+            },
+            {
+             "text": "TDR 阻抗測量\n[[TDR 阻抗測量]] 是 [[AI Server PCB test image 24]] 中列為高頻高速 [[PCB]] 測試方案的一項阻抗量測方法 / 功能，來源將其與 ENA / PNA、TDR 選項、校準件與 TDR 探頭連結。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/TDR 阻抗測量.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "TDR 阻抗測量 › 來源中的說法\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）列出 **基于 ENA/PNA 的 Delta-L 损耗、TDR 阻抗测量和 Dk/Df 提取**。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）列出 **ENA / PNA与TDR选项和校准件**。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）列出 **TDR 探头（是德科技或合作伙伴）**。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）在電路板抽樣測試與大批量監控階段皆涉及 [[阻抗變化]] 量測。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/TDR 阻抗測量.md"
+             },
+             "score": 0.0
+            },
+            {
+             "text": "RSE Test System TS8996 (1) › 重點摘要\n- FCC 47 CFR Part 30 / KDB 842590 / ANSI C63.26 對 5G FR2 的來源說法為 **30 MHz up to 5th harmonic / 100 GHz or 200 GHz**，limit **-13 dBm**，method 為 [[TRP]]，並提到 EIRP early exit criteria。\n- ETSI 301 908-25 draft covers 5G FR2 RSE，依 ERC Recommendation 74-01（1998, amended 29 May 2019），並列出 30 MHz to 1 GHz、1 GHz to 7.25 GHz、7.25 GHz to 2nd harmonic 的 TRP limits。\n- 來源把 [[R&S TS8980 Conformance Test Platform]] 與 [[R&S TS8996]] 做區分：FR1 中 TS8980 負責 validated conducted tests，另需 radiated RSE（TS8996）、EMC（TS9982）、OTA（TS8991）；FR2 中 3GPP validated tests with ATS1800C 屬 TS8980，而 ETSI / FCC 額外 RSE 需求屬 TS8996。\n- 來源稱 TS8980 with compact CATR ATS1800C includes RSE 6 GHz to 92 GHz, limit -13 dBm/MHz acc. 3GPP；而 [[R&S TS8996]] up to **220 GHz / 325 GHz** in anechoic chamber。\n- 5G FR2 signal conditioning 18–50 GHz 使用 [[TS-PRE1850]]，18–40 GHz base，40–50 GHz extension with antenna [[TS-PRE-B1]]，可同時測 spurious 與 carrier。\n- 41–325 GHz system extension 包含 receive units [[TC-RSE60]]、[[TC-RSE90]]、[[TC-RSE140]]、[[TC-RSE220]]、[[TC-RSE325]] 與 multiplier units [[TC-MX60]]、[[TC-MX90]]、[[TC-MX140]]、[[TC-MX220]]、[[TC-MX325]]，並以 [[OSP220]]、[[R&S ESW44]] with B21、[[R&S SMB100A]]、[[R&S CMX500]]、[[R&S ELEKTRA]] 組成系統。\n- TC-RSE units 的 sensitivity EIRP 來源標示為 **< -40 dBm/MHz**（RMS detector）at **1 m** test distance。\n- 5G FR2 ELEKTRA procedure 包含 overview measurement、data reduction、maximization、adjustment、final measurement，並支援 virtual RMS detector with 100 MHz / 200 MHz bandwidth。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/RSE Test System TS8996 (1).md"
+             },
+             "score": 1.413044
+            },
+            {
+             "text": "RSE Test System TS8996 (1) › 重點摘要\n- 來源標題為 `Radited Spurious Emission (RSE) Test System TS8996`，頁尾日期標示 **07/2025**；`Radited` 為原文拼字。\n- 基本 RSE setup 類似 commercial EMI test，可用 FAR 搭配 DUT azimuth 與 optional elevation scan，也可用 SAC 搭配 height scan。\n- 基本頻率範圍列為 **30 MHz to 12.75 / 26 GHz / 40 GHz**，使用 spectrum analyzer 或 spectrum analyzer + test receiver；test distance 可為 **3 m**，或為提高 sensitivity 使用 **1 m**。\n- 系統要求 high sensitivity、stable radiated radiocommunication link、signal conditioning，並由 [[R&S ELEKTRA]] 全自動控制。\n- 來源明示 [[R&S TS8996]] 可作 turnkey solution，也可與 EMC test system 或 regulatory test system（[[R&S TS8997]]）組合 / 擴充。\n- 3G / 4G / 5G FR1 的 signal conditioning 使用 [[OSP-B155G]]，頻率範圍 **30 MHz to 8 GHz**；支援 RED carrier up to **30 dBm**、FCC carrier up to **36 dBm**，並支援 5G NSA mode with 2 simultaneous carriers（LTE and 5G）。\n- 1 GHz to 40 GHz 使用 [[TS-PRE2]] 與 [[TS-LNA1840]]；1–18 GHz 需 high sensitivity 與 carrier suppression，18–40 GHz 則把 receiver 放在 anechoic chamber 內並以 fiber optic 控制。\n- 來源稱 typical sensitivity：TX at 3 m 可達 **-30 dBm with 12 dB S/N**（即 -42 dBm，peak detector）；RX at 1 m 可達 **-47 dBm with 12 dB S/N**（即 -59 dBm，peak detector）。\n- [[R&S ELEKTRA]] 提供 RSE 專用功能：3D EIRP evaluation、ELEMI-OOB burst analysis、substitution method、SAC height-scan correction、CMW / CMX signaling、multi-band measurement。\n- [[R&S ELEKTRA]] RSE option list 包含 ELEMI-EAS、ELEMI-RSE、ELEMI-3D、ELEMC-WRLS、ELEMC-CELS、ELEMC-5GS、ELEMI-5GFC、ELEMI-OOB、ELEMI-MBM、ELEMC-DRV。\n- 5G FR2 section 指出 FCC / ANSI C63.26 的 RSE upper frequency 依 fundamental frequency 決定：RF signal <10 GHz 到 10th harmonic max 40 GHz；RF signal <30 GHz 到 5th harmonic max 100 GHz；RF signal >30 GHz 到 5th harmonic max 200 GHz。\n- 3GPP / RAN4 對 5G FR2 的 RSE specification 為 **9 kHz to 2nd harmonic**，test requirement 為 **6 GHz to 2nd harmonic**，limit **-13 dBm**，method 為 [[TRP]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/RSE Test System TS8996 (1).md"
+             },
+             "score": 1.128967
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "product_option_spec",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 11,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S ELEKTRA.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/RSE Test System TS8996 (1).md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 4,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/RSE Test System TS8996 (1).md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S ATS1800C.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/index/product-vna.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 11,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/index/product-vna.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/entities/R&S ELEKTRA.md",
+             "raw_refs": [
+              "raw/Market/OneNote/RSE Test System TS8996 (1).md",
+              "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/TRP.md",
+             "raw_refs": [
+              "raw/Market/OneNote/GFM324_1e_5G_NR_BaseStation_OTA_TX_Tests.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Radiated Spurious Emissions.md",
+             "raw_refs": [
+              "raw/Market/OneNote/RSE Test System TS8996 (1).md",
+              "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/TDR 阻抗測量.md",
+             "raw_refs": [
+              "raw/Market/AI Server PCB test image 24.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/RSE Test System TS8996 (1).md",
+             "raw_refs": [
+              "raw/Market/OneNote/RSE Test System TS8996 (1).md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

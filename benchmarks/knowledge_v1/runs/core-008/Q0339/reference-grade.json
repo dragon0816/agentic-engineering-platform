@@ -1,0 +1,71 @@
+{
+ "id": "Q0339",
+ "grader": "1.2",
+ "coverage": 0.562,
+ "points": [
+  {
+   "n": 1,
+   "point": "每條規格主張必須標明型號與來源文件版次，來源未標版次就要明說沒標",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions R&S models and source filenames/versions, but not the rule that every claim must cite model and document version or state version absent"
+  },
+  {
+   "n": 2,
+   "point": "規格數字必須連同測試條件一起引用，不換算單位；option 相依性照抄原文，不自行推論相容性",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions measurement conditions, options and formal specs, but omits no unit conversion and no self-inferred option compatibility"
+  },
+  {
+   "n": 3,
+   "point": "只有 specifications with limits / without limits 代表保證效能；typ./nom./meas./n. trc. 不由 R&S 保證，不能用來做比較主張",
+   "verified": true,
+   "label": "covered",
+   "why": "states warranty status is required and typical/nominal/measured/non-traceable values are not warranted"
+  },
+  {
+   "n": 4,
+   "point": "訊號分析儀規格文件同樣註明無 tolerance limits 的資料不具約束力且可能變更",
+   "verified": true,
+   "label": "missing",
+   "why": "does not state this for signal analyzer specs; only mentions SMA100B generator and omits may change"
+  },
+  {
+   "n": 5,
+   "point": "對競品的主張若只有 R&S internal battle card 單一來源，用於客戶文件前必須另查對手官方資料與第三方證據",
+   "verified": true,
+   "label": "partial",
+   "why": "calls for formal/external evidence, but not the specific rule for R&S-internal-only battle cards needing competitor official and third-party evidence before customer use"
+  },
+  {
+   "n": 6,
+   "point": "only platform、first validated、leadership、lower TCO 等銷售語言不可當作可驗證技術規格",
+   "verified": true,
+   "label": "covered",
+   "why": "says leading/unique/highest coverage need external validation rather than sales positioning alone"
+  },
+  {
+   "n": 7,
+   "point": "現有 battle card 未提供競品的正式 datasheet、文件版次、order number、option code、release status 或測試條件",
+   "verified": true,
+   "label": "partial",
+   "why": "lists evidence needed, but does not state the existing battle card lacks competitor datasheet, version, order number, option code, release status and test conditions"
+  },
+  {
+   "n": 8,
+   "point": "Aerospace / Defense（衛星、UAV）的 R&S solution mapping 只是 sales mapping，不可當作測試配置建議書，仍需 sales kits、application notes、datasheet 或正式 proposal",
+   "verified": true,
+   "label": "partial",
+   "why": "says deck/application material is not formal configuration or qualification evidence, but does not fully state satellite/UAV solution mapping is only sales mapping and needs sales kits/application notes/datasheets/proposal"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "Keysight ... strong aerospace / defense presence",
+  "Starlink UT test-flow source maps spectrum analyzer to R&S FSW and Keysight N9040B UXA, and signal generator to R&S SMW200A and Keysight E8257D PSG",
+  "Starlink UT recommended-equipment page says those items must be checked in each product datasheet",
+  "satellite payload group-delay measurement ... FSW spectrum analyzer and SMW200A signal generator can measure absolute and relative group delay",
+  "TVAC or satellite-payload use ... application brochure is solution-level"
+ ]
+}

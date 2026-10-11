@@ -1,0 +1,47 @@
+{
+ "id": "Q0671",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 109.187,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 7,
+   "kind": "wiki",
+   "ref": "wiki/sources/AISeverEcosystem.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "Blackwell platform power consumption doubling",
+   "pushing high-density power demand in AI server power supplies",
+   "The AI server power-supply R&S Solution field maps this demand area",
+   "MXO is explicitly mapped to `power rail / multiphase DC / PI` for the AI server power-supply category",
+   "Blackwell power increase → high-density power demand"
+  ],
+  "reason": "The cited passages support that MXO is listed for `power rail / multiphase DC / PI` under server motherboard/PCBA, and that PDN testing is associated with scopes and network analyzers. They do not support the Blackwell power-doubling market requirement, the high-density power-demand framing, or that this mapping is specifically in the AI server power-supply category.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The cited passages support that MXO is listed for `power rail / multiphase DC / PI` under server motherboard/PCBA, and that PDN testing is associated with scopes and network analyzers. They do not support the Blackwell power-doubling market requirement, the high-density power-demand framing, or that"
+}

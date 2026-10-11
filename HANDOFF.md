@@ -55,7 +55,8 @@ K2 (`docs/phases/KNOWLEDGE_K2.md`) built but its query change was not accepted.
 - The candidate manifest `engineering__rs-knowledge__1.1.0-k2.1.json` was removed
   from the workspace (copy in `.scratch/`); `.scratch/k25_bind.py candidate|restore`
   re-binds the sandbox for another run (it backs up host.json first).
-- Next: the owner chooses A/B/C in `runs/core-007/review.zh-TW.md`; then K3.
+- Option A was run (`runs/core-008`): also worse; see the addendum in the
+  core-007 review. Live binding restored. Next: owner decision, then K3.
 
 Knowledge state (2026-10-10, latest): Skill 1.10.0 is live. A no-support retry check
 plus Skill 1.11.0 was tried in `runs/core-006`, came out worse and was rolled back

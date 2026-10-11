@@ -1,0 +1,71 @@
+{
+ "id": "Q0231",
+ "grader": "1.2",
+ "coverage": 0.188,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's signaling / non-signaling tester category is defined for cellular and WLAN device testing: CMX500 for R&D signaling, CMP180 for production non-signaling RF, where non-signaling mode is used to save test time.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions CMX500 signaling and non-signaling testers, but not Vault definition, CMP180 production role, or saving test time"
+  },
+  {
+   "n": 2,
+   "point": "The Vault's tooling map assigns signaling/protocol testing to CMX500/CMW500 and production non-signaling to CMP180/CMP200/CMW100 — no radar role is assigned to these testers.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "partly maps CMX500/CMP200, but assigns radar-driven roles/requirements to these testers"
+  },
+  {
+   "n": 3,
+   "point": "Radar measurement/stimulus needs in the Vault are served by a separate product class — the AREG800A automotive radar echo generator, not by a signaling or non-signaling tester.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "mentions AREG radar capabilities but treats them as non-signaling tester requirements"
+  },
+  {
+   "n": 4,
+   "point": "Radar-specific capability metrics in the Vault are radar-domain parameters (digital channels, objects per channel, instantaneous bandwidth, object range), unrelated to signaling-tester measurement lists.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "lists radar-domain metrics, then links them to tester measurement requirements"
+  },
+  {
+   "n": 5,
+   "point": "Radar signal scenario generation for module, receiver and DFS tests is attributed to the SMW200A vector signal generator, i.e. a generator rather than a signaling/non-signaling tester.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention SMW200A/vector signal generator radar scenario generation"
+  },
+  {
+   "n": 6,
+   "point": "The single documented radar-related capability on a non-signaling tester is the CMP180 DFS waveform-playing option R&S CMP-KD359 for WLAN.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "omits CMP180 DFS KD359 and implies many other radar-related non-signaling capabilities"
+  },
+  {
+   "n": 7,
+   "point": "The only radar/communications convergence trend recorded is 6G MFSS/ISAC with a possible joint communications + radar sensing waveform.",
+   "verified": true,
+   "label": "covered",
+   "why": "states MFSS/ISAC and joint communications-plus-radar waveforms"
+  },
+  {
+   "n": 8,
+   "point": "For ISAC the Vault lists only technical challenges (high bandwidth, radar equation, power density, spectrum coexistence, waveform design) and derives no tester measurement requirement from them.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "lists ISAC challenges but derives tester requirements from them"
+  }
+ ],
+ "contradicted": 5,
+ "invented": [
+  "Therefore, testers need measurement coverage for wider bandwidth, power-related behavior, coexistence/interference, and waveform quality as radar becomes communication-integrated",
+  "measurement capability must scale from single-channel/single-object testing toward multi-channel and geometry-aware radar scenarios",
+  "required non-signaling radar test capability expands from static RF measurement to dynamic target distance, Doppler, velocity, and FMCW echo simulation",
+  "the signaling tester side needs protocol/network-emulation measurements plus RF/TX and channel-condition measurements",
+  "non-signaling tester capability needs to cover mmWave RF parametric measurement, radiated and conducted setups, multi-carrier operation, modulation quality, spectrum, and power as communication-side radar-adjacent waveforms become more complex"
+ ]
+}

@@ -1,0 +1,128 @@
+{
+ "question": {
+  "id": "Q1061",
+  "text": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+  "technical": "Instrument & Measurement Principles",
+  "topic": "non-signaling tester",
+  "product_related": "true"
+ },
+ "session_id": "conversation-5771d0cf960547938e55caa4523d4812",
+ "exchange": {
+  "sent": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 231.625,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-5771d0cf960547938e55caa4523d4812",
+    "actor": "leo.chi",
+    "title": "What is non-signaling tester, and which product-related measurement deci…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T08:34:06.327601Z",
+    "updated_at": "2026-10-11T08:37:57.801769Z",
+    "messages": [
+     {
+      "message_id": "message-ce2e3944b2f843c98b7c8006baddd096",
+      "role": "user",
+      "text": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-11T08:34:06.335129Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-01a6bdd88ac94174bdf5d819c982b510",
+      "role": "assistant",
+      "text": "The knowledge base gave no answer: it did not produce validated evidence, with 0 Raw citations; the missing facets were `product_option_spec` and `technical_knowledge`.\n\nNot from the knowledge base:  \n\nA **non-signaling tester** is RF test equipment that measures a device under test without setting up a full protocol-level connection, such as a real LTE/5G/Wi‑Fi call/session. Instead of emulating the network stack and exchanging signaling messages, it typically generates and analyzes RF waveforms directly. The DUT is often put into a test mode, controlled by chipset tools, AT commands, or manufacturing software.\n\nIn practice, a non-signaling tester is used when you care about RF performance rather than end-to-end network behavior.\n\nProduct-related measurement decisions that depend on understanding this include:\n\n1. **Signaling vs. non-signaling test architecture**\n   - Use signaling test when you need protocol attach, call setup, registration, mobility, or network emulation.\n   - Use non-signaling test when you need fast RF calibration, verification, or production testing.\n\n2. **Which tester family/product to choose**\n   - A manufacturing RF tester or vector signal generator/analyzer may be sufficient for non-signaling work.\n   - A radio communication tester/network emulator is needed for signaling scenarios.\n\n3. **Throughput vs. RF-parametric measurement**\n   - Non-signaling is usually appropriate for EVM, output power, frequency error, ACLR/ACLR-like spectral measurements, sensitivity, PER/BLER-style receiver checks, and calibration.\n   - Signaling is more relevant for IP throughput, handover, attach procedures, VoLTE/IMS behavior, and protocol conformance.\n\n4. **DUT control method**\n   - Non-signaling requires deciding how the DUT will be controlled: chipset test mode, serial/USB commands, vendor tool, or production interface.\n   - Signaling may require less direct DUT control because the tester behaves like a base station/access point.\n\n5. **Production-line speed and cost**\n   - Non-signaling setups are usually faster and cheaper per unit for high-volume manufacturing.\n   - Signaling setups are more complete but slower and often more expensive.\n\n6. **Required options/licenses**\n   - Product option decisions depend on whether you need waveform generation/analysis only, or full base-station/network emulation.\n   - This affects choices such as cellular standard options, bandwidth, MIMO capability, frequency range, and analysis personalities.\n\n7. **Calibration and verification strategy**\n   - Non-signaling is commonly used for RF calibration and final verification.\n   - Signaling may be reserved for sample validation, interoperability, or conformance-oriented checks.",
+      "created_at": "2026-10-11T08:37:57.801769Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-f636d38882504e2a8385e0e717a1beb2",
+       "request_id": "request-f636d38882504e2a8385e0e717a1beb2",
+       "span_id": "span-f636d38882504e2a8385e0e717a1beb2",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+    "ok": true,
+    "answer": "The knowledge base gave no answer: it did not produce validated evidence, with 0 Raw citations; the missing facets were `product_option_spec` and `technical_knowledge`.\n\nNot from the knowledge base:  \n\nA **non-signaling tester** is RF test equipment that measures a device under test without setting up a full protocol-level connection, such as a real LTE/5G/Wi‑Fi call/session. Instead of emulating the network stack and exchanging signaling messages, it typically generates and analyzes RF waveforms directly. The DUT is often put into a test mode, controlled by chipset tools, AT commands, or manufacturing software.\n\nIn practice, a non-signaling tester is used when you care about RF performance rather than end-to-end network behavior.\n\nProduct-related measurement decisions that depend on understanding this include:\n\n1. **Signaling vs. non-signaling test architecture**\n   - Use signaling test when you need protocol attach, call setup, registration, mobility, or network emulation.\n   - Use non-signaling test when you need fast RF calibration, verification, or production testing.\n\n2. **Which tester family/product to choose**\n   - A manufacturing RF tester or vector signal generator/analyzer may be sufficient for non-signaling work.\n   - A radio communication tester/network emulator is needed for signaling scenarios.\n\n3. **Throughput vs. RF-parametric measurement**\n   - Non-signaling is usually appropriate for EVM, output power, frequency error, ACLR/ACLR-like spectral measurements, sensitivity, PER/BLER-style receiver checks, and calibration.\n   - Signaling is more relevant for IP throughput, handover, attach procedures, VoLTE/IMS behavior, and protocol conformance.\n\n4. **DUT control method**\n   - Non-signaling requires deciding how the DUT will be controlled: chipset test mode, serial/USB commands, vendor tool, or production interface.\n   - Signaling may require less direct DUT control because the tester behaves like a base station/access point.\n\n5. **Production-line speed and cost**\n   - Non-signaling setups are usually faster and cheaper per unit for high-volume manufacturing.\n   - Signaling setups are more complete but slower and often more expensive.\n\n6. **Required options/licenses**\n   - Product option decisions depend on whether you need waveform generation/analysis only, or full base-station/network emulation.\n   - This affects choices such as cellular standard options, bandwidth, MIMO capability, frequency range, and analysis personalities.\n\n7. **Calibration and verification strategy**\n   - Non-signaling is commonly used for RF calibration and final verification.\n   - Signaling may be reserved for sample validation, interoperability, or conformance-oriented checks.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-f636d38882504e2a8385e0e717a1beb2",
+      "request_id": "request-f636d38882504e2a8385e0e717a1beb2",
+      "span_id": "span-f636d38882504e2a8385e0e717a1beb2",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-f636d38882504e2a8385e0e717a1beb2",
+       "request_id": "request-f636d38882504e2a8385e0e717a1beb2",
+       "span_id": "span-f636d38882504e2a8385e0e717a1beb2",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no answer: it did not produce validated evidence, with 0 Raw citations; the missing facets were `product_option_spec` and `technical_knowledge`.\n\nNot from the knowledge base:  \n\nA **non-signaling tester** is RF test equipment that measures a device under test without setting up a full protocol-level connection, such as a real LTE/5G/Wi‑Fi call/session. Instead of emulating the network stack and exchanging signaling messages, it typically generates and analyzes RF waveforms directly. The DUT is often put into a test mode, controlled by chipset tools, AT commands, or manufacturing software.\n\nIn practice, a non-signaling tester is used when you care about RF performance rather than end-to-end network behavior.\n\nProduct-related measurement decisions that depend on understanding this include:\n\n1. **Signaling vs. non-signaling test architecture**\n   - Use signaling test when you need protocol attach, call setup, registration, mobility, or network emulation.\n   - Use non-signaling test when you need fast RF calibration, verification, or production testing.\n\n2. **Which tester family/product to choose**\n   - A manufacturing RF tester or vector signal generator/analyzer may be sufficient for non-signaling work.\n   - A radio communication tester/network emulator is needed for signaling scenarios.\n\n3. **Throughput vs. RF-parametric measurement**\n   - Non-signaling is usually appropriate for EVM, output power, frequency error, ACLR/ACLR-like spectral measurements, sensitivity, PER/BLER-style receiver checks, and calibration.\n   - Signaling is more relevant for IP throughput, handover, attach procedures, VoLTE/IMS behavior, and protocol conformance.\n\n4. **DUT control method**\n   - Non-signaling requires deciding how the DUT will be controlled: chipset test mode, serial/USB commands, vendor tool, or production interface.\n   - Signaling may require less direct DUT control because the tester behaves like a base station/access point.\n\n5. **Production-line speed and cost**\n   - Non-signaling setups are usually faster and cheaper per unit for high-volume manufacturing.\n   - Signaling setups are more complete but slower and often more expensive.\n\n6. **Required options/licenses**\n   - Product option decisions depend on whether you need waveform generation/analysis only, or full base-station/network emulation.\n   - This affects choices such as cellular standard options, bandwidth, MIMO capability, frequency range, and analysis personalities.\n\n7. **Calibration and verification strategy**\n   - Non-signaling is commonly used for RF calibration and final verification.\n   - Signaling may be reserved for sample validation, interoperability, or conformance-oriented checks.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_S0S6BJY8mWFAyARlKYCN3DqD",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "failed",
+         "data": {
+          "knowledge_harness": "not_validated",
+          "answer": "The Knowledge query did not produce a validated answer. Unverified requested facets: product_option_spec, technical_knowledge.",
+          "evidence": {
+           "raw_citations": 0,
+           "facet_status": "missing",
+           "missing_facets": [
+            "product_option_spec",
+            "technical_knowledge"
+           ],
+           "relation_status": "missing",
+           "retrieval_attempts": {}
+          },
+          "phase": "needs_input",
+          "failure_code": "knowledge_insufficient_evidence",
+          "instruction": "The knowledge base did not validate an answer. Tell the person what is above; anything you add is not from the knowledge base and must say so."
+         },
+         "failure": {
+          "code": "knowledge_not_validated",
+          "message": "The Knowledge Harness did not validate an answer",
+          "retryable": false
+         }
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

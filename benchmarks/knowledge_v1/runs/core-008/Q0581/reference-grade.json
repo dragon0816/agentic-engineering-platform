@@ -1,0 +1,62 @@
+{
+ "id": "Q0581",
+ "grader": "1.2",
+ "coverage": 0.286,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's automotive radar content is confined to the AREG800A radar echo generator, which is not a VNA",
+   "verified": true,
+   "label": "partial",
+   "why": "Uses AREG800A as radar source, but does not state Vault is confined to it or that it is not a VNA."
+  },
+  {
+   "n": 2,
+   "point": "The automotive radar frequency bands documented in the Vault are 24–24.25 GHz, 76–81 GHz and 24–44 GHz (FE44S), given for radar echo generator frontends",
+   "verified": true,
+   "label": "partial",
+   "why": "Mentions 24.0–24.25 GHz and 76–81 GHz, but omits 24–44 GHz FE44S and frontend context."
+  },
+  {
+   "n": 3,
+   "point": "The Vault distinguishes FMCW from non-FMCW radar only in the echo-generation/distance context, not as a VNA measurement requirement",
+   "verified": true,
+   "label": "missing",
+   "why": "No FMCW/non-FMCW echo-generation distinction."
+  },
+  {
+   "n": 4,
+   "point": "The ZNA VNA family page describes coverage from 10 MHz up to 67 GHz with no reference to radar or automotive use cases",
+   "verified": true,
+   "label": "partial",
+   "why": "States ZNA 10 MHz to 67 GHz, but omits that it has no radar/automotive context."
+  },
+  {
+   "n": 5,
+   "point": "mmWave VNA coverage in the Vault extends to 110 GHz via the ZNA67EXT converter-head system, stated purely as instrument specification",
+   "verified": true,
+   "label": "partial",
+   "why": "States ZNA67EXT 10 MHz to 110 GHz and converter heads, but not that this is only an instrument spec with no radar link."
+  },
+  {
+   "n": 6,
+   "point": "ZNA67EXT dynamic-range data is segmented by band, including the 75 GHz to 80 GHz segment that overlaps the 76–81 GHz radar band, but the Vault never attributes this to radar needs",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Gives 75–80 GHz dynamic range, but attributes high dynamic range need to radar trends despite reference saying Vault never does."
+  },
+  {
+   "n": 7,
+   "point": "ZNB3000 VNA models are documented with frequency upgrade options up to 54.0 GHz, again with no radar or automotive application context",
+   "verified": true,
+   "label": "missing",
+   "why": "No ZNB3000 upgrade coverage up to 54.0 GHz or lack of radar context."
+  }
+ ],
+ "contradicted": 1,
+ "invented": [
+  "VNA needs shift toward mmWave frequency coverage, GHz-span characterization, high dynamic range, coherent multiport operation, stricter calibration/de-embedding, and related PCB/material characterization workflows",
+  "Wider radar instantaneous bandwidth increases the need to characterize GHz-wide transfer behavior",
+  "Material and radome measurements"
+ ]
+}

@@ -1638,6 +1638,9 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   coverage 0.395 -> 0.349, PASS 16 -> 11 of 22, median 156 -> 166 s, p90
   233 -> 283 s. Not accepted; live binding restored. Review:
   `benchmarks/knowledge_v1/runs/core-007/review.zh-TW.md`.
-- [ ] K2 next step: owner to choose A (data only), B (index hits appended), or
-  C (index for ingest only, continue to K3).
+- [x] K2 option A (owner): core-008, candidate data on reverted code: coverage
+  0.386, PASS 13 of 22, median 199 s; also worse than core-005. The layered
+  index.md removed the flat 2,910-line index that query navigation used, and 7
+  answers cited `wiki/index/` pages. Review addendum in the core-007 review.
+- [ ] K2 next step: owner decision after option A.
 - [ ] K3-K6 per the plan.

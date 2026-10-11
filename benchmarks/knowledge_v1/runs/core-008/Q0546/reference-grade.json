@@ -1,0 +1,69 @@
+{
+ "id": "Q0546",
+ "grader": "1.2",
+ "coverage": 0.375,
+ "points": [
+  {
+   "n": 1,
+   "point": "Automotive is explicitly named as an industry showing interest in 5G NTN-NR, on the same slide that credits SMW200A channel emulation (long path delays, Doppler, customized dynamic fading) for NTN testing — the clearest SigGen link to automotive demand.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "says SMW200A automotive link is unverified; omits 5G NTN-NR automotive interest and SMW200A channel emulation evidence"
+  },
+  {
+   "n": 2,
+   "point": "The Vault already defines a reusable signal generator + signal analyzer component-test pairing (SMW200A + FSW) for NTN, which is the configuration an automotive NTN module/chipset opportunity would use.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "does not identify SMW200A + FSW NTN test pair and treats both as not tied to automotive"
+  },
+  {
+   "n": 3,
+   "point": "The analyzer side of that pair is specified to 85 GHz (overrange 90 GHz) with up to 8 GHz analysis bandwidth, i.e. sufficient reach for mmWave/automotive-radar-band analysis work.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions FSW to 85/90 GHz but omits up to 8 GHz analysis bandwidth and relevance to mmWave/radar-band analysis"
+  },
+  {
+   "n": 4,
+   "point": "Radar echo generation is an orderable SMW200A software option (SMW-K78), making radar echo generation an attach opportunity for the signal generator line itself.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention SMW-K78 radar echo generation option for SMW200A"
+  },
+  {
+   "n": 5,
+   "point": "The AREG800A offers automotive radar production configurations (AREG-P1/P2/P3 with digital channels, 5 GHz instantaneous bandwidth, MFP/BFP frontends), indicating an automotive radar production-test opportunity.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions AREG800A automotive radar echo generator but not AREG-P1/P2/P3 production configurations, 5 GHz bandwidth, or MFP/BFP frontends"
+  },
+  {
+   "n": 6,
+   "point": "Critical scoping caveat: the Vault explicitly classifies the AREG800A automotive radar echo generator as outside the RF signal generator / spectrum analyzer category, so it must not be counted as a SigGen/SA opportunity.",
+   "verified": true,
+   "label": "covered",
+   "why": "explicitly says AREG800A is not RF signal generator or spectrum analyzer and should not be counted as SG/SA"
+  },
+  {
+   "n": 7,
+   "point": "R&S's documented automotive demand driver is NG eCall regulation (obligatory from 2026-01-01), but the instrument of record there is the CMX500 mobile radio tester, not a signal generator or analyzer.",
+   "verified": true,
+   "label": "covered",
+   "why": "states NG eCall 2026-01-01 demand driver and CMX500/CMX-KA098 as instrument of record, not SG/analyzer"
+  },
+  {
+   "n": 8,
+   "point": "6G NTN is a forward-looking automotive pipeline item: the Vault lists automotive V2X safety applications among 6G NTN use cases, a future driver for channel-emulation-capable generators and analyzers.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention 6G NTN automotive V2X safety as forward-looking pipeline"
+  }
+ ],
+ "contradicted": 2,
+ "invented": [
+  "Current vault evidence supports one directly automotive SG opportunity—R&S SMBV100B for eCall GNSS receiver/performance testing",
+  "R&S SMBV100B for eCall GNSS receiver/performance testing is directly supported",
+  "Wiki directly supports the automotive eCall GNSS use case"
+ ]
+}

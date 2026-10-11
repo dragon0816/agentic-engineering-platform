@@ -1,0 +1,79 @@
+{
+ "id": "Q0911",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 118.875,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 42,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G device testing value chain.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 55,
+   "kind": "wiki",
+   "ref": "wiki/sources/3GPP NTN Signal Generator Solutions Overview-EN-UR.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 61,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NTN signal generator solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 43,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G device testing value chain.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 36,
+   "kind": "wiki",
+   "ref": "wiki/sources/oneweb_ut_final_presentation.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 38,
+   "kind": "wiki",
+   "ref": "wiki/entities/Qorvo.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "calibrated RF/modulated stimulus",
+   "after the RFIC or RF front-end DUT is ready for lab validation",
+   "before broader system, conformance, or production testing"
+  ],
+  "reason": "The cited passages support that component testing uses a DUT with R&S SMW200A and R&S FSW, and that validation/conformance includes debugging, RF/transceiver optimization, conducted/radiated testing, and meeting 3GPP or custom criteria. The answer reasonably places signal generation/analysis in a lab RF/component-validation bench, though it adds some workflow ordering and calibration details not explicitly stated in the passages.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

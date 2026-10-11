@@ -1,0 +1,1440 @@
+{
+ "question": {
+  "id": "Q0631",
+  "text": "How do changes in AI data centers technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "market": "AI",
+  "product": "Signaling / Non-signaling Tester",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-94773f31e4b14c73890980652a7adc4d",
+ "exchange": {
+  "sent": "How do changes in AI data centers technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+  "http_status": 200,
+  "seconds": 224.375,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-94773f31e4b14c73890980652a7adc4d",
+    "actor": "leo.chi",
+    "title": "How do changes in AI data centers technology affect the measurement capa…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-11T08:04:43.706854Z",
+    "updated_at": "2026-10-11T08:08:27.965694Z",
+    "messages": [
+     {
+      "message_id": "message-4d086e5644f44f26b6e06be900f2ae66",
+      "role": "user",
+      "text": "How do changes in AI data centers technology affect the measurement capability required from Signaling / Non-signaling Tester?",
+      "created_at": "2026-10-11T08:04:43.725551Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-afb791b070c340dda7999b61fbc72481",
+      "role": "assistant",
+      "text": "What they do support is that AI data centers are moving toward much higher-speed electrical/optical links, denser power, and liquid-cooling infrastructure, while wireless test instruments are separately evolving toward wider bandwidth, more MIMO/RF-chain, OTA, multi-technology, throughput/IP, fading, and automation capabilities [50][51][52][55][13].\n### Supported technology changes in AI data centers\nAI/data-center connectivity is described as a “full-spectrum” portfolio covering high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection [50].\nHigh-speed electrical examples include OSFP cable assemblies from 25G/lane NRZ up to 224G/lane PAM4 with aggregate bandwidths of 200G, 400G, 800G, and 1.6T per cable assembly; XtremePass 448G connector solutions; and Celerity 224 Gb/s PAM4 mezzanine connectors [55].\nOptical examples include XPO-LPO at 224 Gb/s per lane across 64 channels for AI scale-up deployments and 1.6T OSFP transceivers using 200G/lane optical modules [51].\n### Implications for wireless / signaling test instruments\nFor Wi-Fi 7 and next-generation WLAN devices, OTA testing in signaling mode is used to measure antennas and RF transmitter/receiver characteristics under real-world conditions [1].\nBecause MLO is a key Wi-Fi 7 feature, a test environment with multiple RF chains is described as critical [1].\nWi-Fi 7 throughput-related components include 320 MHz channel bandwidth, up to 16 spatial streams, 4096 QAM, and MLO [3].\nTherefore, signaling testers used for Wi-Fi 7 development need to address OTA MIMO stress testing, realistic multipath RF conditions, antenna/RF TX/RX behavior, and multi-antenna performance for IEEE 802.11be stations and access points [2][5].\nThe R&S CMX500 is described as a multi-technology, multi-channel one-box signaling tester, and the passages list support for LTE, 5G NR FR1, 5G NR FR2, Wi-Fi 7, and 5G RedCap in OTA measurement environments [6].\nThe CMX500 feature summary also lists NR FR1/FR2 signaling and TX measurements, LTE signaling and measurements, NB-IoT/NB-NTN signaling, WLAN signaling and WLAN TX measurements including 802.11be and 2x2 MIMO, plus fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, IP traffic analysis, IMS/audio/POLQA, and automation interfaces [13].\nIn a Bluetest OTA workflow, CMX500 OBT with Bluetest RTS and Bluetest Flow supports 5G NR SA, 5G NR NSA, LTE, and WLAN OTA testing, and WLAN capability was expanded to Wi-Fi 7 320 MHz bandwidth support [21].\nHowever, that same knowledge base notes this is PR/upgrade evidence and not a binding formal specification for RFU18 order number, bandwidth, throughput, or test conditions [64].\n### Implications for non-signaling test instruments\nFor non-signaling and production-style testing, the RAW passage describes Wireless Manufacturing Test as a modular software framework tailored for high-volume production testing and non-signaling R&D applications [66].\nThe R&S PVT360A is described as a Performance Vector Tester that can provide multi-wireless-standard waveform playback, TX/RX measurements, spectrum analysis, WLAN MIMO, and external frontend frequency extension [46].\nIts NR waveform playback capabilities include 1 to 16 carriers and per-carrier channel bandwidths up to 400 MHz, with release 17/18 waveform additions including 480 kHz / 960 kHz subcarrier spacing and 1024QAM [48].\nIts spectrum analysis option provides I/Q-based spectrum analysis, frequency sweep power-vs-frequency, zero-span power-vs-time, marker evaluation, peak search, and TOI results [49].\nA RAW passage also states that the R&S CMP180 can verify a 480 MHz bandwidth signal waveform in loopback mode and is positioned for R&D and production beyond Wi-Fi 7 requirements [67].\n### Practical separation of required capabilities\n| Instrument role | Measurement capability that becomes more relevant | Passage-supported basis |\n|---|---|---|\n| Signaling / network-emulation tester | Multi-technology, multi-channel signaling across LTE, NR FR1/FR2, Wi-Fi 7, and RedCap | CMX500 is described as multi-technology/multi-channel and supports LTE, NR FR1/FR2, Wi-Fi 7, and 5G RedCap in OTA contexts.[6] |\n| Signaling / Wi-Fi 7 OTA tester | OTA, real-world signaling-mode RF and antenna measurement, MIMO stress, multiple RF chains | Wi-Fi 7 device development needs real-world signaling-mode antenna and RF TX/RX measurement, and MLO makes multiple RF chains critical.[1] |\n| Signaling / throughput and protocol tester | Throughput, PER, BLER, CSI, fading, AWGN, IP traffic analysis, application testing | CMX500 feature summary lists fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, application test, and IP traffic analysis.[13] |\n| Signaling / future cellular tester | FR1/FR2/FR3, higher data rate, 4096QAM, more antenna ports, NTN/D2C/Wi-Fi 7/Wi-Fi 8 readiness | CMX500 PR states FR1/FR2/FR3, up to 20 Gbps, 4096QAM, up to 16 device antenna ports, and support positioning for NTN, D2C, Wi-Fi 7, and future Wi-Fi 8.[63] |\n| Non-signaling R&D / production tester | High-volume production framework and non-signaling R&D workflow | Wireless Manufacturing Test is described as a modular software framework for high-volume production testing and non-signaling R&D applications.[66] |\n| Non-signaling waveform / RF tester | Wider waveform playback, TX/RX, spectrum analysis, WLAN MIMO, multi-carrier NR | PVT360A provides waveform playback, TX/RX measurements, spectrum analysis, WLAN MIMO, and external frontend frequency extension; its NR waveform playback supports 1 to 16 carriers and up to 400 MHz per-carrier bandwidth.[46][48] |\n| Non-signaling wideband waveform tester | 480 MHz waveform verification for R&D and production beyond Wi-Fi 7 | CMP180 is stated to verify a 480 MHz bandwidth signal waveform in loopback mode and to be positioned for R&D and production beyond Wi-Fi 7.[67] |\n### Inference\n【推論】Because AI data-center connectivity is moving toward 224G/lane, 448G, 1.6T optical/electrical interconnects and denser power/cooling systems, wireless testers are not shown as directly measuring those data-center interconnects; instead, the relevant wireless/signaling requirement is to keep pace with adjacent wireless-device complexity such as Wi-Fi 7 OTA MIMO, MLO, 320 MHz bandwidth, multi-RF-chain operation, FR1/FR2/FR3, high throughput, and IP/application-layer validation.[50][51][52][55][1][2][3][13][63]\n【推論】For non-signaling instruments, the measurement capability trend is toward production-scalable waveform generation/playback, TX/RX and spectrum analysis, wider bandwidth verification, and multi-carrier NR/WLAN support, because WMT is described for high-volume production and non-signaling R&D, PVT360A supports waveform playback/TX/RX/spectrum/WLAN MIMO, and CMP180 is stated to verify 480 MHz bandwidth waveforms.[66][46][48][49][67]\n\n來源：\n[1] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[2] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[3] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[5] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[6] Wiki：Wi-Fi 7 and 5G RedCap OTA measurements（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[13] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[21] Wiki：R&S CMX500 OBT（來源：`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[46] Wiki：R&S PVT360A（缺來源連結）\n[48] Wiki：R&S PVT360A（缺來源連結）\n[49] Wiki：R&S PVT360A（缺來源連結）\n[50] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[51] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[52] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[55] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[63] Wiki：Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`、`Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md`…）\n[64] Wiki：Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`、`Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md`…）\n[66] `raw/Market/OneNote/MWC2025---WIC-INFRA.md`\n[67] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+      "created_at": "2026-10-11T08:08:27.965694Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-34d112cd2ae149b290e52654c63df434",
+       "request_id": "request-34d112cd2ae149b290e52654c63df434",
+       "span_id": "span-34d112cd2ae149b290e52654c63df434",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "What they do support is that AI data centers are moving toward much higher-speed electrical/optical links, denser power, and liquid-cooling infrastructure, while wireless test instruments are separately evolving toward wider bandwidth, more MIMO/RF-chain, OTA, multi-technology, throughput/IP, fading, and automation capabilities [50][51][52][55][13].\n### Supported technology changes in AI data centers\nAI/data-center connectivity is described as a “full-spectrum” portfolio covering high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection [50].\nHigh-speed electrical examples include OSFP cable assemblies from 25G/lane NRZ up to 224G/lane PAM4 with aggregate bandwidths of 200G, 400G, 800G, and 1.6T per cable assembly; XtremePass 448G connector solutions; and Celerity 224 Gb/s PAM4 mezzanine connectors [55].\nOptical examples include XPO-LPO at 224 Gb/s per lane across 64 channels for AI scale-up deployments and 1.6T OSFP transceivers using 200G/lane optical modules [51].\n### Implications for wireless / signaling test instruments\nFor Wi-Fi 7 and next-generation WLAN devices, OTA testing in signaling mode is used to measure antennas and RF transmitter/receiver characteristics under real-world conditions [1].\nBecause MLO is a key Wi-Fi 7 feature, a test environment with multiple RF chains is described as critical [1].\nWi-Fi 7 throughput-related components include 320 MHz channel bandwidth, up to 16 spatial streams, 4096 QAM, and MLO [3].\nTherefore, signaling testers used for Wi-Fi 7 development need to address OTA MIMO stress testing, realistic multipath RF conditions, antenna/RF TX/RX behavior, and multi-antenna performance for IEEE 802.11be stations and access points [2][5].\nThe R&S CMX500 is described as a multi-technology, multi-channel one-box signaling tester, and the passages list support for LTE, 5G NR FR1, 5G NR FR2, Wi-Fi 7, and 5G RedCap in OTA measurement environments [6].\nThe CMX500 feature summary also lists NR FR1/FR2 signaling and TX measurements, LTE signaling and measurements, NB-IoT/NB-NTN signaling, WLAN signaling and WLAN TX measurements including 802.11be and 2x2 MIMO, plus fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, IP traffic analysis, IMS/audio/POLQA, and automation interfaces [13].\nIn a Bluetest OTA workflow, CMX500 OBT with Bluetest RTS and Bluetest Flow supports 5G NR SA, 5G NR NSA, LTE, and WLAN OTA testing, and WLAN capability was expanded to Wi-Fi 7 320 MHz bandwidth support [21].\nHowever, that same knowledge base notes this is PR/upgrade evidence and not a binding formal specification for RFU18 order number, bandwidth, throughput, or test conditions [64].\n### Implications for non-signaling test instruments\nFor non-signaling and production-style testing, the RAW passage describes Wireless Manufacturing Test as a modular software framework tailored for high-volume production testing and non-signaling R&D applications [66].\nThe R&S PVT360A is described as a Performance Vector Tester that can provide multi-wireless-standard waveform playback, TX/RX measurements, spectrum analysis, WLAN MIMO, and external frontend frequency extension [46].\nIts NR waveform playback capabilities include 1 to 16 carriers and per-carrier channel bandwidths up to 400 MHz, with release 17/18 waveform additions including 480 kHz / 960 kHz subcarrier spacing and 1024QAM [48].\nIts spectrum analysis option provides I/Q-based spectrum analysis, frequency sweep power-vs-frequency, zero-span power-vs-time, marker evaluation, peak search, and TOI results [49].\nA RAW passage also states that the R&S CMP180 can verify a 480 MHz bandwidth signal waveform in loopback mode and is positioned for R&D and production beyond Wi-Fi 7 requirements [67].\n### Practical separation of required capabilities\n| Instrument role | Measurement capability that becomes more relevant | Passage-supported basis |\n|---|---|---|\n| Signaling / network-emulation tester | Multi-technology, multi-channel signaling across LTE, NR FR1/FR2, Wi-Fi 7, and RedCap | CMX500 is described as multi-technology/multi-channel and supports LTE, NR FR1/FR2, Wi-Fi 7, and 5G RedCap in OTA contexts.[6] |\n| Signaling / Wi-Fi 7 OTA tester | OTA, real-world signaling-mode RF and antenna measurement, MIMO stress, multiple RF chains | Wi-Fi 7 device development needs real-world signaling-mode antenna and RF TX/RX measurement, and MLO makes multiple RF chains critical.[1] |\n| Signaling / throughput and protocol tester | Throughput, PER, BLER, CSI, fading, AWGN, IP traffic analysis, application testing | CMX500 feature summary lists fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, application test, and IP traffic analysis.[13] |\n| Signaling / future cellular tester | FR1/FR2/FR3, higher data rate, 4096QAM, more antenna ports, NTN/D2C/Wi-Fi 7/Wi-Fi 8 readiness | CMX500 PR states FR1/FR2/FR3, up to 20 Gbps, 4096QAM, up to 16 device antenna ports, and support positioning for NTN, D2C, Wi-Fi 7, and future Wi-Fi 8.[63] |\n| Non-signaling R&D / production tester | High-volume production framework and non-signaling R&D workflow | Wireless Manufacturing Test is described as a modular software framework for high-volume production testing and non-signaling R&D applications.[66] |\n| Non-signaling waveform / RF tester | Wider waveform playback, TX/RX, spectrum analysis, WLAN MIMO, multi-carrier NR | PVT360A provides waveform playback, TX/RX measurements, spectrum analysis, WLAN MIMO, and external frontend frequency extension; its NR waveform playback supports 1 to 16 carriers and up to 400 MHz per-carrier bandwidth.[46][48] |\n| Non-signaling wideband waveform tester | 480 MHz waveform verification for R&D and production beyond Wi-Fi 7 | CMP180 is stated to verify a 480 MHz bandwidth signal waveform in loopback mode and to be positioned for R&D and production beyond Wi-Fi 7.[67] |\n### Inference\n【推論】Because AI data-center connectivity is moving toward 224G/lane, 448G, 1.6T optical/electrical interconnects and denser power/cooling systems, wireless testers are not shown as directly measuring those data-center interconnects; instead, the relevant wireless/signaling requirement is to keep pace with adjacent wireless-device complexity such as Wi-Fi 7 OTA MIMO, MLO, 320 MHz bandwidth, multi-RF-chain operation, FR1/FR2/FR3, high throughput, and IP/application-layer validation.[50][51][52][55][1][2][3][13][63]\n【推論】For non-signaling instruments, the measurement capability trend is toward production-scalable waveform generation/playback, TX/RX and spectrum analysis, wider bandwidth verification, and multi-carrier NR/WLAN support, because WMT is described for high-volume production and non-signaling R&D, PVT360A supports waveform playback/TX/RX/spectrum/WLAN MIMO, and CMP180 is stated to verify 480 MHz bandwidth waveforms.[66][46][48][49][67]\n\n來源：\n[1] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[2] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[3] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[5] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[6] Wiki：Wi-Fi 7 and 5G RedCap OTA measurements（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[13] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[21] Wiki：R&S CMX500 OBT（來源：`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[46] Wiki：R&S PVT360A（缺來源連結）\n[48] Wiki：R&S PVT360A（缺來源連結）\n[49] Wiki：R&S PVT360A（缺來源連結）\n[50] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[51] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[52] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[55] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[63] Wiki：Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`、`Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md`…）\n[64] Wiki：Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`、`Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md`…）\n[66] `raw/Market/OneNote/MWC2025---WIC-INFRA.md`\n[67] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-34d112cd2ae149b290e52654c63df434",
+      "request_id": "request-34d112cd2ae149b290e52654c63df434",
+      "span_id": "span-34d112cd2ae149b290e52654c63df434",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-34d112cd2ae149b290e52654c63df434",
+       "request_id": "request-34d112cd2ae149b290e52654c63df434",
+       "span_id": "span-34d112cd2ae149b290e52654c63df434",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "What they do support is that AI data centers are moving toward much higher-speed electrical/optical links, denser power, and liquid-cooling infrastructure, while wireless test instruments are separately evolving toward wider bandwidth, more MIMO/RF-chain, OTA, multi-technology, throughput/IP, fading, and automation capabilities [50][51][52][55][13].\n### Supported technology changes in AI data centers\nAI/data-center connectivity is described as a “full-spectrum” portfolio covering high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection [50].\nHigh-speed electrical examples include OSFP cable assemblies from 25G/lane NRZ up to 224G/lane PAM4 with aggregate bandwidths of 200G, 400G, 800G, and 1.6T per cable assembly; XtremePass 448G connector solutions; and Celerity 224 Gb/s PAM4 mezzanine connectors [55].\nOptical examples include XPO-LPO at 224 Gb/s per lane across 64 channels for AI scale-up deployments and 1.6T OSFP transceivers using 200G/lane optical modules [51].\n### Implications for wireless / signaling test instruments\nFor Wi-Fi 7 and next-generation WLAN devices, OTA testing in signaling mode is used to measure antennas and RF transmitter/receiver characteristics under real-world conditions [1].\nBecause MLO is a key Wi-Fi 7 feature, a test environment with multiple RF chains is described as critical [1].\nWi-Fi 7 throughput-related components include 320 MHz channel bandwidth, up to 16 spatial streams, 4096 QAM, and MLO [3].\nTherefore, signaling testers used for Wi-Fi 7 development need to address OTA MIMO stress testing, realistic multipath RF conditions, antenna/RF TX/RX behavior, and multi-antenna performance for IEEE 802.11be stations and access points [2][5].\nThe R&S CMX500 is described as a multi-technology, multi-channel one-box signaling tester, and the passages list support for LTE, 5G NR FR1, 5G NR FR2, Wi-Fi 7, and 5G RedCap in OTA measurement environments [6].\nThe CMX500 feature summary also lists NR FR1/FR2 signaling and TX measurements, LTE signaling and measurements, NB-IoT/NB-NTN signaling, WLAN signaling and WLAN TX measurements including 802.11be and 2x2 MIMO, plus fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, IP traffic analysis, IMS/audio/POLQA, and automation interfaces [13].\nIn a Bluetest OTA workflow, CMX500 OBT with Bluetest RTS and Bluetest Flow supports 5G NR SA, 5G NR NSA, LTE, and WLAN OTA testing, and WLAN capability was expanded to Wi-Fi 7 320 MHz bandwidth support [21].\nHowever, that same knowledge base notes this is PR/upgrade evidence and not a binding formal specification for RFU18 order number, bandwidth, throughput, or test conditions [64].\n### Implications for non-signaling test instruments\nFor non-signaling and production-style testing, the RAW passage describes Wireless Manufacturing Test as a modular software framework tailored for high-volume production testing and non-signaling R&D applications [66].\nThe R&S PVT360A is described as a Performance Vector Tester that can provide multi-wireless-standard waveform playback, TX/RX measurements, spectrum analysis, WLAN MIMO, and external frontend frequency extension [46].\nIts NR waveform playback capabilities include 1 to 16 carriers and per-carrier channel bandwidths up to 400 MHz, with release 17/18 waveform additions including 480 kHz / 960 kHz subcarrier spacing and 1024QAM [48].\nIts spectrum analysis option provides I/Q-based spectrum analysis, frequency sweep power-vs-frequency, zero-span power-vs-time, marker evaluation, peak search, and TOI results [49].\nA RAW passage also states that the R&S CMP180 can verify a 480 MHz bandwidth signal waveform in loopback mode and is positioned for R&D and production beyond Wi-Fi 7 requirements [67].\n### Practical separation of required capabilities\n| Instrument role | Measurement capability that becomes more relevant | Passage-supported basis |\n|---|---|---|\n| Signaling / network-emulation tester | Multi-technology, multi-channel signaling across LTE, NR FR1/FR2, Wi-Fi 7, and RedCap | CMX500 is described as multi-technology/multi-channel and supports LTE, NR FR1/FR2, Wi-Fi 7, and 5G RedCap in OTA contexts.[6] |\n| Signaling / Wi-Fi 7 OTA tester | OTA, real-world signaling-mode RF and antenna measurement, MIMO stress, multiple RF chains | Wi-Fi 7 device development needs real-world signaling-mode antenna and RF TX/RX measurement, and MLO makes multiple RF chains critical.[1] |\n| Signaling / throughput and protocol tester | Throughput, PER, BLER, CSI, fading, AWGN, IP traffic analysis, application testing | CMX500 feature summary lists fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, application test, and IP traffic analysis.[13] |\n| Signaling / future cellular tester | FR1/FR2/FR3, higher data rate, 4096QAM, more antenna ports, NTN/D2C/Wi-Fi 7/Wi-Fi 8 readiness | CMX500 PR states FR1/FR2/FR3, up to 20 Gbps, 4096QAM, up to 16 device antenna ports, and support positioning for NTN, D2C, Wi-Fi 7, and future Wi-Fi 8.[63] |\n| Non-signaling R&D / production tester | High-volume production framework and non-signaling R&D workflow | Wireless Manufacturing Test is described as a modular software framework for high-volume production testing and non-signaling R&D applications.[66] |\n| Non-signaling waveform / RF tester | Wider waveform playback, TX/RX, spectrum analysis, WLAN MIMO, multi-carrier NR | PVT360A provides waveform playback, TX/RX measurements, spectrum analysis, WLAN MIMO, and external frontend frequency extension; its NR waveform playback supports 1 to 16 carriers and up to 400 MHz per-carrier bandwidth.[46][48] |\n| Non-signaling wideband waveform tester | 480 MHz waveform verification for R&D and production beyond Wi-Fi 7 | CMP180 is stated to verify a 480 MHz bandwidth signal waveform in loopback mode and to be positioned for R&D and production beyond Wi-Fi 7.[67] |\n### Inference\n【推論】Because AI data-center connectivity is moving toward 224G/lane, 448G, 1.6T optical/electrical interconnects and denser power/cooling systems, wireless testers are not shown as directly measuring those data-center interconnects; instead, the relevant wireless/signaling requirement is to keep pace with adjacent wireless-device complexity such as Wi-Fi 7 OTA MIMO, MLO, 320 MHz bandwidth, multi-RF-chain operation, FR1/FR2/FR3, high throughput, and IP/application-layer validation.[50][51][52][55][1][2][3][13][63]\n【推論】For non-signaling instruments, the measurement capability trend is toward production-scalable waveform generation/playback, TX/RX and spectrum analysis, wider bandwidth verification, and multi-carrier NR/WLAN support, because WMT is described for high-volume production and non-signaling R&D, PVT360A supports waveform playback/TX/RX/spectrum/WLAN MIMO, and CMP180 is stated to verify 480 MHz bandwidth waveforms.[66][46][48][49][67]\n\n來源：\n[1] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[2] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[3] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[5] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[6] Wiki：Wi-Fi 7 and 5G RedCap OTA measurements（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[13] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[21] Wiki：R&S CMX500 OBT（來源：`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[46] Wiki：R&S PVT360A（缺來源連結）\n[48] Wiki：R&S PVT360A（缺來源連結）\n[49] Wiki：R&S PVT360A（缺來源連結）\n[50] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[51] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[52] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[55] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[63] Wiki：Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`、`Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md`…）\n[64] Wiki：Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`、`Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md`…）\n[66] `raw/Market/OneNote/MWC2025---WIC-INFRA.md`\n[67] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_gzC6I671xFaNvtRJkrBcj8SB",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "What they do support is that AI data centers are moving toward much higher-speed electrical/optical links, denser power, and liquid-cooling infrastructure, while wireless test instruments are separately evolving toward wider bandwidth, more MIMO/RF-chain, OTA, multi-technology, throughput/IP, fading, and automation capabilities [50][51][52][55][13].\n### Supported technology changes in AI data centers\nAI/data-center connectivity is described as a “full-spectrum” portfolio covering high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection [50].\nHigh-speed electrical examples include OSFP cable assemblies from 25G/lane NRZ up to 224G/lane PAM4 with aggregate bandwidths of 200G, 400G, 800G, and 1.6T per cable assembly; XtremePass 448G connector solutions; and Celerity 224 Gb/s PAM4 mezzanine connectors [55].\nOptical examples include XPO-LPO at 224 Gb/s per lane across 64 channels for AI scale-up deployments and 1.6T OSFP transceivers using 200G/lane optical modules [51].\n### Implications for wireless / signaling test instruments\nFor Wi-Fi 7 and next-generation WLAN devices, OTA testing in signaling mode is used to measure antennas and RF transmitter/receiver characteristics under real-world conditions [1].\nBecause MLO is a key Wi-Fi 7 feature, a test environment with multiple RF chains is described as critical [1].\nWi-Fi 7 throughput-related components include 320 MHz channel bandwidth, up to 16 spatial streams, 4096 QAM, and MLO [3].\nTherefore, signaling testers used for Wi-Fi 7 development need to address OTA MIMO stress testing, realistic multipath RF conditions, antenna/RF TX/RX behavior, and multi-antenna performance for IEEE 802.11be stations and access points [2][5].\nThe R&S CMX500 is described as a multi-technology, multi-channel one-box signaling tester, and the passages list support for LTE, 5G NR FR1, 5G NR FR2, Wi-Fi 7, and 5G RedCap in OTA measurement environments [6].\nThe CMX500 feature summary also lists NR FR1/FR2 signaling and TX measurements, LTE signaling and measurements, NB-IoT/NB-NTN signaling, WLAN signaling and WLAN TX measurements including 802.11be and 2x2 MIMO, plus fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, IP traffic analysis, IMS/audio/POLQA, and automation interfaces [13].\nIn a Bluetest OTA workflow, CMX500 OBT with Bluetest RTS and Bluetest Flow supports 5G NR SA, 5G NR NSA, LTE, and WLAN OTA testing, and WLAN capability was expanded to Wi-Fi 7 320 MHz bandwidth support [21].\nHowever, that same knowledge base notes this is PR/upgrade evidence and not a binding formal specification for RFU18 order number, bandwidth, throughput, or test conditions [64].\n### Implications for non-signaling test instruments\nFor non-signaling and production-style testing, the RAW passage describes Wireless Manufacturing Test as a modular software framework tailored for high-volume production testing and non-signaling R&D applications [66].\nThe R&S PVT360A is described as a Performance Vector Tester that can provide multi-wireless-standard waveform playback, TX/RX measurements, spectrum analysis, WLAN MIMO, and external frontend frequency extension [46].\nIts NR waveform playback capabilities include 1 to 16 carriers and per-carrier channel bandwidths up to 400 MHz, with release 17/18 waveform additions including 480 kHz / 960 kHz subcarrier spacing and 1024QAM [48].\nIts spectrum analysis option provides I/Q-based spectrum analysis, frequency sweep power-vs-frequency, zero-span power-vs-time, marker evaluation, peak search, and TOI results [49].\nA RAW passage also states that the R&S CMP180 can verify a 480 MHz bandwidth signal waveform in loopback mode and is positioned for R&D and production beyond Wi-Fi 7 requirements [67].\n### Practical separation of required capabilities\n| Instrument role | Measurement capability that becomes more relevant | Passage-supported basis |\n|---|---|---|\n| Signaling / network-emulation tester | Multi-technology, multi-channel signaling across LTE, NR FR1/FR2, Wi-Fi 7, and RedCap | CMX500 is described as multi-technology/multi-channel and supports LTE, NR FR1/FR2, Wi-Fi 7, and 5G RedCap in OTA contexts.[6] |\n| Signaling / Wi-Fi 7 OTA tester | OTA, real-world signaling-mode RF and antenna measurement, MIMO stress, multiple RF chains | Wi-Fi 7 device development needs real-world signaling-mode antenna and RF TX/RX measurement, and MLO makes multiple RF chains critical.[1] |\n| Signaling / throughput and protocol tester | Throughput, PER, BLER, CSI, fading, AWGN, IP traffic analysis, application testing | CMX500 feature summary lists fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, application test, and IP traffic analysis.[13] |\n| Signaling / future cellular tester | FR1/FR2/FR3, higher data rate, 4096QAM, more antenna ports, NTN/D2C/Wi-Fi 7/Wi-Fi 8 readiness | CMX500 PR states FR1/FR2/FR3, up to 20 Gbps, 4096QAM, up to 16 device antenna ports, and support positioning for NTN, D2C, Wi-Fi 7, and future Wi-Fi 8.[63] |\n| Non-signaling R&D / production tester | High-volume production framework and non-signaling R&D workflow | Wireless Manufacturing Test is described as a modular software framework for high-volume production testing and non-signaling R&D applications.[66] |\n| Non-signaling waveform / RF tester | Wider waveform playback, TX/RX, spectrum analysis, WLAN MIMO, multi-carrier NR | PVT360A provides waveform playback, TX/RX measurements, spectrum analysis, WLAN MIMO, and external frontend frequency extension; its NR waveform playback supports 1 to 16 carriers and up to 400 MHz per-carrier bandwidth.[46][48] |\n| Non-signaling wideband waveform tester | 480 MHz waveform verification for R&D and production beyond Wi-Fi 7 | CMP180 is stated to verify a 480 MHz bandwidth signal waveform in loopback mode and to be positioned for R&D and production beyond Wi-Fi 7.[67] |\n### Inference\n【推論】Because AI data-center connectivity is moving toward 224G/lane, 448G, 1.6T optical/electrical interconnects and denser power/cooling systems, wireless testers are not shown as directly measuring those data-center interconnects; instead, the relevant wireless/signaling requirement is to keep pace with adjacent wireless-device complexity such as Wi-Fi 7 OTA MIMO, MLO, 320 MHz bandwidth, multi-RF-chain operation, FR1/FR2/FR3, high throughput, and IP/application-layer validation.[50][51][52][55][1][2][3][13][63]\n【推論】For non-signaling instruments, the measurement capability trend is toward production-scalable waveform generation/playback, TX/RX and spectrum analysis, wider bandwidth verification, and multi-carrier NR/WLAN support, because WMT is described for high-volume production and non-signaling R&D, PVT360A supports waveform playback/TX/RX/spectrum/WLAN MIMO, and CMP180 is stated to verify 480 MHz bandwidth waveforms.[66][46][48][49][67]\n\n來源：\n[1] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[2] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[3] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[5] Wiki：Wi-Fi 7 OTA MIMO stress testing（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[6] Wiki：Wi-Fi 7 and 5G RedCap OTA measurements（來源：`Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md`、`Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md`、`EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md`）\n[13] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[21] Wiki：R&S CMX500 OBT（來源：`CMW500 to CMX500OBT_License_Swap_Process.md`、`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`…）\n[46] Wiki：R&S PVT360A（缺來源連結）\n[48] Wiki：R&S PVT360A（缺來源連結）\n[49] Wiki：R&S PVT360A（缺來源連結）\n[50] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[51] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[52] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[55] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[63] Wiki：Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`、`Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md`…）\n[64] Wiki：Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness（來源：`CMX500_specs_en_5216-4127-22_v1100.md`、`KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md`、`Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md`…）\n[66] `raw/Market/OneNote/MWC2025---WIC-INFRA.md`\n[67] `raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`",
+          "evidence": {
+           "raw_citations": 18,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.1.0-k2.1"
+           },
+           "trace": {
+            "trace_id": "trace-3937f7c80d8a42f38b428200d638ab6d",
+            "request_id": "request-3937f7c80d8a42f38b428200d638ab6d",
+            "span_id": "span-3937f7c80d8a42f38b428200d638ab6d",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "How do changes in AI data centers technology affect the measurement capability required from Signaling / Non-signaling Tester? Please focus on implications for wireless/signaling and non-signaling test instruments.",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "Wi-Fi 7 OTA MIMO stress testing › 為什麼需要 OTA 與 multiple RF chains\n[[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]] 指出，在 WLAN devices development 期間，需要在 real-world conditions in signaling mode 下量測 antennas 以及 RF transmitter / receiver characteristics。由於 [[MLO]] 是 [[Wi-Fi 7]] key feature，提供 multiple RF chains 的 test environment 很關鍵。\n\n同一來源同時將 [[R&S CMX500]] 描述為 multi-technology multi-channel signaling tester；其 flexibility、support for multiple radio technologies 與 embedded IP test capabilities 使其可用於 broad range of Wi-Fi 7-specific tests。\n\n[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 進一步把 Wi-Fi 7 OTA 測試放入更廣的 [[4G 5G NR WLAN OTA MIMO stress testing]] 情境：同一 [[R&S CMX500 OBT]] / [[Bluetest]] RTS workflow 同時涵蓋 WiFi、[[LTE]]、5G SA / NSA 的 radio and antenna performance validation。\n\n[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 沒有使用 MIMO stress testing 一詞，也沒有提供 RF chains、spatial streams 或 chamber reflection model；它的貢獻是確認另一個 OTA chamber vendor [[EMITE]] 也將 [[R&S CMX500]] 整合到 [[Wi-Fi 7]] OTA measurement solution 中。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+              },
+              "score": 3.743189
+             },
+             {
+              "text": "Wi-Fi 7 OTA MIMO stress testing › 來源中的測試架構\n[[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]]（來源未標示發布日期；raw created 2026-09-11）描述的架構為：\n\n- [[R&S CMX500]] one-box signaling tester 提供 integrated [[Wi-Fi 7]] test functionality。\n- [[Bluetest Flow]] control software / integrated test environment 整合 [[R&S CMX500]] 的 [[Wi-Fi 7]] test functionality。\n- [[Bluetest]] reverberation test systems（RTS），例如 [[Bluetest RTS65]]，提供 reverberation chamber OTA environment。\n- 測試對象為 [[IEEE 802.11be]] stations 與 access points。\n- 測試目標為 MIMO stress testing under realistic conditions。\n\n[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]]（來源未標示發布日期；raw created 2026-09-11）補充：\n\n- [[Bluetest]] expanded its earlier integrated testing capabilities for [[WLAN]] stations and access points（[[IEEE 802.11]] a/b/g/n/ac/ax/be）。\n- [[Wi-Fi 7]] 現在支援 bandwidth up to **320 MHz**。\n- 此能力與 [[R&S CMX500 OBT]]、[[Bluetest Flow]] v1.18 與 [[Bluetest]] RTS 組成 single tester and reverberation test system 的 integrated path。\n\n[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]]（來源未標示發布日期；raw created 2026-09-11）補充：\n\n- [[EMITE]] over-the-air chambers 可 combined with the latest sophisticated testing features of [[R&S CMX500]]。\n- 整合 enables support of [[LTE]]、[[NR FR1]]、[[NR FR2]]、full compliance with [[IEEE 802.11be]] and [[5G RedCap]]。\n- [[R&S CMX500]] 被描述為支援 non-cellular technologies including latest [[Wi-Fi 7]]，all in a single instrument。\n- [[EMITE]] customers obtain a comprehensive environment for accurately assessing performance of [[Wi-Fi 7]] as well as [[5G RedCap]] devices。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+              },
+              "score": 3.381164
+             },
+             {
+              "text": "Wi-Fi 7 OTA MIMO stress testing › Wi-Fi 7 技術背景\n[[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]] 列出的 [[Wi-Fi 7]] / [[IEEE 802.11be]] throughput-related components 包含：\n\n| 技術項目 | 來源說法 |\n|---|---|\n| 320 MHz channel bandwidth | key component facilitating higher throughput |\n| up to 16 spatial streams | key component facilitating higher throughput |\n| 4096 QAM modulation | key component facilitating higher throughput |\n| [[MLO]] | key component；also key feature making multiple RF chains important |\n\n[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 提供 solution-level update：[[Bluetest]] earlier integrated WLAN testing capabilities 現在支援 [[Wi-Fi 7]] bandwidth up to **320 MHz**。\n\n[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 則以背景段落描述 [[IEEE 802.11be]] / [[Wi-Fi 7]] 是 next generation Wi-Fi technology，面向 extremely high data throughput、tens of gigabits per second、low latency、ultra-high-definition video streaming、virtual reality 與 augmented reality applications。\n\n以上皆為來源對 Wi-Fi 7 與整合測試能力的敘述，不等同於 [[R&S CMX500]]、[[R&S CMX500 OBT]]、[[Bluetest Flow]]、[[Bluetest]] RTS 或 [[EMITE]] chambers 對所有 feature combination 的完整規格保證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+              },
+              "score": 2.562899
+             },
+             {
+              "text": "Wi-Fi 7 OTA MIMO stress testing › 可追溯範圍與限制\n- 本頁目前由 [[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]]、[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 與 [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 支撐。\n- 本頁不推論 [[R&S CMX500]] 或 [[R&S CMX500 OBT]] 實際支援的 RF chains 數量、spatial streams 數量、MLO link combination、software option code 或 hardware configuration。\n- 本頁不推論 [[Bluetest RTS65]]、其他 Bluetest RTS chambers 或 [[EMITE]] OTA chambers 的完整規格、measurement uncertainty、校準流程或 certification applicability。\n- 本頁不把新聞稿中的 solution positioning 視為 conformance test coverage 或正式規格。\n- [[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 標示 [[Bluetest Flow]] v1.18，但未提供 release date、release notes、license requirement 或相容性矩陣。\n- [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 使用 full compliance with [[IEEE 802.11be]] 的語句，但未展開 compliance 的測試項目、標準版本、認證機構或是否等同正式 conformance / certification testing。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+              },
+              "score": 1.280609
+             },
+             {
+              "text": "Wi-Fi 7 OTA MIMO stress testing\n[[Wi-Fi 7 OTA MIMO stress testing]] 是在 over-the-air、signaling mode 與 realistic multipath RF conditions 下，對 [[IEEE 802.11be]] stations 與 access points 的 antenna、RF transmitter / receiver 與 multi-antenna performance 進行壓力測試的測試情境。新匯入的 [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 補充另一個 partner integration 視角：[[EMITE]] OTA chambers 可整合 [[R&S CMX500]] 最新測試能力，用於 [[Wi-Fi 7]] 與 [[5G RedCap]] device performance assessment。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+              },
+              "score": 0.710587
+             },
+             {
+              "text": "Wi-Fi 7 and 5G RedCap OTA measurements › 來源中的測試架構\n依 [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]]：\n\n- [[EMITE]] over-the-air chambers 可與 [[R&S CMX500]] one-box signaling tester 的 latest sophisticated testing features combined。\n- [[R&S CMX500]] 被描述為 multi-technology、multi-channel one-box signaling tester。\n- cellular technologies：[[LTE]]、[[5G NR]] [[NR FR1]] frequency range up to 8 GHz、[[NR FR2]] millimeter wave frequency range up to 50 GHz、latest [[5G RedCap]]。\n- non-cellular technologies：latest [[Wi-Fi 7]]。\n- integration enables support of LTE、FR1、FR2、full compliance with [[IEEE 802.11be]] and [[5G RedCap]]。\n- EMITE customers obtain a comprehensive environment for accurately assessing performance of [[Wi-Fi 7]] and [[5G RedCap]] devices。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+              },
+              "score": 7.30377
+             },
+             {
+              "text": "Wi-Fi 7 and 5G RedCap OTA measurements › 5G RedCap 部分\n來源對 [[RedCap]] / [[5G RedCap]] 的定義：\n\n- [[3GPP Release 17]] defined 5G technology。\n- reduced-functionality version of 5G。\n- significantly lower cost compared to [[5G eMBB]]。\n- mid-range data throughput。\n- low power consumption。\n- low complexity。\n- ability to support a large number of devices。\n- particularly attractive for [[IoT]] applications。\n\n本頁只記錄來源中的 solution-level 說法；不推論 RedCap UE category、band support、3GPP test case coverage、RF measurements、protocol conformance 或 certification scope。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+              },
+              "score": 2.660721
+             },
+             {
+              "text": "Wi-Fi 7 and 5G RedCap OTA measurements › Wi-Fi 7 部分\n來源將 [[IEEE 802.11be]] 與 [[Wi-Fi 7]] 視為同一段背景，描述為 next generation of Wi-Fi technology，目標是 extremely high data throughput，far surpassing [[IEEE 802.11ax]] / [[Wi-Fi 6]] / [[Wi-Fi 6E]]。\n\n來源提到的應用需求：\n\n- tens of gigabits of data per second。\n- low latency。\n- ultra-high-definition video streaming。\n- immersive virtual reality。\n- augmented reality applications。\n\n本頁不從這段背景推論 [[R&S CMX500]] + [[EMITE]] chamber 實際支援的 channel bandwidth、spatial streams、MLO combination、MIMO layers 或 throughput 數值。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+              },
+              "score": 2.430261
+             },
+             {
+              "text": "Wi-Fi 7 and 5G RedCap OTA measurements › 使用限制\n- 來源未標示發布日期。\n- 來源未標示 [[R&S CMX500]] 搭配 [[EMITE]] OTA chambers 的硬體 BOM、software option code、CSW version、RF chain count 或 license requirement。\n- 來源未標示 [[EMITE]] chamber 型號、頻率範圍、DUT 尺寸、load condition、校準程序、measurement uncertainty 或 conformance applicability。\n- 來源使用 full compliance with [[IEEE 802.11be]] and [[5G RedCap]] 的語句，但未展開 compliance 的標準版本、測試項目、pass/fail criteria 或認證機構。\n- 來源未列出 [[Wi-Fi 7]]、[[5G RedCap]]、[[LTE]]、[[NR FR1]]、[[NR FR2]] 的完整 test case list。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+              },
+              "score": 1.759399
+             },
+             {
+              "text": "Wi-Fi 7 and 5G RedCap OTA measurements › 下一步：NTN\n來源說明下一步合作方向是 integrating test capabilities for [[NB-IoT NTN]] and [[NR NTN]]，且這些能力 already covered by [[R&S CMW500]] and [[R&S CMX500]]。\n\n這句話只能證明該 PR 對 roadmap / collaboration next step 的描述；來源未提供 [[NB-IoT NTN]] 或 [[NR NTN]] 的 option code、software version、test case list、hardware configuration 或正式規格條件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+              },
+              "score": 0.550773
+             },
+             {
+              "text": "Wi-Fi 7 and 5G RedCap OTA measurements › 與 Bluetest OTA 來源的關係\n本頁與 [[Wi-Fi 7 OTA MIMO stress testing]] 互補：\n\n- [[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]] 聚焦 [[Bluetest Flow]]、[[Bluetest]] reverberation test systems、[[Wi-Fi 7]] OTA MIMO stress testing 與 [[R&S CMX500]]。\n- [[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 聚焦 [[R&S CMX500 OBT]]、[[Bluetest Flow]] v1.18 與 4G / 5G NR / WLAN OTA workflow。\n- [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 聚焦 [[EMITE]] OTA chambers、[[Wi-Fi 7]] 與 [[5G RedCap]]，並提到 [[NB-IoT NTN]] / [[NR NTN]] 作為下一步。\n\n三者都是 PR / solution-level statements，不應替代正式 datasheet、configuration guide 或 certification documentation。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+              },
+              "score": 0.492223
+             },
+             {
+              "text": "Wi-Fi 7 and 5G RedCap OTA measurements\n[[Wi-Fi 7 and 5G RedCap OTA measurements]] 是 [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 中描述的 OTA 測試解決方案情境：將 [[R&S CMX500]] 的 latest test capabilities 整合到 [[EMITE]] over-the-air chambers，以評估 [[Wi-Fi 7]] / [[IEEE 802.11be]] 與 [[5G RedCap]] devices 的 performance。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+              },
+              "score": 0.447274
+             },
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 15.030628
+             },
+             {
+              "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 8.867548
+             },
+             {
+              "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 8.270467
+             },
+             {
+              "text": "R&S CMX500 › Fading / test scenario / application options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. |\n|---|---|---|\n| R&S CMX-KE500 | LTE fading according to 3GPP TS 36.101 | 1222.6674.xx |\n| R&S CMX-KE501 | LTE fading profiles higher order MIMO | 1222.8131.xx |\n| R&S CMX-KE600 | NR fading according to 3GPP TS 38.101 | 1222.2985.xx |\n| R&S CMX-KE601 | NR fading profiles higher order MIMO | 1222.6980.xx |\n| R&S CMX-KE611 | NR NTN fading profiles according to 3GPP TS 38.101 | 1222.8148.xx |\n| R&S CMX-KE620 | User defined fading profiles for LTE, NR and NTN | 1222.9950.xx |\n| R&S CMX-KE621 | User defined UE antenna pattern import | 1222.9996.xx |\n| R&S CMX-KT600 | ASN.1 import for NR | 1222.8183.xx |\n| R&S CMX-KT620 | DL IQ recorder | 1222.9715.xx |\n| R&S CMX-KC550B | LTE 3GPP RF test scenarios | 1222.9067.xx |\n| R&S CMX-KC660B | NR NSA FR1 3GPP RF test scenarios | 1222.4507.xx |\n| R&S CMX-KC661B | NR SA FR1 3GPP RF test scenarios | 1222.4513.xx |\n| R&S CMX-KC665B | NR-NTN 3GPP RF test scenarios | 1222.8748.xx |\n| R&S CMX-KA100 | CMX application test, feature set 1 | 1222.1595.xx |\n| R&S CMX-KA110 | CMX application test, feature set 2 | 1222.4142.xx |\n| R&S CMX-KA150 | CMX IP traffic analysis | 1222.4159.xx |\n| R&S CMX-KA180 | CMX audio enabler | 1222.4165.xx |\n| R&S CMX-KA181 | CMX audio POLQA measurement | 1222.4936.xx |\n| R&S CMX-KA401 | CMX application test audio, feature set 2 | 1222.8125.xx |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 28,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.857323
+             },
+             {
+              "text": "R&S CMX500 › Application tests 與 audio\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n- 未啟用 R&S CMX-KA100 等 application test license 時，IP application test functionality 降到最低；只能使用 standalone mode，不能連接 external servers，也不支援 IP based measurements 或 tools。\n- R&S CMX-KA100 提供 internal IP services 與 IP connection to DUT 測試 applications，包含 DNS、IMS、Message Center、FTP、HTTP、DNS monitor、IP logging、iPerf、Ping、throughput、Max Throughput Wizard、web server。\n- R&S CMX-KA110 增強 KA100，加入 QoS、ePDG、N3IWF、delay measurement、IP tune tool、SMPP / MT SMS advanced settings。\n- R&S CMX-KA150 提供 IP analysis tool，用於監控與分析 DUT uplink / downlink IP traffic。\n- R&S CMX-KA180 提供 audio codecs for 4G and 5G IMS voice call，支援 AMR-NB、AMR-WB、EVS，並包含 [[R&S CMX-ZG180A]] external sound card drivers and configuration settings。\n- R&S CMX-KA181 加入 [[POLQA]]，用於 measuring perceived speech quality；measurement version 為 3，mode 為 full-band 或 narrowband。\n- R&S CMX-KA401 支援 WAV player / recorder、upload/download WAV files、file-based POLQA measurements 與 end-to-end audio delay。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 35,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.299787
+             },
+             {
+              "text": "R&S CMX500 › Base unit 與主要訂購資訊\n依 [[CMX500_specs_en_5216-4127-22_v1100]]：\n\n| 項目 | Type / code | Order No. | 原文說明 |\n|---|---|---|---|\n| CMX500 Radio communication tester | CMX500 | 1201.0002K70 | accessories 包含 power cords、operating manual (getting started)、R&S CMX-B300C cables and adapters、R&S CMX-PB70H cables and adapters |\n| CMX500 basic assembly | R&S CMX-PB70H | 1222.0676.09 | basic assembly |\n| R&S CMX accelerator unit | R&S CMX-B200A | 1222.0747.02 | accelerated digital signal processing capabilities |\n| R&S CMX processing unit | R&S CMX-B300C | 1222.0801.04 | generic high-performance computing platform for advanced data processing |\n| R&S CMX IF unit | R&S CMX-B500A | 1222.0924.02 | IF frequency range vector signal analysis and ARB based generator |\n| R&S CMX RF unit | R&S CMX-B600B | 1222.0953.03 | FR1 frequency range vector signal analysis and ARB based generator |\n\n[[CMX500_Features_CSW9-20-0_en_32]] 使用 generic code [[R&S CMX-B500x]] 與 [[R&S CMX-B600x]]；[[CMX500_specs_en_5216-4127-22_v1100]] 在 ordering information 中列出具體 orderable unit 為 [[R&S CMX-B500A]] 與 [[R&S CMX-B600B]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 4.081134
+             },
+             {
+              "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx | WLAN SISO signaling |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx | 802.11ax station testing |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx | 802.11be station testing |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx | 802.11bn station testing |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx | 802.11ax AP testing |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx | 802.11be AP testing |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx | 802.11bn AP testing |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx | 2x2 MIMO support |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx | Enterprise security support |\n| R&S CMX-KS500B / M / X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx | 僅 LTE standalone 需要；NR NSA LTE anchor cells 包含於 NR signaling options |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx | D2C fixed / variable delay |\n| R&S CMX-KS600B / M / X | NR signaling enabler, Rel. 15 | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx | 包含 5G NR SA option 2、NSA option 3、DL 2x2/4x4 MIMO、one CC、UL 256QAM |\n| R&S CMX-KS610B / M / X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx | UL 2x2 MIMO、CA up to 9 CC |\n| R&S CMX-KS611B / M / X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx | SUL / Rel. 16 features |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.813784
+             },
+             {
+              "text": "R&S CMX500 › 使用介面與 automation\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n| 介面 | 原文定位 |\n|---|---|\n| [[CMsquares]] | 單一 graphical user interface，web-based、responsive，支援 RF tests、functional tests、advanced signaling tests、protocol tests |\n| [[R&S CMXmars]] | Message log analysis，可離線分析或在線監控 instrument messaging |\n| [[R&S CMsequencer]] | Graphical scripting interface，可在 CMX500 或 Windows PC 上建立、設定與執行 test scripts |\n| [[XLAPI]] | Python-based scripting interface，適合 complex scripting use cases |\n| [[SCPI]] | Remote control interface，適合 simple、standardized scripting use cases |\n\nXLAPI scripting environment：Python 3.10；script development computer 可為 Windows PC 或 CMX500；XLAPI installation package 為 **CMX-KF600X**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 36,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 3.754322
+             },
+             {
+              "text": "R&S CMX500 OBT › Bluetest RTS / OTA test 語境\n依 [[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]]：\n\n- [[R&S CMX500 OBT]] 可與 [[Bluetest]] reverberation test systems（RTS）及 [[Bluetest Flow]] v1.18 搭配。\n- 支援使用 [[R&S CMX500 OBT]] 在 Bluetest RTS 中執行 [[5G NR Standalone]]、[[5G NR Non-Standalone]]（EN-DC）與 [[LTE]] testing。\n- [[Bluetest]] 也將較早的 [[WLAN]] stations / access points（[[IEEE 802.11]] a/b/g/n/ac/ax/be）integrated testing capabilities 擴充到 [[Wi-Fi 7]] 320 MHz bandwidth support。\n- 來源將此整合定位為 single tester and reverberation test system 的 multi-technology validation path。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+              },
+              "score": 5.188209
+             },
+             {
+              "text": "R&S CMX500 OBT › 來源中的定位\n[[CMW500 to CMX500OBT_License_Swap_Process]] 將 license swap 流程描述為 `License swap for OBT upgrades`，並以：\n\n- Unit A：[[R&S CMW500]]。\n- Unit B：[[R&S CMX500 OBT]]。\n\n來表示從 CMW500 setup 升級到 CMX500 OBT 時的 keycode transfer target。\n\n來源短版流程另寫明：Customers who upgrade their Setup2 to CMX500 OBT，R&S offers a license swap CMW500 → CMX500。\n\n[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]]（來源未標示發布日期；raw created 2026-09-11）將 [[R&S CMX500 OBT]] 描述為 CMX500 one-box signaling tester（OBT），可在 [[Bluetest]] RTS 中讓 developers 進行 realistic [[MIMO]] stress tests。該來源明確說 [[Bluetest]] 已將 [[R&S CMX500 OBT]] 的 4G 與 [[5G NR]] test functionality 整合進 [[Bluetest Flow]] control software，並讓 developers 使用 [[R&S CMX500 OBT]] 在 [[Bluetest]] RTS 中執行 [[5G NR Standalone]]、[[5G NR Non-Standalone]]（EN-DC）與 [[LTE]] testing。\n\n[[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]]（來源未標示發布日期；raw created 2026-09-11）將 [[R&S CMX500 OBT]] 描述為 state-of-the-art one-box signaling tester，用於展示基於 [[3GPP Release 17]] specifications 的 [[5G NTN-NR]] connection。該來源說展示 setup 使用 [[R&S CMX500 OBT]] 與 [[MediaTek]] 的 NTN-NR device as DUT，並在 [[MWC Barcelona 2024]] 的 Rohde & Schwarz booth 展示 live 5G NTN-NR connection。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+              },
+              "score": 3.453054
+             },
+             {
+              "text": "R&S CMX500 OBT\nR&S CMX500 OBT 是 [[R&S CMX500]] 的 one box tester upgrade / target configuration 語彙；在 [[CMW500 to CMX500OBT_License_Swap_Process]]（November 2024；文件版次來源未標示）中，它是 [[R&S CMW500]] license swap 的 Unit B / target unit。[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 進一步把 [[R&S CMX500 OBT]] 描述為可在 [[Bluetest]] reverberation test systems（RTS）中與 [[Bluetest Flow]] v1.18 搭配，用於 4G、[[5G NR]] 與 [[WLAN]] over-the-air tests 的 one-box signaling tester。[[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 則把它放在 [[MWC Barcelona 2024]] 的 [[5G NTN-NR Rel.17 connection demonstration]] 中，用來 simulate satellite base station 並支援 interactive callbox mode。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+              },
+              "score": 2.650656
+             },
+             {
+              "text": "R&S CMX500 OBT › License swap 語境\n[[CMW500 to CMX500OBT_License_Swap_Process]] 對 CMX500 OBT upgrade 定義了一組 allowed keycode swaps，包含 5G NR measurement、LTE measurement、WLAN signaling / measurement、IP application 與 NGeCall application。流程要求先刪除 [[R&S CMW500]] 上的 permanent licenses，並用 Delete Confirmation Keys 確認刪除，再由 Swap Team 為 [[R&S CMX500 OBT]] 產生對應 new keys。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+              },
+              "score": 2.649318
+             },
+             {
+              "text": "R&S CMX500 OBT › unresolved\n- [[CMW500 to CMX500OBT_License_Swap_Process]] 未提供 CMX500 OBT 的正式 order no.、bundle code 或完整硬體組態。\n- [[CMW500 to CMX500OBT_License_Swap_Process]] 未定義 Setup2。\n- [[CMW500 to CMX500OBT_License_Swap_Process]] 未說明 CMX500 OBT upgrade 是否只對特定 promo、地區、客戶或銷售期間有效。\n- OBT 硬體配置需依 [[CMX500_Features_CSW9-20-0_en_32]]、[[CMX500_specs_en_5216-4127-22_v1100]] 與正式 configure 工具確認。\n- [[XLAPI-CMX_Scenario_Database]] 多處使用 [[R&S CMX500 OBT]] 作為 minimum hardware requirements，但未提供 OBT 的料號、BOM 或配置約束。\n- [[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 未標示 [[R&S CMX500 OBT]] 在 [[Bluetest]] RTS 中所需 hardware configuration、software option code、RF chains 數量、test case list 或 measurement uncertainty。\n- [[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 未標示新聞稿發布日期。\n- [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 未標示新聞稿發布日期，也未提供 CMX500 OBT 的 NTN-NR demo option stack、RF chain 數、test mode details、measurement uncertainty 或 formal configuration。\n- [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 未說明展示是 conducted、radiated、OTA chamber 或其他 physical setup。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+              },
+              "score": 1.395181
+             },
+             {
+              "text": "R&S CMX500 OBT › MWC 2024 5G NTN-NR Rel.17 展示語境\n依 [[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]]：\n\n- 展示使用 [[R&S CMX500 OBT]] 與 [[MediaTek]] 的 NTN-NR device as DUT。\n- 展示內容為 live [[5G NTN-NR]] connection，emulating a [[Low Earth Orbit]] satellite access node。\n- [[R&S CMX500 OBT]] radio communication tester 在 setup 中 simulate the satellite base station。\n- [[R&S SMBV100B]] vector signal generator 在 setup 中以 integrated GNSS option simulate the different satellite constellations。\n- [[R&S CMX500]] 會 operate in an interactive callbox mode，allowing users to trigger voice calls alongside RF-related measurements。\n- 來源定位此 test mode 為評估 future NTN-NR devices powered by [[MediaTek]] NTN test platform 在不同條件下的 5G connection performance and reliability。\n\n此段只可作為 [[MWC Barcelona 2024]] 展示 / PR 層級證據；不能取代 [[CMX500 NR-NTN configuration]]、[[CMX500_specs_en_5216-4127-22_v1100]] 或 [[CMX500_Features_CSW9-20-0_en_32]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+              },
+              "score": 1.207264
+             },
+             {
+              "text": "R&S CMX500 OBT › 與 R&S CMX500 頁的關係\n既有 [[R&S CMX500]] 頁依 [[CMX500_Features_CSW9-20-0_en_32]] 整理 standard hardware configurations：OBT、OBT lite、OBT plus、OBT FR1 specialist、OBT FR2 specialist。該 features 文件中 OBT 原文組成為 2 RF units、2 IF units（optional）、3 AU。\n\n[[CMW500 to CMX500OBT_License_Swap_Process]] 只把 CMX500 OBT 作為 license swap target，不提供 OBT 的硬體細節、order number、完整 bundle 內容或 target configuration 的正式 BOM。因此本頁不從 `OBT` 名稱推導硬體組成，硬體資訊需回 [[R&S CMX500]]、[[CMX500_Features_CSW9-20-0_en_32]] 與 [[CMX500_specs_en_5216-4127-22_v1100]]。\n\n[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 是 PR / solution-level statement，補充 [[R&S CMX500 OBT]] 在 [[Bluetest]] RTS / [[Bluetest Flow]] v1.18 中的 OTA test workflow；它不提供新的 CMX500 OBT hardware BOM、order number 或 software option code。\n\n[[Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024]] 也是 PR / demo announcement；它補充 [[R&S CMX500 OBT]] 在 [[5G NTN-NR Rel.17 connection demonstration]] 中的角色，但不提供正式 hardware configuration、software option stack、measurement uncertainty 或 release matrix。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+              },
+              "score": 1.055311
+             },
+             {
+              "text": "R&S CMX500 OBT › XLAPI scenario database 中的 minimum hardware 角色\n依 [[XLAPI-CMX_Scenario_Database]]（issued 2026-06-22；CMX Software release 9.00.x），[[R&S CMX500 OBT]] 是多數 [[XLAPI]] R&D scripts 的 minimum hardware requirements，包括 [[R&S CMX-KF600X]]、[[R&S CMX-KF601X]]、[[R&S CMX-KF602X]]、[[R&S CMX-KF603X]]、[[R&S CMX-KF604X]]、[[R&S CMX-KF605M]]、[[R&S CMX-KF606X]]、[[R&S CMX-KF607X]]、[[R&S CMX-KF611X]]、[[R&S CMX-KF615X]]、[[R&S CMX-KF616X]]、[[R&S CMX-KF617X]]、[[R&S CMX-KF619X]]、[[R&S CMX-KF620X]]、[[R&S CMX-KF623X]]、[[R&S CMX-KF625X]]、[[R&S CMX-KF651X]]、[[R&S CMX-KF655X]] / `CMX-KF655`、[[R&S CMX-KF678X]] 與 [[R&S CMX-KF690]] 的許多 scripts。\n\n來源中也出現兩種常見變體：\n\n- [[R&S CMX500 OBT]] (FR2 config)：用於 FR2、NR-DC、FR2 throughput、FR2 RF measurement、FR2 fading、FR2 neighbor measurement 等 scripts。\n- [[R&S CMX500 OBT]] + [[R&S CMW500]] Callbox：用於 WCDMA / GSM Multi-SIM scripts，例如 [[R&S CMX-KF621X]] 的 NR + WCDMA / GSM Multi-SIM scenarios。\n\n此處只能證明 scenario database 把 OBT 作為最低硬體需求語彙；仍不提供 OBT hardware BOM、commercial bundle、option count 或 RF / IF / AU 組合。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+              },
+              "score": 0.960194
+             },
+             {
+              "text": "R&S NTN signaling solutions › 需求蒐集範圍\n來源中的問題涵蓋：\n\n- Service offerings：客戶預計透過 NTN 提供 [[IoT]]、broadband、voice 或其他 applications。\n- Test environment：live network environment（包含 satellite gateway）或 simulated environment。\n- Deployment timeline：NTN service deployment timeline、key milestones、deadlines。\n- Test layer：RF、Protocol、Application Testing。\n- Technology：[[NB-NTN]]、[[NR-NTN]]、[[Direct-to-Cell]] / [[DTC]] / [[D2C]]。\n- 3GPP release：[[3GPP Rel. 17]]、[[3GPP Rel. 18]]、[[3GPP Rel. 19]] 及其 timeline。\n- Device platform：NTN devices 使用的 chipset 或 hardware platform。\n- Service link bands：S/L/Ku/Ka-Band。\n- Gateway integration：是否把 CMX 連接到 [[satellite gateway]]，在 real live satellite network 測試；若是，需提供 gateway bands。\n- Satellite orbit：[[LEO]]、[[MEO]]、[[GEO]]、[[GSO]]。\n- Payload type：[[transparent satellite payload]] 或 [[regenerative satellite payload]]。\n- DTC operator：LTE-DTC 與 NR-DTC 需要的 satellite operator。\n- Network complexity：cellular cells 與 satellite cells 的組合。\n- Long-term tests：是否需要 hundreds of satellites，例如 [[LEO]] scenario。\n- UE：specific device model 或 generic UE simulator。\n- Performance metrics：throughput、battery lifetime、latency 等。\n- QoS：不同 traffic type 的 prioritization 或 guaranteed bandwidth。\n- Mobility：stationary、pedestrian、vehicular 或其他 UE mobility pattern。\n- Handover / beam switching：satellite-UE handovers、beam switching、seamless handovers、optimized beam switching。\n- Constellation workflow：是否有興趣 configuring and visualizing constellations，並在 [[R&S CMX500]] environment 中部署其中一部分。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+              },
+              "score": 2.479442
+             },
+             {
+              "text": "R&S NTN signaling solutions\n[[R&S NTN signaling solutions]] 是 [[Rohde & Schwarz]] 在 [[cmx500_ntn_customer_questionnaire]] 中用來描述其 [[Non-Terrestrial Network]]（[[NTN]]）signaling 測試相關 solution offering 的名稱；目前此頁只由客戶需求問卷支撐，不能視為正式規格頁。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+              },
+              "score": 2.065
+             },
+             {
+              "text": "R&S NTN signaling solutions › unresolved\n- 來源未標示 [[R&S NTN signaling solutions]] 的正式產品名稱、料號、license code、version 或 delivery package。\n- 來源未說明「CMX」是否只指 [[R&S CMX500]]。\n- 來源未提供 supported bands、supported satellite gateways、supported satellite operators、release support、UE simulator support 或 constellation scale 的正式 capability limits。\n- 來源只列 customer discovery questions；不能推論 [[Rohde & Schwarz]] 已具備每一項被問到的功能。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+              },
+              "score": 1.757941
+             },
+             {
+              "text": "R&S NTN signaling solutions › 來源中的 solution positioning\n[[cmx500_ntn_customer_questionnaire]] 的開頭說明：\n\n- 文件目的在了解客戶對 [[NTN]] communication technology 的 specific needs and challenges。\n- 蒐集到的 insights 會協助 [[Rohde & Schwarz]] tailor a solution。\n- 問卷不要求所有題目都必答，因為並非所有問題都適用於每個客戶情境。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+              },
+              "score": 1.218105
+             },
+             {
+              "text": "R&S NTN signaling solutions › 文件依據與版次\n| 來源 | 文件類型 | 日期 / 版次 | 用途 |\n|---|---|---|---|\n| [[cmx500_ntn_customer_questionnaire]] | customer questionnaire | Last Update: August 19, 2026；正式文件版次來源未標示 | 蒐集 NTN signaling solution 需求、測試場景與 deployment planning |\n\n來源未標示正式 document number、version、ordering information 或 specifications；因此本頁只整理問卷中明示的 solution discovery 範圍。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+              },
+              "score": 0.111662
+             },
+             {
+              "text": "R&S NTN signaling solutions › 與 R&S CMX500 的關係\n[[cmx500_ntn_customer_questionnaire]] 的檔名含 `cmx500`，正文也提到「CMX500 environment」。但來源未列 [[R&S CMX500]] 的硬體規格、option code、NTN feature matrix 或 ordering information。\n\n因此：\n\n- 可說：此問卷與 [[R&S CMX500]] / CMX environment 的 NTN signaling use case discovery 有關。\n- 不可說：此問卷證明某個 [[R&S CMX500]] option 已支援某 release、band、orbit、satellite gateway interface、payload type 或 constellation scale。\n- 正式規格仍需引用 [[CMX500_specs_en_5216-4127-22_v1100]]、[[CMX500_Features_CSW9-20-0_en_32]] 或其他正式 product / feature 文件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S NTN signaling solutions.md"
+              },
+              "score": 0.104546
+             },
+             {
+              "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 重點摘要\n- 來源將 [[Keysight]] 描述為大型美國 test & measurement vendor，總部在 Santa Rosa, California, USA，員工數約 **16,800+**，在 semiconductor、aerospace / defense、cloud 與 wireless testing 具有強市場存在。\n- 來源主張 [[Keysight]] mobile communications strategy 越來越 software-led 與 AI-driven，但 [[Keysight UXM]] portfolio 分散於多個 hardware SKUs：[[Keysight E7515P]]、[[Keysight E7515W]]、[[Keysight E7515B]]、[[Keysight E7515E]]、[[Keysight E7515R]]。\n- 來源列出 [[Keysight]] portfolio 包含 UXM 5G Wireless Test Platforms、[[ProbSim]] channel emulators、[[Nemo]] field test tools、[[RaySim]] digital twin engine、[[Atlas]] AI-powered device test、C-V2X 與 cybersecurity tools。\n- 來源把 R&S positioning 表述為：[[R&S CMX500]] 在 one instrument 中整合 [[NR FR1]]、[[NR FR2]]、[[Wi-Fi]]、[[Fading]]、IP throughput、RF analysis、[[NTN]]、[[RedCap]] 與 end-to-end signaling；而 Keysight 需分散於多個 UXM models、add-on software 與 external tools。\n- 來源主張 [[R&S CMX500]] 的差異化包含 one-platform architecture、integrated fading + IP + application testing、unified software ecosystem（[[CMsquares]]、[[R&S CMsequencer]]、AI Script Assistant）、measurement leadership、FR3 / 6G path、cellular + Wi-Fi in one platform，以及 NTN / RedCap / operator certification leadership。\n- 來源對 [[Keysight]] 的弱點敘述包含 hardware fragmentation、multi-tool workflow、advanced testing external dependencies、limited legacy、Wi-Fi only on selected models、FR3 / 6G roadmap relies on add-ons。\n- 來源的 quick comparison table 將 R&S / CMX500 描述為 one platform：FR1 + FR2 + FR3 + WLAN + fading + IP + NTN + LTE + RedCap；將 Keysight 描述為 multiple UXM SKUs + external tools。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+              },
+              "score": 6.968114
+             },
+             {
+              "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 對 Keysight 的主要主張\n| 主題 | 來源對 Keysight 的說法 | 限制 |\n|---|---|---|\n| Portfolio | UXM 5G Wireless Test Platforms E7515B/W/P/E/R、ProbSim、Nemo、RaySim、Atlas、C-V2X、cybersecurity tools | 未提供 Keysight 官方 datasheet 或版本 |\n| Architecture | Multi-Box UXM approach；不同 UXM 有不同 NR bandwidth、RF ports、Rel-17 support、WLAN capability、IP throughput、FR2 readiness | 未列各 SKU 的完整規格條件 |\n| Software model | Atlas + Channel Studio + RaySim + Nemo + WLAN tools + UXM-specific features；no unified automation environment | 這是 R&S battle card 觀點，需 Keysight 官方資料驗證 |\n| Support model | tiered KeysightCare model：Assured、Enhanced、Application Software Support；optional warranty / calibration assurance plan | 未提供 KeysightCare 文件版次或服務條款 |\n| Wi-Fi | Wi-Fi signaling only on selected models：E7515W、E7515P | 未提供 Keysight WLAN option / configuration 文件 |\n| RedCap | E7515R is dedicated RedCap / IoT model | 未提供 E7515R 官方規格或 order data |\n| FR3 / 6G | UXM-P bandwidth options + RaySim + future hardware / software；multi-component approach | future hardware / software 未標示日期、型號或 release status |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+              },
+              "score": 6.054547
+             },
+             {
+              "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › Keysight 相關\n- [[Keysight]] — 本 battle card 的競品公司。\n- [[Keysight UXM]] — 來源中的 UXM 5G Wireless Test Platforms 總稱。\n- [[Keysight E7515P]] — 來源稱 high-end wideband / 5G platform with Wi-Fi as additional capability；quick table 稱 E7515P up to 15 GHz。\n- [[Keysight E7515W]] — 來源稱 Wi-Fi 7 / connectivity platform。\n- [[Keysight E7515B]] — 來源稱 standard / mid-tier 5G UXM。\n- [[Keysight E7515E]] — 來源稱 value / mid-tier 5G UXM。\n- [[Keysight E7515R]] — 來源稱 RedCap / IoT-only SKU。\n- [[ProbSim]] — channel emulator；來源在 integrated vs external fading landmine 中列名。\n- [[RaySim]] — digital twin / ray tracing engine；來源說 advanced fading、digital twin、FR3 / 6G scenarios 可能需要 RaySim。\n- [[Channel Studio]] — channel modeling / fading 相關 external tool。\n- [[Nemo]] — field test tools；來源列於 Keysight fragmented toolchain。\n- [[Atlas]] — AI-powered device test / test management；來源列於 Keysight fragmented toolchain。\n- [[KeysightCare]] — 來源說 Keysight support model 使用 tiered KeysightCare：Assured、Enhanced、Application Software Support，以及 optional warranty / calibration assurance plan。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+              },
+              "score": 5.064225
+             },
+             {
+              "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › Battle card 中的 R&S positioning\n來源的 positioning statement 主張：\n\n- [[Rohde & Schwarz]] delivers the industry’s only fully integrated platform for FR1、FR2、Wi-Fi、fading、IP throughput、RF analysis、NTN、RedCap and end-to-end signalling in one instrument。\n- 來源說 [[Keysight]] spreads equivalent capabilities across multiple UXM models、add-on software and external tools。\n- 來源說 R&S ensures long-term scalability、measurement accuracy and path from R&D to certification without hardware fragmentation。\n\n使用限制：以上是 sales language；其中 only、industry’s only、fully integrated、long-term scalability、lower TCO 等敘述不能當作可驗證規格，需回查正式 datasheet、features document、conformance report 或配置工具。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+              },
+              "score": 1.651586
+             },
+             {
+              "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › R&S / Rohde & Schwarz 相關\n- [[R&S CMX500]] — battle card 的核心產品；來源定位為 one-platform cellular + Wi-Fi + fading + IP + NTN + RedCap 測試平台。\n- [[R&S CMW500]] — 來源在 Keysight weaknesses 中說 R&S CMW500 covers all legacy + EN-DC；正式能力需追溯 [[CMW_dat-sw_en_5213-9211-22_v1700]]。\n- [[RFU18]] — 來源描述為 wide frequency range up to 18 GHz，並說 max aggregated NR bandwidth 2000 MHz with RFU18；來源未提供正式 order number、specification document、release date 或 configuration 條件。\n- [[CMsquares]]、[[R&S CMsequencer]]、[[CONTEST]]、[[AI Script Assistant]] — battle card 中 R&S unified automation / software ecosystem 的列名。\n- [[TS8980]]、[[TS-RRM]] — 來源在 NR-NTN conformance 敘述中與 CMX500、CONTEST 同列。\n- [[Samsung]] — 來源說 R&S was first to validate 3GPP NR-NTN conformance across RF、RRM、PCT with Samsung。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+              },
+              "score": 1.166904
+             },
+             {
+              "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 與既有知識的關係\n- 與 [[R&S CMX500 vs amarisoft]]、[[R&S CMX500 vs Anritsu]] 同屬 2026-02-26 R&S battle card 類型來源；三者都應視為競品銷售定位，而不是正式規格來源。\n- [[R&S CMX500]] 的正式規格仍需以 [[CMX500_specs_en_5216-4127-22_v1100]]（Version 11.00，August 2025）與 [[CMX500_Features_CSW9-20-0_en_32]]（Version 32，CSW 9.20.0 and higher）追溯。\n- 本來源提到 [[R&S CMW500]] covers all legacy + EN-DC；[[R&S CMW500]] 的正式資料需追溯 [[CMW_dat-sw_en_5213-9211-22_v1700]]。\n- 本來源新增 [[Keysight]] 在 wireless device testing battle card 語境中的公司與 UXM portfolio 描述；既有 [[Keysight]] 頁主要來自高頻高速 PCB 測試圖像來源，兩者資料層次不同。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+              },
+              "score": 0.837214
+             },
+             {
+              "text": "2026_02_CMX500_Keysight_Sales_Battle_Card › 原文未解的問題\n- unresolved：來源是 lossy derivative；原始 PDF 才是 source of truth。\n- unresolved：來源標示 COMPANY CONFIDENTIAL；未說明可對外使用範圍。\n- unresolved：來源未提供 [[Keysight E7515P]]、[[Keysight E7515W]]、[[Keysight E7515B]]、[[Keysight E7515E]]、[[Keysight E7515R]] 的正式文件編號、版本、order number 或日期。\n- unresolved：來源未提供 [[RFU18]] 的正式 order number、datasheet、release date、supported CMX500 configurations、校準條件或 availability。\n- unresolved：來源說 [[RFU18]] up to 18 GHz、max aggregated NR bandwidth 2000 MHz，但未提供測試條件、band combination、carrier count、SCS、modulation、MIMO layers 或 binding tolerance。\n- unresolved：來源說 R&S first validated 3GPP NR-NTN conformance with [[Samsung]]，但未提供 validation report、test case list、PTCRB RFT 555 版本或日期。\n- unresolved：來源多處使用 only、first、leadership、lower TCO、fewer boxes 等 sales language；需要正式證據才能在技術比較或客戶文件中使用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/2026_02_CMX500_Keysight_Sales_Battle_Card.md"
+              },
+              "score": 0.77462
+             },
+             {
+              "text": "R&S PVT360A › Signal generation\n| Option | Order no. | 功能 |\n|---|---:|---|\n| R&S PVT-KW400 | 1214.0458.xx | Bluetooth waveform playback through GPRF generator |\n\n依 [[PVT360A_Features_V8-5-30_en_06]]，Bluetooth signal generation 支援：\n\n- Bluetooth specification 4.2 的 basic rate、enhanced data rate、low energy mode。\n- BR/EDR transport modes：ACL+EDR、SCO、eSCO+EDR。\n- BR/EDR packet types 包含 ID、NULL、POLL、FHS、DMx、DHx、AUX1、2-DHx、3-DHx、HVx、DV、EVx。\n- LE packet format：LE 1M、LE 2M、LE coded。\n- LE advertising extensions、direction finding with AoA/AoD。\n- Dirty transmitter / dirty transmission test settings。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 4.948589
+             },
+             {
+              "text": "R&S PVT360A › R&S VSE integration\n依 [[PVT360A_Features_V8-5-30_en_06]]：\n\n- [[R&S VSE]] 是 vector signal explorer analysis software，用於 various analysis tasks 與來自 various instruments 的 input。\n- Supported instruments 包含 PVT360A。\n- VSE client licenses 可由 USB smart card reader dongle 或 PVT360A 提供。\n- 若由 PVT360A 提供 licenses，需要 **R&S VSE-PVT**。\n- R&S VSE-KPxxx options 對應 smart card 上的 R&S VSE-Kxxx options；例：R&S VSE-KP144 對應 R&S VSE-K144。\n\n| Option | Order no. | 功能 |\n|---|---:|---|\n| R&S VSE-PVT | 1345.2401.xx | VSE base software for PVT360A |\n| R&S VSE-KPxxx | 來源未列完整 | Specific VSE measurement options |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 21,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 4.230127
+             },
+             {
+              "text": "R&S PVT360A › 規格與數字使用限制\n- [[PVT360A_Features_V8-5-30_en_06]] 是 Features and Functions overview；沒有 tolerance limits 的 data 不可作為 binding specifications。\n- 含 tolerance limits 的 measurement ranges 需查 specifications document **PD 3683.6212.22**。\n- 報價或配置相容性需以正式 ordering data、configuration tool、specifications document 或 Rohde & Schwarz sales / application support 確認。\n- `.xx` order number 後綴不可推導；本頁只照抄來源。\n- R&S PVT options 不可與 [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMX500]] 的 R&S CMP / R&S CMX options 混用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 4.041479
+             },
+             {
+              "text": "R&S PVT360A › 產品定位\n依 [[PVT360A_Features_V8-5-30_en_06]]，[[R&S PVT360A]] 的功能目錄涵蓋：\n\n- Global options\n- Bluetooth options\n- CDMA2000 options\n- GSM options\n- LTE options\n- NB-IoT options\n- NR options\n- Spectrum analysis options\n- WCDMA options\n- WLAN options\n- [[R&S VSE]] options\n- Ordering information\n\n與 [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMX500]] 不同，本來源把產品名稱標示為 **PVT360A Performance Vector Tester**；因此本頁保留為獨立產品頁，不與 CMP / CMX radio communication tester 頁面合併。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 3.333254
+             },
+             {
+              "text": "R&S PVT360A\n[[R&S PVT360A]] 是 [[Rohde & Schwarz]] 的 **Performance Vector Tester**，依 [[PVT360A_Features_V8-5-30_en_06]] Version 06 可透過 R&S PVT-KW / KM / KB options 提供多無線標準 waveform playback、TX/RX measurements、spectrum analysis、WLAN MIMO 與 external frontend frequency extension。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 3.146599
+             },
+             {
+              "text": "R&S PVT360A › 文件依據與版次\n本頁目前依一份 Productions 來源整理：\n\n- [[PVT360A_Features_V8-5-30_en_06]]：**Features and Functions** 文件，文件編號 **1179.6543.02**，**Version 06**，適用 base software version **V8.5.30 or higher**，版權標示 **© 2025 Rohde & Schwarz**。\n\n此文件是 test applications overview；詳細說明需參考 PVT360A help 或 user manuals。含 tolerance limits 的 measurement ranges 需參考 specifications document **PD 3683.6212.22**。因此本頁不得把 Features and Functions 的數字視為 binding specifications。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 2.707626
+             },
+             {
+              "text": "R&S PVT360A › Waveform playback\n| Option | Order no. | 功能 |\n|---|---:|---|\n| R&S PVT-KW320 | 1214.0435.xx | 5G NR release 15/16 waveform playback；mandatory |\n| R&S PVT-KW326 | 1214.0441.xx | 5G NR release 17 waveform extension |\n\nNR waveform 功能摘錄：\n\n- R15 waveform 依 3GPP TS 38.211/212/213/214 V17.3.0 or newer。\n- NR-TM presets test models 依 3GPP TS 38.141-1/2 17.6.0。\n- Number of carriers：**1 to 16**。\n- Per carrier channel bandwidth：5 MHz、10 MHz、15 MHz、20 MHz、25 MHz、30 MHz、40 MHz、50 MHz、60 MHz、70 MHz、80 MHz、90 MHz、100 MHz、200 MHz、400 MHz。\n- R17/18 waveform 新增 35 MHz、45 MHz channel bandwidth，480 kHz / 960 kHz subcarrier spacing，1024QAM，3 MHz channel bandwidth 與 other release 17 / 18 features。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 1.929803
+             },
+             {
+              "text": "R&S PVT360A › Spectrum analysis\n| Option | Order no. | 功能 |\n|---|---:|---|\n| R&S PVT-KM100 | 1214.3140.xx | I/Q-based spectrum analysis |\n\nSpectrum analysis 提供：\n\n- Frequency sweep measurement：power vs frequency，最多 four traces。\n- Zero span measurement：power vs time，最多 four traces。\n- Marker evaluation、peak search。\n- Two-tone signal third order intercept / TOI results。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 18,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S PVT360A.md"
+              },
+              "score": 1.624039
+             },
+             {
+              "text": "Data center full-spectrum connectivity\n[[Data center full-spectrum connectivity]] 是 [[full-spectrum-data-center-connectivity-brochure]] 呈現的 portfolio 視角：把 AI / data center 的 high-speed electrical interconnect、optical interconnect、fiber deployment、rack power distribution、busbar、liquid cooling 與 leak detection 放在同一張 data center connectivity brochure 中。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 1.880795
+             },
+             {
+              "text": "Data center full-spectrum connectivity › Optical 與 fiber connectivity\n- [[Amphenol XPO-LPO]] — 來源稱其以 224 Gb/s per lane across 64 channels，面向 AI scale-up deployments。\n- [[1.6T OSFP Transceivers]] — 來源稱 Amphenol 200G/lane optical modules support DR4、FR4、2×DR4、2×FR4、AOC、breakout AOC configurations with LC or MPO ports。\n- [[Amphenol Co-packaged Optics]] — 來源稱 Amphenol offers an architecture from high-density electrical interposer to linear optical conversion module to fiber plant。\n- [[LEAP On-Board Transceiver]] — 來源稱其為 12-channel duplex optical transceiver，up to 25Gbps per channel，300Gbps cumulative on multi-mode fiber。\n- [[300G CXP2 Active Optical Cable]] — 來源稱 CXP2 to CXP2 AOC provides cost-effective plug and play cabling solution，delivers high hardware faceplate port density among existing SFF industry standards。\n- [[CommScope Rapid Fiber Connect Platform]] — 來源稱其 simplifies and accelerates AI scaling by pre-integrating optics off-site and reducing on-site fiber connections。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 1.787039
+             },
+             {
+              "text": "Data center full-spectrum connectivity › Power 與 cooling connectivity\n- [[Amphenol BarKlip I-O products]] / [[BarKlip Busbar Connectors]] — 來源稱其 distribute high-current power between busbars、cables and circuit boards，適用 power-dense data centers、OCP rack and power solutions。\n- [[60 A Universal AC Input Connector and Cable Assemblies]] — 來源稱其 meet 2OU power distribution architecture standards，將 power 從 busway routing 到 power shelf。\n- [[M-CRPS +54V Connectors and Cable Assemblies]] — 來源稱其 meet OCP M-CRPS power supply input specifications。\n- [[PwrBlade ULTRA HD+ Cable Assembly]] — 來源稱其 Cable-to-Board serves as high-power I/O cable configuration in a low-profile design。\n- [[OSFP-RHS 224G Cold Plate and Cage Assembly]] — 來源稱其 optimizes port thermal efficiency and reliability，meeting MSA requirements，並提供 one-step press assembly。\n- [[Amphenol Liquid Cooling Leakage Detection Sensor Cable Assembly]] — 來源稱其 detects coolant leaks and ensures system reliability。\n- [[Liquid Cooling Quick Disconnect Connectors]] — 來源稱其用於 high-efficiency thermal management。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 1.655631
+             },
+             {
+              "text": "Data center full-spectrum connectivity › 相關來源\n- [[full-spectrum-data-center-connectivity-brochure]] — 來源未標示正式日期、raw converted 2026-09-17 的 Amphenol full-spectrum data center connectivity brochure。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 0.11512
+             },
+             {
+              "text": "Data center full-spectrum connectivity › 與既有概念的關係\n- [[Data center server 高速互連產品組合]] 偏向 data center server interconnect portfolio 的分類表；[[Data center full-spectrum connectivity]] 更強調 full-spectrum：electrical interconnect + optical + fiber + power + cooling。\n- [[Compute tray component solutions]] 偏向 compute tray connectors、cables、power connector、busbar 與 backplane interconnect；本頁納入 optical transceiver、CPO、fiber deployment 與 liquid cooling。\n- [[高速伺服器儲存互連]] 可連接本頁中的 [[Mini Cool Edge IO]]、[[Cool Express Link]]、[[Direct Attached Copper Cables]]、[[PCIe CEM 7 Connectors]] 與 storage / EDSFF 類產品。\n- [[CPO]]、[[Optical I-O]]、[[Near-Packaged Optics]] 可連接本頁的 [[Amphenol Co-packaged Optics]] 與 [[LEAP On-Board Transceiver]]，但本來源不是技術標準或市場採用證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 0.096036
+             },
+             {
+              "text": "Data center full-spectrum connectivity › High-speed electrical connectivity\n- [[Amphenol OverPass Cable Systems]] — 來源稱其 enable high-speed signal transmission from ASIC packages to end-points across the system。\n- [[ExtremePort OSFP Connectors]] — 來源稱 connectors and cages have 60 contacts per port、0.6 mm pitch，並 optimized for signal integrity、thermal management and multi-lane pluggable architecture。\n- [[Amphenol XtremePass]] — 來源稱 XtremePass 448G connector solution supports scalable form factors from 32DP to 128DP，並跨 Ethernet、NVLink、PCIe、InfiniBand systems。\n- [[OSFP Cable Assemblies]] — 來源稱 OSFP cable assemblies compatible with 25G/lane NRZ up to 224G/lane PAM4，deliver aggregate bandwidths of 200G、400G、800G and 1.6T per cable assembly，available in Passive and Active variants。\n- [[Sentry HD High-Speed Backplane Connector]] — 來源稱其是 next-generation high-speed backplane connector platform。\n- [[Celerity 224 Gb-s BGA Mezzanine Connectors]] — 來源稱其 designed to support data rates up to 224 Gb/s PAM4。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 0.077816
+             },
+             {
+              "text": "Data center full-spectrum connectivity › 使用限制\n- [[full-spectrum-data-center-connectivity-brochure]] 未標示正式日期；所有產品能力、規格數字與 marketing claim 需標示來源日期缺口。\n- 來源是供應商 brochure，不是第三方市場報告；不可用來推論市占率、排名、客戶導入、採購關係或出貨量。\n- 來源未提供 datasheet 版次、order number、合規證書或測試條件；224G、448G、1.6T、300G、60A、+54V、60 contacts、0.6mm pitch 等數字只能作為來源文字摘錄。\n- PDF 轉檔為 lossy derivative；欄位串接與 OCR 風險需回看原始 PDF。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 0.068453
+             },
+             {
+              "text": "Data center full-spectrum connectivity › 底部圖上產品清單\n來源底部再以清單列出多個 electrical interconnect / memory / card edge / cable connector 類別，包括 [[SOCAMM and LPCAMM CAMM2 Connectors]]、[[CompacLink PCIe Gen 6 Compression Board-to-Board Connectors]]、[[Mini Cool Edge IO]] / [[Multi-Trak]]、[[Titen]]、[[Cool Express Link]]、[[DDR5 and Next Gen Memory Connector]]、[[Double & Single Density Mini Cool Edge]]、[[U.2 SFF8639]]、[[PCIe CEM 7 Connectors]] 與 [[Direct Attached PCIe CEM Cable Connectors]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+              },
+              "score": 0.067135
+             },
+             {
+              "text": "full-spectrum-data-center-connectivity-brochure › 與既有知識的關係\n- 本來源延伸既有 [[Amphenol Communications Solutions]]、[[Data center server 高速互連產品組合]]、[[高速伺服器儲存互連]] 與 [[Compute tray component solutions]]，但比 [[compute-tray-flyer]] 與 [[data-center-server-solutions-guide]] 更強調 full-spectrum coverage：high-speed I/O、backplane、mezzanine、optical、fiber、power 與 cooling 同頁並列。\n- 本來源與 [[HSD Cable test image 1]]、[[HSD Cable test image 2]]、[[HSD Cable test image 3]]、[[HSD Cable test image 4]]、[[HSD Cable test image 6]]、[[HSD Cable test image 7]]、[[HSD Cable test image]]、[[compute-tray-flyer]] 與 [[data-center-server-solutions-guide]] 都屬 Amphenol 型錄 / brochure 類資料；不可把多個型錄 / 轉檔重疊內容視為獨立市場驗證。\n- 本來源補充 [[BarKlip Busbar Connectors]] 的 high-current power distribution 應用描述，但未提供比既有來源更精確的 current rating 表、測試條件或 order number。\n- 本來源新增 optical 與 fiber deployment 相關線索，例如 [[Amphenol XPO-LPO]]、[[1.6T OSFP Transceivers]]、[[Amphenol Co-packaged Optics]]、[[LEAP On-Board Transceiver]]、[[300G CXP2 Active Optical Cable]] 與 [[CommScope Rapid Fiber Connect Platform]]；這些在既有 Amphenol compute tray / server guide 頁面中尚未完整展開。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/full-spectrum-data-center-connectivity-brochure.md"
+              },
+              "score": 2.915431
+             },
+             {
+              "text": "full-spectrum-data-center-connectivity-brochure › 關鍵實體與概念\n- [[Amphenol Communications Solutions]] — 來源頁面與頁尾社群帳號皆以 amphenol-cs.com / Amphenol CS 呈現，支撐其 data center connectivity portfolio 語境。\n- [[Amphenol OverPass Cable Systems]] — 來源稱其提供 broad range of next gen capabilities，讓 high-speed signal 從 ASIC packages 到 system endpoints 傳輸。\n- [[ExtremePort OSFP Connectors]] — 來源稱 ExtremePort OSFP connectors and cages have 60 contacts per port and a 0.6 mm pitch form factor，optimized for signal integrity、thermal management and multi-lane pluggable architecture。\n- [[Amphenol XtremePass]] — 來源稱 XtremePass 448G connector solution 提供 best-in-class SI performance、maximize substrate density，支援 32DP 到 128DP form factors，並跨 Ethernet、NVLink、PCIe 與 InfiniBand systems。\n- [[Sentry HD High-Speed Backplane Connector]] — 來源稱 Sentry HD 是 Amphenol next-generation high-speed backplane connector platform，purpose-built to power future AI data center architectures。\n- [[Celerity 224 Gb-s BGA Mezzanine Connectors]] — 來源稱 Celerity / Celerity LP 224 Gb/s BGA mezzanine connectors support up to 224 Gb/s PAM4，並有 hermaphroditic mating interfaces。\n- [[Amphenol XPO-LPO]] — 來源稱 XPO-LPO addresses the power and density wall of traditional OSFP form factors，224 Gb/s per lane across 64 channels，面向 AI scale-up deployments。\n- [[Amphenol Co-packaged Optics]] — 來源稱 Amphenol CPO extends end-to-end ownership to the chip，從 high-density electrical interposer 到 optical conversion module 再到 fiber plant。\n- [[BarKlip Busbar Connectors]] — 來源補充 BarKlip I/O products 用於 busbars、cables 與 circuit boards 間 high-current power distribution，且 direct pluggable connection to an uninsulated busbar generates very low energy loss。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/full-spectrum-data-center-connectivity-brochure.md"
+              },
+              "score": 2.005809
+             },
+             {
+              "text": "full-spectrum-data-center-connectivity-brochure › 關鍵實體與概念\n- [[Data center full-spectrum connectivity]] — 本來源可作為 data center electrical interconnect、optical interconnect、power distribution 與 cooling connectivity 的 full-spectrum portfolio 節點。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/full-spectrum-data-center-connectivity-brochure.md"
+              },
+              "score": 0.182381
+             },
+             {
+              "text": "full-spectrum-data-center-connectivity-brochure › 重點摘要\n- 本來源是由 `full-spectrum-data-center-connectivity-brochure.pdf` 轉出的 lossy derivative；原檔路徑在 raw frontmatter 中標示，正式內容日期、文件編號與版本未標示。\n- 來源以 [[Amphenol Communications Solutions]] / amphenol-cs.com 的 data center connectivity portfolio 為主，涵蓋 high-speed I/O、backplane、mezzanine、optical、CPO / NPO、fiber deployment、rack power input、busbar power distribution、liquid cooling 與 leak detection。\n- High-speed electrical interconnect 方面，來源列出 [[Amphenol OverPass Cable Systems]]、[[ExtremePort OSFP Connectors]]、[[Amphenol XtremePass]]、[[OSFP Cable Assemblies]]、[[Sentry HD High-Speed Backplane Connector]] 與 [[Celerity 224 Gb-s BGA Mezzanine Connectors]]。\n- Optical connectivity 方面，來源列出 [[Amphenol XPO-LPO]]、[[1.6T OSFP Transceivers]]、[[Amphenol Co-packaged Optics]]、[[LEAP On-Board Transceiver]]、[[300G CXP2 Active Optical Cable]] 與 [[CommScope Rapid Fiber Connect Platform]]。\n- Power 與 cooling 方面，來源列出 [[BarKlip Busbar Connectors]] / [[Amphenol BarKlip I-O products]]、[[60 A Universal AC Input Connector and Cable Assemblies]]、[[M-CRPS +54V Connectors and Cable Assemblies]]、[[PwrBlade ULTRA HD+ Cable Assembly]]、[[OSFP-RHS 224G Cold Plate and Cage Assembly]]、[[Amphenol Liquid Cooling Leakage Detection Sensor Cable Assembly]] 與 [[Liquid Cooling Quick Disconnect Connectors]]。\n- 來源底部以圖上清單方式列出多個既有 Amphenol connector 類別：[[CompacLink PCIe Gen 6 Compression Board-to-Board Connectors]]、[[SOCAMM and LPCAMM CAMM2 Connectors]]、[[Mini Cool Edge IO]] / [[Multi-Trak]]、[[Titen]]、[[Cool Express Link]]、[[DDR5 and Next Gen Memory Connector]]、[[Double & Single Density Mini Cool Edge]]、[[U.2 SFF8639]]、[[PCIe CEM 7 Connectors]]、[[Direct Attached PCIe CEM Cable Connectors]] 等。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/full-spectrum-data-center-connectivity-brochure.md"
+              },
+              "score": 0.137846
+             },
+             {
+              "text": "full-spectrum-data-center-connectivity-brochure › 原文未解的問題\n- 來源未標示正式發布日期、文件版次、brochure 編號或產品資料表版本。\n- 來源未說明 PDF 原始發布頁、QR code 目標頁、各 featured product 的 order number、料號、可訂購狀態或量產狀態。\n- 來源未提供 224 Gb/s PAM4、448G、32DP–128DP、1.6T、300G、60 contacts per port、0.6 mm pitch、60 A、+54V、high-current、very low energy loss、leak detection 或 quick disconnect 等數字 / 能力的測試條件、合規文件或第三方驗證。\n- 來源未提供客戶、導入案例、市占率、營收、出貨量或排名；所有產品能力只能視為 brochure claim。\n- 來源中的文字由 PDF 轉檔而來，版面欄位有串接風險，例如 `System with Integrated Liquid Cage Systems Cooling`、`XtremePass™448G`、`L C P A C M A M M 2 M` 等需回看原 PDF 圖像確認。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/full-spectrum-data-center-connectivity-brochure.md"
+              },
+              "score": 0.080539
+             },
+             {
+              "text": "Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness › 重點摘要\n- 來源的 Future-ready CMX500 platform for 6G 段落稱 [[R&S CMX500]] 是 modular、powerful、future-proof one-box signaling tester，支援 RF to protocol testing across [[FR1]]、[[FR2]]、[[FR3]]；all existing CMX500 platforms can be enhanced with [[RFU18]] board。\n- 同段落另稱 [[R&S CMX500]] engineered for data rates up to **20 Gbps**、supporting wide dynamic range、[[4096QAM]] 與 up to **16 device antenna ports** for advanced spatial multiplexing；並列出 LTE、NR SA/NSA、NR-NTN、NB-NTN、Direct-to-Cell（D2C/DTC）、WLAN including [[Wi-Fi 7]] and future [[Wi-Fi 8]]。\n- Demo 展示地點：[[MWC Barcelona 2026]]，Rohde & Schwarz booth 5A80，hall 5，期間 **March 2 to 5, 2026**。\n- Press & media contact 為 [[Christian Mokry]]，PR Manager Test & measurement，phone +49 89 412913052，email press@rohde-schwarz.com。\n- 來源未標示 published date；raw frontmatter created 為 2026-09-11。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md"
+              },
+              "score": 3.883686
+             },
+             {
+              "text": "Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness › 與既有知識的關係\n- 既有 [[Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks]] 描述 13 GHz proposed [[FR3]] [[5G NR]] high-throughput demonstration，未提 [[RFU18]]；本來源進一步說明 [[R&S CMX500]] 透過 new [[RFU18]] board coverage up to 18 GHz，並把 demo 從 13 GHz single connection 擴展到 FR1 約 2.5 GHz + FR3 約 7 GHz carrier aggregation。\n- 既有 [[FR3 測試與 RFU18 battle card 主張]] 記錄 2026-02-26 battle card 對 [[RFU18]] up to 18 GHz 與 max aggregated NR bandwidth 2000 MHz 的 sales claims。本來源是 Rohde & Schwarz PR，能支撐 RFU18 up to 18 GHz 與 CMX500 + RFU18 的 FR1-FR3 CA demo claim；但來源仍未提供 RFU18 order number、formal specifications 文件編號、測試條件、bandwidth 或 throughput 數字，因此不能直接替代 formal datasheet。\n- 既有 [[R&S CMX500]] 頁依 [[CMX500_specs_en_5216-4127-22_v1100]] 記錄正式 Specifications Version 11.00（August 2025），其中 [[R&S CMX-B600B]] RF unit frequency range 為 400 MHz to 8000 MHz，[[R&S CMX-B500A]] 為 IF unit。新來源說 all existing CMX500 platforms can be enhanced with [[RFU18]] board to extend frequency coverage；判斷上應視為新 PR / upgrade claim，不應回寫成 August 2025 specs 的 binding data。\n- 既有 [[Qualcomm Technologies]] 頁已記錄 [[KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance]] 與 13 GHz FR3 demonstration；本來源新增 Qualcomm MTP powered by [[Qualcomm Modem-RF System]] 用於 FR1-FR3 carrier aggregation validation 的說法。\n- 既有 [[Tingfang Ji]] 頁在 13 GHz FR3 PR 中記錄其為 Vice President of Engineering at [[Qualcomm Technologies]]；本來源更新同一人物在此 PR 中的職稱為 Vice President of Engineering and Head of 6G Research at Qualcomm Technologies, Inc.。\n- 既有 [[Christian Mokry]] 頁已有多份 [[Rohde & Schwarz]] PR contact block；本來源新增同一 phone 與 press email。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md"
+              },
+              "score": 2.853384
+             },
+             {
+              "text": "![](Picture4.jpg)\nWireless communication tester\nEMI test receiver\nSignal & spectrum analyzer\nWireless communication tester",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-4a179a13677acd8f",
+                "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+                "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+               "section": 175,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 23.152758
+             },
+             {
+              "text": "Wireless Manufacturing Test (WMT)\nModular software framework tailored for high volume production testing and non-signaling R&D applications.\n27",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-ae261ae2c6ea49d8",
+                "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+                "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+                "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "section": 278,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 21.242901
+             },
+             {
+              "text": "Rohde & Schwarz will display its [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities. With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup. In addition to this, the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-d0a8f03c4120b8e2",
+                "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+                "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+                "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 21.101236
+             },
+             {
+              "text": "The setup is operated using the Bluetest Flow control software, an integrated test environment for complex wireless solutions. By integrating the Wi-Fi 7 test functionality of the [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") one-box signaling tester into the Bluetest Flow software, WLAN developers utilizing the R&S CMX500 can now leverage Bluetest's reverberation chamber technology in the development of their advanced WLAN stations and access points.",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-54cc8cb2ee42584d",
+                "original_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+                "sha256": "54cc8cb2ee42584d7782fc776b5114e91fddf5f57b891a177556a7f8bdfd3d42",
+                "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 21.001775
+             }
+            ],
+            "text": "What they do support is that AI data centers are moving toward much higher-speed electrical/optical links, denser power, and liquid-cooling infrastructure, while wireless test instruments are separately evolving toward wider bandwidth, more MIMO/RF-chain, OTA, multi-technology, throughput/IP, fading, and automation capabilities [50][51][52][55][13].\n### Supported technology changes in AI data centers\nAI/data-center connectivity is described as a “full-spectrum” portfolio covering high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection [50].\nHigh-speed electrical examples include OSFP cable assemblies from 25G/lane NRZ up to 224G/lane PAM4 with aggregate bandwidths of 200G, 400G, 800G, and 1.6T per cable assembly; XtremePass 448G connector solutions; and Celerity 224 Gb/s PAM4 mezzanine connectors [55].\nOptical examples include XPO-LPO at 224 Gb/s per lane across 64 channels for AI scale-up deployments and 1.6T OSFP transceivers using 200G/lane optical modules [51].\n### Implications for wireless / signaling test instruments\nFor Wi-Fi 7 and next-generation WLAN devices, OTA testing in signaling mode is used to measure antennas and RF transmitter/receiver characteristics under real-world conditions [1].\nBecause MLO is a key Wi-Fi 7 feature, a test environment with multiple RF chains is described as critical [1].\nWi-Fi 7 throughput-related components include 320 MHz channel bandwidth, up to 16 spatial streams, 4096 QAM, and MLO [3].\nTherefore, signaling testers used for Wi-Fi 7 development need to address OTA MIMO stress testing, realistic multipath RF conditions, antenna/RF TX/RX behavior, and multi-antenna performance for IEEE 802.11be stations and access points [2][5].\nThe R&S CMX500 is described as a multi-technology, multi-channel one-box signaling tester, and the passages list support for LTE, 5G NR FR1, 5G NR FR2, Wi-Fi 7, and 5G RedCap in OTA measurement environments [6].\nThe CMX500 feature summary also lists NR FR1/FR2 signaling and TX measurements, LTE signaling and measurements, NB-IoT/NB-NTN signaling, WLAN signaling and WLAN TX measurements including 802.11be and 2x2 MIMO, plus fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, IP traffic analysis, IMS/audio/POLQA, and automation interfaces [13].\nIn a Bluetest OTA workflow, CMX500 OBT with Bluetest RTS and Bluetest Flow supports 5G NR SA, 5G NR NSA, LTE, and WLAN OTA testing, and WLAN capability was expanded to Wi-Fi 7 320 MHz bandwidth support [21].\nHowever, that same knowledge base notes this is PR/upgrade evidence and not a binding formal specification for RFU18 order number, bandwidth, throughput, or test conditions [64].\n### Implications for non-signaling test instruments\nFor non-signaling and production-style testing, the RAW passage describes Wireless Manufacturing Test as a modular software framework tailored for high-volume production testing and non-signaling R&D applications [66].\nThe R&S PVT360A is described as a Performance Vector Tester that can provide multi-wireless-standard waveform playback, TX/RX measurements, spectrum analysis, WLAN MIMO, and external frontend frequency extension [46].\nIts NR waveform playback capabilities include 1 to 16 carriers and per-carrier channel bandwidths up to 400 MHz, with release 17/18 waveform additions including 480 kHz / 960 kHz subcarrier spacing and 1024QAM [48].\nIts spectrum analysis option provides I/Q-based spectrum analysis, frequency sweep power-vs-frequency, zero-span power-vs-time, marker evaluation, peak search, and TOI results [49].\nA RAW passage also states that the R&S CMP180 can verify a 480 MHz bandwidth signal waveform in loopback mode and is positioned for R&D and production beyond Wi-Fi 7 requirements [67].\n### Practical separation of required capabilities\n| Instrument role | Measurement capability that becomes more relevant | Passage-supported basis |\n|---|---|---|\n| Signaling / network-emulation tester | Multi-technology, multi-channel signaling across LTE, NR FR1/FR2, Wi-Fi 7, and RedCap | CMX500 is described as multi-technology/multi-channel and supports LTE, NR FR1/FR2, Wi-Fi 7, and 5G RedCap in OTA contexts.[6] |\n| Signaling / Wi-Fi 7 OTA tester | OTA, real-world signaling-mode RF and antenna measurement, MIMO stress, multiple RF chains | Wi-Fi 7 device development needs real-world signaling-mode antenna and RF TX/RX measurement, and MLO makes multiple RF chains critical.[1] |\n| Signaling / throughput and protocol tester | Throughput, PER, BLER, CSI, fading, AWGN, IP traffic analysis, application testing | CMX500 feature summary lists fading, AWGN, BLER, CSI report, throughput measurement, PER measurement, application test, and IP traffic analysis.[13] |\n| Signaling / future cellular tester | FR1/FR2/FR3, higher data rate, 4096QAM, more antenna ports, NTN/D2C/Wi-Fi 7/Wi-Fi 8 readiness | CMX500 PR states FR1/FR2/FR3, up to 20 Gbps, 4096QAM, up to 16 device antenna ports, and support positioning for NTN, D2C, Wi-Fi 7, and future Wi-Fi 8.[63] |\n| Non-signaling R&D / production tester | High-volume production framework and non-signaling R&D workflow | Wireless Manufacturing Test is described as a modular software framework for high-volume production testing and non-signaling R&D applications.[66] |\n| Non-signaling waveform / RF tester | Wider waveform playback, TX/RX, spectrum analysis, WLAN MIMO, multi-carrier NR | PVT360A provides waveform playback, TX/RX measurements, spectrum analysis, WLAN MIMO, and external frontend frequency extension; its NR waveform playback supports 1 to 16 carriers and up to 400 MHz per-carrier bandwidth.[46][48] |\n| Non-signaling wideband waveform tester | 480 MHz waveform verification for R&D and production beyond Wi-Fi 7 | CMP180 is stated to verify a 480 MHz bandwidth signal waveform in loopback mode and to be positioned for R&D and production beyond Wi-Fi 7.[67] |\n### Inference\n【推論】Because AI data-center connectivity is moving toward 224G/lane, 448G, 1.6T optical/electrical interconnects and denser power/cooling systems, wireless testers are not shown as directly measuring those data-center interconnects; instead, the relevant wireless/signaling requirement is to keep pace with adjacent wireless-device complexity such as Wi-Fi 7 OTA MIMO, MLO, 320 MHz bandwidth, multi-RF-chain operation, FR1/FR2/FR3, high throughput, and IP/application-layer validation.[50][51][52][55][1][2][3][13][63]\n【推論】For non-signaling instruments, the measurement capability trend is toward production-scalable waveform generation/playback, TX/RX and spectrum analysis, wider bandwidth verification, and multi-carrier NR/WLAN support, because WMT is described for high-volume production and non-signaling R&D, PVT360A supports waveform playback/TX/RX/spectrum/WLAN MIMO, and CMP180 is stated to verify 480 MHz bandwidth waveforms.[66][46][48][49][67]",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "Wi-Fi 7 OTA MIMO stress testing › 為什麼需要 OTA 與 multiple RF chains\n[[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]] 指出，在 WLAN devices development 期間，需要在 real-world conditions in signaling mode 下量測 antennas 以及 RF transmitter / receiver characteristics。由於 [[MLO]] 是 [[Wi-Fi 7]] key feature，提供 multiple RF chains 的 test environment 很關鍵。\n\n同一來源同時將 [[R&S CMX500]] 描述為 multi-technology multi-channel signaling tester；其 flexibility、support for multiple radio technologies 與 embedded IP test capabilities 使其可用於 broad range of Wi-Fi 7-specific tests。\n\n[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 進一步把 Wi-Fi 7 OTA 測試放入更廣的 [[4G 5G NR WLAN OTA MIMO stress testing]] 情境：同一 [[R&S CMX500 OBT]] / [[Bluetest]] RTS workflow 同時涵蓋 WiFi、[[LTE]]、5G SA / NSA 的 radio and antenna performance validation。\n\n[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 沒有使用 MIMO stress testing 一詞，也沒有提供 RF chains、spatial streams 或 chamber reflection model；它的貢獻是確認另一個 OTA chamber vendor [[EMITE]] 也將 [[R&S CMX500]] 整合到 [[Wi-Fi 7]] OTA measurement solution 中。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+             },
+             "score": 3.743189
+            },
+            {
+             "text": "Wi-Fi 7 OTA MIMO stress testing › 來源中的測試架構\n[[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]]（來源未標示發布日期；raw created 2026-09-11）描述的架構為：\n\n- [[R&S CMX500]] one-box signaling tester 提供 integrated [[Wi-Fi 7]] test functionality。\n- [[Bluetest Flow]] control software / integrated test environment 整合 [[R&S CMX500]] 的 [[Wi-Fi 7]] test functionality。\n- [[Bluetest]] reverberation test systems（RTS），例如 [[Bluetest RTS65]]，提供 reverberation chamber OTA environment。\n- 測試對象為 [[IEEE 802.11be]] stations 與 access points。\n- 測試目標為 MIMO stress testing under realistic conditions。\n\n[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]]（來源未標示發布日期；raw created 2026-09-11）補充：\n\n- [[Bluetest]] expanded its earlier integrated testing capabilities for [[WLAN]] stations and access points（[[IEEE 802.11]] a/b/g/n/ac/ax/be）。\n- [[Wi-Fi 7]] 現在支援 bandwidth up to **320 MHz**。\n- 此能力與 [[R&S CMX500 OBT]]、[[Bluetest Flow]] v1.18 與 [[Bluetest]] RTS 組成 single tester and reverberation test system 的 integrated path。\n\n[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]]（來源未標示發布日期；raw created 2026-09-11）補充：\n\n- [[EMITE]] over-the-air chambers 可 combined with the latest sophisticated testing features of [[R&S CMX500]]。\n- 整合 enables support of [[LTE]]、[[NR FR1]]、[[NR FR2]]、full compliance with [[IEEE 802.11be]] and [[5G RedCap]]。\n- [[R&S CMX500]] 被描述為支援 non-cellular technologies including latest [[Wi-Fi 7]]，all in a single instrument。\n- [[EMITE]] customers obtain a comprehensive environment for accurately assessing performance of [[Wi-Fi 7]] as well as [[5G RedCap]] devices。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+             },
+             "score": 3.381164
+            },
+            {
+             "text": "Wi-Fi 7 OTA MIMO stress testing › Wi-Fi 7 技術背景\n[[Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices]] 列出的 [[Wi-Fi 7]] / [[IEEE 802.11be]] throughput-related components 包含：\n\n| 技術項目 | 來源說法 |\n|---|---|\n| 320 MHz channel bandwidth | key component facilitating higher throughput |\n| up to 16 spatial streams | key component facilitating higher throughput |\n| 4096 QAM modulation | key component facilitating higher throughput |\n| [[MLO]] | key component；also key feature making multiple RF chains important |\n\n[[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]] 提供 solution-level update：[[Bluetest]] earlier integrated WLAN testing capabilities 現在支援 [[Wi-Fi 7]] bandwidth up to **320 MHz**。\n\n[[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 則以背景段落描述 [[IEEE 802.11be]] / [[Wi-Fi 7]] 是 next generation Wi-Fi technology，面向 extremely high data throughput、tens of gigabits per second、low latency、ultra-high-definition video streaming、virtual reality 與 augmented reality applications。\n\n以上皆為來源對 Wi-Fi 7 與整合測試能力的敘述，不等同於 [[R&S CMX500]]、[[R&S CMX500 OBT]]、[[Bluetest Flow]]、[[Bluetest]] RTS 或 [[EMITE]] chambers 對所有 feature combination 的完整規格保證。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+             },
+             "score": 2.562899
+            },
+            {
+             "text": "Wi-Fi 7 OTA MIMO stress testing\n[[Wi-Fi 7 OTA MIMO stress testing]] 是在 over-the-air、signaling mode 與 realistic multipath RF conditions 下，對 [[IEEE 802.11be]] stations 與 access points 的 antenna、RF transmitter / receiver 與 multi-antenna performance 進行壓力測試的測試情境。新匯入的 [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]] 補充另一個 partner integration 視角：[[EMITE]] OTA chambers 可整合 [[R&S CMX500]] 最新測試能力，用於 [[Wi-Fi 7]] 與 [[5G RedCap]] device performance assessment。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+             },
+             "score": 0.710587
+            },
+            {
+             "text": "Wi-Fi 7 and 5G RedCap OTA measurements › 來源中的測試架構\n依 [[EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap]]：\n\n- [[EMITE]] over-the-air chambers 可與 [[R&S CMX500]] one-box signaling tester 的 latest sophisticated testing features combined。\n- [[R&S CMX500]] 被描述為 multi-technology、multi-channel one-box signaling tester。\n- cellular technologies：[[LTE]]、[[5G NR]] [[NR FR1]] frequency range up to 8 GHz、[[NR FR2]] millimeter wave frequency range up to 50 GHz、latest [[5G RedCap]]。\n- non-cellular technologies：latest [[Wi-Fi 7]]。\n- integration enables support of LTE、FR1、FR2、full compliance with [[IEEE 802.11be]] and [[5G RedCap]]。\n- EMITE customers obtain a comprehensive environment for accurately assessing performance of [[Wi-Fi 7]] and [[5G RedCap]] devices。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+             },
+             "score": 7.30377
+            },
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 15.030628
+            },
+            {
+             "text": "R&S CMX500 OBT › Bluetest RTS / OTA test 語境\n依 [[Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT]]：\n\n- [[R&S CMX500 OBT]] 可與 [[Bluetest]] reverberation test systems（RTS）及 [[Bluetest Flow]] v1.18 搭配。\n- 支援使用 [[R&S CMX500 OBT]] 在 Bluetest RTS 中執行 [[5G NR Standalone]]、[[5G NR Non-Standalone]]（EN-DC）與 [[LTE]] testing。\n- [[Bluetest]] 也將較早的 [[WLAN]] stations / access points（[[IEEE 802.11]] a/b/g/n/ac/ax/be）integrated testing capabilities 擴充到 [[Wi-Fi 7]] 320 MHz bandwidth support。\n- 來源將此整合定位為 single tester and reverberation test system 的 multi-technology validation path。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500 OBT.md"
+             },
+             "score": 5.188209
+            },
+            {
+             "text": "R&S PVT360A\n[[R&S PVT360A]] 是 [[Rohde & Schwarz]] 的 **Performance Vector Tester**，依 [[PVT360A_Features_V8-5-30_en_06]] Version 06 可透過 R&S PVT-KW / KM / KB options 提供多無線標準 waveform playback、TX/RX measurements、spectrum analysis、WLAN MIMO 與 external frontend frequency extension。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S PVT360A.md"
+             },
+             "score": 3.146599
+            },
+            {
+             "text": "R&S PVT360A › Waveform playback\n| Option | Order no. | 功能 |\n|---|---:|---|\n| R&S PVT-KW320 | 1214.0435.xx | 5G NR release 15/16 waveform playback；mandatory |\n| R&S PVT-KW326 | 1214.0441.xx | 5G NR release 17 waveform extension |\n\nNR waveform 功能摘錄：\n\n- R15 waveform 依 3GPP TS 38.211/212/213/214 V17.3.0 or newer。\n- NR-TM presets test models 依 3GPP TS 38.141-1/2 17.6.0。\n- Number of carriers：**1 to 16**。\n- Per carrier channel bandwidth：5 MHz、10 MHz、15 MHz、20 MHz、25 MHz、30 MHz、40 MHz、50 MHz、60 MHz、70 MHz、80 MHz、90 MHz、100 MHz、200 MHz、400 MHz。\n- R17/18 waveform 新增 35 MHz、45 MHz channel bandwidth，480 kHz / 960 kHz subcarrier spacing，1024QAM，3 MHz channel bandwidth 與 other release 17 / 18 features。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 15,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S PVT360A.md"
+             },
+             "score": 1.929803
+            },
+            {
+             "text": "R&S PVT360A › Spectrum analysis\n| Option | Order no. | 功能 |\n|---|---:|---|\n| R&S PVT-KM100 | 1214.3140.xx | I/Q-based spectrum analysis |\n\nSpectrum analysis 提供：\n\n- Frequency sweep measurement：power vs frequency，最多 four traces。\n- Zero span measurement：power vs time，最多 four traces。\n- Marker evaluation、peak search。\n- Two-tone signal third order intercept / TOI results。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 18,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S PVT360A.md"
+             },
+             "score": 1.624039
+            },
+            {
+             "text": "Data center full-spectrum connectivity\n[[Data center full-spectrum connectivity]] 是 [[full-spectrum-data-center-connectivity-brochure]] 呈現的 portfolio 視角：把 AI / data center 的 high-speed electrical interconnect、optical interconnect、fiber deployment、rack power distribution、busbar、liquid cooling 與 leak detection 放在同一張 data center connectivity brochure 中。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+             },
+             "score": 1.880795
+            },
+            {
+             "text": "Data center full-spectrum connectivity › Optical 與 fiber connectivity\n- [[Amphenol XPO-LPO]] — 來源稱其以 224 Gb/s per lane across 64 channels，面向 AI scale-up deployments。\n- [[1.6T OSFP Transceivers]] — 來源稱 Amphenol 200G/lane optical modules support DR4、FR4、2×DR4、2×FR4、AOC、breakout AOC configurations with LC or MPO ports。\n- [[Amphenol Co-packaged Optics]] — 來源稱 Amphenol offers an architecture from high-density electrical interposer to linear optical conversion module to fiber plant。\n- [[LEAP On-Board Transceiver]] — 來源稱其為 12-channel duplex optical transceiver，up to 25Gbps per channel，300Gbps cumulative on multi-mode fiber。\n- [[300G CXP2 Active Optical Cable]] — 來源稱 CXP2 to CXP2 AOC provides cost-effective plug and play cabling solution，delivers high hardware faceplate port density among existing SFF industry standards。\n- [[CommScope Rapid Fiber Connect Platform]] — 來源稱其 simplifies and accelerates AI scaling by pre-integrating optics off-site and reducing on-site fiber connections。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+             },
+             "score": 1.787039
+            },
+            {
+             "text": "Data center full-spectrum connectivity › Power 與 cooling connectivity\n- [[Amphenol BarKlip I-O products]] / [[BarKlip Busbar Connectors]] — 來源稱其 distribute high-current power between busbars、cables and circuit boards，適用 power-dense data centers、OCP rack and power solutions。\n- [[60 A Universal AC Input Connector and Cable Assemblies]] — 來源稱其 meet 2OU power distribution architecture standards，將 power 從 busway routing 到 power shelf。\n- [[M-CRPS +54V Connectors and Cable Assemblies]] — 來源稱其 meet OCP M-CRPS power supply input specifications。\n- [[PwrBlade ULTRA HD+ Cable Assembly]] — 來源稱其 Cable-to-Board serves as high-power I/O cable configuration in a low-profile design。\n- [[OSFP-RHS 224G Cold Plate and Cage Assembly]] — 來源稱其 optimizes port thermal efficiency and reliability，meeting MSA requirements，並提供 one-step press assembly。\n- [[Amphenol Liquid Cooling Leakage Detection Sensor Cable Assembly]] — 來源稱其 detects coolant leaks and ensures system reliability。\n- [[Liquid Cooling Quick Disconnect Connectors]] — 來源稱其用於 high-efficiency thermal management。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+             },
+             "score": 1.655631
+            },
+            {
+             "text": "Data center full-spectrum connectivity › High-speed electrical connectivity\n- [[Amphenol OverPass Cable Systems]] — 來源稱其 enable high-speed signal transmission from ASIC packages to end-points across the system。\n- [[ExtremePort OSFP Connectors]] — 來源稱 connectors and cages have 60 contacts per port、0.6 mm pitch，並 optimized for signal integrity、thermal management and multi-lane pluggable architecture。\n- [[Amphenol XtremePass]] — 來源稱 XtremePass 448G connector solution supports scalable form factors from 32DP to 128DP，並跨 Ethernet、NVLink、PCIe、InfiniBand systems。\n- [[OSFP Cable Assemblies]] — 來源稱 OSFP cable assemblies compatible with 25G/lane NRZ up to 224G/lane PAM4，deliver aggregate bandwidths of 200G、400G、800G and 1.6T per cable assembly，available in Passive and Active variants。\n- [[Sentry HD High-Speed Backplane Connector]] — 來源稱其是 next-generation high-speed backplane connector platform。\n- [[Celerity 224 Gb-s BGA Mezzanine Connectors]] — 來源稱其 designed to support data rates up to 224 Gb/s PAM4。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+             },
+             "score": 0.077816
+            },
+            {
+             "text": "Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness › 重點摘要\n- 來源的 Future-ready CMX500 platform for 6G 段落稱 [[R&S CMX500]] 是 modular、powerful、future-proof one-box signaling tester，支援 RF to protocol testing across [[FR1]]、[[FR2]]、[[FR3]]；all existing CMX500 platforms can be enhanced with [[RFU18]] board。\n- 同段落另稱 [[R&S CMX500]] engineered for data rates up to **20 Gbps**、supporting wide dynamic range、[[4096QAM]] 與 up to **16 device antenna ports** for advanced spatial multiplexing；並列出 LTE、NR SA/NSA、NR-NTN、NB-NTN、Direct-to-Cell（D2C/DTC）、WLAN including [[Wi-Fi 7]] and future [[Wi-Fi 8]]。\n- Demo 展示地點：[[MWC Barcelona 2026]]，Rohde & Schwarz booth 5A80，hall 5，期間 **March 2 to 5, 2026**。\n- Press & media contact 為 [[Christian Mokry]]，PR Manager Test & measurement，phone +49 89 412913052，email press@rohde-schwarz.com。\n- 來源未標示 published date；raw frontmatter created 為 2026-09-11。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md"
+             },
+             "score": 3.883686
+            },
+            {
+             "text": "Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness › 與既有知識的關係\n- 既有 [[Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks]] 描述 13 GHz proposed [[FR3]] [[5G NR]] high-throughput demonstration，未提 [[RFU18]]；本來源進一步說明 [[R&S CMX500]] 透過 new [[RFU18]] board coverage up to 18 GHz，並把 demo 從 13 GHz single connection 擴展到 FR1 約 2.5 GHz + FR3 約 7 GHz carrier aggregation。\n- 既有 [[FR3 測試與 RFU18 battle card 主張]] 記錄 2026-02-26 battle card 對 [[RFU18]] up to 18 GHz 與 max aggregated NR bandwidth 2000 MHz 的 sales claims。本來源是 Rohde & Schwarz PR，能支撐 RFU18 up to 18 GHz 與 CMX500 + RFU18 的 FR1-FR3 CA demo claim；但來源仍未提供 RFU18 order number、formal specifications 文件編號、測試條件、bandwidth 或 throughput 數字，因此不能直接替代 formal datasheet。\n- 既有 [[R&S CMX500]] 頁依 [[CMX500_specs_en_5216-4127-22_v1100]] 記錄正式 Specifications Version 11.00（August 2025），其中 [[R&S CMX-B600B]] RF unit frequency range 為 400 MHz to 8000 MHz，[[R&S CMX-B500A]] 為 IF unit。新來源說 all existing CMX500 platforms can be enhanced with [[RFU18]] board to extend frequency coverage；判斷上應視為新 PR / upgrade claim，不應回寫成 August 2025 specs 的 binding data。\n- 既有 [[Qualcomm Technologies]] 頁已記錄 [[KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance]] 與 13 GHz FR3 demonstration；本來源新增 Qualcomm MTP powered by [[Qualcomm Modem-RF System]] 用於 FR1-FR3 carrier aggregation validation 的說法。\n- 既有 [[Tingfang Ji]] 頁在 13 GHz FR3 PR 中記錄其為 Vice President of Engineering at [[Qualcomm Technologies]]；本來源更新同一人物在此 PR 中的職稱為 Vice President of Engineering and Head of 6G Research at Qualcomm Technologies, Inc.。\n- 既有 [[Christian Mokry]] 頁已有多份 [[Rohde & Schwarz]] PR contact block；本來源新增同一 phone 與 press email。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md"
+             },
+             "score": 2.853384
+            },
+            {
+             "text": "Wireless Manufacturing Test (WMT)\nModular software framework tailored for high volume production testing and non-signaling R&D applications.\n27",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-ae261ae2c6ea49d8",
+               "original_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "sha256": "ae261ae2c6ea49d800146e9cfbd5418a5a5cf1cb800e9777f4343409a9353b31",
+               "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/MWC2025---WIC-INFRA.md",
+              "section": 278,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 21.242901
+            },
+            {
+             "text": "Rohde & Schwarz will display its [R&S CMX500](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-network-emulator/cmx500-5g-one-box-signaling-tester_63493-601282.html \"CMX500\") multi-technology multi-channel signaling tester at MWC 2024 with newly added Wi-Fi 7 testing capabilities. With this functionality, the one-box tester allows R&D engineers of wireless devices to comprehensively test their design’s operation in cellular and non-cellular standards of the latest generation in a single instrument setup. In addition to this, the [R&S CMP180](https://www.rohde-schwarz.com/us/products/test-and-measurement/wireless-tester-rf-analyzer-generator/cmp180-radio-communication-tester_63493-1081280.html \"CMP180\") radio communication tester will verify a signal waveform of 480 MHz bandwidth in loopback mode, attesting to be a future-proof solution for users in R&D and production, even beyond the requirements of Wi-Fi 7.",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-d0a8f03c4120b8e2",
+               "original_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "sha256": "d0a8f03c4120b8e29173fa9441f6e5860ee9b3227a81aec8e3188457b8dad3f6",
+               "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 21.101236
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "technical_knowledge",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 4,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 5,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/Wi-Fi 7 OTA MIMO stress testing.md",
+             "raw_refs": [
+              "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+              "raw/Productions/PR/Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md",
+              "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Wi-Fi 7 and 5G RedCap OTA measurements.md",
+             "raw_refs": [
+              "raw/Productions/PR/Bluetest and Rohde & Schwarz collaborate to offer over-the-air testing of next-generation WLAN devices.md",
+              "raw/Productions/PR/Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md",
+              "raw/Productions/PR/EMITE and Rohde & Schwarz join forces to support OTA measurements on Wi-Fi 7 and 5G RedCap.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX500 OBT.md",
+             "raw_refs": [
+              "raw/Productions/CMW500 to CMX500OBT_License_Swap_Process.md",
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+              "raw/Productions/PR/Bluetest reverberation test solutions now support 4G, 5G NR, and WLAN over-the-air tests with Rohde & Schwarz CMX500 OBT.md",
+              "raw/Productions/PR/Rohde & Schwarz and MediaTek to showcase 5G NTN-NR Rel.17 connection at MWC 2024.md",
+              "raw/Productions/XLAPI-CMX_Scenario_Database.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S PVT360A.md",
+             "raw_refs": []
+            },
+            {
+             "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md",
+             "raw_refs": [
+              "raw/Market/OneNote/full-spectrum-data-center-connectivity-brochure.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md",
+              "raw/Productions/PR/KT and Rohde & Schwarz to showcase AI-enhanced radio transmission performance.md",
+              "raw/Productions/PR/Rohde & Schwarz and Qualcomm unlock potential of proposed FR3 frequency range for next generation 6G wireless networks.md",
+              "raw/Productions/PR/Rohde & Schwarz demonstrates FR1–FR3 carrier aggregation, advancing 6G readiness.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}
