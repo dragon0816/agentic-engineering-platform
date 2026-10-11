@@ -84,6 +84,8 @@ FILE_READ_SPEC = _spec("file-read", "Read one Markdown file of a sandbox for pre
 RULE_WRITE_SPEC = _spec("rule-write", "Save the schema or a skill file in a sandbox",
                         "write")
 PLAN_PAGE_SPEC = _spec("plan-page", "Show a planned page before and after", "read")
+QUESTION_SETS_SPEC = _spec("question-sets", "List a sandbox's benchmark question sets",
+                           "read")
 MERGE_SPEC = _spec("merge", "Preview or write a three-way merge of a sandbox into a new "
                    "candidate vault; the published vault is never edited", "write", "medium")
 INDEX_BUILD_SPEC = _spec("index-build", "Preview or write the layered index of a sandbox",
@@ -308,4 +310,14 @@ class PlanPageHandler:
         request = PlanPageRequest.model_validate(inputs)
         result: Contract = await _run(lambda: self.pipeline.plan_page(
             request.sandbox_id, request.plan_id, request.path))
+        return result
+
+
+class QuestionSetsHandler:
+    def __init__(self, pipeline: KnowledgePipeline) -> None:
+        self.pipeline = pipeline
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        request = SandboxRef.model_validate(inputs)
+        result: Contract = await _run(lambda: self.pipeline.question_sets(request.sandbox_id))
         return result

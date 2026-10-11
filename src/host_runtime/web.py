@@ -71,6 +71,7 @@ from capabilities.knowledge_pipeline.handlers import (
     MERGE_SPEC,
     PLAN_PAGE_SPEC,
     PULL_SPEC,
+    QUESTION_SETS_SPEC,
     RULE_FILES_SPEC,
     RULE_WRITE_SPEC,
     SANDBOX_CONTENTS_SPEC,
@@ -147,7 +148,9 @@ from host_runtime.conversations import (
     MessageFeedback,
 )
 from host_runtime.host import HostRuntime, build_telegram, choice_sources, load_authorization
-from host_runtime.knowledge_harness import KnowledgeHarness, knowledge_source_lines
+from host_runtime.knowledge_bench import latest as latest_benchmark
+from host_runtime.knowledge_bench import run_benchmark
+from host_runtime.knowledge_harness import KnowledgeHarness, harness_skill, knowledge_source_lines
 from host_runtime.knowledge_publish import PublishError, publish_candidate
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.profiles import ProfileError, activate_profile
@@ -189,6 +192,8 @@ from knowledge.market_matrix import (
 )
 from knowledge.procedure import KnowledgeProcedure
 from knowledge.query import cited_numbers
+from knowledge.sandbox import SandboxError, Sandboxes
+from knowledge.vault import Vault
 from models.contracts import ModelMessage
 from models.wire import MethodTransport, UrllibTransport
 
@@ -204,7 +209,8 @@ PIPELINE_STEPS = {spec.identity.name: spec for spec in (
     SANDBOX_CREATE_SPEC, SANDBOX_LIST_SPEC, SANDBOX_CONTENTS_SPEC, SANDBOX_DISCARD_SPEC,
     DROP_ADD_SPEC, CONVERT_SPEC, INGEST_PLAN_SPEC, INGEST_APPLY_SPEC, LINT_SPEC,
     ADOPT_SPEC, INDEX_ENRICH_SPEC, INDEX_BUILD_SPEC, MERGE_SPEC, DROP_FOLDERS_SPEC,
-    PULL_SPEC, RULE_FILES_SPEC, FILE_READ_SPEC, RULE_WRITE_SPEC, PLAN_PAGE_SPEC)}
+    PULL_SPEC, QUESTION_SETS_SPEC, RULE_FILES_SPEC, FILE_READ_SPEC, RULE_WRITE_SPEC,
+    PLAN_PAGE_SPEC)}
 AUTHORING_ROUTES = (
     "/api/authoring/start", "/api/authoring/get", "/api/authoring/discuss",
     "/api/authoring/preview", "/api/authoring/install",
@@ -2534,6 +2540,48 @@ class AgentWeb:
                 return {"ok": False, "code": error.code}
         return {"ok": True, "restart_required": True, "data": result.model_dump(mode="json")}
 
+    def _sandboxes(self) -> Sandboxes | None:
+        binding = self.runtime.config.knowledge_pipeline
+        if binding is None:
+            return None
+        return Sandboxes(self.runtime.layout.workspace_root,
+                         root=Path(binding.sandbox_root) if binding.sandbox_root else None)
+
+    def start_benchmark(self, sandbox_id: str, sets: list[str]) -> dict[str, Any]:
+        """Run the chosen question sets in the background (collaboration C3)."""
+        boxes = self._sandboxes()
+        binding = self.runtime.config.knowledge_pipeline
+        if boxes is None or binding is None:
+            return {"ok": False, "code": "knowledge_pipeline_disabled"}
+        try:
+            info, sandbox = boxes.open(sandbox_id)
+        except SandboxError as error:
+            return {"ok": False, "code": error.code}
+        if not sets or not all(isinstance(name, str) for name in sets):
+            return {"ok": False, "code": "no_question_sets"}
+        entry = next((v for v in binding.vaults if v.name == info.base_name), None)
+        fallback = (Path(entry.questions_root) if entry and entry.questions_root
+                    else Path(info.base_root) / "checks" / "questions")
+        skill = harness_skill(self.runtime.agent.gateway.router.commands.skills)
+        run_id = f"bench-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}"
+        thread = threading.Thread(target=run_benchmark, daemon=True, kwargs={
+            "ask": lambda request, catalog: self.knowledge_harness.ask(request, catalog=catalog),
+            "sandbox_id": sandbox_id, "sandbox": sandbox, "project": Vault(Path(info.base_root)),
+            "sets": tuple(sets), "actor": self.runtime.actor, "skill": skill,
+            "questions_fallback": fallback, "run_id": run_id})
+        thread.start()
+        return {"ok": True, "run_id": run_id}
+
+    def benchmark_status(self, sandbox_id: str) -> dict[str, Any]:
+        boxes = self._sandboxes()
+        if boxes is None:
+            return {"ok": False, "code": "knowledge_pipeline_disabled"}
+        try:
+            _, sandbox = boxes.open(sandbox_id)
+        except SandboxError as error:
+            return {"ok": False, "code": error.code}
+        return {"ok": True, "report": latest_benchmark(sandbox)}
+
     def ask_knowledge(self, request: KnowledgeAskRequest) -> dict[str, Any]:
         """Ask one exact installed Knowledge version through Bridge policy."""
         with telemetry.run("knowledge_query", attributes={"ingress": "agent_web"}):
@@ -2675,6 +2723,9 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.readiness())
         elif parsed.path == "/api/knowledge/pipeline":
             self._json(200, web.knowledge_pipeline())
+        elif parsed.path == "/api/knowledge/benchmark":
+            query = parse_qs(parsed.query)
+            self._json(200, web.benchmark_status((query.get("sandbox_id") or [""])[0]))
         elif parsed.path == "/api/settings":
             self._json(200, web.settings())
         elif parsed.path == "/api/avatars":
@@ -2732,6 +2783,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/knowledge/ask",
             "/api/knowledge/pipeline/call",
             "/api/knowledge/pipeline/publish",
+            "/api/knowledge/benchmark/start",
             "/api/settings/model",
             "/api/settings/telegram",
             "/api/mcp/save",
@@ -2786,6 +2838,13 @@ class _Handler(BaseHTTPRequestHandler):
             except Exception as failure:  # noqa: BLE001 - a page shows everything
                 result = {"ok": False, "code": f"pipeline_error:{type(failure).__name__}"}
             self._json(200, result)
+            return
+        if path == "/api/knowledge/benchmark/start":
+            if not isinstance(body, dict) or not isinstance(body.get("sets"), list):
+                self._json(400, {"ok": False, "code": "benchmark_request_invalid"})
+                return
+            self._json(200, self.server.web.start_benchmark(
+                str(body.get("sandbox_id") or ""), list(body["sets"])))
             return
         if path == "/api/knowledge/pipeline/publish":
             if not isinstance(body, dict):

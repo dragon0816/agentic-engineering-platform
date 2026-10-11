@@ -99,6 +99,7 @@ body {
 #nav-knowledge::before { content: "\25a4"; }
 .kp-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
 .kp-list button { margin: 2px 6px 2px 0; }
+.kp-check { display: inline-block; margin: 2px 14px 2px 0; }
 #kp-rule-text { width: 100%; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
 .kp-markdown { max-height: 70vh; overflow: auto; }
 pre.kp-added { background: var(--ok-bg, #e8f5e9); white-space: pre-wrap; padding: 8px; }
@@ -819,6 +820,12 @@ tr:last-child td { border-bottom: none; }
       </div>
       <div id="kp-box" hidden>
         <h2 id="kp-title"></h2>
+        <div class="card"><h3>Pull from the project vault</h3>
+          <p class="note">Choose the drop folders this sandbox works on. Originals already
+            ingested are skipped; the folders become the sandbox's scope.</p>
+          <div id="kp-pull-folders" class="kp-list"></div>
+          <div class="kp-actions"><button class="go" id="kp-pull" type="button">Pull</button>
+            <span class="note" id="kp-pull-result"></span></div></div>
         <div class="card"><h3>Drop</h3>
           <div class="kp-actions">
             <input id="kp-files" type="file" multiple aria-label="Originals to add">
@@ -854,6 +861,14 @@ tr:last-child td { border-bottom: none; }
             <button id="kp-enrich" type="button">Write bilingual summaries</button>
             <button id="kp-index" type="button">Build layered index</button>
           </div><div id="kp-index-result" class="note"></div></div>
+        <div class="card"><h3>Benchmark</h3>
+          <p class="note">Each question is asked against this sandbox and against the project
+            vault, and graded by its must-mention / must-not-say terms.</p>
+          <div id="kp-bench-sets" class="kp-list"></div>
+          <div class="kp-actions">
+            <button class="go" id="kp-bench" type="button">Run benchmark</button>
+            <span class="note" id="kp-bench-state"></span></div>
+          <div id="kp-bench-result"></div></div>
         <div class="card"><h3>Merge and publish</h3>
           <div class="kp-actions">
             <button id="kp-merge-preview" type="button">Preview merge</button>
@@ -3564,6 +3579,66 @@ async function kpOpen(item) {
     kpButton("Plan ingest", () => kpRun("Planning ingest (this asks the model)",
       () => kpPlan(row)))]));
   await kpLoadRules();
+  await kpLoadPull();
+  await kpLoadBench();
+}
+
+function kpChecks(box, items, checked) {
+  box.replaceChildren();
+  for (const [value, label] of items) {
+    const row = document.createElement("label"); row.className = "kp-check";
+    const tick = document.createElement("input"); tick.type = "checkbox"; tick.value = value;
+    tick.checked = checked.includes(value); row.append(tick, text(" " + label)); box.append(row);
+  }
+}
+
+function kpTicked(box) {
+  return [...box.querySelectorAll("input[type=checkbox]:checked")].map((t) => t.value);
+}
+
+async function kpLoadPull() {
+  const folders = await pipeline("drop-folders", {base: kpSandbox.base_name});
+  kpChecks(el("kp-pull-folders"), folders.folders.map((f) =>
+    [f.path, f.path + " (" + f.files + " files)"]), []);
+  if (!folders.folders.length) {
+    el("kp-pull-folders").append(text("The project vault's drop is empty."));
+  }
+}
+
+async function kpLoadBench() {
+  const sets = await pipeline("question-sets", {sandbox_id: kpSandbox.sandbox_id});
+  kpChecks(el("kp-bench-sets"), Object.entries(sets.sets).map(([name, n]) =>
+    [name, (name || "(general)") + " \u2014 " + n + " questions"]), sets.defaults);
+  if (sets.ungraded.length) {
+    el("kp-bench-sets").append(text(" Not graded (no must-mention / must-not-say terms): "
+      + sets.ungraded.join(", ")));
+  }
+  await kpBenchShow();
+}
+
+let kpBenchTimer = null;
+async function kpBenchShow() {
+  const reply = await call("/api/knowledge/benchmark?sandbox_id="
+    + encodeURIComponent(kpSandbox.sandbox_id));
+  const report = reply.ok ? reply.report : null;
+  const box = el("kp-bench-result"); box.replaceChildren();
+  if (!report) { el("kp-bench-state").textContent = "No benchmark run yet."; return; }
+  el("kp-bench-state").textContent = report.status + ": " + report.results.length + " of "
+    + report.total + " questions; sandbox " + report.sandbox_score + ", project vault "
+    + report.project_score + (report.regressions.length ? "; REGRESSIONS: "
+    + report.regressions.length : "") + (report.error ? "; error " + report.error : "");
+  const rows = [...report.results].sort((a, b) =>
+    Number(report.regressions.includes(b.path)) - Number(report.regressions.includes(a.path)));
+  const mark = (side) => (side.grade.passed ? "pass" : "fail")
+    + (side.grade.missing.length ? " \u2014 missing: " + side.grade.missing.join(", ") : "")
+    + (side.grade.forbidden.length ? " \u2014 said: " + side.grade.forbidden.join(", ") : "");
+  box.append(table(["Question", "Set", "Project vault", "Sandbox"], rows, (row) => [
+    (report.regressions.includes(row.path) ? "\u26a0 regression: " : "") + row.question,
+    row.set || "(general)", mark(row.project), mark(row.sandbox)]));
+  clearTimeout(kpBenchTimer);
+  if (report.status === "running") {
+    kpBenchTimer = setTimeout(() => kpBenchShow().catch(() => {}), 5000);
+  }
 }
 
 function kpViewer(title, content) {
@@ -3705,6 +3780,25 @@ el("kp-upload").addEventListener("click", () => kpRun("Adding to drop", async ()
 el("kp-preview").addEventListener("click", () => kpRun("Previewing", () => kpConvert("dry_run")));
 el("kp-convert").addEventListener("click", () => kpRun("Converting", () => kpConvert("apply")));
 el("kp-lint").addEventListener("click", () => kpRun("Linting", kpLint));
+el("kp-pull").addEventListener("click", () => kpRun("Pulling", async () => {
+  const folders = kpTicked(el("kp-pull-folders"));
+  if (!folders.length) { kpStatus("Choose at least one folder.", true); return; }
+  const pulled = await pipeline("pull", {sandbox_id: kpSandbox.sandbox_id, folders});
+  el("kp-pull-result").textContent = "Copied " + pulled.copied.length + "; already ingested "
+    + pulled.already_ingested.length + "; already here " + pulled.already_in_sandbox.length
+    + (pulled.too_large.length ? "; too large " + pulled.too_large.length : "") + ".";
+  await kpOpen(kpSandbox);
+}));
+el("kp-bench").addEventListener("click", () => kpRun("Starting the benchmark", async () => {
+  const sets = kpTicked(el("kp-bench-sets"));
+  if (!sets.length) { kpStatus("Choose at least one question set.", true); return; }
+  const reply = await call("/api/knowledge/benchmark/start",
+                           {sandbox_id: kpSandbox.sandbox_id, sets});
+  if (!reply.ok) {
+    const problem = new Error(reply.code); problem.code = reply.code; throw problem;
+  }
+  setTimeout(() => kpBenchShow().catch(() => {}), 1500);
+}));
 el("kp-viewer-close").addEventListener("click", () => { el("kp-viewer").hidden = true; });
 el("kp-rule-close").addEventListener("click", () => {
   el("kp-rule-editor").hidden = true; kpRulePath = null;

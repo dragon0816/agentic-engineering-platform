@@ -114,6 +114,7 @@ from capabilities.knowledge_pipeline.handlers import (
     MERGE_SPEC,
     PLAN_PAGE_SPEC,
     PULL_SPEC,
+    QUESTION_SETS_SPEC,
     RULE_FILES_SPEC,
     RULE_WRITE_SPEC,
     SANDBOX_CONTENTS_SPEC,
@@ -133,6 +134,7 @@ from capabilities.knowledge_pipeline.handlers import (
     MergeHandler,
     PlanPageHandler,
     PullHandler,
+    QuestionSetsHandler,
     RuleFilesHandler,
     RuleWriteHandler,
     SandboxContentsHandler,
@@ -304,6 +306,7 @@ from knowledge.pipeline import (
     MergeReport,
     PlanPage,
     PullResult,
+    QuestionSets,
     RuleFiles,
     SandboxContents,
     SandboxFile,
@@ -1904,7 +1907,9 @@ def _register_knowledge_pipeline(
         {item.name: Path(item.root) for item in config.knowledge_pipeline.vaults},
         extractors=office_extractors(), model=model, alias=alias, describer=describer,
         drop_roots={item.name: Path(item.drop_root)
-                    for item in config.knowledge_pipeline.vaults if item.drop_root})
+                    for item in config.knowledge_pipeline.vaults if item.drop_root},
+        questions_roots={item.name: Path(item.questions_root)
+                         for item in config.knowledge_pipeline.vaults if item.questions_root})
     local = ExecutionDependencies(central_required=False)
     for spec, handler, request, response in (
         (SANDBOX_CREATE_SPEC, SandboxCreateHandler(pipeline), SandboxCreateRequest, SandboxRecord),
@@ -1920,6 +1925,7 @@ def _register_knowledge_pipeline(
         (MERGE_SPEC, MergeHandler(pipeline), MergeRequest, MergeReport),
         (DROP_FOLDERS_SPEC, DropFoldersHandler(pipeline), DropFoldersRequest, DropFolders),
         (PULL_SPEC, PullHandler(pipeline), PullRequest, PullResult),
+        (QUESTION_SETS_SPEC, QuestionSetsHandler(pipeline), SandboxRef, QuestionSets),
         (RULE_FILES_SPEC, RuleFilesHandler(pipeline), SandboxRef, RuleFiles),
         (FILE_READ_SPEC, FileReadHandler(pipeline), FileRequest, SandboxFile),
         (RULE_WRITE_SPEC, RuleWriteHandler(pipeline), RuleWriteRequest, SandboxFile),

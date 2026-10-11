@@ -28,6 +28,9 @@ from knowledge.lint import scan
 from knowledge.merge import MergeChange, MergeConflict, Resolution, read_tree, three_way
 from knowledge.migrate import adopt
 from knowledge.planning import DEFAULT_CONVENTIONS, IngestPlanner
+from knowledge.questions import default_sets
+from knowledge.questions import load as load_questions
+from knowledge.questions import sets as question_set_counts
 from knowledge.raw import (
     Describer,
     DropIntake,
@@ -149,12 +152,17 @@ class KnowledgePipeline:
         alias: str | None = None,
         describer: Describer | None = None,
         drop_roots: dict[str, Path] | None = None,
+        questions_roots: dict[str, Path] | None = None,
     ) -> None:
         self.sandboxes = sandboxes
         self.bases = dict(bases)
         # Where each project vault collects originals; default <vault>/drop.
         self.drop_roots = {name: (drop_roots or {}).get(name, root / "drop")
                            for name, root in self.bases.items()}
+        # Where each project vault keeps its question sets; default checks/questions.
+        self.questions_roots = {
+            name: (questions_roots or {}).get(name, root / "checks" / "questions")
+            for name, root in self.bases.items()}
         self.extractors: tuple[Extractor, ...] = (
             PlainTextExtractor(), MarkdownExtractor(), *extractors)
         self.model = model
@@ -289,6 +297,17 @@ class KnowledgePipeline:
             raise PipelineError("unknown_file")
         return PlanPage(sandbox_id=sandbox_id, plan_id=plan_id, path=rel,
                         before=vault.read(rel), after=page["content"].replace("\r\n", "\n"))
+
+    def question_sets(self, sandbox_id: str) -> QuestionSets:
+        """The sandbox's question sets with counts, the ones its pulled scope
+        selects by default, and questions that have no terms to grade."""
+        info, vault = self.sandboxes.open(sandbox_id)
+        root = vault.root / "checks" / "questions"
+        found = load_questions(root if root.is_dir() else self.questions_roots[info.base_name])
+        counts = question_set_counts(found)
+        return QuestionSets(
+            sandbox_id=sandbox_id, sets=counts, defaults=default_sets(counts, info.pulled),
+            ungraded=tuple(q.path for q in found if not (q.must or q.must_not)))
 
     def add_drop(self, sandbox_id: str, name: str, data: bytes) -> str:
         """Put one original into the sandbox's drop/; never replaces a file."""
@@ -587,3 +606,11 @@ class PlanPage(Contract):
     path: str
     before: str  # empty for a new page
     after: str
+
+
+
+class QuestionSets(Contract):
+    sandbox_id: str
+    sets: dict[str, int] = Field(default_factory=dict)  # "" is the general set
+    defaults: tuple[str, ...] = ()
+    ungraded: tuple[str, ...] = ()

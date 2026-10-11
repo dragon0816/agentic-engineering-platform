@@ -24,8 +24,9 @@ from agent.task_contract import (
     TaskContract,
     TaskExecutionConstraints,
 )
-from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC
-from common.execution import TraceIdentifiers
+from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, KnowledgeQueryHandler
+from capabilities.runtime import CapabilityRefused
+from common.execution import RequestContext, TraceIdentifiers
 from common.local_agent import LocalCapabilityRequest
 from host_runtime.answers import readable
 from host_runtime.contracts import KnowledgeAskRequest
@@ -106,10 +107,13 @@ class KnowledgeHarness:
         skill = harness_skill(self.runtime.agent.gateway.router.commands.skills)
         return self.ask(KnowledgeAskRequest(asset=asset, question=question, skill=skill))
 
-    def ask(self, request: KnowledgeAskRequest) -> dict[str, Any]:
+    def ask(self, request: KnowledgeAskRequest, *, catalog: Any = None) -> dict[str, Any]:
+        """Ask through the installed Knowledge Skill. With `catalog`, the same
+        Harness asks a Knowledge version that is not installed (a sandbox
+        benchmark, collaboration C3) by calling the query handler directly."""
         item = KnowledgeAskRequest.model_validate(request)
         if item.skill is None:
-            return self._ask_knowledge_bridge(item, _trace())
+            return self._ask_knowledge_bridge(item, _trace(), catalog=catalog)
         installed = self.runtime.agent.gateway.router.commands.skills.discover(
             item.skill.namespace
         )
@@ -194,7 +198,8 @@ class KnowledgeHarness:
         )
         plan = plan_task(task, skill, "knowledge")
         actions = KnowledgeBridgeActions(
-            lambda: self._ask_knowledge_bridge(item, trace, procedure=procedure),
+            lambda: self._ask_knowledge_bridge(item, trace, procedure=procedure,
+                                               catalog=catalog),
             required_evidence=plan.skill_evidence,
             required_facets=required_facets,
             relation_required=relation_required,
@@ -202,7 +207,7 @@ class KnowledgeHarness:
             procedure=procedure,
             broadened=None if procedure is None else (
                 lambda attempt: self._ask_knowledge_bridge(
-                    item, trace, procedure=broaden(procedure, attempt))),
+                    item, trace, procedure=broaden(procedure, attempt), catalog=catalog)),
             retry_budget=plan.retry_budget,
         )
         run = run_harness(plan, actions)
@@ -342,8 +347,10 @@ class KnowledgeHarness:
 
     def _ask_knowledge_bridge(
         self, item: KnowledgeAskRequest, trace: TraceIdentifiers,
-        *, procedure: KnowledgeProcedure | None = None,
+        *, procedure: KnowledgeProcedure | None = None, catalog: Any = None,
     ) -> dict[str, Any]:
+        if catalog is not None:
+            return self._ask_catalog(item, trace, procedure, catalog)
         device = self.runtime.config.device
         local = LocalCapabilityRequest(
             ingress="local",
@@ -378,6 +385,35 @@ class KnowledgeHarness:
             "record": (None if record is None else json.loads(record.model_dump_json())),
             "outcome": json.loads(outcome.model_dump_json()),
         }
+
+    def _ask_catalog(
+        self, item: KnowledgeAskRequest, trace: TraceIdentifiers,
+        procedure: KnowledgeProcedure | None, catalog: Any,
+    ) -> dict[str, Any]:
+        """The installed query handler's model and alias over another catalog;
+        the result has the Bridge route's shape, refusals included."""
+        import asyncio
+
+        installed = self.runtime.agent.gateway.bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity)
+        if installed is None or not isinstance(installed.handler, KnowledgeQueryHandler):
+            return {"ok": False, "answer": "Knowledge asking is not installed on this host.",
+                    "record": None, "outcome": None}
+        handler = KnowledgeQueryHandler(catalog, installed.handler.model,
+                                        alias=installed.handler.alias)
+        context = RequestContext(trace=trace, actor=self.runtime.actor,
+                                 namespace=item.asset.namespace, message=item.question,
+                                 channel="knowledge-benchmark")
+        request = KnowledgeQueryRequest(asset=item.asset, question=item.question,
+                                        procedure=procedure)
+        try:
+            data = asyncio.run(handler(context, request))
+        except CapabilityRefused as refused:
+            outcome = {"capability": {"status": "failed", "failure": {"code": refused.code}}}
+            return {"ok": False, "answer": f"The Knowledge query was refused ({refused.code}).",
+                    "record": None, "outcome": outcome}
+        record = KnowledgeAnswerRecord.model_validate(data)
+        return {"ok": True, "answer": record.answer.text,
+                "record": json.loads(record.model_dump_json()), "outcome": None}
 
     @staticmethod
     def _knowledge_failure_text(outcome: Any) -> str:
