@@ -2162,3 +2162,12 @@ Decision (owner), design `docs/phases/KNOWLEDGE_COLLAB.md`:
 Why: several maintainers will develop one vault; sandboxes, section-level merge, scoped
 benchmarks and push records keep their work from colliding or silently degrading
 another domain. Rejected: git in the OneDrive folder (sync corrupts `.git`).
+
+## 2026-10-11: Knowledge pushes have no lock; a benchmark gate decides
+
+Decision (owner): no file lock while maintainers work. The first push wins; a later push
+re-merges against the current project vault and is allowed only when no question
+regresses and its merged result scores no lower than the vault (a regression blocks).
+The first live pushes go to a copy of RS_Knowledge.
+
+Rejected: an SVN-style push lock with a timeout.

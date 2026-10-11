@@ -107,22 +107,32 @@ A sandbox works like a git branch with a pull request:
 
 - **Who.** Any maintainer listed for the project may push; no second approval is needed
   (owner, 2026-10-11).
+- **No lock: first push wins (owner, 2026-10-11).** Like git, nobody holds files while
+  working. Whoever pushes first is merged. A later push is merged against the vault as
+  it is then, and must pass the gate again.
 - **Steps.**
-  1. **Lock.** Push takes a lock file in the project vault (`.aep-push.lock`, holding who
-     and when). A second push waits or is refused while the lock is held. A lock older
-     than its timeout is reported, never silently broken.
-  2. **Merge against the vault as it is now.** The K3.3 three-way merge runs with
+  1. **Merge against the vault as it is now.** The K3.3 three-way merge runs with
      `.base` (where the sandbox started), the sandbox, and the project vault at push
-     time.
-     - If someone else pushed since the preview, the merge is recomputed.
+     time. The result is a candidate in the sandbox area.
      - Two-sided edits of the same section are conflicts, resolved on the Knowledge page
        side by side.
      - Nothing is written while a conflict is open.
-  3. **Write in place, with backups.** The project vault is a folder people open in
-     Obsidian, so a push writes the merged files into it in place. It does not create a
-     versioned copy. Every file it overwrites is first copied to
-     `.ingest-backup/<push id>/`. A push can be undone from that backup and the push
-     record.
+  2. **Benchmark gate on the merged result.** The selected question sets are run on the
+     candidate and on the current project vault. The push is allowed only when both hold:
+     - no question regresses (passes on the vault, fails on the candidate). A regression
+       **blocks** the push (owner);
+     - the candidate's score is not lower than the vault's.
+
+     If the vault changed since the last benchmark, both are run again before pushing.
+  3. **Compare and write.**
+     - Right before writing, the vault's digest is compared with the one the merge used.
+       If someone pushed in between, the push goes back to step 1 automatically.
+     - The write then copies only the merged files into the vault, in place. The project
+       vault is a folder people open in Obsidian, so no versioned copy is made.
+     - Every file it overwrites is first copied to `.ingest-backup/<push id>/`. A push
+       can be undone from that backup and the push record.
+     - No lock is held while people work. The only exclusion is this compare-and-write,
+       which takes seconds.
   4. **Check after writing.** Run lint and the sourced-line check: no line linking a
      source, and no ⚠️ line, from either side may be lost. Any finding is reported in the
      push record.
@@ -135,15 +145,11 @@ A sandbox works like a git branch with a pull request:
   - conflicts and how each was resolved;
   - the benchmark sets run, with scores on both sides and regressions;
   - the backup location.
-- **Benchmark gate.** Push shows the benchmark result. A regression does not block the
-  push, but the maintainer must confirm it explicitly, and the confirmation is recorded.
-  Proposed default, open for the owner to change.
-
 ## 7. Why this answers the collaboration conflicts
 
 | Conflict | Handled by |
 |---|---|
-| two people ingest into one vault at the same time | each works in a sandbox; pushes are serialized by the lock |
+| two people ingest into one vault at the same time | each works in a sandbox; the first push wins, a later push re-merges and must pass the gate again |
 | A rewrites a shared page that B also changed | section-level edits (K3.2) and the per-section three-way merge (K3.3); only the same section edited on both sides conflicts |
 | a rule change silently degrades another domain | benchmark sets by folder and combination; regressions shown before push |
 | content lost by an over-eager rewrite | the sourced-line guard at ingest and again after the push |
@@ -154,7 +160,7 @@ A sandbox works like a git branch with a pull request:
 
 - Sandbox create: copy from the project vault without `drop/`, plus Pull. K3 copies the
   published local vault and has no pull.
-- New: question sets by folder, the sandbox benchmark, the push lock, in-place push with
+- New: question sets by folder, the sandbox benchmark, the benchmark gate, in-place push with
   backups, push records, maintainers, and the per-project `drop_root` / `questions_root`.
 - K3.4's publish of a versioned local copy becomes "Refresh from the project vault"
   for the Agent's query version.
@@ -170,12 +176,15 @@ A sandbox works like a git branch with a pull request:
 ## 9. Slices
 
 C1 project vault settings and Pull → C2 skill editor and Markdown preview → C3 question
-sets and the sandbox benchmark → C4 push lock, in-place push with backups and push
+sets and the sandbox benchmark → C4 benchmark gate, in-place compare-and-write push with backups and push
 records → C5 Knowledge page in workflow order → C6 live trial with two sandboxes on
 `RS_Knowledge` copies (never the real folder until the owner says so).
 
-## 10. Open points
+## 10. Owner decisions (2026-10-11)
 
-- The benchmark gate default in section 6 (confirm regressions, not block).
-- Lock timeout length.
-- Whether the first live push goes to the real OneDrive `RS_Knowledge` or to a copy.
+1. A regression blocks the push.
+2. No lock. The first push wins; a later push re-merges against the current vault and is
+   allowed only when its merged result scores no lower than the vault and regresses no
+   question. "Not lower" is the reading taken; "strictly higher" would block pushes that
+   only add knowledge the questions do not ask about.
+3. The first live pushes go to a copy of `RS_Knowledge`, not the real folder.
