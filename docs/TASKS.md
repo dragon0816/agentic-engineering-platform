@@ -41,7 +41,7 @@ paused at the owner's request while `MRT1CV` access is resolved. PR #96 merged
 the local interfaces, company-model wiring, bounded
 SOP-to-Workflow authoring, installed-browser automation and weekly mail draft.
 A product-direction review merged in PR #97 and is documented in
-`docs/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md`. The owner approved its fixed
+`docs/archive/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md`. The owner approved its fixed
 E2E order. E2E-02 merged in PR #98, E2E-03 merged in PR #99 and E2E-05 merged
 in PR #100 after each exact head passed Windows/Python 3.12 CI. E2E-04 merged in
 PR #101 after its exact head passed Windows/Python 3.12 CI. E2E-01's inert
@@ -428,7 +428,7 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Audit current Agent, Gateway, CLI backend, Harness, Knowledge, Workflow,
   Bridge and Marketplace boundaries against the proposed multi-backend target.
   Record source inventories, conflicts, baseline tests and an incremental
-  sequence in `docs/MULTI_BACKEND_ORCHESTRATOR_PHASE0.md`.
+  sequence in `docs/archive/MULTI_BACKEND_ORCHESTRATOR_PHASE0.md`.
 - [x] Set the initial unclassified-data rule: use only a suitably approved
   internal Gateway; require explicit PUBLIC classification for Codex/Claude.
 - [x] Review and approve the incremental backend/data-policy design before
@@ -449,7 +449,7 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   configuration defaulting to `NONE`, and negative tests for zero optional
   provider calls and pre-egress authorization. Keep the actual JEV adapter
   disabled until the benchmark and policy gates in
-  `docs/MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md` are met. Full local selection:
+  `docs/archive/MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md` are met. Full local selection:
   1,548 passed, 4 skipped, 2 environment-specific deselected; ruff, mypy and
   sdist/wheel build passed on 2026-10-02.
 - [x] Extend the same Decision Service to `Gateway.converse` Skill candidates:
@@ -511,7 +511,7 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [ ] Compare Workflow 11's live preview plan and workbook-read evidence with
   the source against a workbook copy. A successful run proves the installed
   route and read-only execution, not report parity. See
-  `docs/VALIDATION_GAPS_2026-10-02.md`.
+  `docs/archive/VALIDATION_GAPS_2026-10-02.md`.
 - [x] Resolve Workflow 11's Outlook draft authorization on this Host. After
   the owner asked to make the change, added exactly one persistent grant for
   `leo.chi` / `weekly-report/mail@1.0.0` / `outlook.draft` with
@@ -547,7 +547,7 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   lists the bound Knowledge identity over loopback HTTP. Focused grounded
   asking/policy tests passed with a scripted model. The Codex process has no
   `LITELLM_MASTER_KEY`, so live Gateway asking and installed convert/ingest/lint
-  remain open. See `docs/KNOWLEDGE_VALIDATION_2026-10-02.md`.
+  remain open. See `docs/archive/KNOWLEDGE_VALIDATION_2026-10-02.md`.
 - [ ] Plan a provenance-preserving conversion of `RS_Knowledge` into a valid
   platform Vault, then stage a verified copy and exact manifest/binding.
   The source root lacks required index/log files; the owner will later specify

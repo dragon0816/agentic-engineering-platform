@@ -17,7 +17,7 @@ required, and Codex repair/Hermes retest limits are explicit bounded integers.
 `OwnerDecision` records a named business/policy decision with evidence. Its
 approval does not modify a grant, model route or Knowledge integration; Hermes
 re-runs the same preflight before continuing. The GitHub transport is documented
-in `docs/hermes-validation-lifecycle.md` and uses versioned JSON payloads rather
+in `docs/archive/hermes-validation-lifecycle.md` and uses versioned JSON payloads rather
 than executing Issue text.
 
 ## Local Codex Telegram coordination

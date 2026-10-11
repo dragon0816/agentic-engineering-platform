@@ -3,7 +3,7 @@
 ## Multi-backend Personal Agent (approved 2026-10-02)
 
 The owner approved the incremental design in
-`MULTI_BACKEND_ORCHESTRATOR_PHASE0.md`. Strengthen the Agent harness before
+`archive/MULTI_BACKEND_ORCHESTRATOR_PHASE0.md`. Strengthen the Agent harness before
 continuing Workflow migration and product acceptance. Preserve deterministic
 commands, installed-only Workflow execution, device admission, Bridge policy,
 durable run evidence and existing user-visible result contracts.

@@ -13,7 +13,7 @@ The 2026-10-02 owner decision adds a prerequisite before this existing E2E
 sequence: establish the incremental multi-backend Agent harness and its data
 trust boundary, then migrate the pinned source Workflows with parameter parity.
 The E2E order below remains the order for *claiming product acceptance* after
-those prerequisites. See `MULTI_BACKEND_ORCHESTRATOR_PHASE0.md` and
+those prerequisites. See `archive/MULTI_BACKEND_ORCHESTRATOR_PHASE0.md` and
 `REQUIREMENTS.md`. No E2E is marked complete by a harness unit test.
 
 ```text

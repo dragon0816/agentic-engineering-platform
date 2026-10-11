@@ -2,7 +2,7 @@
 
 Status: approved by the owner on 2026-10-02 for slice 1 implementation.
 Source inventory, architecture gaps and all nine slices are recorded in
-`../../MULTI_BACKEND_ORCHESTRATOR_PHASE0.md`.
+`../../archive/MULTI_BACKEND_ORCHESTRATOR_PHASE0.md`.
 
 ## Boundary
 

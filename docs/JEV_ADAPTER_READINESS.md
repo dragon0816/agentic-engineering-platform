@@ -7,7 +7,7 @@ performed. An offline, injected-transport Skill-selection adapter now exists.
 ## Evidence inspected
 
 - Owner handoff `CODEX_AEP_MULTI_BACKEND_ORCHESTRATOR_HANDOFF_JEV_READY.md` (local attachment), especially §§2A, 3, 20 Phase 8, and 21.
-- `docs/MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md`, `docs/REQUIREMENTS.md`, `docs/ARCHITECTURE.md`, and `docs/DECISIONS.md`.
+- `docs/archive/MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md`, `docs/REQUIREMENTS.md`, `docs/ARCHITECTURE.md`, and `docs/DECISIONS.md`.
 - `src/agent/decisions.py`, `src/agent/gateway.py`, `src/agent/routing.py`, `src/agent/data_policy.py`, `src/host_runtime/contracts.py`, and `tests/test_decision_service.py`.
 - TypeSafe's official [OpenAPI schema](https://api.typesafe.ai/openapi.json), inspected on 2026-10-03.
 

@@ -340,7 +340,7 @@ unsupported output, low confidence or provider failure returns to the baseline.
 Confidentiality, backend eligibility, Bridge grants and completion validation
 never derive authority from JEV confidence. `src/harness` remains the separate
 coding/validation vertical; it is not a second Agent routing stack. See
-`MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md` for the phased adapter and benchmark
+`archive/MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md` for the phased adapter and benchmark
 gate.
 
 A portable `TaskContract` now names the actor, trace, objective, task type,

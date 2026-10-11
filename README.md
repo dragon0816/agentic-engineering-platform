@@ -5,7 +5,7 @@ Unified engineering automation platform for agentic reasoning, deterministic wor
 The product direction is defined in [Product Vision](docs/PRODUCT_VISION.md).
 The required product gates and implementation order are defined in
 [Product Acceptance Tests](docs/PRODUCT_ACCEPTANCE_TESTS.md).
-The approved [Personal Agent and Coding Harness proposal](docs/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md)
+The approved [Personal Agent and Coding Harness proposal](docs/archive/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md)
 compares that vision with the implemented architecture and fixes the incremental
 product gate order.
 
@@ -123,7 +123,7 @@ supply trusted policy grants; never construct grants from model output.
 
 The sample `skills/source-routing.json` preserves source command routing only;
 it does not install release/build/test implementations or authorize production actions.
-See [Phase 2 scope](docs/phases/PHASE_2_AGENT_CAPABILITIES.md) and
+See [Phase 2 scope](docs/archive/PHASE_2_AGENT_CAPABILITIES.md) and
 [migration decisions](docs/PHASE_2_MIGRATION.md).
 
 Phase 3 adds `agent.gateway.Gateway` and `workflow.engine.WorkflowEngine`.
@@ -155,7 +155,7 @@ old process is gone, and continued from its completed prefix — through the sam
 finished history can be retired without a used idempotency key ever running again.
 
 Phase 4 (knowledge platform, `src/knowledge/`) is complete
-(`docs/phases/PHASE_4_KNOWLEDGE.md`). The vault safety model never writes `drop/`
+(`docs/archive/PHASE_4_KNOWLEDGE.md`). The vault safety model never writes `drop/`
 or `raw/`, defaults to a dry run, backs up every overwrite and rejects a rule-breaking
 write plan whole. Originals dropped into `drop/` become write-once Raw Markdown whose
 identity is its content; PDF, PPTX and DOCX are extracted with page/slide/image
@@ -168,7 +168,7 @@ through a ledger, with snapshot and restore of the generated half, without a byt
 of `raw/` changing. No model provider is named anywhere in knowledge code.
 
 Phase 5 (model gateway, `src/models/`) is complete
-(`docs/phases/PHASE_5_GATEWAY.md`). A catalog maps a stable alias to a
+(`docs/archive/PHASE_5_GATEWAY.md`). A catalog maps a stable alias to a
 provider, a model id and the capabilities that endpoint actually has, and
 selection matches declared `ModelRequirements` against them deterministically,
 so changing a provider or a model is configuration rather than a code change.
@@ -182,7 +182,7 @@ runtime install is still `pydantic` alone and no test opens a socket.
 `models.proof` is a complete inert example a host can copy.
 
 Phase 6 (evaluation, policy and observability, `src/common/evaluation.py` and
-`src/common/trace.py`) is complete (`docs/phases/PHASE_6_EVALUATION.md`). The
+`src/common/trace.py`) is complete (`docs/archive/PHASE_6_EVALUATION.md`). The
 cases under `evaluation/cases/` are graded by what they declare, every grader
 is proven to reject, every routed case runs through a real `Gateway` where
 execution can be seen, and every run leaves an `ExecutionTrace` that is
@@ -190,8 +190,8 @@ redacted by construction. The suite runs on every CI push with no model,
 network or host process; the criteria-by-criteria record is in
 [the Roadmap](docs/ROADMAP.md#phase-6--evaluation-policy-and-observability).
 
-See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/PHASE_1_PLAN.md),
-[Phase 1 requirements](docs/phases/PHASE_1_FOUNDATION.md) and [handoff](HANDOFF.md).
+See [contract semantics](docs/CONTRACTS.md), [implementation/source decisions](docs/archive/PHASE_1_PLAN.md),
+[Phase 1 requirements](docs/archive/PHASE_1_FOUNDATION.md) and [handoff](HANDOFF.md).
 Profiles and sample assets remain outside package code so contributions do not
 require runtime edits. Production host distribution remains outside this preview.
 

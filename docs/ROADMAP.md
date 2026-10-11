@@ -73,7 +73,7 @@ The product-level direction is recorded in `PRODUCT_VISION.md`. The approved
 next milestone is one useful Personal Engineering Agent with a bounded Coding
 Harness that passes three executable benchmark categories: device/chipset
 development, SOP-to-deterministic-Workflow, and parser/transformation
-development. `AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md` assesses the current
+development. `archive/AGENT_HARNESS_ARCHITECTURE_PROPOSAL.md` assesses the current
 implementation and defines the incremental boundary approved by the owner.
 The product E2E gate order and observable completion evidence are defined in
 `PRODUCT_ACCEPTANCE_TESTS.md`; this Roadmap does not override them.
@@ -181,7 +181,7 @@ Preserve immutable raw/source semantics, dry-run/apply separation, backups, sour
 
 Exit criteria: PDF/PPT/DOCX sample corpus round-trips to Raw with traceable source/page/slide/image relationships; Wiki generation cannot mutate Raw; query answers can cite source provenance.
 
-Met 2026-09-21 in nine slices (`docs/phases/PHASE_4_KNOWLEDGE.md`, decisions in `docs/PHASE_4_MIGRATION.md`): vault safety model, Drop → Raw with content identity, office extraction, image description and ingest planning through the model interface, static lint, conflicts and decisions, query with provenance, and a migration adapter that adopts an existing vault without rewriting `raw/`.
+Met 2026-09-21 in nine slices (`docs/archive/PHASE_4_KNOWLEDGE.md`, decisions in `docs/PHASE_4_MIGRATION.md`): vault safety model, Drop → Raw with content identity, office extraction, image description and ingest planning through the model interface, static lint, conflicts and decisions, query with provenance, and a migration adapter that adopts an existing vault without rewriting `raw/`.
 
 ## Phase 5 — Model gateway
 
@@ -189,7 +189,7 @@ Extract the LiteLLM/company-model gateway from the mixed knowledge repository in
 
 Exit criteria: at least local Ollama and the internal OpenAI-compatible gateway can satisfy the same model client interface; credentials are externalized.
 
-Met 2026-09-22 in five slices (`docs/phases/PHASE_5_GATEWAY.md`, decisions in `docs/PHASE_5_MIGRATION.md`): a capability-checked model catalog with deterministic selection, an OpenAI-compatible adapter, an Ollama adapter over its own wire format, the credential resolution boundary and client construction from a catalog, and per-response latency with a worked example. The source's LiteLLM proxy was deliberately not migrated: it existed to terminate the Anthropic wire format for Claude Code, which the owner placed out of scope, and the company gateway is already OpenAI-compatible.
+Met 2026-09-22 in five slices (`docs/archive/PHASE_5_GATEWAY.md`, decisions in `docs/PHASE_5_MIGRATION.md`): a capability-checked model catalog with deterministic selection, an OpenAI-compatible adapter, an Ollama adapter over its own wire format, the credential resolution boundary and client construction from a catalog, and per-response latency with a worked example. The source's LiteLLM proxy was deliberately not migrated: it existed to terminate the Anthropic wire format for Claude Code, which the owner placed out of scope, and the company gateway is already OpenAI-compatible.
 
 ## Phase 6 — Evaluation, policy and observability
 
@@ -219,7 +219,7 @@ Capture route, plan, tool/workflow calls, approvals, duration, model usage and f
 
 Exit criteria: evaluation suite runs in CI without production side effects and blocks known regressions.
 
-Met 2026-09-22 in five slices (`docs/phases/PHASE_6_EVALUATION.md`, decisions in `docs/PHASE_6_MIGRATION.md`): a case's declared assertions decide whether it passed and an unrecognized assertion fails it; every grader is proven to reject; every routed case is exercised through a real Gateway where execution could be seen, and a check that could not have seen its evidence does not pass; the scenario above is a case whose four prohibitions are checked as evidence of what happened; the `agent` category is routed by a model through the real Phase 5 adapter and compared across aliases with repetition, reported as skipped rather than passed when no alias is configured; and every run leaves an `ExecutionTrace` that joins to its request, keeps the Bridge's order, and is redacted by construction and refused if a credential remains. The suite runs on every CI push with no model, network or host process. The source's coding benchmark was deliberately not migrated: it measures a model, needs a live endpoint and executes generated code, which the exit criterion rules out. Codex and Claude Code were excluded from this phase entirely by the owner.
+Met 2026-09-22 in five slices (`docs/archive/PHASE_6_EVALUATION.md`, decisions in `docs/PHASE_6_MIGRATION.md`): a case's declared assertions decide whether it passed and an unrecognized assertion fails it; every grader is proven to reject; every routed case is exercised through a real Gateway where execution could be seen, and a check that could not have seen its evidence does not pass; the scenario above is a case whose four prohibitions are checked as evidence of what happened; the `agent` category is routed by a model through the real Phase 5 adapter and compared across aliases with repetition, reported as skipped rather than passed when no alias is configured; and every run leaves an `ExecutionTrace` that joins to its request, keeps the Bridge's order, and is redacted by construction and refused if a credential remains. The suite runs on every CI push with no model, network or host process. The source's coding benchmark was deliberately not migrated: it measures a model, needs a live endpoint and executes generated code, which the exit criterion rules out. Codex and Claude Code were excluded from this phase entirely by the owner.
 
 ## Phase 7 — End-to-end migration and deprecation
 
@@ -262,20 +262,20 @@ the Registry/Marketplace computer. See
 The 2026-10-02 owner-approved multi-backend sequence strengthens the Personal
 Agent before the remaining Workflow migration and product evidence. Existing
 backend profiles, Gateway adaptation, data policy and portable state are
-recorded in `MULTI_BACKEND_ORCHESTRATOR_PHASE0.md` and `TASKS.md`.
+recorded in `archive/MULTI_BACKEND_ORCHESTRATOR_PHASE0.md` and `TASKS.md`.
 
 The JEV-ready update inserts Phase 1A: a provider-neutral Decision Service
 around bounded Agent decisions, with `NONE` as the zero-configuration baseline.
 Only later, after whole-context egress policy and a golden accuracy/latency
 benchmark, may JEV be added as an optional provider for named low-risk
 classifications. It cannot decide confidentiality, execution authority or
-completion. See `MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md` for the repository
+completion. See `archive/MULTI_BACKEND_ORCHESTRATOR_JEV_PLAN.md` for the repository
 mapping, acceptance tests and later adapter gate.
 
 The next executable checkpoint is an explicit local `aep-host run-task` path
 through Agent admission, approved Gateway execution, bounded read-only tool
 scope, durable task state and independent local answer-artifact validation.
-`docs/ORCHESTRATOR_GATEWAY_TASK_SLICE.md` records its contract and tests.
+`docs/archive/ORCHESTRATOR_GATEWAY_TASK_SLICE.md` records its contract and tests.
 Ordinary Web chat and deterministic Workflow launches retain their existing
 routes. A later slice will connect ordinary Agent ingress to task state;
 native task backends require full-context re-authorization and containment.
@@ -301,7 +301,7 @@ harness, running Workflows and driving the computer's own tools, answering
 questions from the Knowledge wiki, several agents on one machine each with
 its own skills/model/memory, and a web interface to all of it.
 
-`docs/AGENT_CAPABILITIES_REQUESTED.md` records the request, what already
+`docs/archive/AGENT_CAPABILITIES_REQUESTED.md` records the request, what already
 exists, and the one thing that gates most of it: **no model is configured on
 a company host at all today**. That file decides nothing; work appears in
 `docs/TASKS.md` and architecture changes in `docs/ARCHITECTURE.md`.
