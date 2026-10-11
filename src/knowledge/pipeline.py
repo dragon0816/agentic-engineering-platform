@@ -40,6 +40,9 @@ PLANS = ".plans"
 MAX_FINDINGS = 50
 # One dropped original; the Agent Web upload limit is smaller.
 MAX_DROP_BYTES = 50 * 1024 * 1024
+# A plan writes every page in full; 8,000 tokens truncated a 12-slide deck
+# (K1.5 live run, 2026-10-11).
+PLAN_MAX_OUTPUT_TOKENS = 16000
 
 
 class PipelineError(Exception):
@@ -211,7 +214,8 @@ class KnowledgePipeline:
         if entry is None:
             raise PipelineError("unknown_raw")
         conventions, schema_source = self._conventions(vault)
-        planner = IngestPlanner(self.model, vault, alias=self.alias, conventions=conventions)
+        planner = IngestPlanner(self.model, vault, alias=self.alias, conventions=conventions,
+                                max_output_tokens=PLAN_MAX_OUTPUT_TOKENS)
         outcome = planner.plan(load_document(vault, entry), today=date.today().isoformat(),
                                decisions=decisions_text(vault))
         base = IngestPlanResult(sandbox_id=sandbox_id, raw_ref=entry.raw_ref,
