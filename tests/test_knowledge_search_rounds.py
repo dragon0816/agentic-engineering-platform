@@ -142,3 +142,37 @@ def test_the_skill_sets_how_many_sections_of_a_relevant_page_are_read(tmp_path: 
         evidence = search_rounds(snapshot, planner, "a", TRACE, "示波器 抖動",  # type: ignore[arg-type]
                                  _first(snapshot), rounds=2, per_page=per_page)
         assert sum(1 for p in evidence if p.citation.wiki_page == ZH_PAGE) == expected
+
+
+def _deep_pages(tmp_path: Path) -> None:
+    for name in ("alpha", "bravo"):
+        sections = "".join(
+            f"\n\n## {name} part {n}\n\nThe {name} jitter note {n} explains a calibration "
+            "step of the oscilloscope in detail." for n in range(1, 7))
+        (tmp_path / "wiki" / "concepts" / f"{name}.md").write_text(
+            f"---\ntitle: {name}\n---\n# {name}{sections}\n", encoding="utf-8")
+
+
+def test_every_relevant_page_gives_its_best_sections_before_any_goes_deeper(
+    tmp_path: Path,
+) -> None:
+    snapshot = _snapshot(tmp_path)
+    _deep_pages(tmp_path)
+    planner = _Planner({"relevant_pages": [], "queries": ["alpha jitter", "bravo jitter"]},
+                       {"relevant_pages": ["alpha", "bravo"], "done": True})
+    evidence = search_rounds(snapshot, planner, "a", TRACE, "jitter",  # type: ignore[arg-type]
+                             _first(snapshot), rounds=2, k=6, per_page=8)
+    pages = [p.citation.wiki_page for p in evidence if p.citation.kind == "wiki"]
+    assert pages.count("wiki/concepts/alpha.md") == 3
+    assert pages.count("wiki/concepts/bravo.md") == 3
+
+
+def test_relevant_page_sections_are_ranked_by_the_rank_text(tmp_path: Path) -> None:
+    snapshot = _snapshot(tmp_path)
+    _deep_pages(tmp_path)
+    planner = _Planner({"relevant_pages": [], "queries": ["alpha jitter"]},
+                       {"relevant_pages": ["alpha"], "done": True})
+    evidence = search_rounds(snapshot, planner, "a", TRACE, "jitter",  # type: ignore[arg-type]
+                             _first(snapshot), rounds=2, k=1, per_page=8,
+                             rank_text="jitter note 5")
+    assert "alpha part 5" in evidence[0].text

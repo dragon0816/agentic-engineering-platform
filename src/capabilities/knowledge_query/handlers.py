@@ -292,9 +292,11 @@ class KnowledgeQueryHandler:
             # for every question.
             prefix = content_words(request.question)
         queries = [request.question, *(focus.expansions if focus else ())]
+        rewrites: tuple[str, ...] = ()
         if bilingual:
-            queries[1:1] = rewrite_queries(
+            rewrites = rewrite_queries(
                 self.model, self.alias, request.question, context.trace)
+            queries[1:1] = rewrites
         for facet in procedure.requested_facets(request.question):
             for search in (*facet.search_queries, *facet.discovery_queries)[:2]:
                 queries.append(f"{prefix} {search}".strip())
@@ -307,7 +309,8 @@ class KnowledgeQueryHandler:
             passages = search_rounds(
                 snapshot, self.model, self.alias, context.trace, request.question,
                 passages, rounds=procedure.retrieval_rounds, k=sections, max_chars=chars,
-                per_page=procedure.evidence_sections_per_page)
+                per_page=procedure.evidence_sections_per_page,
+                rank_text=" ".join((request.question, *rewrites)))
         if not passages:
             raise CapabilityRefused("knowledge_insufficient_evidence")
         assessment = assess_wiki_primary(passages, request.question, procedure)

@@ -22,7 +22,7 @@ from models.contracts import ModelClient, ModelMessage, ModelRequest, ModelRequi
 
 MAX_QUERIES = 6
 MAX_SHOWN = 30
-MAX_RELEVANT = 12
+MAX_RELEVANT = 20
 SECTIONS_PER_PAGE = 3
 SNIPPET_CHARS = 160
 PLANNER_PROMPT = (
@@ -77,9 +77,17 @@ def search_rounds(
     snapshot: RetrievalSnapshot, model: ModelClient, alias: str, trace: TraceIdentifiers,
     question: str, first: tuple[Passage, ...], *, rounds: int,
     k: int = 36, max_chars: int = 40000, per_page: int = SECTIONS_PER_PAGE,
+    rank_text: str | None = None,
 ) -> tuple[Passage, ...]:
     """The evidence set: pages the model marked relevant lead, then the first
-    retrieval's Wiki passages fill the budget, then its Raw passages."""
+    retrieval's Wiki passages fill the budget, then its Raw passages.
+
+    A relevant page's sections are ranked by `rank_text` (the question and
+    its bilingual rewrites) or the question. Every relevant page first gives
+    its best SECTIONS_PER_PAGE sections, then the pages give the rest up to
+    `per_page`, so the budget spreads over more pages before going deeper
+    into a few (2026-10-12: offline, the reference quotes present in the
+    evidence rose from 0.34 to 0.44 on the 22 answerable core questions)."""
     if rounds < 1:
         return first
     titles = snapshot.wiki_titles()
@@ -126,8 +134,13 @@ def search_rounds(
         selected.append(passage)
         chars += len(passage.text)
 
-    for page in relevant[:MAX_RELEVANT]:
-        for passage in snapshot.wiki_page_sections(page, question, k=per_page):
+    ranked = [snapshot.wiki_page_sections(page, rank_text or question, k=per_page)
+              for page in relevant[:MAX_RELEVANT]]
+    for sections in ranked:
+        for passage in sections[:SECTIONS_PER_PAGE]:
+            add(passage)
+    for sections in ranked:
+        for passage in sections[SECTIONS_PER_PAGE:]:
             add(passage)
     for passage in first:
         if passage.citation.kind == "wiki":

@@ -82,7 +82,7 @@ class KnowledgeProcedure(Contract):
     retrieval_rounds: int = Field(default=0, ge=0, le=3, strict=True)
     # wiki_primary evidence budget for synthesis (owner 2026-10-10). Unset
     # keeps 24 sections (36 with bilingual retrieval) and 40,000 characters.
-    evidence_sections: int | None = Field(default=None, ge=8, le=64, strict=True)
+    evidence_sections: int | None = Field(default=None, ge=8, le=128, strict=True)
     evidence_chars: int | None = Field(default=None, ge=8000, le=80000, strict=True)
     evidence_sections_per_page: int = Field(default=3, ge=1, le=8, strict=True)
 
