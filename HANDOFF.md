@@ -43,6 +43,16 @@ answerable coverage 0.30 -> 0.40, FAIL and contradictions about flat, overreach
 items 35 -> 63. Kept under the owner's rule. To roll back, move 1.9.0 back from
 `disabled/`, move 1.10.0 out, and restart Agent Web.
 
+Knowledge pipeline (2026-10-11, latest): stage K1 of
+`docs/phases/KNOWLEDGE_PIPELINE_RELEASE.zh-TW.md` is done (spec
+`docs/phases/KNOWLEDGE_K1.md`). host.json now has `knowledge_pipeline` with the
+test vault `k-test` (backup `host.json.bak-20261011-103013-before-knowledge-pipeline`).
+Owner mode is live (DECISIONS 2026-10-11): no grants.json needed for the owner;
+`local_owner_grants: false` restores strict grants. Live sandbox with three
+ingested sources: `workspace/knowledge-sandboxes/sb-k1-5-live-20261011t023216-bb69`.
+Next: owner-mode step 2 (Approve button for model-chosen side effects), browser
+check of the Knowledge tab, then K2 (layered bilingual index; legacy Raw adoption).
+
 Knowledge state (2026-10-10, latest): Skill 1.10.0 is live. A no-support retry check
 plus Skill 1.11.0 was tried in `runs/core-006`, came out worse and was rolled back
 (code revert ca110b0). The coverage target is 0.50, set after calibration

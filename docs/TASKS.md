@@ -1602,3 +1602,26 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
 - [x] Atlas Windows backend tests on Python 3.13.15: 35 OK, 7 platform skips
   (Atlas 8267f66).
 - [ ] Atlas browser acceptance (needs the owner at the computer).
+
+## Knowledge pipeline release (plan: docs/phases/KNOWLEDGE_PIPELINE_RELEASE.zh-TW.md)
+
+- [x] K1.1 Local test vault `%LOCALAPPDATA%\AEP\k-test` (7 originals copied from
+  OneDrive RS_Knowledge/drop; the published vault untouched). Fixed Raw image
+  references with whitespace (461d6e9).
+- [x] K1.2 Personal sandboxes (2a298cd).
+- [x] K1.3 Sandboxed pipeline and nine `knowledge-pipeline/*` Bridge capabilities
+  (4680f5e, 370bed7).
+- [x] K1.4 Agent Web Knowledge tab (bc1dd98).
+- [x] Owner mode: device owner holds installed capabilities; model-chosen side
+  effects return approval_required (6919302).
+- [x] K1.5 Live acceptance on k-test with the company model: 4 of 7 originals
+  converted (PDF images described by the endpoint), 3 reported unsupported
+  (XLSX, HTML: K4); 3 Raw documents ingested (26 wiki pages); lint report;
+  base vault byte-identical. Ingest plan output limit raised to 16,000 tokens
+  after a 12-slide deck truncated at 8,000.
+- [ ] Owner mode step 2: an Approve button in the conversation for a side
+  effect the model chose (runs it as the person).
+- [ ] Browser check of the Knowledge tab (owner at the computer).
+- [ ] Legacy Raw of the published vault needs adoption (`knowledge.migrate`)
+  before the pipeline can ingest it (K2).
+- [ ] K2-K6 per the plan.
