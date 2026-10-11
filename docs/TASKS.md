@@ -1619,9 +1619,12 @@ the dated owner decisions above and `docs/phases/PHASE_7_MIGRATION.md`:
   (XLSX, HTML: K4); 3 Raw documents ingested (26 wiki pages); lint report;
   base vault byte-identical. Ingest plan output limit raised to 16,000 tokens
   after a 12-slide deck truncated at 8,000.
-- [ ] Owner mode step 2: an Approve button in the conversation for a side
-  effect the model chose (runs it as the person).
-- [ ] Browser check of the Knowledge tab (owner at the computer).
+- [x] Owner mode step 2: a model-chosen side effect becomes an approval card;
+  Approve runs that exact call as the person (1d9806f).
+- [x] Headless browser check of the Knowledge tab against the live host
+  (2026-10-11): tab, sandbox list, open, Raw with Plan ingest, lint and
+  convert preview all render; no errors. Sandbox buttons still use the
+  default button style (cosmetic).
 - [ ] Legacy Raw of the published vault needs adoption (`knowledge.migrate`)
   before the pipeline can ingest it (K2).
 - [ ] K2-K6 per the plan.
