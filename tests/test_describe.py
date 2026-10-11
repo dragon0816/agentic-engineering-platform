@@ -93,7 +93,7 @@ def test_a_description_request_declares_vision_and_carries_the_image_inline() ->
     assert request.requirements.vision is True and request.model_alias == "vision-default"
     assert request.messages[0].text == DEFAULT_PROMPT
     assert request.messages[0].images == (data_uri(PNG, "image/png"),)
-    assert request.max_output_tokens == 400 and request.trace == trace()
+    assert request.max_output_tokens == 1500 and request.trace == trace()
 
 
 def test_every_failure_is_a_closed_status() -> None:
@@ -266,3 +266,30 @@ def test_without_a_describer_nothing_is_asked(tmp_path: Path) -> None:
         )
     with pytest.raises(ValidationError, match="reached a document"):
         IntakeOutcome(mode="apply", status="empty", original_ref="drop/x.img", images_to_describe=1)
+
+
+class TruncatingModel(VisionModel):
+    """Runs out of output tokens below `enough`, as a reasoning model does on a
+    dense diagram."""
+
+    def __init__(self, enough: int) -> None:
+        super().__init__()
+        self.enough = enough
+
+    def generate(self, request: ModelRequest) -> ModelResponse:
+        if (request.max_output_tokens or 0) < self.enough:
+            self.requests.append(request)
+            return ModelResponse(trace=request.trace, model_alias=request.model_alias,
+                                 failure=Failure(code="model_output_truncated",
+                                                 message="output token limit"))
+        return super().generate(request)
+
+
+def test_a_truncated_description_is_asked_once_more_with_a_larger_budget() -> None:
+    model = TruncatingModel(enough=3000)
+    described = ImageDescriber(model, alias="v").describe("a.png", b"\x89PNG", trace=trace())
+    assert described.status == "described"
+    assert [r.max_output_tokens for r in model.requests] == [1500, 4000]
+    still = TruncatingModel(enough=10_000)
+    failed = ImageDescriber(still, alias="v").describe("a.png", b"\x89PNG", trace=trace())
+    assert failed.status == "model_failed" and len(still.requests) == 2  # one retry only

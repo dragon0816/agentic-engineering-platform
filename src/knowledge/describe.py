@@ -53,15 +53,20 @@ class ImageDescriber:
         *,
         alias: Symbol,
         prompt: Text = DEFAULT_PROMPT,
-        max_output_tokens: int = 400,
+        max_output_tokens: int = 1500,
         max_bytes: int = MAX_IMAGE_BYTES,
+        retry_output_tokens: int = 4000,
     ) -> None:
-        if max_output_tokens < 1 or max_bytes < 1:
-            raise ValueError("limits are positive")
+        if max_output_tokens < 1 or max_bytes < 1 or retry_output_tokens < max_output_tokens:
+            raise ValueError("limits are positive and a retry is not smaller")
         self.model = model
         self.alias = alias
         self.prompt = prompt
         self.max_output_tokens = max_output_tokens
+        # A dense diagram or table can need more than the usual budget, and a
+        # reasoning model spends part of it before writing (OCNG, 2026-10-12):
+        # a truncated answer is asked once more with this larger budget.
+        self.retry_output_tokens = retry_output_tokens
         self.max_bytes = max_bytes
         self._by_content: dict[str, str] = {}
 
@@ -86,6 +91,11 @@ class ImageDescriber:
         )
         try:
             response = self.model.generate(request)
+            if (response.failure is not None
+                    and response.failure.code == "model_output_truncated"
+                    and self.retry_output_tokens > self.max_output_tokens):
+                response = self.model.generate(request.model_copy(
+                    update={"max_output_tokens": self.retry_output_tokens}))
         except Exception as error:  # noqa: BLE001 - an adapter's failure is a status here
             return ImageDescription(
                 image_ref=image_ref, status="model_failed", failure=failure_from_exception(error)
