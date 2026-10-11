@@ -96,6 +96,9 @@ body {
 #nav-capabilities::before { content: "\25c7"; }
 #nav-settings::before { content: "\2699"; }
 #nav-schedules::before { content: "\25f7"; }
+#nav-knowledge::before { content: "\25a4"; }
+.kp-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
+.kp-list button { margin: 2px 6px 2px 0; }
 .schedule-grid { display: grid; gap: 14px; }
 .schedule-card { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
   background: var(--panel); }
@@ -402,6 +405,7 @@ tr:last-child td { border-bottom: none; }
     <button id="nav-capabilities" type="button">Capabilities</button>
     <button id="nav-settings" type="button">Settings</button>
     <button id="nav-schedules" type="button">Schedules</button>
+    <button id="nav-knowledge" type="button">Knowledge</button>
   </div>
   <div class="session-heading"><span>Sessions</span><span id="session-count">0</span></div>
   <input id="session-search" class="session-search" type="search"
@@ -789,6 +793,47 @@ tr:last-child td { border-bottom: none; }
     </details>
   </section>
 
+  <section id="panel-knowledge">
+    <div class="workspace-head">
+      <div><h2>Knowledge</h2>
+        <p class="note">Convert, ingest and lint run in your own sandbox, a copy of a base
+          vault. Nothing here changes the base vault.</p></div>
+      <button class="go" id="kp-refresh" type="button">Refresh</button>
+    </div>
+    <div id="kp-disabled" class="empty" hidden>The Knowledge pipeline is not configured on
+      this machine (host.json <code>knowledge_pipeline</code>).</div>
+    <div id="kp-main">
+      <h2>Sandboxes</h2>
+      <div class="card">
+        <div id="kp-sandboxes" class="kp-list">reading&hellip;</div>
+        <form id="kp-new" class="kp-actions">
+          <select id="kp-base" aria-label="Base vault"></select>
+          <input id="kp-label" required maxlength="80" placeholder="Sandbox name, e.g. VNA trial"
+                 aria-label="Sandbox name">
+          <button class="go" type="submit">Create sandbox</button>
+        </form>
+      </div>
+      <div id="kp-box" hidden>
+        <h2 id="kp-title"></h2>
+        <div class="card"><h3>Drop</h3>
+          <div class="kp-actions">
+            <input id="kp-files" type="file" multiple aria-label="Originals to add">
+            <button id="kp-upload" type="button">Add to drop</button>
+            <button id="kp-preview" type="button">Preview convert</button>
+            <button class="go" id="kp-convert" type="button">Convert</button>
+          </div>
+          <div id="kp-drop"></div><div id="kp-converted"></div></div>
+        <div class="card"><h3>Raw</h3><div id="kp-raw" class="kp-list"></div></div>
+        <div class="card"><h3>Ingest plan</h3>
+          <div id="kp-plan" class="empty">Choose Plan ingest on a Raw document.</div></div>
+        <div class="card"><h3>Lint</h3>
+          <div class="kp-actions"><button id="kp-lint" type="button">Run lint</button></div>
+          <div id="kp-lint-result"></div></div>
+        <div class="kp-actions"><button id="kp-discard" type="button">Discard sandbox</button></div>
+      </div>
+    </div>
+    <div id="kp-status" class="section-status" role="status" aria-live="polite"></div>
+  </section>
   <section id="panel-schedules">
     <div class="workspace-head">
       <div><h2>Scheduled tasks</h2>
@@ -3425,8 +3470,152 @@ renderScheduleDays();
 
 // -- Workspace navigation -------------------------------------------------
 
+// -- Knowledge pipeline (docs/phases/KNOWLEDGE_K1.md) ----------------------
+
+let kpSandbox = null;
+
+async function pipeline(step, args) {
+  const reply = await call("/api/knowledge/pipeline/call", {step, arguments: args || {}});
+  if (!reply.ok) {
+    const problem = new Error(reply.code); problem.code = reply.code; throw problem;
+  }
+  return reply.data;
+}
+
+function kpStatus(message, bad) {
+  const box = el("kp-status"); box.textContent = message || "";
+  box.classList.toggle("bad", !!bad);
+}
+
+async function kpRun(label, action) {
+  kpStatus(label + "\u2026");
+  try { await action(); kpStatus(""); }
+  catch (failure) { kpStatus(label + " failed: " + (failure.code || failure.message), true); }
+}
+
+function kpButton(label, action) {
+  const button = document.createElement("button"); button.type = "button";
+  button.append(text(label)); button.addEventListener("click", action); return button;
+}
+
+async function loadKnowledge() {
+  const info = await call("/api/knowledge/pipeline");
+  el("kp-disabled").hidden = info.enabled; el("kp-main").hidden = !info.enabled;
+  if (!info.enabled) return;
+  const base = el("kp-base"); base.replaceChildren();
+  for (const name of info.bases) {
+    const option = document.createElement("option"); option.value = name;
+    option.append(text(name)); base.append(option);
+  }
+  const listed = await pipeline("sandbox-list");
+  const box = el("kp-sandboxes"); box.replaceChildren();
+  if (!listed.sandboxes.length) box.append(text("No sandbox yet."));
+  for (const item of listed.sandboxes) {
+    box.append(kpButton(item.label + " (" + item.base_name + ")",
+      () => kpRun("Opening", () => kpOpen(item))));
+  }
+  if (kpSandbox && !listed.sandboxes.some((s) => s.sandbox_id === kpSandbox.sandbox_id)) {
+    kpSandbox = null; el("kp-box").hidden = true;
+  }
+}
+
+async function kpOpen(item) {
+  kpSandbox = item; el("kp-box").hidden = false;
+  el("kp-title").textContent = item.label + " \u2014 " + item.sandbox_id;
+  const contents = await pipeline("sandbox-contents", {sandbox_id: item.sandbox_id});
+  el("kp-drop").replaceChildren(table(["Original in drop"], contents.drop, (row) => [row]));
+  const raw = el("kp-raw"); raw.replaceChildren();
+  raw.append(table(["Raw document", ""], contents.raw, (row) => [row,
+    kpButton("Plan ingest", () => kpRun("Planning ingest (this asks the model)",
+      () => kpPlan(row)))]));
+}
+
+function kpFileBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(",", 2)[1] || "");
+    reader.onerror = () => reject(reader.error); reader.readAsDataURL(file);
+  });
+}
+
+async function kpConvert(mode) {
+  const result = await pipeline("convert", {sandbox_id: kpSandbox.sandbox_id, mode});
+  el("kp-converted").replaceChildren(table(["Original", "Result", "Raw", "Images"],
+    result.items, (row) => [row.path, row.status, row.raw_ref || "", String(row.images)]));
+  if (mode === "apply") await kpOpen(kpSandbox);
+}
+
+async function kpPlan(rawRef) {
+  const plan = await pipeline("ingest-plan", {sandbox_id: kpSandbox.sandbox_id, raw_ref: rawRef});
+  const box = el("kp-plan"); box.className = ""; box.replaceChildren();
+  const head = document.createElement("p");
+  head.append(text(rawRef + ": " + plan.status + (plan.summary ? " \u2014 " + plan.summary : "")
+    + " (schema: " + plan.schema_source + ")"));
+  box.append(head);
+  if (plan.problems.length) box.append(text("Problems: " + plan.problems.join(", ")));
+  box.append(table(["Page", "Change", "Characters"], plan.pages,
+    (row) => [row.path, row.change, String(row.chars)]));
+  if (plan.contradictions.length) {
+    const list = document.createElement("ul");
+    for (const line of plan.contradictions) {
+      const li = document.createElement("li"); li.append(text("\u26a0 " + line)); list.append(li);
+    }
+    box.append(list);
+  }
+  if (plan.plan_id) {
+    box.append(kpButton("Apply to this sandbox", () => kpRun("Applying", async () => {
+      const done = await pipeline("ingest-apply",
+        {sandbox_id: kpSandbox.sandbox_id, plan_id: plan.plan_id});
+      const note = document.createElement("p");
+      note.append(text(done.status === "applied" ? "Applied: " + done.written.join(", ")
+        : "Not applied: " + done.problems.join(", ")));
+      box.append(note);
+    })));
+  }
+}
+
+async function kpLint() {
+  const report = await pipeline("lint", {sandbox_id: kpSandbox.sandbox_id});
+  const box = el("kp-lint-result"); box.replaceChildren();
+  box.append(text(report.pages + " pages, " + (report.clean ? "clean" : "findings") + ": "
+    + Object.entries(report.counts).filter(([, n]) => n).map(([k, n]) => k + " " + n)
+      .join(", ")));
+  const list = document.createElement("ul");
+  for (const line of report.findings) {
+    const li = document.createElement("li"); li.append(text(line)); list.append(li);
+  }
+  box.append(list);
+}
+
+el("kp-refresh").addEventListener("click", () => kpRun("Reading", loadKnowledge));
+el("kp-new").addEventListener("submit", (event) => {
+  event.preventDefault();
+  kpRun("Creating the sandbox (copying the base vault)", async () => {
+    const made = await pipeline("sandbox-create",
+      {base: el("kp-base").value, label: el("kp-label").value.trim()});
+    el("kp-label").value = ""; await loadKnowledge(); await kpOpen(made);
+  });
+});
+el("kp-upload").addEventListener("click", () => kpRun("Adding to drop", async () => {
+  for (const file of el("kp-files").files) {
+    await pipeline("drop-add", {sandbox_id: kpSandbox.sandbox_id, name: file.name,
+      data_base64: await kpFileBase64(file)});
+  }
+  el("kp-files").value = ""; await kpOpen(kpSandbox);
+}));
+el("kp-preview").addEventListener("click", () => kpRun("Previewing", () => kpConvert("dry_run")));
+el("kp-convert").addEventListener("click", () => kpRun("Converting", () => kpConvert("apply")));
+el("kp-lint").addEventListener("click", () => kpRun("Linting", kpLint));
+el("kp-discard").addEventListener("click", () => {
+  if (!kpSandbox || !confirm("Discard this sandbox? It is moved aside, not deleted.")) return;
+  kpRun("Discarding", async () => {
+    await pipeline("sandbox-discard", {sandbox_id: kpSandbox.sandbox_id});
+    kpSandbox = null; el("kp-box").hidden = true; await loadKnowledge();
+  });
+});
+
 const panels = {ask: null, installed: loadCapabilities,
-  settings: loadSettings, schedules: loadSchedules};
+  settings: loadSettings, schedules: loadSchedules, knowledge: loadKnowledge};
 
 function showBootError(failure) {
   const banner = el("boot-error"); banner.hidden = false;
@@ -3440,6 +3629,7 @@ async function selectPrimaryTab(name) {
   el("nav-capabilities").toggleAttribute("aria-current", name === "installed");
   el("nav-settings").toggleAttribute("aria-current", name === "settings");
   el("nav-schedules").toggleAttribute("aria-current", name === "schedules");
+  el("nav-knowledge").toggleAttribute("aria-current", name === "knowledge");
   if (name === "ask") { field.focus(); return; }
   try { await panels[name](); }
   catch (failure) { showBootError(failure); }
@@ -3448,6 +3638,7 @@ async function selectPrimaryTab(name) {
 el("nav-capabilities").addEventListener("click", () => selectPrimaryTab("installed"));
 el("nav-settings").addEventListener("click", () => selectPrimaryTab("settings"));
 el("nav-schedules").addEventListener("click", () => selectPrimaryTab("schedules"));
+el("nav-knowledge").addEventListener("click", () => selectPrimaryTab("knowledge"));
 
 Promise.all([loadAbout(), loadAssets(), loadChat(), loadSlashCommands(), loadAvatars(), loadMcp()])
   .catch(showBootError);

@@ -57,6 +57,17 @@ from agent.data_policy import ContextMaterial, OutboundContext
 from agent.gateway import GatewayConversationResult
 from agent.routing import DOT_COMMAND
 from agent.skills import SkillManifest
+from capabilities.knowledge_pipeline.handlers import (
+    CONVERT_SPEC,
+    DROP_ADD_SPEC,
+    INGEST_APPLY_SPEC,
+    INGEST_PLAN_SPEC,
+    LINT_SPEC,
+    SANDBOX_CONTENTS_SPEC,
+    SANDBOX_CREATE_SPEC,
+    SANDBOX_DISCARD_SPEC,
+    SANDBOX_LIST_SPEC,
+)
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, MARKET_MATRIX_SPEC
 from capabilities.script_tools import load_script_tools
 from capabilities.workflow_author.review import rendered as review_rendered
@@ -176,6 +187,11 @@ MAX_BODY_BYTES = 256 * 1024
 MAX_SOP_UPLOAD_BYTES = 28 * 1024 * 1024
 #: One attached file (25 MB) as base64 in JSON, with room for its name.
 MAX_ATTACHMENT_REQUEST_BYTES = 36 * 1024 * 1024
+# The Knowledge tab's pipeline steps (docs/phases/KNOWLEDGE_K1.md), by the short
+# name the page sends; nothing else can be called through its route.
+PIPELINE_STEPS = {spec.identity.name: spec for spec in (
+    SANDBOX_CREATE_SPEC, SANDBOX_LIST_SPEC, SANDBOX_CONTENTS_SPEC, SANDBOX_DISCARD_SPEC,
+    DROP_ADD_SPEC, CONVERT_SPEC, INGEST_PLAN_SPEC, INGEST_APPLY_SPEC, LINT_SPEC)}
 AUTHORING_ROUTES = (
     "/api/authoring/start", "/api/authoring/get", "/api/authoring/discuss",
     "/api/authoring/preview", "/api/authoring/install",
@@ -2466,6 +2482,32 @@ class AgentWeb:
             "outcome": json.loads(outcome.model_dump_json()),
         }
 
+    def knowledge_pipeline(self) -> dict[str, Any]:
+        """What the Knowledge tab may offer: the configured base vaults."""
+        binding = self.runtime.config.knowledge_pipeline
+        return {"enabled": binding is not None,
+                "bases": [item.name for item in binding.vaults] if binding else []}
+
+    def pipeline_call(self, step: str, arguments: dict[str, Any]) -> dict[str, Any]:
+        """One pipeline step through the Agent, as the person who pressed it."""
+        spec = PIPELINE_STEPS.get(step)
+        if spec is None or self.runtime.config.knowledge_pipeline is None:
+            return {"ok": False, "code": "unknown_pipeline_step"}
+        local = LocalCapabilityRequest(
+            ingress="local", actor=self.runtime.actor,
+            bridge_id=self.runtime.config.device.bridge_id, target=spec.identity,
+            arguments=arguments, trace=_trace())
+        import asyncio
+
+        outcome = asyncio.run(self.runtime.agent.execute_capability(local))
+        if outcome.refusal is not None:
+            return {"ok": False, "code": str(outcome.refusal)}
+        capability = outcome.capability
+        if capability is None or capability.status != "succeeded":
+            failure = capability.failure if capability is not None else None
+            return {"ok": False, "code": failure.code if failure else "pipeline_step_failed"}
+        return {"ok": True, "data": capability.data}
+
     def ask_knowledge(self, request: KnowledgeAskRequest) -> dict[str, Any]:
         """Ask one exact installed Knowledge version through Bridge policy."""
         with telemetry.run("knowledge_query", attributes={"ingress": "agent_web"}):
@@ -2605,6 +2647,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.about())
         elif parsed.path == "/api/readiness":
             self._json(200, web.readiness())
+        elif parsed.path == "/api/knowledge/pipeline":
+            self._json(200, web.knowledge_pipeline())
         elif parsed.path == "/api/settings":
             self._json(200, web.settings())
         elif parsed.path == "/api/avatars":
@@ -2660,6 +2704,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/profiles/activate",
             "/api/workflows/run",
             "/api/knowledge/ask",
+            "/api/knowledge/pipeline/call",
             "/api/settings/model",
             "/api/settings/telegram",
             "/api/mcp/save",
@@ -2692,7 +2737,8 @@ class _Handler(BaseHTTPRequestHandler):
             return
         limit = (
             MAX_SOP_UPLOAD_BYTES if path == "/api/authoring/start"
-            else MAX_ATTACHMENT_REQUEST_BYTES if path == "/api/attachments"
+            else MAX_ATTACHMENT_REQUEST_BYTES
+            if path in ("/api/attachments", "/api/knowledge/pipeline/call")
             else MAX_BODY_BYTES
         )
         if length > limit:
@@ -2702,6 +2748,17 @@ class _Handler(BaseHTTPRequestHandler):
             body = json.loads(self.rfile.read(length) or b"{}")
         except (ValueError, TypeError):
             self._json(400, {"error": "the request was not valid JSON"})
+            return
+        if path == "/api/knowledge/pipeline/call":
+            if not isinstance(body, dict) or not isinstance(body.get("arguments", {}), dict):
+                self._json(400, {"ok": False, "code": "pipeline_request_invalid"})
+                return
+            try:
+                result = self.server.web.pipeline_call(
+                    str(body.get("step") or ""), dict(body.get("arguments") or {}))
+            except Exception as failure:  # noqa: BLE001 - a page shows everything
+                result = {"ok": False, "code": f"pipeline_error:{type(failure).__name__}"}
+            self._json(200, result)
             return
         if path in ("/api/drafts/install", "/api/drafts/delete"):
             if not isinstance(body, dict):
