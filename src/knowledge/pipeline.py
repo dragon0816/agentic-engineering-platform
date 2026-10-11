@@ -25,7 +25,15 @@ from knowledge.conflicts import decisions_text
 from knowledge.evolution import knowledge_digest
 from knowledge.layered_index import KEYS, EnrichReport, IndexReport, LayeredIndex, read_entry
 from knowledge.lint import scan
-from knowledge.merge import MergeChange, MergeConflict, Resolution, read_tree, three_way
+from knowledge.merge import (
+    ROOT_FILES,
+    TEXT_AREAS,
+    MergeChange,
+    MergeConflict,
+    Resolution,
+    read_tree,
+    three_way,
+)
 from knowledge.migrate import adopt
 from knowledge.planning import DEFAULT_CONVENTIONS, IngestPlanner
 from knowledge.questions import default_sets
@@ -509,6 +517,24 @@ class KnowledgePipeline:
         whoever runs this Agent (OneDrive sharing still decides who can write)."""
         allowed = self.maintainers.get(base, ())
         return not allowed or actor in allowed
+
+    def sync_after_push(self, sandbox_id: str) -> None:
+        """After a push, the project vault holds the sandbox's work and possibly
+        others'. The sandbox and its `.base` take the project's wiki, rules and
+        root files, so work continues from the pushed state and a later merge
+        never mistakes others' pushes for edits the sandbox undid."""
+        info, vault = self.sandboxes.open(sandbox_id)
+        project = self.bases[info.base_name]
+        for target in (vault.root, vault.root / BASE):
+            for area in TEXT_AREAS:
+                if (target / area).exists():
+                    shutil.rmtree(target / area)
+                if (project / area).is_dir():
+                    shutil.copytree(project / area, target / area)
+            for name in ROOT_FILES:
+                if (project / name).is_file():
+                    target.mkdir(exist_ok=True)
+                    shutil.copy2(project / name, target / name)
 
     def write_push(self, base: str, candidate_root: str, written: tuple[str, ...],
                    push_id: str) -> str:

@@ -133,6 +133,7 @@ def run_push(pipeline: KnowledgePipeline, ask: Ask, *, sandbox_id: str, actor: s
             backup = pipeline.write_push(info.base_name, merged.candidate_root, merged.written, pid)
             report = save(report, status="pushed", backup=backup, finished_at=_now())
             _record(project, report, info.label)
+            pipeline.sync_after_push(sandbox_id)
             return report
         return save(report, status="moved", finished_at=_now(),
                     reason="the project vault kept changing; try again")

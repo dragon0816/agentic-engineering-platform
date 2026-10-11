@@ -104,3 +104,17 @@ def test_conflicts_and_non_maintainers_stop_before_writing(tmp_path: Path) -> No
     resolved = run_push(pipeline, ask, sandbox_id=sandbox, actor="leo.chi", sets=("market",),
                         resolutions={"wiki/entities/CMX500.md#規格": "sandbox"})
     assert resolved.status == "pushed" and "7.5 GHz" in page.read_text(encoding="utf-8")
+
+
+def test_after_a_push_the_sandbox_continues_from_the_pushed_state(tmp_path: Path) -> None:
+    pipeline, base = _project(tmp_path)
+    first, _ = _sandbox(pipeline)
+    second, _ = _sandbox(pipeline, ("- K100", "- K100\n- K200"))
+    ask = _answers("FSWX K91BE", "FSWX K91BE")
+    for sandbox, actor in ((first, "a"), (second, "b")):
+        pushed = run_push(pipeline, ask, sandbox_id=sandbox, actor=actor, sets=("market",))
+        assert pushed.status == "pushed"
+    # The first sandbox has nothing left to push, and does not undo the second push.
+    assert pipeline.merge(first).changes == ()
+    text = (base / "wiki/entities/CMX500.md").read_text(encoding="utf-8")
+    assert "- 400 MHz" in text and "- K200" in text
