@@ -282,7 +282,7 @@ class KnowledgeQueryHandler:
         procedure: KnowledgeProcedure, vault: Vault,
     ) -> Contract:
         """Answer from curated Wiki sections, with Raw as provenance and fallback."""
-        snapshot = RetrievalSnapshot(vault)
+        snapshot = RetrievalSnapshot.cached(vault)
         subject = procedure.subject(request.question)
         focus = procedure.focus(request.question)
         prefix = " ".join(part for part in (subject, focus.query if focus else None) if part)

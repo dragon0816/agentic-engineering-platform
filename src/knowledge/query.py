@@ -14,10 +14,12 @@ given is refused, and one that honestly cites nothing is reported as such.
 
 import hashlib
 import math
+import os
 import re
+import threading
 from collections import Counter
 from collections.abc import Callable
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from typing import Literal
 
 from pydantic import Field, ValidationError
@@ -665,8 +667,53 @@ def retrieve_batch(
     return RetrievalSnapshot(vault).batch(queries, k=k, min_raw=min_raw)
 
 
+def vault_fingerprint(root: Path) -> tuple[int, int, int]:
+    """Count, newest modification and total size of every file under a Vault.
+
+    Any write, addition or removal changes it. One `os.scandir` walk takes
+    tens of milliseconds on a 5,000-file Vault, against about 20 seconds to
+    rebuild the corpus.
+    """
+    count = newest = size = 0
+    pending = [str(root)]
+    while pending:
+        with os.scandir(pending.pop()) as entries:
+            for entry in entries:
+                if entry.is_dir(follow_symlinks=False):
+                    pending.append(entry.path)
+                    continue
+                stat = entry.stat(follow_symlinks=False)
+                count += 1
+                newest = max(newest, stat.st_mtime_ns)
+                size += stat.st_size
+    return count, newest, size
+
+
+_SNAPSHOT_LOCK = threading.Lock()
+_SNAPSHOTS: dict[str, tuple[tuple[int, int, int], "RetrievalSnapshot"]] = {}
+
+
 class RetrievalSnapshot:
     """One Raw/Wiki corpus load across bounded facet searches."""
+
+    @classmethod
+    def cached(cls, vault: Vault) -> "RetrievalSnapshot":
+        """The snapshot of this Vault's current content, rebuilt only when a
+        file under it changed (2026-10-12: building it took about 20 s of
+        every wiki-primary question). Its lazy parts are built before it is
+        shared, so concurrent questions read a complete, unchanging snapshot."""
+        root = str(vault.root.resolve())
+        with _SNAPSHOT_LOCK:
+            fingerprint = vault_fingerprint(vault.root)
+            found = _SNAPSHOTS.get(root)
+            if found is not None and found[0] == fingerprint:
+                return found[1]
+            snapshot = cls(vault)
+            snapshot._prepare_wiki_navigation()
+            snapshot._wiki_section_docs()
+            snapshot.wiki_titles()
+            _SNAPSHOTS[root] = (fingerprint, snapshot)
+            return snapshot
 
     def __init__(self, vault: Vault) -> None:
         self._docs = _corpus(vault)
@@ -677,6 +724,7 @@ class RetrievalSnapshot:
         self._index_docs: list[_Doc] = []
         self._navigation_ready = False
         self._wiki_sections: list[_Doc] | None = None
+        self._titles: dict[str, str] | None = None
 
     def _prepare_wiki_navigation(self) -> None:
         if self._navigation_ready:
@@ -936,8 +984,12 @@ class RetrievalSnapshot:
         return self._wiki_sections
 
     def wiki_titles(self) -> dict[str, str]:
-        """Wiki page path -> title."""
-        return {rel: title for rel, title in self._vault.wiki_pages() if not is_navigation(rel)}
+        """Wiki page path -> title, read once per snapshot."""
+        if self._titles is None:
+            self._titles = {
+                rel: title for rel, title in self._vault.wiki_pages() if not is_navigation(rel)
+            }
+        return dict(self._titles)
 
     def search_wiki_pages(
         self, query: str, *, exclude: set[str], limit: int = 8,
@@ -1106,6 +1158,38 @@ def wiki_sections(title: str, text: str) -> list[str]:
     return sections
 
 
+_STATISTICS_LOCK = threading.Lock()
+_STATISTICS: dict[int, tuple[list[_Doc], int, float, Counter[str]]] = {}
+# Only a corpus this large is worth remembering; a page's few sections are not.
+_STATISTICS_MIN_DOCS = 1000
+_STATISTICS_KEEP = 8
+
+
+def _corpus_statistics(docs: list[_Doc]) -> tuple[float, Counter[str]]:
+    """Mean length and document frequency of a corpus for BM25.
+
+    Counting them took most of each query's 0.7 s on a 100,000-passage Vault,
+    and one question runs about 30 queries over the same snapshot lists, so a
+    large list's statistics are kept while that list is alive and unchanged.
+    """
+    key = id(docs)
+    with _STATISTICS_LOCK:
+        found = _STATISTICS.get(key)
+        if found is not None and found[0] is docs and found[1] == len(docs):
+            return found[2], found[3]
+    average = sum(doc.length for doc in docs) / len(docs)
+    frequency: Counter[str] = Counter()
+    for doc in docs:
+        frequency.update(set(doc.counts))
+    if len(docs) >= _STATISTICS_MIN_DOCS:
+        with _STATISTICS_LOCK:
+            while len(_STATISTICS) >= _STATISTICS_KEEP:
+                _STATISTICS.pop(next(iter(_STATISTICS)))
+            # Holding the list keeps its id from being reused by another list.
+            _STATISTICS[key] = (docs, len(docs), average, frequency)
+    return average, frequency
+
+
 def _retrieve_docs(
     docs: list[_Doc], question: str, *, k: int, min_raw: int,
     evidence_coverage: bool = False,
@@ -1128,10 +1212,7 @@ def _retrieve_docs(
         return ()
     facets = _coverage_terms(question) if evidence_coverage else ()
     covered = bool(facets)
-    average = sum(doc.length for doc in docs) / len(docs)
-    frequency: Counter[str] = Counter()
-    for doc in docs:
-        frequency.update(set(doc.counts))
+    average, frequency = _corpus_statistics(docs)
     search_average = sum(doc.search_length for doc in docs) / len(docs) if covered else average
     search_frequency: Counter[str] = Counter()
     if covered:

@@ -372,3 +372,27 @@ def test_labeled_inferences_stay_under_their_heading_and_are_capped() -> None:
     assert lines[0] == "### 推薦先賣"
     assert lines[1:4] == [inference] * 3
     assert lines[4:] == ["### 事實", "ZNA covers 10 MHz to 67 GHz [1]."]
+
+
+# -- Snapshot reuse (2026-10-12) ----------------------------------------------
+
+
+def test_a_cached_snapshot_is_reused_until_a_vault_file_changes(tmp_path: Path) -> None:
+    vault = _wiki_vault(tmp_path)
+    first = RetrievalSnapshot.cached(vault)
+    assert RetrievalSnapshot.cached(vault) is first
+    page = tmp_path / "wiki" / "entities" / "R&S ZNB.md"
+    page.write_text("---\ntitle: R&S ZNB\n---\nZNB vector network analyzer with "
+                    "bandwidth up to 43.5 GHz for production test.\n", encoding="utf-8")
+    second = RetrievalSnapshot.cached(vault)
+    assert second is not first
+    assert "wiki/entities/R&S ZNB.md" in second.wiki_titles()
+    found = second.search_wiki_pages("ZNB production", exclude=set())
+    assert found and found[0].citation.wiki_page == "wiki/entities/R&S ZNB.md"
+
+
+def test_a_cached_snapshot_ranks_like_a_fresh_one(tmp_path: Path) -> None:
+    vault = _wiki_vault(tmp_path)
+    queries = ("ZNA option", "eye diagram time domain")
+    cached = RetrievalSnapshot.cached(vault).wiki_primary_passages(queries)
+    assert cached == RetrievalSnapshot(vault).wiki_primary_passages(queries)
