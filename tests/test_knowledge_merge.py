@@ -125,3 +125,20 @@ def test_out_of_domain_changes_are_proposals(tmp_path: Path) -> None:
     assert changes == {"wiki/concepts/S-parameter.md": False, "wiki/concepts/EVM.md": True}
     with pytest.raises(PipelineError, match="unknown_domain"):
         pipeline.create_sandbox("k-test", "x", "a", domain="nope")
+
+
+def test_schema_and_category_rules_merge_like_pages(tmp_path: Path) -> None:
+    pipeline, base = _pipeline(tmp_path)
+    sandbox = pipeline.create_sandbox("k-test", "rules", "leo.chi").sandbox_id
+    root = pipeline.sandboxes.open(sandbox)[1].root
+    (root / "CLAUDE.md").write_text("schema\n\n## 語言慣例\n\n- 雙語別名\n", encoding="utf-8")
+    (root / "skills/ingest-market").mkdir(parents=True)
+    (root / "skills/ingest-market/SKILL.md").write_text(
+        "---\nname: ingest-market\napplies_to: raw/Market\n---\n每條說法要有日期。\n",
+        encoding="utf-8")
+    applied = pipeline.merge(sandbox, mode="apply")
+    assert {c.path for c in applied.changes} == {"CLAUDE.md", "skills/ingest-market/SKILL.md"}
+    assert applied.candidate_root
+    candidate = Path(applied.candidate_root)
+    assert "雙語別名" in (candidate / "CLAUDE.md").read_text(encoding="utf-8")
+    assert (candidate / "skills/ingest-market/SKILL.md").is_file()

@@ -27,8 +27,11 @@ from typing import Literal
 from common.base import Contract
 from knowledge.sections import Page, parse
 
-ROOT_FILES = ("index.md", "log.md", "decisions.md")
-AREAS = ("wiki", "raw")
+# The schema and category rules (K3.1) merge like pages, so a domain owner's
+# rule change in a sandbox reaches the published vault.
+ROOT_FILES = ("index.md", "log.md", "decisions.md", "CLAUDE.md")
+AREAS = ("wiki", "raw", "skills")
+TEXT_AREAS = ("wiki", "skills")
 PREAMBLE = "(preamble)"
 Resolution = Literal["sandbox", "published"]
 
@@ -61,7 +64,7 @@ class MergeResult:
 
 def read_tree(root: Path, *, raw: bool = True) -> dict[str, bytes]:
     files: dict[str, bytes] = {}
-    for area in AREAS if raw else ("wiki",):
+    for area in AREAS if raw else TEXT_AREAS:
         folder = root / area
         if folder.is_dir():
             for path in sorted(folder.rglob("*")):

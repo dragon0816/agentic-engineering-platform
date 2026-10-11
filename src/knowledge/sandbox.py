@@ -21,6 +21,7 @@ from pathlib import Path
 from pydantic import BaseModel
 
 from knowledge.evolution import decision_digest, knowledge_digest, raw_digest
+from knowledge.merge import ROOT_FILES, TEXT_AREAS
 from knowledge.vault import Vault, VaultError
 
 ROOT_NAME = "knowledge-sandboxes"
@@ -99,9 +100,10 @@ class Sandboxes:
         shutil.copytree(base.root, folder,
                         ignore=lambda _dir, names: [n for n in names if n in _SKIPPED])
         (folder / "drop").mkdir(exist_ok=True)
-        if (base.root / "wiki").is_dir():
-            shutil.copytree(base.root / "wiki", folder / BASE / "wiki")
-        for name in ("index.md", "log.md", "decisions.md"):
+        for area in TEXT_AREAS:
+            if (base.root / area).is_dir():
+                shutil.copytree(base.root / area, folder / BASE / area)
+        for name in ROOT_FILES:
             if (base.root / name).is_file():
                 (folder / BASE).mkdir(exist_ok=True)
                 shutil.copy2(base.root / name, folder / BASE / name)
