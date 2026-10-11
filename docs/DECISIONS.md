@@ -2143,3 +2143,22 @@ Decision (owner), spec `docs/phases/KNOWLEDGE_K3.md`:
    not blocked.
 3. Publishing a merged Knowledge version needs one person's confirm click; per-domain
    approval was not required.
+
+## 2026-10-11: Knowledge collaboration works like branches and pull requests
+
+Decision (owner), design `docs/phases/KNOWLEDGE_COLLAB.md`:
+- Workflow: Pull -> edit skills -> Convert -> Ingest -> Benchmark -> Push.
+- The project vault (the team's shared folder) is configured per project; for this
+  project it is OneDrive `RS_Knowledge`. Nothing is tied to that folder.
+- Pull copies chosen `drop/` folders (any depth) into a sandbox; the pulled folders are
+  the sandbox's scope.
+- Benchmark questions follow the drop folders: `checks/questions/<folder>/` and
+  combinations such as `market_productions/`; a sandbox runs the sets inside its scope by
+  default and the maintainer can adjust them. Grading is the owner's existing
+  must-mention / must-not-say string match.
+- Co-developers may push without a second approval. A push merges three ways into the
+  project vault, records who pushed and from which sandbox, and keeps backups.
+
+Why: several maintainers will develop one vault; sandboxes, section-level merge, scoped
+benchmarks and push records keep their work from colliding or silently degrading
+another domain. Rejected: git in the OneDrive folder (sync corrupts `.git`).

@@ -113,6 +113,7 @@ K3 以這些為起點轉成平台 Skill，不從零撰寫；雙語別名（4.2�
 - 段落層級寫入（4.4）是自動合併的前提，所以合併放在 K3 之後。
 - 不在 OneDrive 共享資料夾上用 git：同步會損壞 `.git`；改用候選版本加摘要比對。
 - 「領域負責人核准」是工作流程，不是權限控制。
+- **多人協作流程（owner 2026-10-11）**：Pull → 改 skill → Convert → Ingest → Benchmark → Push，類似 git 的分支與 PR；共用 vault 依專案設定（本專案為 OneDrive `RS_Knowledge`）。設計見 `docs/phases/KNOWLEDGE_COLLAB.md`。
 
 ## 5. 分階段
 

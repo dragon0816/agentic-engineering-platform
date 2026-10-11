@@ -1666,4 +1666,7 @@ s-k-20261011T102952` (not published).
 - [ ] Knowledge source blocked: `OCNG (NR) .pdf` stops at `description_failed`
   (3 of 7 images fail twice, cause not yet diagnosed; K4 image work).
 - [x] Pages edited by section or merged keep their CRLF line endings (2026-10-11).
+- [x] Collaboration design `docs/phases/KNOWLEDGE_COLLAB.md` (owner, 2026-10-11):
+  Pull -> skills -> Convert -> Ingest -> Benchmark -> Push.
+- [ ] C1-C6 per the collaboration design (includes the Knowledge page improvements).
 - [ ] K4-K6 per the plan.
