@@ -43,30 +43,26 @@ answerable coverage 0.30 -> 0.40, FAIL and contradictions about flat, overreach
 items 35 -> 63. Kept under the owner's rule. To roll back, move 1.9.0 back from
 `disabled/`, move 1.10.0 out, and restart Agent Web.
 
-Knowledge pipeline (2026-10-11, latest): K1 done (`docs/phases/KNOWLEDGE_K1.md`);
-K2 (`docs/phases/KNOWLEDGE_K2.md`) built but its query change was not accepted.
-- host.json `knowledge_pipeline` has vaults `k-test` and `rs-k`, sandbox root
-  `%LOCALAPPDATA%\AEP\sb`. Owner mode is live (DECISIONS 2026-10-11).
-- Sandbox `%LOCALAPPDATA%\AEP\sb\sb-k2-index-10cd71` is a copy of rs-k with all
-  2,007 pages enriched (bilingual summary, aliases, categories) and the layered
-  index written. The published rs-k 1.0.2 is untouched and is what Agent Web serves.
-- K2.4 (index-led query and ingest) was measured in `runs/core-007` and was worse
-  than core-005; it is reverted (405e9d7). Agent Web restarted on the revert.
-- The candidate manifest `engineering__rs-knowledge__1.1.0-k2.1.json` was removed
-  from the workspace (copy in `.scratch/`); `.scratch/k25_bind.py candidate|restore`
-  re-binds the sandbox for another run (it backs up host.json first).
-- Option A was run (`runs/core-008`): also worse; see the addendum in the
-  core-007 review. Live binding restored.
-- Option C adopted: layered index for ingest; query reads the flat list from
-  `wiki/index/all.md` (offline check 180/180 identical).
-- K3 done in code (spec `docs/phases/KNOWLEDGE_K3.md`): vault schema plus category
-  skill, section operations with the sourced-line guard, three-way merge into a
-  candidate (`knowledge-pipeline/merge`), publish from Agent Web
-  (`/api/knowledge/pipeline/publish`, one confirm, host.json backed up, restart).
-- K3.5 live: sandbox `sb-k3-live-9eb4bd`, candidate
-  `%LOCALAPPDATA%\AEP\sb\candidatess-k-20261011T102952` waiting for the owner's
-  review; nothing published. OCNG PDF blocked by image description failures.
-- Next: owner review and publish decision; then K4 (Excel, HTML, .ppt, images).
+Knowledge pipeline and collaboration (2026-10-12, latest). Read
+`docs/phases/KNOWLEDGE_COLLAB.md` (owner design: Pull -> Rules -> Convert -> Ingest ->
+Lint -> Benchmark -> Push) and the K1-K3 specs; progress rows are in `docs/TASKS.md`.
+- Built and committed: K1-K3 (sandboxes, vault rules layered general to specific,
+  section edits with a sourced-line guard, three-way merge) and C1-C5 (pull, rule
+  editor and previews, question-set benchmark, push behind a benchmark gate with
+  first-push-wins compare-and-write, backups and push records, workflow-ordered
+  Knowledge tab). Last full run: 2513 passed, 6 skipped; ruff and mypy src clean.
+- Live config: host.json `knowledge_pipeline` has `k-test`, `rs-k` and `rs-project`
+  (the local RS_Knowledge copy `%LOCALAPPDATA%\AEP\projects\rsk-copy`, `knowledge_asset: rs-knowledge`). The Agent
+  still answers from rs-knowledge 1.0.2 (`AEP\rs-k`); nothing was refreshed.
+  The real OneDrive RS_Knowledge was only read (copied), never written.
+- C6 trial results are in TASKS. Test sandboxes `sb-c6-*` and `sb-probe-*` are in
+  `AEP\sb`; the copy holds four test pushes (`pushes/`, `log.md`, `.ingest-backup/`).
+- Open: the owner validates in Agent Web (Knowledge tab, project `rs-project`);
+  domain experts add question sets under `checks/questions/<folder>/`; the free-form
+  ZNAEXT question needs must-mention terms; before the real RS_Knowledge goes live it
+  needs one adopt pass and a host.json switch; an intermittent single test failure
+  (passes on rerun) is unidentified; the OCNG PDF image description failure waits for
+  K4. Next stage after validation: K4 (Excel, HTML, .ppt, images).
 
 Knowledge state (2026-10-10, latest): Skill 1.10.0 is live. A no-support retry check
 plus Skill 1.11.0 was tried in `runs/core-006`, came out worse and was rolled back

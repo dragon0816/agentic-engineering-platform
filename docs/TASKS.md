@@ -1679,7 +1679,17 @@ s-k-20261011T102952` (not published).
   first-push-wins compare-and-write with backups, push records; Refresh stages the
   project vault as the Agent's next Knowledge version (34a933d).
 - [x] C5 Knowledge tab in workflow order (eaa447a).
-- [ ] C6 live trial on a local copy of RS_Knowledge (`%LOCALAPPDATA%\AEP\projects\rsk-copy`).
+- [x] C6 live trial (2026-10-12) on a local copy of RS_Knowledge (`%LOCALAPPDATA%\AEP\projects\rsk-copy`, Raw
+  adopted: 508 files), configured in host.json as project vault `rs-project`
+  (backup `host.json.bak-20261012-002108-before-rs-project`). Pull recognized 441
+  Market and all 51 Productions originals as already ingested (legacy `source_sha`
+  fix f667026); two sandboxes ingested and pushed in turn; two sandboxes editing one
+  section: the first pushed, the second was listed as a conflict and pushed after
+  choosing a side; four push records, log entries and backups written. Headless
+  check of the Knowledge tab: seven steps, no page errors. Found and fixed: a pushed
+  sandbox now continues from the pushed state (739c647).
+- [ ] The only gradable question (Wi-Fi 7) fails on both sides today, so the gate
+  compares 0 with 0; the gate becomes meaningful once domain experts add questions.
 - [ ] Owner: add must-mention / must-not-say terms to `checks/questions/ZNAEXT升級配置.md`
   (free format, not gradable) and organize questions into folder sets.
 - [ ] Before the real RS_Knowledge goes live: its Raw is legacy format and needs one

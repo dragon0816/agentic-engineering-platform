@@ -207,3 +207,13 @@ records → C5 Knowledge page in workflow order → C6 live trial with two sandb
    question. "Not lower" is the reading taken; "strictly higher" would block pushes that
    only add knowledge the questions do not ask about.
 3. The first live pushes go to a copy of `RS_Knowledge`, not the real folder.
+
+## 11. C6 live trial (2026-10-12)
+
+On a local copy of RS_Knowledge (legacy Raw adopted first): pull recognized originals
+already ingested through the legacy `source_sha` prefix; two sandboxes pushed in turn;
+two sandboxes edited one section, the second push was listed as a conflict and went in
+after a side was chosen; push records, log entries and backups were written. One fix
+came out of it: after a push the sandbox and its `.base` take the pushed state.
+Observation: the only gradable question fails on both sides, so the gate compared 0
+with 0. The gate only protects what the question sets ask.
