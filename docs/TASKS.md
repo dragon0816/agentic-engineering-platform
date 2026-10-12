@@ -1784,3 +1784,7 @@ s-k-20261011T102952` (not published).
   session side by side, Preview and Markdown tabs, red removals and green additions in
   Markdown view, splitters remembered per browser, maximize/restore per pane. Headless
   check passed; full suite 2538 passed.
+- [x] Rule editor diff view (owner, 2026-10-13): Previous file (hunks, -N red, +N green)
+  above the editable Current file (line-number gutter, added lines green), aligned while
+  scrolling, collapsible; Preview shows the current file only; splitter to the AI
+  session. Headless check passed; full suite 2538 passed.
