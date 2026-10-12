@@ -214,33 +214,67 @@ def from_benchmarks(sandbox_root: Path) -> list[ExperienceCase]:
     return found
 
 
+def _run_detail(conn: sqlite3.Connection, run_id: str) -> dict[str, str]:
+    """The Workflow, and the first step that failed with its tool and code,
+    from a run's telemetry events."""
+    detail: dict[str, str] = {}
+    try:
+        rows = conn.execute("SELECT record FROM events WHERE run_id = ? ORDER BY sequence",
+                            (run_id,)).fetchall()
+    except sqlite3.Error:
+        return detail
+    for (record,) in rows:
+        try:
+            attributes = json.loads(record).get("attributes") or {}
+        except ValueError:
+            continue
+        for key in ("workflow_id", "task_id", "skill_id"):
+            if attributes.get(key) and key not in detail:
+                detail[key] = str(attributes[key])
+        if attributes.get("failure_code") and "failure_code" not in detail:
+            detail["failure_code"] = str(attributes["failure_code"])
+            detail["tool_id"] = str(attributes.get("tool_id") or "")
+            if attributes.get("step_index") is not None:
+                detail["step_index"] = str(attributes["step_index"])
+    return detail
+
+
 def from_telemetry(path: Path) -> list[ExperienceCase]:
-    """Coding and Workflow runs that failed."""
+    """Coding and Workflow runs that failed, named by their Workflow and the
+    step that failed, so a group is one Workflow failing one way."""
     if not path.is_file():
         return []
     conn = sqlite3.connect(str(path), timeout=10)
+    found = []
     try:
-        rows = conn.execute(
-            "SELECT run_id, run_kind, started_at, status, skill_id, summary FROM runs"
-            " WHERE run_kind IN ('coding_change', 'workflow_run') AND status = 'failed'"
-        ).fetchall()
-    except sqlite3.Error:
-        rows = []
+        try:
+            rows = conn.execute(
+                "SELECT run_id, run_kind, started_at, skill_id, summary FROM runs"
+                " WHERE run_kind IN ('coding_change', 'workflow_run') AND status = 'failed'"
+            ).fetchall()
+        except sqlite3.Error:
+            rows = []
+        for run_id, kind, started, skill, summary in rows:
+            try:
+                data = json.loads(summary or "{}")
+            except ValueError:
+                data = {}
+            detail = _run_detail(conn, str(run_id))
+            code = detail.get("failure_code") or str(data.get("outcome") or "failed")
+            name = detail.get("workflow_id") or detail.get("task_id") or skill or kind
+            step = (f"step {detail['step_index']} " if "step_index" in detail else "") + \
+                detail.get("tool_id", "")
+            subject = f"{'Workflow' if kind == 'workflow_run' else 'Coding task'} {name}" + (
+                f": {step.strip()} failed ({code})" if step.strip() else f" failed ({code})")
+            found.append(ExperienceCase(
+                case_id=_id("telemetry", str(run_id)), created_at=str(started or ""),
+                domain="coding" if kind == "coding_change" else "workflow",
+                signal="run_failed", subject=_clip(subject), failure_code=code[:80],
+                # Versions of one Workflow fail for one reason: group without the version.
+                rule=name.split("@")[0] if name != kind else None,
+                source=f"telemetry:{run_id}"))
     finally:
         conn.close()
-    found = []
-    for run_id, kind, started, _status, skill, summary in rows:
-        try:
-            data = json.loads(summary or "{}")
-        except ValueError:
-            data = {}
-        attributes = data.get("attributes") if isinstance(data.get("attributes"), dict) else data
-        code = str(attributes.get("failure_code") or attributes.get("outcome") or "failed")
-        found.append(ExperienceCase(
-            case_id=_id("telemetry", str(run_id)), created_at=str(started or ""),
-            domain="coding" if kind == "coding_change" else "workflow", signal="run_failed",
-            subject=_clip(str(attributes.get("workflow") or attributes.get("task") or kind)),
-            failure_code=code[:80], rule=skill, source=f"telemetry:{run_id}"))
     return found
 
 

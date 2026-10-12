@@ -1753,3 +1753,13 @@ s-k-20261011T102952` (not published).
   versioned changes through existing paths; nothing applies without a person.
 - [ ] Owner decisions on the experience review (signals, schedule, review model input,
   reviewers, retention), then slices E1-E6.
+- [x] Experience review E1-E2 (dcefede7, 80a9cc9b): cases from conversations, sandbox
+  benchmarks and telemetry; nightly report-only review on the Knowledge tab; retention
+  setting (default 30 days). Workflow cases name the Workflow and the failed step.
+  First live review: 32 cases in 6 groups; the Knowledge group points at missing
+  oscilloscope / eye-diagram / RFIC-validation pages (data_missing).
+- [ ] Flaky test identified (2026-10-12): `tests/test_browser.py::
+  test_a_signed_in_profile_is_what_carries_the_session` fails with
+  `navigation_failed: WebSocketError` only under full-suite load; passes 5/5 alone.
+- [ ] Next for experience review: E3 (route proposals into sandboxes, gap list, draft
+  test questions; Reviews page), after the owner reads the first reports.

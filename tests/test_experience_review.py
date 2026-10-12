@@ -92,6 +92,20 @@ def test_benchmarks_and_telemetry_become_cases(tmp_path: Path) -> None:
     conn.close()
     (run,) = from_telemetry(db)
     assert (run.domain, run.signal) == ("workflow", "run_failed")
+    # With events, the case names the Workflow and the step that failed.
+    conn = sqlite3.connect(db)
+    conn.execute("CREATE TABLE events (run_id TEXT, sequence INTEGER, record TEXT)")
+    for number, attributes in enumerate([
+            {"workflow_id": "engineering/weekly@1.0.2"},
+            {"step_index": 2, "tool_id": "excel/read@1.0.0", "failure_code": "handler_error"}]):
+        conn.execute("INSERT INTO events VALUES ('r1', ?, ?)",
+                     (number, json.dumps({"attributes": attributes})))
+    conn.commit()
+    conn.close()
+    (named,) = from_telemetry(db)
+    assert named.subject == ("Workflow engineering/weekly@1.0.2: step 2 excel/read@1.0.0 "
+                             "failed (handler_error)")
+    assert (named.failure_code, named.rule) == ("handler_error", "engineering/weekly")
 
 
 def test_retention_is_a_setting_with_a_thirty_day_default(tmp_path: Path) -> None:
