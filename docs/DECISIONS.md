@@ -2284,3 +2284,18 @@ recorded; review nightly when there are new cases (and by hand); conversation ex
 may go to the company model endpoint with secrets redacted; domain owners review
 vault-rule proposals and the owner reviews platform Skill proposals; case retention is a
 user setting with a 30-day default.
+
+## 2026-10-12: GitHub Copilot as an agent mode with AEP assistant tools
+
+Decision (owner), design `docs/phases/COPILOT_INTEGRATION.md`: integrate GitHub Copilot
+(company-approved, one account per user) as a selectable Agent Web conversation mode
+while AEP's harness matures; the AEP harness stays the default. All data may be sent to
+Copilot. Copilot gets AEP's assistant tools (Knowledge search/read/ask, installed
+Workflows) over MCP served by the running Agent Web; file writes and shell stay denied
+and Workflow side effects still need the person's approval.
+
+This changes the external-agent data boundary for the assistant tools only: the
+authoring tools keep returning statuses and codes.
+Rejected: letting Copilot read the vault folders directly (no access control, no
+record, not pinned to the published version); a stdio MCP server per turn (rebuilds
+the Host each time).
