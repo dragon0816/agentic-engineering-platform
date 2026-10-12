@@ -1,0 +1,1856 @@
+{
+ "question": {
+  "id": "Q0571",
+  "text": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Vector Network Analyzer.",
+  "market": "Automotive",
+  "product": "Vector Network Analyzer",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-93e9d4562a9e4cd29c88b6e002894c3a",
+ "exchange": {
+  "sent": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Vector Network Analyzer.",
+  "http_status": 200,
+  "seconds": 85.594,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-93e9d4562a9e4cd29c88b6e002894c3a",
+    "actor": "leo.chi",
+    "title": "Map the chain from a Automotive market requirement to a measurable param…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-12T05:53:01.193678Z",
+    "updated_at": "2026-10-12T05:54:26.634096Z",
+    "messages": [
+     {
+      "message_id": "message-1babc3189df043f2a7593f9d1ef0cbe8",
+      "role": "user",
+      "text": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Vector Network Analyzer.",
+      "created_at": "2026-10-12T05:53:01.207787Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-99707d05e88544bbb86fff1463a5a905",
+      "role": "assistant",
+      "text": "### 建議主軸\n【推論】可把 Automotive 的 ADAS / V2X「高速訊號傳輸」需求，轉成 PCB / SerDes channel 的 insertion loss、return loss、impedance 等量測項目，再要求 VNA 具備足夠頻率範圍、dynamic range、measurement bandwidth、probing / de-embedding 對接能力；此串接來自車用高速訊號需求、PCB/SI量測流程、以及 VNA 測試案例與規格的分別證據，不是知識庫已直接宣稱的 automotive VNA solution。[22][39][47][52][56]\n### 推薦先賣\n知識庫未證實有任何 R&S VNA 被直接指定為 Automotive ADAS / V2X、GMSL 或 ASA 的正式測試方案；High speed SerDes standards 只列出 GMSL、ASA 等名稱，未標示版本、資料率或測試項目，R&S PCB test solutions 也未提供正式產品型號、option code、測試頻率、標準、fixture 或 calibration method。[69][56]\n可先賣「高速 PCB / SerDes channel SI 量測」能力，而不是直接宣稱「車用認證測試」能力；車用領域的 ADAS 與 V2X 需要高速訊號傳輸，PCB test solutions 明示的量測項目包含 IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram、TDR 與 Delta-L 等。[22][55]\n### Chain map：Automotive requirement → measurable parameter → VNA capability\n| 層級 | 可確認內容 | 對應下一層 | 證據 |\n|---|---|---|---|\n| Automotive market requirement | 消費電子與車用領域中，汽車上的 ADAS 與 V2X 通訊需要高速訊號傳輸。[22] | 高速訊號傳輸需要檢查 transmission channel / PCB / connector 的 signal integrity，但知識庫未直接把 ADAS / V2X 與特定 VNA 產品相連。[19][56] | [22][19][56] |\n| Technical measurement need | 高速電性介面的 validation challenges 包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package 等路徑；Signal integrity flow 列出 IL / Xtalk / Eye diagram、TDR Impedance、Stackup Planner、TL Calculator。[19] | 可量測參數包括 insertion loss、crosstalk、eye diagram、TDR impedance 等。[19] | [19] |\n| PCB / material measurable parameters | R&S PCB test solutions 在 Material Measurement 階段列出 Impedance (TDR)、DK/DF extraction；在 Material/Stackup selection 階段列出 IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram；在 Sampling testing 階段列出 IL、DK/DF、impedance。[55] | VNA 需要能支援 impedance、insertion loss / return loss 等 PCB / interconnect 量測情境，並能配合 probing、mount-kit 與 de-embedding tool。[39] | [55][39] |\n| VNA case linkage | TRI_AMD_RSKR Sharing1 的 ongoing projects 把 Bare Board for SoCs 的 application 寫成 PCB test with probing，包含 impedance、insertion loss、return loss；offered solution 為 ZNB40、probe、mount-kit、de-embedding tool，並列出 Meritech（PCB manufacturer, ZNA43）。[39] | VNA 所需能力至少包括 PCB probing 對接、de-embedding、impedance / insertion loss / return loss 量測工作流；但 ZNB40 未對應到正式 R&S 型號頁，且來源未標示完整量測條件。[39][38] | [39][38] |\n| VNA required capability — frequency coverage | R&S ZNA 系列涵蓋 ZNA26、ZNA43、ZNA50、ZNA67，頻率範圍從 10 MHz 延伸到最高 67 GHz；ZNA43 為 10 MHz to 43.5 GHz，ZNA67 為 10 MHz to 67 GHz。[47] | 若量測對象需要更高頻率的 PCB / interconnect S-parameter 掃頻，VNA 頻率範圍需覆蓋對應測試頻段；知識庫未提供 automotive GMSL / ASA 的測試頻率需求。[47][69] | [47][69] |\n| VNA required capability — dynamic range / sensitivity | R&S ZNA key performance 包含 dynamic range >129 dB specification without options、147 dB typical with options、maximum attainable range up to 170 dB allowing full 2-port correction，以及 sensitivity > –120 dBm at 1 Hz IF bandwidth specification without options。[47] | insertion loss / return loss 等通道量測需要足夠 dynamic range 與 sensitivity；此為由量測項目與產品規格對接的需求，不是 automotive 規格書直接要求。[39][47] | [39][47] |\n| VNA required capability — bandwidth / speed | R&S ZNA base unit measurement bandwidth 為 1 Hz to 1.5 MHz，搭配 R&S ZNA-K17 increased IF bandwidth 30 MHz option 時為 1 Hz to 30 MHz；速度例為 10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。[47] | 若場景是 sampling testing 或 process monitoring，VNA 的 measurement bandwidth 與 sweep speed 會影響量測吞吐，但 R&S PCB test solutions 未提供抽樣頻率、樣本數或允收條件。[47][7] | [47][7] |\n| VNA required capability — de-embedding / fixtures | TRI_AMD_RSKR Sharing1 的 LSmtron board-to-board connector case 將 total solution 寫成包含 probe、mount-kit、de-embedding tool；ongoing Bare Board for SoCs case 也把 offered solution 寫成 ZNB40、probe、mount-kit、de-embedding tool。[39] | 對 board-to-board connector、bare board、socket / transmission line 類 DUT，VNA solution 需要與 probing、mount-kit、de-embedding tool 一起規劃；但來源未提供 fixture、calibration、de-embedding 方法或 DUT 條件。[39][38] | [39][38] |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S ZNA | 可接軌 high-speed PCB / interconnect 的 insertion loss、return loss、impedance 等 VNA 量測需求，但知識庫未直接證實其為 Automotive ADAS / V2X 測試方案。[39][56] | ZNA26 / ZNA43 / ZNA50 / ZNA67 頻率範圍最高到 67 GHz；base measurement bandwidth 1 Hz to 1.5 MHz，搭配 R&S ZNA-K17 為 1 Hz to 30 MHz；dynamic range >129 dB specification without options，147 dB typical with options，maximum attainable range up to 170 dB allowing full 2-port correction。[47][52] | 已有高頻範圍、dynamic range、measurement bandwidth 與 deembedding / time domain analysis 等 VNA 概念可對接高速互連量測工作流。[45][47][52] | [39][45][47][52][56] | 知識庫未提供 automotive 標準版本、GMSL / ASA 資料率、測試頻率、fixture、calibration method 或正式 automotive VNA configuration。[69][56] |\n| R&S ZNB3000 | 可接軌較低到中高頻的 impedance / S-parameter 類 VNA 量測需求，但知識庫未直接證實其為 Automotive ADAS / V2X 測試方案。[11][67] | R&S ZNB3000 base frequency range 從 9 kHz 延伸到 43.5 GHz，搭配 frequency upgrade option 最高到 54.0 GHz；measurement range 為 impedance 50 Ω、frequency resolution 1 Hz、每 trace 1 to 100001 points；base measurement bandwidth 1 Hz to 1 MHz，搭配 R&S ZNB3-K17 為 1 Hz to 10 MHz。[11][67] | 可提供 50 Ω impedance 量測脈絡、頻率解析度、多點數與最高 54.0 GHz 的 VNA 覆蓋，但與 automotive 需求的直接對接未被來源證實。[11][67][56] | [11][67][56] | 知識庫未提供 automotive 專用 option、GMSL / ASA compliance test、fixture、calibration method、測試頻率或 pass/fail criteria。[69][56] |\n| ZNB40 / ZNA43 case-sharing context | 來源中的 Bare Board for SoCs ongoing projects 明示 application 是 PCB test with probing，包含 impedance、insertion loss、return loss；customer 欄列 Advantest（ATS, ZVA67）與 Meritech（PCB manufacturer, ZNA43）。[39] | Offered solution 明示 ZNB40、probe、mount-kit、de-embedding tool；但 ZNB40 未對應到既有正式 R&S 型號頁。[39][38] | 這是知識庫中最直接把 VNA、probing、de-embedding 與 impedance / insertion loss / return loss 串在一起的案例，但不是 automotive market linkage。[39][38] | [39][38] | Slide 8 的 ZNB40 未對應到既有正式 R&S 型號頁，Slide 5 的 67 GHz stability claim 未標示儀器組合、extender、probe、calibration、de-embedding、fixture 或 DUT 條件。[38] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Automotive ADAS / V2X 高速訊號傳輸 | 知識庫未證實特定 VNA 組合；可先以高速 PCB / SerDes channel SI 量測需求盤點為前置。[22][56] | 從 ADAS / V2X 需要高速訊號傳輸切入，再盤點 IL、Xtalk、Eye diagram、TDR impedance、DK/DF、roughness、impedance 等量測項目。[22][19][55] | GMSL、ASA 只在 High speed SerDes standards 清單中列名，未標示版本、資料率或測試項目。[69] |\n| PCB / PCBA signal integrity flow | R&S PCB test solutions 的流程可對應 Material Measurement、Material/Stackup selection、Signal Integrity modeling/testing、Sampling testing、PL / Process Monitoring。[7][55] | 量測項目包含 Impedance (TDR)、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram 等。[55] | Slide 21 未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。[56] |\n| Bare board / connector / probing interconnect | 來源中的 offered solution 為 ZNB40、probe、mount-kit、de-embedding tool；同一 ongoing projects 表中也列 Meritech（PCB manufacturer, ZNA43）。[39] | 切入 impedance、insertion loss、return loss 與 probing / de-embedding workflow。[39] | ZNB40 未對應到正式 R&S 型號頁，且來源未提供完整 cable / port / fixture 連線與測試條件。[38] |\n| 高頻 VNA 規格盤點 | R&S ZNA 可盤點 ZNA43 10 MHz to 43.5 GHz、ZNA67 10 MHz to 67 GHz、dynamic range、measurement bandwidth 與 K17 increased IF bandwidth 30 MHz option。[47][52] | 若 DUT 的通道損耗或 return loss 量測需要更高頻率或較大 dynamic range，可用 ZNA 規格作為能力盤點項目。[47][52] | 知識庫未提供 automotive ADAS / V2X 對應的測試頻率、loss mask、return loss mask 或 compliance procedure。[69][56] |\n### 限制\n知識庫沒有直接證據把 Automotive ADAS / V2X market requirement、具體 measurable parameter、以及特定 R&S VNA 型號 / option 串成正式產品推薦或 compliance solution。[22][56][69]\nR&S PCB test solutions 來源未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method，因此不能把其流程圖解讀為完整採購配置。[56]\nHigh speed SerDes standards 來源只列出 GMSL、ASA 等名稱，未提供標準版本、發布組織、資料率、lane 數、channel model、compliance 測試或 fixture 要求。[17][69]\nTRI_AMD_RSKR Sharing1 的 ZNB40 / ZNA43 內容是 case-sharing / ongoing projects 脈絡，且 ZNB40 未對應到既有正式 R&S 型號頁，不能直接當成正式 datasheet 或 automotive solution。[38][39]\n\n來源：\n[7] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[11] Wiki：ZNB3000_specs_en_3647-5184-22_v0900（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[17] Wiki：High speed SerDes standards（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[19] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[22] Wiki：High speed SerDes eco-chain（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[38] Wiki：TRI_AMD_RSKR Sharing1（來源：`TRI_AMD_RSKR Sharing1.md`）\n[39] Wiki：TRI_AMD_RSKR Sharing1（來源：`TRI_AMD_RSKR Sharing1.md`）\n[45] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[47] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[52] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[55] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[56] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[67] Wiki：R&S ZNB3000（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[69] Wiki：High speed SerDes standards（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+      "created_at": "2026-10-12T05:54:26.634096Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-34f693787a4f41da8673fbd052a12806",
+       "request_id": "request-34f693787a4f41da8673fbd052a12806",
+       "span_id": "span-34f693787a4f41da8673fbd052a12806",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": true,
+    "answer": "### 建議主軸\n【推論】可把 Automotive 的 ADAS / V2X「高速訊號傳輸」需求，轉成 PCB / SerDes channel 的 insertion loss、return loss、impedance 等量測項目，再要求 VNA 具備足夠頻率範圍、dynamic range、measurement bandwidth、probing / de-embedding 對接能力；此串接來自車用高速訊號需求、PCB/SI量測流程、以及 VNA 測試案例與規格的分別證據，不是知識庫已直接宣稱的 automotive VNA solution。[22][39][47][52][56]\n### 推薦先賣\n知識庫未證實有任何 R&S VNA 被直接指定為 Automotive ADAS / V2X、GMSL 或 ASA 的正式測試方案；High speed SerDes standards 只列出 GMSL、ASA 等名稱，未標示版本、資料率或測試項目，R&S PCB test solutions 也未提供正式產品型號、option code、測試頻率、標準、fixture 或 calibration method。[69][56]\n可先賣「高速 PCB / SerDes channel SI 量測」能力，而不是直接宣稱「車用認證測試」能力；車用領域的 ADAS 與 V2X 需要高速訊號傳輸，PCB test solutions 明示的量測項目包含 IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram、TDR 與 Delta-L 等。[22][55]\n### Chain map：Automotive requirement → measurable parameter → VNA capability\n| 層級 | 可確認內容 | 對應下一層 | 證據 |\n|---|---|---|---|\n| Automotive market requirement | 消費電子與車用領域中，汽車上的 ADAS 與 V2X 通訊需要高速訊號傳輸。[22] | 高速訊號傳輸需要檢查 transmission channel / PCB / connector 的 signal integrity，但知識庫未直接把 ADAS / V2X 與特定 VNA 產品相連。[19][56] | [22][19][56] |\n| Technical measurement need | 高速電性介面的 validation challenges 包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package 等路徑；Signal integrity flow 列出 IL / Xtalk / Eye diagram、TDR Impedance、Stackup Planner、TL Calculator。[19] | 可量測參數包括 insertion loss、crosstalk、eye diagram、TDR impedance 等。[19] | [19] |\n| PCB / material measurable parameters | R&S PCB test solutions 在 Material Measurement 階段列出 Impedance (TDR)、DK/DF extraction；在 Material/Stackup selection 階段列出 IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram；在 Sampling testing 階段列出 IL、DK/DF、impedance。[55] | VNA 需要能支援 impedance、insertion loss / return loss 等 PCB / interconnect 量測情境，並能配合 probing、mount-kit 與 de-embedding tool。[39] | [55][39] |\n| VNA case linkage | TRI_AMD_RSKR Sharing1 的 ongoing projects 把 Bare Board for SoCs 的 application 寫成 PCB test with probing，包含 impedance、insertion loss、return loss；offered solution 為 ZNB40、probe、mount-kit、de-embedding tool，並列出 Meritech（PCB manufacturer, ZNA43）。[39] | VNA 所需能力至少包括 PCB probing 對接、de-embedding、impedance / insertion loss / return loss 量測工作流；但 ZNB40 未對應到正式 R&S 型號頁，且來源未標示完整量測條件。[39][38] | [39][38] |\n| VNA required capability — frequency coverage | R&S ZNA 系列涵蓋 ZNA26、ZNA43、ZNA50、ZNA67，頻率範圍從 10 MHz 延伸到最高 67 GHz；ZNA43 為 10 MHz to 43.5 GHz，ZNA67 為 10 MHz to 67 GHz。[47] | 若量測對象需要更高頻率的 PCB / interconnect S-parameter 掃頻，VNA 頻率範圍需覆蓋對應測試頻段；知識庫未提供 automotive GMSL / ASA 的測試頻率需求。[47][69] | [47][69] |\n| VNA required capability — dynamic range / sensitivity | R&S ZNA key performance 包含 dynamic range >129 dB specification without options、147 dB typical with options、maximum attainable range up to 170 dB allowing full 2-port correction，以及 sensitivity > –120 dBm at 1 Hz IF bandwidth specification without options。[47] | insertion loss / return loss 等通道量測需要足夠 dynamic range 與 sensitivity；此為由量測項目與產品規格對接的需求，不是 automotive 規格書直接要求。[39][47] | [39][47] |\n| VNA required capability — bandwidth / speed | R&S ZNA base unit measurement bandwidth 為 1 Hz to 1.5 MHz，搭配 R&S ZNA-K17 increased IF bandwidth 30 MHz option 時為 1 Hz to 30 MHz；速度例為 10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。[47] | 若場景是 sampling testing 或 process monitoring，VNA 的 measurement bandwidth 與 sweep speed 會影響量測吞吐，但 R&S PCB test solutions 未提供抽樣頻率、樣本數或允收條件。[47][7] | [47][7] |\n| VNA required capability — de-embedding / fixtures | TRI_AMD_RSKR Sharing1 的 LSmtron board-to-board connector case 將 total solution 寫成包含 probe、mount-kit、de-embedding tool；ongoing Bare Board for SoCs case 也把 offered solution 寫成 ZNB40、probe、mount-kit、de-embedding tool。[39] | 對 board-to-board connector、bare board、socket / transmission line 類 DUT，VNA solution 需要與 probing、mount-kit、de-embedding tool 一起規劃；但來源未提供 fixture、calibration、de-embedding 方法或 DUT 條件。[39][38] | [39][38] |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S ZNA | 可接軌 high-speed PCB / interconnect 的 insertion loss、return loss、impedance 等 VNA 量測需求，但知識庫未直接證實其為 Automotive ADAS / V2X 測試方案。[39][56] | ZNA26 / ZNA43 / ZNA50 / ZNA67 頻率範圍最高到 67 GHz；base measurement bandwidth 1 Hz to 1.5 MHz，搭配 R&S ZNA-K17 為 1 Hz to 30 MHz；dynamic range >129 dB specification without options，147 dB typical with options，maximum attainable range up to 170 dB allowing full 2-port correction。[47][52] | 已有高頻範圍、dynamic range、measurement bandwidth 與 deembedding / time domain analysis 等 VNA 概念可對接高速互連量測工作流。[45][47][52] | [39][45][47][52][56] | 知識庫未提供 automotive 標準版本、GMSL / ASA 資料率、測試頻率、fixture、calibration method 或正式 automotive VNA configuration。[69][56] |\n| R&S ZNB3000 | 可接軌較低到中高頻的 impedance / S-parameter 類 VNA 量測需求，但知識庫未直接證實其為 Automotive ADAS / V2X 測試方案。[11][67] | R&S ZNB3000 base frequency range 從 9 kHz 延伸到 43.5 GHz，搭配 frequency upgrade option 最高到 54.0 GHz；measurement range 為 impedance 50 Ω、frequency resolution 1 Hz、每 trace 1 to 100001 points；base measurement bandwidth 1 Hz to 1 MHz，搭配 R&S ZNB3-K17 為 1 Hz to 10 MHz。[11][67] | 可提供 50 Ω impedance 量測脈絡、頻率解析度、多點數與最高 54.0 GHz 的 VNA 覆蓋，但與 automotive 需求的直接對接未被來源證實。[11][67][56] | [11][67][56] | 知識庫未提供 automotive 專用 option、GMSL / ASA compliance test、fixture、calibration method、測試頻率或 pass/fail criteria。[69][56] |\n| ZNB40 / ZNA43 case-sharing context | 來源中的 Bare Board for SoCs ongoing projects 明示 application 是 PCB test with probing，包含 impedance、insertion loss、return loss；customer 欄列 Advantest（ATS, ZVA67）與 Meritech（PCB manufacturer, ZNA43）。[39] | Offered solution 明示 ZNB40、probe、mount-kit、de-embedding tool；但 ZNB40 未對應到既有正式 R&S 型號頁。[39][38] | 這是知識庫中最直接把 VNA、probing、de-embedding 與 impedance / insertion loss / return loss 串在一起的案例，但不是 automotive market linkage。[39][38] | [39][38] | Slide 8 的 ZNB40 未對應到既有正式 R&S 型號頁，Slide 5 的 67 GHz stability claim 未標示儀器組合、extender、probe、calibration、de-embedding、fixture 或 DUT 條件。[38] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Automotive ADAS / V2X 高速訊號傳輸 | 知識庫未證實特定 VNA 組合；可先以高速 PCB / SerDes channel SI 量測需求盤點為前置。[22][56] | 從 ADAS / V2X 需要高速訊號傳輸切入，再盤點 IL、Xtalk、Eye diagram、TDR impedance、DK/DF、roughness、impedance 等量測項目。[22][19][55] | GMSL、ASA 只在 High speed SerDes standards 清單中列名，未標示版本、資料率或測試項目。[69] |\n| PCB / PCBA signal integrity flow | R&S PCB test solutions 的流程可對應 Material Measurement、Material/Stackup selection、Signal Integrity modeling/testing、Sampling testing、PL / Process Monitoring。[7][55] | 量測項目包含 Impedance (TDR)、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram 等。[55] | Slide 21 未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。[56] |\n| Bare board / connector / probing interconnect | 來源中的 offered solution 為 ZNB40、probe、mount-kit、de-embedding tool；同一 ongoing projects 表中也列 Meritech（PCB manufacturer, ZNA43）。[39] | 切入 impedance、insertion loss、return loss 與 probing / de-embedding workflow。[39] | ZNB40 未對應到正式 R&S 型號頁，且來源未提供完整 cable / port / fixture 連線與測試條件。[38] |\n| 高頻 VNA 規格盤點 | R&S ZNA 可盤點 ZNA43 10 MHz to 43.5 GHz、ZNA67 10 MHz to 67 GHz、dynamic range、measurement bandwidth 與 K17 increased IF bandwidth 30 MHz option。[47][52] | 若 DUT 的通道損耗或 return loss 量測需要更高頻率或較大 dynamic range，可用 ZNA 規格作為能力盤點項目。[47][52] | 知識庫未提供 automotive ADAS / V2X 對應的測試頻率、loss mask、return loss mask 或 compliance procedure。[69][56] |\n### 限制\n知識庫沒有直接證據把 Automotive ADAS / V2X market requirement、具體 measurable parameter、以及特定 R&S VNA 型號 / option 串成正式產品推薦或 compliance solution。[22][56][69]\nR&S PCB test solutions 來源未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method，因此不能把其流程圖解讀為完整採購配置。[56]\nHigh speed SerDes standards 來源只列出 GMSL、ASA 等名稱，未提供標準版本、發布組織、資料率、lane 數、channel model、compliance 測試或 fixture 要求。[17][69]\nTRI_AMD_RSKR Sharing1 的 ZNB40 / ZNA43 內容是 case-sharing / ongoing projects 脈絡，且 ZNB40 未對應到既有正式 R&S 型號頁，不能直接當成正式 datasheet 或 automotive solution。[38][39]\n\n來源：\n[7] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[11] Wiki：ZNB3000_specs_en_3647-5184-22_v0900（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[17] Wiki：High speed SerDes standards（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[19] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[22] Wiki：High speed SerDes eco-chain（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[38] Wiki：TRI_AMD_RSKR Sharing1（來源：`TRI_AMD_RSKR Sharing1.md`）\n[39] Wiki：TRI_AMD_RSKR Sharing1（來源：`TRI_AMD_RSKR Sharing1.md`）\n[45] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[47] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[52] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[55] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[56] Wiki：R&S PCB test solutions（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[67] Wiki：R&S ZNB3000（來源：`ZNB3000_specs_en_3647-5184-22_v0900.md`）\n[69] Wiki：High speed SerDes standards（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-34f693787a4f41da8673fbd052a12806",
+      "request_id": "request-34f693787a4f41da8673fbd052a12806",
+      "span_id": "span-34f693787a4f41da8673fbd052a12806",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-34f693787a4f41da8673fbd052a12806",
+       "request_id": "request-34f693787a4f41da8673fbd052a12806",
+       "span_id": "span-34f693787a4f41da8673fbd052a12806",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.3-askrules.1"
+       },
+       "trace": {
+        "trace_id": "trace-34f693787a4f41da8673fbd052a12806",
+        "request_id": "request-34f693787a4f41da8673fbd052a12806",
+        "span_id": "span-34f693787a4f41da8673fbd052a12806",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "Map the chain from a Automotive market requirement to a measurable parameter and then to a required capability of Vector Network Analyzer.",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › 規格條件與資料定義\n- Specifications with limits：表示 warranted product performance；以 <、≤、>、≥、±、maximum、limit of、minimum 等符號標示；compliance 由 testing 確保或由 design 推導。\n- Non-traceable specifications with limits（n. trc.）：依 specifications with limits 指定與測試，但因缺乏可追溯至 national metrology standards 的 measuring equipment，product performance 不保證。\n- Specifications without limits：表示 warranted product performance；未特別標記時表示數值沒有或只有可忽略偏差。\n- Typical data（typ.）：representative information；若標示 <、> 或 range，代表約 80% instruments 在 production time 可達成的 performance，其他情況代表 mean value。\n- Nominal values（nom.）：representative value；production 期間不測試該 parameter。\n- Measured values（meas.）：individual samples 的 measurement results。\n- Uncertainties：coverage factor 2，依 Guide to the Expression of Uncertainty in Measurement（GUM），並考量 environmental conditions、aging、wear and tear。\n- 來源明確說明：non-traceable specifications with limits、typical data、nominal values、measured values 不由 Rohde & Schwarz 保證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 14.188372
+         },
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › 與既有知識的關係\n- 本來源補齊 [[R&S ZNA]] 主系列，與既有 [[R&S ZNA67EXT]] 形成關聯：[[R&S ZNA67EXT]] 是 1.0 mm Vector Network Analyzer System，量測範圍 10 MHz to 110 GHz；本來源的 [[R&S ZNA67]] 是 67 GHz base VNA 型號，並可透過 [[mmWave converter support]] 與 accessories 延伸應用。\n- 本來源與既有 [[R&S FSW]]、[[R&S FSWP]]、[[R&S FSWX]] 等 spectrum / phase-noise analyzer 頁面在 [[Spectrum analyzer mode]]、[[Phase noise]]、[[Noise figure measurement]] 等功能上有橫向關聯，但本來源屬於 VNA 產品規格，不應與市場或技術背景合併。\n- [[R&S ZNA-K980]] HUMS 與既有其他產品頁的 [[Health and utilization monitoring service]] 有橫向關聯；本來源列出 SNMP、REST JSON、SCPI、device web 等 readout/display protocols。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 13.208246
+         },
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › 讀圖補充\n來源包含「【讀圖補充】原文這幾頁沒有文字層」；以下內容可信度低於正文，引用時應標示「[[ZNA_specs_en_5215-4652-22_v2400]]（讀圖）」。本次輸入的來源摘錄未提供圖片嵌入 wikilink，因此無法在 wiki 頁帶入原圖附件。\n\n- p001（讀圖）：封面可辨識 R&S®ZNA、VECTOR NETWORK ANALYZER、Specifications、Version 24.00、ROHDE&SCHWARZ、Make ideas real、ZNA - Vector Network Analyzer、R&S；背景有類似 Smith chart 的大型圓形網格圖；設備螢幕顯示多個黑底網格曲線圖視窗；前面板可辨識 Port 1、Port 3、Port 2；可辨識數值只有 Version 24.00。\n- p044（讀圖）：頁首 Version 24.00, April 2026；圖說為 Test set configuration for R&S®ZNAXx-B501 low power spurious reduction port 1。可辨識 Source、–20 dB、R&S®ZNAXx-B21 source step attenuator 0 dB to 70 dB / 10 dB、R&S®ZNAXx-B161 direct source monitor access、R&S®ZNAXx-B501 low-power spurious reduction 30 dB、R&S®ZNAXx-B31 receiver step attenuators 0 dB to 35 dB / 5 dB、Meas receiver、Ref receiver、Port 1、Source Out、Source In、Meas Out、Meas In、Ref Out、Ref In、Src Mon Out、10 dB。\n- p050（讀圖）：頁首 Version 24.00, April 2026；圖說為 Side view of the R&S®ZNA；可辨識尺寸數值 452.1、407.6、131、272.43、272.43、116.1、161.95、56.3、110.5；尺寸數值旁單位無法辨識。\n- p059（讀圖）：頁面幾乎空白，無實質內容；可辨識 Version 24.00, April 2026；Rohde & Schwarz R&S®ZNA Vector Network Analyzer；59。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 9.874301
+         },
+         {
+          "text": "R&S ZNA › Measurement speed\n- Measurement speed 測試條件：firmware version 3.20、Windows 11 (64 bit)。\n- Acquisition time per point：1 MHz measurement bandwidth、IF filter analog wideband 時 1 µs；30 MHz measurement bandwidth 時 32 ns。\n- Linear frequency sweep 條件 201 points、10 GHz center frequency、200 MHz span：1 MHz measurement bandwidth、IF filter analog normal 時 time per sweep < 3.9 ms；sweep cycle time < 4.9 ms。\n- IEC/IEEE VXI11 over 1 Gbit/s LAN：201 measurement points、800 MHz start frequency、1 GHz stop frequency、1 MHz measurement bandwidth 的 measurement and data transfer time 為 14 ms / 13 ms；201 measurement points magnitude 的 data transfer time 為 1.7 ms / 0.9 ms。\n- Switching time between channels with a maximum of 2001 points：< 2 ms。\n- Continuous mode 不需要額外 data transfer time，因為 data transfer 與 measurement 同時進行。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 10.647282
+         },
+         {
+          "text": "R&S ZNA › 讀圖補充\n[[ZNA_specs_en_5215-4652-22_v2400]]（讀圖）包含 4 頁無文字層頁面的模型讀圖結果；可信度低於正文，不應用來推翻正文。來源摘錄未提供圖片嵌入 wikilink，因此本頁無法帶入原圖附件。\n\n- p001（讀圖）：封面可辨識 R&S®ZNA、VECTOR NETWORK ANALYZER、Specifications、Version 24.00、ROHDE&SCHWARZ、Make ideas real；前面板可辨識 Port 1、Port 3、Port 2。\n- p044（讀圖）：圖說為 Test set configuration for R&S®ZNAXx-B501 low power spurious reduction port 1；可辨識 R&S®ZNAXx-B21、R&S®ZNAXx-B161、R&S®ZNAXx-B501、R&S®ZNAXx-B31 與 Source / Meas / Ref 連接標示。\n- p050（讀圖）：Side view of the R&S®ZNA，尺寸數值 452.1、407.6、131、272.43、272.43、116.1、161.95、56.3、110.5；尺寸單位無法辨識。\n- p059（讀圖）：頁面幾乎空白，無實質內容。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 19,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 9.071598
+         },
+         {
+          "text": "R&S ZNA › 未決事項\n- [[R&S ZNA-K121]] RF off boot up 在本次來源摘錄中未標示 Order No.。\n- 讀圖 p050 的尺寸單位無法辨識，不能推論單位。\n- 來源摘錄未提供讀圖頁面的圖片嵌入 wikilink，無法將原圖帶入 wiki 頁供核對。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 20,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 8.013026
+         },
+         {
+          "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 9.742703
+         },
+         {
+          "text": "R&S PCB test solutions › 未決事項\n- Slide 21 未標示 R&S PCB test solutions 的正式文件版次與產品 portfolio 對應。\n- Slide 21 未標示 [[TDR]]、[[Delta-L]]、ISD/ADK、DK/DF extraction 的標準版本、演算法、測試條件或工具型號。\n- Slide 21 未展開 PL、ISD、ADK、RSTW、SWISSTO12、QWED、KEYCOM。\n- 需回看原始 PPTX 圖像確認各圖示、商標、箭頭與工具對應關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 9.676491
+         },
+         {
+          "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 5.497914
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › p001（讀圖）\n- 可見文字：R&S®ZNB3000、VECTOR NETWORK ANALYZER、Specifications、Version 09.00、ROHDE&SCHWARZ、Make ideas real、ZNB Vector Network Analyzer。\n- 頁面為文件封面樣式，主體是 R&S ZNB3000 VECTOR NETWORK ANALYZER 儀器照片。\n- 儀器正面有大螢幕、右側實體按鍵與旋鈕、左右把手、前面板下方多個射頻連接埠。\n- 螢幕顯示多個網路分析儀量測圖窗；圖表細部標示、座標數值與按鍵文字多數無法辨識。\n- 可清楚辨識的數值只有 Version 09.00。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 28.745365
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › 重點摘要\n- Product data 適用條件：ambient temperature 儲存 3 小時後 warm-up operation 30 分鐘、符合 specified environmental conditions、遵守 recommended calibration interval，且已執行所有 applicable internal automatic adjustments。\n- 所有 specification data 在 **+18 °C to +28 °C** 有效；measurement accuracy 另要求 calibration 後 temperature variation 不得超過 **1 °C**，且 measurement 與 calibration 的 frequency points、measurement bandwidth、sweep time 必須相同，不允許 interpolation。\n- Measurement range：impedance 50 Ω；frequency resolution 1 Hz；number of measurement points per trace 1 to 100001。\n- Measurement bandwidth：base unit **1 Hz to 1 MHz**；搭配 [[R&S ZNB3-K17]] 10 MHz receiver bandwidth option 時為 **1 Hz to 10 MHz**。\n- 型號與頻率範圍：[[R&S ZNB3004]] 為 9 kHz to 4.5 GHz，搭配 [[R&S ZNB3-B082]] 或 [[R&S ZNB3-B084]] 可到 9.0 GHz；[[R&S ZNB3020]] 為 9 kHz to 20.0 GHz，搭配 [[R&S ZNB3-B262]] 或 [[R&S ZNB3-B264]] 可到 26.5 GHz；[[R&S ZNB3032]] 為 9 kHz to 32.0 GHz，搭配 [[R&S ZNB3-B442]] 或 [[R&S ZNB3-B444]] 可到 43.5 GHz；[[R&S ZNB3044]] 為 9 kHz to 43.5 GHz，搭配 [[R&S ZNB3-B542]] 或 [[R&S ZNB3-B544]] 可到 54.0 GHz。\n- Dynamic range 規格以 10 Hz measurement bandwidth、without user correction applied 為條件；使用 1 Hz measurement bandwidth 可增加 dynamic range；crosstalk does not limit dynamic range。\n- Measurement speed 以 firmware version 4.12 與 Windows 11 測得；來源註明 sweep time 應理解為 cycle time。\n- General data：operating temperature +5 °C to +40 °C；storage temperature –20 °C to +60 °C；calibration interval 1 year；power supply 100 V to 240 V ±10 %，50 Hz to 60 Hz and 400 Hz，max. 3.5 A。\n- Ordering information 列出 base units、frequency upgrade options、extended power range、receiver step attenuators、extended dynamic range、hardware options、software / measurement options、calibration accessories、power sensors、attenuators、switch matrices、test cables、hardware add-ons、warranty and service options。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 8.756078
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › Base units\n| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3004 2-port | Vector network analyzer，9 kHz to 4.5 GHz (N) | 1351.5050.02 |\n| R&S®ZNB3004 4-port | Vector network analyzer，9 kHz to 4.5 GHz (N) | 1351.5050.04 |\n| R&S®ZNB3020 2-port | Vector network analyzer，9 kHz to 20 GHz (3.5 mm) | 1351.5050.22 |\n| R&S®ZNB3020 4-port | Vector network analyzer，9 kHz to 20 GHz (3.5 mm) | 1351.5050.24 |\n| R&S®ZNB3032 2-port | Vector network analyzer，9 kHz to 32 GHz (2.92 mm) | 1351.5050.32 |\n| R&S®ZNB3032 4-port | Vector network analyzer，9 kHz to 32 GHz (2.92 mm) | 1351.5050.34 |\n| R&S®ZNB3044 2-port | Vector network analyzer，9 kHz to 43.5 GHz (1.85 mm) | 1351.5050.42 |\n| R&S®ZNB3044 4-port | Vector network analyzer，9 kHz to 43.5 GHz (1.85 mm) | 1351.5050.44 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 7.717692
+         },
+         {
+          "text": "R&S ZNB3000 › Unresolved\n- 來源萃取文字內部對 [[R&S ZNB3032]] / [[R&S ZNB3044]] dynamic range 小節的 option code 標題疑似錯位，詳見本頁 ⚠️ 註記。\n- Power consumption 其中一組 2 ports 145 W typ. / 4 ports 200 W typ. 未能從萃取文字判定對應型號。\n- 來源未提供價格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 16,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 10.095973
+         },
+         {
+          "text": "R&S ZNB3000 › 讀圖補充\n- [[ZNB3000_specs_en_3647-5184-22_v0900]]（讀圖）p001 為封面，顯示 R&S®ZNB3000、VECTOR NETWORK ANALYZER、Specifications、Version 09.00 與儀器正面照片；螢幕圖表細節多數無法辨識。\n- [[ZNB3000_specs_en_3647-5184-22_v0900]]（讀圖）p006 顯示 Measurement speed 圖解，條件為 firmware version 4.12 and Windows 11，並定義 TPREP、TSAMPLE、TPOST、TACO、TSWEEP、TRETRACE、TCYCLE；本頁未標出具體時間數值或單位。\n- [[ZNB3000_specs_en_3647-5184-22_v0900]]（讀圖）p035 為 Side view of the R&S®ZNB3000，可辨識 361.5、162.5、217、0、75.5、251.5 等尺寸數值，但圖上未清楚顯示尺寸單位；不覆蓋正文 dimensions。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 15,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 9.948422
+         },
+         {
+          "text": "R&S ZNB3000 › Base units 與 ordering information\n| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3004 2-port | Vector network analyzer，9 kHz to 4.5 GHz，N connector | 1351.5050.02 |\n| R&S®ZNB3004 4-port | Vector network analyzer，9 kHz to 4.5 GHz，N connector | 1351.5050.04 |\n| R&S®ZNB3020 2-port | Vector network analyzer，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.22 |\n| R&S®ZNB3020 4-port | Vector network analyzer，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.24 |\n| R&S®ZNB3032 2-port | Vector network analyzer，9 kHz to 32 GHz，2.92 mm connector | 1351.5050.32 |\n| R&S®ZNB3032 4-port | Vector network analyzer，9 kHz to 32 GHz，2.92 mm connector | 1351.5050.34 |\n| R&S®ZNB3044 2-port | Vector network analyzer，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.42 |\n| R&S®ZNB3044 4-port | Vector network analyzer，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.44 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 8.748765
+         },
+         {
+          "text": "High speed SerDes standards › 可追溯限制\n- 本頁不把 Slide 4 清單解讀為完整 SerDes 標準版圖。\n- 本頁不推論任何標準之間的競合、速率、採用率、測試需求或 R&S 產品支援狀態。\n- 來源未提供標準版本與發布組織，因此本頁的標準頁連結多為待寫頁或待補證頁。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes standards.md"
+          },
+          "score": 7.683764
+         },
+         {
+          "text": "High speed SerDes standards › 未決事項\n- Slide 4 未提供各 standards 的版本、組織、年份、資料率、lane 數、channel model、compliance 測試或 fixture 要求。\n- [[ASA]] 在本來源未展開縮寫。\n- [[JESD204]] 與 [[JESD204D]] 的關係需回看原圖或另補正式標準來源。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes standards.md"
+          },
+          "score": 7.044449
+         },
+         {
+          "text": "High speed SerDes standards › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes standards.md"
+          },
+          "score": 3.497797
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 10.535771
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 未決事項\n- Slide 11 未標示各測試區塊對應的標準版本、測試流程、儀器型號、軟體 option 或測試條件。\n- Slide 20 未標示 IL、Xtalk、Eye diagram、TDR impedance、Stackup Planner 與 TL Calculator 的工具、供應商或規格。\n- 需回看原始 PPTX 才能確認圖片中的 waveform、diagram 與 instrument details。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 8.128411
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 4.628047
+         },
+         {
+          "text": "High speed SerDes eco-chain › 下游 — 終端應用與市場部署\n- 通訊設備製造商：核心網、5G 基站、光傳輸設備、交換機、路由器等。\n- 服務器與資料中心：協助 AI、高效能計算環境部署，需求高速內部連與介面連接。\n- 網通基礎建設與雲端應用：包含物聯網、雲計算與邊緣運算等場域皆需高速數據傳輸與處理能力。\n- 消費電子與車用領域：筆電 / 手機等需 [[HDMI]]、[[DisplayPort]]、[[USB]] 介面，汽車上的 [[ADAS]] 與 [[V2X]] 通訊亦需高速訊號傳輸。\n- 工業與智慧製造：工業自動化系統、高速資料擷取與辨識也仰賴高速訊號鏈路。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 21.227599
+         },
+         {
+          "text": "High speed SerDes eco-chain › 分層整理\n| 層級 | 來源分類 | 來源明示內容 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| 上游 | 基礎材料與核心元件 | 半導體晶片、光模組 / 光元件、PCB 材、被動元件、高頻高速線材與接頭 | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供公司名單完整性、市占率、供應關係或材料規格 |\n| 中游 | 模組整合與生產製造 | 晶片封測、線材接頭組裝、系統級整合、消費電子裝置整合、高速 PCB 設計 | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供具體廠商、產能或客戶 |\n| 下游 | 終端應用與市場部署 | 通訊設備、伺服器與資料中心、雲端 / 邊緣、消費電子 / 車用、工業與智慧製造 | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供需求數字、出貨量或區域市場資料 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 9.497532
+         },
+         {
+          "text": "High speed SerDes eco-chain › 與既有知識的關係\n- [[台灣 SerDes IC-IP 公司名單]] 記錄台灣 IC design、silicon IP、networking IC、I/O interface IC 等公司線索；本頁是應用 / 供應鏈分層，沒有列出完整台灣公司名單。\n- [[高速伺服器儲存互連]] 與 [[HSD Cable test 外部資料清單]] 已有 Amphenol / connector / cable 線索；本頁補入 high speed SerDes eco-chain 對高頻高速線材與接頭的上游定位。\n- [[高頻高速 PCB 測試解決方案]] 與 [[R&S PCB test solutions]] 可承接 Slide 9 中「高速 PCB 設計」與 Slide 20–21 的測試流程。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 8.498815
+         },
+         {
+          "text": "6G NTN 展望 › 使用限制\n- 本頁多數內容屬 outlook、research project、study item 或 proposal，不是 finalized 6G specification。\n- 來源中的 6G topics 包含 [[TR 22.870]]、[[TR 38.914]]、IMT-2030、RSPG、6G-TakeOff、6G-Coverage、6G-NTN 等多來源脈絡；正式需求需回查各文件。\n- 6G waveform、security、AI、RIS、MFSS、PNT、ISAC、semantic coding 與 routing architecture 皆不可推論為現有產品功能。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 13,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/6G NTN 展望.md"
+          },
+          "score": 10.56455
+         },
+         {
+          "text": "6G NTN 展望 › ISAC\n[[ISAC]] 將 sensing capability 整合進 communications network。\n\n- satellite sensing 可為 active / passive、imaging / non-imaging、monostatic / bistatic / multistatic。\n- ISAC 可能支援 drones、transportation、refrigerated logistics、rural sensing 等 multi-operator collaboration use cases。\n- challenge 包含 high bandwidth、radar equation、power density、spectrum coexistence 與 waveform design。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/6G NTN 展望.md"
+          },
+          "score": 4.662309
+         },
+         {
+          "text": "6G NTN 展望 › Waveforms 與 air interface\n6G NTN waveform / air interface research 包含：\n\n- OFDMA enhancements。\n- [[OTFS]]：適合 high Doppler；把 signal 轉換到 delay-Doppler domain。\n- [[FDSS]]：降低 PAPR，改善 uplink-constrained NTN power efficiency；來源稱可改善 link budget 約 4 dB 到 5 dB。\n- ECRA / grant-free IoT access：結合 asynchronous retransmission 與 SIC receiver，用於大量 small packet IoT access。\n- circular constellation mapping、APSK、semantic coding、joint-source-channel coding。\n- NOMA、full duplex、flexible TDD、multi-radio shared spectrum。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/6G NTN 展望.md"
+          },
+          "score": 3.766884
+         },
+         {
+          "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 重點摘要\n- [[Rohde & Schwarz]] 宣稱其 hybrid eCall 與 Next Generation eCall test solution 已成功通過 [[cetecom advanced]] 的 certification testing。\n- 來源描述 [[cetecom advanced]] 是 independent test laboratory，服務範圍包含 communication technologies、automotive、medical technology、payment & identification 等產品測試與 worldwide certification。\n- 測試方案以 [[R&S CMX500]] radio communication tester 為基礎，搭配更新後的 eCall option，以支援最新 eCall regulations and standards。\n- 來源說 [[Hybrid eCall testing]] 所依據的 [[EN 18052]] 要求 hybrid system 結合不同 transmission paths and protocols，使 eCall 能可靠到達目的地。\n- 來源說實務上車輛會使用 NG eCall functions，即 IP/IMS-based voice and data over 4G/5G；但在 coverage 或 service quality 降低時，可自動 fallback 到 classic CS eCall 2G/3G transport paths。\n- 製造商需要驗證 hybrid implementations 能 trigger calls、transmit [[MSD]]、maintain [[GNSS]] positioning，並在 [[VoNR]]、[[VoLTE]] 與 circuit-switched fallback 等多種 network scenarios 下提供 intelligible voice quality。\n- [[Rohde & Schwarz]] 宣稱其 eCall evaluation solution [[R&S CMX-KA09x]] 已更新，以支援 compliance with [[EN 18052]]:2025 與 [[EN 17240]]:2024+A1:2026。\n- [[R&S CMX-KA099]] option completed Public Safety Answering Point scenario tests according to [[EN 18052]]:2025。\n- [[R&S CMX-KA098]] option completed Public Safety Answering Point scenario tests according to [[EN 17240]]:2024+A1:2026。\n- [[Thomas Reschka]] 以 [[cetecom advanced]] Senior Technical Consultant 身分表示，該 solution 用於 functional tests、protocol conformity tests，以及 type-approval of [[IVS]] implementing hybrid eCall and NG eCall。\n- 來源稱 test environment 可 simulation real-world mobile network conditions 並 emulation various network scenarios，用於 certifications 或 new vehicle model market launch 前準備。\n- Press contact 為 [[Patrizia Muehlbauer]]，職稱 PR Manager Products & Standard Systems。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+          },
+          "score": 14.516586
+         },
+         {
+          "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 原文未解的問題\n- unresolved：新聞稿 frontmatter 的 published 欄位為空；來源正文也未標示發布日期。raw created 為 2026-09-11，但不可等同正式發布日。\n- unresolved：新聞稿未標示 document version、press release ID 或 revision。\n- unresolved：來源未提供 cetecom advanced certification report number、certificate number、測試日期、測試環境版本或完整 acceptance criteria。\n- unresolved：來源未提供 [[R&S CMX-KA09x]]、[[R&S CMX-KA098]]、[[R&S CMX-KA099]] 的完整 order number、license dependencies、software version 或 maintenance mapping。\n- unresolved：來源只稱 CMX-KA099 / CMX-KA098 completed PSAP test scenarios，未列出各 PSAP scenario 的 test case IDs、pass/fail detail 或是否涵蓋所有 EN 18052:2025 / EN 17240:2024+A1:2026 requirements。\n- unresolved：來源提到 national requirements，但未列國家、法規名稱或版本。\n- unresolved：來源未展開 [[EN 18052]]、[[EN 17240]] 的發布組織、正式標題或 amendment 細節。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+          },
+          "score": 5.245993
+         },
+         {
+          "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 關鍵實體與概念\n- [[Rohde & Schwarz]] — 新聞稿發布公司，提供 automotive test solutions。\n- [[R&S CMX500]] — 測試方案基礎設備，radio communication tester。\n- [[R&S CMX-KA09x]] — 來源中的 updated eCall evaluation solution 泛稱，支援 EN 18052:2025 與 EN 17240:2024+A1:2026 compliance。\n- [[R&S CMX-KA099]] — 來源稱已完成 EN 18052:2025 的 PSAP test scenarios。\n- [[R&S CMX-KA098]] — 來源稱已完成 EN 17240:2024+A1:2026 的 PSAP test scenarios。\n- [[cetecom advanced]] — 執行 certification testing 的 independent test laboratory。\n- [[Thomas Reschka]] — cetecom advanced Senior Technical Consultant，新聞稿引述人物。\n- [[Patrizia Muehlbauer]] — Rohde & Schwarz press and media contact。\n- [[Hybrid eCall testing]] — hybrid eCall / NG eCall 測試主題，涵蓋 NG eCall、classic CS eCall fallback、GNSS、MSD、voice quality、handover 與 degraded radio conditions。\n- [[EN 18052]]、[[EN 17240]]、[[CEN]]、[[ETSI]]、[[3GPP]]、[[NGeCall over LTE]]、[[NGeCall over NR-LTE]]、[[IMS eCall]]、[[IVS]]、[[PSAP]]、[[MSD]]、[[GNSS]]、[[VoNR]]、[[VoLTE]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+          },
+          "score": 3.210269
+         },
+         {
+          "text": "Dk-Df › 可追溯限制\n- [[AI Server PCB test image 24]] 未定義 Dk 與 Df 的完整名稱、測試頻率、測試方法、量測標準或條件。\n- [[AI Server PCB test image 24]] 未提供任何 Dk 或 Df 數值。\n- [[AI Server PCB test image 24]] 未標示材料樣本、基材牌號、層壓板型號或供應商。\n- [[HSD PCB image 15]] 未提供 [[DK]] 或 [[Low DK]] 的數值門檻、測試頻率、測試方法、厚度範圍或標準版本。\n- [[HSD PCB image 15]] 未說明 [[Low DK 玻纖布]] 的主要台廠註記是否等同供應商、主要市場參與者、概念股或其他口徑。\n- [[HSD PCB image 18]] 未提供 [[Low Dk]] / [[Low Df]] 的數值門檻、測試頻率、測試方法、厚度範圍、產品型號、標準版本或價格。\n- [[HSD PCB image 18]] 的「AI/5G 標配」是未標示日期圖卡的說法；不得推論 [[富喬]] 或 [[台玻]] 已量產、出貨或取得特定 AI / 5G 客戶認證。\n- [[snla426]] 的 Df / εr / SDD21 表格是 TI application note 中的 high-speed PCB design reference；來源摘要未提供測試結構、trace geometry、stack-up、銅粗糙度、溫度、濕度或 measurement / simulation 條件。\n- [[snla426]] 中 `Roger` 材料名稱需回查原文確認是否為 Rogers 或特定 laminate product family；本頁照來源摘要保存。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Dk-Df.md"
+          },
+          "score": 8.851209
+         },
+         {
+          "text": "Dk-Df › 來源中的說法\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）在原材料表徵階段寫明「测量原材料（如基材或层压板）的 Dk/Df」。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）在材料選擇階段寫明「测量插入损耗、表面粗糙度和材料特性（Dk/Df）」。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）在電路板抽樣測試階段寫明「测量插入损耗、阻抗变化和材料特性（Dk/Df）」。\n- [[AI Server PCB test image 24]]（來源未標示日期；取得於 2026-09-04）在解決方案區塊寫明「基于 ENA/PNA 的 Delta-L 损耗、TDR 阻抗测量和 Dk/Df 提取」。\n- [[HSD PCB image 15]]（來源未標示日期；取得於 2026-09-04）稱[[玻纖布]]可依據[[介電係數]]（[[DK]]）和厚度做綜合等級區分。\n- [[HSD PCB image 15]]（來源未標示日期；取得於 2026-09-04）稱常聽到的 [[Low DK]] 是玻纖布材質低介電 / 低延遲的意思。\n- [[HSD PCB image 15]]（來源未標示日期；取得於 2026-09-04）將 [[Low DK 玻纖布]]列為次高階玻纖布，用途 / 特性欄為「高頻高速PCB板材、伺服器、車用、通訊」。\n- [[HSD PCB image 18]]（來源未標示日期；取得於 2026-09-04）在材料演進階梯中把 [[Low Dk]] / [[Low Df]] 標為「低損耗」，並寫「降低訊號損耗，AI/5G 標配（[[富喬]]、[[台玻]] 主力衝刺區）。」\n- [[snla426]]（June 2023）說 Loss tangent（Df）或 Dissipation Factor 是 signal 沿 transmission line 傳播時 signal attenuation 的量測。\n- [[snla426]]（June 2023）說 dielectric loss 來自 dielectric material 對 electromagnetic wave 的吸收；frequency 增加時，dielectric loss 也成比例增加。\n- [[snla426]]（June 2023）說 ultra-low loss materials 的 Df 通常範圍為 0.02 到 0.001；較小的 Df 會造成較低 signal attenuation；[[PCIe]] 等 high speed applications 需要低 Df。\n- [[snla426]]（June 2023）說 [[fiberglass weave]] 的 εr 約為 6，[[epoxy]] 的 εr 約為 3；fiber glass laminate 中的 holes 或 openings 會造成 εr 與 Df 差異。\n- [[snla426]]（June 2023）說 εr 與 Df 差異會在 signal bandwidth 的不同頻率上造成 transmission media 的 [[return loss]] 或 [[insertion loss]] resonance / anti-resonance。\n- [[snla426]]（June 2023）說 εr 通常範圍為 2.5 到 4.5，並隨 frequency 變化；frequency 增加時 εr 下降。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Dk-Df.md"
+          },
+          "score": 8.571613
+         },
+         {
+          "text": "Dk-Df › 未決事項\n- [[AI Server PCB test image 24]] 未標示 Dk/Df 的測試標準、頻率、溫度、材料樣本或校準方法。\n- [[AI Server PCB test image 24]] 未標示 Dk/Df 提取使用的 ENA / PNA 型號與 option code。\n- 既有 [[CCL 產品規格分級]] 來源與 [[AI Server PCB test image 24]] 未提供共同測試條件，因此不同來源中的 Df 不能直接比較。\n- [[HSD PCB image 15]] 未定義 DK 的完整測試條件或數值門檻。\n- [[HSD PCB image 15]] 未說明 Low DK 的「低延遲」是定性描述、材料分類、產品等級或市場用語。\n- [[HSD PCB image 18]] 未標示日期、發布者、報告名稱或資料期間。\n- [[HSD PCB image 18]] 未定義 [[Low Dk]] / [[Low Df]] 的量化門檻、測試條件或產品範圍。\n- [[HSD PCB image 18]] 未說明「AI/5G 標配」的樣本、材料範圍、採用率或期間。\n- [[snla426]] 未提供 Df / SDD21 表格的完整測試條件與 measurement / simulation 方法。\n- [[snla426]] 未提供 Megtron 6、Roger、GETEK、Nelco 4000-6、FR4、Tetra Functional FR4 的正式 material datasheet reference。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Dk-Df.md"
+          },
+          "score": 7.317492
+         },
+         {
+          "text": "OAM insertion loss budget\n[[OAM insertion loss budget]] 是 [[OCP Accelerator Module OAM Specifications]] 中對 [[OAM]] module interconnection channel insertion loss 與 system baseboard insertion loss budget 的規格語彙；本頁與既有 [[OAM 互連信號損耗]] 分開保存，避免把不同來源、不同資料率與不同通道定義的 dB 數字混用。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/OAM insertion loss budget.md"
+          },
+          "score": 5.295365
+         },
+         {
+          "text": "OAM insertion loss budget › 與既有 OAM 互連信號損耗頁的關係\n- [[OAM 互連信號損耗]] 依 [[AI Server PCB test image 30]] 與 [[AI Server PCB test image 55]]（皆來源未標示日期；取得於 2026-09-04）記錄 **30 dB** total channel budget、Tx module budget **8dB**、QSFP-DD assembly budget **5 dB**、Rx module budget **8dB**。\n- [[OCP Accelerator Module OAM Specifications]]（來源未標示正式發布日期；Rev 0.85 context）的 **@28Gbps <= -8dB** 與 **baseboard IL = Die-to-Die IL – 16dB** 不可直接與既有市場圖的 **30 dB** loss budget 合併，因為來源未標示相同資料率、通道定義、connector path、測試方法或產品世代。\n- 本頁暫不標註矛盾：兩組來源看起來描述的是不同層級或不同口徑的 channel loss / insertion loss budget，而不是同一欄位的互斥數值。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/OAM insertion loss budget.md"
+          },
+          "score": 4.628411
+         },
+         {
+          "text": "OAM insertion loss budget › 可追溯限制\n- 本頁目前只由 [[OCP Accelerator Module OAM Specifications]] 支撐。\n- 來源未定義 Die-to-Die IL 的完整測試方法、package model、fixture、board material、connector model、frequency domain extrapolation 或 pass / fail method。\n- 來源未標示 -8 dB 是否包含 connector、baseboard、package 或 die-to-die 的哪一段；本頁只照原文保存。\n- 來源未說明 28 Gbps 是 NRZ、PAM4 equivalent、per-lane signaling 或其他 encoding condition；本頁不得推論。\n- 來源未說明此 Rev 0.85 budget 是否沿用到後續 OAM spec 版本。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/OAM insertion loss budget.md"
+          },
+          "score": 3.752159
+         },
+         {
+          "text": "TRI_AMD_RSKR Sharing1 › 與既有知識的關係\n- [[R&S PCB test solutions]] 已記錄 2026.3.4 R&S high-speed digital 簡報中的 material measurement、stackup selection、SI modeling/testing、sampling testing 與 process monitoring；本來源補入 actual sales / case-sharing 層級的 probing、mount-kit、de-embedding tool 與 partner 需求。\n- [[SerDes 與 SI PI 測試概覽]] 已建立 high-speed digital 測試區塊；本來源補入 Bare Board for SoCs、socket / transmission line evaluation、board-to-board connector DUT 與 5G SoC VCO tuning case。\n- [[R&S ZNB3044]] 既有 Productions 頁面依 July 2026 規格書記錄 base frequency range 9 kHz to 43.5 GHz、with upgrade 到 54.0 GHz；本 Market 來源的 AMD case 說 optimized setup stability up to 67 GHz，但未說明是否由 ZNB3044 單機達成、是否使用 extender / probe / fixture / de-embedding，因此不能直接改寫 ZNB3044 產品規格。\n- [[R&S SMW200A]] 既有頁面依 May 2026 specifications 記錄 RF path A 最高 67 GHz、RF path B 最高 44 GHz；本來源中的 SMW200A(44GHz) 只支撐 Samsung case 中使用 44GHz 等級 SMW200A 的 sales-case 語境。\n- [[Keysight ENA]] 既有頁面來自 Keysight PCB test image；本來源新增其在 LSmtron board-to-board connector case 中作為 competitor 的線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/TRI_AMD_RSKR Sharing1.md"
+          },
+          "score": 12.44431
+         },
+         {
+          "text": "TRI_AMD_RSKR Sharing1 › 原文未解的問題\n- 來源未標示正式發布日期、簡報版次、作者、發布對象或完整 RSKR / TRI 展開名稱。\n- Slide 2 圖像未 OCR 出完整 cable / port / fixture 連線，無法確認兩台 ZNB3044、OSP320、flying probe module 與 interposer board 的完整拓撲。\n- Slide 3 的 `< 5` 未標示指標名稱、單位與測試條件。\n- Slide 5 的 67 GHz stability claim 未標示儀器組合、extender、probe、calibration、de-embedding、fixture 或 DUT 條件；不可當成 ZNB3044 standalone specification。\n- Slide 7 僅明示 AMD EPYC 9965；socket interconnection test 的 socket 型號、signal standard、data rate、frequency sweep 與量測項目未標示。\n- Slide 8 的 ZNB40 未對應到既有正式 R&S 型號頁；是否為 ZNB40 / ZNB 40 GHz variant 需後續來源補證。\n- Slide 9 的 ATS、ZVA67、ZNA43 欄位可能分別指既有 equipment 或 customer-owned instruments，但來源未明確分層。\n- Slide 11 的 SGS100A 未對應既有頁；可能需確認是否為 [[R&S SGT100A]] 或其他型號，不能自行更正。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/TRI_AMD_RSKR Sharing1.md"
+          },
+          "score": 11.473818
+         },
+         {
+          "text": "TRI_AMD_RSKR Sharing1 › 重點摘要\n- 來源正式發布日期未標示；raw frontmatter 僅標示 converted: 2026-09-18。Slide 8 頁尾另有 28/04/2020，應視為該 success story slide 的日期線索，不可套用到整份簡報。\n- Slide 2 的 TRI case 題為 Test environment，圖中文字列出 4-port VNA [[R&S ZNB3044]]、[[R&S OSP320]]、DUT、flying probe module、interposer board，並寫明 ATE test scenario 是 dual-side capacity：test sides A and B 各量測 two DUTs，在 single inline measurement cycle 完成 full 4-DUT sequence。\n- Slide 3 的 TRI case 題為 Test Result and capabilities，只能辨識 `< 5`，但來源未標示指標名稱、單位、測試條件或 pass/fail 門檻。\n- Slide 4–5 的 AMD case 題為 Optimization for validation / Test result and stability proof。文字指出 default setup 在 40 GHz 以上 severe noise and uncertainty dominate the signal；optimized setup 則 complete signal stability unlocked up to 67 GHz；100 cycles continuous measurements 的 SDD12 distribution contained within +/- 3σ at 18.75 GHz。\n- Slide 7 backup 題為 Socket – socket interconnection test，明示 [[AMD EPYC 9965]]，但圖片細節未 OCR，未提供 socket、interposer、fixture 或量測規格。\n- Slide 8 的 key success story：Country / Region RSK；Customer 為 [[LSmtron]]，括號說明 manufacturer of FPCB and connector；Products 為 ZNB40；Competitor 為 [[Keysight ENA]]；Strength 是 total solution including probe, mount-kit, and de-embedding tool with local partner [[TeraBit Solutions]]，其為 [[AtaiTec]] 在 Korea 的 agency；DUT 為 Board to Board Connector。\n- Slide 9 ongoing projects：Project 為 Bare Board for SoCs；Customer 欄列 [[Advantest]]（ATS, ZVA67）與 [[Meritech]]（PCB manufacturer, ZNA43）；Application 是 PCB test with probing，包含 impedance、insertion loss、return loss；Offered solution 是 ZNB40、probe、mount-kit、de-embedding tool；What does it take to win: Partners。\n- Slide 10 sales strategy：目標 customer group 覆蓋 ICR、WIC、ADT、AUT；industry 為 Bare board for SoCs (RFIC)；fit 為 VNAs；companies 為 suppliers of Samsung Electronics；comments 為 evaluation of socket and transmission line。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/TRI_AMD_RSKR Sharing1.md"
+          },
+          "score": 5.254662
+         },
+         {
+          "text": "Texas Instruments › 可追溯限制\n- [[AI Server PCB test image 79]] 未提供 [[Texas Instruments]] 的具體晶片型號、交換機產品、客戶、出貨量、設計導入或市占率。\n- [[AI Server PCB test image 79]] 未標示日期，因此不可寫成特定時間點的市場現況。\n- [[snla426]] 是 TI application note，支撐的是 PCIe Gen5 high-speed PCB layout advice；不可由此推論 TI 的市場份額、客戶導入、出貨量或 R&S 往來關係。\n- [[snla426]] 摘要未提供完整 application note 頁碼、修訂紀錄或 TI 網址。\n- [[snla426]] 的 rules 需保留其 TI PCIe device / PCIe Gen5 context，不可直接套用到所有 high-speed standards 或所有 PCB material / stack-up。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Texas Instruments.md"
+          },
+          "score": 2.867485
+         },
+         {
+          "text": "Texas Instruments\n[[Texas Instruments]] 是半導體公司 / 品牌；在本 vault 中，既有市場來源把它列於交換機上游 CPU/PHY chip 分類，[[snla426]] 則提供其 PCIe Gen5 high-speed PCB layout application note 脈絡。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Texas Instruments.md"
+          },
+          "score": 1.583078
+         },
+         {
+          "text": "Texas Instruments › 技術文件與 PCIe Gen5 PCB layout 脈絡\n- [[snla426]]（June 2023）是 [[Texas Instruments]] application note《High-Speed PCB Layout for PCIe Gen 5》，文件編號 SNLA426，作者為 [[Vicente Flores Prado]]。\n- [[snla426]]（June 2023）主題是 [[PCIe Gen5 high-speed PCB layout]]，目標是協助系統設計者在 high-speed [[PCI Express]] 平台設計時理解 [[PCB layout]] best practices 與 layout options。\n- [[snla426]]（June 2023）指出 [[PCIe Gen5]] 資料傳輸速率為 32 GT/s，Gen5 x16 lane 設計需以最佳化 [[crosstalk]]、[[return loss]] 與 [[insertion loss]] 為核心。\n- [[snla426]]（June 2023）列出 [[Texas Instruments]] PCIe device 的 critical signals：PCIE_RXP、PCIE_RXN、PCIE_TXP、PCIE_TXN、REFCLKP/N（100 MHz Reference CLK）。\n- [[snla426]]（June 2023）提到 [[TI DS320PR1601 EVM]] 使用 co-planar GND reference waveguide 以降低 crosstalk 影響。\n- [[snla426]]（June 2023）reference 列出 [[TI DS320PR1601]] 32 Gbps 16 Lane PCIe 5.0 / CXL 2.0 Linear Redriver data sheet。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Texas Instruments.md"
+          },
+          "score": 1.168053
+         },
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › Option 與 licence 摘要\n來源列出大量 hardware options、software options、service upgrades 與 accessories。依 Productions 規則，option 不另開頁，依附在 [[R&S ZNA]] 與各型號頁下；本來源摘要只列主軸，完整 code、order no. 與相依關係需回查對應實體頁與原始來源。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 8.378332
+         },
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › 原文未解的問題\n- 來源有列出大量 options、accessories 與相依關係；本次 wiki 摘要保留主要可報價項目的 code、order no.、名稱與原文相依關係，但未逐字展開所有 calibration accessories、test cables、switch matrix extensions 的完整規格表。\n- 部分表格同時出現 spec.、typ.、meas. 或 nom. 數值；本摘要依原文標示保留，不自行調和。\n- 來源註明 Internal PC is subject to change without notice；因此 internal PC 規格需以此 Version 24.00（April 2026）為準。\n- [[R&S ZNA-K121]] RF off boot up 在本次來源摘錄中列出名稱，但未提供 Order No.；頁面標示為來源未標示。\n- 讀圖補充 p050 的尺寸數值旁單位無法辨識；不得推論為 mm 或其他單位。\n- 本次輸入摘錄未提供讀圖頁面的圖片嵌入 wikilink，故 wiki 無法帶入原圖供核對。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 7.39803
+         },
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › 關鍵實體與概念\n- [[R&S ZNA]] — Vector Network Analyzer 系列，涵蓋 26.5 GHz、43.5 GHz、50 GHz、67 GHz 型號。\n- [[R&S ZNA26]] — 26.5 GHz 型號，3.5 mm ruggedized male connector。\n- [[R&S ZNA43]] — 43.5 GHz 型號，2.92 mm 或 2.4 mm ruggedized male connector。\n- [[R&S ZNA50]] — 50 GHz 型號，2.4 mm ruggedized male connector。\n- [[R&S ZNA67]] — 67 GHz 型號，1.85 mm ruggedized male connector。\n- [[Vector Network Analyzer]]、[[Dynamic range]]、[[Measurement bandwidth]]、[[Direct source and receiver access]]、[[Noise figure measurement]]、[[mmWave converter support]]、[[Phase-coherent source control]]、[[Health and utilization monitoring service]]、[[Time domain analysis]]、[[Deembedding]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 5.853762
+         },
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › 讀圖頁面\n> 以下段落引用的內容來自這幾頁的圖片。模型讀圖沒有信心分數，請以圖片為準。\n\n**p001**\n\n![[ZNA_specs_en_5215-4652-22_v2400-p001.png]]\n\n**p044**\n\n![[ZNA_specs_en_5215-4652-22_v2400-p044.png]]\n\n**p050**\n\n![[ZNA_specs_en_5215-4652-22_v2400-p050.png]]\n\n**p059**\n\n![[ZNA_specs_en_5215-4652-22_v2400-p059.png]]",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 12,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 4.907753
+         },
+         {
+          "text": "ZNA_specs_en_5215-4652-22_v2400 › 重點摘要\n- 型號頻率範圍：\n  - [[R&S ZNA26]]：10 MHz to 26.5 GHz。\n  - [[R&S ZNA43]]：10 MHz to 43.5 GHz，可為 2.92 mm 或 2.4 mm ruggedized male test port connector。\n  - [[R&S ZNA50]]：10 MHz to 50 GHz。\n  - [[R&S ZNA67]]：10 MHz to 67 GHz。\n- 各型號提供 2 ports 或 4 ports base unit；test port impedance 為 50 Ω，DC block 為 standard。\n- Key performance 包含：dynamic range > 129 dB specification without options、147 dB typical with options、maximum attainable range up to 170 dB allowing full 2-port correction；sensitivity > –120 dBm at 1 Hz IF bandwidth specification without options，並有 –162 dBm measured with options（1 kHz measurement bandwidth normalized to 1 Hz）。\n- Measurement bandwidth：base unit 1 Hz to 1.5 MHz；搭配 [[R&S ZNA-K17]] increased IF bandwidth 30 MHz option 時為 1 Hz to 30 MHz。\n- Measurement speed 條件包含 firmware version 3.20、Windows 11 (64 bit)；例：10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。\n- 4-port instruments：最多 4 sources，independently configurable、phase coherent、phase controlled；另有第 5 source 可作為 LO supply；每 port 有 2 true receivers，4-port model 總計 8 true receivers，無 multiplexing。\n- 2-port instruments：最多 2 sources，independently configurable、phase coherent、phase controlled；另有第 3 source 可作為 LO supply；每 port 有 2 true receivers，2-port model 總計 4 true receivers，無 multiplexing。\n- Optional rear panel LO out 可支援 mmWave converters；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters，無需 external signal generator；rear panel LO out typ. +25 dBm，最高 26.5 GHz。\n- [[R&S ZNA-K28]] continuous data recording 支援 infinite data point capture、circular buffer，並可透過 LAN 或 USB 連續資料傳輸。\n- [[R&S ZNA-B26]] direct IF access：IF input 可用於 mmWave converter 與 antenna measurement systems，bandwidth 1 GHz；IF output up to 2 GHz bandwidth 可用於 external pulse analysis。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+          },
+          "score": 4.658948
+         },
+         {
+          "text": "R&S ZNA › 讀圖頁面\n> 以下段落引用的內容來自這幾頁的圖片。模型讀圖沒有信心分數，請以圖片為準。\n\n**p001**\n\n![[ZNA_specs_en_5215-4652-22_v2400-p001.png]]\n\n**p044**\n\n![[ZNA_specs_en_5215-4652-22_v2400-p044.png]]\n\n**p050**\n\n![[ZNA_specs_en_5215-4652-22_v2400-p050.png]]\n\n**p059**\n\n![[ZNA_specs_en_5215-4652-22_v2400-p059.png]]",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 21,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 7.339774
+         },
+         {
+          "text": "R&S ZNA › 重要 recommended setups\n- [[R&S ZNA-K5]] vector corrected converter measurements：recommended setup 為 4-port R&S®ZNA；需要 R&S®ZNA-K4、R&S®ZNA-B5、R&S®ZNA-B8 mmWave converter LO、R&S®ZN-ZM292 calibration mixer 與 calibration accessories。\n- [[R&S ZNA-K8]] mmWave converter support：two mmWave converters with 2-port R&S®ZNA，或 four mmWave converters with 4-port R&S®ZNA；需要 R&S®ZNA-K8、R&S®ZNA-B8、R&S®ZNA-B26、R&S®ZCAKN 與 accessories。Alternative setup：two mmWave converters with 4-port R&S®ZNA，需要 R&S®ZNA-K8、R&S®ZNAxx-B16、R&S®ZCAKN 與 accessories。\n- [[R&S ZNA-K9]] group delay measurements：4-port R&S®ZNA recommended setup 需要 R&S®ZNAxx-B213、R&S®ZNA-B5、R&S®ZNA-K9；2-port R&S®ZNA recommended setup 需要 R&S®ZNAxx-B212、R&S®ZNAxx-B52、R&S®ZNA-K9。\n- [[R&S ZNA-K30]] noise figure measurement：recommended setup 使用 port 1 as driving and port 2 as receiving port；需要 R&S®ZNAxx-B16、R&S®ZNAxx-B21、R&S®ZNAxx-B32、R&S®ZNAxx-B161、R&S®ZNAxx-B302、diode power sensor（例如 R&S®NRP40S）與 accessories（test cables、fixed attenuators 3 dB / 6 dB / 10 dB 等）。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 15,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 7.048014
+         },
+         {
+          "text": "R&S ZNA › 文件依據\n- 來源：[[ZNA_specs_en_5215-4652-22_v2400]]。\n- 文件：R&S®ZNA Vector Network Analyzer Specifications。\n- 文件編號：PD 5215.4652.22。\n- 文件版本：Version 24.00。\n- 發布時間：April 2026。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 6.936881
+         },
+         {
+          "text": "R&S ZNA\n[[R&S ZNA]] 是 Rohde & Schwarz 的 Vector Network Analyzer 系列，依 Version 24.00（April 2026）規格書涵蓋 [[R&S ZNA26]]、[[R&S ZNA43]]、[[R&S ZNA50]]、[[R&S ZNA67]]，頻率範圍從 10 MHz 延伸到最高 67 GHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 6.750517
+         },
+         {
+          "text": "R&S ZNA › Key performance（Version 24.00）\n- Dynamic range：> 129 dB specification without options；147 dB typical with options；maximum attainable range up to 170 dB allowing full 2-port correction。\n- Sensitivity：> –120 dBm，1 Hz IF bandwidth，specification without options；–162 dBm，1 Hz IF bandwidth，measured with options。來源註明 –162 dBm 是以 1 kHz measurement bandwidth 量測後 normalized to 1 Hz。\n- Power sweep range：100 dB typical continuous electronic sweep range；可使用 mechanical step attenuators 位移 sweep range。\n- Source power linearity：0.2 dB typical，範圍 –40 dBm to +10 dBm。\n- Receiver compression：0.05 dB typical，up to +8 dBm at test port，referenced to –10 dBm。\n- Trace noise：0.005 dB specification RMS、0.002 dB typical RMS，條件為 10 GHz、100 kHz measurement bandwidth、0 dB reflection。\n- Speed example：10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNA.md"
+          },
+          "score": 4.84999
+         },
+         {
+          "text": "R&S PCB test solutions › 圖上工具 / 合作方文字\n| 圖上文字 | 可能角色 | 來源 | 限制 |\n|---|---|---|---|\n| [[SPEAG]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未說明是合作夥伴、工具、方法或範例 |\n| [[SWISSTO12]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[QWED]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[KEYCOM]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供產品或服務名稱 |\n| [[RSTW]] | 圖上列名 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開完整單位名稱 |\n| TDR | 測 impedance | [[0 Digital Test - What are SIPI and Serdes]] | 未提供 TDR option 或探頭型號 |\n| Delta-L | 損耗量測相關 | [[0 Digital Test - What are SIPI and Serdes]] | 未提供方法定義、標準或軟體名稱 |\n| ISD/ADK | 圖上方法 / 工具文字 | [[0 Digital Test - What are SIPI and Serdes]] | 未展開縮寫，未說明與 Delta-L 的關係 |\n| w/ cable / connector testing | cable / connector testing | [[0 Digital Test - What are SIPI and Serdes]] | 未提供連接器類型、線纜規格或測試項目 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 2.619535
+         },
+         {
+          "text": "R&S PCB test solutions › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 既有內容來自 Keysight 圖像，流程是原材料表徵、材料選擇、電路板抽樣測試、大批量監控；本頁保存 R&S 簡報中的類似但不完全相同的流程詞。\n- [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 均已有既有頁面；本來源增加 2026.3.4 R&S 簡報的追溯來源，但沒有新增可量化規格。\n- [[SerDes 與 SI PI 測試概覽]] 連接 Slide 11 和 Slide 20 的 validation challenges / SI flow；本頁聚焦 Slide 21 的 PCB test solutions。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 2.584302
+         },
+         {
+          "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 2.354196
+         },
+         {
+          "text": "R&S PCB test solutions › 可追溯限制\n- 本來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。\n- 本頁不把 Slide 21 的圖上列名解讀為正式解決方案型錄或完整採購配置。\n- [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]] 的角色未明，僅保留圖上列名。\n- [[ISD-ADK]] 與 PL 未展開縮寫，需後續來源補證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 2.263352
+         },
+         {
+          "text": "R&S PCB test solutions › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+          },
+          "score": 0.951016
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › 關鍵實體與概念\n- [[R&S ZNB3000]] — Vector Network Analyzer 系列入口，涵蓋 4.5 GHz、20 GHz、32 GHz、43.5 GHz base models 與 frequency upgrade options。\n- [[R&S ZNB3004]] — type N female connector，9 kHz to 4.5 GHz；with [[R&S ZNB3-B082]] / [[R&S ZNB3-B084]] 為 9 kHz to 9.0 GHz。\n- [[R&S ZNB3020]] — 3.5 mm ruggedized male connector，9 kHz to 20.0 GHz；with [[R&S ZNB3-B262]] / [[R&S ZNB3-B264]] 為 9 kHz to 26.5 GHz。\n- [[R&S ZNB3032]] — 2.92 mm ruggedized male connector，9 kHz to 32.0 GHz；with [[R&S ZNB3-B442]] / [[R&S ZNB3-B444]] 為 9 kHz to 43.5 GHz。\n- [[R&S ZNB3044]] — 1.85 mm ruggedized male connector，9 kHz to 43.5 GHz；with [[R&S ZNB3-B542]] / [[R&S ZNB3-B544]] 為 9 kHz to 54.0 GHz。\n- [[Vector Network Analyzer]]、[[Dynamic range]]、[[Measurement bandwidth]]、[[Effective system data]]、[[Noise figure measurement]]、[[mmWave converter support]]、[[Health and utilization monitoring service]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 6.892887
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › 與既有知識的關係\n- 本來源更新既有 [[R&S ZNB3000]] 系列頁面，補齊 extended power range order no.、manual / automatic calibration units、inline calibration units、switch matrices、test cables、hardware add-ons 與讀圖補充。\n- [[R&S ZNB3044]] 可透過 frequency upgrade option 達 54.0 GHz；既有 [[R&S ZNA67]] 依 Version 24.00 達 67 GHz，[[R&S ZNA67EXT]] 依 Version 09.00 達 110 GHz。這是不同產品線與不同文件，不合併。\n- 本來源列出 [[R&S ZNB3-K30]] noise figure measurement、[[R&S ZNB3-K8]] mmWave converter support、[[R&S ZNB3-K980]] HUMS 等功能，與既有 ZNA 系列頁面有功能層面的橫向連結，但 option code 與 order no. 不可互用。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 6.810019
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › 重點摘要\n這份來源是 **R&S®ZNB3000 Vector Network Analyzer Specifications**，文件識別 **PD 3647.5184.22**，**Version 09.00**，日期 **July 2026**，涵蓋 [[R&S ZNB3000]] 系列與 [[R&S ZNB3004]]、[[R&S ZNB3020]]、[[R&S ZNB3032]]、[[R&S ZNB3044]] 四個型號。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 4.911298
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › 原文未解的問題\n- 來源萃取文字中，[[R&S ZNB3032]] dynamic range 小節標題寫作「with or without R&S®ZNB3-B322 / -B324」，但 ordering information 與 frequency range 小節列出 [[R&S ZNB3-B442]] / [[R&S ZNB3-B444]] 才是 ZNB3032 upgrade to 43.5 GHz。暫視為來源萃取或表頭錯位，報價與規格頁以 ordering information 明列代碼為準。\n- 來源萃取文字中，[[R&S ZNB3044]] dynamic range 小節標題寫作「with or without R&S®ZNB3-B442 / -B444」，但 ordering information 與 frequency range 小節列出 [[R&S ZNB3-B542]] / [[R&S ZNB3-B544]] 才是 ZNB3044 upgrade to 54 GHz。暫視為來源萃取或表頭錯位，報價與規格頁以 ordering information 明列代碼為準。\n- Power consumption 表格中有一組 2 ports max. 450 W, 145 W typ. / 4 ports max. 450 W, 200 W typ.，但型號在萃取文字中未清楚對應；本次不自行指派型號。\n- 讀圖 p035 的尺寸圖可見多個數值，但圖上未清楚顯示尺寸單位；不將其覆蓋正文 dimensions。\n- 來源未提供價格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 13,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 4.686413
+         },
+         {
+          "text": "ZNB3000_specs_en_3647-5184-22_v0900 › p006（讀圖）\n- 頁首：Version 09.00, July 2026。\n- 標題：Measurement speed。\n- 條件：Measured with firmware version 4.12 and Windows 11。\n- Measurement sequence 使用 TPREP、TSAMPLE、TPOST、TACO、TSWEEP、TRETRACE、TCYCLE 等時間符號；圖中流程由 Sweep 1 經 TRETRACE 到 Sweep 2。\n- 本頁未標出具體時間數值或單位。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+          },
+          "score": 4.615867
+         },
+         {
+          "text": "R&S ZNB3000 › Dynamic range 條件\n- Receiver noise floor 定義為 transmission magnitude data trace 的 RMS 值，該 trace 由 noise 與 crosstalk 產生，test ports short-circuited。\n- Specifications 適用於 10 Hz measurement bandwidth，without user correction applied。\n- 使用 1 Hz measurement bandwidth 可增加 dynamic range。\n- Crosstalk does not limit dynamic range。\n- Dynamic range performance 規格化於 port 1 與 port 2 之間，以及 4-port model 的 port 3 與 port 4 之間；其他 dynamic range performance 為 typical。\n- Without enhanced dynamic range mode 時，above 100 kHz 的 nominal system dynamic range 會降低 15 dB to 20 dB；below 100 kHz 的影響可能更高。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 7.008169
+         },
+         {
+          "text": "R&S ZNB3000 › 讀圖頁面\n> 以下段落引用的內容來自這幾頁的圖片。模型讀圖沒有信心分數，請以圖片為準。\n\n**p001**\n\n![[ZNB3000_specs_en_3647-5184-22_v0900-p001.png]]\n\n**p006**\n\n![[ZNB3000_specs_en_3647-5184-22_v0900-p006.png]]\n\n**p035**\n\n![[ZNB3000_specs_en_3647-5184-22_v0900-p035.png]]",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 17,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 6.305095
+         },
+         {
+          "text": "R&S ZNB3000 › General data\n- Operating temperature range：+5 °C to +40 °C。\n- Storage temperature range：–20 °C to +60 °C。\n- Damp heat：+40 °C at 95 % relative humidity，符合 IEC 60068-2-30。\n- Altitude：operating max. 2000 m；storage max. 4500 m。\n- Calibration interval：1 year。\n- Power supply：100 V to 240 V ± 10 %，50 Hz to 60 Hz and 400 Hz，max. 3.5 A。\n- Power consumption：[[R&S ZNB3004]] 2 ports max. 450 W / 120 W typ.，4 ports max. 450 W / 170 W typ.；[[R&S ZNB3032]] / [[R&S ZNB3044]] 2 ports max. 450 W / 160 W typ.，4 ports max. 450 W / 230 W typ.。另有一組 2 ports max. 450 W / 145 W typ.、4 ports max. 450 W / 200 W typ.，來源萃取未清楚對應型號。\n- Dimensions：462.5 mm × 239.6 mm × 361.5 mm（W × H × D）。\n- Weight：2-port 14 kg；4-port 16 kg。\n- Shipping weight：2-port 19 kg；4-port 21 kg。\n- Safety：IEC 61010-1、EN 61010-1、UL 61010-1、CAN/CSA-C22.2 No.61010-1。\n- EMC：符合 EMC Directive 2014/30/EU；instrument 適用於 industrial environments。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 14,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 6.235839
+         },
+         {
+          "text": "R&S ZNB3000 › 文件依據\n- 來源：[[ZNB3000_specs_en_3647-5184-22_v0900]]。\n- 文件：R&S®ZNB3000 Vector Network Analyzer Specifications。\n- 文件編號：PD 3647.5184.22。\n- 文件版本：Version 09.00。\n- 發布時間：July 2026。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 5.940012
+         },
+         {
+          "text": "R&S ZNB3000\n[[R&S ZNB3000]] 是 Rohde & Schwarz 的 [[Vector Network Analyzer]] 系列，依 [[ZNB3000_specs_en_3647-5184-22_v0900]] Version 09.00（July 2026）涵蓋 [[R&S ZNB3004]]、[[R&S ZNB3020]]、[[R&S ZNB3032]]、[[R&S ZNB3044]]，base frequency range 從 9 kHz 延伸到 43.5 GHz，搭配 frequency upgrade option 最高到 54.0 GHz。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S ZNB3000.md"
+          },
+          "score": 5.735032
+         },
+         {
+          "text": "High speed SerDes standards › 與既有知識的關係\n- 既有 [[SerDes]] 頁已從 SoC IP 圖卡整理 SATA、LVDS、MIPI D-PHY、HDMI2.1、Ethernet、USB 與 PCI-Express 等介面分類；本頁補入 R&S 2026.3.4 簡報中較廣的 high-speed SerDes standards 清單。\n- [[NVLink]]、[[PCIe]]、[[USB]]、[[HDMI]]、[[DisplayPort]]、[[LVDS]] 等可各自建立技術頁，但本來源不足以提供規格細節。\n- [[UALink]]、[[Ultra Ethernet]] 與 [[OIF CEI-112G]] 在本來源只列名；若後續 ingest 標準文件，應拆到 [[Knowledge]] 類 concept 頁並記錄標準版本與發布組織。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes standards.md"
+          },
+          "score": 3.174446
+         },
+         {
+          "text": "High speed SerDes standards › 來源中的說法\n| 圖上名稱 | 本 vault 連結 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| GMSL | [[GMSL]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本、發布組織、資料率或測試項目 |\n| OIF CEI-112G | [[OIF CEI-112G]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示 OIF 文件版次或 CEI profile |\n| LVDS | [[LVDS]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 來源只重複 LVDS 字樣 |\n| JESD204 | [[JESD204D]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上同列 JESD204 與 JESD204D；未說明是否專指 D 版 |\n| DisplayPort | [[DisplayPort]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |\n| HDMI | [[HDMI]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |\n| MIPI | [[MIPI]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示 D-PHY / C-PHY / M-PHY 等子標準 |\n| USB | [[USB]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示 USB 版本 |\n| ASA | [[ASA]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未展開縮寫 |\n| UALink | [[UALink]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本或發布組織 |\n| PCIE | [[PCIe]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上拼作 PCIE；未標示 generation |\n| NVLink | [[NVLink]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上重複 NVLink 字樣；未標示版本 |\n| UltraEthernet | [[Ultra Ethernet]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本或 organization |\n| Infiniband | [[InfiniBand]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上拼作 Infiniband；未標示速率世代 |\n| SATA | [[SATA]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |\n| SAS | [[SAS]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes standards.md"
+          },
+          "score": 1.971509
+         },
+         {
+          "text": "High speed SerDes standards › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 4 題為 **High speed Serdes standards**，列出下列名稱：",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes standards.md"
+          },
+          "score": 0.844329
+         },
+         {
+          "text": "High speed SerDes standards\n[[High speed SerDes standards]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 4 中列出的高速 SerDes / serial interface standards 與 interface 名稱清單；來源只列名，沒有提供標準版本、發布組織或資料率。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes standards.md"
+          },
+          "score": 0.76287
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽\n[[SerDes 與 SI PI 測試概覽]] 是依 [[0 Digital Test - What are SIPI and Serdes]] 建立的 high-speed digital 測試主題頁，用來連接 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]]、[[PCB]] / [[PCBA]] 與相關驗證儀器類型。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 3.660316
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 可追溯限制\n- 本來源是 lossy markdown derivative，多數圖像未 OCR；不可把未擷取的圖片內容當成已驗證主張。\n- Slide 11 的頁腳日期 **6/13/2025** 與封面日期 **2026.3.4** 並存，未能判定何者是內容日期。\n- 本頁不推論 R&S 具備所有列名儀器或方案，也不把儀器類型轉換成正式 product configuration。\n- 本頁不提供 [[Signal Integrity]]、[[Power Integrity]] 或 [[SerDes]] 的標準定義；只保存來源明示的測試區塊與儀器類型。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 3.436477
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 與既有知識的關係\n- [[SerDes]] 已記錄 die-to-die、SoC IP 與封裝示意圖中的 SerDes 語彙；本頁補充 R&S 簡報中 SerDes 與 SI / PI / validation challenges 的測試場景。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]] 與 [[TDR 阻抗測量]] 可承接 Slide 20–21 中對 high speed PCB / PCBA signal integrity flow 與 PCB test solutions 的列名。\n- [[Power Integrity 外部資料清單]] 保存既有 OneNote link hub 中的 PDN impedance 待讀資料；本頁只加入 Slide 11 明示的 [[Power Distribution Network]] 測試區塊。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 2.318162
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 0.92488
+         },
+         {
+          "text": "High speed SerDes eco-chain › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 6.751693
+         },
+         {
+          "text": "High speed SerDes eco-chain\n[[High speed SerDes eco-chain]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 9 對高速 SerDes 應用產業鏈的三層分類，分為上游基礎材料與核心元件、中游模組整合與生產製造、下游終端應用與市場部署。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 4.713461
+         },
+         {
+          "text": "High speed SerDes eco-chain › 未決事項\n- Slide 9 未標示資料來源、公司選取標準、市場期間、區域範圍或分類依據。\n- Slide 9 未列出光模組 / 光元件、PCB 材、被動元件、封測、系統整合等分類的具體公司。\n- Slide 8 題為 **High speed Serdes eco-chain (Customers)**，但轉檔只擷取到 `HighSpeedSerdesIC`，需回看原始 PPTX 才能確認 customer list。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 10,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 3.902354
+         },
+         {
+          "text": "High speed SerDes eco-chain › 上游 — 基礎材料與核心元件\n- 半導體晶片：控制器晶片、協定芯片、重驅動 / 重定時（Repeater / Re-timer）、介面協議轉換器等，用於 [[HDMI]]、[[USB]]、[[PCIe]]、[[DisplayPort]] 等高速數位介面。\n- 光模組 / 光元件。\n- [[PCB]] 印刷電路板材。\n- 被動元件。\n- 高頻高速連接線材與接頭：同軸 / 雙絞線（twinax）、飛線（Flyover®）、SFP / QSFP 倍率線纜，以及 [[Amphenol]]、[[Molex]]、[[Samtec]]、[[TE]] 提供的背板與板對板連結方案。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 3.686905
+         },
+         {
+          "text": "High speed SerDes eco-chain › 中游 — 模組整合與生產製造\n- 晶片封測製造。\n- 高速連接線材與接頭組裝。\n- 系統級整合：製造通信設備、服務器用的光傳輸設備、交換機、路由器等中間件設備。\n- 電腦與消費性電子裝置整合 [[HDMI]]、[[USB]]、[[PCIe]] 介面等，含各類轉換器、擴充塢、模組等。\n- 高速 PCB 設計：涉及阻抗控制、差分對布局、地平面配置等，確保訊號品質。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+          },
+          "score": 3.486701
+         },
+         {
+          "text": "6G NTN 展望 › 6G NTN use cases\n來源根據 [[TR 22.870]] 與 research projects，列出多類 use cases：\n\n- disaster relief / PPDR enhancement。\n- automotive V2X safety applications。\n- Advanced Air Mobility passenger immersive media。\n- network energy saving with TN / NTN multiple access。\n- reliable data multicast（RDM）。\n- connectivity in space，例如 Moon / Mars exploration。\n- trusted partner model / QKD security key provisioning。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/6G NTN 展望.md"
+          },
+          "score": 3.413371
+         },
+         {
+          "text": "6G NTN 展望 › AI for NTN\n來源將 AI in 6G 分為：\n\n- AI on RAN。\n- AI for RAN。\n- AI and RAN。\n\n對 NTN 最相關的是 AI for RAN，可支援：\n\n- energy management。\n- anti-jamming。\n- traffic forecasting。\n- beam hopping。\n- predictive handover。\n- traffic scheduling。\n- topology-aware learning。\n- channel coefficient prediction。\n- dynamic routing tables。\n- self-healing、load balancing、fraud detection。\n\n但來源明確提醒：AI/ML 可在 feasible regions 內最佳化，不能克服物理限制；例如 speed of light、LEO topology dynamics、Doppler shift 仍存在。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/6G NTN 展望.md"
+          },
+          "score": 3.268971
+         },
+         {
+          "text": "6G NTN 展望 › 3GPP timeline to 6G NTN\n來源說：\n\n- 3GPP 於 2023 年 12 月承諾開發 6G specifications。\n- Rel. 20 預期啟動 6G use cases / service requirements / technology studies。\n- 6G system-level 與 RAN-level technical specifications 預期在 Rel. 21 開始。\n- 6G normative phase 預期持續到 2028 年底。\n- Timeline 與 [[WRC-27]]、[[WRC-31]]、IMT-2030、Olympic games 2028 / 2030 等外部節點對齊。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 12,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/6G NTN 展望.md"
+          },
+          "score": 3.234276
+         },
+         {
+          "text": "6G NTN 展望 › Position, navigation and timing（PNT）\n6G NTN PNT 的方向：\n\n- 降低對 [[GNSS]] 的依賴。\n- 基於 6G TN / NTN connections 進行 position determination。\n- 提供 timing information。\n- 支援 one-way range、one-way Doppler、two-way range、two-way Doppler、TDoA 等 RAT-based satellite PNT methods。\n\n來源將 Rel. 20 [[GNSS free and resilient operation]] 與 6G PNT 區分：前者主要保障 NTN access 的 time / Doppler precompensation；後者更廣泛，目標是 positioning 與 timing service。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/6G NTN 展望.md"
+          },
+          "score": 2.570516
+         },
+         {
+          "text": "6G NTN 展望 › IMT-2030 與 ubiquitous connectivity\n來源指出 [[ITU]] 的 IMT-2030 initiative 將 5G service triangle 擴展為包含：\n\n- enhanced mobile broadband 類增強。\n- ultra reliable low latency / time-sensitive 類服務。\n- massive communication 類服務。\n- AI and communications。\n- [[Integrated sensing and communications]]（[[ISAC]]）。\n- ubiquitous connectivity。\n\nUbiquitous connectivity 要求 6G system from day one 納入 NTN，而不只是 terrestrial network 的 coverage extension。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/6G NTN 展望.md"
+          },
+          "score": 2.484988
+         },
+         {
+          "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 與既有知識的關係\n- 既有 [[CMX-KA098_CMX-KF671B_PanEUNGeCall_TC_Status]] 是 [[R&S CMX500]] 搭配 [[R&S CMX-KA098]] / [[R&S CMX-KF671B]] 的 NGeCall over NR/LTE capability list，狀態含 Dec. 2024、May. 2025 與 June 2025 標註。本來源是新聞稿層級的 certification claim，補充 CMX-KA098 已完成 EN 17240:2024+A1:2026 PSAP test scenarios，但不提供完整 test case list。\n- 既有 [[CMX_Configuration_Guide]] 與 [[CMX500 NGeCall configuration]] 已列 [[R&S CMX-KA099]] 作為 EN18052:2025 hybrid configuration 的 mandatory software item。本來源補充 CMX-KA099 completed PSAP test scenarios according to EN 18052:2025。\n- 既有 [[R&S CMX-KA099]] 只由 configuration guide 確認 material number 與 APPL NGECALL MULTI CELL description；本來源提供其 certification / PSAP scenario context，但仍不是 formal datasheet。\n- 既有 [[NGeCall over LTE]] 頁整理 CMW500 與 CMX500 capability list。本來源將 scope 推進到 EN 17240:2024+A1:2026 與 hybrid eCall / EN 18052:2025 compliance statement。\n- 既有 [[eCall GNSS Testing configuration]] 記錄 SMBV100B-based GNSS configuration；本來源只說 hybrid implementations 需 maintain GNSS positioning，未提供 SMBV100B 或 GNSS test suite 配置。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+          },
+          "score": 3.195343
+         },
+         {
+          "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing\n這份來源是 [[Rohde & Schwarz]] 的新聞稿，說明其以 [[R&S CMX500]] radio communication tester 為基礎的 hybrid eCall 與 [[NGeCall over LTE]] / [[NGeCall over NR-LTE]] 測試方案，通過 [[cetecom advanced]] 執行的 certification testing。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+          },
+          "score": 2.117737
+         },
+         {
+          "text": "cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing › 重點摘要\n- Rohde & Schwarz 公司資訊：2024/2025 fiscal year net revenue EUR 3.16 billion；2025-06-30 employees more than 15,000 worldwide。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+          },
+          "score": 0.231157
+         },
+         {
+          "text": "Dk-Df › 與既有知識的關係\n- [[CCL 產品規格分級]] 已記錄 [[AI Server PCB test image 19]] 中 [[聯茂]] CCL 產品的 [[Df]] 範圍與 M / M2 / M4 / M6 / M7 / M8 分級；該頁是產品分級資料。\n- [[AI Server PCB test image 24]] 補充的是 [[Dk-Df]] 在 [[高頻高速 PCB 測試解決方案]] 中的量測與提取流程；它沒有提供 CCL 型號、Df 數值範圍或 M 等級。\n- [[HSD PCB image 15]] 補充的是 [[DK]] 與 [[Low DK]] 在[[玻纖布]]分級圖卡中的語彙；它沒有提供 Dk / DK 數值、Df 數值、測試頻率或測試標準。\n- [[HSD PCB image 18]] 補充的是市場資訊圖把 [[Low Dk]] / [[Low Df]] 作為 [[E-Glass]] 與 [[T-Glass]] 之間的低損耗材料階梯，並連到 AI/5G 應用；它沒有提供 Dk、Df、損耗、頻率、厚度、樹脂、玻纖布規格或測試標準。\n- [[snla426]] 補充的是 [[PCIe Gen5 high-speed PCB layout]] application note 脈絡下，Df / Dissipation Factor、dielectric loss、εr、fiberglass / epoxy 差異與 material insertion loss 的設計說法。\n- 因 [[AI Server PCB test image 24]]、[[AI Server PCB test image 19]]、[[HSD PCB image 15]]、[[HSD PCB image 18]] 與 [[snla426]] 未提供共同測試條件，本頁不把其 Dk、DK、Df、M 等級或 SDD21 數字直接互相換算。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Dk-Df.md"
+          },
+          "score": 5.942496
+         },
+         {
+          "text": "Dk-Df › 相關來源\n- [[AI Server PCB test image 24]] — 未標示日期的 Keysight 高頻高速 PCB 測試解決方案流程圖。\n- [[AI Server PCB test image 19]] — 未標示日期的 CCL 產品規格分級圖，列出聯茂產品線與 Df 範圍。\n- [[AI Server PCB test image 21]] — 未標示日期的高階 CCL 公司產品比較表，使用 M6 / M7 / M8，但未提供 Df 範圍。\n- [[HSD PCB image 15]] — 來源未標示日期、取得於 2026-09-04 的玻纖布分級圖，使用 DK / Low DK 語彙。\n- [[HSD PCB image 18]] — 來源未標示日期、取得於 2026-09-04 的材料演進階梯圖，使用 Low Dk / Low Df 語彙。\n- [[snla426]] — Texas Instruments application note《High-Speed PCB Layout for PCIe Gen 5》，SNLA426，June 2023。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Dk-Df.md"
+          },
+          "score": 3.298609
+         },
+         {
+          "text": "Dk-Df › Dk/Df\n[[Dk-Df]] 是市場與技術來源中用於描述 [[PCB]] 原材料、基材、層壓板材料、[[玻纖布]]分級或 high-speed transmission line loss 的介電相關語彙；既有來源以 [[Df]] 記錄 [[CCL]] 產品規格分級，[[HSD PCB image 15]] 以 [[DK]] 與 [[Low DK]] 說明玻纖布材質低介電 / 低延遲，[[HSD PCB image 18]] 則把 [[Low Dk]] / [[Low Df]] 作為材料演進階梯中的低損耗層級。[[snla426]] 補入 Texas Instruments 在 [[PCIe Gen5 high-speed PCB layout]] 脈絡中對 Df / Dissipation Factor、dielectric loss、εr 與 material insertion loss 的說法。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Dk-Df.md"
+          },
+          "score": 2.598959
+         },
+         {
+          "text": "OAM insertion loss budget › 未決事項\n- 尚缺 OAM final spec 中 channel loss budget 的正式定義。\n- 尚缺 @28Gbps loss measurement setup 與 allowed connector / board / package contribution breakdown。\n- 尚缺與既有 [[OAM 互連信號損耗]] 市場圖 30 dB budget 的口徑對照。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/OAM insertion loss budget.md"
+          },
+          "score": 3.254244
+         },
+         {
+          "text": "TRI_AMD_RSKR Sharing1 › 關鍵實體與概念\n- [[TRI]] — 來源只提供 TRI case 標題，未展開 TRI 的正式公司 / 組織名稱。\n- [[AMD]]、[[AMD EPYC 9965]] — AMD case 與 socket interconnection test 相關；來源未提供 AMD EPYC 9965 的規格。\n- [[R&S ZNB3044]]、[[R&S OSP320]]、ZNB40、[[R&S ZNA43]]、[[R&S FSWP50]]、[[R&S SMW200A]]、SGS100A — 來源列名的 R&S 儀器或方案線索。\n- [[Keysight ENA]]、Keysight E5052B、VXG — 來源列名的 competitor 產品 / 平台。\n- [[LSmtron]]、[[TeraBit Solutions]]、[[AtaiTec]]、[[Advantest]]、[[Meritech]]、[[Samsung Electronics]]、FormFactor — 來源列名的 customer、partner、competitor-context 或設備供應商線索。\n- [[高速互連 probing 與 de-embedding 測試案例]] — 本來源抽出的測試與 sales case 彙總概念。\n- [[R&S PCB test solutions]]、[[SerDes 與 SI PI 測試概覽]]、[[TDR 阻抗測量]]、[[Dk-Df]]、[[Delta-L]]、[[Insertion Loss]]、[[Return Loss]]、[[Impedance]] — 與 PCB / interconnect test 相關的既有概念。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/TRI_AMD_RSKR Sharing1.md"
+          },
+          "score": 3.663224
+         },
+         {
+          "text": "TRI_AMD_RSKR Sharing1 › 重點摘要\n- Slide 11 success story：Customer 為 [[Samsung Electronics]] Foundry RF/Analog Enablement Group；Products 為 [[R&S FSWP50]]、[[R&S SMW200A]] 44GHz、SGS100A；Competitor 為 Keysight E5052B、VXG；DUT 為 5G SoC including VCO；USP 為 performance fast/precise 與 supports from AE；RSK AE developed and provided automated VCO Tuning S/W；圖上另有 Semi-auto Probe Station from FormFactor。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/TRI_AMD_RSKR Sharing1.md"
+          },
+          "score": 1.533295
+         },
+         {
+          "text": "TRI_AMD_RSKR Sharing1\n[[TRI_AMD_RSKR Sharing1]] 是一份由 `TRI_AMD_RSKR Sharing1.pptx` 轉出的 company confidential case sharing 來源，整理 [[TRI]]、[[AMD]]、[[LSmtron]]、[[Advantest]]、[[Meritech]] 與 [[Samsung Electronics]] 相關的 high-speed interconnect / PCB / VCO 測試案例。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/TRI_AMD_RSKR Sharing1.md"
+          },
+          "score": 1.127759
+         },
+         {
+          "text": "Texas Instruments › 市場來源中的列名\n- [[AI Server PCB test image 79]]（來源未標示日期；取得於 2026-09-04）在「交換機產業鏈情況」圖中，將 TEXAS INSTRUMENTS 與 [[Intel]]、[[Broadcom]] 同列於上游「CPU/PHY芯片」。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Texas Instruments.md"
+          },
+          "score": 0.886855
+         },
+         {
+          "text": "R&S®ZNA\nVECTOR NETWORK ANALYZER",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-f1351a1b7fda64ad",
+            "original_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+            "sha256": "f1351a1b7fda64ad785212c8f7a8d8b142ebc59d7ba52185cda0819016cc0533",
+            "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 22.833339
+         },
+         {
+          "text": "R&S®ZNL\nVECTOR NETWORK ANALYZER",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-9b0b29b71d0a06d2",
+            "original_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+            "sha256": "9b0b29b71d0a06d220ca923e588ced6eceab3b355fca18cedd1f7092c8cb29f0",
+            "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 22.833339
+         },
+         {
+          "text": "Ordering information\nDesignation\nBase units\nVector network analyzer, 2-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 4-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 2-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 4-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 2-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 4-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 2-port 9 kHz to 43.5 GHz (1.85 mm)\nVector network analyzer, 4-port 9 kHz to 43.5 GHz (1.85 mm)\nOptions\nFrequency upgrade",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-eca8f030d797ca58",
+            "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+            "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+            "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+           "section": 596,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 22.8204
+         },
+         {
+          "text": "Network analyzer\nVector signal generator\nBroadband Amplifier",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-4a179a13677acd8f",
+            "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+            "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+           "section": 177,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 22.268578
+         }
+        ],
+        "text": "### 建議主軸\n【推論】可把 Automotive 的 ADAS / V2X「高速訊號傳輸」需求，轉成 PCB / SerDes channel 的 insertion loss、return loss、impedance 等量測項目，再要求 VNA 具備足夠頻率範圍、dynamic range、measurement bandwidth、probing / de-embedding 對接能力；此串接來自車用高速訊號需求、PCB/SI量測流程、以及 VNA 測試案例與規格的分別證據，不是知識庫已直接宣稱的 automotive VNA solution。[22][39][47][52][56]\n### 推薦先賣\n知識庫未證實有任何 R&S VNA 被直接指定為 Automotive ADAS / V2X、GMSL 或 ASA 的正式測試方案；High speed SerDes standards 只列出 GMSL、ASA 等名稱，未標示版本、資料率或測試項目，R&S PCB test solutions 也未提供正式產品型號、option code、測試頻率、標準、fixture 或 calibration method。[69][56]\n可先賣「高速 PCB / SerDes channel SI 量測」能力，而不是直接宣稱「車用認證測試」能力；車用領域的 ADAS 與 V2X 需要高速訊號傳輸，PCB test solutions 明示的量測項目包含 IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram、TDR 與 Delta-L 等。[22][55]\n### Chain map：Automotive requirement → measurable parameter → VNA capability\n| 層級 | 可確認內容 | 對應下一層 | 證據 |\n|---|---|---|---|\n| Automotive market requirement | 消費電子與車用領域中，汽車上的 ADAS 與 V2X 通訊需要高速訊號傳輸。[22] | 高速訊號傳輸需要檢查 transmission channel / PCB / connector 的 signal integrity，但知識庫未直接把 ADAS / V2X 與特定 VNA 產品相連。[19][56] | [22][19][56] |\n| Technical measurement need | 高速電性介面的 validation challenges 包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package 等路徑；Signal integrity flow 列出 IL / Xtalk / Eye diagram、TDR Impedance、Stackup Planner、TL Calculator。[19] | 可量測參數包括 insertion loss、crosstalk、eye diagram、TDR impedance 等。[19] | [19] |\n| PCB / material measurable parameters | R&S PCB test solutions 在 Material Measurement 階段列出 Impedance (TDR)、DK/DF extraction；在 Material/Stackup selection 階段列出 IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram；在 Sampling testing 階段列出 IL、DK/DF、impedance。[55] | VNA 需要能支援 impedance、insertion loss / return loss 等 PCB / interconnect 量測情境，並能配合 probing、mount-kit 與 de-embedding tool。[39] | [55][39] |\n| VNA case linkage | TRI_AMD_RSKR Sharing1 的 ongoing projects 把 Bare Board for SoCs 的 application 寫成 PCB test with probing，包含 impedance、insertion loss、return loss；offered solution 為 ZNB40、probe、mount-kit、de-embedding tool，並列出 Meritech（PCB manufacturer, ZNA43）。[39] | VNA 所需能力至少包括 PCB probing 對接、de-embedding、impedance / insertion loss / return loss 量測工作流；但 ZNB40 未對應到正式 R&S 型號頁，且來源未標示完整量測條件。[39][38] | [39][38] |\n| VNA required capability — frequency coverage | R&S ZNA 系列涵蓋 ZNA26、ZNA43、ZNA50、ZNA67，頻率範圍從 10 MHz 延伸到最高 67 GHz；ZNA43 為 10 MHz to 43.5 GHz，ZNA67 為 10 MHz to 67 GHz。[47] | 若量測對象需要更高頻率的 PCB / interconnect S-parameter 掃頻，VNA 頻率範圍需覆蓋對應測試頻段；知識庫未提供 automotive GMSL / ASA 的測試頻率需求。[47][69] | [47][69] |\n| VNA required capability — dynamic range / sensitivity | R&S ZNA key performance 包含 dynamic range >129 dB specification without options、147 dB typical with options、maximum attainable range up to 170 dB allowing full 2-port correction，以及 sensitivity > –120 dBm at 1 Hz IF bandwidth specification without options。[47] | insertion loss / return loss 等通道量測需要足夠 dynamic range 與 sensitivity；此為由量測項目與產品規格對接的需求，不是 automotive 規格書直接要求。[39][47] | [39][47] |\n| VNA required capability — bandwidth / speed | R&S ZNA base unit measurement bandwidth 為 1 Hz to 1.5 MHz，搭配 R&S ZNA-K17 increased IF bandwidth 30 MHz option 時為 1 Hz to 30 MHz；速度例為 10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。[47] | 若場景是 sampling testing 或 process monitoring，VNA 的 measurement bandwidth 與 sweep speed 會影響量測吞吐，但 R&S PCB test solutions 未提供抽樣頻率、樣本數或允收條件。[47][7] | [47][7] |\n| VNA required capability — de-embedding / fixtures | TRI_AMD_RSKR Sharing1 的 LSmtron board-to-board connector case 將 total solution 寫成包含 probe、mount-kit、de-embedding tool；ongoing Bare Board for SoCs case 也把 offered solution 寫成 ZNB40、probe、mount-kit、de-embedding tool。[39] | 對 board-to-board connector、bare board、socket / transmission line 類 DUT，VNA solution 需要與 probing、mount-kit、de-embedding tool 一起規劃；但來源未提供 fixture、calibration、de-embedding 方法或 DUT 條件。[39][38] | [39][38] |\n### 產品與 Option 對接表\n| 產品線 | 可接軌的需求 | 知識庫確認的 option / 規格 | 為什麼適合 | 證據 | 缺口 / 報價風險 |\n|---|---|---|---|---|---|\n| R&S ZNA | 可接軌 high-speed PCB / interconnect 的 insertion loss、return loss、impedance 等 VNA 量測需求，但知識庫未直接證實其為 Automotive ADAS / V2X 測試方案。[39][56] | ZNA26 / ZNA43 / ZNA50 / ZNA67 頻率範圍最高到 67 GHz；base measurement bandwidth 1 Hz to 1.5 MHz，搭配 R&S ZNA-K17 為 1 Hz to 30 MHz；dynamic range >129 dB specification without options，147 dB typical with options，maximum attainable range up to 170 dB allowing full 2-port correction。[47][52] | 已有高頻範圍、dynamic range、measurement bandwidth 與 deembedding / time domain analysis 等 VNA 概念可對接高速互連量測工作流。[45][47][52] | [39][45][47][52][56] | 知識庫未提供 automotive 標準版本、GMSL / ASA 資料率、測試頻率、fixture、calibration method 或正式 automotive VNA configuration。[69][56] |\n| R&S ZNB3000 | 可接軌較低到中高頻的 impedance / S-parameter 類 VNA 量測需求，但知識庫未直接證實其為 Automotive ADAS / V2X 測試方案。[11][67] | R&S ZNB3000 base frequency range 從 9 kHz 延伸到 43.5 GHz，搭配 frequency upgrade option 最高到 54.0 GHz；measurement range 為 impedance 50 Ω、frequency resolution 1 Hz、每 trace 1 to 100001 points；base measurement bandwidth 1 Hz to 1 MHz，搭配 R&S ZNB3-K17 為 1 Hz to 10 MHz。[11][67] | 可提供 50 Ω impedance 量測脈絡、頻率解析度、多點數與最高 54.0 GHz 的 VNA 覆蓋，但與 automotive 需求的直接對接未被來源證實。[11][67][56] | [11][67][56] | 知識庫未提供 automotive 專用 option、GMSL / ASA compliance test、fixture、calibration method、測試頻率或 pass/fail criteria。[69][56] |\n| ZNB40 / ZNA43 case-sharing context | 來源中的 Bare Board for SoCs ongoing projects 明示 application 是 PCB test with probing，包含 impedance、insertion loss、return loss；customer 欄列 Advantest（ATS, ZVA67）與 Meritech（PCB manufacturer, ZNA43）。[39] | Offered solution 明示 ZNB40、probe、mount-kit、de-embedding tool；但 ZNB40 未對應到既有正式 R&S 型號頁。[39][38] | 這是知識庫中最直接把 VNA、probing、de-embedding 與 impedance / insertion loss / return loss 串在一起的案例，但不是 automotive market linkage。[39][38] | [39][38] | Slide 8 的 ZNB40 未對應到既有正式 R&S 型號頁，Slide 5 的 67 GHz stability claim 未標示儀器組合、extender、probe、calibration、de-embedding、fixture 或 DUT 條件。[38] |\n### 場景切入建議\n| 場景 | 推薦組合 | 切入重點 | 未驗證事項 |\n|---|---|---|---|\n| Automotive ADAS / V2X 高速訊號傳輸 | 知識庫未證實特定 VNA 組合；可先以高速 PCB / SerDes channel SI 量測需求盤點為前置。[22][56] | 從 ADAS / V2X 需要高速訊號傳輸切入，再盤點 IL、Xtalk、Eye diagram、TDR impedance、DK/DF、roughness、impedance 等量測項目。[22][19][55] | GMSL、ASA 只在 High speed SerDes standards 清單中列名，未標示版本、資料率或測試項目。[69] |\n| PCB / PCBA signal integrity flow | R&S PCB test solutions 的流程可對應 Material Measurement、Material/Stackup selection、Signal Integrity modeling/testing、Sampling testing、PL / Process Monitoring。[7][55] | 量測項目包含 Impedance (TDR)、DK/DF extraction、IL、roughness、Xtalk、TL modeling、Eye diagram 等。[55] | Slide 21 未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。[56] |\n| Bare board / connector / probing interconnect | 來源中的 offered solution 為 ZNB40、probe、mount-kit、de-embedding tool；同一 ongoing projects 表中也列 Meritech（PCB manufacturer, ZNA43）。[39] | 切入 impedance、insertion loss、return loss 與 probing / de-embedding workflow。[39] | ZNB40 未對應到正式 R&S 型號頁，且來源未提供完整 cable / port / fixture 連線與測試條件。[38] |\n| 高頻 VNA 規格盤點 | R&S ZNA 可盤點 ZNA43 10 MHz to 43.5 GHz、ZNA67 10 MHz to 67 GHz、dynamic range、measurement bandwidth 與 K17 increased IF bandwidth 30 MHz option。[47][52] | 若 DUT 的通道損耗或 return loss 量測需要更高頻率或較大 dynamic range，可用 ZNA 規格作為能力盤點項目。[47][52] | 知識庫未提供 automotive ADAS / V2X 對應的測試頻率、loss mask、return loss mask 或 compliance procedure。[69][56] |\n### 限制\n知識庫沒有直接證據把 Automotive ADAS / V2X market requirement、具體 measurable parameter、以及特定 R&S VNA 型號 / option 串成正式產品推薦或 compliance solution。[22][56][69]\nR&S PCB test solutions 來源未提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method，因此不能把其流程圖解讀為完整採購配置。[56]\nHigh speed SerDes standards 來源只列出 GMSL、ASA 等名稱，未提供標準版本、發布組織、資料率、lane 數、channel model、compliance 測試或 fixture 要求。[17][69]\nTRI_AMD_RSKR Sharing1 的 ZNB40 / ZNA43 內容是 case-sharing / ongoing projects 脈絡，且 ZNB40 未對應到既有正式 R&S 型號頁，不能直接當成正式 datasheet 或 automotive solution。[38][39]",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+         },
+         "score": 9.742703
+        },
+        {
+         "text": "ZNB3000_specs_en_3647-5184-22_v0900 › 重點摘要\n- Product data 適用條件：ambient temperature 儲存 3 小時後 warm-up operation 30 分鐘、符合 specified environmental conditions、遵守 recommended calibration interval，且已執行所有 applicable internal automatic adjustments。\n- 所有 specification data 在 **+18 °C to +28 °C** 有效；measurement accuracy 另要求 calibration 後 temperature variation 不得超過 **1 °C**，且 measurement 與 calibration 的 frequency points、measurement bandwidth、sweep time 必須相同，不允許 interpolation。\n- Measurement range：impedance 50 Ω；frequency resolution 1 Hz；number of measurement points per trace 1 to 100001。\n- Measurement bandwidth：base unit **1 Hz to 1 MHz**；搭配 [[R&S ZNB3-K17]] 10 MHz receiver bandwidth option 時為 **1 Hz to 10 MHz**。\n- 型號與頻率範圍：[[R&S ZNB3004]] 為 9 kHz to 4.5 GHz，搭配 [[R&S ZNB3-B082]] 或 [[R&S ZNB3-B084]] 可到 9.0 GHz；[[R&S ZNB3020]] 為 9 kHz to 20.0 GHz，搭配 [[R&S ZNB3-B262]] 或 [[R&S ZNB3-B264]] 可到 26.5 GHz；[[R&S ZNB3032]] 為 9 kHz to 32.0 GHz，搭配 [[R&S ZNB3-B442]] 或 [[R&S ZNB3-B444]] 可到 43.5 GHz；[[R&S ZNB3044]] 為 9 kHz to 43.5 GHz，搭配 [[R&S ZNB3-B542]] 或 [[R&S ZNB3-B544]] 可到 54.0 GHz。\n- Dynamic range 規格以 10 Hz measurement bandwidth、without user correction applied 為條件；使用 1 Hz measurement bandwidth 可增加 dynamic range；crosstalk does not limit dynamic range。\n- Measurement speed 以 firmware version 4.12 與 Windows 11 測得；來源註明 sweep time 應理解為 cycle time。\n- General data：operating temperature +5 °C to +40 °C；storage temperature –20 °C to +60 °C；calibration interval 1 year；power supply 100 V to 240 V ±10 %，50 Hz to 60 Hz and 400 Hz，max. 3.5 A。\n- Ordering information 列出 base units、frequency upgrade options、extended power range、receiver step attenuators、extended dynamic range、hardware options、software / measurement options、calibration accessories、power sensors、attenuators、switch matrices、test cables、hardware add-ons、warranty and service options。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+         },
+         "score": 8.756078
+        },
+        {
+         "text": "High speed SerDes standards › 未決事項\n- Slide 4 未提供各 standards 的版本、組織、年份、資料率、lane 數、channel model、compliance 測試或 fixture 要求。\n- [[ASA]] 在本來源未展開縮寫。\n- [[JESD204]] 與 [[JESD204D]] 的關係需回看原圖或另補正式標準來源。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 7,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/High speed SerDes standards.md"
+         },
+         "score": 7.044449
+        },
+        {
+         "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+         },
+         "score": 10.535771
+        },
+        {
+         "text": "High speed SerDes eco-chain › 下游 — 終端應用與市場部署\n- 通訊設備製造商：核心網、5G 基站、光傳輸設備、交換機、路由器等。\n- 服務器與資料中心：協助 AI、高效能計算環境部署，需求高速內部連與介面連接。\n- 網通基礎建設與雲端應用：包含物聯網、雲計算與邊緣運算等場域皆需高速數據傳輸與處理能力。\n- 消費電子與車用領域：筆電 / 手機等需 [[HDMI]]、[[DisplayPort]]、[[USB]] 介面，汽車上的 [[ADAS]] 與 [[V2X]] 通訊亦需高速訊號傳輸。\n- 工業與智慧製造：工業自動化系統、高速資料擷取與辨識也仰賴高速訊號鏈路。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+         },
+         "score": 21.227599
+        },
+        {
+         "text": "TRI_AMD_RSKR Sharing1 › 原文未解的問題\n- 來源未標示正式發布日期、簡報版次、作者、發布對象或完整 RSKR / TRI 展開名稱。\n- Slide 2 圖像未 OCR 出完整 cable / port / fixture 連線，無法確認兩台 ZNB3044、OSP320、flying probe module 與 interposer board 的完整拓撲。\n- Slide 3 的 `< 5` 未標示指標名稱、單位與測試條件。\n- Slide 5 的 67 GHz stability claim 未標示儀器組合、extender、probe、calibration、de-embedding、fixture 或 DUT 條件；不可當成 ZNB3044 standalone specification。\n- Slide 7 僅明示 AMD EPYC 9965；socket interconnection test 的 socket 型號、signal standard、data rate、frequency sweep 與量測項目未標示。\n- Slide 8 的 ZNB40 未對應到既有正式 R&S 型號頁；是否為 ZNB40 / ZNB 40 GHz variant 需後續來源補證。\n- Slide 9 的 ATS、ZVA67、ZNA43 欄位可能分別指既有 equipment 或 customer-owned instruments，但來源未明確分層。\n- Slide 11 的 SGS100A 未對應既有頁；可能需確認是否為 [[R&S SGT100A]] 或其他型號，不能自行更正。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/TRI_AMD_RSKR Sharing1.md"
+         },
+         "score": 11.473818
+        },
+        {
+         "text": "TRI_AMD_RSKR Sharing1 › 重點摘要\n- 來源正式發布日期未標示；raw frontmatter 僅標示 converted: 2026-09-18。Slide 8 頁尾另有 28/04/2020，應視為該 success story slide 的日期線索，不可套用到整份簡報。\n- Slide 2 的 TRI case 題為 Test environment，圖中文字列出 4-port VNA [[R&S ZNB3044]]、[[R&S OSP320]]、DUT、flying probe module、interposer board，並寫明 ATE test scenario 是 dual-side capacity：test sides A and B 各量測 two DUTs，在 single inline measurement cycle 完成 full 4-DUT sequence。\n- Slide 3 的 TRI case 題為 Test Result and capabilities，只能辨識 `< 5`，但來源未標示指標名稱、單位、測試條件或 pass/fail 門檻。\n- Slide 4–5 的 AMD case 題為 Optimization for validation / Test result and stability proof。文字指出 default setup 在 40 GHz 以上 severe noise and uncertainty dominate the signal；optimized setup 則 complete signal stability unlocked up to 67 GHz；100 cycles continuous measurements 的 SDD12 distribution contained within +/- 3σ at 18.75 GHz。\n- Slide 7 backup 題為 Socket – socket interconnection test，明示 [[AMD EPYC 9965]]，但圖片細節未 OCR，未提供 socket、interposer、fixture 或量測規格。\n- Slide 8 的 key success story：Country / Region RSK；Customer 為 [[LSmtron]]，括號說明 manufacturer of FPCB and connector；Products 為 ZNB40；Competitor 為 [[Keysight ENA]]；Strength 是 total solution including probe, mount-kit, and de-embedding tool with local partner [[TeraBit Solutions]]，其為 [[AtaiTec]] 在 Korea 的 agency；DUT 為 Board to Board Connector。\n- Slide 9 ongoing projects：Project 為 Bare Board for SoCs；Customer 欄列 [[Advantest]]（ATS, ZVA67）與 [[Meritech]]（PCB manufacturer, ZNA43）；Application 是 PCB test with probing，包含 impedance、insertion loss、return loss；Offered solution 是 ZNB40、probe、mount-kit、de-embedding tool；What does it take to win: Partners。\n- Slide 10 sales strategy：目標 customer group 覆蓋 ICR、WIC、ADT、AUT；industry 為 Bare board for SoCs (RFIC)；fit 為 VNAs；companies 為 suppliers of Samsung Electronics；comments 為 evaluation of socket and transmission line。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/TRI_AMD_RSKR Sharing1.md"
+         },
+         "score": 5.254662
+        },
+        {
+         "text": "ZNA_specs_en_5215-4652-22_v2400 › 關鍵實體與概念\n- [[R&S ZNA]] — Vector Network Analyzer 系列，涵蓋 26.5 GHz、43.5 GHz、50 GHz、67 GHz 型號。\n- [[R&S ZNA26]] — 26.5 GHz 型號，3.5 mm ruggedized male connector。\n- [[R&S ZNA43]] — 43.5 GHz 型號，2.92 mm 或 2.4 mm ruggedized male connector。\n- [[R&S ZNA50]] — 50 GHz 型號，2.4 mm ruggedized male connector。\n- [[R&S ZNA67]] — 67 GHz 型號，1.85 mm ruggedized male connector。\n- [[Vector Network Analyzer]]、[[Dynamic range]]、[[Measurement bandwidth]]、[[Direct source and receiver access]]、[[Noise figure measurement]]、[[mmWave converter support]]、[[Phase-coherent source control]]、[[Health and utilization monitoring service]]、[[Time domain analysis]]、[[Deembedding]]。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 4,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+         },
+         "score": 5.853762
+        },
+        {
+         "text": "ZNA_specs_en_5215-4652-22_v2400 › 重點摘要\n- 型號頻率範圍：\n  - [[R&S ZNA26]]：10 MHz to 26.5 GHz。\n  - [[R&S ZNA43]]：10 MHz to 43.5 GHz，可為 2.92 mm 或 2.4 mm ruggedized male test port connector。\n  - [[R&S ZNA50]]：10 MHz to 50 GHz。\n  - [[R&S ZNA67]]：10 MHz to 67 GHz。\n- 各型號提供 2 ports 或 4 ports base unit；test port impedance 為 50 Ω，DC block 為 standard。\n- Key performance 包含：dynamic range > 129 dB specification without options、147 dB typical with options、maximum attainable range up to 170 dB allowing full 2-port correction；sensitivity > –120 dBm at 1 Hz IF bandwidth specification without options，並有 –162 dBm measured with options（1 kHz measurement bandwidth normalized to 1 Hz）。\n- Measurement bandwidth：base unit 1 Hz to 1.5 MHz；搭配 [[R&S ZNA-K17]] increased IF bandwidth 30 MHz option 時為 1 Hz to 30 MHz。\n- Measurement speed 條件包含 firmware version 3.20、Windows 11 (64 bit)；例：10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。\n- 4-port instruments：最多 4 sources，independently configurable、phase coherent、phase controlled；另有第 5 source 可作為 LO supply；每 port 有 2 true receivers，4-port model 總計 8 true receivers，無 multiplexing。\n- 2-port instruments：最多 2 sources，independently configurable、phase coherent、phase controlled；另有第 3 source 可作為 LO supply；每 port 有 2 true receivers，2-port model 總計 4 true receivers，無 multiplexing。\n- Optional rear panel LO out 可支援 mmWave converters；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters，無需 external signal generator；rear panel LO out typ. +25 dBm，最高 26.5 GHz。\n- [[R&S ZNA-K28]] continuous data recording 支援 infinite data point capture、circular buffer，並可透過 LAN 或 USB 連續資料傳輸。\n- [[R&S ZNA-B26]] direct IF access：IF input 可用於 mmWave converter 與 antenna measurement systems，bandwidth 1 GHz；IF output up to 2 GHz bandwidth 可用於 external pulse analysis。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+         },
+         "score": 4.658948
+        },
+        {
+         "text": "R&S ZNA › Key performance（Version 24.00）\n- Dynamic range：> 129 dB specification without options；147 dB typical with options；maximum attainable range up to 170 dB allowing full 2-port correction。\n- Sensitivity：> –120 dBm，1 Hz IF bandwidth，specification without options；–162 dBm，1 Hz IF bandwidth，measured with options。來源註明 –162 dBm 是以 1 kHz measurement bandwidth 量測後 normalized to 1 Hz。\n- Power sweep range：100 dB typical continuous electronic sweep range；可使用 mechanical step attenuators 位移 sweep range。\n- Source power linearity：0.2 dB typical，範圍 –40 dBm to +10 dBm。\n- Receiver compression：0.05 dB typical，up to +8 dBm at test port，referenced to –10 dBm。\n- Trace noise：0.005 dB specification RMS、0.002 dB typical RMS，條件為 10 GHz、100 kHz measurement bandwidth、0 dB reflection。\n- Speed example：10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 4,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S ZNA.md"
+         },
+         "score": 4.84999
+        },
+        {
+         "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+         },
+         "score": 2.354196
+        },
+        {
+         "text": "R&S PCB test solutions › 可追溯限制\n- 本來源沒有提供正式 R&S 產品型號、option code、license、測試頻率、測試標準、fixture 或 calibration method。\n- 本頁不把 Slide 21 的圖上列名解讀為正式解決方案型錄或完整採購配置。\n- [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]] 的角色未明，僅保留圖上列名。\n- [[ISD-ADK]] 與 PL 未展開縮寫，需後續來源補證。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 6,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+         },
+         "score": 2.263352
+        },
+        {
+         "text": "R&S ZNB3000\n[[R&S ZNB3000]] 是 Rohde & Schwarz 的 [[Vector Network Analyzer]] 系列，依 [[ZNB3000_specs_en_3647-5184-22_v0900]] Version 09.00（July 2026）涵蓋 [[R&S ZNB3004]]、[[R&S ZNB3020]]、[[R&S ZNB3032]]、[[R&S ZNB3044]]，base frequency range 從 9 kHz 延伸到 43.5 GHz，搭配 frequency upgrade option 最高到 54.0 GHz。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/entities/R&S ZNB3000.md"
+         },
+         "score": 5.735032
+        },
+        {
+         "text": "High speed SerDes standards › 來源中的說法\n| 圖上名稱 | 本 vault 連結 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| GMSL | [[GMSL]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本、發布組織、資料率或測試項目 |\n| OIF CEI-112G | [[OIF CEI-112G]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示 OIF 文件版次或 CEI profile |\n| LVDS | [[LVDS]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 來源只重複 LVDS 字樣 |\n| JESD204 | [[JESD204D]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上同列 JESD204 與 JESD204D；未說明是否專指 D 版 |\n| DisplayPort | [[DisplayPort]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |\n| HDMI | [[HDMI]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |\n| MIPI | [[MIPI]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示 D-PHY / C-PHY / M-PHY 等子標準 |\n| USB | [[USB]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示 USB 版本 |\n| ASA | [[ASA]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未展開縮寫 |\n| UALink | [[UALink]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本或發布組織 |\n| PCIE | [[PCIe]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上拼作 PCIE；未標示 generation |\n| NVLink | [[NVLink]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上重複 NVLink 字樣；未標示版本 |\n| UltraEthernet | [[Ultra Ethernet]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本或 organization |\n| Infiniband | [[InfiniBand]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 圖上拼作 Infiniband；未標示速率世代 |\n| SATA | [[SATA]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |\n| SAS | [[SAS]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未標示版本 |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/High speed SerDes standards.md"
+         },
+         "score": 1.971509
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [
+         {
+          "name": "market_segment",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 6,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 6,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/sources/cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/Dk-Df.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/concepts/R&S PCB test solutions.md",
+         "raw_refs": [
+          "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md",
+         "raw_refs": [
+          "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/High speed SerDes standards.md",
+         "raw_refs": [
+          "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+         "raw_refs": [
+          "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/High speed SerDes eco-chain.md",
+         "raw_refs": [
+          "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/TRI_AMD_RSKR Sharing1.md",
+         "raw_refs": [
+          "raw/Market/OneNote/TRI_AMD_RSKR Sharing1.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md",
+         "raw_refs": [
+          "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S ZNA.md",
+         "raw_refs": [
+          "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/entities/R&S ZNB3000.md",
+         "raw_refs": [
+          "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-1fd584a23abd4b17a3a5c68eff3d7ad3",
+      "task_sha256": "7cb9d836b7e24112990940eb1d7e91dc84eaa857d29acd2d301a6e3a91190f8a",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.12.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "validated",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validated",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "passed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": null
+    },
+    "evidence": {
+     "raw_citations": 14,
+     "facet_status": "covered",
+     "missing_facets": [],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {
+      "market_segment": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

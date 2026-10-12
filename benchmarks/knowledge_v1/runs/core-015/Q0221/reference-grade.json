@@ -1,0 +1,67 @@
+{
+ "id": "Q0221",
+ "grader": "1.2",
+ "coverage": 0.375,
+ "points": [
+  {
+   "n": 1,
+   "point": "Aerospace / Defense 市場需求：在不修改 DUT 的前提下，讓 deployed private 5G 連線對 smart jamming 更有韌性（tactical edge、軍事基地 private 5G、secure C2 等 driver）",
+   "verified": true,
+   "label": "covered",
+   "why": "states unmodified DUT/private 5G resilience under smart jamming/contested spectrum"
+  },
+  {
+   "n": 2,
+   "point": "此需求出自 R&S Aerospace & Defense Test 的業務脈絡（簡報封面列名 Business Development Manager, Aerospace & Defense Test）",
+   "verified": true,
+   "label": "missing",
+   "why": "does not identify the R&S Aerospace & Defense Test business-development source/context"
+  },
+  {
+   "n": 3,
+   "point": "可量測參數：RRC reconfiguration 造成的 UE data interruption gap 被定義為 HO interruption interval",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions HO interruption interval but not the RRC reconfiguration UE data interruption gap definition"
+  },
+  {
+   "n": 4,
+   "point": "量測結果門檻：最差情境（每秒跳頻、target cell 未預先啟用）下 data interruptions 在 99% 時間低於 75 ms",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions 1 s hopping and 99%/75 ms-style results, but not clearly the worst case with late target activation"
+  },
+  {
+   "n": 5,
+   "point": "該參數對應到 mission-critical 需求判準：3GPP 5QI 的 mission-critical push-to-talk voice 75 ms at 99% reliability",
+   "verified": true,
+   "label": "missing",
+   "why": "no 3GPP 5QI mission-critical push-to-talk 75 ms at 99% reliability criterion"
+  },
+  {
+   "n": 6,
+   "point": "signaling tester 必要能力（硬體面）：CMX500 作為 5G network emulator，需 two NR FR1 RF units、four RF ports、up to eight cells，並同時部署 n41 / n78 / n79 三個 5G SA cells",
+   "verified": true,
+   "label": "covered",
+   "why": "gives CMX500, two NR FR1 RF units, four RF ports, up to eight cells, n41/n78/n79 SA cells"
+  },
+  {
+   "n": 7,
+   "point": "signaling tester 必要能力（signaling 面）：須能在 UE 沒有 target cell RSRP measurements 的情況下強制執行 handover（late / dynamic target cell activation）",
+   "verified": true,
+   "label": "missing",
+   "why": "does not state forced handover without target cell RSRP measurements / late dynamic target activation"
+  },
+  {
+   "n": 8,
+   "point": "航太（衛星）側平行鏈條：NTN space-to-ground effects（Doppler、delay、scattering）要求 tester 區分 propagation emulation 與 fading；eco-chain mapping 把 UT 的 NB-NTN / NR-NTN 需求對應到 CMX500 與 CMP180",
+   "verified": true,
+   "label": "missing",
+   "why": "does not cover NTN Doppler/delay/scattering, propagation-vs-fading distinction, or NB/NR-NTN mapping to CMX500/CMP180"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "Smart jammer ... 發射 noise"
+ ]
+}

@@ -1,0 +1,65 @@
+{
+ "id": "Q1061",
+ "grader": "1.2",
+ "coverage": 0.438,
+ "points": [
+  {
+   "n": 1,
+   "point": "Non-signaling mode means RF measurements are executed without a signaling connection, and is used in production to save test time",
+   "verified": true,
+   "label": "covered",
+   "why": "defines RF testing without signaling/protocol operation and says production uses it to save time"
+  },
+  {
+   "n": 2,
+   "point": "R&S CMP180 is positioned as the production-phase non-signaling RF measurement tester, covering cellular and non-cellular technologies",
+   "verified": true,
+   "label": "partial",
+   "why": "positions CMP180 for production non-signaling RF testing, but only in Wi-Fi 7 context and not as covering cellular and non-cellular technologies"
+  },
+  {
+   "n": 3,
+   "point": "CMP200 plus CMPHEAD30/CMPHEAD50 RRH form the 5G NR FR2 (mmWave) nonsignaling one-box test solution for RF parametric testing in R&D and manufacturing",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention CMP200, CMPHEAD30/CMPHEAD50, FR2/mmWave, or one-box nonsignaling solution"
+  },
+  {
+   "n": 4,
+   "point": "Non-signaling RF is listed as a distinct test type in the 5G device testing value chain, with production/manufacturing mapped to CMP180 / CMP200 / CMW100 while signaling is mapped to CMX500 / CMW500",
+   "verified": true,
+   "label": "partial",
+   "why": "states Non-signaling RF is distinct from Signaling Protocol, but lacks the CMP180/CMP200/CMW100 versus CMX500/CMW500 value-chain mapping"
+  },
+  {
+   "n": 5,
+   "point": "Whether the customer needs non-signaling ATE / multi-port production test or factory-line non-signaling capability is an explicit qualification question driving platform choice",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions multi-port production and platform choice generally, but not explicit qualification questions about non-signaling ATE or factory-line capability"
+  },
+  {
+   "n": 6,
+   "point": "Non-signaling RX/PER measurement capability on CMP180 is option-gated (e.g. CMP-KM365 for WLAN nonsignaling PER), so option selection depends on understanding the mode",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention CMP180 non-signaling RX/PER option gating such as CMP-KM365"
+  },
+  {
+   "n": 7,
+   "point": "CMX500 itself has non-signaling use cases (GPRF generator with ARB/CW/dual tone/.wv replay) alongside its signaling role",
+   "verified": true,
+   "label": "covered",
+   "why": "describes CMX500 GPRF Generator as a non-signaling use case with ARB, CW, dual tone, and .wv replay"
+  },
+  {
+   "n": 8,
+   "point": "The non-signaling GPRF generator licensing claim must be separated from technology-specific ARB licensing, which requires KWxxx licences",
+   "verified": true,
+   "label": "missing",
+   "why": "does not separate the no-license GPRF generator claim from technology-specific ARB KWxxx licensing"
+  }
+ ],
+ "contradicted": 0,
+ "invented": []
+}

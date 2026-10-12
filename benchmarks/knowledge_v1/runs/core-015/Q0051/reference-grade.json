@@ -1,0 +1,53 @@
+{
+ "id": "Q0051",
+ "grader": "1.2",
+ "coverage": 0.583,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's signal integrity capability list is a high-speed PCB/PCBA flow: IL / Xtalk / eye diagram, TDR impedance, Stackup Planner, TL Calculator — not a wireless-application list.",
+   "verified": true,
+   "label": "covered",
+   "why": "states high-speed PCB/PCBA SI flow with IL/Xtalk/eye, TDR impedance, Stackup Planner, TL Calculator, and notes no Wireless ranking"
+  },
+  {
+   "n": 2,
+   "point": "Signal Integrity is positioned in the Digital / high-speed digital test context, with RF as a separate target category, so the Vault does not frame SI as a wireless-communication capability area.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions high-speed digital/power context and lack of Wireless capability list, but not the RF-as-separate-target framing"
+  },
+  {
+   "n": 3,
+   "point": "In the R&S PCB test solutions flow, Signal Integrity modeling/testing is defined as IL, DK/DF, roughness and impedance.",
+   "verified": true,
+   "label": "covered",
+   "why": "explicitly lists Signal Integrity modeling/testing as IL, DK/DF, roughness, impedance"
+  },
+  {
+   "n": 4,
+   "point": "The only wireless-infrastructure SI reference is O-RU / Open RAN testing, where \"Timing / Sync / Signal Integrity\" is listed as one key test focus area.",
+   "verified": true,
+   "label": "covered",
+   "why": "states the Wireless-related raw source only explicitly has “Timing / Sync / Signal Integrity” and cites O-RU source"
+  },
+  {
+   "n": 5,
+   "point": "In the Jio mmWave (Wi-Fi over mmWave) project, signal integrity is tied to EVM/modulation-quality tuning after signal up-conversion.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention Jio mmWave, EVM/modulation quality, or signal integrity after up-conversion"
+  },
+  {
+   "n": 6,
+   "point": "In an SDR/UAV wireless review, filtering stages plus configurable AGC are what mitigate interference and maintain signal integrity.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention SDR/UAV filtering stages or configurable AGC maintaining signal integrity"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "Wireless Communication 的 signal integrity capabilities 可確認的重點能力是 high-speed digital / power verification、PCB/PCBA signal integrity flow、transmission-channel validation、PDN、jitter、ADC/DAC frontend"
+ ]
+}

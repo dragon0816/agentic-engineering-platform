@@ -1,0 +1,71 @@
+{
+ "id": "Q0231",
+ "grader": "1.2",
+ "coverage": 0.25,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's signaling / non-signaling tester category is defined for cellular and WLAN device testing: CMX500 for R&D signaling, CMP180 for production non-signaling RF, where non-signaling mode is used to save test time.",
+   "verified": true,
+   "label": "partial",
+   "why": "Mentions CMX500 cellular/WLAN signaling, but not CMP180 production non-signaling or saving test time; instead cites CMX500 GPRF as non-signaling."
+  },
+  {
+   "n": 2,
+   "point": "The Vault's tooling map assigns signaling/protocol testing to CMX500/CMW500 and production non-signaling to CMP180/CMP200/CMW100 — no radar role is assigned to these testers.",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not give the CMX500/CMW500 vs CMP180/CMP200/CMW100 tooling map or state that these testers have no radar role."
+  },
+  {
+   "n": 3,
+   "point": "Radar measurement/stimulus needs in the Vault are served by a separate product class — the AREG800A automotive radar echo generator, not by a signaling or non-signaling tester.",
+   "verified": true,
+   "label": "partial",
+   "why": "Discusses AREG800A as the radar echo-generation tool, but does not clearly say radar needs are separate from signaling/non-signaling testers."
+  },
+  {
+   "n": 4,
+   "point": "Radar-specific capability metrics in the Vault are radar-domain parameters (digital channels, objects per channel, instantaneous bandwidth, object range), unrelated to signaling-tester measurement lists.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Presents radar-domain metrics as required/implicated tester capabilities rather than unrelated to signaling-tester measurement lists."
+  },
+  {
+   "n": 5,
+   "point": "Radar signal scenario generation for module, receiver and DFS tests is attributed to the SMW200A vector signal generator, i.e. a generator rather than a signaling/non-signaling tester.",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not mention SMW200A vector signal generator or radar scenario generation for module/receiver/DFS tests."
+  },
+  {
+   "n": 6,
+   "point": "The single documented radar-related capability on a non-signaling tester is the CMP180 DFS waveform-playing option R&S CMP-KD359 for WLAN.",
+   "verified": true,
+   "label": "missing",
+   "why": "Does not mention the CMP180 DFS waveform-playing option R&S CMP-KD359 for WLAN."
+  },
+  {
+   "n": 7,
+   "point": "The only radar/communications convergence trend recorded is 6G MFSS/ISAC with a possible joint communications + radar sensing waveform.",
+   "verified": true,
+   "label": "covered",
+   "why": "Mentions ISAC/MFSS and a possible joint communications plus radar sensing waveform."
+  },
+  {
+   "n": 8,
+   "point": "For ISAC the Vault lists only technical challenges (high bandwidth, radar equation, power density, spectrum coexistence, waveform design) and derives no tester measurement requirement from them.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "Lists ISAC challenges but then infers tester requirements, while the reference says no tester requirement is derived."
+  }
+ ],
+ "contradicted": 2,
+ "invented": [
+  "Changes in radar technology increase the required tester capability mainly in bandwidth / frequency coverage, echo and object emulation, Doppler / velocity accuracy, antenna / beamforming verification",
+  "Higher-frequency automotive radar bands ... the measurement setup must match the radar band being tested",
+  "If radar evolves toward FMCW, wider bandwidth, more objects, and Doppler-sensitive scenarios, the relevant measurement capability shifts",
+  "If radar evolves toward phased-array or beam-steered operation, the tester setup needs antenna / beamforming verification",
+  "If radar evolves toward ISAC or communications-plus-radar sensing, a signaling / non-signaling tester context may need to combine protocol/network-emulation or waveform-generation roles with sensing-related RF requirements"
+ ]
+}

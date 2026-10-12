@@ -1,0 +1,151 @@
+{
+ "id": "Q1091",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 71.906,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 10,
+   "kind": "wiki",
+   "ref": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 13,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 28,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 49,
+   "kind": "wiki",
+   "ref": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 53,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 74,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 51,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 70,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 12,
+   "kind": "wiki",
+   "ref": "wiki/sources/0 Digital Test - What are SIPI and Serdes.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 14,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 41,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 73,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": false,
+  "reasonable": true,
+  "overreach": [
+   "oscilloscope-relevant SI observations such as Eye diagram",
+   "network-analyzer / TDR-style measurements such as IL, Xtalk, TDR impedance, DK/DF, Delta-L, and high-speed trace / cable tests",
+   "measurement decisions that depend on this mapping include ... how to separate"
+  ],
+  "reason": "The answer is reasonable in saying the passages do not define the term formally and in mapping scopes to Interface Test and PDN, which is directly supported. However, it goes beyond the cited passages by classifying Eye diagram as oscilloscope-relevant and grouping several PCB/SI measurements as network-analyzer/TDR-style decisions when the passages only list those measurements or product mappings, not that categorization.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The answer is reasonable in saying the passages do not define the term formally and in mapping scopes to Interface Test and PDN, which is directly supported. However, it goes beyond the cited passages by classifying Eye diagram as oscilloscope-relevant and grouping several PCB/SI measurements as net"
+}

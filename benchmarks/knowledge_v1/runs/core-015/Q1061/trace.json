@@ -1,0 +1,1885 @@
+{
+ "question": {
+  "id": "Q1061",
+  "text": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+  "technical": "Instrument & Measurement Principles",
+  "topic": "non-signaling tester",
+  "product_related": "true"
+ },
+ "session_id": "conversation-e803bac7ff0f47179337caca5e1255c3",
+ "exchange": {
+  "sent": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+  "http_status": 200,
+  "seconds": 113.203,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-e803bac7ff0f47179337caca5e1255c3",
+    "actor": "leo.chi",
+    "title": "What is non-signaling tester, and which product-related measurement deci…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-12T06:07:11.587059Z",
+    "updated_at": "2026-10-12T06:09:04.829693Z",
+    "messages": [
+     {
+      "message_id": "message-50f2dbeca6294c51924556911735e658",
+      "role": "user",
+      "text": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+      "created_at": "2026-10-12T06:07:11.887800Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-fd521ba30b444926a68837d2cda1cbed",
+      "role": "assistant",
+      "text": "### Short answer\nThe passages do not give a formal standalone definition of “non-signaling tester,” but they support describing it as a tester used for RF measurements in non-signaling mode, especially production RF testing where measurements are run without signaling/protocol operation to save time [65][100].  \n### What it means\nNon-signaling is tied to RF testing, while signaling is tied to protocol testing in the raw source wording “Non-signaling - RF” and “Signaling - Protocol” [100].  \nIn WLAN device production, all RF measurements are performed in non-signaling mode to save time [65].  \nR&S CMP180 is positioned for production non-signaling RF testing in the Wi‑Fi 7 R&D and production testing context [8][65].  \n### Product-related measurement decisions that depend on it\n| Decision | What the passages support |\n|---|---|\n| Whether to use production non-signaling RF testing or R&D signaling testing | Wi‑Fi 7 R&D testing uses R&S CMX500 for signaling / interworking testing, while production uses R&S CMP180 for non-signaling RF testing [8]. |\n| Whether the measurement is RF-only or protocol/application/signaling-oriented | The value chain lists Non-signaling RF separately from Signaling Protocol, signaling, application, OTA, pre-conformance and conformance testing [4]. |\n| Whether CMP180 is the relevant production tester | CMP180 is described as a radio communication tester for production / wireless communication device testing [1]. |\n| Whether CMP180 can cover the needed production RF architecture | CMP180 supports simultaneous receiver and transmitter testing and provides RF generator/analyzer no. 1 plus optional RF generator/analyzer no. 2 in a multi-port RF test architecture [2]. |\n| How many RF ports / benches are needed | CMP180 RF generator/analyzer no. 1 has 8 × SnapN RF input/output ports RF 1.1 to RF 1.8, and RF generator/analyzer no. 2 has 8 × SnapN RF input/output ports RF 2.1 to RF 2.8 [32]. |\n| Whether a second CMP180 TRX / connector bench is needed | CMP180 RF generator/analyzer no. 2 requires R&S CMP-K102 or R&S CMP-K105 software license key [32][58]. |\n| Whether the frequency requirement exceeds 6 GHz | CMP180 basic RF generator/analyzer frequency range is 400 MHz to 6000 MHz, and R&S CMP-K168 extends the range from 6000 MHz to 8000 MHz [33][96]. |\n| Whether the bandwidth requirement is 250 MHz or 500 MHz | CMP180 IF bandwidth is 250 MHz basic and reaches 500 MHz with R&S CMP-K185 [33]. |\n| Whether the RF unit supports the desired bandwidth upgrade | R&S CMP-B802x supports only 250 MHz bandwidth, while R&S CMP-B805x supports 250 MHz and can use R&S CMP-K185 to enable 500 MHz [58]. |\n| Whether 2x2 or 4x4 MIMO production testing is in scope | The Wi‑Fi 7 production source says CMP180 integrates two analyzers, two generators and two sets of eight RF ports to support 2x2 MIMO testing in one box, and two CMP180 instruments can be combined for four analyzers and generators for 4x4 MIMO access point testing [65]. |\n| Whether to use CMX500 instead for signaling or broader protocol/application workflows | CMX500 is described as a universal one-box network emulation and measurement test solution supporting LTE, NR FR1, NR FR2, NSA, SA, FDD and TDD [10]. |\n| Whether CMX500 non-signaling use cases are relevant in R&D | CMX500 GPRF Generator is described as a CMX500 non-signaling use case that generates ARB, CW, dual tone or replay `.wv` waveforms for R&D waveform replay / creation and standalone TX measurement workflows [16]. |\n【推論】Understanding “non-signaling tester” affects product choice because the passages place CMP180 in production non-signaling RF testing and CMX500 in signaling / network-emulation testing [8][10][65].\n\n來源：\n[1] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[2] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[4] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[8] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[10] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[16] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[32] Wiki：CMP180_specs_en_3609-7348-22_v0800（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[33] Wiki：CMP180_specs_en_3609-7348-22_v0800（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[58] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[65] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[96] Wiki：CMP180_specs_en_3609-7348-22_v0800（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[100] `raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`",
+      "created_at": "2026-10-12T06:09:04.829693Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-a4c3bffb7f654ff9bba2116b8ff09739",
+       "request_id": "request-a4c3bffb7f654ff9bba2116b8ff09739",
+       "span_id": "span-a4c3bffb7f654ff9bba2116b8ff09739",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "### Short answer\nThe passages do not give a formal standalone definition of “non-signaling tester,” but they support describing it as a tester used for RF measurements in non-signaling mode, especially production RF testing where measurements are run without signaling/protocol operation to save time [65][100].  \n### What it means\nNon-signaling is tied to RF testing, while signaling is tied to protocol testing in the raw source wording “Non-signaling - RF” and “Signaling - Protocol” [100].  \nIn WLAN device production, all RF measurements are performed in non-signaling mode to save time [65].  \nR&S CMP180 is positioned for production non-signaling RF testing in the Wi‑Fi 7 R&D and production testing context [8][65].  \n### Product-related measurement decisions that depend on it\n| Decision | What the passages support |\n|---|---|\n| Whether to use production non-signaling RF testing or R&D signaling testing | Wi‑Fi 7 R&D testing uses R&S CMX500 for signaling / interworking testing, while production uses R&S CMP180 for non-signaling RF testing [8]. |\n| Whether the measurement is RF-only or protocol/application/signaling-oriented | The value chain lists Non-signaling RF separately from Signaling Protocol, signaling, application, OTA, pre-conformance and conformance testing [4]. |\n| Whether CMP180 is the relevant production tester | CMP180 is described as a radio communication tester for production / wireless communication device testing [1]. |\n| Whether CMP180 can cover the needed production RF architecture | CMP180 supports simultaneous receiver and transmitter testing and provides RF generator/analyzer no. 1 plus optional RF generator/analyzer no. 2 in a multi-port RF test architecture [2]. |\n| How many RF ports / benches are needed | CMP180 RF generator/analyzer no. 1 has 8 × SnapN RF input/output ports RF 1.1 to RF 1.8, and RF generator/analyzer no. 2 has 8 × SnapN RF input/output ports RF 2.1 to RF 2.8 [32]. |\n| Whether a second CMP180 TRX / connector bench is needed | CMP180 RF generator/analyzer no. 2 requires R&S CMP-K102 or R&S CMP-K105 software license key [32][58]. |\n| Whether the frequency requirement exceeds 6 GHz | CMP180 basic RF generator/analyzer frequency range is 400 MHz to 6000 MHz, and R&S CMP-K168 extends the range from 6000 MHz to 8000 MHz [33][96]. |\n| Whether the bandwidth requirement is 250 MHz or 500 MHz | CMP180 IF bandwidth is 250 MHz basic and reaches 500 MHz with R&S CMP-K185 [33]. |\n| Whether the RF unit supports the desired bandwidth upgrade | R&S CMP-B802x supports only 250 MHz bandwidth, while R&S CMP-B805x supports 250 MHz and can use R&S CMP-K185 to enable 500 MHz [58]. |\n| Whether 2x2 or 4x4 MIMO production testing is in scope | The Wi‑Fi 7 production source says CMP180 integrates two analyzers, two generators and two sets of eight RF ports to support 2x2 MIMO testing in one box, and two CMP180 instruments can be combined for four analyzers and generators for 4x4 MIMO access point testing [65]. |\n| Whether to use CMX500 instead for signaling or broader protocol/application workflows | CMX500 is described as a universal one-box network emulation and measurement test solution supporting LTE, NR FR1, NR FR2, NSA, SA, FDD and TDD [10]. |\n| Whether CMX500 non-signaling use cases are relevant in R&D | CMX500 GPRF Generator is described as a CMX500 non-signaling use case that generates ARB, CW, dual tone or replay `.wv` waveforms for R&D waveform replay / creation and standalone TX measurement workflows [16]. |\n【推論】Understanding “non-signaling tester” affects product choice because the passages place CMP180 in production non-signaling RF testing and CMX500 in signaling / network-emulation testing [8][10][65].\n\n來源：\n[1] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[2] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[4] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[8] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[10] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[16] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[32] Wiki：CMP180_specs_en_3609-7348-22_v0800（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[33] Wiki：CMP180_specs_en_3609-7348-22_v0800（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[58] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[65] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[96] Wiki：CMP180_specs_en_3609-7348-22_v0800（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[100] `raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-a4c3bffb7f654ff9bba2116b8ff09739",
+      "request_id": "request-a4c3bffb7f654ff9bba2116b8ff09739",
+      "span_id": "span-a4c3bffb7f654ff9bba2116b8ff09739",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-a4c3bffb7f654ff9bba2116b8ff09739",
+       "request_id": "request-a4c3bffb7f654ff9bba2116b8ff09739",
+       "span_id": "span-a4c3bffb7f654ff9bba2116b8ff09739",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "### Short answer\nThe passages do not give a formal standalone definition of “non-signaling tester,” but they support describing it as a tester used for RF measurements in non-signaling mode, especially production RF testing where measurements are run without signaling/protocol operation to save time [65][100].  \n### What it means\nNon-signaling is tied to RF testing, while signaling is tied to protocol testing in the raw source wording “Non-signaling - RF” and “Signaling - Protocol” [100].  \nIn WLAN device production, all RF measurements are performed in non-signaling mode to save time [65].  \nR&S CMP180 is positioned for production non-signaling RF testing in the Wi‑Fi 7 R&D and production testing context [8][65].  \n### Product-related measurement decisions that depend on it\n| Decision | What the passages support |\n|---|---|\n| Whether to use production non-signaling RF testing or R&D signaling testing | Wi‑Fi 7 R&D testing uses R&S CMX500 for signaling / interworking testing, while production uses R&S CMP180 for non-signaling RF testing [8]. |\n| Whether the measurement is RF-only or protocol/application/signaling-oriented | The value chain lists Non-signaling RF separately from Signaling Protocol, signaling, application, OTA, pre-conformance and conformance testing [4]. |\n| Whether CMP180 is the relevant production tester | CMP180 is described as a radio communication tester for production / wireless communication device testing [1]. |\n| Whether CMP180 can cover the needed production RF architecture | CMP180 supports simultaneous receiver and transmitter testing and provides RF generator/analyzer no. 1 plus optional RF generator/analyzer no. 2 in a multi-port RF test architecture [2]. |\n| How many RF ports / benches are needed | CMP180 RF generator/analyzer no. 1 has 8 × SnapN RF input/output ports RF 1.1 to RF 1.8, and RF generator/analyzer no. 2 has 8 × SnapN RF input/output ports RF 2.1 to RF 2.8 [32]. |\n| Whether a second CMP180 TRX / connector bench is needed | CMP180 RF generator/analyzer no. 2 requires R&S CMP-K102 or R&S CMP-K105 software license key [32][58]. |\n| Whether the frequency requirement exceeds 6 GHz | CMP180 basic RF generator/analyzer frequency range is 400 MHz to 6000 MHz, and R&S CMP-K168 extends the range from 6000 MHz to 8000 MHz [33][96]. |\n| Whether the bandwidth requirement is 250 MHz or 500 MHz | CMP180 IF bandwidth is 250 MHz basic and reaches 500 MHz with R&S CMP-K185 [33]. |\n| Whether the RF unit supports the desired bandwidth upgrade | R&S CMP-B802x supports only 250 MHz bandwidth, while R&S CMP-B805x supports 250 MHz and can use R&S CMP-K185 to enable 500 MHz [58]. |\n| Whether 2x2 or 4x4 MIMO production testing is in scope | The Wi‑Fi 7 production source says CMP180 integrates two analyzers, two generators and two sets of eight RF ports to support 2x2 MIMO testing in one box, and two CMP180 instruments can be combined for four analyzers and generators for 4x4 MIMO access point testing [65]. |\n| Whether to use CMX500 instead for signaling or broader protocol/application workflows | CMX500 is described as a universal one-box network emulation and measurement test solution supporting LTE, NR FR1, NR FR2, NSA, SA, FDD and TDD [10]. |\n| Whether CMX500 non-signaling use cases are relevant in R&D | CMX500 GPRF Generator is described as a CMX500 non-signaling use case that generates ARB, CW, dual tone or replay `.wv` waveforms for R&D waveform replay / creation and standalone TX measurement workflows [16]. |\n【推論】Understanding “non-signaling tester” affects product choice because the passages place CMP180 in production non-signaling RF testing and CMX500 in signaling / network-emulation testing [8][10][65].\n\n來源：\n[1] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[2] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[4] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[8] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[10] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[16] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[32] Wiki：CMP180_specs_en_3609-7348-22_v0800（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[33] Wiki：CMP180_specs_en_3609-7348-22_v0800（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[58] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[65] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[96] Wiki：CMP180_specs_en_3609-7348-22_v0800（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[100] `raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_0E2O9zk85nxP6tD2ea2GsA59",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "### Short answer\nThe passages do not give a formal standalone definition of “non-signaling tester,” but they support describing it as a tester used for RF measurements in non-signaling mode, especially production RF testing where measurements are run without signaling/protocol operation to save time [65][100].  \n### What it means\nNon-signaling is tied to RF testing, while signaling is tied to protocol testing in the raw source wording “Non-signaling - RF” and “Signaling - Protocol” [100].  \nIn WLAN device production, all RF measurements are performed in non-signaling mode to save time [65].  \nR&S CMP180 is positioned for production non-signaling RF testing in the Wi‑Fi 7 R&D and production testing context [8][65].  \n### Product-related measurement decisions that depend on it\n| Decision | What the passages support |\n|---|---|\n| Whether to use production non-signaling RF testing or R&D signaling testing | Wi‑Fi 7 R&D testing uses R&S CMX500 for signaling / interworking testing, while production uses R&S CMP180 for non-signaling RF testing [8]. |\n| Whether the measurement is RF-only or protocol/application/signaling-oriented | The value chain lists Non-signaling RF separately from Signaling Protocol, signaling, application, OTA, pre-conformance and conformance testing [4]. |\n| Whether CMP180 is the relevant production tester | CMP180 is described as a radio communication tester for production / wireless communication device testing [1]. |\n| Whether CMP180 can cover the needed production RF architecture | CMP180 supports simultaneous receiver and transmitter testing and provides RF generator/analyzer no. 1 plus optional RF generator/analyzer no. 2 in a multi-port RF test architecture [2]. |\n| How many RF ports / benches are needed | CMP180 RF generator/analyzer no. 1 has 8 × SnapN RF input/output ports RF 1.1 to RF 1.8, and RF generator/analyzer no. 2 has 8 × SnapN RF input/output ports RF 2.1 to RF 2.8 [32]. |\n| Whether a second CMP180 TRX / connector bench is needed | CMP180 RF generator/analyzer no. 2 requires R&S CMP-K102 or R&S CMP-K105 software license key [32][58]. |\n| Whether the frequency requirement exceeds 6 GHz | CMP180 basic RF generator/analyzer frequency range is 400 MHz to 6000 MHz, and R&S CMP-K168 extends the range from 6000 MHz to 8000 MHz [33][96]. |\n| Whether the bandwidth requirement is 250 MHz or 500 MHz | CMP180 IF bandwidth is 250 MHz basic and reaches 500 MHz with R&S CMP-K185 [33]. |\n| Whether the RF unit supports the desired bandwidth upgrade | R&S CMP-B802x supports only 250 MHz bandwidth, while R&S CMP-B805x supports 250 MHz and can use R&S CMP-K185 to enable 500 MHz [58]. |\n| Whether 2x2 or 4x4 MIMO production testing is in scope | The Wi‑Fi 7 production source says CMP180 integrates two analyzers, two generators and two sets of eight RF ports to support 2x2 MIMO testing in one box, and two CMP180 instruments can be combined for four analyzers and generators for 4x4 MIMO access point testing [65]. |\n| Whether to use CMX500 instead for signaling or broader protocol/application workflows | CMX500 is described as a universal one-box network emulation and measurement test solution supporting LTE, NR FR1, NR FR2, NSA, SA, FDD and TDD [10]. |\n| Whether CMX500 non-signaling use cases are relevant in R&D | CMX500 GPRF Generator is described as a CMX500 non-signaling use case that generates ARB, CW, dual tone or replay `.wv` waveforms for R&D waveform replay / creation and standalone TX measurement workflows [16]. |\n【推論】Understanding “non-signaling tester” affects product choice because the passages place CMP180 in production non-signaling RF testing and CMX500 in signaling / network-emulation testing [8][10][65].\n\n來源：\n[1] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[2] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[4] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[8] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[10] Wiki：R&S CMX500（來源：`CMX500_Features_CSW9-20-0_en_32.md`、`CMX500_specs_en_5216-4127-22_v1100.md`）\n[16] Wiki：CMX500 GPRF Generator（來源：`CMX500_Callbox.md`）\n[32] Wiki：CMP180_specs_en_3609-7348-22_v0800（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[33] Wiki：CMP180_specs_en_3609-7348-22_v0800（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[58] Wiki：R&S CMP180（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[65] Wiki：Wi-Fi 7 R&D and production testing（來源：`Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md`）\n[96] Wiki：CMP180_specs_en_3609-7348-22_v0800（來源：`CMP180_Features_V11-9_en_09.md`、`CMP180_specs_en_3609-7348-22_v0800.md`）\n[100] `raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`",
+          "evidence": {
+           "raw_citations": 12,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "supported",
+           "retrieval_attempts": {
+            "product_option_spec": 1,
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.3-askrules.1"
+           },
+           "trace": {
+            "trace_id": "trace-f557103aef184b6983ccfaabfae92c03",
+            "request_id": "request-f557103aef184b6983ccfaabfae92c03",
+            "span_id": "span-f557103aef184b6983ccfaabfae92c03",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "What is non-signaling tester, and which product-related measurement decisions depend on understanding it?",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "R&S CMP180\n[[R&S CMP180]] 是 [[Rohde & Schwarz]] 的 **Radio Communication Tester**，用於 production / wireless communication device 測試，依文件可配置多埠 RF generator/analyzer、通訊標準 measurement options、waveform options 與 [[R&S VSE]] 分析能力。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 32.519549
+             },
+             {
+              "text": "R&S CMP180 › 產品定位\n[[R&S CMP180]] 是 Radio Communication Tester。依 [[CMP180 Features and Functions Version 09]]，文件涵蓋 global options、Bluetooth、CDMA2000、GSM、LP-IoT、LTE、NB-IoT、NR、spectrum analysis、UWB、WCDMA、WLAN、[[R&S VSE]] options 與 ordering information。\n\n依 [[CMP180 Specifications Version 08.00]]，CMP180 支援 simultaneous receiver and transmitter testing，並提供 RF generator/analyzer no. 1 與可選 RF generator/analyzer no. 2 的多埠 RF 測試架構。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 17.059002
+             },
+             {
+              "text": "R&S CMP180 › 文件依據與版本\n本頁目前依兩份 Productions 來源整理：\n\n- [[CMP180 Features and Functions Version 09]]：文件識別碼 **1179.5118.02**，**Version 09**，對應 software **V11.9 or higher**，版權標示 © 2026；此文件是 test applications overview，並明示量測範圍與 tolerance limits 需參考 specifications document **PD 3609.7348.22**。\n- [[CMP180 Specifications Version 08.00]]：文件識別碼 **PD 3609.7348.22**，**Version 08.00**，日期 **March 2026**；此文件提供 specifications、general data、ordering information、warranty 與 service。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 8.805384
+             },
+             {
+              "text": "5G device testing value chain › 測試類型\n來源列出的測試類型包含：\n\n- [[RF]]。\n- [[Signaling]]。\n- [[Application testing]]。\n- [[OTA testing]]。\n- [[Pre-conformance testing]]。\n- [[Conformance approval]]。\n- [[Carrier acceptance]]。\n- [[Non-signaling RF]]。\n- [[Signaling Protocol]]。\n- [[Service and repair]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 10.700745
+             },
+             {
+              "text": "5G device testing value chain › Manufacturing 目標\n來源指出 manufacturing 測試目標包含：\n\n- High yield of devices with high quality。\n- Achieve shortest test time possible；time = money。\n- Characterize and optimize parametric RF transceiver sub systems。\n- Debug and trace。\n\n來源列出的 manufacturing / production 相關工具包含 [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100]]、[[R&S CMX500]] / [[R&S CMW500]] for signaling 與 [[R&S CMQ]]。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 7.932822
+             },
+             {
+              "text": "5G device testing value chain\n[[5G device testing value chain]] 是 [[Rethink 5G Testing solution overview 5G RedCap NTN FWA]] 中整理的 5G device ecosystem 測試分工：從 chip vendor、device manufacturer、test house 到 network operator，依 Lab、R&D、Production、Operations 與 Use cases 串接 RF、signaling、application、OTA、pre-conformance、conformance、carrier acceptance 與 service / repair 測試。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 6.976193
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › R&D：R&S CMX500 single-box signaling testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- [[R&S CMX500]] 是 multi-technology multi-channel signaling tester。\n- 來源稱其已新增 integrated [[Wi-Fi 7]] test functionality。\n- 目的在 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation。\n- Wi-Fi 7 R&D 測試需在 signaling mode 與 real-world conditions 下量測 RF TX / RX characteristics。\n- [[MLO]] 是 [[Wi-Fi 7]] key feature，因此提供 multiple RF chains 的 test environment 很重要。\n- 來源列出的 Wi‑Fi 7-specific tests 包含 2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 9.992665
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing\n[[Wi-Fi 7 R&D and production testing]] 是 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 中描述的測試方案組合：以 [[R&S CMX500]] 覆蓋 R&D signaling / interworking 測試，以 [[R&S CMP180]] 覆蓋 production non-signaling RF 測試。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 5.197704
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › 使用限制\n- 本頁目前只由 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 支撐。\n- 來源是 PR / demonstration positioning，不是正式 datasheet、configuration guide、test case list 或 certification document。\n- 不可從本來源推論 [[R&S CMX500]] Wi‑Fi 7 的 option code、software release、支援 RF chains 數量、MLO link combination、measurement uncertainty 或完整 test coverage。\n- 不可從本來源推論 [[R&S CMP180]] 480 MHz waveform 的正式 [[Wi-Fi 8]] 標準地位、量測規格或 production throughput。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 4.724902
+             },
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 19.922636
+             },
+             {
+              "text": "R&S CMX500 › mmWave extension 與 remote radio heads\n[[CMX500_specs_en_5216-4127-22_v1100]] 指出 3GPP FR2 frequency range 測試可由 [[R&S CMX500]] 搭配 [[R&S CMXHEAD30]]、[[R&S CMXHEAD50]] 或 [[R&S CMXHEAD50-Evo]] 執行。Remote radio head 是獨立 compact unit，在 IF 與 5G NR FR2 frequency ranges 間執行 upconversion / downconversion。CMX500 與 remote radio head 的 split concept 可在 5G NR FR2 frequency range 使用短 RF cable lengths，以最佳化 radiated chamber test environments 的 link budget。\n\n適用 radiated chamber test environments：[[R&S CMQ500]] shielding cube 與 [[R&S ATS800R]] CATR rack based antenna test system。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 21,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 13.581625
+             },
+             {
+              "text": "R&S CMX500\n[[R&S CMX500]] 是 [[Rohde & Schwarz]] 的 Radio Communication Tester；依 [[CMX500_specs_en_5216-4127-22_v1100]] Specifications Version 11.00（August 2025），它是 universal one-box network emulation and measurement test solution，支援 [[LTE]]、[[NR FR1]]、[[NR FR2]]、NSA、SA、FDD、TDD、FR1/FR2 RF parametric testing、fading propagation conditions 與多種 OBT hardware configurations。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 13.115318
+             },
+             {
+              "text": "CMX500 Callbox › Callbox 定位\n依 [[CMX500_Callbox]]，callbox 的核心敘事是：\n\n- Easy to set up。\n- Easy to get in a call。\n- Easy to test with。\n- Focus on [[RF Testing]]，including [[3GPP pre-conformance]]。\n\n來源以 [[Device Under Test]]、cell tower 與 smartphone 圖示描述 [[R&S CMX500]] 作為 DUT 連線與測試環境的中心。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 8.810762
+             },
+             {
+              "text": "CMX500 Callbox\n[[CMX500 Callbox]] 是 [[CMX500_Callbox]] 簡報中對 [[R&S CMX500]] 的 use-case 定位：用一台 callbox 快速建立 DUT 連線，進行 RF、mobility、application、NTN、WLAN / cellular desense、pre-conformance 與 non-signaling R&D 驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 4.85096
+             },
+             {
+              "text": "CMX500 Callbox › Testing phases\n[[CMX500_Callbox]] 將測試階段放在下列脈絡中：\n\n- [[Go-NoGo Testing]]。\n- [[Non-Sig Testing]]。\n- [[Conformance Testing]]。\n- [[R&D Testing]]。\n\n來源未明確說這四者是完整 lifecycle，也未定義各階段 pass/fail 標準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 4.819179
+             },
+             {
+              "text": "CMX500 GPRF Generator\n[[CMX500 GPRF Generator]] 是 [[CMX500_Callbox]] 中的 [[R&S CMX500]] non-signaling use case：在 CMX500 上產生 ARB、CW、dual tone 或 replay `.wv` waveform，支援 R&D waveform replay / creation 與 standalone TX measurement 工作流。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 7.540049
+             },
+             {
+              "text": "CMX500 GPRF Generator › IQ recorder\n來源稱 IQ recorder 可：\n\n- Record up to 4 Gbyte to a file。\n- Save files as `.wv` for replay。\n- Use the same IQ stream + RF parameters as signaling。\n- As many instances as supported by CMX hardware。\n- 2 per RFU。\n- 1 per IFU。\n- FR1 specialist：8 instances in parallel。\n- Inspect the recorded trace directly in GUI。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 3.214244
+             },
+             {
+              "text": "CMX500 GPRF Generator › Waveform replay\n來源描述可 replay any waveform from：\n\n- IQ capture。\n- MATLAB。\n- Other sources。\n\n流程線索包含：\n\n1. Convert with R&S MATLAB tools from App Note [[1GP60]]。\n2. Read in complex IQ vector。\n3. Add parameters（sample rate provided in `.info` file in CMX500 captures）。\n4. Run conversion script from [[1GP60]]。\n5. `.wv` stored in active directory。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+              },
+              "score": 1.761621
+             },
+             {
+              "text": "CMX500_Callbox › 重點摘要\n- Desense / interference 部分描述 WLAN + cellular in one box enables interference / desense testing against all LTE/NR bands with real connections，並列出 WiFi 4096QAM、6 GHz band 320 MHz BW、EN-DC + WiFi7、LTE + NR + WiFi measurements in parallel。\n- 3GPP features 部分列出 Rel-15 SUL、Rel-16 UL TX Switching、Rel-17 extensions、Rel-17 PEI、Rel-17 1024 DL QAM、MIMO Nx6/nx8，並宣稱 10.6 Gbps with 5CC SA verified。\n- Multi-SIM 部分描述 DSDS / DSDA：1 DUT、2 SIM slots、2 parallel connections、1 CMX；DSDS 通常 one TX / 2 RX、2 SIMs standby、一次一個 active connection；DSDA 為 two TRX、2 SIMs active connection at a time；option 線索為 [[R&S CMX-KS600B]] NR Signaling SA/NSA 與 [[R&S CMX-KS613B]] Multi-SIM Enabler。\n- Callbox example use cases 包含 R&D verification of new bands、sensitivity testing、RedCap、de-sense testing、3GPP pre-conformance、SRS measurements、UL MIMO and UL CA RF measurements、UL TX Switching、Multi-SIM、high e2e TP testing 與 non-signaling verification。\n- RedCap 部分稱 [[R&S CMX-KS617B]] NR R17 Signaling 用於 RedCap standalone，並列出 early identification via MSG1/MSG3、RedCap initial UL/DL BWP、NCD-SSB、LTE↔NR handover、eDRX、FR1/FR2 supported、Rel. Power Saving、UE measurement relaxation、PEI、PDCCH skipping。\n- SRS / UL MIMO / UL TX Switching 部分稱 CMX supports all SRS modes / configurations，SRS measurements 可量測 TX power、EVM 等，[[R&S CMX-KS610B]] 用於 SRS carrier switching；UL MIMO RF measurements 提到 [[R&S CMX-KM604]] NR FR1 measurements MIMO、PC 1.5、29 dBm theoretical sum power for 2 TX antennas、UL FPTX、TX diversity、DFTS-OFDM。\n- NTN 部分稱 comprehensive support for NR-NTN，multi-orbit：LEO、MEO、GEO、GSO，complete channel emulation in one box，live graphics for NTN orbits and parameters，NB-NTN coming end of `25，option 線索為 [[R&S CMX-KS627B]] NR Signaling Extension Rel-17。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Callbox.md"
+              },
+              "score": 9.661183
+             },
+             {
+              "text": "CMX500_Callbox › 重點摘要\n- 來源 frontmatter 顯示原始檔為 `CMX500_Callbox.pptx`，由 markitdown 轉出，converted date 為 2026-09-17；投影片中另出現日期 **05.01.2026**，但日期格式未標示。\n- 簡報將測試階段分為 [[Go-NoGo Testing]]、[[Non-Sig Testing]]、[[Conformance Testing]] 與 [[R&D Testing]]，並以 [[R&S CMX500]] callbox 作為可快速建立 call、進行 RF testing、mobility testing 與 application testing 的平台。\n- Callbox focus 包含 [[RF Testing]]、[[3GPP pre-conformance]]、[[Mobility Testing]]、[[Application Testing]]、[[Network Slicing]]、[[IP Throughput]]、[[Security Analysis]]、[[Backend Service]]、[[IMS Services]]、[[WLAN offloading with Voice over WLAN]]、[[ATSSS]]、[[Power Consumption]]、[[XR Responsiveness & L4S]]、[[eCall]] / [[NGeCall]] 與 [[Speech Quality]]。\n- 來源描述 [[CMsquares]] 為 web based、all-in-one configuration、all tools in one place、modern UI 的介面，並列出 live views、app testing、NTN live views、sequencer、log analysis 與 one-click RF testing。\n- [[RF SA Preconformance]] 部分宣稱可在 GUI 中快速開始 manual 3GPP RF pre-conformance，並提到 automatic configuration of parameters per TC、25 TCs、dynamic workspace per TC、NR-NTN / NSA / LTE coming、release 時有 comprehensive App Note，連結為 `https://www.rohde-schwarz.com/appnote/1C111`。\n- [[CMSequencer]] 部分描述可由 manual 快速切換到 automated pre-conformance，使用 same technology specific license，並引用 `Sequencer-CMX-Test_Packages_Database.xlsx`；來源圖表列出 RF pre-conformance TC count：category 7.1 為 3GPP 43、7.4 為 68、7.6 為 134、8.3 為 3GPP 159 / RED 33 / WiFi 92。\n- R&D automation / RF pathloss calibration 部分描述 predefined blocks、mix & match、PL from signaling measurements + reports、GPRF measurements 與 NRP Power Meter；來源 notes 稱 NRP slightly more precise、GPRF 會包含 connector + additional RF path、golden device 最容易但 least precise。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Callbox.md"
+              },
+              "score": 6.493976
+             },
+             {
+              "text": "CMX500_Callbox › 與既有知識的關係\n- 本來源補充 [[R&S CMX500]] 正式 specifications / features 以外的 callbox sales / training 視角；其內容多為 use-case、workflow、roadmap 或 demo claim，不可替代 [[CMX500_specs_en_5216-4127-22_v1100]] 或 [[CMX500_Features_CSW9-20-0_en_32]] 的 binding specifications。\n- 本來源對 [[5G NR FR1 SA pre-conformance testing]] 補充 GUI one-click / wizard / 25 TCs / 1C111 app note 的簡報敘事；既有 [[1C111_1e_3GPPPreConfGuide]] 仍是具體 workflow 與限制的主要來源。\n- 本來源對 [[CMX500 Sequencer Test Packages]] 補充 manual-to-automated pre-conformance、TC count chart 與 WiFi RF pre-conformance update 的簡報圖表；正式 verified status 仍以 [[Sequencer-CMX-Test_Packages_Database]] 為主。\n- 本來源對 [[CMX500 NTN one-box tester]] 補充 multi-orbit、complete channel emulation in one box 與 NTN orbit live graphics 的簡報說法；PR 與 configuration guide 仍需分別追溯。\n- 本來源對 [[WLAN offloading with Voice over WLAN]] 補充 application testing 清單中的 WLAN offloading / ATSSS 與 desense / WiFi7 parallel testing 情境。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Callbox.md"
+              },
+              "score": 3.322551
+             },
+             {
+              "text": "Rethink 5G Testing solution overview 5G RedCap NTN FWA › 與既有知識的關係\n- 本來源補強 [[FWA CPE 市場與測試分類]] 與 [[FWA CPE 測試與驗證]]：既有頁面偏向 OneNote 表格與 GSA July 2025 directory taxonomy，本來源增加 operator deployments、Indoor / Outdoor CPE economic tradeoff、FWA CPE UE test requirement taxonomy 與 example test scenario。\n- 本來源補強 [[5G RedCap OTA measurements]] 的 RedCap 應用背景：既有頁面由 EMITE / R&S PR 支撐 OTA measurement；本來源增加 RedCap SA-only、R17 / R18 feature reduction、power saving cluster、testing use cases 與 CMX-KF678X scenario package。\n- 本來源補強 [[5G NTN validation and testing]] 與 [[NTN propagation emulation and fading]]：既有頁面主要來自 R&S PR；本來源加入 NTN NB-IoT device requirements、long delay、Doppler、SIB31 / SIB32、segmented UL transmission、mobility 與 CMW500 NB-NTN Rel.17 test solution 線索。\n- 本來源對 [[R&S CMX500]] 與 [[R&S CMW500]] 的內容屬 solution / market positioning，不是正式 product specifications；正式規格仍需回 [[CMX500_specs_en_5216-4127-22_v1100]]、[[CMX500_Features_CSW9-20-0_en_32]] 與 [[CMW_dat-sw_en_5213-9211-22_v1700]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rethink 5G Testing solution overview 5G RedCap NTN FWA.md"
+              },
+              "score": 5.807231
+             },
+             {
+              "text": "Rethink 5G Testing solution overview 5G RedCap NTN FWA › 重點摘要\n- 來源主題是 Rethink 5G testing：如何針對 suitable use cases and markets 實作 ultimate 5G device experience，並把 testing focus 從 single tools 轉為 complete use cases。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- Wireless communication equipment shipment forecast 以 2022 為基準列出：Base Station RUs 0.01 Bn、Smartphones 1.2 Bn、Cellular IoT modules 0.4 Bn、Wi‑Fi devices 4.4 Bn、Bluetooth devices 5.1 Bn；CAGR4 分別為 +5%、+4%、+19%、+8%、+8%，資料來源列 [[IDC]]、[[Berg Insight]]、[[Murata]]。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- 5G global ecosystem Q2CY2023 snapshot 指出 5G ecosystem 相較 LTE 仍在 early stages，列出 chipsets 110 / commercial 104、devices 1820 / commercial 1546、operators 532 / commercial 254、5G connections 約 1B、5G SA 41、mmW 128 / commercial 47、FWA CPE 203。來源標示 [[GSA Gambod]] and [[Ericsson Mobile Data]], Q2 2023。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- LTE / 5G connection forecast 顯示 5G 從 2020 年 160.267 增至 2028 年 4974.568，同期 LTE 從 4751.87 於 2022 年達 5157.401 後逐年下降到 2028 年 3583.092；單位與資料來源在萃取片段未完整標示。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- 5G device value chain 包含 [[Network operator]]、[[Device manufacturer]]、[[Test house]]、[[Chip vendor]]，測試階段 / 場域涵蓋 Lab、R&D、Production、Operations、Use cases；測試類型涵蓋 RF、Signaling、Application、OTA、Pre-conformance、Conformance approval、Carrier acceptance、Non-signaling RF、Signaling Protocol、Service and repair。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rethink 5G Testing solution overview 5G RedCap NTN FWA.md"
+              },
+              "score": 5.725262
+             },
+             {
+              "text": "Rethink 5G Testing solution overview 5G RedCap NTN FWA › 重點摘要\n- NTN 部分涵蓋 NTN-IoT、NTN-NR、direct-to-smartphone projects、hybrid network adoption、NB-IoT NTN device requirements、RTT / Doppler、mobility、UE procedures 與 R&S CMW500 NB-NTN Rel.17 test solution。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- 來源列出 5G NTN addressable revenue of $35B worldwide by 2035，Source: [[GSMA Intelligence]]；並列 NTN-IoT、direct link to smartphones、fixed/mobile broadband services on VSATs 等應用分層。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- XR / Metaverse 部分整理 data rate / latency、XR testbed、Cloud XR、5G One Box Signaling Tester、R&S CMX500 XR-related roadmap 與 Release 15–19 features，但本次僅建立較高層 testing 概念連結，未細拆 XR 頁。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rethink 5G Testing solution overview 5G RedCap NTN FWA.md"
+              },
+              "score": 5.138363
+             },
+             {
+              "text": "R&S CMW100 K06 › 規格資料的使用限制\n[[CMW100-K06_specs_en_5214-8348-22_v0500]] 對規格類型定義如下：\n\n- Specifications with limits 代表 warranted product performance，以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等標示。\n- Non-traceable specifications with limits 標示為 n. trc.，因缺乏可追溯至 national metrology standards 的 measuring equipment，產品性能不保證。\n- Specifications without limits 代表指定參數的 warranted product performance，通常為 dimensions 或 setting parameter resolution 等無偏差或偏差可忽略的值。\n- Typical data 標示為 typ.，若標示為 `<`、`>` 或 range，代表生產時約 80% instruments 可達到的 performance；否則代表 mean value。\n- Nominal values 標示為 nom.，不進行 statistical evaluation，生產時不測試該參數。\n- Measured values 標示為 meas.，以個別 samples 的 measurement results 描述 expected product performance。\n- Uncertainties 以 coverage factor 2 定義，依 GUM 規則計算，納入 environmental conditions、aging、wear and tear。\n- Non-traceable specifications with limits、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 保證。\n- Data without tolerance limits is not binding；Subject to change。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+              },
+              "score": 21.70135
+             },
+             {
+              "text": "R&S CMW100 K06\n[[R&S CMW100 K06]] 是 [[Rohde & Schwarz]] 的 Communications Manufacturing Test Set，依 [[CMW100-K06_specs_en_5214-8348-22_v0500]]（PD 5214.8348.22，Version 05.00，September 2025）提供 8 個 RF DUT input/output、TX AUX、RF generator/analyzer、power meter、spectrum analyzer 與多種行動 / 無線標準 production test 規格。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+              },
+              "score": 18.754072
+             },
+             {
+              "text": "R&S CMW100 K06 › 通訊標準與 measurement options 摘要\n本節只抄錄 [[CMW100-K06_specs_en_5214-8348-22_v0500]] 中明示的 option code、waveform file、frequency range 與主要限制；未補推未列明代碼。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 17,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+              },
+              "score": 13.512649
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › 無線技術與測試主題\n- [[NR FR1]]、[[NR FR2]]、[[LTE]]、[[NB-IoT]]、[[WLAN]]、[[LTE C-V2X]]、[[NR C-V2X]]、[[RedCap]]、[[eRedCap]]、[[NTN]]、[[Direct-to-cell communication]]。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]、[[Spectrum analysis]]。\n- [[POLQA]]、[[IMS]]、[[iPerf]]、[[QoS]]、[[ePDG]]、[[N3IWF]]、[[IP traffic analysis]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 22.562741
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › 產品、硬體與附件\n- [[R&S CMX500]] — Radio Communication Tester，modular and scalable hardware architecture。\n- [[R&S CMX-B500x]] — IF unit；NR FR2 連接使用，來源未列完整 order no.。\n- [[R&S CMX-B500A]] — IF unit；remote radio heads 連接到 [[R&S CMX500]] 的 IF units 時列名，來源未列完整 order no.。\n- [[R&S CMX-B600x]] — RF unit；最高 8 GHz 連接使用，來源未列完整 order no.。\n- [[R&S CMXHEAD30]] — remote radio head，搭配 IF unit 時 RF frequencies 最高 43.5 GHz。\n- [[R&S CMXHEAD50]] — remote radio head，搭配 IF unit 時 RF frequencies 最高 50.2 GHz。\n- [[R&S CMQ500]]、[[R&S ATS800R]]、[[R&S ATS1800C]] — 建議用於 mmWave OTA 量測的 RF shield chambers。\n- [[R&S CMX-ZG180A]] — external sound card；R&S CMX-KA180 / KA401 audio use cases 中列名。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 10.620249
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › 與既有知識的關係\n- 本來源與 [[CMP180_Features_V11-9_en_09]]、[[CMP200_Features_V8-14-22_en_09]] 同屬 Rohde & Schwarz radio communication tester 的 Features and Functions 文件，但 [[R&S CMX500]] 聚焦於 5G/LTE/WLAN signaling、protocol/application tests、FR1/FR2 measurements、fading/AWGN 與可擴充 OBT hardware architecture。\n- [[R&S CMP180]] 的 Features and Functions 文件涵蓋 Bluetooth、WLAN、LTE、NR FR1、NB-IoT、UWB、GSM、WCDMA、CDMA2000 等 production / nonsignaling / TX/RX options；本來源未把 [[R&S CMX500]] 描述為 CMP180 的替代品，不應合併產品頁。\n- [[R&S CMP200]] 的 Features and Functions 文件主要聚焦 NR FR2、UWB、LP-IoT 與 UWB test plans；本來源的 [[R&S CMX500]] 也有 NR FR2 measurement options，但同時涵蓋 broader signaling、application 與 hardware deployment。\n- 本來源是 Features and Functions，不是 specifications datasheet；報價或規格保證仍需查 [[R&S CMX500]] specifications document / product brochure 與正式 ordering data。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 20,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 8.569606
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › 與既有知識的關係\n- [[CMP180 Features and Functions Version 09]] 已指出量測範圍與 tolerance limits 不在 Features and Functions 文件內，需參考 specifications document **PD 3609.7348.22**；本來源正是該 specifications 文件，補足 spec、general data 與 ordering information。\n- [[CMP180 Features and Functions Version 09]] 提到 [[R&S CMP180]] 的 RF unit 分為 **R&S CMP-B802x** 與 **R&S CMP-B805x**，且 **R&S CMP-K185** 可啟用 500 MHz bandwidth；本來源以具體 ordering item **R&S CMP-B802I**、**R&S CMP-B805I**、**R&S CMP-K185** 補足 order number 與 availability 條件。\n- [[CMP180 Features and Functions Version 09]] 提到未安裝 **R&S CMP-K168** 時 maximum 為 6 GHz；本來源在 ordering information 將 **R&S CMP-K168** 定義為 **Extended frequency range, from 6 GHz to 8 GHz**。\n- [[CMP180 Features and Functions Version 09]] 列出多個 option order number 後綴為 `.xx`；本來源多數對應項目給出 `.02` 或 `.10` / `.11` 版本的完整 order number。\n- 本來源與既有 [[R&S CMX500]]、[[R&S CMP200]]、[[R&S CMW100 K06]]、[[R&S CMW500]]、[[R&S CMW290]]、[[R&S CMW270]] 同屬 Rohde & Schwarz wireless / radio communication test 產品知識區，但 [[R&S CMP180]] 的本文件聚焦 production tester 類 RF generator/analyzer 規格與多埠 RF 測試。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 17.723216
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › RF generator / analyzer 功能\nGeneral functions：\n\n- simultaneous receiver and transmitter testing。\n- RF generator/analyzer no. 1：**8 × SnapN**，RF input/output to DUT，RF 1.1 to RF 1.8。\n- RF generator/analyzer no. 2：**8 × SnapN**，RF input/output to DUT，RF 2.1 to RF 2.8；requires **R&S CMP-K102** or **R&S CMP-K105** software license key。\n\nReceiver test functions：\n\n- RF generator signal is split and forwarded to 8 output ports each。\n- every output can be switched off separately。\n- collective output level setting for RF 1.1 to RF 1.8 and RF 2.1 to RF 2.8。\n- frequency-dependent attenuation（FDA）table for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。\n\nTransmitter test functions：\n\n- 8 input signals multiplexed to RF analyzer no. 1。\n- 8 input signals multiplexed to RF analyzer no. 2。\n- frequency-dependent attenuation（FDA）tables for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。\n\nVSWR：\n\n| Port | Frequency | 規格 |\n|---|---|---|\n| RF x.1 to RF x.8 | 400 MHz to 4000 MHz | < 1.6 |\n| RF x.1 to RF x.8 | 4000 MHz to 8000 MHz | < 2.0 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 6.919824
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › 重點摘要\n這份來源是 [[R&S CMP180]] **Radio Communication Tester** 的 specifications 文件，文件識別碼 **PD 3609.7348.22**，**Version 08.00**，日期標示 **March 2026**；封面與頁尾皆標示 **Version 08.00**。來源頁尾標示 **© 2021–2026 Rohde & Schwarz**，並聲明 **Data without tolerance limits is not binding**、**Subject to change**。\n\n本規格書補足 [[CMP180 Features and Functions Version 09]] 所未提供的 binding specifications、base unit order number、RF unit order number、RF generator/analyzer 規格、general data、ordering information、warranty 與 service 資訊。\n\n主要重點：\n\n- [[R&S CMP180]] base unit order no.：**1201.0002K18**，包含 power cables 與 getting started guide。\n- 文件版次：**PD 3609.7348.22 | Version 08.00 | March 2026 (ch)**。\n- RF generator/analyzer 頻率範圍：基本 **400 MHz to 6000 MHz**；使用 **R&S CMP-K168** 可擴展到 **6000 MHz to 8000 MHz**。\n- 搭配 **R&S CMP-B805I** 與 **R&S CMP-K168** 時，generator overrange 為 **6000 MHz to 8250 MHz**，maximum center frequency **8000 MHz**；analyzer overrange 為 **6000 MHz to 8500 MHz**，maximum center frequency **8250 MHz**。\n- 每個 RF generator/analyzer connector bench 有 **8 × SnapN** RF input/output to DUT；第二組 TRX / RF 2.1 to RF 2.8 需 **R&S CMP-K102** 或 **R&S CMP-K105** software license key。\n- IF bandwidth：基本 **250 MHz**；使用 **R&S CMP-K185** 可達 **500 MHz**，且 ordering information 明示 only available if **R&S CMP-B805I or higher option** is installed。\n- ARB memory：**8 Gbyte/channel**；sample length up to **800 Msample**；maximum sample rate **312.5 MHz**，搭配 **R&S CMP-K185** 為 **625 MHz**。\n- Calibration interval：**24 months**；base unit warranty：**1 year**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 6.019975
+             },
+             {
+              "text": "R&S CMP200 › 產品定位\n依 [[CMP200_specs_en_5216-4391-22_v0800]]，[[R&S CMP200]] 與 [[R&S CMPHEAD30]] / [[R&S CMPHEAD50]] remote radio head（RRH）形成 5G NR FR2（mmWave）nonsignaling one-box test solution，目標應用為：\n\n- R&D 的 RF parametric testing。\n- Manufacturing 的 high-volume RF parametric testing。\n- Fully assembled smart devices 的 pure radiated mmWave setup。\n- 具 IF interface 的 mmWave RF integrated circuits 的 mixed radiated mmWave / conducted IF setup。\n- 具 mmWave interface 的 mmWave RF integrated circuits 的 mixed radiated mmWave / conducted mmWave setup。\n\nCMP200 本體提供 IF frequency range 的 vector signal analysis 與 ARB-based generator functionality；[[R&S CMPHEAD30]] / [[R&S CMPHEAD50]] 作為 compact remote radio head，負責 upconversion / downconversion 至 5G NR FR2 frequencies。分離式 one-box tester + RRH 架構可在 mmWave frequency range 使用較短 RF cable lengths，以改善 radiated test environments 的 link budget。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 14.651014
+             },
+             {
+              "text": "R&S CMP200 › Product data 使用限制\n依 [[CMP200_specs_en_5216-4391-22_v0800]]：\n\n- Product data 適用條件為 ambient temperature 儲存 3 小時後 warm-up operation 30 分鐘、符合指定 environmental conditions、遵守 recommended calibration interval，且如適用需完成 all internal automatic adjustments。\n- Specifications with limits 代表保證的 product performance，以 `<`、`≤`、`>`、`≥`、`±`、maximum、limit of、minimum 等形式標示。\n- Non-traceable specifications with limits（n. trc.）依 limits 測試，但因 measuring equipment 不可追溯至 national metrology standards，Rohde & Schwarz 不保證其 performance。\n- Typical data（typ.）、nominal values（nom.）、measured values（meas.）均不由 Rohde & Schwarz 保證。\n- Uncertainties 採 coverage factor 2，依 GUM 計算。\n- 3GPP 標準中 chip rates 以 Mcps 表示，bit rates / symbol rates 以 Gbps、Mbps、kbps、Msps、ksps 表示，sample rates 以 Msample/s 表示；這些不是 SI units。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 9.40138
+             },
+             {
+              "text": "R&S CMP200 › NR FR2 options 與 measurements\n依 [[CMP200_Features_V8-14-22_en_09]] 與 [[CMP200_specs_en_5216-4391-22_v0800]]：\n\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---:|---|\n| R&S CMP-KM601 | NR FR2 measurements, singlecarrier / NR mmWave measurements | 1212.1140.02 | NR FR2 measurements basic option |\n| R&S CMP-KM603 | NR FR2 measurements, multicarrier / multi-carrier | 1212.2647.02 | 超過 1 carrier 需要此 option |\n| R&S CMP-KM605 | NR FR2 measurements, two RX antennas / switched MIMO | 1212.3195.02 | Two RX antennas / switched MIMO |\n| R&S CMP-KW601 | NR mmWave waveform playback | 1212.1163.02 | Enables R&S WinIQSIM2 waveforms for ARB generator |\n\nNR FR2 multi-evaluation measurement 提供含 PUSCH 的 uplink signals 測試，measurement results 包含 Modulation、Spectrum、Power。Common settings 包含 number of carriers 1 to 4、operating band n257/n258/n259/n260/n261/n262、channel bandwidth 50/100/200/400 MHz、subcarrier spacing 60/120 kHz、duplex mode TDD、external attenuation –50 dB to 90 dB。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP200.md"
+              },
+              "score": 7.71141
+             },
+             {
+              "text": "CMP180 Features and Functions Version 09 › 與既有知識的關係\n- [[R&S CMP180]] 屬於 Rohde & Schwarz 的 radio communication tester 產品，與既有 [[R&S FSW]]、[[R&S FSV3000]]、[[R&S FSVA3000]]、[[R&S FSWX]] 等 signal / spectrum analyzer 類產品不同；本來源主要是無線通訊標準 production / nonsignaling / TX/RX application option 清單與功能概述。\n- 本來源是 **Features and Functions**，不是 specifications datasheet；因此所有量測範圍與 tolerance limits 必須回到 **PD 3609.7348.22** 查證。\n- WLAN 部分明確把 6 GHz 以上 frequency 使用與 [[R&S CMP180]] 的 **R&S CMP-K168** 連結，320 MHz channel bandwidth 與 **R&S CMP-K185** 連結，True MIMO 第二 connector bench 與 **R&S CMP-K102** / **R&S CMP-K105** 連結。\n- [[R&S VSE]] 部分指出 VSE client license 可以由 dongle 或 CMP180 提供；若由 CMP180 提供，需 **R&S CMP-KM150**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_Features_V11-9_en_09.md"
+              },
+              "score": 16.349865
+             },
+             {
+              "text": "CMP180 Features and Functions Version 09 › 重點摘要\n這份來源是 [[R&S CMP180]] **Radio Communication Tester** 的 **CMP180 Features and Functions** 文件，文件識別碼 **1179.5118.02**，文件版本 **Version 09**，對應軟體版本 **V11.9 or higher**，版權標示 **© 2026 Rohde & Schwarz**。\n\n文件用途是提供 [[R&S CMP180]] 的 test applications overview；詳細描述需參考 **CMP180 help** 或 **user manuals**。量測範圍與 tolerance limits 不在本文件內，需參考 specifications document **PD 3609.7348.22**。文件聲明為：**Subject to change – data without tolerance limits is not binding.**\n\n本文件涵蓋以下功能分類：\n\n- Global options\n- Bluetooth® options\n- CDMA2000 options\n- GSM options\n- LP-IoT options\n- LTE options\n- NB-IoT options\n- NR options\n- Spectrum analysis options\n- UWB options\n- WCDMA options\n- WLAN options\n- R&S VSE options\n- Ordering information",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_Features_V11-9_en_09.md"
+              },
+              "score": 5.125408
+             },
+             {
+              "text": "CMP180 Features and Functions Version 09 › 原文未解的問題\n- 來源不是 specifications document；量測 tolerance limits、binding specifications 與完整 performance 數字未在本文件內，需查 **PD 3609.7348.22**。\n- 來源未提供 [[R&S CMP180]] 主機 base unit 的 order number。\n- 來源未提供 [[R&S CMP180]] 的完整硬體 base configuration、port 數、connector type、標準附件與校驗條件。\n- 來源未提供 RF unit **R&S CMP-B802x** / **R&S CMP-B805x** 各 variant 的完整 order number。\n- 來源列出多個 option 的 order number 後綴為 `.xx`；本頁照抄，不推導完整尾碼。\n- 來源指出 detailed descriptions 需參考 CMP180 help 或 user manuals，但未提供這些文件的文件識別碼或版次。\n- 來源未標示 **PD 3609.7348.22** 的文件版本或日期。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_Features_V11-9_en_09.md"
+              },
+              "score": 3.402976
+             },
+             {
+              "text": "Signaling test solution › 重點摘要\n- 本來源是 OneNote 複製出的 [[UAV]] signaling test solution 筆記，raw 轉檔日期為 2026-09-17；正文未標示正式發布日期、作者、文件版次或適用客戶 / 專案。\n- 來源指出無人機常使用多種通信技術，例子包含 proprietary radio / image transmission、Wi‑Fi、[[LTE]]、未來 [[5G]]、[[RTK]]、[[SATCOM]] 與 encrypted frequency-hopping radio。\n- 來源以多款無人機 / UAV 產品為例整理核心通訊技術：[[DJI Mini 4 Pro]]、[[DJI Mavic 3]]、[[DJI Mavic 3 Enterprise]]、[[Parrot ANAFI Ai]]、[[XAG P100]]、[[Skydio X2E]]、[[RQ-4 Global Hawk]] 與 [[Switchblade]]。\n- 來源稱 [[R&S CMX500]] RF frequency range 為 **400 MHz 至 8 GHz**，可提供 [[LTE]]、[[5G]] 與 [[Wi-Fi]] UE 的單一技術 signaling test。\n- 來源列出 signaling test 可包含基本 RF 量測、application layer tests 與 protocol test；基本 RF 量測項目包含 Power、Frequency、Spectrum、[[EVM]]、[[PER]] / [[BLER]]、[[MIMO]]。\n- 來源列出一組 [[R&S CMX500]] 5G test configuration，包含 [[R&S CMX-PB70H]]、[[R&S CMX-B200A]]、[[R&S CMX-B300C]]、[[R&S CMX-B600B]]、[[R&S CMX-KA100]] 與 [[R&S CMX-KM600]]。\n- 來源列出一組 [[R&S CMX500]] Wi‑Fi test configuration，包含 WLAN signaling、WLAN TX measurement 與 WLAN ARB generator options，例如 [[R&S CMX-KS350B]]、[[R&S CMX-KS351B]]、[[R&S CMX-KS352B]]、[[R&S CMX-KS355B]]、[[R&S CMX-KS356B]]、[[R&S CMX-KS360B]]、[[R&S CMX-KM350]]、[[R&S CMX-KM351]]、[[R&S CMX-KM352]]、[[R&S CMX-KM360]]、[[R&S CMX-KW350]]、[[R&S CMX-KW351]]、[[R&S CMX-KW352]]。\n- 來源指出如果 UAV 使用兩種以上通訊技術，通訊技術之間可能造成相互干擾；基於 [[R&S CMX500]] 支援多種通訊技術，可進行 De-sense validation。\n- 來源對多技術整合驗證的配置原則是：software options 合併上述 5G 與 Wi‑Fi 表格，hardware 以滿足兩者中最大的 carrier aggregation 或 [[MIMO]] 作為配置。\n- 來源末尾列出兩個待讀材料：本機 PDF `5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.pdf`，以及 SharePoint 上 `Making Deployed 5G Private Networks more Resilient.pptx`；正文未擷取。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Signaling test solution.md"
+              },
+              "score": 14.830662
+             },
+             {
+              "text": "Signaling test solution › 原文未解的問題\n- 來源未標示正式發布日期、作者、整理單位、客戶、專案、版本或適用地區。\n- UAV 產品表未提供各產品官方 datasheet、文件版次、通訊模組型號、頻段地區限制、發射功率、頻寬、加密 / 跳頻細節或測試條件。\n- [[R&S CMX500]] 5G / Wi‑Fi 配置表未標示依據的正式 configuration guide、軟體版本、license bundle、報價工具版本或 release date。\n- 來源寫「配置如有疑問請與 1C PM 確認」，表示表格不應被視為最終報價或完整配置。\n- 多技術 De-sense validation 只提供概念與配置合併原則，未提供測試案例、干擾模型、pass / fail limits、setup diagram、synchronization、shielding / chamber 條件或 automation flow。\n- `5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.pdf` 未擷取正文；不可引用其 anti-jamming 主張。\n- `Making Deployed 5G Private Networks more Resilient.pptx` 未擷取正文；不可引用其 5G private network resilience 主張。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Signaling test solution.md"
+              },
+              "score": 13.487532
+             },
+             {
+              "text": "Signaling test solution › UAV 與通訊技術\n- [[UAV 通訊]] — 本來源補充 UAV 產品使用 Radio、Wi‑Fi、LTE、5G、SATCOM、RTK 與 proprietary radio 的例子。\n- [[UAV 通訊頻段]] — 本來源新增 DJI O4 / O3+ 專有影像傳輸使用 2.4 / 5.8 GHz 的例子；頻段合規仍需回到地區法規與產品文件確認。\n- [[UAV signaling test solution]] — 本次建立的概念頁，整理本來源對 [[R&S CMX500]] 在 UAV signaling test / De-sense validation 的配置與使用限制。\n- [[UAV 多技術 De-sense 驗證]] — 來源中的多技術整合驗證線索；目前只有概念性配置原則，未提供 test case、limits 或量測結果。\n- [[Radio communication]]、[[Wi-Fi]]、[[LTE]]、[[5G]]、[[SATCOM]]、[[RTK]]、[[MIMO]]、[[EVM]]、[[PER]]、[[BLER]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Signaling test solution.md"
+              },
+              "score": 13.12306
+             },
+             {
+              "text": "UAV UAS Drones T&M Solutions › 與 signaling test 的區分\n- [[UAV signaling test solution]] 依 [[Signaling test solution]] 聚焦 [[R&S CMX500]] 對 UAV [[LTE]]、[[5G]]、[[Wi-Fi]] UE 的 signaling test 與 De-sense validation。\n- [[UAV UAS Drones T&M Solutions]] 依 [[2025RS Drone Solution]] 聚焦 [[EMC]]、[[EMI]]、[[EMS]]、[[EME]]、radiated / conducted layout 與 system-level effects test。\n\n兩者可同屬 drone test solution 線索，但不可把 CMX500 signaling option 自動推論為 EMC / EME test system，也不可把 EMC 系統推論為 cellular / WLAN protocol tester。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV UAS Drones T&M Solutions.md"
+              },
+              "score": 6.207253
+             },
+             {
+              "text": "UAV UAS Drones T&M Solutions › 客製化 solution 線索\n來源列出的 customised solution 包含：\n\n- [[B-RID Environment Performance]]。\n- [[CUAS System Performance Verification]]。\n- [[Electromagnetic Environment Emulation]]。\n- [[High-Intensity RF]]。\n\n來源宣稱可提供 `Proven solutions that meet current testing requirements, along with flexibility to provide customized systems based on specific requirements`。但它沒有提供測試方法、設備清單、頻段、功率、threat waveform、chamber / open area setup、pass / fail criteria、案例或客戶。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV UAS Drones T&M Solutions.md"
+              },
+              "score": 5.935353
+             },
+             {
+              "text": "UAV UAS Drones T&M Solutions › 來源中的 standard system\n[[2025RS Drone Solution]] 的 `UAV/UAS Drones T&M Solutions` 頁列出 standard system：\n\n| 來源列名 | 來源描述 | 使用限制 |\n|---|---|---|\n| [[R&S TS9975 EMI Test System]] | EMI Test System | 未提供完整規格、frequency range、receiver、antenna、software、chamber、order number 或適用標準。 |\n| [[R&S TS9982 EMS Test System]] | EMS Test System | 未提供 RF amplifier、field probe、immunity standard、software、chamber、frequency range 或 order number。 |\n| [[R&S TS8997]] | 只見 `TS8997` | markdown 排版無法確認完整產品名稱、系統功能或與 EMI / EMS 的關係。 |\n\n來源同頁還列出 `EMC Conformance`、`Commercial Drones`、`Military Drones` 與 `E-VTOL`，但沒有把每個測試系統與每個應用類別建立明確 mapping。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV UAS Drones T&M Solutions.md"
+              },
+              "score": 4.516263
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › toolchain\n來源列出的 CMX500 toolchain 包含：\n\n- [[R&S CMsquares]]。\n- [[R&S CONTEST]]。\n- Conformance：LTE、NR、2G、3G、C-IoT。\n- 測試範圍：RF Conformance、RRM、LBS、NetOp、PCT、signaling tests、application、callbox、NPT、PQA、3GPP RF preconformance、ATE。\n- 相關設備：[[R&S CMX500]]、[[R&S ATS CATR]]、[[R&S NGM200]]、[[R&S TS8980 Conformance Test Platform]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 9.4223
+             },
+             {
+              "text": "CMX500 use-case based 5G testing › XR / application testing 線索\n來源的 XR / Metaverse 章節以 [[R&S CMX500]] 連接 lab-based XR testbed：\n\n- Compact 3GPP-compliant OTA chamber for 5G NR mmWave signals。\n- 5G One Box Signaling Tester。\n- Cloud XR Server。\n- IP connection。\n- XR Client App。\n- Artificial Head on 3D positioner to emulate 6DoF。\n- HMD or AR glasses。\n- USB-C tethering。\n- future: WiFi7。\n\n來源另列 R&S CMX500 XR-related roadmap focuses on power savings and low latency，包含 BWP switching、SCell dormancy、cross-slot scheduling、uplink configured grant、enhanced cDRX、PDCCH skipping、low latency mobility 等 Release 15–18 / 19 features。此部分本次只作為待拆頁線索。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 7.232051
+             },
+             {
+              "text": "CMX500 use-case based 5G testing\n[[CMX500 use-case based 5G testing]] 是 [[Rethink 5G Testing solution overview 5G RedCap NTN FWA]] 中對 [[R&S CMX500]] 的 market / solution positioning：以 use-case based approach 支援 5G eMBB、FWA、RedCap、NTN、XR 等裝置測試，而不只是一組單點工具。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 use-case based 5G testing.md"
+              },
+              "score": 6.15994
+             },
+             {
+              "text": "5G FWA CPE deployment and testing requirements › 5G FWA UE test requirements\n來源將 [[5G FWA]] UE test requirements 分成：\n\n| 類別 | Indicators | Goal |\n|---|---|---|\n| RF parametric | NR 3GPP RF TRx test specification、Output power、EVM、OBW、receiver sensitivity level BLER、band permutations and CAs | Checks RF TRX performance in accordance with common test specifications；mostly required by operators |\n| Functional | E2E max throughput DL / UL per band CA / ENDC / DC combos、24/7 long duration tests、NSA / SA attach、modulations <1024QAM、long connection stability、latency、SMS、USIM / eSIM authentication、FW versioning | Improve customer satisfaction；check battery life、thermal、firmware regression、wireless module benchmark、CPE under heavy load |\n| Operator acceptance | Operator-specific test criteria | Verifies whether device meets operator test criteria |\n| Conformance | RF / RRM / PCT | [[GCF]] / [[PTCRB]] certification |\n| OTA | [[CTIA]] OTA test specification | Verifies antenna performance，required by operators |\n| Coexistence | WLAN coexistence testing with Wi‑Fi signaling | Ensure no impact between different radios |\n| Security | TCP/IP application message flows | SW vulnerability testing |\n| Regulatory | RF output power、emission mask、spurious emissions | CE / FCC certification |\n\n來源列出的 instruments 包含 Power Supply、Power Meters、Scopes、VSA、VSG、[[R&S RTO]]、[[R&S FSW]]、[[R&S SMW200A]]、[[R&S CMP180]]、[[R&S CMP200]]、[[R&S ATS1800C]]、[[R&S NGM200]]。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FWA CPE deployment and testing requirements.md"
+              },
+              "score": 9.614041
+             },
+             {
+              "text": "5G FWA CPE deployment and testing requirements › 與既有知識的關係\n- [[FWA CPE 市場與測試分類]] 整理 OneNote 表格與 GSA July 2025 taxonomy；本頁增加 operator deployment、Indoor / Outdoor economics 與 test requirement taxonomy。\n- [[FWA CPE 測試與驗證]] 整理 EVT / DVT / PVT / MP；本頁增加 FWA UE test requirement 類別與 instruments。\n- [[FWA Device Ecosystem Directory]] 與 [[GSA-FWA-Company-Directory-V13.4]] 是 GSA directory 來源；本頁的 99 vendors 和 examples 仍需回原 directory 確認版本與範圍。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FWA CPE deployment and testing requirements.md"
+              },
+              "score": 9.136733
+             },
+             {
+              "text": "5G FWA CPE deployment and testing requirements\n[[5G FWA CPE deployment and testing requirements]] 整理 [[Rethink 5G Testing solution overview 5G RedCap NTN FWA]] 中對 [[5G FWA]]、[[FWA CPE]] deployment、Indoor / Outdoor CPE tradeoff 與 UE test requirements 的市場 / 測試需求描述。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FWA CPE deployment and testing requirements.md"
+              },
+              "score": 7.990488
+             },
+             {
+              "text": "5G FWA CPE EVT DVT PVT MP 測試路線圖 › 5G FWA UE test requirements\n來源 slide 18 將 5G FWA UE test requirements and solutions 分成：\n\n| Test type | Indicators | Goal |\n|---|---|---|\n| RF parametric | NR 3GPP RF TRx test specification、output power、EVM、OBW、receiver sensitivity level BLER、band permutations and CAs | Checks RF TRX performance；mostly required by operators |\n| Functional | E2E max throughput DL/UL per band CA / ENDC / DC combos、24/7 long duration tests、NSA/SA attach、modulations <1024QAM、latency、SMS、USIM/eSIM authentication、FW versioning | Improve customer satisfaction；check battery life、thermal、firmware regression、module benchmark、heavy load behavior |\n| Operator acceptance | Operator-specific test criteria | Verifies whether device meets operator criteria |\n| Conformance | RF / RRM / PCT | [[GCF]] / [[PTCRB]] certification |\n| OTA | [[CTIA]] OTA test specification | Verifies antenna performance，required by operators |\n| Coexistence | WLAN coexistence testing with Wi-Fi signaling | Ensure no impact between different radios |\n| Security | TCP/IP application message flows | SW vulnerability testing |\n| Regulatory | RF output power、emission mask、spurious emissions | CE / FCC certification |\n\n來源列出的 instruments / tool categories 包含 Power Supply、Power Meters、Scopes、VSA、VSG、Signaling、Conformance，以及 [[R&S RTO]]、[[R&S FSW]]、[[R&S SMW200A]]、[[R&S CMX500]]、[[R&S CMP180]] / [[R&S CMP200]]、[[R&S ATS1800C]]、[[R&S TS8980]]、[[R&S NGM200]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FWA CPE EVT DVT PVT MP 測試路線圖.md"
+              },
+              "score": 7.456524
+             },
+             {
+              "text": "5G FWA CPE EVT DVT PVT MP 測試路線圖 › Roadmap 總表\n來源 slide 12 將 testing roadmap 表示為 EVT → DVT → PVT → MP：\n\n| Stage | Hardware | RF / Wireless | Protocol / Mgmt | Security | Production |\n|---|---|---|---|---|---|\n| EVT | Power、I/O、temp | Initial RF scan | — | — | — |\n| DVT | Thermal、EMC | TX/RX、OTA、spec mask | IPv4/6、Wi-Fi、TR-069 init | — | — |\n| PVT | — | FCC/CE/PTCRB | CDRouter、BBF.069/369、perf | Vuln scan、pwd、mgmt access | FCT、yield >98% |\n| MP | — | OTA、long-term perf | Operator custom tests、TR-143 | CVD、patch cycles、monitoring | CPK、defect tracking |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FWA CPE EVT DVT PVT MP 測試路線圖.md"
+              },
+              "score": 5.302953
+             },
+             {
+              "text": "5G FWA CPE EVT DVT PVT MP 測試路線圖 › 使用限制\n- 本頁不是正式測試規範，沒有 pass / fail limits、measurement uncertainty、test case IDs、校準流程、fixture、chamber、DUT mode 或 software option dependencies。\n- Acceptance criteria 是簡報層級；需由客戶 test plan、operator requirement、certification body 與產品規格裁決。\n- R&S tool images / labels 只支援「來源列名」，不可推論完整 solution configuration。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G FWA CPE EVT DVT PVT MP 測試路線圖.md"
+              },
+              "score": 4.523454
+             },
+             {
+              "text": "R&S CMP180 › Transmitter test functions\n- 8 input signals to be multiplexed to RF analyzer no. 1。\n- 8 input signals to be multiplexed to RF analyzer no. 2。\n- frequency-dependent attenuation（FDA）tables for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 4.359797
+             },
+             {
+              "text": "R&S CMP180 › Receiver test functions\n- RF generator signal is split and forwarded to 8 output ports each。\n- every output can be switched off separately。\n- collective output level setting for connectors RF 1.1 to RF 1.8 and RF 2.1 to RF 2.8。\n- frequency-dependent attenuation（FDA）table for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 4.211157
+             },
+             {
+              "text": "R&S CMP180 › Product conformity 與 approvals\n依 [[CMP180 Specifications Version 08.00]]：\n\n- EMC Directive 2014/30/EU；EN 61326-1 industrial environment；EN 55011 class A。\n- Low Voltage Directive 2014/35/EU；EN 61010-1。\n- USA/Canada：UL 61010-1；CAN C22.2 No. 61010-1。\n- VDE mark certificate：40049747。\n- CSA mark certificate：70214983；file number LR114196。\n- Korea KC：R-R-RnS-CCMP2HG。\n- RoHS：Directive 2011/65/EU；EN IEC 63000。\n- EU Data Act：Regulation (EU) 2023/2854；details in user documentation。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 22,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 3.426553
+             },
+             {
+              "text": "R&S CMP180 › Base unit 與硬體配置\n依 [[CMP180 Specifications Version 08.00]] ordering information：\n\n| Designation | Type | Order no. |\n|---|---|---|\n| Radio communication tester, including power cables and getting started guide | CMP180 | 1201.0002K18 |\n| CMP180 basic assembly | R&S CMP-PB18I | 1212.1986.10 |\n| Single instrument interface | R&S CMP-B40J | 1212.3372.11 |\n| Multi-instrument interface | R&S CMP-B41J | 1212.3389.11 |\n| RF unit 250（basic function, 6 GHz/250 MHz） | R&S CMP-B802I | 1212.3408.10 |\n| RF unit 500（basic function, 6 GHz/250 MHz） | R&S CMP-B805I | 1212.3414.10 |\n| Performance uprating for RF unit 500 | R&S CMP-KB805 | 1212.3866.02 |\n\n依 [[CMP180 Features and Functions Version 09]] 的 RF unit 描述：\n\n- **R&S CMP-B802x**：僅支援 **250 MHz bandwidth**。\n- **R&S CMP-B805x**：支援 **250 MHz bandwidth**，可用 **R&S CMP-K185** 啟用 **500 MHz**。\n\n依 [[CMP180 Specifications Version 08.00]]：\n\n- RF generator/analyzer no. 1：**8 × SnapN**，RF input/output to DUT，RF 1.1 to RF 1.8。\n- RF generator/analyzer no. 2：**8 × SnapN**，RF input/output to DUT，RF 2.1 to RF 2.8；requires **R&S CMP-K102** or **R&S CMP-K105** software license key。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 3.193869
+             },
+             {
+              "text": "R&S CMP180 › Measurement options\n依 [[CMP180 Features and Functions Version 09]] 與 [[CMP180 Specifications Version 08.00]]，CMP180 支援多種 measurement options。Version 08.00 ordering information 的完整 order number 節錄如下：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 2.720096
+             },
+             {
+              "text": "5G device testing value chain › Validation and Conformance 目標\n來源指出 validation and conformance 測試目標包含：\n\n- Chipset L1–L4 test plan and verification。\n- Investigate and debug modem stack。\n- Validate and optimize end to end performance of IMS / SIP / TCP/IP。\n- Investigate and debug app stack。\n- Plan、develop、execute 3GPP / carrier device tests。\n- Radiated and conducted testing。\n\n測試目的包含：\n\n- Final product according to [[3GPP]] specs and KPIs 的 conformance。\n- Final product for different carriers 的 conformance。\n- New product introduction test framework 與 pilot production tests。\n- 確認 HW / SW 如設計般運作。\n- Cellular transceiver systems optimization。\n- Meet 3GPP specifications or custom design criteria。\n- Assure robustness / reliability and performance on L1–L3。\n- Optimize each stack for highest throughput and defined KPIs。\n- Ensure robustness / reliability and performance on IMS、TCP/IP stack and app protocols。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 6.422307
+             },
+             {
+              "text": "5G device testing value chain › 工具與平台 mapping\n來源列出下列工具 / 平台 mapping：\n\n| 測試層 | 來源列出的工具 |\n|---|---|\n| RF / parametric / characterization | [[R&S SMW200A]]、[[R&S FSW]]、Oscilloscopes |\n| Signaling / protocol / application | [[R&S CMX500]]、[[R&S CMW500]]、[[R&S CMsquares]] |\n| OTA / chamber | [[R&S ATS1800C]]、[[R&S CMQ]]、[[R&S ATS CATR]] |\n| Production / manufacturing | [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100]]、[[R&S CMX500]] / [[R&S CMW500]] |\n| Conformance automation | [[R&S CONTEST]] for RRM、PQA、LBS、PCT、NPT、RF OTA |\n| Toolchain / scripts | [[R&S CMsequencer]]、[[XLAPI]]、[[SCPI]]、Python |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 6.23838
+             },
+             {
+              "text": "5G device testing value chain › 來源日期與範圍\n- 主要來源：[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]。\n- 來源正式日期：來源未標示。\n- 來源內容日期線索：Q2CY2023 ecosystem snapshot、2022 shipment base、2023–2028 LTE / 5G connection forecast、2030 cellular IoT forecast、2035 NTN revenue forecast。\n- 本頁整理的是 Market / solution overview，不是正式 test plan、產品規格或標準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 4.659962
+             },
+             {
+              "text": "5G device testing value chain › Shuffler 與 CMsequencer\n來源描述 [[Shuffler]] 可在 one go 執行 device 支援 UE band combos 的 RF / throughput test，並以 one test script with one test report 取得 RF TX/RX measurement、RX sensitivity、Throughput、VoLTE / VoNR 等 summarized results。來源說：\n\n- Shuffler tests part of [[R&S CMX-KF612M]] test package。\n- Shuffler implemented in [[R&S CMsequencer]]。\n- Band combinations 可由 UE capabilities 或 user-defined Excel sheet 輸入。\n- Band combo support table 包含 LTE 4/5 LTE CA、LTE + NR 4 LTE + 2 NR / 5 LTE + 2 NR、NR 2–4 NR CA、NRDC、LTE + FR1、LTE + FR2。\n\n此處為 solution overview；[[R&S CMX-KF612M]] 的正式 feature list、order number、CSW version 與 supported bands 仍需正式 R&S 文件補證。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 2.99452
+             },
+             {
+              "text": "5G device testing value chain › ecosystem roles\n來源列出的 5G device value chain 角色包含：\n\n- [[Network operator]]。\n- [[Device manufacturer]]。\n- [[Test house]]。\n- [[Chip vendor]]。\n\n這些角色橫跨 Lab、R&D、Production、Operations 與 Use cases，不同階段需要不同層級的 test and measurement instruments。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 2.647071
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › Production：R&S CMP180 non-signaling RF testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。\n- [[R&S CMP180]] 被定位為 optimized for this purpose 的 radio communication tester。\n- 來源稱 [[R&S CMP180]] 支援 many cellular and non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform。\n- 來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。\n- 來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。\n- 來源稱 two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 4.430821
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › Interworking：WLAN offloading 與 Voice over WLAN\n同一來源也把 [[R&S CMX500]] 用於 cellular [[5G]] 與 [[WLAN]] 的 seamless traffic offloading and interworking demonstration：\n\n- [[WLAN offloading]] 是把原本 intended for cellular networks 的 data 透過 WLAN 傳送，以減少 cellular bands data load。\n- [[Voice over WLAN]] 情境聚焦在 cellular network 與 WLAN 之間 handover during a voice call，以維持 uninterrupted voice call experience。\n- 來源稱 [[R&S CMX500]] 內建 newly integrated [[N3IWF]] gateway，可測試 WLAN offloading with Voice over WLAN。\n- 來源稱 [[R&S CMX500]] 的 integrated [[POLQA]] voice quality measurement function 可用於 voice over WLAN applications 的 quality of experience early-stage 評估。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 2.18654
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › Wi-Fi 7 技術挑戰\n來源將 [[Wi-Fi 7]] / [[IEEE 802.11be]] 描述為 designed for extremely high data throughput，面向 tens of gigabits per second、low latency、ultra-high-definition video streaming、virtual reality 與 augmented reality applications。來源列出的 higher throughput key elements：\n\n| 技術項目 | 來源說法 |\n|---|---|\n| channel bandwidth | increased channel bandwidth of 320 MHz |\n| spatial streams | up to 16 spatial streams |\n| modulation | 4096 QAM modulation |\n| MLO | key feature；使 multiple RF chains 測試環境變重要 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 1.583769
+             },
+             {
+              "text": "R&S CMX500 › Application tests 與 audio\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n- 未啟用 R&S CMX-KA100 等 application test license 時，IP application test functionality 降到最低；只能使用 standalone mode，不能連接 external servers，也不支援 IP based measurements 或 tools。\n- R&S CMX-KA100 提供 internal IP services 與 IP connection to DUT 測試 applications，包含 DNS、IMS、Message Center、FTP、HTTP、DNS monitor、IP logging、iPerf、Ping、throughput、Max Throughput Wizard、web server。\n- R&S CMX-KA110 增強 KA100，加入 QoS、ePDG、N3IWF、delay measurement、IP tune tool、SMPP / MT SMS advanced settings。\n- R&S CMX-KA150 提供 IP analysis tool，用於監控與分析 DUT uplink / downlink IP traffic。\n- R&S CMX-KA180 提供 audio codecs for 4G and 5G IMS voice call，支援 AMR-NB、AMR-WB、EVS，並包含 [[R&S CMX-ZG180A]] external sound card drivers and configuration settings。\n- R&S CMX-KA181 加入 [[POLQA]]，用於 measuring perceived speech quality；measurement version 為 3，mode 為 full-band 或 narrowband。\n- R&S CMX-KA401 支援 WAV player / recorder、upload/download WAV files、file-based POLQA measurements 與 end-to-end audio delay。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 35,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 11.474198
+             },
+             {
+              "text": "R&S CMX500 › 使用介面與 automation\n依 [[CMX500_Features_CSW9-20-0_en_32]]：\n\n| 介面 | 原文定位 |\n|---|---|\n| [[CMsquares]] | 單一 graphical user interface，web-based、responsive，支援 RF tests、functional tests、advanced signaling tests、protocol tests |\n| [[R&S CMXmars]] | Message log analysis，可離線分析或在線監控 instrument messaging |\n| [[R&S CMsequencer]] | Graphical scripting interface，可在 CMX500 或 Windows PC 上建立、設定與執行 test scripts |\n| [[XLAPI]] | Python-based scripting interface，適合 complex scripting use cases |\n| [[SCPI]] | Remote control interface，適合 simple、standardized scripting use cases |\n\nXLAPI scripting environment：Python 3.10；script development computer 可為 Windows PC 或 CMX500；XLAPI installation package 為 **CMX-KF600X**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 36,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 9.550188
+             },
+             {
+              "text": "R&S CMX500 › RF ports 與 routing\n- RF Com 1、RF Com 2：simultaneous receiver and transmitter testing；2 × SnapN；RF input/output to DUT。\n- RF In 1、RF In 2：transmitter testing；2 × SnapN；RF input from DUT。\n- RF Out 1 to RF Out 4：receiver testing；4 × SnapN；RF output to DUT。\n- Receiver test functions：四個 RF generators（其中兩個在 GPRF mode）可 routing 到 RF Com 1、RF Com 2、RF Out 1 to RF Out 4。\n- Transmitter test functions：RF Com 1、RF Com 2、RF In 1、RF In 2 ports 的四個 input signals 各可 split 到 one or two RF analyzers。\n- FDA tables 支援 user-specific frequency-dependent attenuation corrections。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 8.557596
+             },
+             {
+              "text": "R&S CMX500 › Signaling options（依 [[CMX500_Features_CSW9-20-0_en_32]]）\n| Code | Name / 原文說明 | Order no. | 相依關係 / 限制 |\n|---|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx | WLAN SISO signaling |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx | 802.11ax station testing |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx | 802.11be station testing |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx | 802.11bn station testing |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx | 802.11ax AP testing |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx | 802.11be AP testing |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx | 802.11bn AP testing |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx | 2x2 MIMO support |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx | Enterprise security support |\n| R&S CMX-KS500B / M / X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx | 僅 LTE standalone 需要；NR NSA LTE anchor cells 包含於 NR signaling options |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx | D2C fixed / variable delay |\n| R&S CMX-KS600B / M / X | NR signaling enabler, Rel. 15 | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx | 包含 5G NR SA option 2、NSA option 3、DL 2x2/4x4 MIMO、one CC、UL 256QAM |\n| R&S CMX-KS610B / M / X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx | UL 2x2 MIMO、CA up to 9 CC |\n| R&S CMX-KS611B / M / X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx | SUL / Rel. 16 features |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 8.539321
+             },
+             {
+              "text": "R&S CMX500 › 文件依據與版次\n本頁並列使用兩份來源：\n\n| 來源 | 文件類型 | 文件編號 | 版次 / 軟體 | 日期 | 用途 |\n|---|---|---|---|---|---|\n| [[CMX500_specs_en_5216-4127-22_v1100]] | Specifications | PD 5216.4127.22 | Version 11.00 | August 2025 | binding specifications、hardware unit 型號、order number、環境、尺寸、電源、service |\n| [[CMX500_Features_CSW9-20-0_en_32]] | Features and Functions | 1179.1164.02 | Version 32；CSW 9.20.0 and higher | 來源未標示；© 2026 | GUI、software features、signaling / application / measurement options 與使用介面 |\n\n[[CMX500_specs_en_5216-4127-22_v1100]] 的 product data 適用條件：ambient temperature 儲存 3 小時後，warm-up operation 30 分鐘；符合指定 environmental conditions；遵守 recommended calibration interval；已執行所有適用的 internal automatic adjustments。文件區分 specifications with limits、non-traceable specifications、typical data、nominal values、measured values 與 uncertainties；non-traceable specifications、typical data、nominal values、measured values 不由 [[Rohde & Schwarz]] 擔保。\n\n[[CMX500_Features_CSW9-20-0_en_32]] 明示：**Subject to change – data without tolerance limits is not binding**。它是 features/functions overview，不是 technical specifications datasheet。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 8.42323
+             },
+             {
+              "text": "CMX500 Callbox › Example Callbox use cases\n[[CMX500_Callbox]] 的 Example Callbox use cases 進一步列出：\n\n- R&D verification of new bands。\n- Sensitivity testing。\n- [[RedCap]]。\n- [[CMX500 Desense Testing]]。\n- [[3GPP Pre-Conformance Testing]]。\n- [[CMX500 SRS RF measurements]]。\n- UL MIMO and UL CA RF measurements。\n- UL TX Switching。\n- [[CMX500 Multi-SIM testing]]。\n- High e2e TP testing。\n- Non-signaling verification。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 4.643085
+             },
+             {
+              "text": "CMX500 Callbox › unresolved\n- 來源未標示簡報版本、作者、正式發佈日期與對應 CSW software release。\n- 多個 use cases 未列出完整 option stack、BOM、DUT 條件或測試報告。\n- Roadmap 字樣如 coming soon、coming in 2025 and later、planned for CSW 9.00 / 9.10 需以 release note 或正式 product documentation 補證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 4.072961
+             },
+             {
+              "text": "CMX500 Callbox › UI 與 automation\n來源將 [[CMsquares]] 描述為 web based、all-in-one configuration、all tools in one place、modern UI，並列出：\n\n- live views。\n- App Testing。\n- NTN live views。\n- Sequencer。\n- Log analysis。\n- One-click RF testing。\n\n在 RF pre-conformance 脈絡中，來源稱可 quick switch from manual to automated pre-conformance，且使用 same technology specific license，並指向 [[CMX500 Sequencer Test Packages]] 與 `Sequencer-CMX-Test_Packages_Database.xlsx`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 2.811608
+             },
+             {
+              "text": "CMX500 Callbox › Application / mobility use cases\n來源列出的 callbox application / mobility use cases 包含：\n\n- [[Mobility Testing]]。\n- [[Network Slicing]]。\n- [[IP Throughput]]。\n- [[Security Analysis]]。\n- [[Backend Service]]。\n- [[IMS Services]]。\n- [[WLAN offloading with Voice over WLAN]]。\n- [[ATSSS]]。\n- [[Power Consumption]]。\n- [[XR Responsiveness & L4S]]。\n- [[eCall]] / [[NGeCall]]。\n- [[Speech Quality]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/CMX500 Callbox.md"
+              },
+              "score": 0.604428
+             },
+             {
+              "text": "CMX500_Callbox › 原文未解的問題\n- 來源投影片中日期 **05.01.2026** 未標示格式；不可判定為 2026-01-05 或 2026-05-01。\n- 來源 frontmatter 只標示 converted 2026-09-17；原始簡報發布日期、作者、版本與 software release 未標示。\n- Slide 21 的「25 TCs」未列出 test case IDs，也未說明是否僅限 manual NR SA FR1 GUI pre-conformance。\n- Slide 31 RF Pre-Conformance TC Count 圖表的 category 7.1、7.4、7.6、8.3000000000000007 未展開為標準章節或 package 名稱。\n- Slide 23 / 52 說 NR-NTN、NSA、LTE coming；來源未標示該 roadmap 對應 software release 或實際可用日期。\n- Slide 69 說 LTE+LTE DSDA coming soon；Slide 42 的 supported combinations 圖上也列 LTE+LTE DSDA，兩者 scope / 時點未明。\n- Slide 70 說 NB-NTN coming end of `25；來源日期格式未定，且未提供 option code / release note / availability 證據。\n- Slide 71 的 10.6 Gbps with 5CC SA verified、1CC FR1 + 8CC FR2、10 Gbps E2E testing 未提供 test setup、DUT、band combination、software release 或 report。\n- GPRF Generator 標示 no license required，但 ARB libraries / WinIQSim2 waveforms 又列出 KWxxx licenses；需區分 base GPRF signal generation 與 technology-specific protected ARB files。\n- QDART WLAN support 標示 internally verified / currently in process to get listed in Qualcomm help files，尚非正式 listed claim。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Callbox.md"
+              },
+              "score": 3.156021
+             },
+             {
+              "text": "CMX500_Callbox\n[[CMX500_Callbox]] 是由 `CMX500_Callbox.pptx` 轉出的 company restricted 簡報來源，介紹 [[R&S CMX500]] 作為 callbox 的定位、R&D / pre-conformance / application / mobility / NTN / WLAN / non-signaling use cases 與相關 option 線索。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Callbox.md"
+              },
+              "score": 3.007647
+             },
+             {
+              "text": "CMX500_Callbox › 重點摘要\n- High end-to-end throughput 部分稱 1024 DL QAM available in FR1、10.6 Gbps with 5CC SA verified、1CC FR1 + 8CC FR2、10 Gbps E2E testing，並列出 [[R&S CMX-KS610B]]、[[R&S CMX-KS637B]] 與 [[R&S CMX-KA100]]。\n- Non-signaling / GPRF 部分稱 GPRF Generator signal types 包含 ARB、CW、Dual Tone、Replay `.wv` files、up to 4 GPRF Generator instances in parallel、ARB Sequencer，且標示 no license required；但 technology-specific R&S provided ARB files 與 WinIQSim2 waveforms 由 KWxxx licenses enable。\n- GPRF / ARB file 部分列出 KW libraries：GNSS [[R&S CMX-KW220]]、BT [[R&S CMX-KW310]]、WLAN KW350/KW351/KW352/KW353、GSM KW420、WCDMA KW440、LTE KW500、NB-IoT KW250、LTE C-V2X KW570、NR Rel 15/16 KW601、NR Rel 17 KW602 + KW601、NR C-V2X KW670、AWGN KW120；另有 [[R&S CMX-KW101]] Create ARB on CMX，coming with CSW 9.10。\n- IQ recorder 部分稱可 record up to 4 Gbyte to a file、save files as `.wv` for replay、使用 same IQ stream + RF parameters as signaling、2 per RFU、1 per IFU、FR1 specialist 可 8 instances in parallel。\n- Standalone TX measurements 部分列出 [[R&S CMX-KM500]] LTE Measurements 與 [[R&S CMX-KM600]] NR FR1 Measurements, Single Carrier。\n- QDART support 部分稱 CMX500 officially listed for 5G Sub-6 / 2G–4G，WLAN internally verified and currently in process to get listed in Qualcomm help files。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Callbox.md"
+              },
+              "score": 1.602736
+             },
+             {
+              "text": "Rethink 5G Testing solution overview 5G RedCap NTN FWA › 關鍵實體與概念\n- 實體 / 工具：[[R&S CMX500]]、[[R&S CMW500]]、[[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100]]、[[R&S CMQ]]、[[R&S ATS1800C]]、[[R&S TS8980 Conformance Test Platform]]、[[R&S NGM200]]、[[R&S SMW200A]]、[[R&S FSW]]、[[R&S RTO]]、[[R&S CONTEST]]、[[R&S CMsquares]]、[[R&S CMsequencer]]。\n- 5G device / test 概念：[[5G device testing value chain]]、[[5G device requirements]]、[[Carrier Aggregation testing]]、[[Pre-conformance testing]]、[[Conformance testing]]、[[Carrier acceptance]]、[[OTA testing]]、[[Non-signaling RF]]、[[Signaling Protocol]]。\n- FWA 概念：[[5G FWA CPE deployment and testing requirements]]、[[FWA CPE 市場與測試分類]]、[[FWA CPE 測試與驗證]]、[[Indoor CPE]]、[[Outdoor CPE]]、[[mmWave ODU]]、[[MU-MIMO]]、[[1024QAM]]。\n- RedCap 概念：[[5G RedCap device testing]]、[[5G RedCap]]、[[RedCap]]、[[3GPP Release 17]]、[[3GPP Release 18]]、[[5G SA network]]、[[RedCap-specific BWP]]、[[RedCap early indication]]、[[HD-FDD]]。\n- NTN 概念：[[NTN IoT device testing requirements]]、[[5G NTN validation and testing]]、[[NTN propagation emulation and fading]]、[[NB-NTN]]、[[NTN-IoT]]、[[NTN-NR]]、[[SIB31]]、[[SIB32]]、[[Doppler frequency shift]]、[[RTT]]、[[GNSS]]、[[Satellite ephemeris]]。\n- Market / ecosystem 來源名稱：[[GSA]]、[[GSA FWA Survey]]、[[GSMA Intelligence]]、[[Quectel RedCap insights]]、[[Bullitt Group Market Study 2022]]、[[IDC]]、[[Berg Insight]]、[[Murata]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rethink 5G Testing solution overview 5G RedCap NTN FWA.md"
+              },
+              "score": 4.605769
+             },
+             {
+              "text": "Rethink 5G Testing solution overview 5G RedCap NTN FWA › 重點摘要\n- [[R&S CMX500]] 被定位為 future proof 5G signaling test platform，具 Linux-based platform、single web-based GUI、modular and scalable HW architecture、LTE / FR1 up to 8 GHz、FR2 24–50 GHz、ready for up to 20 Gbps and more E2E IP performance，以及 onboard IP / application test feature set。此處屬 solution overview / Market 來源，不取代 [[CMX500_specs_en_5216-4127-22_v1100]]。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- [[FWA]] 部分指出 431 個 4G FWA operators 與 99 個 5G FWA operators launched services；5G FWA CPE shipments growing 30% YoY，來源標示 [[GSA FWA Survey]]。同頁也列 USA、Europe、South East Asia、Middle East、South Africa、India 等 growth regions。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- [[FWA CPE]] 測試要求被分為 RF parametric、Functional、Operator acceptance、Conformance、OTA、Coexistence、Security、Regulatory；instrument examples 包含 Power Supply、Power Meters、Scopes、VSA、VSG、[[R&S RTO]]、[[R&S FSW]]、[[R&S SMW200A]]、[[R&S CMP180]]、[[R&S CMP200]]、[[R&S ATS1800C]]、[[R&S NGM200]]。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- [[5G RedCap]] 部分指出 RedCap device works only over [[5G SA network]]，主 use cases 包含 Industrial IoT、Surveillance、Robots、Consumer IoT、Wearables、XR；3GPP R17 optimized features 包含 FR1 20 MHz、FR2 100 MHz、1/2 RX antennas、single TX、64QAM、half-duplex、no CA / MR-DC / DAPS / CPC、RRM measurement relaxation、RedCap-specific BWP、max 8 DRBs 等。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]\n- RedCap cellular IoT evolution table 對比 5G NR、5G RedCap 1T2R、5G RedCap 1T1R、Cat 4、Cat 1 / Cat 1bis，列出 peak data rate、URLLC、power consumption、network slicing、5G LAN、mobility、voice、NTN、chipset / modem cost。該表的單位、來源與測試條件在萃取片段未完整標示。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rethink 5G Testing solution overview 5G RedCap NTN FWA.md"
+              },
+              "score": 3.450944
+             },
+             {
+              "text": "Rethink 5G Testing solution overview 5G RedCap NTN FWA\n這份 OneNote / solution overview 來源整理 [[5G device testing]] 的 use-case based approach，涵蓋 [[5G eMBB]]、[[FWA]]、[[5G RedCap]]、[[NTN]]、[[XR]] 與 [[R&S CMX500]] / [[R&S CMW500]] 等測試平台定位；來源正式發布日期未標示，內容含 Q2CY2023、2022、2023–2028、2030 與 2035 等多個市場 / roadmap 時間點。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rethink 5G Testing solution overview 5G RedCap NTN FWA.md"
+              },
+              "score": 1.074766
+             },
+             {
+              "text": "Rethink 5G Testing solution overview 5G RedCap NTN FWA › 原文未解的問題\n- 來源正式發布日期、投影片版次、作者、document number 與保密等級未在萃取片段中標示。\n- 多數市場數字只標示來源名稱或圖上來源，未提供完整報告標題、URL、出版日期、單位、口徑或引用頁碼。\n- LTE / 5G connection forecast 的單位未標示；可能為 million connections，但不可推論。\n- Q2CY2023 5G ecosystem snapshot 中部分數字的分類標籤重複或不完整，例如 Announced 6 / Announced 273、SA 52 / SA 199 等欄位需回原圖確認。\n- FWA deployment figures、5G FWA CPE shipment growth 30% YoY、operator ambitions 與 regional figures 需回 GSA FWA Survey 或原始 operator data 確認。\n- RedCap cellular IoT evolution table 的來源、測試條件、成本口徑與 power consumption 條件未標示。\n- NTN addressable revenue $35B by 2035、8% IoT market addressable by NTN-IoT、possible NTN adoption in device shipments 等 market forecast 需要完整 GSMA Intelligence 引用。\n- CMW500 NB-NTN Rel.17 test solution 中 CMW-KP030、CMW-KR317、CMW-KU317、CMW-KK307 的正式 order number、launch status 與目前 availability 未確認。\n- XR / Metaverse、L4S、CMX500 XR roadmap 相關內容本次尚未拆成專頁；需後續依正式 R&S / 3GPP / partner 來源補強。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Rethink 5G Testing solution overview 5G RedCap NTN FWA.md"
+              },
+              "score": 0.782975
+             },
+             {
+              "text": "R&S CMW100 K06 › 文件依據與版次\n本頁所有主張除非另註，均來自 [[CMW100-K06_specs_en_5214-8348-22_v0500]]：\n\n- 文件名稱：CMW100 Communications Manufacturing Test Set Specifications，Model K06。\n- 文件識別碼：PD 5214.8348.22。\n- 文件版本：Version 05.00。\n- 文件日期：September 2025。\n- 適用資料：除非另有說明，規格資料適用於 CMW100, model K06。\n- 頁尾標示：PD 5214.8348.22，Version 05.00，September 2025 (ch)。\n- 產品資料適用條件：ambient temperature 下儲存 3 小時後，30 分鐘 warm-up operation；符合指定 environmental conditions；遵守 recommended calibration interval；已執行 internal path correction adjustment。\n- 4000 MHz 以上頻率的規格值僅適用於配備 R&S®CMW-K046 option 的 [[R&S CMW100 K06]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+              },
+              "score": 11.621318
+             },
+             {
+              "text": "R&S CMW100 K06 › Base unit 與硬體 / 文件項目\n| Designation | Type / Code | Order no. | 原文說明 |\n|---|---|---:|---|\n| Communications manufacturing test set | CMW100 | 1201.0002K06 | Model K06 base product |\n| CMW100 hardware kit 1 | R&S®CMW-PS16 | 1210.7629.03 | hardware kit |\n| CMW100 hardware kit 2 | R&S®CMW-PS16 | 1210.7629.13 | hardware kit |\n| Documentation of calibration values | R&S®DCV-2 | 0240.2193.08 | calibration values documentation |\n| Printout of DCV | R&S®DCV-ZP | 1173.6506.02 | printout of DCV |\n| Extended frequency range, 4 GHz to 6 GHz | R&S®CMW-PK461 | 1210.7129.02 | Extended frequency range, 4 GHz to 6 GHz |\n| 19-inch rackmounting kit for CMW100 | R&S®CMW100-Z19 | 1210.7470.02 | Recommended extra |\n| Security Information, Getting Started, Specifications | R&S®CMW100-Z32 | 1210.7587.02 | Recommended extra |\n| CMW100 software on USB flash drive | R&S®CMW100-Z33 | 1210.7593.02 | Recommended extra |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 30,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+              },
+              "score": 6.458082
+             },
+             {
+              "text": "R&S CMW100 K06 › LR-WPAN\n- Standard：IEEE 802.15.4 – 2011 low-rate wireless personal area networks。\n- LR-WPAN RF generator frequency range：2450 MHz O-QPSK PHY，2405 MHz to 2480 MHz。\n- LR-WPAN waveforms 使用 R&S®CMW-KV680 option。\n- LR-WPAN RF analyzer 使用 R&S®CMW-KM680 option。\n- LR-WPAN RF analyzer level range：–35 dBm to +36 dBm；maximum permissible continuous power +34 dBm due to thermal limits。\n- LR-WPAN frequency accuracy measurement range：±800 kHz。\n- LR-WPAN frequency accuracy uncertainty：< 20 Hz + drift of timebase。\n- Offset EVM PSDU inherent EVM：PRBS pattern 時 < 2 % RMS。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 24,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+              },
+              "score": 5.775528
+             },
+             {
+              "text": "R&S CMW100 K06 › General data\n| 項目 | 規格 / 說明 |\n|---|---|\n| Power input | Rear panel DC socket；基於安全原因，儀器只能搭配 Rohde & Schwarz AC adapter order no. 1210.7812.00 使用。 |\n| Rated voltage | 24 V DC ±10 % |\n| Rated current | max. 5 A |\n| Power consumption | max. 80 W |\n| Operating temperature range | +5 °C to +45 °C |\n| Storage temperature range | –25 °C to +60 °C |\n| Damp heat | +40 °C，80 % relative humidity，steady state，in line with EN 600068-2-78 |\n| Dimensions | 354 mm × 112 mm × 394 mm；14.0 in × 4.4 in × 15.5 in |\n| Weight | approx. 6.8 kg；15 lb |\n| Calibration interval | 12 months recommended for highest accuracy；24 months add 0.2 dB to specified RF generator and RF analyzer level uncertainty |\n| Warranty | Base unit 1 year；all other items 1 year |\n\nProduct conformity：EMC 適用 EU EMC Directive 2014/30/EC、EN 61326-1 industrial environment、EN 61326-2-1、EN 55011 class A；electrical safety 適用 EU EN 61010-1、USA/Canada UL 61010-1、CAN C22.2 No. 61010-1；RoHS 適用 EU Directive 2011/65/EC、EN IEC 63000；EU legislation 另列 Data Act Regulation (EU) 2023/2854。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 28,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+              },
+              "score": 5.285732
+             },
+             {
+              "text": "R&S CMW100 K06 › Bluetooth\n- Standard：Bluetooth Core Specification Version 5.0、5.1、5.2、5.3、5.4。\n- Bluetooth 5.2 支援 isochronous PDU type。\n- Test standards：Radio Frequency Bluetooth Test Specification RF.TS.p33；Low Energy RF PHY Bluetooth Test Specification RF-PHY.TS.p19。\n- Bluetooth RF generator frequency range：2402 MHz to 2480 MHz。\n- Bluetooth R&S®WinIQSIM2 option：R&S®CMW-KW610。\n- Bluetooth RF analyzer options：R&S®CMW-KM610、R&S®CMW-KM721。\n- Bluetooth RF analyzer level range：–35 dBm to +36 dBm；maximum permissible continuous power +34 dBm due to thermal limits。\n- Bluetooth basic rate supported packet types：DH1、DH3、DH5。\n- Bluetooth EDR supported packet types：2-DH1、2-DH3、2-DH5、3-DH1、3-DH3、3-DH5。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 22,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMW100 K06.md"
+              },
+              "score": 3.654531
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › LTE measurements\n- R&S CMX-KM500 提供 LTE uplink measurements，支援含 PUCCH/PUSCH signals、random access preambles、sounding reference signals。\n- LTE uplink multi-evaluation 支援 FDD / TDD signals、channel bandwidth 1.4 MHz、3 MHz、5 MHz、10 MHz、15 MHz、20 MHz、normal 或 extended cyclic prefix、arbitrary resource block allocation，以及 QPSK、16QAM、64QAM。\n- Carrier aggregation 支援 intraband contiguous UL CA signals；可量測 two、three 或 four carriers depending on bandwidth class。\n- LTE sidelink measurements 由 R&S CMX-KM570 提供，RF operating band 為 band 47。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 17,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 8.120423
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › WLAN signaling 與 measurement\n- WLAN signaling 支援 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn、AP testing、station testing、single user 2x2 MIMO、advanced encryption and authentication。\n- 若相關 options 都可用，[[R&S CMX500]] 支援 simultaneous WLAN AP and station emulation。\n- WLAN measurement options 支援 WLAN TX measurements：802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 True MIMO。\n- WLAN measurement RF frequency 依 hardware 而定，涵蓋 2.4 GHz、4 GHz、5 GHz、6 GHz operating bands，也支援 out-of-band frequencies；802.11ax SISO input signal settings 明示 RF frequency 為 all WLAN frequency bands up to 7.125 GHz。\n- WLAN measurement bandwidth 依 standard 支援 5 MHz、10 MHz、20 MHz、40 MHz、80 MHz、160 MHz、320 MHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 7.915693
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › 使用介面與軟體\n- [[CMsquares]] — [[R&S CMX500]] 單一 graphical user interface，支援 RF tests、functional tests、advanced signaling tests、protocol tests。\n- [[R&S CMXmars]] — message log analysis 工具，可離線分析或在線監控 instrument messaging。\n- [[R&S CMsequencer]] — graphical scripting interface，可在 CMX500 或 Windows PC 上建立、設定與執行 test scripts。\n- [[XLAPI]] — Python-based scripting interface；script language 為 Python 3.10，安裝 package 為 CMX-KF600X。\n- [[SCPI]] — remote control interface；適合 simple、standardized scripting use cases。\n- [[R&S VSE]] — 來源未列為本文件主要 ordering table 的焦點，但與既有 CMP 文件中的 analysis software 脈絡相鄰。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 6.506896
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › Signaling options\n| Code | 原文名稱 / 用途 | Order no. |\n|---|---|---|\n| R&S CMX-KS350B | WLAN signaling, 802.11a/b/g/n/ac, basic | 1222.7064.xx |\n| R&S CMX-KS351B | WLAN signaling, 802.11ax, STA testing, basic | 1222.7070.xx |\n| R&S CMX-KS352B | WLAN signaling, 802.11be, STA testing, basic | 1222.7087.xx |\n| R&S CMX-KS353B | WLAN signaling, 802.11bn, STA testing, basic | 1222.9873.xx |\n| R&S CMX-KS355B | WLAN signaling, 802.11ax, AP testing, basic | 1222.7093.xx |\n| R&S CMX-KS356B | WLAN signaling, 802.11be, AP testing, basic | 1222.7106.xx |\n| R&S CMX-KS357B | WLAN signaling, 802.11bn, AP testing, basic | 1222.9880.xx |\n| R&S CMX-KS360B | WLAN signaling, 2x2 MIMO single user | 1222.7112.xx |\n| R&S CMX-KS365B | WLAN advanced encryption and authentication | 1222.7129.xx |\n| R&S CMX-KS500B / KS500M / KS500X | LTE signaling basic / medium / expert | 1222.6380.xx / 1222.6397.xx / 1222.6400.xx |\n| R&S CMX-KS527B / KS527X | NB-NTN signaling, Rel. 17, basic / expert | 1222.9738.xx / 1222.9744.xx |\n| R&S CMX-KS550B | LTE-DTC extension for direct-to-cell communication | 1222.9573.xx |\n| R&S CMX-KS600B / KS600M / KS600X | NR signaling enabler, Rel. 15, basic / medium / expert | 1222.1672.xx / 1222.1650.xx / 1222.1695.xx |\n| R&S CMX-KS610B / KS610M / KS610X | NR signaling extension, Rel. 15, feature set 3 | 1222.3700.xx / 1222.3717.xx / 1222.3723.xx |\n| R&S CMX-KS611B / KS611M / KS611X | NR signaling extension, SUL and Rel. 16 features | 1222.3730.xx / 1222.3746.xx / 1222.3752.xx |\n| R&S CMX-KS612B / KS612M / KS612X | NR signaling extension, CA 10 to 12 CC | 1222.6574.xx / 1222.6580.xx / 1222.6597.xx |\n| R&S CMX-KS613B / KS613X | Multi-SIM enabler, basic / expert | 1222.9580.xx / 1222.9596.xx |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 6.156746
+             },
+             {
+              "text": "CMX500_Features_CSW9-20-0_en_32 › Fading、test scenario 與 application test options\n| Code | 原文名稱 / 用途 | Order no. |\n|---|---|---|\n| R&S CMX-KE500 | LTE fading according to 3GPP TS 36.101 | 1222.6674.xx |\n| R&S CMX-KE501 | LTE fading profiles higher order MIMO | 1222.8131.xx |\n| R&S CMX-KE600 | NR fading according to 3GPP TS 38.101 | 1222.2985.xx |\n| R&S CMX-KE601 | NR fading profiles higher order MIMO | 1222.6980.xx |\n| R&S CMX-KE611 | NR NTN fading profiles according to 3GPP TS 38.101 | 1222.8148.xx |\n| R&S CMX-KE620 | User defined fading profiles for LTE, NR and NTN | 1222.9950.xx |\n| R&S CMX-KE621 | User defined UE antenna pattern import | 1222.9996.xx |\n| R&S CMX-KT600 | ASN.1 import for NR | 1222.8183.xx |\n| R&S CMX-KT620 | DL IQ recorder | 1222.9715.xx |\n| R&S CMX-KC550B | LTE 3GPP RF test scenarios | 1222.9067.xx |\n| R&S CMX-KC660B | NR NSA FR1 3GPP RF test scenarios | 1222.4507.xx |\n| R&S CMX-KC661B | NR SA FR1 3GPP RF test scenarios | 1222.4513.xx |\n| R&S CMX-KC665B | NR-NTN 3GPP RF test scenarios | 1222.8748.xx |\n| R&S CMX-KA100 | CMX application test, feature set 1 | 1222.1595.xx |\n| R&S CMX-KA110 | CMX application test, feature set 2 | 1222.4142.xx |\n| R&S CMX-KA150 | CMX IP traffic analysis | 1222.4159.xx |\n| R&S CMX-KA180 | CMX audio enabler | 1222.4165.xx |\n| R&S CMX-KA181 | CMX audio POLQA measurement | 1222.4936.xx |\n| R&S CMX-KA401 | CMX application test audio, feature set 2 | 1222.8125.xx |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMX500_Features_CSW9-20-0_en_32.md"
+              },
+              "score": 5.139677
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › 基本規格與條件\n來源定義 product data 適用條件：\n\n- Ambient temperature storage **3 hours** followed by **30 minutes warm-up operation**。\n- Specified environmental conditions met。\n- Recommended calibration interval adhered to。\n- All internal automatic adjustments performed, if applicable。\n- 所有 specifications valid within a **24-month calibration period**。\n\n來源區分：\n\n- Specifications with limits。\n- Non-traceable specifications with limits（n. trc.）。\n- Specifications without limits。\n- Typical data（typ.）。\n- Nominal values（nom.）。\n- Measured values（meas.）。\n- Uncertainties，coverage factor **2**，依 GUM rules 計算。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 4.986351
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › 產品與文件\n- [[R&S CMP180]]：Radio Communication Tester；本來源提供 Version 08.00 specifications。\n- [[Rohde & Schwarz]]：文件版權方與產品廠商。\n- [[Rohde & Schwarz GmbH & Co. KG]]：R&S registered trademark 所屬組織。\n- [[Bluetooth SIG]]：Bluetooth word mark and logos 所屬組織；Rohde & Schwarz under license 使用。\n- [[HDMI Licensing]]：HDMI / HDMI High-Definition Multimedia Interface / HDMI Logo 商標所屬組織。\n- [[Semtech Corporation]]：LoRa Mark and LoRa Logo registered trademarks 所屬組織。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 4.834043
+             },
+             {
+              "text": "CMP180 Specifications Version 08.00 › Ordering information 摘要\nBase unit / hardware：\n\n| Designation | Type | Order no. |\n|---|---|---|\n| Radio communication tester, including power cables and getting started guide | CMP180 | 1201.0002K18 |\n| CMP180 basic assembly | R&S CMP-PB18I | 1212.1986.10 |\n| Single instrument interface | R&S CMP-B40J | 1212.3372.11 |\n| Multi-instrument interface | R&S CMP-B41J | 1212.3389.11 |\n| RF unit 250（basic function, 6 GHz/250 MHz） | R&S CMP-B802I | 1212.3408.10 |\n| RF unit 500（basic function, 6 GHz/250 MHz） | R&S CMP-B805I | 1212.3414.10 |\n| Performance uprating for RF unit 500 | R&S CMP-KB805 | 1212.3866.02 |\n\nFunctionality extension options：\n\n| Designation | Type | Order no. |\n|---|---|---|\n| Smart channel | R&S CMP-K108 | 1212.2099.02 |\n| Enable second TRX for RF unit 250 | R&S CMP-K102 | 1212.3543.02 |\n| Enable second TRX for RF unit 500 | R&S CMP-K105 | 1212.3550.02 |\n| Extended frequency range, from 6 GHz to 8 GHz | R&S CMP-K168 | 1212.2582.02 |\n| 500 MHz bandwidth | R&S CMP-K185 | 1212.3566.02 |\n\nSoftware measurement options 節錄：\n\nSoftware predefined waveform options 與 [[R&S WinIQSIM2]] waveform options 也列於本來源，包括 GNSS、NB-IoT、LP-IoT、UWB、NG-UWB、Bluetooth Rel. 7.0、WLAN ax/be、LTE、NR Rel. 15/16、NR Rel. 17、NR C-V2X 等。\n\nExtras：\n\n| Designation | Type | Order no. |\n|---|---|---|\n| 19 inch adapter, 2 HU, 1/1 | R&S ZZA-KN2OT | 1175.3810.00 |\n| Multi-instrument connection cable set, for R&S CMPflexx system | R&S CMP-Z41H | 1212.3489.09 |\n\nWarranty and service：\n\n- Base unit warranty：1 year。\n- All other items warranty：1 year。\n- Service plans：on demand up to five years；extended periods require contacting Rohde & Schwarz sales office。\n- Calibration：pay per calibration。\n- Warranty and repair：up to five years，standard price repair。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+              },
+              "score": 4.110613
+             },
+             {
+              "text": "non-signaling\nwith signaling",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-6f4e9ea1141f0dd1",
+                "original_ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+                "sha256": "6f4e9ea1141f0dd1b05cf4e085ab51bd7dcd7db37f1ff9d1d0a6974ab9025692",
+                "raw_ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/TS8980_RF_Conf_FR2_Customer_Presentation_Status_2020_11_02.md",
+               "section": 93,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 17.605508
+             },
+             {
+              "text": "Non-signaling",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-094dfa34f112d59b",
+                "original_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+                "sha256": "094dfa34f112d59b36ac5657e84e88379ec21b54fd169328c309f062cf839f95",
+                "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/CMX500_Callbox.md",
+               "section": 315,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.818487
+             },
+             {
+              "text": "Product Brochure\nVirtual Signalling Tester\nVirtual Signalling Tester NR Software MX844030PC",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-d9d332dee24b8332",
+                "original_ref": "raw/Productions/mx844030pc-j1200.md",
+                "sha256": "d9d332dee24b83321746db80609075eb57c48f67986d48b6d9f4392e7c7be314",
+                "raw_ref": "raw/Productions/mx844030pc-j1200.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/mx844030pc-j1200.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.722121
+             },
+             {
+              "text": "Non-signaling - RF\nSignaling - Protocol\nPre-conformance",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-930719e012588eec",
+                "original_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+                "sha256": "930719e012588eec7cb2f397159386a87d1a5920c6edc93e0410be578603327b",
+                "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+               "section": 62,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 16.567208
+             }
+            ],
+            "text": "### Short answer\nThe passages do not give a formal standalone definition of “non-signaling tester,” but they support describing it as a tester used for RF measurements in non-signaling mode, especially production RF testing where measurements are run without signaling/protocol operation to save time [65][100].  \n### What it means\nNon-signaling is tied to RF testing, while signaling is tied to protocol testing in the raw source wording “Non-signaling - RF” and “Signaling - Protocol” [100].  \nIn WLAN device production, all RF measurements are performed in non-signaling mode to save time [65].  \nR&S CMP180 is positioned for production non-signaling RF testing in the Wi‑Fi 7 R&D and production testing context [8][65].  \n### Product-related measurement decisions that depend on it\n| Decision | What the passages support |\n|---|---|\n| Whether to use production non-signaling RF testing or R&D signaling testing | Wi‑Fi 7 R&D testing uses R&S CMX500 for signaling / interworking testing, while production uses R&S CMP180 for non-signaling RF testing [8]. |\n| Whether the measurement is RF-only or protocol/application/signaling-oriented | The value chain lists Non-signaling RF separately from Signaling Protocol, signaling, application, OTA, pre-conformance and conformance testing [4]. |\n| Whether CMP180 is the relevant production tester | CMP180 is described as a radio communication tester for production / wireless communication device testing [1]. |\n| Whether CMP180 can cover the needed production RF architecture | CMP180 supports simultaneous receiver and transmitter testing and provides RF generator/analyzer no. 1 plus optional RF generator/analyzer no. 2 in a multi-port RF test architecture [2]. |\n| How many RF ports / benches are needed | CMP180 RF generator/analyzer no. 1 has 8 × SnapN RF input/output ports RF 1.1 to RF 1.8, and RF generator/analyzer no. 2 has 8 × SnapN RF input/output ports RF 2.1 to RF 2.8 [32]. |\n| Whether a second CMP180 TRX / connector bench is needed | CMP180 RF generator/analyzer no. 2 requires R&S CMP-K102 or R&S CMP-K105 software license key [32][58]. |\n| Whether the frequency requirement exceeds 6 GHz | CMP180 basic RF generator/analyzer frequency range is 400 MHz to 6000 MHz, and R&S CMP-K168 extends the range from 6000 MHz to 8000 MHz [33][96]. |\n| Whether the bandwidth requirement is 250 MHz or 500 MHz | CMP180 IF bandwidth is 250 MHz basic and reaches 500 MHz with R&S CMP-K185 [33]. |\n| Whether the RF unit supports the desired bandwidth upgrade | R&S CMP-B802x supports only 250 MHz bandwidth, while R&S CMP-B805x supports 250 MHz and can use R&S CMP-K185 to enable 500 MHz [58]. |\n| Whether 2x2 or 4x4 MIMO production testing is in scope | The Wi‑Fi 7 production source says CMP180 integrates two analyzers, two generators and two sets of eight RF ports to support 2x2 MIMO testing in one box, and two CMP180 instruments can be combined for four analyzers and generators for 4x4 MIMO access point testing [65]. |\n| Whether to use CMX500 instead for signaling or broader protocol/application workflows | CMX500 is described as a universal one-box network emulation and measurement test solution supporting LTE, NR FR1, NR FR2, NSA, SA, FDD and TDD [10]. |\n| Whether CMX500 non-signaling use cases are relevant in R&D | CMX500 GPRF Generator is described as a CMX500 non-signaling use case that generates ARB, CW, dual tone or replay `.wv` waveforms for R&D waveform replay / creation and standalone TX measurement workflows [16]. |\n【推論】Understanding “non-signaling tester” affects product choice because the passages place CMP180 in production non-signaling RF testing and CMX500 in signaling / network-emulation testing [8][10][65].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "R&S CMP180\n[[R&S CMP180]] 是 [[Rohde & Schwarz]] 的 **Radio Communication Tester**，用於 production / wireless communication device 測試，依文件可配置多埠 RF generator/analyzer、通訊標準 measurement options、waveform options 與 [[R&S VSE]] 分析能力。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP180.md"
+             },
+             "score": 32.519549
+            },
+            {
+             "text": "R&S CMP180 › 產品定位\n[[R&S CMP180]] 是 Radio Communication Tester。依 [[CMP180 Features and Functions Version 09]]，文件涵蓋 global options、Bluetooth、CDMA2000、GSM、LP-IoT、LTE、NB-IoT、NR、spectrum analysis、UWB、WCDMA、WLAN、[[R&S VSE]] options 與 ordering information。\n\n依 [[CMP180 Specifications Version 08.00]]，CMP180 支援 simultaneous receiver and transmitter testing，並提供 RF generator/analyzer no. 1 與可選 RF generator/analyzer no. 2 的多埠 RF 測試架構。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP180.md"
+             },
+             "score": 17.059002
+            },
+            {
+             "text": "5G device testing value chain › 測試類型\n來源列出的測試類型包含：\n\n- [[RF]]。\n- [[Signaling]]。\n- [[Application testing]]。\n- [[OTA testing]]。\n- [[Pre-conformance testing]]。\n- [[Conformance approval]]。\n- [[Carrier acceptance]]。\n- [[Non-signaling RF]]。\n- [[Signaling Protocol]]。\n- [[Service and repair]]。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G device testing value chain.md"
+             },
+             "score": 10.700745
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing\n[[Wi-Fi 7 R&D and production testing]] 是 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 中描述的測試方案組合：以 [[R&S CMX500]] 覆蓋 R&D signaling / interworking 測試，以 [[R&S CMP180]] 覆蓋 production non-signaling RF 測試。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 5.197704
+            },
+            {
+             "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             },
+             "score": 19.922636
+            },
+            {
+             "text": "CMX500 GPRF Generator\n[[CMX500 GPRF Generator]] 是 [[CMX500_Callbox]] 中的 [[R&S CMX500]] non-signaling use case：在 CMX500 上產生 ARB、CW、dual tone 或 replay `.wv` waveform，支援 R&D waveform replay / creation 與 standalone TX measurement 工作流。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md"
+             },
+             "score": 7.540049
+            },
+            {
+             "text": "CMP180 Specifications Version 08.00 › RF generator / analyzer 功能\nGeneral functions：\n\n- simultaneous receiver and transmitter testing。\n- RF generator/analyzer no. 1：**8 × SnapN**，RF input/output to DUT，RF 1.1 to RF 1.8。\n- RF generator/analyzer no. 2：**8 × SnapN**，RF input/output to DUT，RF 2.1 to RF 2.8；requires **R&S CMP-K102** or **R&S CMP-K105** software license key。\n\nReceiver test functions：\n\n- RF generator signal is split and forwarded to 8 output ports each。\n- every output can be switched off separately。\n- collective output level setting for RF 1.1 to RF 1.8 and RF 2.1 to RF 2.8。\n- frequency-dependent attenuation（FDA）table for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。\n\nTransmitter test functions：\n\n- 8 input signals multiplexed to RF analyzer no. 1。\n- 8 input signals multiplexed to RF analyzer no. 2。\n- frequency-dependent attenuation（FDA）tables for user-specific corrections，分別對 RF 1.1 to RF 1.8 與 RF 2.1 to RF 2.8。\n\nVSWR：\n\n| Port | Frequency | 規格 |\n|---|---|---|\n| RF x.1 to RF x.8 | 400 MHz to 4000 MHz | < 1.6 |\n| RF x.1 to RF x.8 | 4000 MHz to 8000 MHz | < 2.0 |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+             },
+             "score": 6.919824
+            },
+            {
+             "text": "CMP180 Specifications Version 08.00 › 重點摘要\n這份來源是 [[R&S CMP180]] **Radio Communication Tester** 的 specifications 文件，文件識別碼 **PD 3609.7348.22**，**Version 08.00**，日期標示 **March 2026**；封面與頁尾皆標示 **Version 08.00**。來源頁尾標示 **© 2021–2026 Rohde & Schwarz**，並聲明 **Data without tolerance limits is not binding**、**Subject to change**。\n\n本規格書補足 [[CMP180 Features and Functions Version 09]] 所未提供的 binding specifications、base unit order number、RF unit order number、RF generator/analyzer 規格、general data、ordering information、warranty 與 service 資訊。\n\n主要重點：\n\n- [[R&S CMP180]] base unit order no.：**1201.0002K18**，包含 power cables 與 getting started guide。\n- 文件版次：**PD 3609.7348.22 | Version 08.00 | March 2026 (ch)**。\n- RF generator/analyzer 頻率範圍：基本 **400 MHz to 6000 MHz**；使用 **R&S CMP-K168** 可擴展到 **6000 MHz to 8000 MHz**。\n- 搭配 **R&S CMP-B805I** 與 **R&S CMP-K168** 時，generator overrange 為 **6000 MHz to 8250 MHz**，maximum center frequency **8000 MHz**；analyzer overrange 為 **6000 MHz to 8500 MHz**，maximum center frequency **8250 MHz**。\n- 每個 RF generator/analyzer connector bench 有 **8 × SnapN** RF input/output to DUT；第二組 TRX / RF 2.1 to RF 2.8 需 **R&S CMP-K102** 或 **R&S CMP-K105** software license key。\n- IF bandwidth：基本 **250 MHz**；使用 **R&S CMP-K185** 可達 **500 MHz**，且 ordering information 明示 only available if **R&S CMP-B805I or higher option** is installed。\n- ARB memory：**8 Gbyte/channel**；sample length up to **800 Msample**；maximum sample rate **312.5 MHz**，搭配 **R&S CMP-K185** 為 **625 MHz**。\n- Calibration interval：**24 months**；base unit warranty：**1 year**。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+             },
+             "score": 6.019975
+            },
+            {
+             "text": "R&S CMP180 › Base unit 與硬體配置\n依 [[CMP180 Specifications Version 08.00]] ordering information：\n\n| Designation | Type | Order no. |\n|---|---|---|\n| Radio communication tester, including power cables and getting started guide | CMP180 | 1201.0002K18 |\n| CMP180 basic assembly | R&S CMP-PB18I | 1212.1986.10 |\n| Single instrument interface | R&S CMP-B40J | 1212.3372.11 |\n| Multi-instrument interface | R&S CMP-B41J | 1212.3389.11 |\n| RF unit 250（basic function, 6 GHz/250 MHz） | R&S CMP-B802I | 1212.3408.10 |\n| RF unit 500（basic function, 6 GHz/250 MHz） | R&S CMP-B805I | 1212.3414.10 |\n| Performance uprating for RF unit 500 | R&S CMP-KB805 | 1212.3866.02 |\n\n依 [[CMP180 Features and Functions Version 09]] 的 RF unit 描述：\n\n- **R&S CMP-B802x**：僅支援 **250 MHz bandwidth**。\n- **R&S CMP-B805x**：支援 **250 MHz bandwidth**，可用 **R&S CMP-K185** 啟用 **500 MHz**。\n\n依 [[CMP180 Specifications Version 08.00]]：\n\n- RF generator/analyzer no. 1：**8 × SnapN**，RF input/output to DUT，RF 1.1 to RF 1.8。\n- RF generator/analyzer no. 2：**8 × SnapN**，RF input/output to DUT，RF 2.1 to RF 2.8；requires **R&S CMP-K102** or **R&S CMP-K105** software license key。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP180.md"
+             },
+             "score": 3.193869
+            },
+            {
+             "text": "Wi-Fi 7 R&D and production testing › Production：R&S CMP180 non-signaling RF testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。\n- [[R&S CMP180]] 被定位為 optimized for this purpose 的 radio communication tester。\n- 來源稱 [[R&S CMP180]] 支援 many cellular and non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform。\n- 來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。\n- 來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。\n- 來源稱 two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             "score": 4.430821
+            },
+            {
+             "text": "CMP180 Specifications Version 08.00 › Ordering information 摘要\nBase unit / hardware：\n\n| Designation | Type | Order no. |\n|---|---|---|\n| Radio communication tester, including power cables and getting started guide | CMP180 | 1201.0002K18 |\n| CMP180 basic assembly | R&S CMP-PB18I | 1212.1986.10 |\n| Single instrument interface | R&S CMP-B40J | 1212.3372.11 |\n| Multi-instrument interface | R&S CMP-B41J | 1212.3389.11 |\n| RF unit 250（basic function, 6 GHz/250 MHz） | R&S CMP-B802I | 1212.3408.10 |\n| RF unit 500（basic function, 6 GHz/250 MHz） | R&S CMP-B805I | 1212.3414.10 |\n| Performance uprating for RF unit 500 | R&S CMP-KB805 | 1212.3866.02 |\n\nFunctionality extension options：\n\n| Designation | Type | Order no. |\n|---|---|---|\n| Smart channel | R&S CMP-K108 | 1212.2099.02 |\n| Enable second TRX for RF unit 250 | R&S CMP-K102 | 1212.3543.02 |\n| Enable second TRX for RF unit 500 | R&S CMP-K105 | 1212.3550.02 |\n| Extended frequency range, from 6 GHz to 8 GHz | R&S CMP-K168 | 1212.2582.02 |\n| 500 MHz bandwidth | R&S CMP-K185 | 1212.3566.02 |\n\nSoftware measurement options 節錄：\n\nSoftware predefined waveform options 與 [[R&S WinIQSIM2]] waveform options 也列於本來源，包括 GNSS、NB-IoT、LP-IoT、UWB、NG-UWB、Bluetooth Rel. 7.0、WLAN ax/be、LTE、NR Rel. 15/16、NR Rel. 17、NR C-V2X 等。\n\nExtras：\n\n| Designation | Type | Order no. |\n|---|---|---|\n| 19 inch adapter, 2 HU, 1/1 | R&S ZZA-KN2OT | 1175.3810.00 |\n| Multi-instrument connection cable set, for R&S CMPflexx system | R&S CMP-Z41H | 1212.3489.09 |\n\nWarranty and service：\n\n- Base unit warranty：1 year。\n- All other items warranty：1 year。\n- Service plans：on demand up to five years；extended periods require contacting Rohde & Schwarz sales office。\n- Calibration：pay per calibration。\n- Warranty and repair：up to five years，standard price repair。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 14,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md"
+             },
+             "score": 4.110613
+            },
+            {
+             "text": "Non-signaling - RF\nSignaling - Protocol\nPre-conformance",
+             "citation": {
+              "kind": "raw",
+              "source": {
+               "source_id": "src-930719e012588eec",
+               "original_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+               "sha256": "930719e012588eec7cb2f397159386a87d1a5920c6edc93e0410be578603327b",
+               "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+               "page": null,
+               "slide": null,
+               "parent_source_id": null
+              },
+              "raw_ref": "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+              "section": 62,
+              "page": null,
+              "slide": null,
+              "wiki_page": null
+             },
+             "score": 16.567208
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "product_option_spec",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMP180.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 3,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMP180.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMP180.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 6,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/5G device testing value chain.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+               }
+              ],
+              "attempts": 1
+             },
+             {
+              "name": "technical_knowledge",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S CMP180.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 5,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/5G device testing value chain.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 6,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/5G device testing value chain.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/5G device testing value chain.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 2,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 1,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": true,
+            "relation_citations": [
+             {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMP180.md"
+             },
+             {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+             },
+             {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S CMX500.md"
+             }
+            ],
+            "relations": [
+             {
+              "left": "product_option_spec",
+              "right": "technical_knowledge",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              }
+             },
+             {
+              "left": "product_option_spec",
+              "right": "technical_knowledge",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              }
+             },
+             {
+              "left": "product_option_spec",
+              "right": "technical_knowledge",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              }
+             }
+            ]
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/entities/R&S CMP180.md",
+             "raw_refs": [
+              "raw/Productions/CMP180_Features_V11-9_en_09.md",
+              "raw/Productions/CMP180_specs_en_3609-7348-22_v0800.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/5G device testing value chain.md",
+             "raw_refs": [
+              "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+              "raw/Market/OneNote/TestHouse/Test House.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md",
+             "raw_refs": [
+              "raw/Productions/PR/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S CMX500.md",
+             "raw_refs": [
+              "raw/Productions/CMX500_Features_CSW9-20-0_en_32.md",
+              "raw/Productions/CMX500_specs_en_5216-4127-22_v1100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/CMX500 GPRF Generator.md",
+             "raw_refs": [
+              "raw/Market/OneNote/CMX500_Callbox.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/CMP180_specs_en_3609-7348-22_v0800.md",
+             "raw_refs": [
+              "raw/Productions/CMP180_Features_V11-9_en_09.md",
+              "raw/Productions/CMP180_specs_en_3609-7348-22_v0800.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

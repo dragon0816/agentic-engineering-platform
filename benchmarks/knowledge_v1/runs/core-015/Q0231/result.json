@@ -1,0 +1,96 @@
+{
+ "id": "Q0231",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 48.562,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 6,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 7,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 13,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 GPRF Generator.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 18,
+   "kind": "wiki",
+   "ref": "wiki/concepts/6G NTN 展望.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 50,
+   "kind": "wiki",
+   "ref": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 55,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 87,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Beamforming.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 71,
+   "kind": "wiki",
+   "ref": "wiki/concepts/6G NTN 展望.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "Changes in radar technology increase the required tester capability mainly in bandwidth / frequency coverage, echo and object emulation, Doppler / velocity accuracy, antenna / beamforming verification, and possible communication-sensing convergence",
+   "the measurement setup must match the radar band being tested",
+   "the relevant measurement capability shifts from only RF power/frequency checks toward radar echo generation with distance, object, bandwidth, and Doppler controls",
+   "a signaling / non-signaling tester context may need to combine protocol/network-emulation or waveform-generation roles with sensing-related RF requirements"
+  ],
+  "reason": "The cited passages support the underlying facts about AREG800A radar echo generation, bandwidth, frequency bands, object/Doppler capabilities, CMX500 signaling/non-signaling roles, ISAC/MFSS convergence, and beamforming test concepts. The answer is mostly a fair synthesis and explicitly caveats that the passages do not provide one integrated requirement statement for a Signaling/Non-signaling Tester, though several requirement-style conclusions are inferred rather than directly stated.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

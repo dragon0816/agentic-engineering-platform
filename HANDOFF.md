@@ -64,7 +64,14 @@ Lint -> Benchmark -> Push) and the K1-K3 specs; progress rows are in `docs/TASKS
   (passes on rerun) is unidentified (see TASKS); the OCNG image failure is fixed
   (b293aeb). Next stage after validation: K4 (Excel, HTML, .ppt, images).
 
-Knowledge answer quality update (2026-10-12, latest): owner proposal 1 was tried at
+Knowledge answer rules (2026-10-12, latest): vault skills with `mode: answer` now shape
+answers; the rewritten ask-knowledge measured better in core-015 (coverage 0.503,
+invented 31 vs 67) but is not yet in the live Agent Knowledge (rs-knowledge 1.0.2 has no
+skills/). It is in the project vault copy. Owner decision pending: publish rs-k + the
+rule as rs-knowledge 1.0.3, or Refresh from the project vault. The Skill assistant is on
+the Knowledge page (Rules card).
+
+Knowledge answer quality update (2026-10-12): owner proposal 1 was tried at
 677e18a and ROLLED BACK (2df2faf1) after core-014; live is the core-012 setup.
 Earlier note: proposal 1 was live at
 677e18a (the last search plan's queries run, pages added beyond the budget).

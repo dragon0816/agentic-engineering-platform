@@ -1732,3 +1732,14 @@ s-k-20261011T102952` (not published).
 - [x] core-014 repeated proposal 1: coverage 0.492 (two-run mean 0.500 vs 0.477),
   grader-1.4 PASS 30 vs 33; Q1041 and Q1061 failed validation in both runs (product
   option facet). Owner rolled proposal 1 back (2df2faf1); live is core-012's setup.
+- [x] Answer rules in the vault (owner, 2026-10-12): `mode: answer` skills shape the
+  synthesis prompt (b25e1f1d); rewritten ask-knowledge, writing guide and ingest
+  template ship in `src/knowledge/skill_guide/` and show on the Knowledge page.
+  core-015 with the rewritten ask-knowledge in a candidate vault: answerable coverage
+  0.477 -> 0.503, contradicted 15 -> 9, invented 67 -> 31, grader-1.4 PASS 33 -> 32,
+  median 74 -> 71 s. Kept. The rewrite is in the project vault copy (old file backed up
+  as SKILL.md.bak-20261012-before-rewrite); the live Agent version (rs-knowledge 1.0.2)
+  has no skills/ yet, so users benefit after a new Knowledge version or a Refresh.
+- [x] Skill assistant on the Knowledge page: proposes a whole SKILL.md from the
+  expert's words with the guide, template, current file and a sample source; the
+  person compares, uses and saves it.

@@ -1,0 +1,1636 @@
+{
+ "question": {
+  "id": "Q0911",
+  "text": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+  "market": "Semiconductor",
+  "product": "Signal Generator / Signal Analyzer",
+  "type": "application",
+  "difficulty": "L2"
+ },
+ "session_id": "conversation-2e725133149748c597dd332709da7b4f",
+ "exchange": {
+  "sent": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+  "http_status": 200,
+  "seconds": 42.406,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-2e725133149748c597dd332709da7b4f",
+    "actor": "leo.chi",
+    "title": "For a Semiconductor use case involving RFIC validation, where would Sign…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-12T06:03:37.300125Z",
+    "updated_at": "2026-10-12T06:04:19.491482Z",
+    "messages": [
+     {
+      "message_id": "message-ed96f9cb365a470aa1c285e940189486",
+      "role": "user",
+      "text": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+      "created_at": "2026-10-12T06:03:37.309979Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-a0f8d337bb874677b9b4c91de5b5da43",
+      "role": "assistant",
+      "text": "They fit in the **test → debug → validation** part of the workflow as **RF / parametric / characterization lab instruments**, especially for a chip-vendor / semiconductor workflow that needs RF measurements across Lab, R&D, Production, and Operations [72][75].  \nFor RFIC validation, the closest supported placement is **RF / parametric / characterization**: the knowledge base maps this layer to **R&S SMW200A, R&S FSW, and oscilloscopes** [75].  \nThe validation workflow these instruments support includes **chipset L1–L4 test plan and verification**, **modem-stack investigation/debug**, **radiated and conducted testing**, and checking that HW/SW works as designed against specs or custom design criteria [24].  \nIn production/manufacturing-adjacent semiconductor work, the supported need is to **characterize and optimize parametric RF transceiver subsystems** and to **debug and trace** [74].  \nThe **Signal Generator** side can be represented by **R&S SMW200A**, which is a Rohde & Schwarz vector signal generator and can scale from a single-path vector signal generator to a multichannel MIMO receiver tester [6].  \nThe **Signal Analyzer** side can be represented by **R&S FSW**, a high-end signal and spectrum analyzer series, with analysis use cases including EVM, ACLR, group delay, DVB-S2X analysis, and phase-coherent multichannel measurement in the cited T&M context [7][31].  \n【推論】In an RFIC validation workflow, Signal Generator / Signal Analyzer would sit after implementation as the bench/lab measurement layer for RF stimulus and RF response analysis during test, debug, and validation, because the cited workflow spans implementation → test → debug → validation and explicitly includes lab equipment interfaces, while the cited product mapping places SMW200A/FSW in RF / parametric / characterization [1][3][75].\n\n來源：\n[1] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[3] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[6] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[7] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[24] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[31] Wiki：NTN test and measurement aspects（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[72] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[74] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[75] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）",
+      "created_at": "2026-10-12T06:04:19.491482Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-110f66898634440992277efdf0cc9bb7",
+       "request_id": "request-110f66898634440992277efdf0cc9bb7",
+       "span_id": "span-110f66898634440992277efdf0cc9bb7",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "They fit in the **test → debug → validation** part of the workflow as **RF / parametric / characterization lab instruments**, especially for a chip-vendor / semiconductor workflow that needs RF measurements across Lab, R&D, Production, and Operations [72][75].  \nFor RFIC validation, the closest supported placement is **RF / parametric / characterization**: the knowledge base maps this layer to **R&S SMW200A, R&S FSW, and oscilloscopes** [75].  \nThe validation workflow these instruments support includes **chipset L1–L4 test plan and verification**, **modem-stack investigation/debug**, **radiated and conducted testing**, and checking that HW/SW works as designed against specs or custom design criteria [24].  \nIn production/manufacturing-adjacent semiconductor work, the supported need is to **characterize and optimize parametric RF transceiver subsystems** and to **debug and trace** [74].  \nThe **Signal Generator** side can be represented by **R&S SMW200A**, which is a Rohde & Schwarz vector signal generator and can scale from a single-path vector signal generator to a multichannel MIMO receiver tester [6].  \nThe **Signal Analyzer** side can be represented by **R&S FSW**, a high-end signal and spectrum analyzer series, with analysis use cases including EVM, ACLR, group delay, DVB-S2X analysis, and phase-coherent multichannel measurement in the cited T&M context [7][31].  \n【推論】In an RFIC validation workflow, Signal Generator / Signal Analyzer would sit after implementation as the bench/lab measurement layer for RF stimulus and RF response analysis during test, debug, and validation, because the cited workflow spans implementation → test → debug → validation and explicitly includes lab equipment interfaces, while the cited product mapping places SMW200A/FSW in RF / parametric / characterization [1][3][75].\n\n來源：\n[1] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[3] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[6] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[7] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[24] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[31] Wiki：NTN test and measurement aspects（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[72] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[74] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[75] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-110f66898634440992277efdf0cc9bb7",
+      "request_id": "request-110f66898634440992277efdf0cc9bb7",
+      "span_id": "span-110f66898634440992277efdf0cc9bb7",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-110f66898634440992277efdf0cc9bb7",
+       "request_id": "request-110f66898634440992277efdf0cc9bb7",
+       "span_id": "span-110f66898634440992277efdf0cc9bb7",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "They fit in the **test → debug → validation** part of the workflow as **RF / parametric / characterization lab instruments**, especially for a chip-vendor / semiconductor workflow that needs RF measurements across Lab, R&D, Production, and Operations [72][75].  \nFor RFIC validation, the closest supported placement is **RF / parametric / characterization**: the knowledge base maps this layer to **R&S SMW200A, R&S FSW, and oscilloscopes** [75].  \nThe validation workflow these instruments support includes **chipset L1–L4 test plan and verification**, **modem-stack investigation/debug**, **radiated and conducted testing**, and checking that HW/SW works as designed against specs or custom design criteria [24].  \nIn production/manufacturing-adjacent semiconductor work, the supported need is to **characterize and optimize parametric RF transceiver subsystems** and to **debug and trace** [74].  \nThe **Signal Generator** side can be represented by **R&S SMW200A**, which is a Rohde & Schwarz vector signal generator and can scale from a single-path vector signal generator to a multichannel MIMO receiver tester [6].  \nThe **Signal Analyzer** side can be represented by **R&S FSW**, a high-end signal and spectrum analyzer series, with analysis use cases including EVM, ACLR, group delay, DVB-S2X analysis, and phase-coherent multichannel measurement in the cited T&M context [7][31].  \n【推論】In an RFIC validation workflow, Signal Generator / Signal Analyzer would sit after implementation as the bench/lab measurement layer for RF stimulus and RF response analysis during test, debug, and validation, because the cited workflow spans implementation → test → debug → validation and explicitly includes lab equipment interfaces, while the cited product mapping places SMW200A/FSW in RF / parametric / characterization [1][3][75].\n\n來源：\n[1] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[3] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[6] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[7] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[24] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[31] Wiki：NTN test and measurement aspects（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[72] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[74] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[75] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_uXk3DaCBhS6VyhXqj56jOzQy",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "They fit in the **test → debug → validation** part of the workflow as **RF / parametric / characterization lab instruments**, especially for a chip-vendor / semiconductor workflow that needs RF measurements across Lab, R&D, Production, and Operations [72][75].  \nFor RFIC validation, the closest supported placement is **RF / parametric / characterization**: the knowledge base maps this layer to **R&S SMW200A, R&S FSW, and oscilloscopes** [75].  \nThe validation workflow these instruments support includes **chipset L1–L4 test plan and verification**, **modem-stack investigation/debug**, **radiated and conducted testing**, and checking that HW/SW works as designed against specs or custom design criteria [24].  \nIn production/manufacturing-adjacent semiconductor work, the supported need is to **characterize and optimize parametric RF transceiver subsystems** and to **debug and trace** [74].  \nThe **Signal Generator** side can be represented by **R&S SMW200A**, which is a Rohde & Schwarz vector signal generator and can scale from a single-path vector signal generator to a multichannel MIMO receiver tester [6].  \nThe **Signal Analyzer** side can be represented by **R&S FSW**, a high-end signal and spectrum analyzer series, with analysis use cases including EVM, ACLR, group delay, DVB-S2X analysis, and phase-coherent multichannel measurement in the cited T&M context [7][31].  \n【推論】In an RFIC validation workflow, Signal Generator / Signal Analyzer would sit after implementation as the bench/lab measurement layer for RF stimulus and RF response analysis during test, debug, and validation, because the cited workflow spans implementation → test → debug → validation and explicitly includes lab equipment interfaces, while the cited product mapping places SMW200A/FSW in RF / parametric / characterization [1][3][75].\n\n來源：\n[1] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[3] Wiki：Virtual tester（來源：`AIW_Products_Customer_Questionnaire.md`）\n[6] Wiki：R&S SMW200A（來源：`SMW200A_config-guide_en_3606-8037-92_v0600.md`、`SMW200A_specs_en_3606-8037-22_v3100.md`）\n[7] Wiki：R&S FSW（來源：`FSW_specs_en_5215-6749-22_v1701.md`）\n[24] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[31] Wiki：NTN test and measurement aspects（來源：`5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md`）\n[72] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[74] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）\n[75] Wiki：5G device testing value chain（來源：`Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md`、`Test House.md`）",
+          "evidence": {
+           "raw_citations": 9,
+           "facet_status": "not_assessed",
+           "missing_facets": null
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.3-askrules.1"
+           },
+           "trace": {
+            "trace_id": "trace-aba2ba00620841b1861a34715c246b57",
+            "request_id": "request-aba2ba00620841b1861a34715c246b57",
+            "span_id": "span-aba2ba00620841b1861a34715c246b57",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "For a Semiconductor use case involving RFIC validation, where would Signal Generator / Signal Analyzer fit in the test workflow?",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "Virtual tester › 來源定義\n[[AIW_Products_Customer_Questionnaire]] 的 short definitions 寫道：\n\n> Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a single tool.\n\n因此本庫把 [[Virtual tester]] 記為工作流 / solution concept，而非單一軟體工具或儀器。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 6.529211
+             },
+             {
+              "text": "Virtual tester › 與 point tools 的區分\n問卷第 3b 題要求客戶說明他們是在尋找 point tools，或 broader [[Virtual tester]]：\n\n- point tools examples：better scripting、log analysis。\n- broader [[Virtual tester]]：spans implementation → test → debug → validation。\n\n這個區分表示 [[Virtual tester]] 的範圍比單一 scripting assistant 或 log analyzer 更寬，但來源未提供具體產品功能矩陣。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 4.757311
+             },
+             {
+              "text": "Virtual tester › 可能涵蓋的流程\n依問卷上下文，[[Virtual tester]] 相關需求可能涉及：\n\n- test idea 到 running, [[Validated results]] 的流程理解；\n- test script generation 或 refactoring；\n- ambiguous logs / failure debugging；\n- documentation lookup；\n- end-to-end test execution；\n- toolchain integration：repos、CI/CD、test frameworks、lab equipment interfaces、log / analysis pipelines；\n- [[Orchestration layer]] 對 AI agents 的 rules、instructions、skills coordination。\n\n以上是問卷問題範圍，不是已確認產品功能。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 4.704811
+             },
+             {
+              "text": "R&S SMW200A › 產品定位與架構\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]（Version 31.00，May 2026）與 [[SMW200A_config-guide_en_3606-8037-92_v0600]]（Version 06.00，May 2024）：\n\n- [[R&S SMW200A]] 可從 single-path vector signal generator 擴充到 multichannel [[MIMO]] receiver tester。\n- 支援最多 `8` 個 signal sources 與最多 `64` 個 fading channels。\n- 可連接 [[R&S SGT100A]] signal generator modules，提供最多 `8` 條 RF paths。\n- 最多可在 `2` 個 internal baseband modules 上配置 `8` 個 baseband generators，具 real-time coder 與 ARB。\n- 單機可配置最多兩個 internal RF paths：RF path A 為 mandatory，RF path B 為 optional second RF path。\n- Baseband section 分成 standard baseband section 與 wideband baseband section；standard baseband 最高 `160 MHz` RF modulation bandwidth，wideband baseband 最高 `2 GHz` RF modulation bandwidth。\n- 可選 integrated fading section，channel emulation bandwidth 最高 `800 MHz`；最多可安裝 `4` 個 fading modules，提供最多 `64` 個 logical faders。\n- 單一儀器可實作 MIMO fading scenarios：`2x2`、`3x3`、`4x4`、`8x4`、`4x8`、`2x4x4`。\n- Path-specific、baseband-specific 與 fading/MIMO software options 採 floating license concept；若同一 feature 需同時在兩個 paths 或兩個 baseband generators 使用，通常需安裝兩份對應 option。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 12.375022
+             },
+             {
+              "text": "R&S SMW200A › 文件依據\n- 來源：[[SMW200A_config-guide_en_3606-8037-92_v0600]]。\n- 文件名稱：`R&S®SMW200A Vector Signal Generator – Configuration guide`。\n- 文件代碼：`PD 3606.8037.92`。\n- 文件版次：`Version 06.00`。\n- 文件日期：`May 2024`。\n- 文件性質：configuration guide；適合查 mandatory configuration、requires / not compatible / retrofitting notes、ordering information、recommended extras 與 service notes。\n\n- 來源：[[SMW200A_specs_en_3606-8037-22_v3100]]。\n- 文件名稱：`R&S®SMW200A Vector Signal Generator Specifications`。\n- 文件代碼：`PD 3606.8037.22`。\n- 文件版次：`Version 31.00`。\n- 文件日期：`May 2026`。\n- 文件性質：產品 specifications；記錄 RF/baseband performance、interfaces、environmental data、ordering information 與 options。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 7.330858
+             },
+             {
+              "text": "R&S SMW200A\n[[R&S SMW200A]] 是 Rohde & Schwarz 的 vector signal generator；依 `R&S®SMW200A Vector Signal Generator Specifications` `Version 31.00`（`May 2026`），RF path A 可覆蓋 `100 kHz to 67 GHz`，RF path B 可覆蓋至 `44 GHz`，並可由 single-path vector signal generator 擴充到 multichannel MIMO receiver tester（來源：[[SMW200A_specs_en_3606-8037-22_v3100]]）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 6.019906
+             },
+             {
+              "text": "R&S FSW\nR&S FSW 是 Rohde & Schwarz 的 high-end Signal and Spectrum Analyzer 系列，依 Version 17.01（September 2025）涵蓋 8 GHz 至 85 GHz 型號，[[R&S FSW85]] 搭配 R&S FSW-B90G 可延伸至 90 GHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 5.588832
+             },
+             {
+              "text": "R&S FSW › 其他硬體 options（摘錄）\n| Option code | 名稱 | Order No. | 原文說明 / 限制 |\n|---|---|---|---|\n| R&S FSW-B4 | OCXO precision frequency reference | 1313.0703.02 | user-retrofittable |\n| R&S FSW-B8E | Resolution bandwidth up to 40 MHz | 1338.6911.02 | 適用 [[R&S FSW8]]/13/26/43/50/67/85；signal analysis bandwidth 不由 B8E 定義 |\n| R&S FSW-B8 | Resolution bandwidth up to 80 MHz | 1313.2464.26 或 1313.2464.02 | 1313.2464.26 適用 [[R&S FSW8]]/13/26；1313.2464.02 適用 [[R&S FSW43]]/50/67/85 且 export license required |\n| R&S FSW-B10 | External generator control | 1313.1622.02 | contact service center |\n| R&S FSW-B13 | Highpass filter for harmonic measurements | 1313.0761.02 | user-retrofittable |\n| R&S FSW-B17 | Digital baseband Interface | 1313.0784.02 | user-retrofittable |\n| R&S FSW-B18 | Spare solid state drive | 1313.0790.21 | user-retrofittable |\n| R&S FSW-B21 | LO/IF connections for external mixers | 1313.1100.28 / 1313.1100.86 | 不適用 [[R&S FSW8]]、[[R&S FSW13]]；.28 適用 [[R&S FSW26]]/43/50/67；.86 適用 [[R&S FSW85]] |\n| R&S FSW-B24 | RF preamplifier | 1313.0832.13/.26/.43/.49/.51/.66/.67 | 適用範圍依型號與 order no.；來源未列 [[R&S FSW85]] 適用 B24 |\n| R&S FSW-B25 | Electronic attenuator, 1 dB steps | 1313.0990.02 | 適用 [[R&S FSW8]]/13/26 |\n| R&S FSW-B33 | USB mass memory write protection | 1313.3602.02 | 不可 retrofittable；factory pre-installed |\n| R&S FSW-B71 | Analog baseband inputs | 1313.1651.13/.26/.67/.86 | order no. 依型號範圍不同 |\n| R&S FSW-B71E | 80 MHz analysis bandwidth for analog baseband inputs | 1313.6547.02 | 需 R&S FSW-B71；user-retrofittable |\n| R&S FSW-B2071 | Oscilloscope baseband inputs | 1331.8302.02 | 適用所有 FSW models；user-retrofittable |\n| R&S FSW-B90G | Frequency extension 90 GHz | 1331.7693.02 | 不可 retrofittable；僅適用 [[R&S FSW85]]；f > 85 GHz without preselection |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 5.520709
+             },
+             {
+              "text": "R&S FSW › Analysis bandwidth options（硬體 options）\n| Option code | 名稱 | Order No. | 適用與限制 |\n|---|---|---|---|\n| R&S FSW-B40 | 40 MHz analysis bandwidth | 1313.0861.02 | user-retrofittable |\n| R&S FSW-B80 | 80 MHz analysis bandwidth | 1313.0878.02 | user-retrofittable |\n| R&S FSW-B160 | 160 MHz analysis bandwidth | 1325.4850.14 | contact service center |\n| R&S FSW-B320 | 320 MHz analysis bandwidth | 1325.4867.14 | includes 200 MHz IF filter |\n| R&S FSW-B512 | 512 MHz analysis bandwidth | 1331.7106.14 | includes 200 MHz IF filter |\n| R&S FSW-B512R | Real-time spectrum analyzer 512 MHz, POI ≤ 15 µs | 1331.7106.16 | contact service center；includes 512 MHz analysis bandwidth and 200 MHz IF filter |\n| R&S FSW-B1200 | 1.2 GHz analysis bandwidth | 1331.6400.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory；不適用 [[R&S FSW8]]、[[R&S FSW13]] |\n| R&S FSW-B2001 | 2 GHz analysis bandwidth | 1331.6916.14 | 適用 [[R&S FSW26]]/43/50/67/85 ex-factory |\n| R&S FSW-B4001 | 4.4 GHz analysis bandwidth | 1338.5215.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；contact service center |\n| R&S FSW-B6001 | 6.4 GHz analysis bandwidth | 1338.5221.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B8001 | 8.312 GHz analysis bandwidth | 1338.5238.14 | 適用 [[R&S FSW43]]/50/67/85 ex-factory；only available for f ≥ 18 GHz |\n| R&S FSW-B800R | Real-time spectrum analyzer 800 MHz, POI ≤ 15 µs | 1331.6400.16 | 適用 [[R&S FSW26]]/43/50/67/85；export license required |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 2.929637
+             },
+             {
+              "text": "R&S FSVA3000\nR&S FSVA3000 是 Rohde & Schwarz 的 Signal and Spectrum Analyzer 產品系列，依 [[FSVA3000_specs_en_5216-1211-22_v1601]]（Version 16.01，August 2025）包含 4 GHz 到 50 GHz/54 GHz 型號。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSVA3000.md"
+              },
+              "score": 8.227967
+             },
+             {
+              "text": "R&S FSVA3000 › 系列型號\n| 型號 | Order No. | 訂購名稱 / frequency range |\n|---|---:|---|\n| [[R&S FSVA3004]] | 1330.5000.05 | Signal and spectrum analyzer，10 Hz to 4 GHz |\n| [[R&S FSVA3007]] | 1330.5000.08 | Signal and spectrum analyzer，10 Hz to 7.5 GHz |\n| [[R&S FSVA3013]] | 1330.5000.14 | Signal and spectrum analyzer，10 Hz to 13.6 GHz |\n| [[R&S FSVA3030]] | 1330.5000.31 | Signal and spectrum analyzer，10 Hz to 30 GHz |\n| [[R&S FSVA3044]] | 1330.5000.44 | Signal and spectrum analyzer，10 Hz to 44 GHz |\n| [[R&S FSVA3050]] | 1330.5000.51 | Signal and spectrum analyzer，10 Hz to 50 GHz |\n\nSupplied accessories：power cable、quick start guide；[[R&S FSVA3030]] 另隨附 3.5 mm adapter（APC3.5-compatible）female/female；[[R&S FSVA3044]] 另隨附 2.92 mm adapter female/female；[[R&S FSVA3050]] 另隨附 1.85 mm adapter female/female。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSVA3000.md"
+              },
+              "score": 6.785929
+             },
+             {
+              "text": "R&S FSVA3000 › Unresolved\n- 本頁為系列入口；逐型號 order number、connector、重量與 model-specific option 請以各型號頁與 [[FSVA3000_specs_en_5216-1211-22_v1601]] 為準。\n- R&S®FSV3-B21 對 [[R&S FSVA3044]] 與 [[R&S FSVA3050]] 的訂購適用性需回查原始 PDF footnote，因 ordering table 與 external harmonic mixers section 描述粒度不同。\n- [[R&S FSVA3013]] 的 RF input connector 未在來源提供的 RF input connector 表列出；不可由 type N adapter 或 torque wrench 適用性自行推導 connector。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSVA3000.md"
+              },
+              "score": 6.094304
+             },
+             {
+              "text": "oneweb_ut_final_presentation › 與既有知識的關係\n- [[Satellite User Terminal 外部資料清單]] 先前把 `oneweb_ut_final_presentation.html` 列為待擷取附件；本頁將該附件轉出的 markdown 作為已 ingest 的來源摘要，但仍需回查原始 HTML / presentation。\n- [[衛星地面設備]] 先前只把 [[User Terminal]] 視為 link hub；本來源新增 OneWeb user terminal 測試流程、OEM ecosystem、RF metrics 與 commercialization stages 的可追溯摘要。\n- [[5G NTN validation and testing]] 先前由 R&S / MediaTek、Gatehouse、Viasat 等 PR 支撐；本來源新增 OneWeb / Sharp / MediaTek M80 / ITRI 視角，但來源不是標準文件、產品 datasheet 或官方測試報告。\n- [[MediaTek]] 既有頁面整理 MWC 2024 NTN-NR demo 與 Genio / Dimensity 圖卡；本來源新增 [[MediaTek M80]] 作為 5G NTN modem roadmap 線索，但不可視為官方量產或規格確認。\n- [[Analog Devices]] 既有頁面只把 ADI 視為 phased array / receiver IC link hub 線索；本來源新增 ADI LNA / receiver front-end / phased-array receive front-end 供應鏈語境。\n- [[工研院]] 既有頁面記錄 Ka-band LEO satellite RF chipset 研發說法；本來源新增 ITRI 5G NTN terrestrial / satellite gNB development 線索。\n- [[R&S SMW200A]] 與 [[R&S FSW]] 是既有產品頁；本來源只寫 `Rohde & Schwarz SMW6 信號產生器、FSW 譜儀`，其中 `SMW6` 的正式型號未能對應，不能自動改寫為 [[R&S SMW200A]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+              },
+              "score": 14.165337
+             },
+             {
+              "text": "oneweb_ut_final_presentation › 重點摘要\n- 來源題名為「OneWeb UT 測試流程」，副題為「衛星通訊使用者終端機驗證與商業化」，署名脈絡為「衛星通訊測試中心 | RF 工程部門」。\n- 來源將 [[Eutelsat OneWeb]] 描述為 OneWeb constellation operator，並列出 [[OneWeb]] 系統參數：LEO 軌道高度 `750 km`、`600+` 在軌衛星、`100+` 預訂衛星、全球 `±81.4°` 覆蓋、user bands 為 [[Ku-band]] `12–18 GHz` 與 [[Ka-band]] `27–31 GHz`。\n- 來源描述 typical terminal peak downlink `150 Mbps`、latency `50–150 ms`、`200+` simultaneous beams；這些數字未提供 datasheet、測試條件或 OneWeb 官方文件引用。\n- 來源把 [[OneWeb UT 測試流程]] 分成三階段：第 1–3 個月 laboratory RF test、第 3–5 個月 field link validation、第 5–7 個月 commercialization readiness。\n- 第一階段 laboratory RF test 建議選定 [[Intellian]] [[Intellian OW11F]] 或 [[Hughes]] [[Hughes HL1120W]]，量測 G/T、NF、Tx power、link equation，並提到 [[Qorvo]] PA、[[Analog Devices]] LNA、[[MediaTek M80]] 與 `Rohde & Schwarz SMW6` / [[R&S FSW]]。\n- 第二階段 field link validation 透過 [[Eutelsat OneWeb]] gateway 做 real-time link testing，含 mobility scenarios、handover latency / CDT、multi-OEM parallel trials 與 [[Sharp]] + [[MediaTek M80]] 5G NTN trial。\n- 第三階段 commercialization readiness 包含供應鏈最終化、[[MediaTek]] 5G NTN roadmap、[[工研院]] ITRI gNB development、SLA negotiation 與 2026+ commercial launch roadmap。\n- RF 指標區列出 Rx：G/T `18.2 dB/K`（[[Intellian OW11F]]）、NF `<1 dB @ 12 GHz`、gain tolerance `±2 dB`、3 dB bandwidth `500 MHz`；Tx：EIRP `35–45 dBW`、power efficiency `50%+`、PA NF `6–8 dB`、P1dB `35 dBm (2W)`。\n- Link budget 區列出 Ku downlink path loss `196 dB`、rain fade margin `4–6 dB` for `99.5%` availability、margin `>3 dB`、QPSK/BPSK SNR `6–8 dB`。\n- OEM ecosystem 區列出 [[Intellian]]、[[Hughes]]、[[Kymeta]]、[[Sharp]]，並延伸列出 [[Gilat]] / [[Gilat ESR-2030Ku]]、[[ThinKom]] / [[ThinKom Ka2517]]、[[Satcom Direct]] / [[Plane Simple]]、[[PALS]] / [[PPA-SOTM]]、[[SatixFy]] / [[SatixFy ESMA]]、[[Intelsat]] / [[Intelsat ESA]]、[[Requtech]] / [[RESA]]、[[Asmote]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+              },
+              "score": 10.194567
+             },
+             {
+              "text": "oneweb_ut_final_presentation › 關鍵實體與概念\n- [[OneWeb UT 測試流程]]：本來源的核心概念，涵蓋 laboratory RF test、field link validation 與 commercialization readiness。\n- [[Eutelsat OneWeb]]：來源列為 constellation operator 與 gateway / SLA / test account 相關方。\n- [[OneWeb]]：衛星系統與 UT 商業化對象。\n- [[Intellian]]、[[Hughes]]、[[Kymeta]]、[[Sharp]]：主要 OEM terminal / 5G NTN trial 相關廠商。\n- [[Qorvo]]、[[Analog Devices]]、[[Skyworks]]：PA / LNA / receiver front-end 等 RF components 供應商線索。\n- [[MediaTek M80]]：來源稱為 5G NTN modem，支援 [[3GPP Release 19]]，用於 Sharp trial；需官方資料補證。\n- [[工研院]]：來源稱 ITRI 開發 satellite-board 5G gNB / terrestrial gNB integration 相關方案。\n- [[Satellite User Terminal 外部資料清單]]、[[衛星地面設備]]、[[5G NTN validation and testing]]：既有頁面可承接本來源的 user terminal、ground equipment 與 NTN validation 脈絡。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+              },
+              "score": 8.113453
+             },
+             {
+              "text": "Qorvo › 來源中的說法\n[[oneweb_ut_final_presentation]]（來源正式日期未標示；raw converted 2026-09-17）對 [[Qorvo]] 的描述包含：\n\n- 在 laboratory RF test 階段，link equation validation 例子寫為 [[Qorvo]] PA + [[Analog Devices]] LNA。\n- RF metrics 的 Tx 指標寫 `EIRP: 35–45 dBW (Qorvo PA)`。\n- RF components & semiconductor supplier tier 中寫：[[Qorvo]] 是 industry leader；GaN-based Ku / Ka band `2W–100W+`；[[Qorvo QPA1722]] K-band latest，bandwidth increased 3x。\n- LNA generic supply 中列出 LNA `<1 dB NF @ 12 GHz` from [[Qorvo]]、[[ADI]]、[[Skyworks]]。\n- 採購與測試協調區將 [[Qorvo]] PA 列為 RF component supplier supply agreement 對象。\n- 後續行動建議 lock in [[Qorvo]] 與 [[Analog Devices]] component supply agreements。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Qorvo.md"
+              },
+              "score": 6.240101
+             },
+             {
+              "text": "Qorvo › 可追溯範圍\n- 本頁只支持 [[oneweb_ut_final_presentation]] 中 [[Qorvo]] 在 PA / LNA / GaN / K-band component supply chain 的列名與 roadmap 建議。\n- 來源未提供 Qorvo datasheet、part number list、application circuit、frequency range、output power condition、efficiency condition、customer adoption、supply agreement 或 price。\n- [[Qorvo QPA1722]] 的 K-band / bandwidth claim 需要 Qorvo 官方產品頁或 datasheet 補證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Qorvo.md"
+              },
+              "score": 1.965144
+             },
+             {
+              "text": "Qorvo\n[[Qorvo]] 是 [[oneweb_ut_final_presentation]] 中列為 OneWeb user terminal RF component / semiconductor supply chain 的 PA / LNA 供應商，來源特別提到 GaN-based Ku / Ka band PA 與 [[Qorvo QPA1722]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Qorvo.md"
+              },
+              "score": 1.859612
+             },
+             {
+              "text": "MediaTek M80 › 來源中的說法\n[[oneweb_ut_final_presentation]]（來源正式日期未標示；raw converted 2026-09-17）對 [[MediaTek M80]] 的描述包含：\n\n- 在 laboratory RF test 階段，modulation / coding analysis 寫 OneWeb proprietary 或 [[MediaTek M80]] 5G NTN modem。\n- 在 field link validation 階段，寫 5G NTN trial 啟動：[[Sharp]] + [[MediaTek M80]] modem。\n- 在 multi-OEM terminal ecosystem 中，[[Sharp]] 5G NTN LEO terminal 被描述為使用 [[MediaTek M80]] 5G modem，status 為 2025 trial stage。\n- RF components & semiconductor supplier tier 中寫 [[MediaTek M80]] 5G NTN 支援 [[3GPP Release 19]]，用於 Sharp trial，是 5G convergence key。\n- Taiwan strategy positioning 中將 [[MediaTek]] 描述為 5G NTN modem supplier with strategic position，並與 [[Sharp]]、[[工研院]] 合作同列。\n- 5G NTN strategic roadmap 中列出：[[3GPP Release 19]]、[[MediaTek M80]] 5G NR-NTN modem、ITRI satellite-board gNB、Ericsson / Nokia 3GPP certification。\n- Commercial milestones 中列出 `2025 H1: Sharp 5G NTN trial validation`、`2025 H2: MediaTek commercial modem mass production`、`2026+: global 5G NTN service coverage`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/MediaTek M80.md"
+              },
+              "score": 4.463325
+             },
+             {
+              "text": "MediaTek M80 › unresolved\n- 需要取得 [[MediaTek]] 官方 [[MediaTek M80]] datasheet、press release 或 product page。\n- 需要確認 [[MediaTek M80]] 是否正式支援 [[3GPP Release 19]] NTN，以及支援範圍是 modem、protocol stack、RF、NB-NTN、NR-NTN 或其他。\n- 需要確認 [[Sharp]] trial 的日期、終端型號、衛星 operator、frequency band、test setup 與結果。\n- 需要確認 `2025 H2` commercial modem mass production 是否為已發生事件、計畫或簡報假設。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/MediaTek M80.md"
+              },
+              "score": 4.379894
+             },
+             {
+              "text": "MediaTek M80\n[[MediaTek M80]] 是 [[oneweb_ut_final_presentation]] 中被描述為 5G NTN modem / modem roadmap 的產品或平台名稱，來源稱其支援 [[3GPP Release 19]]、用於 [[Sharp]] 5G NTN trial，並被視為 satellite + 5G convergence 的關鍵元件；此說法需以 [[MediaTek]] 官方資料補證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/MediaTek M80.md"
+              },
+              "score": 2.621565
+             },
+             {
+              "text": "5G device testing value chain\n[[5G device testing value chain]] 是 [[Rethink 5G Testing solution overview 5G RedCap NTN FWA]] 中整理的 5G device ecosystem 測試分工：從 chip vendor、device manufacturer、test house 到 network operator，依 Lab、R&D、Production、Operations 與 Use cases 串接 RF、signaling、application、OTA、pre-conformance、conformance、carrier acceptance 與 service / repair 測試。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 9.596045
+             },
+             {
+              "text": "5G device testing value chain › 使用限制\n- 本頁不是 3GPP conformance specification，也不是 R&S formal product configuration guide。\n- 來源中的工具 mapping 是 solution overview / sales enablement 層級；不得替代 datasheet、test case list、option dependency 或 calibration procedure。\n- 來源未標示正式日期；市場數字與 operator requirements 需按其各自來源與日期重新驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 8.30151
+             },
+             {
+              "text": "5G device testing value chain › Validation and Conformance 目標\n來源指出 validation and conformance 測試目標包含：\n\n- Chipset L1–L4 test plan and verification。\n- Investigate and debug modem stack。\n- Validate and optimize end to end performance of IMS / SIP / TCP/IP。\n- Investigate and debug app stack。\n- Plan、develop、execute 3GPP / carrier device tests。\n- Radiated and conducted testing。\n\n測試目的包含：\n\n- Final product according to [[3GPP]] specs and KPIs 的 conformance。\n- Final product for different carriers 的 conformance。\n- New product introduction test framework 與 pilot production tests。\n- 確認 HW / SW 如設計般運作。\n- Cellular transceiver systems optimization。\n- Meet 3GPP specifications or custom design criteria。\n- Assure robustness / reliability and performance on L1–L3。\n- Optimize each stack for highest throughput and defined KPIs。\n- Ensure robustness / reliability and performance on IMS、TCP/IP stack and app protocols。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 6.610639
+             },
+             {
+              "text": "AIW_Products_Customer_Questionnaire › 重點摘要\n- 文件標題：`CUSTOMER QUESTIONNAIRE ROHDE & SCHWARZ AI WORKPLACE SOLUTIONS`。\n- Contact：Tim Seyler（`tim.seyler@rohde-schwarz.com`）。\n- Latest Update：Wednesday, August 19, 2026；文件內也有 `Last Update: August 19, 2026`。\n- 文件目的：透過問題了解客戶在 [[Virtual tester]]、[[AI-assisted agentic test workflows]]、測試建立、結果分析、工具整合、政策限制與 adoption risk 方面的需求。\n- 文件定義三個短語：\n  - [[Validated results]]：可信任到足以 report、ship against 或 close a ticket 的 test outcome。\n  - [[Virtual tester]]：跨 implementation → test → debug → validation 的 agentic workflow，不是單一工具。\n  - [[Orchestration layer]]：shared rules、instructions、skills，用於協調 AI agents across existing stack；不取代 CI 或 test framework。\n- 問卷分成六大段：\n  1. Current workflow and pain。\n  2. AI and tooling readiness。\n  3. Integration and ecosystem。\n  4. Outcomes and success criteria。\n  5. Risk and adoption。\n  6. Tools & AI harness（e.g. Claude Code, Cursor, similar）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AIW_Products_Customer_Questionnaire.md"
+              },
+              "score": 11.644457
+             },
+             {
+              "text": "AIW_Products_Customer_Questionnaire › 關鍵實體與概念\n- [[R&S AI Workplace Solutions]]：文件頁首方案名稱。\n- [[R&S AI Workplace]]：既有 AIW on-prem prerequisites 文件中的 base product / solution；本問卷補充其 customer discovery 語境。\n- [[Tim Seyler]]：文件 contact。\n- [[Virtual tester]]：問卷明確定義的 agentic workflow。\n- [[Orchestration layer]]：問卷明確定義的 shared rules / instructions / skills layer。\n- [[Validated results]]：問卷明確定義的可信任測試結果。\n- [[AI-assisted agentic test workflows]]：問卷描述的目標工作流程主題。\n- [[Customer agent harness]]：問卷第 6g 題提到的概念，用於詢問客戶期望先 orchestration 哪些任務。\n- [[Coding Agent Harness]]：既有 prerequisites 概念；本問卷第 6 段以 tools & AI harness 擴展客戶現況調查。\n- [[Claude Code]]、[[Cursor]]：問卷列為 AI-assisted development tools / harness examples；`similar` 表示例示而非完整清單。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AIW_Products_Customer_Questionnaire.md"
+              },
+              "score": 9.984534
+             },
+             {
+              "text": "AIW_Products_Customer_Questionnaire › 與既有知識的關係\n- 與 [[AIW_on_prem_prerequisites_ScriptAssist]]、[[AIW_on_prem_prerequisites_TechAssist]] 相比，本文件不是 deployment prerequisites，而是 customer discovery questionnaire。\n- [[AIW_on_prem_prerequisites_ScriptAssist]] 與 [[AIW_on_prem_prerequisites_TechAssist]] 定義部署前 must-have items；[[AIW_Products_Customer_Questionnaire]] 則用問題蒐集客戶工作流、政策、工具與導入風險。\n- 本文件補充 [[R&S AI Workplace Solutions]] 的定位：它不只討論 on-prem prerequisites，也涉及 virtual testing、AI-assisted / agentic test workflows、toolchain integration 與 adoption planning。\n- 本文件的 [[Orchestration layer]] 定義與既有 [[Coding Agent Harness]] 不同：前者是 shared rules / instructions / skills coordination layer，後者在 prerequisites 中是 coding agent 工具 / harness 選項。兩者可互連，但不可直接合併為同一概念。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AIW_Products_Customer_Questionnaire.md"
+              },
+              "score": 4.601587
+             },
+             {
+              "text": "Validated results › 限制與未決事項\n- 來源未定義 validated results 的技術驗證流程、審核人員、品質門檻或合規要求。\n- 來源未說明哪些 decisions must stay with engineers vs can be automated；問卷要求客戶自行回答。\n- 來源未提供具體 test framework、ticket system 或 reporting system integration。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Validated results.md"
+              },
+              "score": 9.332146
+             },
+             {
+              "text": "Validated results › 與 Virtual tester 的關係\n[[Virtual tester]] 被定義為跨 implementation → test → debug → validation 的 agentic workflow。[[Validated results]] 可視為該 workflow 的目標結果之一，但來源未提供 validation criteria、test coverage threshold 或品質標準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Validated results.md"
+              },
+              "score": 3.48134
+             },
+             {
+              "text": "Validated results › 問卷中的角色\n問卷第 1a 題以 `new test idea to running, validated results` 描述客戶當前 workflow，並追問耗時環節，例如：\n\n- scripting；\n- environment setup；\n- debugging failures；\n- documentation。\n\n問卷第 4 段則要求客戶定義 success criteria，例如 time to first test、mean time to debug、regression coverage、reuse of tests、fewer expert escalations，以及 minimal human intervention 的邊界。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Validated results.md"
+              },
+              "score": 0.874266
+             },
+             {
+              "text": "NTN test and measurement aspects › Signal generation、analysis 與 SpaceNexus\n來源描述：\n\n- [[R&S SMW200A]] 可配備 fading emulator，支援 TDL / CDL、custom fading profile、Doppler、delay、path loss，以及 [[R&S SMW-K820]] customized dynamic fading。\n- [[R&S SpaceNexus]] 可設定 satellite constellation、UE position / mobility、time-variant Doppler、time-variant propagation delay、path loss、weather-induced attenuation，並 remote configure SMW200A。\n- [[R&S FSW]] / [[R&S FSWX]] 支援 satellite payload testing、EVM、ACLR、group delay、DVB-S2X analysis、phase-coherent multichannel measurement。\n- [[R&S PVT360A]] 被描述為 potential satellite production testing platform，整合 vector signal generator 與 vector spectrum analyzer。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 7.60875
+             },
+             {
+              "text": "NTN test and measurement aspects › 使用限制\n- 本頁是 T&M 技術總覽；正式 test methods、limits、tolerances、test case IDs 與 validation status 需查 [[TS 38.101-5]]、[[TS 38.521-5]]、[[TS 38.523]]、[[TS 38.533]]、[[TS 38.181]]、[[TS 38.108]]、GCF / PTCRB public documents。\n- R&S 產品能力需以正式 datasheet / configuration guide 為準；白皮書中的 solution-level 描述不可直接作為 quote / BOM / orderable capability。\n- OTA / PAAM setup 的 fixtures、antenna modules、chamber dimensions、quiet zone、polarization、frequency conversions 等需以原圖與 setup note 回查。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 5.529254
+             },
+             {
+              "text": "NTN test and measurement aspects › R&S CMX500 與 TS8980\n來源將 [[R&S CMX500]] 描述為 5G NTN 測試平台：\n\n- 可作 one-box testing setup。\n- 可整合進 [[R&S TS8980 Conformance Test Platform]]。\n- 支援 NR-NTN、NB-NTN、DTC。\n- 可執行 RF、protocol、signaling、E2E application、mobility、application testing。\n- 支援 FR1、FR2 與 future FR3 regions 的 white paper level 描述；正式 frequency coverage 需回查產品 specs / heads / RF frontends。\n- 支援 Constellation Insight tool，可 load、configure、visualize、deploy satellites。\n- CMX500 hardware 同時可啟動 cells 數量有限；來源說目前一台 box 最多 six cells。\n\n[[R&S TS8980 Conformance Test Platform]]：\n\n- 補充並擴展 CMX500。\n- 支援 full type approval functionality。\n- 支援 multiple cells、out-of-band emission、spurious emission、interfering / blocking performance tests。\n- 作為 accredited / validated test platform 用於 conformance / certification。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 5.445639
+             },
+             {
+              "text": "Satellite User Terminal 外部資料清單 › 與既有頁面的關係\n- [[衛星地面設備]]：本頁補充 user terminal / terminal OEM / test flow 待讀資料，擴充既有地面設備與 ground station 入口。\n- [[低軌衛星零組件與地面終端供應鏈]]：既有頁面由 2026-09-15 市場報告支撐台灣供應鏈；本頁偏全球 user terminal / OEM / test reference link hub，不可直接合併成供應商驗證。\n- [[相控陣列天線]]：本頁連接 ESA、phased array、flat-panel antenna、active phased array characterization 與 satellite terminal testing 待讀來源；[[Kuiper UT Test & Supply Chain]] 進一步提供 Project Kuiper Ka-band 相控陣與 OTA / RF 測試流程。\n- [[5G NTN validation and testing]]：本頁補充 [[MediaTek M80]]、OneWeb LEO 5G NTN connection 與 3GPP Rel-19 / test equipment 待讀線索。\n- [[台灣衛星產業鏈外部資料清單]]：保存另一組 satellite / space supply-chain link hub；本頁則專注 user terminal 與測試資料。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Satellite User Terminal 外部資料清單.md"
+              },
+              "score": 12.400963
+             },
+             {
+              "text": "Satellite User Terminal 外部資料清單 › 已擷取：Kuiper UT Test & Supply Chain.pptx\n[[Kuiper UT Test & Supply Chain]]（raw converted 2026-09-17；來源正文未標示正式發布日期）是 `Kuiper UT Test & Supply Chain.pptx` 轉出的 company restricted 簡報來源，已建立：\n\n- [[Project Kuiper]] — 記錄 2026年Q1 5 國上線、2026 年底 26 國覆蓋、客群、定位、部署與供應鏈策略等來源說法。\n- [[Project Kuiper 用戶終端]] — 記錄標準型、便攜型、企業型三款 user terminal 的尺寸、速率、功耗、Ka-band 相控陣與成本目標。\n- [[Kuiper UT 測試流程]] — 記錄 FAT、OTA 暗室、RF 測試、波束掃描 / 追蹤、環境可靠性、系統整合與現場試驗。\n- [[Amazon Prometheus SoC]] — 記錄來源中的基帶晶片、衛星 / 網關 / 終端共用、1Tbps 等級資料處理與功耗口徑未決事項。\n- [[Tezmaksan]]、[[L3Harris]] — 記錄來源中的元件夥伴 / 供應鏈列名，但不推論合約或量產供應。\n\n[[Kuiper UT Test & Supply Chain]] 可補強 Kuiper user terminal 測試流程與內部策略，但仍不可取代 Amazon 官方公告、FCC filing、ITU filing、terminal datasheet、test report 或供應商合約證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Satellite User Terminal 外部資料清單.md"
+              },
+              "score": 8.407717
+             },
+             {
+              "text": "Satellite User Terminal 外部資料清單 › Starlink user terminal、teardown、RF testing 與 Taiwan focus 線索\n[[User Terminal]] 的 Starlink 區段列出：\n\n- Supply chain & manufacturing：[[STMicroelectronics]] / [[SpaceX]] partnership、Bastrop production costs、Reuters Taiwanese suppliers relocation、China PCB clusters。\n- Phased Array & RF Architecture：Rev4 teardown、beamformer comparison、antenna evolution。\n- RF Testing & Metrics：FCC router test report、Ku-band G/T/EIRP filings、R&S Taiwan ESA testing、Taiwan LEO / NCC study。\n- Instruments & Procedures：R&S satellite ground station testing、Keysight spectrum analysis、GSOA VSAT standards。\n- Models & Performance Charts：terminal models chart、enterprise comparisons。\n- Taiwan Focus：來源文字稱 NCC certification aligns with FCC for Ku/Ka、emissions <1 mW/cm²、local labs like CTCI / Bureau Veritas。\n\nStarlink 區段明示多個外部來源，但本次 raw 未擷取外部正文。特別是 Taiwan Focus 段落需等待 NCC、FCC、CTCI / Bureau Veritas 或原研究報告正文，才能確認法規、測試機構、限值與適用產品。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Satellite User Terminal 外部資料清單.md"
+              },
+              "score": 5.928816
+             },
+             {
+              "text": "SMW200A_specs_en_3606-8037-22_v3100 › 關鍵實體與概念\n- [[R&S SMW200A]]：本來源的主要產品實體，Rohde & Schwarz vector signal generator。\n- [[Rohde & Schwarz]]：發布者與製造商。\n- [[R&S SGT100A]]：來源說 [[R&S SMW200A]] 可連接 SGT100A signal generator modules，提供最多 8 條 RF paths。\n- [[R&S WinIQSIM2]]：來源說 waveform packages for signals from R&S WinIQSIM2；R&S WinIQSIM2 requires an external PC。\n- [[R&S Pulse Sequencer]]：外部 pulse sequencer software 相關 options 的規格另見 `PD 3607.1388.22`。\n- [[Vector signal generator]]、[[RF path]]、[[RF modulation bandwidth]]、[[I-Q modulation]]、[[Phase noise]]、[[Pulse modulation]]、[[AWGN]]、[[GNSS simulation]]、[[MIMO]]、[[Fading simulator]]、[[Digital I-Q Interface]]、[[HUMS]]、[[SCPI]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMW200A_specs_en_3606-8037-22_v3100.md"
+              },
+              "score": 10.808197
+             },
+             {
+              "text": "SMW200A_specs_en_3606-8037-22_v3100 › 主要配置與相依關係\n- RF path A 必須安裝一個 `R&S®SMW-B10xx` frequency option。\n- RF path B 若安裝 `R&S®SMW-B20xx` frequency option，baseband main module 必須是 `R&S®SMW-B13T` 或 `R&S®SMW-B13XT`。\n- 必須安裝 `R&S®SMW-B13`、`R&S®SMW-B13T` 或 `R&S®SMW-B13XT` 其中一個 signal routing and baseband main module。\n- `R&S®SMW-B13` 與 `R&S®SMW-B13T` 不能安裝於配備 `R&S®SMW-B1044O`、`R&S®SMW-B2044O`、`R&S®SMW-B1056O` 或 `R&S®SMW-B1067O` frequency options 的儀器。\n- `R&S®SMW-B1044` 只能與 `R&S®SMW-B2044` 組合；`R&S®SMW-B1044N` 只能與 `R&S®SMW-B2044N` 組合；`R&S®SMW-B1044O` 只能與 `R&S®SMW-B2044O` 組合。\n- `R&S®SMW-B94L` 是 deeper chassis，Order No. `1438.8150.02`；來源明列 required and only possible for `2 × 12.75 GHz`、`2 × 31.8 GHz`、`2 × 44 GHz` RF path combinations。\n- 所有已安裝 RF paths 必須具有相同 phase noise performance level；RF path A 的 `R&S®SMW-B709/-B710/-B711` 分別對應 RF path B 的 `R&S®SMW-B719/-B720/-B721`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMW200A_specs_en_3606-8037-22_v3100.md"
+              },
+              "score": 7.337134
+             },
+             {
+              "text": "SMW200A_specs_en_3606-8037-22_v3100 › 規格適用條件與語彙\n- Product data 適用條件：ambient temperature 下 storage `3 hours` 後 warm-up operation `30 minutes`、符合 specified environmental conditions、遵守 recommended calibration interval、完成所有 applicable internal automatic adjustments。\n- Specifications with limits 代表 warranted product performance，以 `<`、`≤`、`>`、`≥`、`±`、maximum、limit of、minimum 等標示；test limits 透過 guard bands 納入 measurement uncertainties、drift、aging。\n- Specifications without limits 代表 warranted product performance，通常是 dimensions 或 setting parameter resolution 等偏差可忽略的值。\n- `n. trc.`、`typ.`、`nom.`、`meas.` 不由 Rohde & Schwarz 保證。\n- Uncertainties 的 coverage factor 為 `2`，依 GUM 計算，納入 environmental conditions、aging、wear and tear。\n- 依 3GPP standard，`Gbps`、`Mcps`、`Mbps`、`Msps`、`kbps`、`ksps`、`Msample/s` 在本文件中不是 SI units。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMW200A_specs_en_3606-8037-22_v3100.md"
+              },
+              "score": 7.254548
+             },
+             {
+              "text": "FSV3000_specs_en_5216-1334-22_v1601 › 重點摘要\n- 文件：Rohde & Schwarz R&S®FSV3000 Signal and Spectrum Analyzer，Specifications，PD 5216.1334.22，Version 16.01，August 2025。\n- 適用型號：[[R&S FSV3004]]、[[R&S FSV3007]]、[[R&S FSV3013]]、[[R&S FSV3030]]、[[R&S FSV3044]]、[[R&S FSV3050]]。\n- 產品資料適用條件：環境溫度下存放 3 小時後，30 分鐘 warm-up operation；符合 environmental conditions；遵守 recommended calibration interval；已執行所有適用 internal automatic adjustments。\n- Rohde & Schwarz 明確不保證 non-traceable specifications with limits、typical data、nominal values、measured values；data without tolerance limits is not binding。\n- Recommended calibration interval：2 years。\n- Frequency resolution：0.01 Hz。\n- Display：LCD TFT color display，10.1 inch，1280 × 800 pixel。\n- Operating temperature range：+0 °C to +50 °C；storage：–40 °C to +70 °C。\n- AC supply：100 V to 240 V，max. 3.5 A，50 Hz to 60 Hz、400 Hz，protection class I。\n- EMC：符合 EMC Directive 2014/30/EU；IEC/EN 61326-1 immunity test requirement 為 industrial environment；CISPR 11/EN 55011 class A equipment emission limits。\n- EU legislation：來源標示符合 Data Act - Regulation (EU) 2023/2854；細節見 user documentation。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/FSV3000_specs_en_5216-1334-22_v1601.md"
+              },
+              "score": 10.876003
+             },
+             {
+              "text": "FSV3000_specs_en_5216-1334-22_v1601 › 關鍵實體與概念\n- 實體：[[R&S FSV3000]]、[[R&S FSV3004]]、[[R&S FSV3007]]、[[R&S FSV3013]]、[[R&S FSV3030]]、[[R&S FSV3044]]、[[R&S FSV3050]]、[[Rohde & Schwarz]]、[[R&S VSE]]、[[R&S NRP power sensors]]、[[R&S FE44S]]、[[R&S FE50DTR]]。\n- 概念：[[Signal and Spectrum Analyzer]]、[[YIG preselector]]、[[OCXO reference frequency]]、[[Displayed average noise level]]、[[Third order intercept point]]、[[I-Q data]]、[[EMI measurements]]、[[HUMS]]、[[SCPI]]、[[3GPP]]、[[External harmonic mixer]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 20,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/FSV3000_specs_en_5216-1334-22_v1601.md"
+              },
+              "score": 7.202841
+             },
+             {
+              "text": "FSV3000_specs_en_5216-1334-22_v1601 › 與既有知識的關係\n- 本來源維護 [[R&S FSV3000]] 系列，與既有 [[R&S FPL1003]]、[[R&S FPL1007]]、[[R&S FPL1014]]、[[R&S FPL1026]]、[[R&S FPL1044]] 同屬 spectrum/signal analyzer 產品資料，但本次未建立產品線比較；如需比較應另建 synthesis。\n- 本來源的 options 與 firmware licences 應依附在 [[R&S FSV3000]] 與各 FSV3000 型號頁，不另為 option 建 entity 頁。\n- 本次較先前摘要補齊 R&S®FSV3-B271 Order No. 1330.4190.03 的 requires / excludes：requires R&S®FSV3-B114，且不可與 R&S®FSV3-B200 option 合用。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 21,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/FSV3000_specs_en_5216-1334-22_v1601.md"
+              },
+              "score": 6.31407
+             },
+             {
+              "text": "R&S SMCV100B › 適用條件與規格定義\n依 [[SMCV100B_specs_en_3608-0627-22_v1700]]，產品資料適用條件：\n\n- 在 ambient temperature 儲存 `3 小時` 後，warm-up operation `30 分鐘`。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格定義：\n\n- Specifications with limits：以範圍或限制值表示 warranted product performance，使用 `<, ≤, >, ≥, ±, maximum, minimum` 等標示。\n- Non-traceable specifications with limits (`n. trc.`)：依 specifications with limits 測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- Specifications without limits：代表 warranted product performance，通常為尺寸或設定解析度等無或可忽略偏差的值。\n- Typical data (`typ.`)：代表約 `80%` 量產儀器可達到的性能，或代表平均值。\n- Nominal values (`nom.`)：代表性數值，不做 statistical evaluation，生產時不測試。\n- Measured values (`meas.`)：來自個別樣品的 measurement results。\n- Uncertainties：coverage factor = `2`，依 GUM 規則計算，考慮 environmental conditions、aging、wear and tear。\n- Non-traceable specifications with limits、typical data、nominal values、measured values 不由 Rohde & Schwarz 保證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMCV100B.md"
+              },
+              "score": 31.28959
+             },
+             {
+              "text": "R&S SMCV100B › Unresolved\n- 來源開頭標示 `Version 17.00，September 2025`，文件資訊頁標示文件日期 `August 2025`；需人工確認正式文件日期。\n- 來源未標示價格。\n- Warranty/service options 未列具體 service plan order number；extended periods 只寫 contact Rohde & Schwarz sales office。\n- Digital standards options 多數只列 option code、order number 與部分 requires 關係；未標示 requires/excludes 者本頁不自行推導。\n- `Pulse modulation` 的 on/off ratio 摘錄為 `> 80`，來源摘錄未標示單位。\n- `R&S®SMCVB-K285` LTE Release 10 的 order number 來源列為 `1434.4415.02`，與 `R&S®SMCVB-K261` Multicarrier CW signal generation 相同；本頁照抄來源，不自行判定是否為原文錯字。\n- 來源摘要為分段萃取重點，不是完整逐頁文字；報價前應回查 [[SMCV100B_specs_en_3608-0627-22_v1700]] 對應 raw 原文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 44,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMCV100B.md"
+              },
+              "score": 10.821786
+             },
+             {
+              "text": "R&S SMCV100B › 文件依據\n- 來源：[[SMCV100B_specs_en_3608-0627-22_v1700]]\n- 文件名稱：`R&S®SMCV100B Vector Signal Generator Specifications`\n- 文件識別：`PD 3608.0627.22`\n- 文件版本：`Version 17.00`\n- 文件日期：來源開頭標示 `September 2025`；文件資訊頁標示 `August 2025`，見 [[SMCV100B_specs_en_3608-0627-22_v1700]] 的未解問題。\n- 產品名稱：`R&S®SMCV100B Vector Signal Generator`\n- Base instrument order no.：`1432.7000.02`",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMCV100B.md"
+              },
+              "score": 9.827378
+             },
+             {
+              "text": "R&S SMBV100B › Baseband enhancements\n| Code | Name | Order No. | 原文說明 / 關係 |\n|---|---|---:|---|\n| R&S®SMBVB-K62 | Additive white Gaussian noise（AWGN） | 1423.7876.02 | Adds AWGN with settable bandwidth and settable C/N ratio or Eb/N0。 |\n| R&S®SMBVB-K80 | Bit error rate tester | 1423.7647.02 | BER and BLER measurement；clock rate 100 Hz to 100 MHz。 |\n| R&S®SMBVB-K540 | Envelope tracking | 1423.7701.02 | Analog I/Q outputs 可產生 envelope signal；prerequisite：必須安裝 R&S®SMBVB-K17 option。 |\n| R&S®SMBVB-K541 | AM/AM, AM/φM predistortion | 1423.7718.02 | Predistortion；state on/off；shaping polynomial、from table。 |\n| R&S®SMBVB-K544 | User-defined frequency response correction | 1423.8150.02 | Scattering parameter 與 additional frequency response correction；minimum compensation bandwidth 25 MHz。 |\n| R&S®SMBVB-K548 | Crest factor reduction | 1423.8820.02 | Clipping and filtering；desired crest factor delta –20 dB to 0 dB。 |\n| R&S®SMBVB-K811 | Notched signals | 1423.8972.02 | Up to 25 band-stop filters for baseband signal。 |\n| R&S®SMBVB-K980 | Health and utilization monitoring service（HUMS） | 1423.8872.02 | Data readout/display via SNMP、REST JSON、SCPI、device web；提供 device、options、licenses、status、service、utilization、event log 等資訊。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 35,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 13.813503
+             },
+             {
+              "text": "R&S SMBV100B › Enhancements\n- R&S®SMBVB-K62 AWGN：C/N、Eb/N0 setting range depending on RF level，–50 dB to +45 dB；system bandwidth standard 1 kHz to 120 MHz，with extensions up to 1000 MHz，但高階 extension 條件需回 PDF 查核。\n- R&S®SMBVB-K80 BER measurement：clock rate 100 Hz to 100 MHz；PRBS 9、11、15、16、20、21、23；measurement result in ppm、% 或 decade values。\n- R&S®SMBVB-K80 BLER measurement：arbitrary data；CRC type CCITT CRC16；clock rate 100 Hz to 100 MHz。\n- R&S®SMBVB-K540 Envelope tracking：Analog I/Q outputs 可產生對應 I/Q signal envelope 的 analog signal；prerequisite 必須安裝 R&S®SMBVB-K17 option；envelope to RF delay –1 µs to +1 µs，resolution 1 ps。\n- R&S®SMBVB-K541 AM/AM、AM/φM predistortion：state on/off；shaping polynomial、from table。\n- R&S®SMBVB-K544 User-defined frequency response correction：scattering parameter file *.s<n>p，maximum number of points 16384，datasets cascaded up to 10；minimum compensation bandwidth 25 MHz；total compensation bandwidth standard max. 120 MHz，with extensions up to 1000 MHz。\n- R&S®SMBVB-K548 Crest factor reduction：algorithm clipping and filtering；desired crest factor delta –20 dB to 0 dB。\n- R&S®SMBVB-K811 Notched signals：up to 25 band-stop filters；supported with ARB、LTE、cellular IoT、custom OFDM。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 18,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 13.377057
+             },
+             {
+              "text": "R&S SMBV100B › 文件與適用範圍\n- 主要來源：[[SMBV100B_specs_en_3607-8201-22_v1301]]。\n- 文件：R&S®SMBV100B Vector Signal Generator Specifications。\n- 文件編號：PD 3607.8201.22。\n- 文件版次：Specifications Version 13.01。\n- 文件日期：August 2025（footer：August 2025 (la)）。\n- 產品：R&S®SMBV100B vector signal generator。\n- 規格適用條件：ambient temperature 下 storage 3 hours、warm-up operation 30 minutes、specified environmental conditions met、recommended calibration interval adhered to、all applicable internal automatic adjustments performed。\n- Rohde & Schwarz 不 warranted：Non-traceable specifications with limits、typical data、nominal values、measured values。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMBV100B.md"
+              },
+              "score": 10.405407
+             },
+             {
+              "text": "Virtual tester\n[[Virtual tester]] 在 [[AIW_Products_Customer_Questionnaire]] 中被定義為跨 implementation → test → debug → validation 的 agentic workflow，而不是 single tool。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 1.808086
+             },
+             {
+              "text": "Virtual tester › 限制與未決事項\n- 來源未說明 [[Virtual tester]] 是否為正式產品名、solution architecture 名稱或 sales / discovery 用語。\n- 來源未列出支援的 test frameworks、instruments、CI systems 或 issue trackers。\n- 來源未定義 validation 自動化到何種程度，也未定義 minimal human intervention 的標準。\n- 來源未說明 [[Virtual tester]] 與 [[ScriptAssist]]、[[TechAssist]] 的產品對應。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Virtual tester.md"
+              },
+              "score": 1.724807
+             },
+             {
+              "text": "R&S SMW200A › Digital I/Q\n- Standard digital baseband outputs 至少需 `R&S®SMW-K18`；wideband digital baseband outputs 至少需 `R&S®SMW-K19`。\n- Digital I/Q input/output 可用於 [[R&S SMW200A]] 與其他 Rohde & Schwarz 儀器之間的 lossless connection，例如 [[R&S SGT100A]]、[[R&S SMM100A]]、[[R&S SMCV100B]] 或 CMW500 wideband radio communication tester 的 fading applications。\n- DIG I/Q interface 符合 `R&S®Digital I/Q Interface PAD-R`，level `LVDS`，connector `26-pin MDR`。\n- HS DIG I/Q interface 符合 `R&S®Digital I/Q Interface 40G PAD-R`，connector `QSFP+/QSFP 28`。\n- Wideband HS DIG I/Q standard system configuration mode：40G up to `1.05 GHz`，50G up to `1.25 GHz`；advanced mode with `R&S®SMW-K822` input up to `500 MHz`，with `R&S®SMW-K823` input up to `1000 MHz`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 18,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 5.569133
+             },
+             {
+              "text": "R&S SMW200A › Signal routing and baseband main module\n| Code | Name / description | Order No. | 原文說明 / 限制 |\n|---|---|---:|---|\n| `R&S®SMW-B13` | Signal routing and baseband main module，one I/Q path to RF section | `1413.2807.02` | Standard baseband section；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13T` | Signal routing and baseband main module，two I/Q paths to RF section | `1413.3003.02` | Standard baseband section；若要安裝 RF path B 需 `B13T` 或 `B13XT`；not compatible with `R&S®SMW-BxxxxO` frequency options。 |\n| `R&S®SMW-B13XT` | Wideband baseband main module，two I/Q paths to RF section | `1413.8005.02` | Wideband baseband section；RF modulation bandwidth up to `2 GHz`。 |\n\n- Standard baseband section：`R&S®SMW-B13` 或 `R&S®SMW-B13T`；RF modulation bandwidth 最高 `160 MHz`；可安裝 `R&S®SMW-B10` standard baseband generator 與 `R&S®SMW-B14` fading simulator。\n- Wideband baseband section：`R&S®SMW-B13XT`；RF modulation bandwidth 最高 `2 GHz`；可安裝 `R&S®SMW-B9` / `R&S®SMW-B9F` wideband baseband generator 與 `R&S®SMW-B15` fading simulator and signal processor。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 5.285759
+             },
+             {
+              "text": "R&S SMW200A › 基本訂購限制\n依 [[SMW200A_config-guide_en_3606-8037-92_v0600]] 與 [[SMW200A_specs_en_3606-8037-22_v3100]]：\n\n- Base unit：`R&S®SMW200A`，Order No. `1412.0000.02`。\n- 原文說明：Vector signal generator；includes power cable and quick start guide。\n- Base unit can only be ordered with an `R&S®SMW-B10xx` frequency option and an `R&S®SMW-B13`、`R&S®SMW-B13T` or `R&S®SMW-B13XT` signal routing and baseband main module。\n- 最低配置必須包含 RF path A 的一個 frequency option，以及一個 signal routing and baseband main module。\n- Step 1 RF path A frequency options 不能 retrofitted。\n- Step 2 baseband main module options 可 factory retrofitted；`R&S®SMW-B13XT` retrofitting only for serial number `102700` or higher。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 4.687647
+             },
+             {
+              "text": "R&S SMW200A › Digital standards、R&S WinIQSIM2、Pulse Sequencer、MIMO 與 fading\n- Internal digital modulation systems 至少需安裝一個 `R&S®SMW-B10` 或 `R&S®SMW-B9`。\n- 來源列出 cellular、wireless connectivity、navigation、broadcast 與 other standards options；包含 `GSM/EDGE`、`3GPP FDD`、`LTE Release 8` 到 `Release 15`、`Cellular IoT`、`5G New Radio`、`5G NR Release 16/17`、`IEEE 802.11a/b/g/n/j/p/ac/ax/be/ad/ay`、`Bluetooth EDR/5.x/5.4`、`GNSS`、`DVB-S2/S2X`、`DVB-RCS2`、`LoRa`、`HRP UWB` 等。\n- 來源描述 digital standards 不需要 separate PC software；但 waveform packages for signals from [[R&S WinIQSIM2]] 另明列 [[R&S WinIQSIM2]] requires an external PC。判斷：前者指 instrument internal digital standards，後者指 WinIQSIM2 workflow，不合併為單一規則。\n- `R&S®SMW-K144`：5G New Radio，Order No. `1414.4990.02`。\n- `R&S®SMW-K145`：5G New Radio closed-loop BS test，Order No. `1414.6506.02`。\n- `R&S®SMW-K148`：5G NR Release 16，Order No. `1414.6664.02`。\n- `R&S®SMW-K170`：5G NR sidelink，Order No. `1413.8640.02`。\n- `R&S®SMW-K171`：5G NR Release 17，Order No. `1413.7280.02`。\n- [[R&S WinIQSIM2]] requires an external PC；`R&S®SMW-K200` waveform packages 可登錄 1、5 或 50 waveforms，每台 instrument 最多 `250 waveforms`。\n- [[R&S Pulse Sequencer]] 相關 options 包含 `R&S®SMW-K300`、`K301`、`K302`、`K304`、`K306`、`K307`、`K308`、`K315`、`K350`。\n- Multichannel、MIMO and fading 完整規格另見 `PD 3673.1276.22`；digital standards 完整規格另見 `PD 5213.9434.22`；GNSS/avionics 另見 `PD 3607.6896.22`；Pulse Sequencer 另見 `PD 3607.1388.22`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 21,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 4.321513
+             },
+             {
+              "text": "R&S SMW200A › 主要 RF performance（Version 31.00，May 2026）\n依 [[SMW200A_specs_en_3606-8037-22_v3100]]：\n\n- Frequency range：依 RF path frequency option，RF path A 最高 `100 kHz to 67 GHz`；RF path B 最高 `100 kHz to 44 GHz`。\n- Overrange：`67 GHz to 72 GHz`。\n- Resolution of setting：`0.001 Hz`。\n- Resolution of synthesis：`0.053 nHz nominal`，條件 `f = 1 GHz`。\n- Frequency setting time：依 frequency option 為 `< 1.2 ms` 至 `< 1.8 ms`；with `R&S®SMW-B711/-B721` 為 `< 4.0 ms`。條件包含 GUI update stopped、I/Q optimization mode fast、after IEC/IEEE bus delimiter、HUMS off。\n- Frequency setting time in list mode：依 frequency option為 `< 0.8 ms` 至 `< 1.4 ms`；with `R&S®SMW-B711/-B721`、run mode live 為 `< 4.0 ms`。\n- Level setting range：`100 kHz ≤ f < 1 MHz` 為 `–145 dBm to +8 dBm`；`1 MHz ≤ f < 3 MHz` 為 `–145 dBm to +13 dBm`；`3 MHz ≤ f ≤ 67 GHz` 為 `–145 dBm to +30 dBm`。\n- Standard performance SSB phase noise 條件：CW，carrier offset `20 kHz`，measurement bandwidth `1 Hz`，level `10 dBm` 或 maximum specified output power 兩者較低者；`f = 1 GHz` 為 `< –134 dBc`，typ. `–140 dBc`。\n- `R&S®SMW-B711/-B721` ultra low phase noise 在 `1 GHz`、`10 kHz offset` 下為 `–144 dBc`，typ. `–150 dBc`；在 `67 GHz`、`10 kHz offset` 下為 `–105 dBc`，typ. `–111 dBc`。\n- Pulse modulation 需 `R&S®SMW-K22`；一般 on/off ratio `> 80 dB`，部分高頻條件例外為 `> 65 dB`。\n- Pulse rise/fall time（10 % / 90 % of RF amplitude）：低頻 frequency options fast transition `< 10 ns`；多數 20 GHz 以上 options fast transition `< 15 ns`；smoothed transition 多數條件 `< 200 ns`。\n- Internal baseband I/Q、wideband baseband (`R&S®SMW-B13XT`)、I/Q wideband on：`f > 2.5 GHz` 時 `±1 GHz`；RF modulation bandwidth 可達 `2 GHz`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SMW200A.md"
+              },
+              "score": 4.114239
+             },
+             {
+              "text": "R&S FSW › 共通規格條件\n- Product data 適用條件：ambient temperature 儲存 3 小時、warm-up operation 30 分鐘、符合指定 environmental conditions、遵守 recommended calibration interval，且若適用已完成 internal automatic adjustments。\n- Frequency resolution：0.01 Hz。\n- Recommended calibration interval：1 year。\n- Operating temperature range：+5 °C to +50 °C。\n- Permissible temperature range：0 °C to +55 °C。\n- Storage temperature range：–40 °C to +70 °C。\n- Display：30.7 cm WXGA color touchscreen，1280 × 800 pixel。\n- Internal data storage：standard solid state disk ≥ 128 Gbyte。\n- AC input voltage range：100 V to 240 V；AC supply frequency：50 Hz to 60 Hz / 400 Hz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 2.362597
+             },
+             {
+              "text": "R&S FSW › 型號總覽\n| 型號 | DC coupled frequency range | AC coupled frequency range | Order No. |\n|---|---:|---:|---|\n| [[R&S FSW8]] | 2 Hz to 8 GHz | 10 MHz to 8 GHz | 1331.5003.08 |\n| [[R&S FSW13]] | 2 Hz to 13.6 GHz | 10 MHz to 13.6 GHz | 1331.5003.13 |\n| [[R&S FSW26]] | 2 Hz to 26.5 GHz | 10 MHz to 26.5 GHz | 1331.5003.26 |\n| [[R&S FSW43]] | 2 Hz to 43.5 GHz | 10 MHz to 43.5 GHz | 1331.5003.43 |\n| [[R&S FSW50]] | 2 Hz to 50 GHz | 10 MHz to 50 GHz | 1331.5003.50 |\n| [[R&S FSW67]] | 2 Hz to 67 GHz | 10 MHz to 67 GHz | 1331.5003.67 |\n| [[R&S FSW85]] RF1 standard | 2 Hz to 85 GHz | 10 MHz to 85 GHz | 1331.5003.85 |\n| [[R&S FSW85]] RF1 with R&S FSW-B90G, YIG preselector off | 2 Hz to 90 GHz | 10 MHz to 90 GHz | R&S FSW-B90G: 1331.7693.02 |\n| [[R&S FSW85]] RF2 | 2 Hz to 67 GHz | 10 MHz to 67 GHz | 來源未標示獨立 order no. |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 1.39219
+             },
+             {
+              "text": "R&S FSW › 其他硬體 options（摘錄）\n| Option code | 名稱 | Order No. | 原文說明 / 限制 |\n|---|---|---|---|\n| R&S FSW-B106 | I/Q memory extension 6 GB | 1331.6451.02 | 需 R&S FSW-B160/-U160/-B320 |\n| R&S FSW-B108 | I/Q memory extension 8 GB | 1331.6751.02 | 需 R&S FSW-B1200/-U1200/-B2001/-U2001/-B800R |\n| R&S FSW-B124 | I/Q memory extension 24 GB | 1338.5273.02 | 需 R&S FSW-B4001/-U4001/-B6001/-U6001/-B8001/-U8001 |\n| R&S FSW-B112 | USB instrument remote control, type B plug | 1353.3290.02 | 來源未標示 retrofittable 狀態 |\n| R&S FSW-B517 | DIG IQ 40G streaming out interface | 1331.6980.02 | 需 R&S FSW-B512/-U512/-B1200/-U1200/-B2001/-U2001/-B800R；不適用 B4001/B6001/B8001 |\n| R&S FSW-B1017 | DIG IQ 40G streaming out interface, max. 1 GHz bandwidth | 1350.7008.02 | 需 R&S FSW-B1200/-U1200/-B2001/-U2001/-B800R |\n| R&S FSW-FL | Floating license smart card with USB adapter | 1345.1940.02 | floating license 需此 hardware option |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 1.212944
+             },
+             {
+              "text": "R&S FSW › Firmware / licence options（摘錄）\n- R&S FSW-K6 Pulse measurements，Order No. 1313.1322.02。\n- R&S FSW-K7 AM/FM/PM modulation analysis，Order No. 1313.1339.02。\n- R&S FSW-K8 Bluetooth BR/EDR/LE measurements，Order No. 1313.1351.02；R&S FSW-K8E Bluetooth 6.0 channel sounding，Order No. 1353.3284.02，需 R&S FSW-K8。\n- R&S FSW-K40 Phase noise measurements，Order No. 1313.1397.02。\n- R&S FSW-K54 EMI measurements，Order No. 1313.1400.02。\n- R&S FSW-K70 Vector signal analysis，Order No. 1313.1416.02。\n- WLAN options：R&S FSW-K91、K91N、K91AC、K91AX、K91BE、K91P、K91BN、K95、K97；其中 K95/K97 需 R&S FSW-B2001/-B800R/-B4001/-B6001/-B8001 option。\n- 5G NR options：R&S FSW-K144、K145、K147、K147C、K148、K171、K175、K184；requires 依原文列示，報價前需回查 [[FSW_specs_en_5215-6749-22_v1701]]。\n- Real-time application firmware：R&S FSW-K161R、K512RE、K800RE，各自有 bandwidth option requires/excludes。\n- R&S FSW-K553 External frontend control，Order No. 1350.6118.02；支援 [[R&S FE44S]]、[[R&S FE50DTR]]、[[R&S FE110SR]]、[[R&S FE170SR]]。\n- R&S FSW-K575 I/Q noise cancellation，Order No. 1353.2894.02。\n- R&S FSW-K980 Health and utilization monitoring service（HUMS），Order No. 1350.6718.02。\n- 標註 59 的 firmware 也可作為 floating license；order number 由 `.02` 改為 `.51`，並需 R&S FSW-FL hardware option。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 1.04339
+             },
+             {
+              "text": "R&S FSW › 相依關係與不可同時安裝（照抄來源）\n- R&S FSW-B517 不適用於 R&S FSW-B4001/-B6001/-B8001 option。\n- R&S FSW-B1017 適用於 R&S FSW-B1200/-B2001/-B800R option。\n- R&S FSW-B21 不適用於 [[R&S FSW8]]、[[R&S FSW13]]。\n- 2-port mixers 不支援 R&S FSW-B800R/-B1200/-B2001/-B4001/-B6001/-B8001 options。\n- R&S FSW-B1200 / B2001 / B800R 適用於所有型號，[[R&S FSW8]]、[[R&S FSW13]] 除外。\n- R&S FSW-B4001 / B6001 / B8001 僅適用於 [[R&S FSW43]]、[[R&S FSW50]]、[[R&S FSW67]]、[[R&S FSW85]]。\n- R&S FSW-B90G 不可 retrofittable，僅適用 [[R&S FSW85]]。\n- R&S FSW-K161R 不可搭配 R&S FSW-B512/-B512R/-B6001/-B8001。\n- R&S FSW-K512RE 不可搭配 R&S FSW-B160/-B320/-B512R/-B6001/-B8001。\n- R&S FSW-K800RE 不可搭配 R&S FSW-B160/-B320/-B512/-B512R/-B800R/-B4001/-B6001/-B8001。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSW.md"
+              },
+              "score": 0.897609
+             },
+             {
+              "text": "R&S FSVA3000 › 主要 hardware options\n| Code | Order No. | 名稱 | 原文說明 / 相依關係 |\n|---|---:|---|---|\n| R&S®FSV3-B1 | 1330.5700.02 | Side carry handles | user-retrofittable |\n| R&S®FSV3-B3 | 1330.3765.02 | Audio demodulator | AF demodulation types AM and FM；audio output loudspeaker and phone jack |\n| R&S®FSV3-B4 | 1330.3794.02 | OCXO frequency reference | 改善 internal reference frequency |\n| R&S®FSV3-B5 | 1330.3820.02 | Additional interfaces | GPIB、IF out、video out、trigger out、AUX port、AUX control |\n| R&S®FSV3-B5E | 1330.3820.03 | Additional interfaces | GPIB 不適用 |\n| R&S®FSV3-B6 | 1330.3913.02 | 10 Gbit/s LAN interface | fast remote control and fast I/Q data transfer |\n| R&S®FSV3-B8E | 1346.4337.02 | Resolution bandwidth up to 40 MHz | signal analysis bandwidth 由 B40/B200/B400/B601/B1001 定義；frequencies > 7.5 GHz 建議 R&S®FSV3-B11 |\n| R&S®FSV3-B10 | 1330.3859.02 | External generator control | LAN based；high sweep speed 建議 R&S®FSV3-B5 |\n| R&S®FSV3-B11 | 1330.3865.02 | YIG preselector bypass | 適用 [[R&S FSVA3013]]、[[R&S FSVA3030]]、[[R&S FSVA3044]]、[[R&S FSVA3050]]；center frequencies > 7.5 GHz 且搭配 bandwidth options 進行 signal analysis 時需要 |\n| R&S®FSV3-B18 | 1330.4003.21 | Spare solid-state drive | includes Windows IoT Enterprise LTSC 2021 license；requires R&S®FSV3-B20 |\n| R&S®FSV3-B20 | 1330.3971.02 | Removable hard drive | front panel |\n| R&S®FSV3-B21 | 1330.4010.02 | LO/IF connections for external mixers | ordering table says for [[R&S FSVA3030]]；external harmonic mixers section says [[R&S FSVA3030]]、[[R&S FSVA3044]]、[[R&S FSVA3050]] applicable with R&S®FSV3-B21 option |\n| R&S®FSV3-B24 | 1330.4049.07/.13/.30/.44/.49/.50 | RF preamplifier | model-specific；.50 for [[R&S FSVA3050]] requires export license |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSVA3000.md"
+              },
+              "score": 3.954752
+             },
+             {
+              "text": "R&S FSVA3000 › 型號與文件版次\n- 文件：PD 5216.1211.22，Version 16.01，August 2025。\n- 系列型號：[[R&S FSVA3004]]、[[R&S FSVA3007]]、[[R&S FSVA3013]]、[[R&S FSVA3030]]、[[R&S FSVA3044]]、[[R&S FSVA3050]]。\n- Recommended calibration interval：2 years。\n- Frequency resolution：0.01 Hz。\n- Operating temperature range：+0 °C to +50 °C。\n- 規格適用條件：環境溫度下儲存 3 小時後，30 分鐘 warm-up operation，符合 environmental conditions，遵守 recommended calibration interval，並執行所有適用的 internal automatic adjustments。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSVA3000.md"
+              },
+              "score": 3.70535
+             },
+             {
+              "text": "R&S FSVA3000 › Signal analysis bandwidth options\n| 條件 | Maximum signal analysis bandwidth |\n|---|---:|\n| standard | 28 MHz nominal |\n| R&S®FSV3-B40 | 40 MHz nominal |\n| R&S®FSV3-B200 | 200 MHz nominal |\n| R&S®FSV3-B400 | 400 MHz nominal |\n| R&S®FSV3-B601 | 600 MHz nominal |\n| R&S®FSV3-B1001 | 1000 MHz nominal |\n\nf > 7.5 GHz 時需 R&S®FSV3-B11 option，且必須設定 YIG preselector = off。為取得設定的 analysis bandwidth，必須符合 `(fcenter + ½ analysis bandwidth) ≤ fmax`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSVA3000.md"
+              },
+              "score": 1.895453
+             },
+             {
+              "text": "R&S FSVA3000 › 系列定位\n- FSVA3000 與既有 [[R&S FSV3000]] 名稱相近，但本頁只記錄 [[FSVA3000_specs_en_5216-1211-22_v1601]] 對 FSVA3000 的產品資料，不混用 FSV3000 的 order number 或 option applicability。\n- R&S®FSV3-B114 在本來源中為 mandatory，Order No. 1330.4910.04。\n- R&S®FSV3-B710 enhanced performance 在本來源中提供 minimum frequency 2 Hz、enhanced phase noise and sensitivity specifications，且 not retrofittable。\n- R&S®FSVA3050 安裝 R&S®FSV3-B54G frequency extension option 時可達 54 GHz；R&S®FSV3-B54G requires R&S®FSV3-B11，only applicable to R&S®FSVA3050。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSVA3000.md"
+              },
+              "score": 1.857897
+             },
+             {
+              "text": "R&S FSVA3000 › 主要 hardware options\n| Code | Order No. | 名稱 | 原文說明 / 相依關係 |\n|---|---:|---|---|\n| R&S®FSV3-B25 | 1330.4078.02 | Electronic attenuator, 1 dB steps | frequency range 10 Hz to 7.5 GHz；setting range 0 dB to 25 dB |\n| R&S®FSV3-B28V | 1330.6664.02 | Noise source control via BNC | adds BNC female for noise source control |\n| R&S®FSV3-B54G | 1346.6369.02 | Frequency extension 54 GHz | requires R&S®FSV3-B11；only applicable to [[R&S FSVA3050]] |\n| R&S®FSV3-B114 | 1330.4910.04 | Enhanced computing power | mandatory |\n| R&S®FSV3-B271 | 1330.4190.02 | Analog baseband inputs, 2 × 200 MHz | requires R&S®FSV3-B200/-B400/-B601 or -B1001；supports I/Q analyzer mode and R&S®FSV3-K91/K96/K144/K145 |\n| R&S®FSV3-B271 | 1330.4190.03 | Analog baseband inputs, 2 × 200 MHz | not combinable with R&S®FSV3-B200/-B400/-B601 or -B1001；supports I/Q analyzer mode and R&S®FSV3-K96 |\n| R&S®FSV3-K703 | 1330.7502.02 | 1 GHz reference | user-retrofittable license key |\n| R&S®FSV3-B710 | 1346.4950.05/.08/.14/.31/.44/.51 | Enhanced performance | minimum frequency 2 Hz；enhanced phase noise and sensitivity specifications；not retrofittable |\n| R&S®FSV3-FL | 1345.1957.02 | Floating license smart card | with USB adapter |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S FSVA3000.md"
+              },
+              "score": 1.85205
+             },
+             {
+              "text": "oneweb_ut_final_presentation\n[[oneweb_ut_final_presentation]] 是由 `oneweb_ut_final_presentation.html` 轉出的 OneNote / presentation 型 Market 來源，主題為 [[OneWeb UT 測試流程]]、衛星通訊使用者終端機驗證與商業化；來源正式發布日期、作者正式姓名、部門版次與原始簡報版本皆未標示，raw frontmatter 僅標示 converted: 2026-09-17。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+              },
+              "score": 7.763852
+             },
+             {
+              "text": "oneweb_ut_final_presentation › 原文未解的問題\n- 來源正式發布日期、簡報版次、作者、部門正式名稱與適用客戶 / 專案未標示。\n- 原始檔為 HTML 轉 markdown 的 lossy derivative；需回查 `oneweb_ut_final_presentation.html` 原始內容、圖片與任何 speaker notes。\n- OneWeb constellation 數字、軌道高度、覆蓋範圍、頻段、throughput、latency 與 beam count 未附官方文件或測試條件。\n- [[Intellian OW11F]]、[[Hughes HL1120W]]、[[Kymeta Goshawk u8]]、[[Sharp]] 5G NTN terminal、[[Gilat ESR-2030Ku]]、[[ThinKom Ka2517]]、[[SatixFy ESMA]] 等產品規格需個別 datasheet 或 OEM 文件確認。\n- RF metrics（G/T、NF、EIRP、P1dB、path loss、rain margin、SNR）未標示量測 setup、環境條件、終端型號、頻點、校正狀態或測試不確定度。\n- [[Qorvo]] PA、[[Analog Devices]] LNA / receiver front-end、[[MediaTek M80]]、[[SatixFy Sx3099]] 與 [[Prime ASIC]] 供應鏈角色未附合約、採用或量產證據。\n- [[MediaTek M80]] 的 [[3GPP Release 19]] support、Sharp trial、2025 H2 commercial modem mass production 皆需官方 roadmap / datasheet / announcement 補證。\n- [[工研院]] ITRI satellite-board gNB / terrestrial gNB support 未提供專案名稱、標準版本、頻段、平台或合作單位證據。\n- `Rohde & Schwarz SMW6` 可能是型號簡寫或轉檔 / 原文錯誤；不可自行對應為 [[R&S SMW200A]] 或其他 signal generator。\n- 市場規模、CAGR 與 2035 forecast 未標示研究機構、報告日期、定義口徑或貨幣基準。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+              },
+              "score": 7.063884
+             },
+             {
+              "text": "oneweb_ut_final_presentation › 重點摘要\n- RF component / semiconductor 區列出 [[Qorvo]]、[[Analog Devices]]、[[Skyworks]]、[[MediaTek M80]]、[[SatixFy Sx3099]]、[[Prime ASIC]]，並建議與 [[Qorvo]] 與 [[Analog Devices]] 簽供應協議、與 [[MediaTek]] 溝通 5G NTN modem roadmap。\n- 台灣策略定位區把 2025–2026 稱為 Taiwan positioning opportunity window，列出 [[MediaTek]]、[[工研院]] / ITRI、GaN PA design、phased-array subarray manufacturing 與 5G NTN ground integration solution。\n- 5G NTN strategic roadmap 區列出 [[3GPP Release 19]]、[[MediaTek M80]]、ITRI satellite-board gNB、Ericsson / Nokia 3GPP certification，並列出 2025 H1 Sharp 5G NTN trial validation、2025 H2 MediaTek commercial modem mass production、2026 global 5G NTN service coverage。\n- Market sizing 區列出 flat-panel antenna 2023 `$7.28B`、2035 `$11.9B–$32.95B`、CAGR `15%–32.1%`；LEO UT market 2024 `~$2B`、2035 `~$5–8B`、CAGR `30%+`；5G NTN modem 2024 `<$500M`、2035 `$2–3B`、CAGR `50%+`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/oneweb_ut_final_presentation.md"
+              },
+              "score": 2.7987
+             },
+             {
+              "text": "Qorvo › unresolved\n- 需要擷取 [[Qorvo QPA1722]] official datasheet，確認 frequency range、gain、P1dB、PAE、noise figure、package、application 與 revision。\n- 需要確認 [[Qorvo]] 是否在 OneWeb / Eutelsat OneWeb terminal supply chain 中有正式採用或僅是來源建議。\n- 需要確認 `2W–100W+` GaN Ku / Ka PA coverage 的產品系列與條件。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Qorvo.md"
+              },
+              "score": 0.706087
+             },
+             {
+              "text": "MediaTek M80 › 可追溯範圍\n- 本頁只支持 [[oneweb_ut_final_presentation]] 中對 [[MediaTek M80]] 的 roadmap / market presentation 級說法。\n- 來源未提供 [[MediaTek M80]] datasheet、3GPP release support matrix、chipset category、frequency bands、commercial availability、module partners、terminal reference design、certification status 或 production confirmation。\n- `2025 H2 commercial modem mass production` 是來源 roadmap 文字；不可視為已量產或已供貨。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/MediaTek M80.md"
+              },
+              "score": 0.993754
+             },
+             {
+              "text": "5G device testing value chain › 測試類型\n來源列出的測試類型包含：\n\n- [[RF]]。\n- [[Signaling]]。\n- [[Application testing]]。\n- [[OTA testing]]。\n- [[Pre-conformance testing]]。\n- [[Conformance approval]]。\n- [[Carrier acceptance]]。\n- [[Non-signaling RF]]。\n- [[Signaling Protocol]]。\n- [[Service and repair]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 5.745547
+             },
+             {
+              "text": "5G device testing value chain › ecosystem roles\n來源列出的 5G device value chain 角色包含：\n\n- [[Network operator]]。\n- [[Device manufacturer]]。\n- [[Test house]]。\n- [[Chip vendor]]。\n\n這些角色橫跨 Lab、R&D、Production、Operations 與 Use cases，不同階段需要不同層級的 test and measurement instruments。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 4.434047
+             },
+             {
+              "text": "5G device testing value chain › Shuffler 與 CMsequencer\n來源描述 [[Shuffler]] 可在 one go 執行 device 支援 UE band combos 的 RF / throughput test，並以 one test script with one test report 取得 RF TX/RX measurement、RX sensitivity、Throughput、VoLTE / VoNR 等 summarized results。來源說：\n\n- Shuffler tests part of [[R&S CMX-KF612M]] test package。\n- Shuffler implemented in [[R&S CMsequencer]]。\n- Band combinations 可由 UE capabilities 或 user-defined Excel sheet 輸入。\n- Band combo support table 包含 LTE 4/5 LTE CA、LTE + NR 4 LTE + 2 NR / 5 LTE + 2 NR、NR 2–4 NR CA、NRDC、LTE + FR1、LTE + FR2。\n\n此處為 solution overview；[[R&S CMX-KF612M]] 的正式 feature list、order number、CSW version 與 supported bands 仍需正式 R&S 文件補證。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 4.291111
+             },
+             {
+              "text": "5G device testing value chain › Manufacturing 目標\n來源指出 manufacturing 測試目標包含：\n\n- High yield of devices with high quality。\n- Achieve shortest test time possible；time = money。\n- Characterize and optimize parametric RF transceiver sub systems。\n- Debug and trace。\n\n來源列出的 manufacturing / production 相關工具包含 [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100]]、[[R&S CMX500]] / [[R&S CMW500]] for signaling 與 [[R&S CMQ]]。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 3.949714
+             },
+             {
+              "text": "5G device testing value chain › 工具與平台 mapping\n來源列出下列工具 / 平台 mapping：\n\n| 測試層 | 來源列出的工具 |\n|---|---|\n| RF / parametric / characterization | [[R&S SMW200A]]、[[R&S FSW]]、Oscilloscopes |\n| Signaling / protocol / application | [[R&S CMX500]]、[[R&S CMW500]]、[[R&S CMsquares]] |\n| OTA / chamber | [[R&S ATS1800C]]、[[R&S CMQ]]、[[R&S ATS CATR]] |\n| Production / manufacturing | [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100]]、[[R&S CMX500]] / [[R&S CMW500]] |\n| Conformance automation | [[R&S CONTEST]] for RRM、PQA、LBS、PCT、NPT、RF OTA |\n| Toolchain / scripts | [[R&S CMsequencer]]、[[XLAPI]]、[[SCPI]]、Python |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/5G device testing value chain.md"
+              },
+              "score": 3.544065
+             },
+             {
+              "text": "AIW_Products_Customer_Questionnaire › 6. Tools & AI harness\n問卷以 `Tools & AI harness (e.g. Claude Code, Cursor, similar)` 為題，詢問：\n\n- 客戶目前使用哪些 AI-assisted development tools，例如 IDE coding agents、CLI agents、chat assistants。\n- 產品名稱與 typical use cases：coding、review、test generation、docs。\n- 授權型態：individual licenses、team / enterprise、evaluation only。\n- 新工具核准者：IT、security、engineering leadership。\n- 是否多工具並用或有 standard environment；若多工具並用，如何避免 fragmented workflows。\n- 這些工具如何連到 repos、CI/CD、test frameworks、lab equipment interfaces、log / analysis pipelines。\n- guardrails：allowed models、data handling、on-prem vs cloud、`no code leaves the lab`。\n- test automation 是否已用 AI 生成或 refactor test scripts，或僅用於 application code。\n- 若採用 [[Customer agent harness]]，希望先 orchestration：scripting、documentation lookup、log analysis 或 end-to-end test execution。\n- 90 天成功樣貌：faster scripting、fewer debug cycles、better reuse of tests、less expert dependency，以及哪些 tool integration 是 must-have vs nice-to-have。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AIW_Products_Customer_Questionnaire.md"
+              },
+              "score": 4.323695
+             },
+             {
+              "text": "AIW_Products_Customer_Questionnaire › 3. Integration and ecosystem\n問卷要求描述 standard test stack：instruments、software、CI、issue trackers，並詢問 [[Orchestration layer]] 要插入哪些位置。它也區分客戶是否只需要 point tools，例如 better scripting 或 log analysis，或需要 broader [[Virtual tester]] 跨 implementation → test → debug → validation。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AIW_Products_Customer_Questionnaire.md"
+              },
+              "score": 3.78181
+             },
+             {
+              "text": "AIW_Products_Customer_Questionnaire › 2. AI and tooling readiness\n問卷詢問客戶是否已使用 AI coding assistants 或 agent-style workflows，例如 IDE agents、CI bots、internal automation；並收集 data residency、air-gapped labs、cloud / LLM use approval 等政策限制，以及 IP / test content 應採 fully on-prem、hybrid 或部分 cloud-acceptable 的偏好。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AIW_Products_Customer_Questionnaire.md"
+              },
+              "score": 3.690585
+             },
+             {
+              "text": "AIW_Products_Customer_Questionnaire › 原文未解的問題\n- 來源未標示文件版次、document number、product code、order number 或正式文件 ID。\n- 來源未說明 [[R&S AI Workplace Solutions]]、[[R&S AI Workplace]]、[[ScriptAssist]]、[[TechAssist]] 與本 questionnaire 的正式產品邊界。\n- 來源未說明 [[Virtual tester]] 是否為正式產品名稱、solution architecture 名稱或 sales discovery 用語。\n- 來源未說明 [[Customer agent harness]] 是否為正式功能、架構元件或僅是問卷概念。\n- 來源未定義 [[Orchestration layer]] 的實作方式、部署位置、與 CI / test framework / AI agent 的介面。\n- 來源未列出支援的 AI tools 完整清單；`Claude Code, Cursor, similar` 只是例子，不能推論排除 [[Copilot]] 或其他工具。\n- 來源未提供 security documentation、reference architectures 或 pilot support 的具體交付內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AIW_Products_Customer_Questionnaire.md"
+              },
+              "score": 3.045445
+             },
+             {
+              "text": "AIW_Products_Customer_Questionnaire\n[[AIW_Products_Customer_Questionnaire]] 是 [[R&S AI Workplace Solutions]] 的 customer questionnaire，Latest Update 標示為 Wednesday, August 19, 2026，用於蒐集客戶在 virtual testing 與 AI-assisted, agentic test workflows 方面的需求、限制、工具整合與成功指標。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AIW_Products_Customer_Questionnaire.md"
+              },
+              "score": 2.287778
+             },
+             {
+              "text": "Validated results › 來源定義\n[[AIW_Products_Customer_Questionnaire]] 的 short definitions 寫道：\n\n> Validated results: a test outcome you would trust enough to report, ship against, or close a ticket on.\n\n這裡的 validated 不只是 test has run，而是結果可信任到可支撐報告、出貨判斷或關閉 ticket。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Validated results.md"
+              },
+              "score": 0.124475
+             },
+             {
+              "text": "Validated results\n[[Validated results]] 在 [[AIW_Products_Customer_Questionnaire]] 中指可信任到足以 report、ship against 或 close a ticket 的 test outcome。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Validated results.md"
+              },
+              "score": 0.123273
+             },
+             {
+              "text": "NTN test and measurement aspects › SAN / base station in the sky testing\n來源以 [[TS 38.108]]、[[TS 38.181]] 描述 satellite / [[Satellite Access Node]]（SAN）testing：\n\n- TS 38.108 定義 SAN radio transmission and reception。\n- TS 38.181 定義 SAN conformance testing tolerances 與 test cases。\n- SAN type 包含 type 1-H、type 1-O、type 2-O。\n- FR1 hybrid setup 可 conducted 或 radiated；FR2 only OTA / radiated。\n- TS 38.181 chapters 包含 conducted transmitter、conducted receiver、conducted performance、radiated transmitter、radiated receiver、radiated performance。\n- 測試重點包含 output power、power dynamics、frequency error、modulation quality、ACLR、OBUE、receiver sensitivity、blocking、PUSCH / PUCCH / PRACH performance。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 3.87531
+             },
+             {
+              "text": "NTN test and measurement aspects › NTN 對 T&M 的 paradigm change\n來源指出 [[NTN]] 改變傳統 wireless T&M 假設：\n\n- 傳統假設 UE mobile、network entities stationary。\n- NTN 需考慮 UE 與 network entities 兩者 mobility。\n- 測試條件需 reproducible、accurate、comparable，但 setup 需加入 high path loss、Doppler shift、time delay、delay variance、atmospheric effects、Faraday effect、scintillation、weather influences。\n- satellite 入軌後 maintenance / replacement 困難，使 simulation、software-assisted testing、digital twin、in-orbit monitoring 更重要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 3.793709
+             },
+             {
+              "text": "NTN test and measurement aspects › UE NTN testing\nUE NTN testing categories：\n\n- RF testing。\n- protocol testing。\n- performance testing。\n- carrier acceptance testing。\n- interoperability testing。\n\n相關規格：\n\n- [[TS 38.101-5]]：satellite NR UE RF and performance requirements。\n- [[TS 38.521-5]]：NR UE satellite access RF / performance conformance procedures。\n- [[TS 38.523]]：protocol conformance。\n- [[TS 38.533]]：RRM conformance。\n- [[TS 38.133]]：RRM requirements。\n\n目前 RF tests 多聚焦 FR1；來源預期未來會擴展到 FR2、Ka-band、Ku-band 與 moving satellite conditions。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 2.238231
+             },
+             {
+              "text": "NTN test and measurement aspects › Conformance / certification testing\n來源描述 certification ecosystem 包含 certification organization、neutral test house、test equipment vendor、network operator / equipment vendor。\n\n- NTN NB-IoT certification program 已於 late 2024 launched，聚焦 n255 / n256。\n- conformance tests 在 [[GCF]] [[WI-555]] 與 [[PTCRB]] [[RFT 555]] umbrella 下定義。\n- 來源說 GCF WI-555 描述 124 個 NTN conformance testing 相關 test cases。\n- early 2026 狀態：IoT_NTN test cases 約 174；GSO RF TRX / Performance / RRM 為 58 / 6 / 46，NGSO RF TRX / Performance / RRM 為 56 / 8 / 0。\n- 目前狀態另列 NR-NTN testing 約 RRM 93、RF 38、protocol 22 test cases。\n- 2025 年 GCF 擴展 certification program，納入 NR-NTN 與 DTC certification testing。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 1.941982
+             },
+             {
+              "text": "NTN test and measurement aspects › Fading profiles and test channels\n來源整理 [[TR 38.811]]、[[TR 38.901]] 與 [[TS 38.181]] 的 NTN channel model / test condition：\n\n- [[CDL]]：clustered delay line，適用於 S-band / Ka-band，含 elevation / azimuth 的 3D model。\n- [[TDL]]：tapped delay line，用於 multipath power-delay profile。\n- TR 38.811 定義 NTN-CDL 與 NTN-TDL profiles，各有 LOS / NLOS profiles。\n- TS 38.181 為 SAN testing 定義 NTN-TDLA100、NTN-TDLC5、moving propagation condition。\n- Rel. 19 導入 NGSO time-varying Doppler shift and propagation delay channel model，用於更 realistic demodulation / RRM tests。\n\n來源內有一項需保留的讀法限制：同段中 `NTN-TDLA100-200` 被文字描述為 100 ms delay spread，但表格對 NTN-TDLA100 列 100 ns delay spread。此處需回查原 PDF / TS 38.181。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+              },
+              "score": 1.903397
+             },
+             {
+              "text": "Satellite User Terminal 外部資料清單 › Business & Supply Chain Sources\n- [[Amazon]] What is Project Kuiper（2025 update）。\n- Bloomberg：Kuiper service in 5 countries by 2026。\n- SatNews：Kuiper starts in 5 countries March 2026。\n- Amazon Jobs：Leo Production Operations。\n- Amazon：Project Kuiper becomes [[Amazon Leo]]。\n- EE News Europe：Amazon prepares for mass production of its Kuiper satellites。\n- Australian Government Kuiper supply chain PDF。\n- Northwise Project：Amazon Leo / Kuiper business strategy link。\n\n這些多數仍是待讀連結；不得僅憑標題推論 [[Project Kuiper]] / [[Amazon Leo]] 的正式服務國家、啟用日期、量產進度、供應鏈夥伴、user terminal 規格或測試流程。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Satellite User Terminal 外部資料清單.md"
+              },
+              "score": 5.926933
+             },
+             {
+              "text": "Satellite User Terminal 外部資料清單 › 使用限制\n- 本頁不能用來證明任何 user terminal 已量產、出貨、取得認證、被特定衛星營運商採用或列入 R&S 客戶 / 供應商。\n- 本頁不能用來取代產品 datasheet、FCC filing、3GPP standard、test report、market research report 或 company announcement。\n- 本頁不能把 Perplexity search 整理文字當成原始證據；須回到外部原文逐項查證。\n- 本頁不能從未 OCR 圖片推論圖上內容、公司、架構、成本、測試流程或供應鏈。\n- 本頁不能把 `All links are current` 改寫為所有資料點都在 2026-01-07 仍有效或被官方確認。\n- [[Kuiper UT Test & Supply Chain]] 雖已擷取，但來源未標示正式日期、版本或外部引用，因此仍需官方文件補證其服務啟動、五國上線、終端規格、衛星數與供應鏈說法。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Satellite User Terminal 外部資料清單.md"
+              },
+              "score": 5.620372
+             },
+             {
+              "text": "Satellite User Terminal 外部資料清單 › 來源日期與資料口徑\n- [[User Terminal]] 的 raw frontmatter 顯示 converted date 為 2026-09-17。\n- 來源正文稱所有連結截至 January 7, 2026, 1:33 PM CST 為 current。\n- 這個時間點只表示來源作者當時認為連結可用，不代表外部文章發布日期、產品規格日期、測試日期或市場資料日期。\n- [[User Terminal]] 是 link hub，且多數附件 / 外部頁尚未擷取；不能把連結標題、檔名或表格短描述改寫為已驗證主張。\n- [[Kuiper UT Test & Supply Chain]] 的 raw frontmatter 顯示 converted: 2026-09-17，來源正文未標示正式發布日期、作者、部門或版本。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Satellite User Terminal 外部資料清單.md"
+              },
+              "score": 5.216148
+             },
+             {
+              "text": "Satellite User Terminal 外部資料清單 › OneWeb / Eutelsat OneWeb user terminal 線索\n[[User Terminal]] 表格列出 primary OEM terminal manufacturers：\n\n| Vendor | 來源表格描述 | 使用限制 |\n|---|---|---|\n| [[Intellian]] | OW10H/OW11F specs, G/T 18.2 dB/K | 需讀取 Intellian 官方頁與 bcsatellite 文章確認型號、頻段、G/T 條件與日期。 |\n| [[Hughes]] | HL1100W/HL1120W + gateway | 需讀取 Hughes OneWeb / ESA / gateway 頁面確認產品範圍。 |\n| [[Kymeta]] | Goshawk u8 multi-orbit | 需讀取 Kymeta 與 Satellite Today 來源確認 Eutelsat OneWeb availability、日期與服務條件。 |\n| [[Sharp]] | 5G NTN LEO trial | 來源表格把 Sharp 與 5G NTN LEO trial 同列；需讀取 Sharp 原文確認試驗內容。 |\n\nExpanded OEM Ecosystem 表格列出：\n\n- Aviation：[[Gilat ESR-2030Ku]]，連到 Gilat 產品頁與 Microwave Journal 關於 Eutelsat OneWeb LEO network test 的文章。\n- Aviation：[[ThinKom Ka2517]]，連到 ThinKom 產品頁與 phased array / Telesat LEO test 文章。\n- Defense：[[SatixFy ESMA]]，連到 SatixFy ESMA 產品頁與 OneWeb Technologies / Air Force Research Lab demonstration 文章。\n- Multi-Orbit：[[Intelsat ESA]]，連到 Intelsat ESA product sheet / commercial aviation NGSO Ku ESA 文章。\n\n以上都只是待讀線索；不得推論其已供應 OneWeb、Eutelsat、Telesat、軍方或航空客戶，除非後續來源正文明確寫出。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Satellite User Terminal 外部資料清單.md"
+              },
+              "score": 3.641191
+             },
+             {
+              "text": "Satellite User Terminal 外部資料清單 › unresolved\n- 需要回查 `Kuiper UT Test & Supply Chain.pptx` 原始簡報，確認 markdown 轉檔是否遺失圖片、表格、speaker notes、版次或圖表來源。\n- 需要擷取 `oneweb_ut_final_presentation.html` 與 `Starlink UT Test Flow.pptx`。\n- 需要 OCR / 解析 `User Terminal image.png`、`User Terminal image 1.png`、`User Terminal image 2.png`、`User Terminal image 3.png` 與 `User Terminal - Ink.svg`。\n- 需要建立或更新 [[Intellian]]、[[Hughes]]、[[Kymeta]]、[[Gilat ESR-2030Ku]]、[[ThinKom Ka2517]]、[[SatixFy ESMA]]、[[Intelsat ESA]] 等 entity 頁，前提是讀取原文後能確認產品、日期與規格。\n- 需要擷取 [[Project Kuiper]] / [[Amazon Leo]] 官方文章、FCC appendix、eoPortal、Bloomberg / SatNews / EE News Europe 等來源正文。\n- 需要擷取 Starlink teardown、FCC filings、R&S / Keysight / GSOA / Taiwan NCC study 等來源正文。\n- 需要確認 Taiwan Focus 中 NCC、FCC、Ku/Ka、<1 mW/cm²、CTCI 與 Bureau Veritas 的原始證據與適用範圍。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Satellite User Terminal 外部資料清單.md"
+              },
+              "score": 3.218394
+             },
+             {
+              "text": "SMW200A_specs_en_3606-8037-22_v3100 › 重點摘要\n- 代表性 RF performance：frequency setting resolution `0.001 Hz`；standard performance SSB phase noise 在 `1 GHz`、`20 kHz offset`、`1 Hz measurement bandwidth`、`level = 10 dBm` 條件下為 `< –134 dBc`，typ. `–140 dBc`；`R&S®SMW-B711/-B721` ultra low phase noise 在 `1 GHz`、`10 kHz offset` 下為 `–144 dBc`，typ. `–150 dBc`。\n- Pulse modulation 需 `R&S®SMW-K22`；一般 on/off ratio `> 80 dB`，部分高頻條件例外為 `> 65 dB`；rise/fall time 依 frequency option 為 `< 10 ns` 或 `< 15 ns`（fast transition）。\n- Wideband baseband `R&S®SMW-B9` arbitrary waveform mode 支援 `400 Hz to 600 MHz` sample rate；搭配 `R&S®SMW-K525` 為 `400 Hz to 1200 MHz`，搭配 `R&S®SMW-K527` 為 `400 Hz to 2400 MHz`；對應 RF bandwidth 可到 `500 MHz`、`1000 MHz`、`2000 MHz`。\n- 本文件列出 RF、baseband、digital I/Q、AWGN、enhanced noise、envelope tracking、predistortion、digital Doherty、slow I/Q、bandwidth extension、HUMS、remote control、connectors、environmental、ordering information 等資料；option code、licence code 與 order number 只照錄來源列出的內容，不推導缺欄。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMW200A_specs_en_3606-8037-22_v3100.md"
+              },
+              "score": 5.723008
+             },
+             {
+              "text": "SMW200A_specs_en_3606-8037-22_v3100 › 重點摘要\n- 來源是 Rohde & Schwarz 的 `R&S®SMW200A Vector Signal Generator Specifications`，文件資訊 `PD 3606.8037.22`，`Version 31.00`，日期 `May 2026`，頁尾另標 `May 2026 (ch)`。\n- 本文件補齊 [[R&S SMW200A]] 的 performance specifications；既有 [[SMW200A_config-guide_en_3606-8037-92_v0600]] 是 `Version 06.00`（`May 2024`）configuration guide，偏向配置規則、retrofitting 與 ordering information。\n- [[R&S SMW200A]] 的 RF path A frequency options 覆蓋 `100 kHz to 3/6/7.5/12.75/20/31.8/40/44/56/67 GHz`；RF path B 可選 `100 kHz to 3/6/7.5/12.75/20/31.8/44 GHz`。\n- 架構可從 single-path [[Vector signal generator]] 擴充到 multichannel [[MIMO]] receiver tester；來源說明支援最多 `8` 個 signal sources、最多 `64` 個 fading channels，以及最多 `8` 條 RF paths（透過連接 [[R&S SGT100A]] signal generator modules）。\n- 最多可在 `2` 個 internal baseband modules 上配置 `8` 個 baseband generators，具 real-time coder 與 ARB；可對 baseband signals 做 internal digital adding，包含 frequency offset 與 level offset。\n- Standard baseband section 使用 `R&S®SMW-B13` 或 `R&S®SMW-B13T`，RF modulation bandwidth 最高 `160 MHz`；wideband baseband section 使用 `R&S®SMW-B13XT`，RF modulation bandwidth 最高 `2 GHz`。\n- Internal baseband I/Q modulation bandwidth in RF 最高 `2 GHz`；2 GHz bandwidth 內 modulation frequency response 為 `< 0.4 dB measured`。\n- 支援 internal digital standards，例如 `5G New Radio`、`LTE up to Release 15`、`NB-IoT`、`eMTC`、`3GPP FDD/HSPA/HSPA+`、`GSM/EDGE/EDGE Evolution`、`WLAN IEEE 802.11a/b/g/n/j/p/ac/ax/be/ad/ay`、`DVB-S2/DVB-S2X`；來源同時另列 waveform packages for signals from [[R&S WinIQSIM2]]，其中 [[R&S WinIQSIM2]] requires an external PC。\n- 可選 integrated fading section，channel emulation bandwidth 最高 `800 MHz`；最多可安裝 `4` 個 fading modules，提供最多 `64` 個 logical faders；單機可實作 `2x2`、`3x3`、`4x4`、`8x4`、`4x8`、`2x4x4` 等 MIMO fading scenarios。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMW200A_specs_en_3606-8037-22_v3100.md"
+              },
+              "score": 5.203051
+             },
+             {
+              "text": "SMW200A_specs_en_3606-8037-22_v3100 › 原文未解的問題\n- 來源未標示價格。\n- 來源為分段萃取重點，不是完整逐頁文字；報價前仍需回查 `raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md`、正式 PDF 與 configure 工具。\n- Multichannel、MIMO、fading、digital standards、GNSS/avionics、external pulse sequencer options 的完整規格分別指向其他文件：`PD 3673.1276.22`、`PD 5213.9434.22`、`PD 3607.6896.22`、`PD 3607.1388.22`；本來源只摘錄到交叉引用與部分摘要。\n- RF path combination table 的所有 possible / not possible 組合仍需回查原表；本來源摘要僅明列 `R&S®SMW-B94L` required and only possible for `2 × 12.75 GHz`、`2 × 31.8 GHz`、`2 × 44 GHz`，以及 44 GHz 同型 suffix 組合限制。\n- Source text 中有部分技術圖表為 measured performance 圖，本次只記錄圖名與明列數字，未重新讀取曲線數值。\n- 來源提供讀圖補充為 p001 封面資訊，但本次提示未提供可原封不動複製的圖片嵌入行；依 productions 讀圖規則，未把讀圖內容作為規格主張寫入產品頁。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMW200A_specs_en_3606-8037-22_v3100.md"
+              },
+              "score": 5.042091
+             },
+             {
+              "text": "SMW200A_specs_en_3606-8037-22_v3100 › Base unit\n| Code | Name / description | Order No. |\n|---|---|---:|\n| `R&S®SMW200A` | Vector signal generator，includes power cable and quick start guide | `1412.0000.02` |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/SMW200A_specs_en_3606-8037-22_v3100.md"
+              },
+              "score": 3.688299
+             },
+             {
+              "text": "•  Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-c733beba88ba4b3a",
+                "original_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+                "sha256": "c733beba88ba4b3a7a73b46c78b0191eb5a79f87d47069cf2345244bc474e112",
+                "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/AIW_Products_Customer_Questionnaire.md",
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 24.580028
+             },
+             {
+              "text": "Signal Generator\nSignal Analyzer",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-c478cd76758e3230",
+                "original_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+                "sha256": "c478cd76758e32304c76f6cddcc468bbab6c09f305ddd986166116e13cef3c38",
+                "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/R&S portfolio for O-RU testing.md",
+               "section": 37,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 22.699916
+             },
+             {
+              "text": "Network analyzer\nVector signal generator\nBroadband Amplifier",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-4a179a13677acd8f",
+                "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+                "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+               "section": 177,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 19.87828
+             },
+             {
+              "text": "CW Signal Generator\n(RIB)\n Antenna gain\n~ +10 dBi\nTest fixture\nDUT\nVector Signal Generator",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-78bf3069c4d9ec56",
+                "original_ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+                "sha256": "78bf3069c4d9ec56257898ce4889bcdb258402fa1db341a7ff4cbf02487e94f6",
+                "raw_ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/5G NR Base station conformance testing - EN - UR_Public.md",
+               "section": 158,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 18.401865
+             }
+            ],
+            "text": "They fit in the **test → debug → validation** part of the workflow as **RF / parametric / characterization lab instruments**, especially for a chip-vendor / semiconductor workflow that needs RF measurements across Lab, R&D, Production, and Operations [72][75].  \nFor RFIC validation, the closest supported placement is **RF / parametric / characterization**: the knowledge base maps this layer to **R&S SMW200A, R&S FSW, and oscilloscopes** [75].  \nThe validation workflow these instruments support includes **chipset L1–L4 test plan and verification**, **modem-stack investigation/debug**, **radiated and conducted testing**, and checking that HW/SW works as designed against specs or custom design criteria [24].  \nIn production/manufacturing-adjacent semiconductor work, the supported need is to **characterize and optimize parametric RF transceiver subsystems** and to **debug and trace** [74].  \nThe **Signal Generator** side can be represented by **R&S SMW200A**, which is a Rohde & Schwarz vector signal generator and can scale from a single-path vector signal generator to a multichannel MIMO receiver tester [6].  \nThe **Signal Analyzer** side can be represented by **R&S FSW**, a high-end signal and spectrum analyzer series, with analysis use cases including EVM, ACLR, group delay, DVB-S2X analysis, and phase-coherent multichannel measurement in the cited T&M context [7][31].  \n【推論】In an RFIC validation workflow, Signal Generator / Signal Analyzer would sit after implementation as the bench/lab measurement layer for RF stimulus and RF response analysis during test, debug, and validation, because the cited workflow spans implementation → test → debug → validation and explicitly includes lab equipment interfaces, while the cited product mapping places SMW200A/FSW in RF / parametric / characterization [1][3][75].",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "Virtual tester › 來源定義\n[[AIW_Products_Customer_Questionnaire]] 的 short definitions 寫道：\n\n> Virtual tester: an agentic workflow that spans implementation → test → debug → validation, not a single tool.\n\n因此本庫把 [[Virtual tester]] 記為工作流 / solution concept，而非單一軟體工具或儀器。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Virtual tester.md"
+             },
+             "score": 6.529211
+            },
+            {
+             "text": "Virtual tester › 可能涵蓋的流程\n依問卷上下文，[[Virtual tester]] 相關需求可能涉及：\n\n- test idea 到 running, [[Validated results]] 的流程理解；\n- test script generation 或 refactoring；\n- ambiguous logs / failure debugging；\n- documentation lookup；\n- end-to-end test execution；\n- toolchain integration：repos、CI/CD、test frameworks、lab equipment interfaces、log / analysis pipelines；\n- [[Orchestration layer]] 對 AI agents 的 rules、instructions、skills coordination。\n\n以上是問卷問題範圍，不是已確認產品功能。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/Virtual tester.md"
+             },
+             "score": 4.704811
+            },
+            {
+             "text": "R&S SMW200A\n[[R&S SMW200A]] 是 Rohde & Schwarz 的 vector signal generator；依 `R&S®SMW200A Vector Signal Generator Specifications` `Version 31.00`（`May 2026`），RF path A 可覆蓋 `100 kHz to 67 GHz`，RF path B 可覆蓋至 `44 GHz`，並可由 single-path vector signal generator 擴充到 multichannel MIMO receiver tester（來源：[[SMW200A_specs_en_3606-8037-22_v3100]]）。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S SMW200A.md"
+             },
+             "score": 6.019906
+            },
+            {
+             "text": "R&S FSW\nR&S FSW 是 Rohde & Schwarz 的 high-end Signal and Spectrum Analyzer 系列，依 Version 17.01（September 2025）涵蓋 8 GHz 至 85 GHz 型號，[[R&S FSW85]] 搭配 R&S FSW-B90G 可延伸至 90 GHz。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S FSW.md"
+             },
+             "score": 5.588832
+            },
+            {
+             "text": "5G device testing value chain › Validation and Conformance 目標\n來源指出 validation and conformance 測試目標包含：\n\n- Chipset L1–L4 test plan and verification。\n- Investigate and debug modem stack。\n- Validate and optimize end to end performance of IMS / SIP / TCP/IP。\n- Investigate and debug app stack。\n- Plan、develop、execute 3GPP / carrier device tests。\n- Radiated and conducted testing。\n\n測試目的包含：\n\n- Final product according to [[3GPP]] specs and KPIs 的 conformance。\n- Final product for different carriers 的 conformance。\n- New product introduction test framework 與 pilot production tests。\n- 確認 HW / SW 如設計般運作。\n- Cellular transceiver systems optimization。\n- Meet 3GPP specifications or custom design criteria。\n- Assure robustness / reliability and performance on L1–L3。\n- Optimize each stack for highest throughput and defined KPIs。\n- Ensure robustness / reliability and performance on IMS、TCP/IP stack and app protocols。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G device testing value chain.md"
+             },
+             "score": 6.610639
+            },
+            {
+             "text": "NTN test and measurement aspects › Signal generation、analysis 與 SpaceNexus\n來源描述：\n\n- [[R&S SMW200A]] 可配備 fading emulator，支援 TDL / CDL、custom fading profile、Doppler、delay、path loss，以及 [[R&S SMW-K820]] customized dynamic fading。\n- [[R&S SpaceNexus]] 可設定 satellite constellation、UE position / mobility、time-variant Doppler、time-variant propagation delay、path loss、weather-induced attenuation，並 remote configure SMW200A。\n- [[R&S FSW]] / [[R&S FSWX]] 支援 satellite payload testing、EVM、ACLR、group delay、DVB-S2X analysis、phase-coherent multichannel measurement。\n- [[R&S PVT360A]] 被描述為 potential satellite production testing platform，整合 vector signal generator 與 vector spectrum analyzer。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 9,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/NTN test and measurement aspects.md"
+             },
+             "score": 7.60875
+            },
+            {
+             "text": "5G device testing value chain › ecosystem roles\n來源列出的 5G device value chain 角色包含：\n\n- [[Network operator]]。\n- [[Device manufacturer]]。\n- [[Test house]]。\n- [[Chip vendor]]。\n\n這些角色橫跨 Lab、R&D、Production、Operations 與 Use cases，不同階段需要不同層級的 test and measurement instruments。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 3,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G device testing value chain.md"
+             },
+             "score": 4.434047
+            },
+            {
+             "text": "5G device testing value chain › Manufacturing 目標\n來源指出 manufacturing 測試目標包含：\n\n- High yield of devices with high quality。\n- Achieve shortest test time possible；time = money。\n- Characterize and optimize parametric RF transceiver sub systems。\n- Debug and trace。\n\n來源列出的 manufacturing / production 相關工具包含 [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100]]、[[R&S CMX500]] / [[R&S CMW500]] for signaling 與 [[R&S CMQ]]。[[Rethink 5G Testing solution overview 5G RedCap NTN FWA]]",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 6,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G device testing value chain.md"
+             },
+             "score": 3.949714
+            },
+            {
+             "text": "5G device testing value chain › 工具與平台 mapping\n來源列出下列工具 / 平台 mapping：\n\n| 測試層 | 來源列出的工具 |\n|---|---|\n| RF / parametric / characterization | [[R&S SMW200A]]、[[R&S FSW]]、Oscilloscopes |\n| Signaling / protocol / application | [[R&S CMX500]]、[[R&S CMW500]]、[[R&S CMsquares]] |\n| OTA / chamber | [[R&S ATS1800C]]、[[R&S CMQ]]、[[R&S ATS CATR]] |\n| Production / manufacturing | [[R&S CMP180]]、[[R&S CMP200]]、[[R&S CMW100]]、[[R&S CMX500]] / [[R&S CMW500]] |\n| Conformance automation | [[R&S CONTEST]] for RRM、PQA、LBS、PCT、NPT、RF OTA |\n| Toolchain / scripts | [[R&S CMsequencer]]、[[XLAPI]]、[[SCPI]]、Python |",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 8,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/concepts/5G device testing value chain.md"
+             },
+             "score": 3.544065
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/concepts/Virtual tester.md",
+             "raw_refs": [
+              "raw/Productions/AIW_Products_Customer_Questionnaire.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S SMW200A.md",
+             "raw_refs": [
+              "raw/Productions/SMW200A_config-guide_en_3606-8037-92_v0600.md",
+              "raw/Productions/SMW200A_specs_en_3606-8037-22_v3100.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S FSW.md",
+             "raw_refs": [
+              "raw/Productions/FSW_specs_en_5215-6749-22_v1701.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/5G device testing value chain.md",
+             "raw_refs": [
+              "raw/Market/OneNote/Rethink 5G Testing_solution overview_5G_Redcap_NTN_FWA (1) (1).md",
+              "raw/Market/OneNote/TestHouse/Test House.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/concepts/NTN test and measurement aspects.md",
+             "raw_refs": [
+              "raw/Knowledge/5G-NTN-takes-flight-A-deep-dive_wp_en_3673-3210-52_v0100.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}
