@@ -1743,3 +1743,8 @@ s-k-20261011T102952` (not published).
 - [x] Skill assistant on the Knowledge page: proposes a whole SKILL.md from the
   expert's words with the guide, template, current file and a sample source; the
   person compares, uses and saves it.
+- [x] rs-knowledge 1.0.3 published (owner, 2026-10-12): the core-015 candidate (1.0.2
+  content plus `skills/ask-knowledge`) at `%LOCALAPPDATA%\AEPs-k-v1.0.3`; host.json
+  binding and the `rs-k` pipeline base switched (backup
+  `host.json.bak-20261012-143652-before-rs-knowledge-1.0.3`); 1.0.2 kept for rollback.
+  Agent Web restarted on 1.0.3.

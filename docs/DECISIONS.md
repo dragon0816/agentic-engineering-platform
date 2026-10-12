@@ -2269,3 +2269,10 @@ ingest template ship beside it and are shown on the Knowledge page.
 Rejected: routing questions to an ask skill by a model call (one more call per
 question); concatenating every `ask-*` file regardless of `mode` (old files would
 change answers unannounced).
+
+## 2026-10-12: Publish rs-knowledge 1.0.3 with the vault answer rule
+
+Decision (owner, option A): publish the exact candidate measured in core-015 (1.0.2
+content plus `skills/ask-knowledge/SKILL.md`) as rs-knowledge 1.0.3 so users get the
+better answers now, instead of waiting for a Refresh from the project vault. Rollback:
+restore the host.json backup (1.0.2 vault and manifest are kept) and restart.
