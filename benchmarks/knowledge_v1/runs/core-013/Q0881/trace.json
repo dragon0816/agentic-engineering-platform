@@ -1,0 +1,128 @@
+{
+ "question": {
+  "id": "Q0881",
+  "text": "How do changes in RFIC validation technology affect the measurement capability required from Oscilloscope?",
+  "market": "Semiconductor",
+  "product": "Oscilloscope",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-3c0cf53bfba4432a8f8edd692b13af78",
+ "exchange": {
+  "sent": "How do changes in RFIC validation technology affect the measurement capability required from Oscilloscope?",
+  "http_status": 200,
+  "seconds": 86.469,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-3c0cf53bfba4432a8f8edd692b13af78",
+    "actor": "leo.chi",
+    "title": "How do changes in RFIC validation technology affect the measurement capa…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-12T02:52:16.091139Z",
+    "updated_at": "2026-10-12T02:53:41.025168Z",
+    "messages": [
+     {
+      "message_id": "message-753265bf7ab04c05b23bc81ff1af14bd",
+      "role": "user",
+      "text": "How do changes in RFIC validation technology affect the measurement capability required from Oscilloscope?",
+      "created_at": "2026-10-12T02:52:16.100155Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-d348754790624cf0a000543ef93beb1c",
+      "role": "assistant",
+      "text": "The knowledge base gave no validated answer: the evidence was insufficient for the requested technical knowledge.\n\nNot from the knowledge base — in general, changes in RFIC validation technology push oscilloscopes toward higher-performance and more integrated measurement capability in these ways:\n\n1. **Higher bandwidth**\n   - RFICs are moving to wider modulation bandwidths, mmWave interfaces, high-speed digital control, and faster transient behavior.\n   - Oscilloscopes need enough analog bandwidth to capture fast edges, RF envelopes, pulsed signals, and broadband modulation behavior without distortion.\n\n2. **Higher sample rate and memory depth**\n   - Validation increasingly requires observing short events over longer operating sequences: startup, calibration, beam switching, power-mode transitions, or burst transmissions.\n   - This requires high sample rate plus deep memory so the scope can capture both fine timing detail and long-duration behavior.\n\n3. **Better signal integrity and low noise**\n   - RFIC validation often involves small-amplitude control, bias, clock, or baseband signals that influence RF performance.\n   - Oscilloscopes need low noise floor, high ENOB, good vertical accuracy, and stable triggering to see subtle impairments.\n\n4. **Multi-domain correlation**\n   - Modern RFIC validation is no longer only RF output power or spectrum.\n   - Engineers need to correlate RF behavior with digital control buses, power rails, clocks, triggers, and baseband signals.\n   - This increases the need for mixed-signal oscilloscope capability, protocol decoding, multi-channel timing accuracy, and synchronization with RF instruments.\n\n5. **More advanced triggering and analysis**\n   - RFIC failures can be intermittent: spurs during switching, PLL unlock events, transient EVM degradation, glitches, or power droop.\n   - Oscilloscopes need advanced triggers, zone triggers, serial pattern triggers, jitter analysis, power analysis, and automated measurements.\n\n6. **Support for high-speed digital interfaces**\n   - RFICs increasingly use fast digital interfaces such as JESD204, MIPI, PCIe-related control/test links, or high-speed converter interfaces.\n   - Oscilloscopes must support high-speed serial analysis, eye diagrams, jitter decomposition, compliance testing, and protocol-aware debug.\n\n7. **Power integrity measurement**\n   - RF performance is tightly linked to supply noise, regulator behavior, and dynamic current consumption.\n   - Oscilloscopes need sensitive power-rail probing, low-noise front ends, high dynamic range, and the ability to correlate power events with RF or digital events.\n\n8. **Automation and repeatability**\n   - RFIC validation involves many operating modes, bands, temperatures, voltages, and production corners.\n   - Oscilloscopes need remote control, automated measurement APIs, mask testing, data export, and integration into validation test systems.\n\nIn short: as RFIC validation moves toward wider bandwidths, more complex modulation, tighter power/signal integrity requirements, and multi-domain debugging, oscilloscopes must provide higher bandwidth, lower noise, deeper acquisition, better triggering, mixed-signal capability, protocol analysis, and stronger automation.",
+      "created_at": "2026-10-12T02:53:41.025168Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-665a88e9497141a39ba27c6833cc313e",
+       "request_id": "request-665a88e9497141a39ba27c6833cc313e",
+       "span_id": "span-665a88e9497141a39ba27c6833cc313e",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: failed (knowledge_not_validated) {}",
+    "ok": true,
+    "answer": "The knowledge base gave no validated answer: the evidence was insufficient for the requested technical knowledge.\n\nNot from the knowledge base — in general, changes in RFIC validation technology push oscilloscopes toward higher-performance and more integrated measurement capability in these ways:\n\n1. **Higher bandwidth**\n   - RFICs are moving to wider modulation bandwidths, mmWave interfaces, high-speed digital control, and faster transient behavior.\n   - Oscilloscopes need enough analog bandwidth to capture fast edges, RF envelopes, pulsed signals, and broadband modulation behavior without distortion.\n\n2. **Higher sample rate and memory depth**\n   - Validation increasingly requires observing short events over longer operating sequences: startup, calibration, beam switching, power-mode transitions, or burst transmissions.\n   - This requires high sample rate plus deep memory so the scope can capture both fine timing detail and long-duration behavior.\n\n3. **Better signal integrity and low noise**\n   - RFIC validation often involves small-amplitude control, bias, clock, or baseband signals that influence RF performance.\n   - Oscilloscopes need low noise floor, high ENOB, good vertical accuracy, and stable triggering to see subtle impairments.\n\n4. **Multi-domain correlation**\n   - Modern RFIC validation is no longer only RF output power or spectrum.\n   - Engineers need to correlate RF behavior with digital control buses, power rails, clocks, triggers, and baseband signals.\n   - This increases the need for mixed-signal oscilloscope capability, protocol decoding, multi-channel timing accuracy, and synchronization with RF instruments.\n\n5. **More advanced triggering and analysis**\n   - RFIC failures can be intermittent: spurs during switching, PLL unlock events, transient EVM degradation, glitches, or power droop.\n   - Oscilloscopes need advanced triggers, zone triggers, serial pattern triggers, jitter analysis, power analysis, and automated measurements.\n\n6. **Support for high-speed digital interfaces**\n   - RFICs increasingly use fast digital interfaces such as JESD204, MIPI, PCIe-related control/test links, or high-speed converter interfaces.\n   - Oscilloscopes must support high-speed serial analysis, eye diagrams, jitter decomposition, compliance testing, and protocol-aware debug.\n\n7. **Power integrity measurement**\n   - RF performance is tightly linked to supply noise, regulator behavior, and dynamic current consumption.\n   - Oscilloscopes need sensitive power-rail probing, low-noise front ends, high dynamic range, and the ability to correlate power events with RF or digital events.\n\n8. **Automation and repeatability**\n   - RFIC validation involves many operating modes, bands, temperatures, voltages, and production corners.\n   - Oscilloscopes need remote control, automated measurement APIs, mask testing, data export, and integration into validation test systems.\n\nIn short: as RFIC validation moves toward wider bandwidths, more complex modulation, tighter power/signal integrity requirements, and multi-domain debugging, oscilloscopes must provide higher bandwidth, lower noise, deeper acquisition, better triggering, mixed-signal capability, protocol analysis, and stronger automation.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-665a88e9497141a39ba27c6833cc313e",
+      "request_id": "request-665a88e9497141a39ba27c6833cc313e",
+      "span_id": "span-665a88e9497141a39ba27c6833cc313e",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-665a88e9497141a39ba27c6833cc313e",
+       "request_id": "request-665a88e9497141a39ba27c6833cc313e",
+       "span_id": "span-665a88e9497141a39ba27c6833cc313e",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "The knowledge base gave no validated answer: the evidence was insufficient for the requested technical knowledge.\n\nNot from the knowledge base — in general, changes in RFIC validation technology push oscilloscopes toward higher-performance and more integrated measurement capability in these ways:\n\n1. **Higher bandwidth**\n   - RFICs are moving to wider modulation bandwidths, mmWave interfaces, high-speed digital control, and faster transient behavior.\n   - Oscilloscopes need enough analog bandwidth to capture fast edges, RF envelopes, pulsed signals, and broadband modulation behavior without distortion.\n\n2. **Higher sample rate and memory depth**\n   - Validation increasingly requires observing short events over longer operating sequences: startup, calibration, beam switching, power-mode transitions, or burst transmissions.\n   - This requires high sample rate plus deep memory so the scope can capture both fine timing detail and long-duration behavior.\n\n3. **Better signal integrity and low noise**\n   - RFIC validation often involves small-amplitude control, bias, clock, or baseband signals that influence RF performance.\n   - Oscilloscopes need low noise floor, high ENOB, good vertical accuracy, and stable triggering to see subtle impairments.\n\n4. **Multi-domain correlation**\n   - Modern RFIC validation is no longer only RF output power or spectrum.\n   - Engineers need to correlate RF behavior with digital control buses, power rails, clocks, triggers, and baseband signals.\n   - This increases the need for mixed-signal oscilloscope capability, protocol decoding, multi-channel timing accuracy, and synchronization with RF instruments.\n\n5. **More advanced triggering and analysis**\n   - RFIC failures can be intermittent: spurs during switching, PLL unlock events, transient EVM degradation, glitches, or power droop.\n   - Oscilloscopes need advanced triggers, zone triggers, serial pattern triggers, jitter analysis, power analysis, and automated measurements.\n\n6. **Support for high-speed digital interfaces**\n   - RFICs increasingly use fast digital interfaces such as JESD204, MIPI, PCIe-related control/test links, or high-speed converter interfaces.\n   - Oscilloscopes must support high-speed serial analysis, eye diagrams, jitter decomposition, compliance testing, and protocol-aware debug.\n\n7. **Power integrity measurement**\n   - RF performance is tightly linked to supply noise, regulator behavior, and dynamic current consumption.\n   - Oscilloscopes need sensitive power-rail probing, low-noise front ends, high dynamic range, and the ability to correlate power events with RF or digital events.\n\n8. **Automation and repeatability**\n   - RFIC validation involves many operating modes, bands, temperatures, voltages, and production corners.\n   - Oscilloscopes need remote control, automated measurement APIs, mask testing, data export, and integration into validation test systems.\n\nIn short: as RFIC validation moves toward wider bandwidths, more complex modulation, tighter power/signal integrity requirements, and multi-domain debugging, oscilloscopes must provide higher bandwidth, lower noise, deeper acquisition, better triggering, mixed-signal capability, protocol analysis, and stronger automation.",
+      "model_turns": 2,
+      "tools": [
+       {
+        "call_id": "call_2Gk8OR8wub65BvwtttFcZYkG",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "failed",
+         "data": {
+          "knowledge_harness": "not_validated",
+          "answer": "The Knowledge query did not produce a validated answer. Unverified requested facets: technical_knowledge.",
+          "evidence": {
+           "raw_citations": 0,
+           "facet_status": "missing",
+           "missing_facets": [
+            "technical_knowledge"
+           ],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {}
+          },
+          "phase": "needs_input",
+          "failure_code": "knowledge_insufficient_evidence",
+          "instruction": "The knowledge base did not validate an answer. Tell the person what is above; anything you add is not from the knowledge base and must say so."
+         },
+         "failure": {
+          "code": "knowledge_not_validated",
+          "message": "The Knowledge Harness did not validate an answer",
+          "retryable": false
+         }
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

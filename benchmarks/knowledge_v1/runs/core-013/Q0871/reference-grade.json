@@ -1,0 +1,74 @@
+{
+ "id": "Q0871",
+ "grader": "1.2",
+ "coverage": 0.25,
+ "points": [
+  {
+   "n": 1,
+   "point": "The semiconductor-side market/engineering requirement is recorded as the validation challenge of high-speed electrical interfaces (Slide 11 of the R&S high-speed digital source, cover date 2026.3.4).",
+   "verified": true,
+   "label": "covered",
+   "why": "states high-speed electrical interface validation context"
+  },
+  {
+   "n": 2,
+   "point": "The measurable parameters in that chain are eye diagram, IL, Xtalk and TDR impedance, listed in the signal-integrity flow for high-speed PCB/PCBA.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions eye/eye diagram only; omits IL, Xtalk, TDR impedance"
+  },
+  {
+   "n": 3,
+   "point": "The required instrument capability for Interface Test is scopes (oscilloscopes), alongside BERTs, AWGs and switch matrices; the Power Distribution Network block maps to scopes and network analyzers.",
+   "verified": true,
+   "label": "partial",
+   "why": "covers Interface Test scopes/BERTs/AWGs/switch matrices; omits PDN scopes/network analyzers"
+  },
+  {
+   "n": 4,
+   "point": "The Vault's own mapping table explicitly resolves the PDN \"Scopes\" entry to the Oscilloscope instrument class.",
+   "verified": true,
+   "label": "missing",
+   "why": "no PDN Scopes-to-Oscilloscope mapping table mentioned"
+  },
+  {
+   "n": 5,
+   "point": "The chain stops at instrument type: no model, bandwidth, data rate or test standard is provided for the scopes in the Interface Test row.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "acknowledges no scope specs, but also asserts a 29 GHz scope bandwidth requirement"
+  },
+  {
+   "n": 6,
+   "point": "A second chain runs from the power-semiconductor market driver (800V high-voltage architecture upgrade) on the semiconductor side.",
+   "verified": true,
+   "label": "missing",
+   "why": "no 800V power-semiconductor driver chain"
+  },
+  {
+   "n": 7,
+   "point": "In the AI-server ecosystem source the power requirement (Blackwell power doubling, high-density power demand) is mapped to the measurable parameters power rail / multiphase DC / PI and to the MXO instrument.",
+   "verified": true,
+   "label": "missing",
+   "why": "no Blackwell power doubling to power rail/multiphase DC/PI/MXO chain"
+  },
+  {
+   "n": 8,
+   "point": "The instrument-side link is a sales mapping without test conditions: no option, firmware, fixture or calibration conditions are given for MXO (nor for ZNL/FSWP/ZNA).",
+   "verified": true,
+   "label": "missing",
+   "why": "no MXO sales-mapping caveat or option/firmware/fixture/calibration absence"
+  }
+ ],
+ "contradicted": 1,
+ "invented": [
+  "PCIe Gen5 redriver output 的 eye opening 需要大於或等於表列 eye opening 數值",
+  "Extrapolated Eye Height after EQ = 15 ± 1.5 mV",
+  "Minimum Eye Width after EQ = 0.3 UI（9.375 ± 0.5 ps）",
+  "PCIe Gen5 20/80% rise/fall time 為 12 ps",
+  "需要約 29 GHz bandwidth",
+  "示波器量測鏈至少需要約 29 GHz bandwidth",
+  "Clock target impedance = 100 Ω",
+  "maximum allowed random jitter RMS = 200 fs"
+ ]
+}

@@ -1,0 +1,68 @@
+{
+ "id": "Q0011",
+ "grader": "1.2",
+ "coverage": 0.562,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's Wi-Fi 7 workflow splits CMX500 (R&D signaling/interworking) from CMP180 (production non-signaling RF), i.e. signaling tester early, non-signaling tester at production.",
+   "verified": true,
+   "label": "covered",
+   "why": "clearly splits CMX500 for R&D/validation signaling and CMP180 for production non-signaling"
+  },
+  {
+   "n": 2,
+   "point": "In the production phase all WLAN RF measurements are run in non-signaling mode to save test time, and the CMP180 is positioned as optimized for that stage.",
+   "verified": true,
+   "label": "covered",
+   "why": "states production WLAN RF measurements use non-signaling mode to save time and CMP180 is optimized"
+  },
+  {
+   "n": 3,
+   "point": "Wi-Fi 7 R&D testing requires signaling mode with real-world conditions to measure RF TX/RX characteristics (MLO makes multiple RF chains important).",
+   "verified": true,
+   "label": "covered",
+   "why": "mentions signaling mode, real-world RF TX/RX characterization, MLO multiple RF chains and MIMO"
+  },
+  {
+   "n": 4,
+   "point": "For Wi-Fi 8 / IEEE 802.11bn, the first RF tests were implemented in CMX500 signaling mode before final IEEE standard ratification, on a Broadcom prototype WLAN device.",
+   "verified": true,
+   "label": "partial",
+   "why": "states CMX500 Wi-Fi 8 RF signaling tests on Broadcom prototype, but not explicitly before final IEEE ratification"
+  },
+  {
+   "n": 5,
+   "point": "Wi-Fi 8 signaling-mode tests target PHY features such as distributed resource units (dRU) and unequal modulation (UEQM), i.e. pre-standard PHY validation rather than production screening.",
+   "verified": true,
+   "label": "partial",
+   "why": "frames Wi-Fi 8 as prototype/pre-production signaling validation, but omits dRU and UEQM PHY features"
+  },
+  {
+   "n": 6,
+   "point": "The 5G device testing value chain note maps the same tool split generically: signaling/protocol/application layer = CMX500/CMW500/CMsquares; production/manufacturing = CMP180/CMP200/CMW100.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention the generic 5G value-chain mapping or CMW500/CMsquares/CMP200/CMW100"
+  },
+  {
+   "n": 7,
+   "point": "CMX500 Wi-Fi signaling coverage is licensed per Wi-Fi generation, e.g. WLAN Signaling 11be options for Wi-Fi 7 AP or station emulation, alongside WLAN TX measurement and ARB generator options.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention per-generation CMX500 Wi-Fi signaling licenses or 11be AP/station/TX/ARB options"
+  },
+  {
+   "n": 8,
+   "point": "CMP180's non-signaling production scope covers Wi-Fi 6E/Wi-Fi 7 and 5G NR FR1 up to 8 GHz with bandwidths up to 500 MHz; its 480 MHz loopback waveform is only a potential Wi-Fi 8 candidate, not confirmed Wi-Fi 8 production support.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions 500 MHz bandwidth and 480 MHz candidate waveform not official Wi-Fi 8, but omits Wi-Fi 6E/5G FR1 up to 8 GHz and not-confirmed Wi-Fi 8 production support"
+  }
+ ],
+ "contradicted": 0,
+ "invented": [
+  "OTA / realistic multipath validation for Wi‑Fi 7 devices",
+  "CMX500 integrated into Bluetest or EMITE OTA workflows"
+ ]
+}

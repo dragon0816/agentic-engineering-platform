@@ -1718,3 +1718,9 @@ s-k-20261011T102952` (not published).
   (runs/core-012/review.zh-TW.md). Live: Skill 1.12.0 + engineering 1.0.1 on 425c5f6.
 - [ ] Owner: decide on the structural proposals in HANDOFF.md (retrieval recall, preflight
   label lines, run.py reviewer window); invented claims rose to 67 and need watching.
+- [x] Owner proposal 1 (2026-10-12): the last search plan's queries run and their
+  pages are added beyond the evidence budget (677e18a). Offline reference pages
+  0.48 -> 0.54, quotes 0.41 -> 0.43. core-013: answerable coverage 0.477 -> 0.508
+  (target 0.50 reached), median 74 -> 83 s, p90 114 -> 144 s; run.py PASS 28 -> 25
+  (status churn both ways). Kept under the acceptance rule; single run, gain only
+  slightly above run-to-run noise. Review: runs/core-013/review.zh-TW.md.

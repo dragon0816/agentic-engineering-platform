@@ -1,0 +1,68 @@
+{
+ "id": "Q0871",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "failed",
+ "tools": [],
+ "seconds": 148.547,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 11,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 16,
+   "kind": "wiki",
+   "ref": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 10,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 60,
+   "kind": "wiki",
+   "ref": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 17,
+   "kind": "wiki",
+   "ref": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "若用 Oscilloscope 量測 / 保留 PCIe Gen5 12 ps rise/fall time，示波器量測鏈至少需要約 29 GHz bandwidth",
+   "Semiconductor market / interface requirement"
+  ],
+  "reason": "The answer mostly stays within the passages: PCIe Gen5 eye-opening values, 12 ps rise/fall time and 29 GHz bandwidth, interface-test use of scopes, and the lack of detailed oscilloscope specs are all cited. The oscilloscope 29 GHz capability is an inference from channel bandwidth requirements rather than directly stated, but it is labeled as such and the answer is cautious about unsupported market-segment and model/spec details.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

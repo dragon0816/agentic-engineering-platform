@@ -1,0 +1,132 @@
+{
+ "id": "Q0571",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 95.219,
+ "grader": "1.3",
+ "partial": false,
+ "citations": [
+  {
+   "number": 25,
+   "kind": "wiki",
+   "ref": "wiki/concepts/High speed SerDes eco-chain.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 102,
+   "kind": "wiki",
+   "ref": "wiki/concepts/台灣 SerDes IC-IP 公司名單.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 12,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 30,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 22,
+   "kind": "wiki",
+   "ref": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 23,
+   "kind": "wiki",
+   "ref": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 109,
+   "kind": "wiki",
+   "ref": "wiki/sources/TRI_AMD_RSKR Sharing1.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 105,
+   "kind": "wiki",
+   "ref": "wiki/concepts/玻纖布.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 17,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Dk-Df.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 21,
+   "kind": "wiki",
+   "ref": "wiki/concepts/TDR 阻抗測量.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 34,
+   "kind": "wiki",
+   "ref": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 42,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S ZNA.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 37,
+   "kind": "wiki",
+   "ref": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.0",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "A VNA used for this chain should cover the relevant high-frequency range and dynamic range",
+   "For faster characterization or production-style monitoring, a VNA may require fast sweep / bandwidth capability"
+  ],
+  "reason": "The answer’s core chain is backed by the passages: automotive ADAS/V2X and Automotive SerDes require high-speed links, PCB/SI flows measure IL, impedance, Dk/Df, crosstalk, eye/TDR-related parameters, and cited VNA/ZNA passages support probing/de-embedding, frequency range, dynamic range, time-domain options, and sweep speed. Some capability requirements are inferred from specs and workflows rather than explicitly stated as automotive requirements, but the inferences are qualified and reasonable.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

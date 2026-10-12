@@ -1,0 +1,65 @@
+{
+ "id": "Q0761",
+ "grader": "1.2",
+ "coverage": 0.688,
+ "points": [
+  {
+   "n": 1,
+   "point": "For AI-server PCB, the VNA (R&S ZNA/ZNB) is mapped to insertion loss (IL) and TDR measurements.",
+   "verified": true,
+   "label": "covered",
+   "why": "explicitly says ZNA/ZNB on server PCB for IL and TDR"
+  },
+  {
+   "n": 2,
+   "point": "On server motherboard/PCBA the ZNA is listed for high-speed trace test, alongside ZNL for PDN Target Z and FSWP for clock jitter/LDO NSD.",
+   "verified": true,
+   "label": "partial",
+   "why": "covers ZNA for motherboard/PCBA high-speed trace, but omits ZNL PDN Target Z and FSWP clock jitter/LDO NSD alongside it"
+  },
+  {
+   "n": 3,
+   "point": "VNAs also cover connector/cable and GPU/CPU/IC interconnect characterization, including high-speed cable test with OSP switching and TDR on GPU.",
+   "verified": true,
+   "label": "covered",
+   "why": "mentions connector/cable high-speed cable testing with OSP and GPU/CPU/IC interconnect context including GPU TDR"
+  },
+  {
+   "n": 4,
+   "point": "The R&S PCB test workflow stages where these VNA measurements land are material measurement, stackup selection, SI modeling/testing, sampling testing and process monitoring.",
+   "verified": true,
+   "label": "covered",
+   "why": "lists material measurement, stackup selection, SI modeling/testing, sampling testing and process monitoring"
+  },
+  {
+   "n": 5,
+   "point": "In the SerDes SI/PI test map, network analyzers are the instrument class for the Power Distribution Network block, while interface/link test uses scopes, BERTs, AWGs and switch matrices.",
+   "verified": true,
+   "label": "partial",
+   "why": "states network analyzers fit PDN/channel checks, but does not clearly contrast with scopes/BERTs/AWGs/switch matrices for interface/link test"
+  },
+  {
+   "n": 6,
+   "point": "ZNA options supporting this workflow role include time-domain analysis (TDR), eye diagram, de-embedding and Delta-L PCB characterization.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions TDR/impedance, eye diagram and Delta-L, but not as ZNA options and omits de-embedding"
+  },
+  {
+   "n": 7,
+   "point": "The VNA must be deployed as a total solution with probe, mount-kit and de-embedding tooling, and can be integrated into inline/ATE setups (4-port ZNB3044 + OSP320 + flying probe + interposer).",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention total solution with probe, mount-kit, de-embedding tooling, or inline/ATE integration details"
+  },
+  {
+   "n": 8,
+   "point": "The mapping is a sales-lead level source: no formal test setup, option, fixture, frequency or calibration condition is provided.",
+   "verified": true,
+   "label": "covered",
+   "why": "states the mapping is Excel-derived/sales-level and lacks formal setup details such as options, fixture, frequency and calibration"
+  }
+ ],
+ "contradicted": 0,
+ "invented": []
+}

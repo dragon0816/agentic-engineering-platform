@@ -2233,3 +2233,13 @@ Rejected alternatives:
   which needs the owner.
 - A larger evidence budget (128 sections): offline gain over 96 was small (0.44 -> 0.48) for
   about 20% more synthesis input.
+
+## 2026-10-12: Run the last search plan's queries, outside the evidence budget
+
+Decision (owner chose proposal 1): the final planner round's searches, previously
+dropped, run; the best section of up to three pages per query is added after the
+evidence budget. Kept after core-013: answerable coverage 0.477 -> 0.508, median latency
++12% (rule: no more than +20%). Rejected placements, measured offline: inside the budget
+at the end (no effect, the budget was already full) and ahead of deeper sections (more
+reference pages but fewer reference quotes).
+Caveats: one run; run.py PASS fell 28 -> 25 with changes in both directions; p90 +26%.
