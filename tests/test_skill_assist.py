@@ -57,12 +57,13 @@ def test_a_question_back_has_no_proposal_and_failures_are_reported() -> None:
 
 
 def test_the_page_offers_the_assistant() -> None:
-    # Before, After and the AI session side by side, resizable and each maximizable;
-    # the tabs switch between Preview and Markdown only.
+    # The file pane shows a diff view (Previous above Current, aligned while scrolling)
+    # beside the AI session, with a splitter between; tabs are Preview and Markdown.
     for hook in ('id="kp-assist-send"', "/api/knowledge/skill-assist", 'data-tab="preview"',
-                 'data-tab="md"', 'id="kp-pane-before"', 'id="kp-pane-after"',
-                 'id="kp-pane-ai"', 'class="kp-split"', 'class="kp-max"',
-                 'id="kp-rule-revert"', "avatarWorking(1)"):
+                 'data-tab="md"', 'id="kp-pane-file"', 'id="kp-block-prev"',
+                 'id="kp-block-cur"', 'id="kp-cur-gutter"', 'id="kp-pane-ai"',
+                 'class="kp-split"', 'class="kp-max"', 'id="kp-rule-revert"',
+                 "avatarWorking(1)"):
         assert hook in PAGE
     assert 'data-tab="diff"' not in PAGE
     assert "Use this version" not in PAGE

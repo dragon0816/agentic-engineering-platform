@@ -124,15 +124,36 @@ body {
 .kp-max { position: absolute; right: 8px; bottom: 8px; z-index: 3; padding: 2px 8px; opacity: 0.8; }
 .kp-pane.kp-maxed { position: fixed; inset: 16px; z-index: 60; flex-basis: auto !important;
   box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
-.kp-code, #kp-rule-text { font-family: ui-monospace, Consolas, monospace; font-size: 13px;
-  line-height: 20px; padding: 8px; margin: 0; white-space: pre; tab-size: 4; }
+.kp-filebody { display: flex; flex-direction: column; overflow: hidden; }
+.kp-md-view { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+.kp-block { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0;
+  border-bottom: 1px solid var(--line, #ddd); }
+.kp-block.kp-collapsed { flex: 0 0 auto; }
+.kp-block.kp-collapsed .kp-block-body { display: none; }
+.kp-block.kp-collapsed .kp-chev { display: inline-block; transform: rotate(-90deg); }
+.kp-block-head { text-align: left; border: 0; border-bottom: 1px solid var(--line, #ddd);
+  background: var(--panel, #fff); padding: 6px 10px; font-weight: 600; cursor: pointer; }
+.kp-block-body { flex: 1; min-height: 0; overflow: auto; position: relative; }
+.kp-diffrows, .kp-code, #kp-rule-text, .kp-gutter { font-family: ui-monospace, Consolas, monospace;
+  font-size: 13px; line-height: 20px; }
+.kp-drow { display: flex; white-space: pre; min-height: 20px; }
+.kp-ln { flex: 0 0 3.2em; text-align: right; padding-right: 6px; color: #888;
+  user-select: none; border-right: 1px solid var(--line, #ddd); }
+.kp-txt { padding-left: 8px; }
+.kp-hunk { color: #888; background: var(--accent-soft, #eef3fb); }
+.kp-none { padding: 8px 12px; }
+.kp-cur { display: flex; overflow: hidden; }
+.kp-gutter { flex: 0 0 6.4em; overflow: hidden; padding: 8px 0; }
+.kp-gline { display: flex; height: 20px; white-space: pre; }
+.kp-code { padding: 8px; margin: 0; white-space: pre; tab-size: 4; }
 .kp-code > div { min-height: 20px; }
-.kp-editwrap { overflow: hidden; }
+.kp-editwrap { position: relative; flex: 1; overflow: hidden; }
 .kp-backdrop { position: absolute; inset: 0; overflow: hidden; color: transparent;
   pointer-events: none; }
 #kp-rule-text { position: absolute; inset: 0; width: 100%; height: 100%; box-sizing: border-box;
-  border: 0; resize: none; background: transparent; overflow: auto; color: inherit; }
-#kp-after-preview, #kp-before-preview { padding: 8px 12px; }
+  border: 0; resize: none; background: transparent; overflow: auto; color: inherit;
+  padding: 8px; margin: 0; white-space: pre; tab-size: 4; }
+#kp-after-preview { padding: 8px 12px; overflow: auto; flex: 1; }
 .kp-ai { display: flex; flex-direction: column; gap: 6px; padding: 8px 8px 40px;
   overflow: hidden; }  /* the bottom keeps clear of the maximize button */
 .kp-ai #kp-assist-log { flex: 1; overflow: auto; max-height: none; min-height: 0; }
@@ -888,39 +909,46 @@ tr:last-child td { border-bottom: none; }
           <div id="kp-rules" class="kp-list"></div>
           <div id="kp-rule-editor" hidden>
             <p><strong id="kp-rule-path"></strong>
-              <span class="note" id="kp-rule-dirty"></span>
-              <span class="note" id="kp-diff-summary"></span></p>
+              <span class="note" id="kp-rule-dirty"></span></p>
             <div class="kp-tabs" role="tablist">
               <button type="button" role="tab" data-tab="preview">Preview</button>
               <button type="button" role="tab" data-tab="md" aria-selected="true">Markdown</button>
             </div>
             <div class="kp-panes" id="kp-panes">
-              <section class="kp-pane" id="kp-pane-before">
-                <header>Before <span class="note">saved file</span></header>
-                <div class="kp-pane-body">
-                  <div id="kp-before" class="kp-code"></div>
-                  <div id="kp-before-preview" class="kp-markdown" hidden></div>
-                </div>
-                <button class="kp-max" type="button" data-pane="kp-pane-before"
-                        title="Maximize" aria-label="Maximize Before">&#x2922;</button>
-              </section>
-              <div class="kp-split" data-left="kp-pane-before" data-right="kp-pane-after"
-                   role="separator" aria-orientation="vertical" title="Drag to resize"></div>
-              <section class="kp-pane" id="kp-pane-after">
-                <header>After <span class="note">being edited</span></header>
-                <div class="kp-pane-body kp-editwrap">
-                  <div id="kp-after-backdrop" class="kp-code kp-backdrop" aria-hidden="true"></div>
-                  <textarea id="kp-rule-text" spellcheck="false" wrap="off"
-                            aria-label="Rule file text"></textarea>
+              <section class="kp-pane" id="kp-pane-file">
+                <div class="kp-pane-body kp-filebody">
+                  <div id="kp-md-view" class="kp-md-view">
+                    <div class="kp-block" id="kp-block-prev">
+                      <button class="kp-block-head" type="button" data-block="kp-block-prev"
+                              aria-expanded="true"><span class="kp-chev">&#x2304;</span>
+                        Previous file <span class="note" id="kp-diff-summary"></span></button>
+                      <div class="kp-block-body" id="kp-prev-body">
+                        <div id="kp-prev" class="kp-diffrows"></div></div>
+                    </div>
+                    <div class="kp-block" id="kp-block-cur">
+                      <button class="kp-block-head" type="button" data-block="kp-block-cur"
+                              aria-expanded="true"><span class="kp-chev">&#x2304;</span>
+                        Current file <span class="note">editable</span></button>
+                      <div class="kp-block-body kp-cur" id="kp-cur-body">
+                        <div class="kp-gutter" id="kp-cur-gutter" aria-hidden="true"></div>
+                        <div class="kp-editwrap">
+                          <div id="kp-after-backdrop" class="kp-code kp-backdrop"
+                               aria-hidden="true"></div>
+                          <textarea id="kp-rule-text" spellcheck="false" wrap="off"
+                                    aria-label="Rule file text"></textarea>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   <div id="kp-after-preview" class="kp-markdown" hidden></div>
                 </div>
-                <button class="kp-max" type="button" data-pane="kp-pane-after"
-                        title="Maximize" aria-label="Maximize After">&#x2922;</button>
+                <button class="kp-max" type="button" data-pane="kp-pane-file"
+                        title="Maximize" aria-label="Maximize the file">&#x2922;</button>
               </section>
-              <div class="kp-split" data-left="kp-pane-after" data-right="kp-pane-ai"
+              <div class="kp-split" data-left="kp-pane-file" data-right="kp-pane-ai"
                    role="separator" aria-orientation="vertical" title="Drag to resize"></div>
               <section class="kp-pane" id="kp-pane-ai">
-                <header>AI session <span class="note">proposals go to After</span></header>
+                <header>AI session <span class="note">proposals go to Current file</span></header>
                 <div class="kp-pane-body kp-ai">
                   <div id="kp-assist-log"></div>
                   <textarea id="kp-assist-input" rows="4"
@@ -4045,41 +4073,124 @@ function kpDiffLines(before, after) {
   }
   return out;
 }
-let kpRuleMode = "md", kpRenderTimer = null;
-function kpCodeRows(box, rows) {
-  box.replaceChildren();
-  for (const [kind, line] of rows) {
-    const row = document.createElement("div");
-    row.className = kind === "+" ? "kp-add" : kind === "-" ? "kp-del" : "kp-same";
-    row.append(text(line || "​"));
-    box.append(row);
+let kpRuleMode = "md", kpRenderTimer = null, kpSyncing = false;
+const KP_LINE = 20, KP_CONTEXT = 3;
+function kpNumbered(lines) {
+  // Old and new line numbers for every diff row.
+  let old = 0, now = 0;
+  return lines.map(([kind, line]) => {
+    if (kind !== "+") old += 1;
+    if (kind !== "-") now += 1;
+    return {kind, line, old: kind === "+" ? null : old, now: kind === "-" ? null : now};
+  });
+}
+function kpHunks(rows) {
+  // Changed rows with three rows of context, merged when they touch.
+  const keep = new Set();
+  rows.forEach((row, index) => {
+    if (row.kind === " ") return;
+    for (let k = Math.max(0, index - KP_CONTEXT);
+         k <= Math.min(rows.length - 1, index + KP_CONTEXT); k++) keep.add(k);
+  });
+  const hunks = [];
+  let current = null;
+  rows.forEach((row, index) => {
+    if (!keep.has(index)) { current = null; return; }
+    if (current === null) { current = []; hunks.push(current); }
+    current.push(row);
+  });
+  return hunks;
+}
+function kpRow(cells, kind, now) {
+  const row = document.createElement("div");
+  row.className = "kp-drow " + (kind === "+" ? "kp-add" : kind === "-" ? "kp-del"
+    : kind === "@" ? "kp-hunk" : "kp-same");
+  if (now !== null && now !== undefined) row.dataset.now = String(now);
+  for (const [cls, value] of cells) {
+    const cell = document.createElement("span"); cell.className = cls;
+    cell.append(text(value)); row.append(cell);
   }
+  return row;
+}
+function kpRenderPrevious(rows) {
+  const box = el("kp-prev"); box.replaceChildren();
+  const hunks = kpHunks(rows);
+  if (!hunks.length) {
+    const none = document.createElement("p"); none.className = "note kp-none";
+    none.append(text("No changes from the saved file.")); box.append(none); return;
+  }
+  for (const hunk of hunks) {
+    const olds = hunk.filter((r) => r.old !== null), nows = hunk.filter((r) => r.now !== null);
+    const head = "@@ -" + (olds.length ? olds[0].old : 0) + "," + olds.length
+      + " +" + (nows.length ? nows[0].now : 0) + "," + nows.length + " @@";
+    box.append(kpRow([["kp-ln", ""], ["kp-ln", ""], ["kp-txt", head]], "@", null));
+    for (const row of hunk) {
+      const oldNo = row.kind === "-" ? "-" + row.old : row.old === null ? "" : String(row.old);
+      const nowNo = row.kind === "+" ? "+" + row.now : row.now === null ? "" : String(row.now);
+      box.append(kpRow([["kp-ln", oldNo], ["kp-ln", nowNo], ["kp-txt", row.line || "​"]],
+                       row.kind, row.now !== null ? row.now : row.old));
+    }
+  }
+}
+function kpRenderCurrent(rows) {
+  const gutter = el("kp-cur-gutter"), back = el("kp-after-backdrop");
+  gutter.replaceChildren(); back.replaceChildren();
+  for (const row of rows) {
+    if (row.kind === "-") continue;
+    const numbers = document.createElement("div");
+    numbers.className = "kp-gline" + (row.kind === "+" ? " kp-add" : "");
+    const oldCell = document.createElement("span"); oldCell.className = "kp-ln";
+    oldCell.append(text(row.old === null ? "" : String(row.old)));
+    const nowCell = document.createElement("span"); nowCell.className = "kp-ln";
+    nowCell.append(text(row.kind === "+" ? "+" + row.now : String(row.now)));
+    numbers.append(oldCell, nowCell); gutter.append(numbers);
+    const shade = document.createElement("div");
+    shade.className = row.kind === "+" ? "kp-add" : "kp-same";
+    shade.append(text(row.line || "​")); back.append(shade);
+  }
+  kpSyncCurrent();
 }
 function kpRenderPanes() {
   const current = el("kp-rule-text").value;
-  const lines = kpDiffLines(kpRuleSaved, current);
-  const added = lines.filter(([kind]) => kind === "+").length;
-  const removed = lines.filter(([kind]) => kind === "-").length;
+  const rows = kpNumbered(kpDiffLines(kpRuleSaved, current));
+  const added = rows.filter((r) => r.kind === "+").length;
+  const removed = rows.filter((r) => r.kind === "-").length;
   el("kp-diff-summary").textContent = added || removed
     ? "· +" + added + " added, −" + removed + " removed" : "";
   const preview = kpRuleMode === "preview";
-  el("kp-before").hidden = preview; el("kp-before-preview").hidden = !preview;
-  el("kp-after-backdrop").hidden = preview; el("kp-rule-text").hidden = preview;
-  el("kp-after-preview").hidden = !preview;
+  el("kp-md-view").hidden = preview; el("kp-after-preview").hidden = !preview;
   if (preview) {
-    el("kp-before-preview").replaceChildren(renderMarkdown(kpRuleSaved));
     el("kp-after-preview").replaceChildren(renderMarkdown(current));
   } else {
-    // Before shows what was removed, After what was added, each in its own order.
-    kpCodeRows(el("kp-before"), lines.filter(([kind]) => kind !== "+"));
-    kpCodeRows(el("kp-after-backdrop"), lines.filter(([kind]) => kind !== "-"));
-    kpSyncBackdrop();
+    kpRenderPrevious(rows); kpRenderCurrent(rows);
   }
   kpRuleDirty();
 }
-function kpSyncBackdrop() {
-  const area = el("kp-rule-text"), back = el("kp-after-backdrop");
-  back.scrollTop = area.scrollTop; back.scrollLeft = area.scrollLeft;
+function kpSyncCurrent() {
+  const area = el("kp-rule-text");
+  el("kp-after-backdrop").scrollTop = area.scrollTop;
+  el("kp-after-backdrop").scrollLeft = area.scrollLeft;
+  el("kp-cur-gutter").scrollTop = area.scrollTop;
+}
+function kpAlign(fromCurrent) {
+  // Keep Previous and Current on the same line while either scrolls.
+  if (kpSyncing) return;
+  kpSyncing = true;
+  const area = el("kp-rule-text"), prev = el("kp-prev-body");
+  const rows = [...el("kp-prev").querySelectorAll(".kp-drow[data-now]")];
+  if (rows.length) {
+    if (fromCurrent) {
+      const line = Math.floor(area.scrollTop / KP_LINE) + 1;
+      const target = rows.find((row) => Number(row.dataset.now) >= line) || rows[rows.length - 1];
+      prev.scrollTop = target.offsetTop - el("kp-prev").offsetTop;
+    } else {
+      const top = prev.scrollTop + el("kp-prev").offsetTop;
+      const target = rows.find((row) => row.offsetTop >= top) || rows[rows.length - 1];
+      area.scrollTop = (Number(target.dataset.now) - 1) * KP_LINE;
+      kpSyncCurrent();
+    }
+  }
+  requestAnimationFrame(() => { kpSyncing = false; });
 }
 function kpRuleDirty() {
   const changed = el("kp-rule-text").value !== kpRuleSaved;
@@ -4095,25 +4206,33 @@ function kpTab(name) {
 for (const button of document.querySelectorAll(".kp-tabs [data-tab]")) {
   button.addEventListener("click", () => kpTab(button.dataset.tab));
 }
+for (const head of document.querySelectorAll(".kp-block-head")) {
+  head.addEventListener("click", () => {
+    const block = el(head.dataset.block);
+    const open = block.classList.toggle("kp-collapsed") === false;
+    head.setAttribute("aria-expanded", String(open));
+  });
+}
 el("kp-rule-text").addEventListener("input", () => {
   kpRuleDirty();
   clearTimeout(kpRenderTimer);
   kpRenderTimer = setTimeout(kpRenderPanes, 200);
 });
-el("kp-rule-text").addEventListener("scroll", kpSyncBackdrop);
+el("kp-rule-text").addEventListener("scroll", () => { kpSyncCurrent(); kpAlign(true); });
+el("kp-prev-body").addEventListener("scroll", () => kpAlign(false));
 el("kp-rule-revert").addEventListener("click", () => {
   el("kp-rule-text").value = kpRuleSaved; kpTab(kpRuleMode);
 });
 
 // Splitters: drag to share the width; the widths are remembered on this browser.
-const KP_PANES = ["kp-pane-before", "kp-pane-after", "kp-pane-ai"];
+const KP_PANES = ["kp-pane-file", "kp-pane-ai"];
 function kpApplyWidths(widths) {
   KP_PANES.forEach((id, index) => { el(id).style.flexBasis = widths[index] + "%"; });
 }
-let kpWidths = [32, 36, 32];
+let kpWidths = [68, 32];
 try {
-  const kept = JSON.parse(localStorage.getItem("kp-pane-widths") || "null");
-  if (Array.isArray(kept) && kept.length === 3) kpWidths = kept;
+  const kept = JSON.parse(localStorage.getItem("kp-pane-widths-2") || "null");
+  if (Array.isArray(kept) && kept.length === 2) kpWidths = kept;
 } catch (_ignored) { /* storage may be unavailable */ }
 kpApplyWidths(kpWidths);
 for (const split of document.querySelectorAll(".kp-split")) {
@@ -4134,7 +4253,7 @@ for (const split of document.querySelectorAll(".kp-split")) {
     const stop = () => {
       split.removeEventListener("pointermove", move);
       split.removeEventListener("pointerup", stop);
-      try { localStorage.setItem("kp-pane-widths", JSON.stringify(kpWidths)); }
+      try { localStorage.setItem("kp-pane-widths-2", JSON.stringify(kpWidths)); }
       catch (_ignored) { /* storage may be unavailable */ }
     };
     split.addEventListener("pointermove", move);
@@ -4171,8 +4290,8 @@ function kpAssistShow(progress) {
     item.append(turn.role === "user" ? text(turn.text) : renderMarkdown(turn.text));
     if (turn.proposal) {
       const note = document.createElement("p"); note.className = "note";
-      note.append(text("The proposal is in After (added lines are green, removed ones "
-        + "red in Before); press Save to keep it."));
+      note.append(text("The proposal is in Current file (added lines green; removed "
+        + "ones red under Previous file); press Save to keep it."));
       item.append(note);
     }
     for (const warning of turn.warnings || []) {
