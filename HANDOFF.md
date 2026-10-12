@@ -66,7 +66,7 @@ Lint -> Benchmark -> Push) and the K1-K3 specs; progress rows are in `docs/TASKS
 
 Knowledge answer rules (2026-10-12, latest): vault skills with `mode: answer` now shape
 answers; the rewritten ask-knowledge measured better in core-015 (coverage 0.503,
-invented 31 vs 67) and is LIVE as rs-knowledge 1.0.3 (`AEPs-k-v1.0.3`, published
+invented 31 vs 67) and is LIVE as rs-knowledge 1.0.3 (`AEP\rs-k-v1.0.3`, published
 2026-10-12; host.json backup `host.json.bak-20261012-143652-before-rs-knowledge-1.0.3`,
 1.0.2 kept). It is also in the project vault copy. The Skill assistant is on
 the Knowledge page (Rules card).
