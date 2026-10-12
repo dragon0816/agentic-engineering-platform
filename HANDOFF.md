@@ -64,7 +64,12 @@ Lint -> Benchmark -> Push) and the K1-K3 specs; progress rows are in `docs/TASKS
   (passes on rerun) is unidentified (see TASKS); the OCNG image failure is fixed
   (b293aeb). Next stage after validation: K4 (Excel, HTML, .ppt, images).
 
-Knowledge state (2026-10-12, latest): answer quality was tuned against a fresh baseline
+Knowledge answer quality update (2026-10-12, latest): owner proposal 1 is live at
+677e18a (the last search plan's queries run, pages added beyond the budget).
+core-013: answerable coverage 0.508 (target 0.50), median 83 s, p90 144 s. To roll it
+back, revert 677e18a and restart Agent Web. Proposals 2-4 below are not implemented.
+
+Knowledge state (2026-10-12): answer quality was tuned against a fresh baseline
 (see DECISIONS 2026-10-12 and `runs/core-009` … `core-012` reviews). Live now, commit
 425c5f6: Knowledge Skill `company-agent/knowledge-query@1.12.0` (1.10.0 in `disabled/`),
 `engineering/knowledge-query@1.0.1` (1.0.0 in `disabled/`), Agent Web restarted on 425c5f6.
