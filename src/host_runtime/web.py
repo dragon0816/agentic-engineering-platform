@@ -1011,8 +1011,9 @@ class AgentWeb:
         and drop cases older than the retention setting."""
         workspace = self.runtime.layout.workspace_root
         store = self._experience_store()
+        # The state returns at most the 100 most recent conversations.
         cases = from_conversations(self.runtime.state.conversations(self.runtime.actor,
-                                                                    limit=500))
+                                                                    limit=100))
         boxes = self._sandboxes()
         if boxes is not None and boxes.root.is_dir():
             cases += from_benchmarks(boxes.root)
@@ -1059,6 +1060,7 @@ class AgentWeb:
         store = self._experience_store()
         return {"ok": True, "settings": load_settings(workspace).model_dump(mode="json"),
                 "open": len(store.cases("open")), "last_review": store.meta("last_review"),
+                "last_error": store.meta("last_error") or None,
                 "review": latest_review(workspace)}
 
     def update_experience_settings(self, body: dict[str, Any]) -> dict[str, Any]:
@@ -1070,9 +1072,17 @@ class AgentWeb:
         self._experience_store().prune(settings.retention_days)
         return self.experience()
 
+    def _experience_review_logged(self) -> None:
+        store = self._experience_store()
+        try:
+            result = self.experience_review()
+            store.set_meta("last_error", "" if result.get("ok") else str(result.get("code")))
+        except Exception as error:  # noqa: BLE001 - the page shows why a review stopped
+            store.set_meta("last_error", f"{type(error).__name__}: {error}"[:300])
+
     def start_experience_review(self) -> dict[str, Any]:
-        thread = threading.Thread(target=self.experience_review, name="experience-review",
-                                  daemon=True)
+        thread = threading.Thread(target=self._experience_review_logged,
+                                  name="experience-review", daemon=True)
         thread.start()
         return {"ok": True, "started": True}
 
@@ -1092,7 +1102,7 @@ class AgentWeb:
                         continue
                     self.experience_harvest()
                     if self._experience_store().cases("open"):
-                        self.experience_review()
+                        self._experience_review_logged()
                 except Exception:  # noqa: BLE001 - a failed night is retried the next
                     continue
 

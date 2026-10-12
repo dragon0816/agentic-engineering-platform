@@ -3610,7 +3610,8 @@ async function xpLoad() {
   el("xp-days").value = info.settings.retention_days;
   el("xp-nightly").checked = info.settings.nightly;
   el("xp-summary").textContent = " \u2014 " + info.open + " open cases"
-    + (info.last_review ? "; last review " + info.last_review.slice(0, 16) : "");
+    + (info.last_review ? "; last review " + info.last_review.slice(0, 16) : "")
+    + (info.last_error ? "; last attempt failed: " + info.last_error : "");
   el("xp-report").replaceChildren(info.review ? renderMarkdown(info.review.markdown)
     : text("No review yet."));
 }

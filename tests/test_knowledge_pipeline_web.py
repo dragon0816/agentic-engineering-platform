@@ -144,6 +144,9 @@ def test_the_experience_review_routes_keep_settings_and_report(
     bad = json.loads(fetch(base(server) + "/api/experience/settings", token=server.token,
                            body={"retention_days": 0}).body)
     assert bad == {"ok": False, "code": "experience_settings_invalid"}
+    # Harvesting reads this host's own records (the conversation limit is the
+    # state's maximum of 100).
+    assert server.web.experience_harvest() == 0
     # Without a Knowledge asking model the review cannot run and says so.
     assert server.web.experience_review() == {"ok": False,
                                               "code": "experience_review_unavailable"}
