@@ -816,6 +816,19 @@ tr:last-child td { border-bottom: none; }
       this machine (host.json <code>knowledge_pipeline</code>).</div>
     <div id="kp-status" class="section-status kp-sticky" role="status" aria-live="polite"></div>
     <div id="kp-main">
+      <details class="card" id="xp-card"><summary><strong>Experience review</strong>
+        <span class="note" id="xp-summary"></span></summary>
+        <p class="note">Failed, down-rated and evidence-gap answers are collected as cases;
+          a nightly review groups them and proposes improvements. Nothing is changed by the
+          review: it only reports.</p>
+        <div class="kp-actions">
+          <button class="go" id="xp-run" type="button">Review now</button>
+          <label>Keep cases <input id="xp-days" type="number" min="1" max="3650"
+            style="width:5em"> days</label>
+          <label><input id="xp-nightly" type="checkbox"> Review nightly</label>
+          <button id="xp-save" type="button">Save settings</button>
+        </div>
+        <div id="xp-report" class="kp-markdown"></div></details>
       <h2>Sandboxes</h2>
       <div class="card">
         <div id="kp-sandboxes" class="kp-list">reading&hellip;</div>
@@ -3591,7 +3604,32 @@ function kpButton(label, action) {
   button.append(text(label)); button.addEventListener("click", action); return button;
 }
 
+async function xpLoad() {
+  const info = await call("/api/experience");
+  if (!info.ok) return;
+  el("xp-days").value = info.settings.retention_days;
+  el("xp-nightly").checked = info.settings.nightly;
+  el("xp-summary").textContent = " \u2014 " + info.open + " open cases"
+    + (info.last_review ? "; last review " + info.last_review.slice(0, 16) : "");
+  el("xp-report").replaceChildren(info.review ? renderMarkdown(info.review.markdown)
+    : text("No review yet."));
+}
+el("xp-save").addEventListener("click", () => kpRun("Saving", async () => {
+  const reply = await call("/api/experience/settings", {
+    retention_days: Number(el("xp-days").value), nightly: el("xp-nightly").checked});
+  if (!reply.ok) {
+    const problem = new Error(reply.code); problem.code = reply.code; throw problem;
+  }
+  await xpLoad();
+}));
+el("xp-run").addEventListener("click", () => kpRun("Starting the review", async () => {
+  await call("/api/experience/review", {});
+  kpStatus("The review runs in the background; its report appears here when done.");
+  setTimeout(() => xpLoad().catch(() => {}), 60000);
+}));
+
 async function loadKnowledge() {
+  xpLoad().catch(() => {});
   const info = await call("/api/knowledge/pipeline");
   el("kp-disabled").hidden = info.enabled; el("kp-main").hidden = !info.enabled;
   if (!info.enabled) return;

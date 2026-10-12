@@ -137,15 +137,26 @@ or regressed. These counts show whether the review is worth its cost.
 | E5 | Telemetry and Atlas; proposal outcome tracking | The review loop visible in Atlas |
 | E6 | Live trial for two weeks, then a decision on defaults | Owner review of the proposal quality |
 
-## 10. Owner decisions needed
+## 10. Owner decisions (2026-10-12)
 
-1. **Signals:** start with ratings and harness failures only, or also benchmark and
-   question-set failures? Proposed: all of them, since they are already recorded.
-2. **Schedule:** nightly when there are new cases (proposed), or only by hand at first?
-3. **Review model input:** may the review send conversation excerpts to the company model
-   endpoint? It is the same endpoint that answered them. Proposed: yes, excerpts only,
-   with secrets redacted.
-4. **Who reviews:** domain owners review vault-rule proposals and the owner reviews
-   platform Skill proposals (proposed), or the owner reviews everything at first?
-5. **Retention:** how long experience cases are kept. Proposed: 90 days, or until their
-   proposal is decided.
+1. Signals: all of them (ratings, harness failures, evidence gaps, benchmark and
+   question-set failures, Workflow failures).
+2. Schedule: nightly, only when there are new cases; also runnable by hand.
+3. Review model input: conversation excerpts may go to the company model endpoint,
+   excerpts only, with secrets redacted.
+4. Reviewers: domain owners review vault-rule proposals; the owner reviews platform
+   Skill proposals.
+5. Retention: a setting people can change on the page, default 30 days.
+
+## 11. As built (E1-E2)
+
+- Cases are harvested, not hooked: the review reads the Host's own records. Each case
+  has a stable id, so a harvest can run again without creating duplicates. The sources
+  are:
+  - conversation answers that were down-rated, failed, needed input, or whose tool
+    summary shows a failure code;
+  - sandbox question-set benchmarks;
+  - failed coding and Workflow runs in telemetry.
+- Settings live in `<workspace>/experience-settings.json` (retention days, nightly on
+  or off). Cases are in `<workspace>/experience.sqlite`. Review reports are in
+  `<workspace>/experience-reviews/`.

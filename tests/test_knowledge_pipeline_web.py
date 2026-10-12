@@ -128,3 +128,22 @@ def test_the_skill_assistant_route_only_edits_rule_files(
     # This test host has no Knowledge asking model installed.
     reply = json.loads(fetch(url, token=server.token, body=body).body)
     assert reply == {"ok": False, "code": "skill_assist_unavailable"}
+
+
+def test_the_experience_review_routes_keep_settings_and_report(
+    served_pipeline: tuple[AgentWebServer, Path],
+) -> None:
+    server, _ = served_pipeline
+    assert fetch(base(server) + "/api/experience").status == 401
+    info = json.loads(fetch(base(server) + "/api/experience", token=server.token).body)
+    assert info["settings"] == {"retention_days": 30, "nightly": True}
+    assert info["open"] == 0 and info["review"] is None
+    saved = json.loads(fetch(base(server) + "/api/experience/settings", token=server.token,
+                             body={"retention_days": 14, "nightly": False}).body)
+    assert saved["settings"] == {"retention_days": 14, "nightly": False}
+    bad = json.loads(fetch(base(server) + "/api/experience/settings", token=server.token,
+                           body={"retention_days": 0}).body)
+    assert bad == {"ok": False, "code": "experience_settings_invalid"}
+    # Without a Knowledge asking model the review cannot run and says so.
+    assert server.web.experience_review() == {"ok": False,
+                                              "code": "experience_review_unavailable"}

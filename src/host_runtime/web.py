@@ -41,6 +41,7 @@ import os
 import re
 import secrets
 import threading
+import time
 import uuid
 from collections.abc import Callable, Mapping
 from contextlib import ExitStack
@@ -148,6 +149,16 @@ from host_runtime.conversations import (
     ConversationTurnRequest,
     MessageFeedback,
 )
+from host_runtime.experience import (
+    ExperienceSettings,
+    ExperienceStore,
+    from_benchmarks,
+    from_conversations,
+    from_telemetry,
+    load_settings,
+    save_settings,
+)
+from host_runtime.experience_review import latest_review, run_review
 from host_runtime.host import HostRuntime, build_telegram, choice_sources, load_authorization
 from host_runtime.knowledge_bench import latest as latest_benchmark
 from host_runtime.knowledge_bench import run_benchmark
@@ -201,6 +212,7 @@ from knowledge.pipeline import KnowledgePipeline
 from knowledge.procedure import KnowledgeProcedure
 from knowledge.query import cited_numbers
 from knowledge.sandbox import SandboxError, Sandboxes
+from knowledge.schema import answer_rules_text
 from knowledge.vault import Vault
 from models.contracts import ModelMessage
 from models.wire import MethodTransport, UrllibTransport
@@ -988,6 +1000,103 @@ class AgentWeb:
         except ValueError as error:
             return {"ok": False, "code": "mcp_settings_invalid", "message": str(error)[:300]}
         return {"ok": True, **self.mcp_servers()}
+
+    # -- experience review (docs/phases/EXPERIENCE_REVIEW.md, E1-E2) ---------
+
+    def _experience_store(self) -> ExperienceStore:
+        return ExperienceStore(self.runtime.layout.workspace_root)
+
+    def experience_harvest(self) -> int:
+        """Gather new cases from conversations, sandbox benchmarks and telemetry,
+        and drop cases older than the retention setting."""
+        workspace = self.runtime.layout.workspace_root
+        store = self._experience_store()
+        cases = from_conversations(self.runtime.state.conversations(self.runtime.actor,
+                                                                    limit=500))
+        boxes = self._sandboxes()
+        if boxes is not None and boxes.root.is_dir():
+            cases += from_benchmarks(boxes.root)
+        cases += from_telemetry(workspace / "telemetry.sqlite")
+        added = store.add(cases)
+        store.prune(load_settings(workspace).retention_days)
+        return added
+
+    def _experience_rules(self, domain: str) -> str:
+        """The rules that governed a domain's answers: the installed Knowledge
+        Skill's guidance and the published vault's answer rules."""
+        if domain != "knowledge":
+            return ""
+        installed = self.runtime.agent.gateway.bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity)
+        handler = getattr(installed, "handler", None)
+        catalog = getattr(handler, "catalog", None)
+        parts = []
+        skill = harness_skill(self.runtime.agent.gateway.router.commands.skills)
+        found = next((s for s in self.runtime.agent.gateway.router.commands.skills.discover(
+            skill.namespace) if s.metadata.identity == skill), None) if skill else None
+        guidance = ((found.procedure or {}).get("answer_guidance") if found else None)
+        if guidance:
+            parts.append("Installed Knowledge Skill answer guidance:\n" + str(guidance))
+        if catalog is not None and catalog.manifests():
+            _, vault = catalog.get(catalog.manifests()[0].metadata.identity)
+            parts.append(answer_rules_text(vault, "").replace("{{", "{").replace("}}", "}"))
+        return "\n\n".join(part for part in parts if part)
+
+    def experience_review(self) -> dict[str, Any]:
+        """Harvest, then review the open groups; report only (E2)."""
+        installed = self.runtime.agent.gateway.bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity)
+        handler = getattr(installed, "handler", None)
+        model, alias = getattr(handler, "model", None), getattr(handler, "alias", None)
+        if model is None or alias is None:
+            return {"ok": False, "code": "experience_review_unavailable"}
+        added = self.experience_harvest()
+        report = run_review(self._experience_store(), model, alias, self._experience_rules,
+                            workspace=self.runtime.layout.workspace_root, harvested=added)
+        self._experience_store().set_meta("last_review", report.started_at)
+        return {"ok": True, "review_id": report.review_id, "findings": len(report.findings)}
+
+    def experience(self) -> dict[str, Any]:
+        workspace = self.runtime.layout.workspace_root
+        store = self._experience_store()
+        return {"ok": True, "settings": load_settings(workspace).model_dump(mode="json"),
+                "open": len(store.cases("open")), "last_review": store.meta("last_review"),
+                "review": latest_review(workspace)}
+
+    def update_experience_settings(self, body: dict[str, Any]) -> dict[str, Any]:
+        try:
+            settings = ExperienceSettings.model_validate(body)
+        except ValueError:
+            return {"ok": False, "code": "experience_settings_invalid"}
+        save_settings(self.runtime.layout.workspace_root, settings)
+        self._experience_store().prune(settings.retention_days)
+        return self.experience()
+
+    def start_experience_review(self) -> dict[str, Any]:
+        thread = threading.Thread(target=self.experience_review, name="experience-review",
+                                  daemon=True)
+        thread.start()
+        return {"ok": True, "started": True}
+
+    def start_experience_nightly(self, check_s: float = 1800.0) -> None:
+        """Review once a night after 02:00 local time when there are new cases
+        (owner, 2026-10-12)."""
+        def loop() -> None:
+            while True:
+                time.sleep(check_s)
+                try:
+                    workspace = self.runtime.layout.workspace_root
+                    if not load_settings(workspace).nightly:
+                        continue
+                    now = datetime.now().astimezone()
+                    last = self._experience_store().meta("last_review") or ""
+                    if now.hour < 2 or last[:10] == now.date().isoformat():
+                        continue
+                    self.experience_harvest()
+                    if self._experience_store().cases("open"):
+                        self.experience_review()
+                except Exception:  # noqa: BLE001 - a failed night is retried the next
+                    continue
+
+        threading.Thread(target=loop, name="experience-nightly", daemon=True).start()
 
     def start_feedback_sync(self) -> None:
         """Send queued feedback to the Shared Platform while this runs."""
@@ -2826,6 +2935,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.readiness())
         elif parsed.path == "/api/knowledge/pipeline":
             self._json(200, web.knowledge_pipeline())
+        elif parsed.path == "/api/experience":
+            self._json(200, web.experience())
         elif parsed.path == "/api/knowledge/push":
             query = parse_qs(parsed.query)
             self._json(200, web.push_status((query.get("sandbox_id") or [""])[0]))
@@ -2893,6 +3004,8 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/knowledge/push/start",
             "/api/knowledge/refresh",
             "/api/knowledge/skill-assist",
+            "/api/experience/settings",
+            "/api/experience/review",
             "/api/settings/model",
             "/api/settings/telegram",
             "/api/mcp/save",
@@ -2956,6 +3069,13 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, self.server.web.start_push(
                 str(body.get("sandbox_id") or ""), [str(x) for x in body["sets"]],
                 {str(k): str(v) for k, v in dict(body.get("resolutions") or {}).items()}))
+            return
+        if path == "/api/experience/settings":
+            self._json(200, self.server.web.update_experience_settings(
+                body if isinstance(body, dict) else {}))
+            return
+        if path == "/api/experience/review":
+            self._json(200, self.server.web.start_experience_review())
             return
         if path == "/api/knowledge/skill-assist":
             if not isinstance(body, dict) or not isinstance(body.get("turns"), list):

@@ -2276,3 +2276,11 @@ Decision (owner, option A): publish the exact candidate measured in core-015 (1.
 content plus `skills/ask-knowledge/SKILL.md`) as rs-knowledge 1.0.3 so users get the
 better answers now, instead of waiting for a Refresh from the project vault. Rollback:
 restore the host.json backup (1.0.2 vault and manifest are kept) and restart.
+
+## 2026-10-12: Experience review defaults
+
+Decision (owner), design `docs/phases/EXPERIENCE_REVIEW.md`: collect every signal already
+recorded; review nightly when there are new cases (and by hand); conversation excerpts
+may go to the company model endpoint with secrets redacted; domain owners review
+vault-rule proposals and the owner reviews platform Skill proposals; case retention is a
+user setting with a 30-day default.
