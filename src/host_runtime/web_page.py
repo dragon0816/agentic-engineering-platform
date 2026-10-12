@@ -113,13 +113,33 @@ body {
 .kp-steps .kp-later { opacity: 0.55; }
 .kp-tabs { display: flex; gap: 4px; margin: 6px 0; }
 .kp-tabs [role="tab"][aria-selected="true"] { background: var(--accent, #2b6cb0); color: #fff; }
-.kp-diff pre { white-space: pre-wrap; font-family: ui-monospace, Consolas, monospace;
-  font-size: 13px; max-height: 60vh; overflow: auto; }
+.kp-panes { display: flex; height: 70vh; min-height: 360px; gap: 0; }
+.kp-pane { position: relative; display: flex; flex-direction: column; min-width: 0;
+  border: 1px solid var(--line, #ddd); border-radius: 6px; background: var(--panel, #fff); }
+.kp-pane > header { padding: 6px 10px; font-weight: 600; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis; border-bottom: 1px solid var(--line, #ddd); }
+.kp-pane-body { flex: 1; overflow: auto; position: relative; min-height: 0; }
+.kp-split { flex: 0 0 8px; cursor: col-resize; touch-action: none; }
+.kp-split:hover { background: var(--accent-soft, #dbe8f7); }
+.kp-max { position: absolute; right: 8px; bottom: 8px; z-index: 3; padding: 2px 8px; opacity: 0.8; }
+.kp-pane.kp-maxed { position: fixed; inset: 16px; z-index: 60; flex-basis: auto !important;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
+.kp-code, #kp-rule-text { font-family: ui-monospace, Consolas, monospace; font-size: 13px;
+  line-height: 20px; padding: 8px; margin: 0; white-space: pre; tab-size: 4; }
+.kp-code > div { min-height: 20px; }
+.kp-editwrap { overflow: hidden; }
+.kp-backdrop { position: absolute; inset: 0; overflow: hidden; color: transparent;
+  pointer-events: none; }
+#kp-rule-text { position: absolute; inset: 0; width: 100%; height: 100%; box-sizing: border-box;
+  border: 0; resize: none; background: transparent; overflow: auto; color: inherit; }
+#kp-after-preview, #kp-before-preview { padding: 8px 12px; }
+.kp-ai { display: flex; flex-direction: column; gap: 6px; padding: 8px 8px 40px;
+  overflow: hidden; }  /* the bottom keeps clear of the maximize button */
+.kp-ai #kp-assist-log { flex: 1; overflow: auto; max-height: none; min-height: 0; }
+.kp-ai #kp-assist-input { width: 100%; box-sizing: border-box; }
 .kp-add { background: #e6f4ea; color: #137333; }
 .kp-del { background: #fce8e6; color: #a50e0e; }
 .kp-same { opacity: 0.7; }
-#kp-assist-log { max-height: 50vh; overflow: auto; }
-#kp-rule-text { width: 100%; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
 .kp-markdown { max-height: 70vh; overflow: auto; }
 pre.kp-added { background: var(--ok-bg, #e8f5e9); white-space: pre-wrap; padding: 8px; }
 pre.kp-removed { background: var(--bad-bg, #fdecea); white-space: pre-wrap; padding: 8px; }
@@ -868,34 +888,58 @@ tr:last-child td { border-bottom: none; }
           <div id="kp-rules" class="kp-list"></div>
           <div id="kp-rule-editor" hidden>
             <p><strong id="kp-rule-path"></strong>
-              <span class="note" id="kp-rule-dirty"></span></p>
+              <span class="note" id="kp-rule-dirty"></span>
+              <span class="note" id="kp-diff-summary"></span></p>
             <div class="kp-tabs" role="tablist">
               <button type="button" role="tab" data-tab="preview">Preview</button>
               <button type="button" role="tab" data-tab="md" aria-selected="true">Markdown</button>
-              <button type="button" role="tab" data-tab="diff">Diff</button>
             </div>
-            <div id="kp-tab-preview" class="kp-markdown kp-tab" hidden></div>
-            <textarea id="kp-rule-text" class="kp-tab" rows="18" spellcheck="false"
-                      aria-label="Rule file text"></textarea>
-            <div id="kp-tab-diff" class="kp-diff kp-tab" hidden></div>
+            <div class="kp-panes" id="kp-panes">
+              <section class="kp-pane" id="kp-pane-before">
+                <header>Before <span class="note">saved file</span></header>
+                <div class="kp-pane-body">
+                  <div id="kp-before" class="kp-code"></div>
+                  <div id="kp-before-preview" class="kp-markdown" hidden></div>
+                </div>
+                <button class="kp-max" type="button" data-pane="kp-pane-before"
+                        title="Maximize" aria-label="Maximize Before">&#x2922;</button>
+              </section>
+              <div class="kp-split" data-left="kp-pane-before" data-right="kp-pane-after"
+                   role="separator" aria-orientation="vertical" title="Drag to resize"></div>
+              <section class="kp-pane" id="kp-pane-after">
+                <header>After <span class="note">being edited</span></header>
+                <div class="kp-pane-body kp-editwrap">
+                  <div id="kp-after-backdrop" class="kp-code kp-backdrop" aria-hidden="true"></div>
+                  <textarea id="kp-rule-text" spellcheck="false" wrap="off"
+                            aria-label="Rule file text"></textarea>
+                  <div id="kp-after-preview" class="kp-markdown" hidden></div>
+                </div>
+                <button class="kp-max" type="button" data-pane="kp-pane-after"
+                        title="Maximize" aria-label="Maximize After">&#x2922;</button>
+              </section>
+              <div class="kp-split" data-left="kp-pane-after" data-right="kp-pane-ai"
+                   role="separator" aria-orientation="vertical" title="Drag to resize"></div>
+              <section class="kp-pane" id="kp-pane-ai">
+                <header>AI session <span class="note">proposals go to After</span></header>
+                <div class="kp-pane-body kp-ai">
+                  <div id="kp-assist-log"></div>
+                  <textarea id="kp-assist-input" rows="4"
+                            placeholder="e.g. every market claim must carry a date"
+                            aria-label="Message to the Skill assistant"></textarea>
+                  <div class="kp-actions">
+                    <button class="go" id="kp-assist-send" type="button">Send</button>
+                    <button id="kp-assist-reset" type="button">New conversation</button>
+                  </div>
+                </div>
+                <button class="kp-max" type="button" data-pane="kp-pane-ai"
+                        title="Maximize" aria-label="Maximize AI session">&#x2922;</button>
+              </section>
+            </div>
             <div class="kp-actions">
               <button class="go" id="kp-rule-save" type="button">Save</button>
               <button id="kp-rule-revert" type="button">Revert to saved</button>
               <button id="kp-rule-close" type="button">Close</button>
-            </div>
-            <div class="kp-assist">
-              <h4>Skill assistant</h4>
-              <p class="note">Describe in your own words what should change; the assistant
-                asks what it needs and puts its proposal in the editor above (see Diff).
-                Nothing is saved until you press Save.</p>
-              <div id="kp-assist-log"></div>
-              <textarea id="kp-assist-input" rows="3"
-                        placeholder="e.g. every market claim must carry a date"
-                        aria-label="Message to the Skill assistant"></textarea>
-              <div class="kp-actions">
-                <button class="go" id="kp-assist-send" type="button">Send</button>
-                <button id="kp-assist-reset" type="button">New conversation</button>
-              </div></div></div></div>
+            </div></div></div>
         <div class="card" id="kp-viewer" hidden><h3 id="kp-viewer-title">Preview</h3>
           <div class="kp-actions"><button id="kp-viewer-close" type="button">Close</button></div>
           <div id="kp-viewer-body" class="kp-markdown"></div></div>
@@ -4001,47 +4045,120 @@ function kpDiffLines(before, after) {
   }
   return out;
 }
-function kpRenderDiff() {
-  const box = el("kp-tab-diff"); box.replaceChildren();
-  const lines = kpDiffLines(kpRuleSaved, el("kp-rule-text").value);
-  const added = lines.filter(([kind]) => kind === "+").length;
-  const removed = lines.filter(([kind]) => kind === "-").length;
-  const head = document.createElement("p"); head.className = "note";
-  head.append(text(added || removed ? "+" + added + " added, −" + removed + " removed"
-    + " compared with the saved file" : "No changes from the saved file."));
-  box.append(head);
-  const pre = document.createElement("pre");
-  for (const [kind, line] of lines) {
+let kpRuleMode = "md", kpRenderTimer = null;
+function kpCodeRows(box, rows) {
+  box.replaceChildren();
+  for (const [kind, line] of rows) {
     const row = document.createElement("div");
     row.className = kind === "+" ? "kp-add" : kind === "-" ? "kp-del" : "kp-same";
-    row.append(text((kind === " " ? "  " : kind + " ") + line));
-    pre.append(row);
+    row.append(text(line || "​"));
+    box.append(row);
   }
-  box.append(pre);
+}
+function kpRenderPanes() {
+  const current = el("kp-rule-text").value;
+  const lines = kpDiffLines(kpRuleSaved, current);
+  const added = lines.filter(([kind]) => kind === "+").length;
+  const removed = lines.filter(([kind]) => kind === "-").length;
+  el("kp-diff-summary").textContent = added || removed
+    ? "· +" + added + " added, −" + removed + " removed" : "";
+  const preview = kpRuleMode === "preview";
+  el("kp-before").hidden = preview; el("kp-before-preview").hidden = !preview;
+  el("kp-after-backdrop").hidden = preview; el("kp-rule-text").hidden = preview;
+  el("kp-after-preview").hidden = !preview;
+  if (preview) {
+    el("kp-before-preview").replaceChildren(renderMarkdown(kpRuleSaved));
+    el("kp-after-preview").replaceChildren(renderMarkdown(current));
+  } else {
+    // Before shows what was removed, After what was added, each in its own order.
+    kpCodeRows(el("kp-before"), lines.filter(([kind]) => kind !== "+"));
+    kpCodeRows(el("kp-after-backdrop"), lines.filter(([kind]) => kind !== "-"));
+    kpSyncBackdrop();
+  }
+  kpRuleDirty();
+}
+function kpSyncBackdrop() {
+  const area = el("kp-rule-text"), back = el("kp-after-backdrop");
+  back.scrollTop = area.scrollTop; back.scrollLeft = area.scrollLeft;
 }
 function kpRuleDirty() {
   const changed = el("kp-rule-text").value !== kpRuleSaved;
   el("kp-rule-dirty").textContent = changed ? " — unsaved changes" : "";
 }
 function kpTab(name) {
+  kpRuleMode = name === "preview" ? "preview" : "md";
   for (const button of document.querySelectorAll(".kp-tabs [data-tab]")) {
-    button.setAttribute("aria-selected", String(button.dataset.tab === name));
+    button.setAttribute("aria-selected", String(button.dataset.tab === kpRuleMode));
   }
-  el("kp-tab-preview").hidden = name !== "preview";
-  el("kp-rule-text").hidden = name !== "md";
-  el("kp-tab-diff").hidden = name !== "diff";
-  if (name === "preview") {
-    el("kp-tab-preview").replaceChildren(renderMarkdown(el("kp-rule-text").value));
-  }
-  if (name === "diff") kpRenderDiff();
-  kpRuleDirty();
+  kpRenderPanes();
 }
 for (const button of document.querySelectorAll(".kp-tabs [data-tab]")) {
   button.addEventListener("click", () => kpTab(button.dataset.tab));
 }
-el("kp-rule-text").addEventListener("input", kpRuleDirty);
+el("kp-rule-text").addEventListener("input", () => {
+  kpRuleDirty();
+  clearTimeout(kpRenderTimer);
+  kpRenderTimer = setTimeout(kpRenderPanes, 200);
+});
+el("kp-rule-text").addEventListener("scroll", kpSyncBackdrop);
 el("kp-rule-revert").addEventListener("click", () => {
-  el("kp-rule-text").value = kpRuleSaved; kpTab("md");
+  el("kp-rule-text").value = kpRuleSaved; kpTab(kpRuleMode);
+});
+
+// Splitters: drag to share the width; the widths are remembered on this browser.
+const KP_PANES = ["kp-pane-before", "kp-pane-after", "kp-pane-ai"];
+function kpApplyWidths(widths) {
+  KP_PANES.forEach((id, index) => { el(id).style.flexBasis = widths[index] + "%"; });
+}
+let kpWidths = [32, 36, 32];
+try {
+  const kept = JSON.parse(localStorage.getItem("kp-pane-widths") || "null");
+  if (Array.isArray(kept) && kept.length === 3) kpWidths = kept;
+} catch (_ignored) { /* storage may be unavailable */ }
+kpApplyWidths(kpWidths);
+for (const split of document.querySelectorAll(".kp-split")) {
+  split.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    const left = KP_PANES.indexOf(split.dataset.left);
+    const right = KP_PANES.indexOf(split.dataset.right);
+    const total = el("kp-panes").getBoundingClientRect().width;
+    const startX = event.clientX, start = [...kpWidths];
+    try { split.setPointerCapture(event.pointerId); } catch (_ignored) { /* best effort */ }
+    const move = (moved) => {
+      const delta = (moved.clientX - startX) / total * 100;
+      const pair = start[left] + start[right];
+      const leftWidth = Math.min(pair - 10, Math.max(10, start[left] + delta));
+      kpWidths[left] = leftWidth; kpWidths[right] = pair - leftWidth;
+      kpApplyWidths(kpWidths);
+    };
+    const stop = () => {
+      split.removeEventListener("pointermove", move);
+      split.removeEventListener("pointerup", stop);
+      try { localStorage.setItem("kp-pane-widths", JSON.stringify(kpWidths)); }
+      catch (_ignored) { /* storage may be unavailable */ }
+    };
+    split.addEventListener("pointermove", move);
+    split.addEventListener("pointerup", stop);
+  });
+}
+// Maximize a pane over the page, and restore it.
+function kpMaximize(id, on) {
+  for (const pane of KP_PANES) el(pane).classList.toggle("kp-maxed", pane === id && on);
+  for (const button of document.querySelectorAll(".kp-max")) {
+    const maxed = button.dataset.pane === id && on;
+    button.innerHTML = maxed ? "&#x2921;" : "&#x2922;";
+    button.title = maxed ? "Restore" : "Maximize";
+  }
+}
+for (const button of document.querySelectorAll(".kp-max")) {
+  button.addEventListener("click", () => {
+    kpMaximize(button.dataset.pane, !el(button.dataset.pane).classList.contains("kp-maxed"));
+  });
+}
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && document.querySelector(".kp-pane.kp-maxed")) {
+    kpMaximize(null, false);
+  }
 });
 
 const KP_ASSIST_STATES = [["collecting", "Reading the file, guide and a sample"],
@@ -4054,8 +4171,8 @@ function kpAssistShow(progress) {
     item.append(turn.role === "user" ? text(turn.text) : renderMarkdown(turn.text));
     if (turn.proposal) {
       const note = document.createElement("p"); note.className = "note";
-      note.append(text("The proposal is in the editor above (Diff shows the change); "
-        + "press Save to keep it."));
+      note.append(text("The proposal is in After (added lines are green, removed ones "
+        + "red in Before); press Save to keep it."));
       item.append(note);
     }
     for (const warning of turn.warnings || []) {
@@ -4110,7 +4227,7 @@ el("kp-assist-send").addEventListener("click", async () => {
     kpAssistTurns.push({role: "assistant", text: result.reply, proposal: result.proposal,
                         warnings: result.warnings});
     kpAssistShow();
-    if (result.proposal) { el("kp-rule-text").value = result.proposal; kpTab("diff"); }
+    if (result.proposal) { el("kp-rule-text").value = result.proposal; kpTab("md"); }
   } catch (failure) {
     kpAssistTurns.pop(); kpAssistShow();
     kpStatus("The assistant did not answer: " + (failure.code || failure.message), true);
@@ -4125,7 +4242,7 @@ el("kp-rule-save").addEventListener("click", () => kpRun("Saving the rule", asyn
   await pipeline("rule-write", {sandbox_id: kpSandbox.sandbox_id, path: kpRulePath,
                                 text: textNow});
   kpRuleSaved = textNow; kpRuleDirty();
-  if (!el("kp-tab-diff").hidden) kpRenderDiff();
+  kpRenderPanes();
   kpStatus("Saved " + kpRulePath + "; the next ingest uses it.");
   await kpLoadRules();
 }));

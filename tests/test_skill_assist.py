@@ -57,10 +57,14 @@ def test_a_question_back_has_no_proposal_and_failures_are_reported() -> None:
 
 
 def test_the_page_offers_the_assistant() -> None:
-    # The proposal goes straight into the editor, whose tabs show it three ways.
+    # Before, After and the AI session side by side, resizable and each maximizable;
+    # the tabs switch between Preview and Markdown only.
     for hook in ('id="kp-assist-send"', "/api/knowledge/skill-assist", 'data-tab="preview"',
-                 'data-tab="md"', 'data-tab="diff"', 'id="kp-rule-revert"', "avatarWorking(1)"):
+                 'data-tab="md"', 'id="kp-pane-before"', 'id="kp-pane-after"',
+                 'id="kp-pane-ai"', 'class="kp-split"', 'class="kp-max"',
+                 'id="kp-rule-revert"', "avatarWorking(1)"):
         assert hook in PAGE
+    assert 'data-tab="diff"' not in PAGE
     assert "Use this version" not in PAGE
 
 
