@@ -176,3 +176,23 @@ def test_relevant_page_sections_are_ranked_by_the_rank_text(tmp_path: Path) -> N
                              _first(snapshot), rounds=2, k=1, per_page=8,
                              rank_text="jitter note 5")
     assert "alpha part 5" in evidence[0].text
+
+
+def test_the_last_plans_searches_are_run_and_added_beyond_the_budget(tmp_path: Path) -> None:
+    snapshot = _snapshot(tmp_path)
+    # One round: the second plan (the last) asks for a search no round would run.
+    # The page is shown in the round but not marked relevant, so only the final
+    # search can bring it in.
+    decisions = ({"relevant_pages": [], "queries": ["示波器"]},
+                 {"relevant_pages": [], "queries": ["示波器 眼圖"]})
+    first = _first(snapshot)
+    budget = len([p for p in first if p.citation.kind == "wiki"])
+    without = search_rounds(snapshot, _Planner(*decisions), "a", TRACE, "ZNA option",  # type: ignore[arg-type]
+                            first, rounds=1, k=budget, final_queries=False)
+    with_final = search_rounds(snapshot, _Planner(*decisions), "a", TRACE, "ZNA option",  # type: ignore[arg-type]
+                               first, rounds=1, k=budget)
+    assert all(p.citation.wiki_page != ZH_PAGE for p in without)
+    assert any(p.citation.wiki_page == ZH_PAGE for p in with_final)
+    # Nothing the budget held was displaced.
+    kept = [p for p in with_final if p.citation.wiki_page != ZH_PAGE]
+    assert kept == list(without)
