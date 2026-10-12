@@ -52,6 +52,8 @@ def test_an_original_already_ingested_is_not_pulled(tmp_path: Path) -> None:
     sandbox = pipeline.create_sandbox("rs-k", "prod", "leo.chi").sandbox_id
     pulled = pipeline.pull(sandbox, ("Productions",))
     assert pulled.copied == () and pulled.already_ingested == ("Productions/cmx.txt",)
+    # Its Raw is already in the sandbox: a rule change ingests that again.
+    assert pulled.already_raw == ("raw/Productions/cmx.md",)
 
 
 def test_pull_stays_inside_the_project_drop(tmp_path: Path) -> None:
@@ -78,4 +80,5 @@ def test_an_original_known_to_legacy_raw_by_its_hash_prefix_is_not_pulled(
     sandbox = pipeline.create_sandbox("rs-k", "legacy", "leo.chi").sandbox_id
     pulled = pipeline.pull(sandbox, ("Market",))
     assert pulled.already_ingested == ("Market/5G.txt",)
+    assert pulled.already_raw == ("raw/Market/5G.md",)
     assert pulled.copied == ("Market/AI/deck.txt",)

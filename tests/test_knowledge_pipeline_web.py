@@ -114,6 +114,38 @@ def test_push_and_refresh_routes_need_the_token_and_a_sandbox(
     assert 'id="kp-push"' in PAGE and "/api/knowledge/push/start" in PAGE
 
 
+def test_re_ingest_runs_in_the_background_and_reports_each_document(
+    served_pipeline: tuple[AgentWebServer, Path],
+) -> None:
+    server, vault = served_pipeline
+    before = _snapshot(vault)
+    url = base(server) + "/api/knowledge/reingest"
+    made = _step(server, "sandbox-create", {"base": "k-test", "label": "re"})
+    sandbox = made["data"]["sandbox_id"]
+    assert _step(server, "drop-add", {"sandbox_id": sandbox, "name": "a.txt",
+                                      "data_base64": "aGVsbG8K"})["ok"]
+    raw_ref = _step(server, "convert", {"sandbox_id": sandbox, "mode": "apply"}
+                    )["data"]["items"][0]["raw_ref"]
+    body = {"sandbox_id": sandbox, "raw_refs": [raw_ref]}
+    assert fetch(url + "/start", body=body).status == 401
+    refused = json.loads(fetch(url + "/start", token=server.token,
+                               body={"sandbox_id": sandbox, "raw_refs": ["wiki/x.md"]}).body)
+    assert refused == {"ok": False, "code": "no_raw_documents"}
+    assert json.loads(fetch(url + "/stop", token=server.token, body={"sandbox_id": sandbox}).body
+                      ) == {"ok": False, "code": "reingest_not_running"}
+    assert json.loads(fetch(url + "/start", token=server.token, body=body).body)["ok"]
+    deadline = time.monotonic() + 30
+    while True:
+        run = json.loads(fetch(f"{url}?sandbox_id={sandbox}", token=server.token).body)["run"]
+        if run["status"] == "finished" or time.monotonic() > deadline:
+            break
+        time.sleep(0.2)
+    # This Host has no model, so planning fails; the run still records it.
+    assert run["status"] == "finished" and run["remaining"] == []
+    assert [(i["raw_ref"], i["status"]) for i in run["items"]] == [(raw_ref, "failed")]
+    assert _snapshot(vault) == before
+
+
 def test_the_skill_assistant_route_only_edits_rule_files(
     served_pipeline: tuple[AgentWebServer, Path],
 ) -> None:

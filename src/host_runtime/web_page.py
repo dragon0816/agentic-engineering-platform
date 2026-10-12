@@ -898,8 +898,9 @@ tr:last-child td { border-bottom: none; }
         <p class="note kp-flow">Pull &rarr; Rules &rarr; Drop and convert &rarr; Ingest &rarr;
           Lint &rarr; Benchmark &rarr; Push</p>
         <div class="card"><h3>1. Pull from the project vault</h3>
-          <p class="note">Choose the drop folders this sandbox works on. Originals already
-            ingested are skipped; the folders become the sandbox's scope.</p>
+          <p class="note">Choose the drop folders this sandbox works on; they become its
+            scope. Pull brings originals not yet ingested. Ingested ones are already here as
+            Raw (step 4), so they are not pulled again.</p>
           <div id="kp-pull-folders" class="kp-list"></div>
           <div class="kp-actions"><button class="go" id="kp-pull" type="button">Pull</button>
             <span class="note" id="kp-pull-result"></span></div></div>
@@ -985,7 +986,18 @@ tr:last-child td { border-bottom: none; }
             <button class="go" id="kp-convert" type="button">Convert</button>
           </div><div id="kp-converted"></div></div>
         <div class="card"><h3>4. Ingest</h3>
-          <p class="note">Plan ingest on a Raw document, Compare each page, then apply.</p>
+          <p class="note">Plan ingest on a Raw document, Compare each page, then apply.
+            After changing the rules, tick Raw documents (or a whole folder) and re-ingest
+            them with the current rules; nothing needs to be pulled again.</p>
+          <div class="kp-actions">
+            <select id="kp-raw-folder" aria-label="Raw folder to tick"></select>
+            <button id="kp-raw-tick" type="button">Tick folder</button>
+            <button id="kp-raw-clear" type="button">Clear ticks</button>
+            <button class="go" id="kp-reingest" type="button">Re-ingest ticked</button>
+            <button id="kp-reingest-stop" type="button" hidden>Stop</button>
+            <span class="note" id="kp-raw-count"></span></div>
+          <div class="note" id="kp-reingest-state"></div>
+          <div id="kp-reingest-result"></div>
           <div id="kp-raw" class="kp-list"></div>
           <div id="kp-plan" class="empty">Choose Plan ingest on a Raw document.</div></div>
         <div class="card"><h3>5. Lint</h3>
@@ -3749,10 +3761,27 @@ async function kpOpen(item) {
   const contents = await pipeline("sandbox-contents", {sandbox_id: item.sandbox_id});
   el("kp-drop").replaceChildren(table(["Original in drop"], contents.drop, (row) => [row]));
   const raw = el("kp-raw"); raw.replaceChildren();
-  raw.append(table(["Raw document", "", ""], contents.raw, (row) => [row,
-    kpButton("Preview", () => kpRun("Reading", () => kpShowFile(row))),
-    kpButton("Plan ingest", () => kpRun("Planning ingest (this asks the model)",
-      () => kpPlan(row)))]));
+  raw.append(table(["", "Raw document", "", ""], contents.raw, (row) => {
+    const tick = document.createElement("input"); tick.type = "checkbox";
+    tick.className = "kp-raw-tick"; tick.value = row; tick.setAttribute("aria-label", row);
+    tick.addEventListener("change", kpRawCount);
+    return [tick, row,
+      kpButton("Preview", () => kpRun("Reading", () => kpShowFile(row))),
+      kpButton("Plan ingest", () => kpRun("Planning ingest (this asks the model)",
+        () => kpPlan(row)))];
+  }));
+  const folders = new Set();
+  for (const ref of contents.raw) {
+    const parts = ref.split("/").slice(0, -1);
+    for (let n = 2; n <= parts.length; n++) folders.add(parts.slice(0, n).join("/"));
+  }
+  const pick = el("kp-raw-folder"); pick.replaceChildren();
+  for (const folder of ["raw", ...[...folders].sort()]) {
+    const option = document.createElement("option"); option.value = folder;
+    option.append(text(folder === "raw" ? "raw (all)" : folder)); pick.append(option);
+  }
+  kpRawCount();
+  await kpReingestShow();
   await kpLoadRules();
   await kpLoadPull();
   await kpLoadBench();
@@ -3969,6 +3998,120 @@ async function kpPlan(rawRef) {
   }
 }
 
+// -- Re-ingest with the current rules (owner 2026-10-13) ----------------------
+// Seconds one document took in the live runs; only for the estimate shown.
+const KP_SECONDS_PER_DOC = 60;
+const KP_REINGEST_LABELS = {applied: "applied", needs_review: "needs your review",
+  failed: "failed", rejected: "not applied"};
+
+function kpRawTicked() {
+  return [...document.querySelectorAll("#kp-raw .kp-raw-tick:checked")].map((t) => t.value);
+}
+
+function kpRawCount() {
+  const n = kpRawTicked().length;
+  el("kp-raw-count").textContent = n ? n + " ticked, about "
+    + Math.max(1, Math.round(n * KP_SECONDS_PER_DOC / 60)) + " min" : "";
+}
+
+function kpRawTick(refs) {
+  const wanted = new Set(refs);
+  for (const tick of document.querySelectorAll("#kp-raw .kp-raw-tick")) {
+    if (wanted.has(tick.value)) tick.checked = true;
+  }
+  kpRawCount();
+}
+
+let kpReingestTimer = null;
+async function kpReingestShow() {
+  const reply = await call("/api/knowledge/reingest?sandbox_id="
+    + encodeURIComponent(kpSandbox.sandbox_id));
+  const run = reply.ok ? reply.run : null;
+  const box = el("kp-reingest-result"); box.replaceChildren();
+  const live = run && ["running", "stopping"].includes(run.status);
+  el("kp-reingest-stop").hidden = !live; el("kp-reingest").disabled = !!live;
+  clearTimeout(kpReingestTimer);
+  if (!run) { el("kp-reingest-state").textContent = ""; return; }
+  const counts = {};
+  for (const item of run.items) counts[item.status] = (counts[item.status] || 0) + 1;
+  el("kp-reingest-state").textContent = "Re-ingest " + run.run_id + ": " + run.status + ", "
+    + run.items.length + " of " + run.raw_refs.length + " done"
+    + (run.current ? "; now " + run.current : "")
+    + (Object.keys(counts).length ? " (" + Object.entries(counts).map(([k, n]) =>
+      (KP_REINGEST_LABELS[k] || k) + " " + n).join(", ") + ")" : "");
+  if (!live && run.remaining.length) {
+    box.append(kpButton("Continue with the " + run.remaining.length + " left",
+      () => kpRun("Starting", () => kpReingestStart(run.remaining))));
+  }
+  const shown = run.items.filter((item) => item.status !== "applied");
+  if (shown.length) {
+    box.append(table(["Raw document", "Result", "Detail", ""], shown, (item) => [
+      item.raw_ref, KP_REINGEST_LABELS[item.status] || item.status, item.detail,
+      item.status === "needs_review" && item.plan_id
+        ? kpButton("Review", () => kpReview(item)) : ""]));
+  }
+  if (live) kpReingestTimer = setTimeout(() => kpReingestShow().catch(() => {}), 5000);
+}
+
+async function kpReingestStart(refs) {
+  const minutes = Math.max(1, Math.round(refs.length * KP_SECONDS_PER_DOC / 60));
+  if (!confirm("Re-ingest " + refs.length + " Raw document(s) with this sandbox's current "
+      + "rules? About " + minutes + " min; each one asks the model. Pages are written in "
+      + "this sandbox only; plans the planner flags wait for your review.")) return;
+  const reply = await call("/api/knowledge/reingest/start",
+                           {sandbox_id: kpSandbox.sandbox_id, raw_refs: refs});
+  if (!reply.ok) {
+    const problem = new Error(reply.code); problem.code = reply.code; throw problem;
+  }
+  setTimeout(() => kpReingestShow().catch(() => {}), 1000);
+}
+
+function kpReview(item) {
+  // A flagged plan from a re-ingest run: compare its pages, then apply or leave it.
+  const box = el("kp-plan"); box.className = ""; box.replaceChildren();
+  const head = document.createElement("p");
+  head.append(text(item.raw_ref + ": needs your review — " + item.detail));
+  box.append(head);
+  box.append(table(["Page", ""], item.pages, (path) => [path,
+    kpButton("Compare", () => kpRun("Reading", () => kpShowPlanPage(item.plan_id, path)))]));
+  if (item.contradictions.length) {
+    const list = document.createElement("ul");
+    for (const line of item.contradictions) {
+      const li = document.createElement("li"); li.append(text("⚠ " + line)); list.append(li);
+    }
+    box.append(list);
+  }
+  box.append(kpButton("Apply to this sandbox", () => kpRun("Applying", async () => {
+    const done = await pipeline("ingest-apply",
+      {sandbox_id: kpSandbox.sandbox_id, plan_id: item.plan_id});
+    const note = document.createElement("p");
+    note.append(text(done.status === "applied" ? "Applied: " + done.written.join(", ")
+      : "Not applied: " + done.problems.join(", ")));
+    box.append(note);
+  })));
+  box.scrollIntoView({block: "nearest"});
+}
+
+el("kp-raw-tick").addEventListener("click", () => {
+  const folder = el("kp-raw-folder").value + "/";
+  kpRawTick([...document.querySelectorAll("#kp-raw .kp-raw-tick")]
+    .map((t) => t.value).filter((ref) => ref.startsWith(folder)));
+});
+el("kp-raw-clear").addEventListener("click", () => {
+  for (const tick of document.querySelectorAll("#kp-raw .kp-raw-tick")) tick.checked = false;
+  kpRawCount();
+});
+el("kp-reingest").addEventListener("click", () => kpRun("Starting the re-ingest", async () => {
+  const refs = kpRawTicked();
+  if (!refs.length) { kpStatus("Tick at least one Raw document.", true); return; }
+  await kpReingestStart(refs);
+}));
+el("kp-reingest-stop").addEventListener("click", () => kpRun("Stopping", async () => {
+  await call("/api/knowledge/reingest/stop", {sandbox_id: kpSandbox.sandbox_id});
+  kpStatus("Stops after the document in progress.");
+  await kpReingestShow();
+}));
+
 async function kpLint() {
   const report = await pipeline("lint", {sandbox_id: kpSandbox.sandbox_id});
   const box = el("kp-lint-result"); box.replaceChildren();
@@ -4028,10 +4171,24 @@ el("kp-pull").addEventListener("click", () => kpRun("Pulling", async () => {
   const folders = kpTicked(el("kp-pull-folders"));
   if (!folders.length) { kpStatus("Choose at least one folder.", true); return; }
   const pulled = await pipeline("pull", {sandbox_id: kpSandbox.sandbox_id, folders});
-  el("kp-pull-result").textContent = "Copied " + pulled.copied.length + "; already ingested "
-    + pulled.already_ingested.length + "; already here " + pulled.already_in_sandbox.length
-    + (pulled.too_large.length ? "; too large " + pulled.too_large.length : "") + ".";
+  const parts = [pulled.copied.length + " new original(s) copied to drop (convert them in step 3)"];
+  if (pulled.already_in_sandbox.length) {
+    parts.push(pulled.already_in_sandbox.length + " already in this sandbox's drop");
+  }
+  if (pulled.too_large.length) parts.push(pulled.too_large.length + " too large to pull");
+  if (pulled.already_ingested.length) {
+    parts.push(pulled.already_ingested.length + " already ingested: their Raw ("
+      + pulled.already_raw.length + " document(s)) is already in this sandbox, so they are "
+      + "not pulled again. To try changed rules on them, re-ingest them in step 4");
+  }
   await kpOpen(kpSandbox);
+  const box = el("kp-pull-result"); box.replaceChildren(text(parts.join("; ") + ". "));
+  if (pulled.already_raw.length) {
+    box.append(kpButton("Tick them in step 4", () => {
+      kpRawTick(pulled.already_raw);
+      el("kp-raw").scrollIntoView({block: "start"});
+    }));
+  }
 }));
 el("kp-bench").addEventListener("click", () => kpRun("Starting the benchmark", async () => {
   const sets = kpTicked(el("kp-bench-sets"));

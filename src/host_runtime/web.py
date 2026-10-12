@@ -171,6 +171,11 @@ from host_runtime.knowledge_publish import (
     refresh_from_project,
 )
 from host_runtime.knowledge_push import latest_push, run_push
+from host_runtime.knowledge_reingest import MAX_DOCUMENTS as MAX_REINGEST
+from host_runtime.knowledge_reingest import RUNS as REINGEST_RUNS
+from host_runtime.knowledge_reingest import ReingestRun, run_reingest
+from host_runtime.knowledge_reingest import latest as latest_reingest
+from host_runtime.knowledge_reingest import report as reingest_report
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.profiles import ProfileError, activate_profile
 from host_runtime.reference_sets import (
@@ -2766,6 +2771,73 @@ class AgentWeb:
             return {"ok": False, "code": error.code}
         return {"ok": True, "push": latest_push(sandbox)}
 
+    def start_reingest(self, sandbox_id: str, raw_refs: list[str]) -> dict[str, Any]:
+        """Ingest the chosen Raw documents again with the sandbox's current
+        rules, one after another in the background (owner 2026-10-13)."""
+        boxes = self._sandboxes()
+        if boxes is None or self.runtime.config.knowledge_pipeline is None:
+            return {"ok": False, "code": "knowledge_pipeline_disabled"}
+        try:
+            _, sandbox = boxes.open(sandbox_id)
+        except SandboxError as error:
+            return {"ok": False, "code": error.code}
+        chosen = tuple(dict.fromkeys(ref for ref in raw_refs
+                                     if isinstance(ref, str) and ref.startswith("raw/")))
+        if not chosen or len(chosen) > MAX_REINGEST:
+            return {"ok": False, "code": "no_raw_documents"}
+        self._reingest_stops: dict[str, threading.Event] = getattr(self, "_reingest_stops", {})
+        self._reingest_live: dict[str, ReingestRun] = getattr(self, "_reingest_live", {})
+        if sandbox_id in self._reingest_stops:
+            return {"ok": False, "code": "reingest_running"}
+        stop = threading.Event()
+        self._reingest_stops[sandbox_id] = stop
+        run = ReingestRun(
+            run_id=f"reingest-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}",
+            sandbox_id=sandbox_id, actor=self.runtime.actor, raw_refs=chosen,
+            started=datetime.now(UTC).isoformat(timespec="seconds"))
+
+        def live(current: ReingestRun) -> None:
+            self._reingest_live[sandbox_id] = current
+
+        def work() -> None:
+            try:
+                run_reingest(self.pipeline_call, run, sandbox.root / REINGEST_RUNS, stop,
+                             on_change=live)
+            finally:
+                self._reingest_stops.pop(sandbox_id, None)
+                self._reingest_live.pop(sandbox_id, None)
+
+        threading.Thread(target=work, name="knowledge-reingest", daemon=True).start()
+        return {"ok": True, "run_id": run.run_id}
+
+    def stop_reingest(self, sandbox_id: str) -> dict[str, Any]:
+        """Stop after the document in progress; what is left can be continued."""
+        stop = getattr(self, "_reingest_stops", {}).get(sandbox_id)
+        if stop is None:
+            return {"ok": False, "code": "reingest_not_running"}
+        stop.set()
+        return {"ok": True}
+
+    def reingest_status(self, sandbox_id: str) -> dict[str, Any]:
+        boxes = self._sandboxes()
+        if boxes is None:
+            return {"ok": False, "code": "knowledge_pipeline_disabled"}
+        try:
+            _, sandbox = boxes.open(sandbox_id)
+        except SandboxError as error:
+            return {"ok": False, "code": error.code}
+        current = getattr(self, "_reingest_live", {}).get(sandbox_id)
+        stop = getattr(self, "_reingest_stops", {}).get(sandbox_id)
+        if current is not None:
+            live = reingest_report(current)
+            if stop is not None and stop.is_set() and live["status"] == "running":
+                live["status"] = "stopping"
+            return {"ok": True, "run": live}
+        saved = latest_reingest(sandbox.root / REINGEST_RUNS)
+        if saved is not None and saved["status"] in ("running", "stopping") and stop is None:
+            saved["status"] = "interrupted"  # the Agent restarted while it ran
+        return {"ok": True, "run": saved}
+
     def refresh_knowledge(self, base: str) -> dict[str, Any]:
         """Stage the project vault as the Agent's next Knowledge version."""
         if self.config_path is None:
@@ -3044,6 +3116,9 @@ class _Handler(BaseHTTPRequestHandler):
         elif parsed.path == "/api/knowledge/push":
             query = parse_qs(parsed.query)
             self._json(200, web.push_status((query.get("sandbox_id") or [""])[0]))
+        elif parsed.path == "/api/knowledge/reingest":
+            query = parse_qs(parsed.query)
+            self._json(200, web.reingest_status((query.get("sandbox_id") or [""])[0]))
         elif parsed.path == "/api/knowledge/benchmark":
             query = parse_qs(parsed.query)
             self._json(200, web.benchmark_status((query.get("sandbox_id") or [""])[0]))
@@ -3109,6 +3184,8 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/knowledge/pipeline/publish",
             "/api/knowledge/benchmark/start",
             "/api/knowledge/push/start",
+            "/api/knowledge/reingest/start",
+            "/api/knowledge/reingest/stop",
             "/api/knowledge/refresh",
             "/api/knowledge/skill-assist",
             "/api/experience/settings",
@@ -3176,6 +3253,17 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, self.server.web.start_push(
                 str(body.get("sandbox_id") or ""), [str(x) for x in body["sets"]],
                 {str(k): str(v) for k, v in dict(body.get("resolutions") or {}).items()}))
+            return
+        if path == "/api/knowledge/reingest/start":
+            if not isinstance(body, dict) or not isinstance(body.get("raw_refs"), list):
+                self._json(400, {"ok": False, "code": "reingest_request_invalid"})
+                return
+            self._json(200, self.server.web.start_reingest(
+                str(body.get("sandbox_id") or ""), list(body["raw_refs"])))
+            return
+        if path == "/api/knowledge/reingest/stop":
+            sandbox_id = str(body.get("sandbox_id") or "") if isinstance(body, dict) else ""
+            self._json(200, self.server.web.stop_reingest(sandbox_id))
             return
         if path == "/api/experience/settings":
             self._json(200, self.server.web.update_experience_settings(

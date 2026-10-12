@@ -215,13 +215,16 @@ class KnowledgePipeline:
     def pull(self, sandbox_id: str, folders: tuple[str, ...]) -> PullResult:
         """Copy the chosen drop/ folders of the project vault into the sandbox's
         drop/, keeping their paths. An original already ingested (same content
-        hash) or already in the sandbox is skipped; nothing is replaced."""
+        hash) or already in the sandbox is skipped; nothing is replaced. The Raw
+        documents of skipped originals are named, since a rule change is tried
+        by ingesting them again, not by pulling."""
         info, vault = self.sandboxes.open(sandbox_id)
         root = self.drop_roots[info.base_name].resolve()
-        known = {entry.source.sha256 for entry in RawIndex.scan(vault).entries}
+        known = {entry.source.sha256: entry.raw_ref for entry in RawIndex.scan(vault).entries}
         legacy = _legacy_source_shas(vault)
         copied: list[str] = []
         already: list[str] = []
+        already_raw: list[str] = []
         present: list[str] = []
         large: list[str] = []
         clean_folders = []
@@ -239,9 +242,10 @@ class KnowledgePipeline:
                 target = vault.root / "drop" / name
                 if len(data) > MAX_DROP_BYTES:
                     large.append(name)
-                elif (digest := hashlib.sha256(data).hexdigest()) in known or any(
-                        digest.startswith(prefix) for prefix in legacy):
+                elif (raw_ref := _raw_holding(hashlib.sha256(data).hexdigest(), known,
+                                              legacy)) is not None:
                     already.append(name)
+                    already_raw.append(raw_ref)
                 elif target.exists():
                     present.append(name)
                 else:
@@ -251,7 +255,9 @@ class KnowledgePipeline:
         pulled = tuple(dict.fromkeys((*info.pulled, *clean_folders)))
         self.sandboxes.record(info.model_copy(update={"pulled": pulled}))
         return PullResult(sandbox_id=sandbox_id, folders=pulled, copied=tuple(copied),
-                          already_ingested=tuple(already), already_in_sandbox=tuple(present),
+                          already_ingested=tuple(already),
+                          already_raw=tuple(dict.fromkeys(already_raw)),
+                          already_in_sandbox=tuple(present),
                           too_large=tuple(large))
 
     # -- files: preview and rule editing (collaboration C2) --------------------
@@ -646,6 +652,8 @@ class PullResult(Contract):
     folders: tuple[str, ...] = ()  # every folder pulled so far: the sandbox's scope
     copied: tuple[str, ...] = ()
     already_ingested: tuple[str, ...] = ()
+    # The Raw documents that hold the already-ingested originals.
+    already_raw: tuple[str, ...] = ()
     already_in_sandbox: tuple[str, ...] = ()
     too_large: tuple[str, ...] = ()
 
@@ -696,19 +704,29 @@ class QuestionSets(Contract):
 _LEGACY_SHA = re.compile(r"^source_sha:\s*([0-9a-f]{12,64})\s*$", re.MULTILINE)
 
 
-def _legacy_source_shas(vault: Vault) -> set[str]:
+def _legacy_source_shas(vault: Vault) -> dict[str, str]:
     """Original-file hashes that earlier tooling recorded in its Raw files as
-    `source_sha:` (a sha256 prefix). Adopted legacy Raw is identified by its own
-    bytes, so without these a pull would take every original as new."""
-    found: set[str] = set()
-    for path in (vault.root / "raw").rglob("*.md"):
+    `source_sha:` (a sha256 prefix), with the Raw that holds each. Adopted legacy
+    Raw is identified by its own bytes, so without these a pull would take every
+    original as new."""
+    found: dict[str, str] = {}
+    for path in sorted((vault.root / "raw").rglob("*.md")):
         try:
             with path.open("r", encoding="utf-8", errors="ignore") as handle:
                 head = handle.read(2048)
         except OSError:
             continue
-        found.update(match.group(1) for match in _LEGACY_SHA.finditer(head.split("\n---", 1)[0]))
+        for match in _LEGACY_SHA.finditer(head.split("\n---", 1)[0]):
+            found.setdefault(match.group(1), path.relative_to(vault.root).as_posix())
     return found
+
+
+def _raw_holding(digest: str, known: dict[str, str], legacy: dict[str, str]) -> str | None:
+    """The Raw that already holds an original with this content hash, if any."""
+    if digest in known:
+        return known[digest]
+    return next((raw_ref for prefix, raw_ref in legacy.items() if digest.startswith(prefix)),
+                None)
 
 
 
