@@ -271,3 +271,38 @@ def test_a_chinese_cli_answer_is_read_as_utf8_not_the_console_code_page(tmp_path
         env=dict(__import__("os").environ))
     assert done.stdout == "答案 完成"
     assert _answer(None) == ""
+
+
+def test_copilot_agent_gets_only_aeps_tools_through_the_running_agent_web(
+    tmp_path: Path,
+) -> None:
+    from host_runtime.conversation_backends import AGENT_MCP_FILE, AGENT_TIMEOUT_SECONDS
+
+    def with_copilot(name: str) -> str | None:
+        return "C:/fixed/copilot.exe" if name == "copilot" else installed(name)
+
+    runner = Runner(json.dumps({"result": "CMX500 needs option KM606 (wiki/entities/x.md)."}))
+    backends = LocalConversationBackends(tmp_path, which=with_copilot, runner=runner)
+    context = public_context(history(), "Speak plainly.")
+    early = backends.complete("copilot_agent", history(), persona_guidance="Speak plainly.",
+                              outbound=context)
+    # Without a running Agent Web there are no tools to give it.
+    assert (early.status, early.code) == ("unavailable", "assistant_tools_unavailable")
+    backends.agent_mcp = ("http://127.0.0.1:5000/mcp", "assistant-token")
+    result = backends.complete("copilot_agent", history(), persona_guidance="Speak plainly.",
+                               outbound=context)
+    argv, call = runner.calls[0]
+    assert result.status == "answered" and "KM606" in result.text
+    assert "--allow-tool=aep" in argv and "--deny-tool=shell" in argv
+    assert "--deny-tool=write" in argv and "--disable-builtin-mcps" in argv
+    config_arg = argv[argv.index("--additional-mcp-config") + 1]
+    config = json.loads((tmp_path / ".conversation-backends" / AGENT_MCP_FILE)
+                        .read_text(encoding="utf-8"))
+    assert config_arg.startswith("@") and config["mcpServers"]["aep"]["url"].endswith("/mcp")
+    assert config["mcpServers"]["aep"]["headers"]["Authorization"] == "Bearer assistant-token"
+    assert "aep_knowledge_search" in call["input"] and "Do not use tools" not in call["input"]
+    assert call["timeout"] == AGENT_TIMEOUT_SECONDS
+    statuses = {item.name: item for item in backends.statuses(gateway_available=True)}
+    # Listed for the person to choose; like copilot, it asks for a sign-in first.
+    assert statuses["copilot_agent"].selectable is True
+    assert statuses["copilot_agent"].action == "authenticate"

@@ -17,13 +17,26 @@ from agent.data_policy import DataPolicy, OutboundContext
 from common.assets import RegistryContract
 from models.contracts import ModelMessage
 
-ConversationBackendName = Literal["gateway", "claude_code", "codex", "copilot"]
+ConversationBackendName = Literal["gateway", "claude_code", "codex", "copilot",
+                                  "copilot_agent"]
 ConversationBackendAuthentication = Literal[
     "ready", "required", "pending", "unavailable", "not_applicable"
 ]
 MAX_BACKEND_OUTPUT_CHARS = 16_000
 MAX_BACKEND_PROMPT_CHARS = 48_000
 BACKEND_TIMEOUT_SECONDS = 90
+# The Copilot agent mode reads Knowledge through AEP's tools, several calls per turn.
+AGENT_TIMEOUT_SECONDS = 300
+AGENT_MCP_FILE = "copilot-agent-mcp.json"
+AGENT_POLICY = (
+    "You are GitHub Copilot answering inside AEP, a company engineering agent. You may use "
+    "only the `aep` tools. For anything about the company's products, options, standards, "
+    "markets or competitors, look it up with aep_knowledge_search and aep_knowledge_read "
+    "(try English and Chinese wording) or ask aep_knowledge_ask, and name the page paths "
+    "your answer relies on. Say what the knowledge base does not cover instead of guessing. "
+    "Run a Workflow only with aep_run_workflow, and never claim one ran when the tool says "
+    "the person must run it. Do not write files or run commands."
+)
 AUTH_STATUS_TIMEOUT_SECONDS = 10
 
 
@@ -131,6 +144,22 @@ SPECS = (
         authentication_status_arguments=("auth", "status"),
     ),
     BackendSpec(
+        # COPILOT_INTEGRATION CP2: the same signed-in CLI with AEP's assistant tools
+        # (MCP over Agent Web) as its only tools; shell and file writes denied.
+        name="copilot_agent",
+        label="GitHub Copilot (agent, AEP tools)",
+        executable="copilot",
+        arguments=(
+            "--output-format=json",
+            "--no-ask-user",
+            "--disable-builtin-mcps",
+            "--allow-tool=aep",
+            "--deny-tool=shell",
+            "--deny-tool=write",
+        ),
+        authentication_arguments=("login",),
+    ),
+    BackendSpec(
         name="copilot",
         label="GitHub Copilot",
         executable="copilot",
@@ -201,6 +230,8 @@ def _environment() -> dict[str, str]:
         "APPDATA",
         "LOCALAPPDATA",
         "CODEX_HOME",
+        # A person's own Copilot token, for headless sign-in (COPILOT_INTEGRATION).
+        "COPILOT_GITHUB_TOKEN",
         "TEMP",
         "TMP",
         "SystemRoot",
@@ -291,6 +322,8 @@ class LocalConversationBackends:
         self._unavailable: dict[ConversationBackendName, str] = {}
         self._authentication_processes: dict[ConversationBackendName, AuthenticationProcess] = {}
         self._authenticated_this_run: set[ConversationBackendName] = set()
+        # (MCP URL, assistant token) of the running Agent Web, for the agent mode.
+        self.agent_mcp: tuple[str, str] | None = None
 
     def _authentication(
         self, spec: BackendSpec, executable: str
@@ -458,14 +491,29 @@ class LocalConversationBackends:
         if isinstance(max_history_messages, bool) or not 1 <= max_history_messages <= 40:
             raise ValueError("conversation supports one to forty history messages")
         prompt = self._prompt(history, persona_guidance, max_history_messages)
+        extra: list[str] = []
+        timeout = BACKEND_TIMEOUT_SECONDS
+        if backend == "copilot_agent":
+            if self.agent_mcp is None:
+                return ConversationBackendResult(
+                    backend=backend, status="unavailable", code="assistant_tools_unavailable")
+            url, token = self.agent_mcp
+            config = self.root / AGENT_MCP_FILE
+            config.write_text(json.dumps({"mcpServers": {"aep": {
+                "type": "http", "url": url, "tools": ["*"],
+                "headers": {"Authorization": f"Bearer {token}"}}}}), encoding="utf-8")
+            extra = ["--additional-mcp-config", f"@{config}"]
+            timeout = AGENT_TIMEOUT_SECONDS
+            prompt = self._prompt(history, persona_guidance, max_history_messages,
+                                  policy=AGENT_POLICY)
         try:
             completed = self._runner(
-                [executable, *spec.arguments],
+                [executable, *spec.arguments, *extra],
                 cwd=self.root,
                 input=prompt,
                 capture_output=True,
                 text=True,
-                timeout=BACKEND_TIMEOUT_SECONDS,
+                timeout=timeout,
                 check=False,
                 env=_environment(),
             )
@@ -491,9 +539,10 @@ class LocalConversationBackends:
 
     @staticmethod
     def _prompt(
-        history: tuple[ModelMessage, ...], persona_guidance: str, max_history_messages: int = 12
+        history: tuple[ModelMessage, ...], persona_guidance: str, max_history_messages: int = 12,
+        policy: str | None = None,
     ) -> str:
-        policy = (
+        policy = policy or (
             "You are a restricted conversation backend for a Personal Engineering Agent. "
             "Answer with text only. Do not use tools, read files, execute commands, browse, "
             "modify state, or claim an action occurred. The host Agent separately validates "

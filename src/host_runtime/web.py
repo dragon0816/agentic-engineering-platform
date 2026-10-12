@@ -3447,6 +3447,11 @@ class AgentWebServer(ThreadingHTTPServer):
         self.token = token if token is not None else secrets.token_urlsafe(32)
         self._page = page
         super().__init__(("127.0.0.1", port), _Handler)
+        # The Copilot agent mode reaches the assistant tools on this server.
+        backends = getattr(web, "backends", None)
+        if backends is not None and hasattr(backends, "agent_mcp"):
+            backends.agent_mcp = (f"http://127.0.0.1:{self.server_address[1]}/mcp",
+                                  web.assistant_token)
 
     def page(self) -> bytes:
         if self._page is not None:
