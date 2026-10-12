@@ -1,0 +1,1968 @@
+{
+ "question": {
+  "id": "Q0671",
+  "text": "Map the chain from a AI market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+  "market": "AI",
+  "product": "Oscilloscope",
+  "type": "solution_mapping",
+  "difficulty": "L3"
+ },
+ "session_id": "conversation-bd1dbc00f6b548e3b6226567137fb714",
+ "exchange": {
+  "sent": "Map the chain from a AI market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+  "http_status": 200,
+  "seconds": 67.422,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-bd1dbc00f6b548e3b6226567137fb714",
+    "actor": "leo.chi",
+    "title": "Map the chain from a AI market requirement to a measurable parameter and…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-12T03:45:46.130868Z",
+    "updated_at": "2026-10-12T03:46:48.512288Z",
+    "messages": [
+     {
+      "message_id": "message-1d287cefe683468394f23a5a1aad5970",
+      "role": "user",
+      "text": "Map the chain from a AI market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+      "created_at": "2026-10-12T03:45:46.163310Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-e9974c22e6e7400382b45ae047fd34a9",
+      "role": "assistant",
+      "text": "### Chain mapping\n| AI market requirement | Measurable parameter / test item | Required Oscilloscope capability supported by passages | Evidence / gap |\n|---|---|---|---|\n| AI data center infrastructure emphasizes **Connectivity** as a core capability, and the data-center connectivity portfolio includes high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection. [15][62] | High-speed interface / signal-integrity validation can include **Eye diagram**, plus IL / Xtalk and TDR impedance in the SI flow. [65] | The oscilloscope requirement supported by the passages is **Interface Test using scopes**; the passages do not specify oscilloscope bandwidth, sample rate, model, software option, or pass/fail limits. [65][4][5] | Supported chain: **Connectivity → Eye diagram / interface validation → oscilloscope used for Interface Test**, with detailed scope capability unspecified. [15][65][4][5] |\n| AI server PCB trends are described as pushing PCB toward high layer count, large area, and **high-speed transmission**. [75] | The SI/PI overview lists **IL / Xtalk / Eye diagram** and **TDR Impedance** as high-speed PCB / PCBA signal-integrity flow items. [65] | The passages support oscilloscope involvement only at the level of **scopes for Interface Test**; they do not state a formal oscilloscope configuration for 112G / 224G / 448G AI interconnect validation. [65][66] | Supported chain: **AI server high-speed transmission → Eye diagram / SI validation → scope-based Interface Test**, but exact oscilloscope capability is not given. [75][65][66] |\n| AI data center infrastructure also emphasizes **Power** as a core capability. [15] | The SI/PI overview maps **Power Distribution Network** testing to scopes and network analyzers, and the R&S AI server mapping lists **Power rail**, **multiphase DC**, and **PI** under MXO. [65][72] | The oscilloscope capability supported by the passages is **power rail / multiphase DC / PI measurement with MXO**; PDN Target Z is separately mapped to R&S ZNL, not to the oscilloscope. [72] | Supported chain: **Power → PDN / power rail / multiphase DC / PI → MXO oscilloscope power-analysis role**, with option, fixture, and calibration details not provided. [65][72][69] |\n### Minimal conclusion\n【推論】The clearest oscilloscope chain in the passages is **AI Connectivity / high-speed transmission → Eye diagram or interface validation → oscilloscope used for Interface Test**, but the required oscilloscope bandwidth, data rate coverage, probes, and compliance software are not specified. [15][75][65][4][5]  \n【推論】For AI power requirements, the supported oscilloscope chain is **Power → PDN / power rail / multiphase DC / PI → MXO power-analysis role**, while formal options and test setup remain unspecified. [15][65][72][69]\n\n來源：\n[4] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[5] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[15] Wiki：AI 資料中心基礎設施（來源：`0. AI Data Center image 1.md`、`0. AI Data Center image 2.md`、`0. AI Data Center image 3.md`…）\n[62] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[65] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[66] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[69] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[72] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[75] Wiki：AI 伺服器 PCB 供應鏈升級（來源：`AI Server PCB test image 4.md`、`HSD PCB image 1.md`、`HSD PCB image 11.md`）\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+      "created_at": "2026-10-12T03:46:48.512288Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-bdf75d53a7534d1a83c68a2c63ae8bb6",
+       "request_id": "request-bdf75d53a7534d1a83c68a2c63ae8bb6",
+       "span_id": "span-bdf75d53a7534d1a83c68a2c63ae8bb6",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "ok": true,
+    "answer": "### Chain mapping\n| AI market requirement | Measurable parameter / test item | Required Oscilloscope capability supported by passages | Evidence / gap |\n|---|---|---|---|\n| AI data center infrastructure emphasizes **Connectivity** as a core capability, and the data-center connectivity portfolio includes high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection. [15][62] | High-speed interface / signal-integrity validation can include **Eye diagram**, plus IL / Xtalk and TDR impedance in the SI flow. [65] | The oscilloscope requirement supported by the passages is **Interface Test using scopes**; the passages do not specify oscilloscope bandwidth, sample rate, model, software option, or pass/fail limits. [65][4][5] | Supported chain: **Connectivity → Eye diagram / interface validation → oscilloscope used for Interface Test**, with detailed scope capability unspecified. [15][65][4][5] |\n| AI server PCB trends are described as pushing PCB toward high layer count, large area, and **high-speed transmission**. [75] | The SI/PI overview lists **IL / Xtalk / Eye diagram** and **TDR Impedance** as high-speed PCB / PCBA signal-integrity flow items. [65] | The passages support oscilloscope involvement only at the level of **scopes for Interface Test**; they do not state a formal oscilloscope configuration for 112G / 224G / 448G AI interconnect validation. [65][66] | Supported chain: **AI server high-speed transmission → Eye diagram / SI validation → scope-based Interface Test**, but exact oscilloscope capability is not given. [75][65][66] |\n| AI data center infrastructure also emphasizes **Power** as a core capability. [15] | The SI/PI overview maps **Power Distribution Network** testing to scopes and network analyzers, and the R&S AI server mapping lists **Power rail**, **multiphase DC**, and **PI** under MXO. [65][72] | The oscilloscope capability supported by the passages is **power rail / multiphase DC / PI measurement with MXO**; PDN Target Z is separately mapped to R&S ZNL, not to the oscilloscope. [72] | Supported chain: **Power → PDN / power rail / multiphase DC / PI → MXO oscilloscope power-analysis role**, with option, fixture, and calibration details not provided. [65][72][69] |\n### Minimal conclusion\n【推論】The clearest oscilloscope chain in the passages is **AI Connectivity / high-speed transmission → Eye diagram or interface validation → oscilloscope used for Interface Test**, but the required oscilloscope bandwidth, data rate coverage, probes, and compliance software are not specified. [15][75][65][4][5]  \n【推論】For AI power requirements, the supported oscilloscope chain is **Power → PDN / power rail / multiphase DC / PI → MXO power-analysis role**, while formal options and test setup remain unspecified. [15][65][72][69]\n\n來源：\n[4] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[5] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[15] Wiki：AI 資料中心基礎設施（來源：`0. AI Data Center image 1.md`、`0. AI Data Center image 2.md`、`0. AI Data Center image 3.md`…）\n[62] Wiki：Data center full-spectrum connectivity（來源：`full-spectrum-data-center-connectivity-brochure.md`）\n[65] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[66] Wiki：SerDes 與 SI PI 測試概覽（來源：`0 Digital Test - What are SIPI and Serdes.md`）\n[69] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[72] Wiki：AISeverEcosystem R&S solution mapping（來源：`AISeverEcosystem.md`）\n[75] Wiki：AI 伺服器 PCB 供應鏈升級（來源：`AI Server PCB test image 4.md`、`HSD PCB image 1.md`、`HSD PCB image 11.md`）\n\nEvidence check: Wiki/Raw citations and requested facets verified.",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-bdf75d53a7534d1a83c68a2c63ae8bb6",
+      "request_id": "request-bdf75d53a7534d1a83c68a2c63ae8bb6",
+      "span_id": "span-bdf75d53a7534d1a83c68a2c63ae8bb6",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "on_behalf_of": null,
+     "refusal": null,
+     "decision": {
+      "kind": "capability",
+      "target": {
+       "namespace": "knowledge-query",
+       "name": "ask",
+       "version": "1.0.0"
+      },
+      "reason": "Exact local capability request"
+     },
+     "capability": {
+      "trace": {
+       "trace_id": "trace-bdf75d53a7534d1a83c68a2c63ae8bb6",
+       "request_id": "request-bdf75d53a7534d1a83c68a2c63ae8bb6",
+       "span_id": "span-bdf75d53a7534d1a83c68a2c63ae8bb6",
+       "parent_span_id": null
+      },
+      "status": "succeeded",
+      "data": {
+       "asset": {
+        "namespace": "engineering",
+        "name": "rs-knowledge",
+        "version": "1.0.2"
+       },
+       "trace": {
+        "trace_id": "trace-bdf75d53a7534d1a83c68a2c63ae8bb6",
+        "request_id": "request-bdf75d53a7534d1a83c68a2c63ae8bb6",
+        "span_id": "span-bdf75d53a7534d1a83c68a2c63ae8bb6",
+        "parent_span_id": null
+       },
+       "answer": {
+        "question": "Map the chain from a AI market requirement to a measurable parameter and then to a required capability of Oscilloscope.",
+        "status": "answered",
+        "passages": [
+         {
+          "text": "Data center full-spectrum connectivity › 使用限制\n- [[full-spectrum-data-center-connectivity-brochure]] 未標示正式日期；所有產品能力、規格數字與 marketing claim 需標示來源日期缺口。\n- 來源是供應商 brochure，不是第三方市場報告；不可用來推論市占率、排名、客戶導入、採購關係或出貨量。\n- 來源未提供 datasheet 版次、order number、合規證書或測試條件；224G、448G、1.6T、300G、60A、+54V、60 contacts、0.6mm pitch 等數字只能作為來源文字摘錄。\n- PDF 轉檔為 lossy derivative；欄位串接與 OCR 風險需回看原始 PDF。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+          },
+          "score": 15.0203
+         },
+         {
+          "text": "Data center full-spectrum connectivity › 與既有概念的關係\n- [[Data center server 高速互連產品組合]] 偏向 data center server interconnect portfolio 的分類表；[[Data center full-spectrum connectivity]] 更強調 full-spectrum：electrical interconnect + optical + fiber + power + cooling。\n- [[Compute tray component solutions]] 偏向 compute tray connectors、cables、power connector、busbar 與 backplane interconnect；本頁納入 optical transceiver、CPO、fiber deployment 與 liquid cooling。\n- [[高速伺服器儲存互連]] 可連接本頁中的 [[Mini Cool Edge IO]]、[[Cool Express Link]]、[[Direct Attached Copper Cables]]、[[PCIe CEM 7 Connectors]] 與 storage / EDSFF 類產品。\n- [[CPO]]、[[Optical I-O]]、[[Near-Packaged Optics]] 可連接本頁的 [[Amphenol Co-packaged Optics]] 與 [[LEAP On-Board Transceiver]]，但本來源不是技術標準或市場採用證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+          },
+          "score": 4.77223
+         },
+         {
+          "text": "Data center full-spectrum connectivity › High-speed electrical connectivity\n- [[Amphenol OverPass Cable Systems]] — 來源稱其 enable high-speed signal transmission from ASIC packages to end-points across the system。\n- [[ExtremePort OSFP Connectors]] — 來源稱 connectors and cages have 60 contacts per port、0.6 mm pitch，並 optimized for signal integrity、thermal management and multi-lane pluggable architecture。\n- [[Amphenol XtremePass]] — 來源稱 XtremePass 448G connector solution supports scalable form factors from 32DP to 128DP，並跨 Ethernet、NVLink、PCIe、InfiniBand systems。\n- [[OSFP Cable Assemblies]] — 來源稱 OSFP cable assemblies compatible with 25G/lane NRZ up to 224G/lane PAM4，deliver aggregate bandwidths of 200G、400G、800G and 1.6T per cable assembly，available in Passive and Active variants。\n- [[Sentry HD High-Speed Backplane Connector]] — 來源稱其是 next-generation high-speed backplane connector platform。\n- [[Celerity 224 Gb-s BGA Mezzanine Connectors]] — 來源稱其 designed to support data rates up to 224 Gb/s PAM4。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+          },
+          "score": 4.11531
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 10.177968
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 未決事項\n- Slide 11 未標示各測試區塊對應的標準版本、測試流程、儀器型號、軟體 option 或測試條件。\n- Slide 20 未標示 IL、Xtalk、Eye diagram、TDR impedance、Stackup Planner 與 TL Calculator 的工具、供應商或規格。\n- 需回看原始 PPTX 才能確認圖片中的 waveform、diagram 與 instrument details。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 5.701661
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 與既有知識的關係\n- [[SerDes]] 已記錄 die-to-die、SoC IP 與封裝示意圖中的 SerDes 語彙；本頁補充 R&S 簡報中 SerDes 與 SI / PI / validation challenges 的測試場景。\n- [[高頻高速 PCB 測試解決方案]]、[[Dk-Df]]、[[Delta-L]] 與 [[TDR 阻抗測量]] 可承接 Slide 20–21 中對 high speed PCB / PCBA signal integrity flow 與 PCB test solutions 的列名。\n- [[Power Integrity 外部資料清單]] 保存既有 OneNote link hub 中的 PDN impedance 待讀資料；本頁只加入 Slide 11 明示的 [[Power Distribution Network]] 測試區塊。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 5.40634
+         },
+         {
+          "text": "AISeverEcosystem R&S solution mapping › 與既有知識的關係\n- [[R&S PCB test solutions]] 提供 2026.3.4 R&S high-speed digital 簡報中的 PCB fabricator / system house 測試流程；本頁則來自市場 Excel，將 R&S 儀器與 AI server supply-chain 類別做銷售 mapping。\n- [[高頻高速 PCB 測試解決方案]] 與 [[Dk-Df]]、[[Delta-L]]、[[TDR 阻抗測量]] 已有 Keysight / PCB test 圖像來源；本頁新增 R&S 方案對應，但未提供可替代正式規格的量測條件。\n- [[AI 伺服器 PCB 供應鏈升級]] 記錄材料與板層升級；本頁只補充對應測試入口，例如 IL、TDR、high speed trace、PDN Target Z。\n- [[資料中心電力電子生態系]]、[[NVIDIA 800V HVDC 架構]] 與 [[AI 資料中心高壓直流供電]] 記錄 data center power electronics；本頁補充 [[MXO]]、[[R&S FSWP]]、[[ZISO]] 與 BMS test 的 sales mapping 線索。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+          },
+          "score": 14.006636
+         },
+         {
+          "text": "AISeverEcosystem R&S solution mapping › 來源中的 mapping\n| 分類 | 對象 / 企業欄 | 來源中的 R&S Solution | 來源日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| [[伺服器主機板]] / PCBA | [[鴻海]] | [[R&S ZNL]]: PDN Target Z；[[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test、clock jitter test；[[R&S ZNA]]: high speed trace test | 來源未標示正式日期；raw converted 2026-09-17 | 未提供正式 test setup、option、fixture、頻率或 sales kit |\n| [[伺服器電路板]] / [[PCB]] | [[博智]] | [[R&S ZNA]] / [[R&S ZNB]]: IL、TDR | 來源未標示正式日期；raw converted 2026-09-17 | 只對應表內 [[博智]]列，不能推論其他 PCB 廠同樣適用 |\n| [[連接器]] / 線纜 | [[嘉澤]] / [[嘉基]] | [[R&S ZNA]] / [[R&S ZNB]] + [[OSP]]: high speed cable | 來源未標示正式日期；raw converted 2026-09-17 | [[嘉澤]] / [[嘉基]] 同格寫法未決；未提供 cable type、connector type 或 calibration method |\n| [[網通交換機]] | [[智邦]] | [[R&S FSWP]]: jitter / phase noise test；VNA（[[R&S ZNA]] / [[R&S ZNB]]）；EMI pretest | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；不可推論完整 switching test portfolio |\n| [[矽光子]] | [[上詮]] | optical VNA：[[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]；[[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]] | 來源未標示正式日期；raw converted 2026-09-17 | ThinkLands、GOCA、Newkey 與 PSA 未展開；未提供 optical VNA setup 或 module type |\n| [[散熱器]] | [[建準]] | [[MXO]]: motor driver analysis | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 motor driver type、fan / pump 類型或量測條件 |\n| [[電源供應器]] | [[光寶科]] | [[MXO]]: Power rail、multiphase DC、PI；[[ZISO]]；[[R&S FSWP]]: LDO NSD test；BMS test | 來源未標示正式日期；raw converted 2026-09-17 | 未擷取 SharePoint sales kit 正文；未提供 HVDC / PSU / BBU 測試配置 |\n| [[GPU]] | [[輝達]] | [[R&S ZNA]]: TDR、[[OSP]] | 來源未標示正式日期；raw converted 2026-09-17 | 不代表 R&S 與 NVIDIA 合作或採購關係；僅是表內 solution mapping |\n| [[CPU]] | [[超微]] | [[R&S ZNA]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 TDR、SI、PI 或其他測項 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+          },
+          "score": 9.257433
+         },
+         {
+          "text": "AISeverEcosystem R&S solution mapping › Optical / SiPh / CPO\n- [[矽光子]]欄將 optical VNA 對應到 [[R&S ZNA]] / [[R&S ZNB]] + PSA with [[ThinkLands]]，以及 [[R&S ZNA]] / [[R&S ZNB]] + [[GOCA]] with [[Newkey]]。\n- 來源角色亮點稱 [[CPO]] 對有源 / 無源 [[SiPh]]、先進封裝與測試需求大幅提升，並稱 [[前鼎]]提供高速載板給矽光子模組與 CPO 元件、[[光聖]]提供 ELS 外部雷射源。\n- 這些說法都只追溯到 [[AISeverEcosystem]]，不等同於量產、採購、出貨或 R&S formal application note。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+          },
+          "score": 7.650145
+         },
+         {
+          "text": "AI 伺服器 PCB 供應鏈升級 › 可追溯限制\n- [[AI Server PCB test image 4]] 是一張表格整理圖，不是統計圖表；沒有座標軸、圖例、樣本數、營收、出貨量、市占率、ASP 或產能資料。\n- [[AI Server PCB test image 4]] 的頁尾只標示「資料來源：採訪整理」與「製表：楊絡懸」，未提供完整資料來源。\n- 本頁不能把 [[AWS Trainium 2 Max]]、[[Google TPU V6]]、[[Meta MTIA 2]] 的「量產」改寫成客觀市場事實；只能寫成 [[AI Server PCB test image 4]]（來源未標示日期）的表格說法。\n- [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 都是來源發布日期未標示的規格比較表；圖中雖有 25Q1、25Q2、25H2、2026、26H2、2027 等平台時間，但不能替代來源發布日期。\n- [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 的試產、量產、樣機、放量、供應商占比、價格與交期說法都缺少定義、樣本、資料來源與驗證文件；不得改寫成客觀已發生事實。\n- [[HSD PCB image 11]] 與 [[HSD PCB image 1]] 高度重疊，不能把兩者當作相互獨立的市場驗證來源。\n- 公司列名不可推論為完整供應鏈、市場排名、採購名單、供應合約、R&S 往來對象或投資建議。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+          },
+          "score": 13.555178
+         },
+         {
+          "text": "AI 伺服器 PCB 供應鏈升級 › 升級面向整理\n| 面向 | 來源文字 | 可追溯數字 / 時間 | 限制 |\n|---|---|---|---|\n| AI伺服器趨勢 | 推升 PCB 邁向高層數、大面積與高速傳輸，供應鏈全面翻新 | [[AI Server PCB test image 4]] 來源未標示日期 | 未提供出貨量、平台樣本、PCB 面積或層數分布 |\n| ASIC平台進展 | AWS Trainium 2 Max、Google TPU V6、Meta MTIA 2量產，2026年新平台將陸續推出 | 2026年；量產時間未標示 | 未定義量產、未列出出貨量、客戶或供應鏈 |\n| 材料升級方向 | HVLP銅箔進入第4、5代，CCL以M8為主，導入低介電、低損耗與高散熱設計 | 第4、5代；來源未標示日期 | 未定義 HVLP 世代、M8、低介電、低損耗或高散熱設計的測試條件 |\n| 製程挑戰 | 主板層數達30～40層，縱深比需達12～14倍，需應對厚銅、雷射鑽孔等高階製程 | 30～40層；12～14倍；來源未標示日期 | 未說明板種、平台、線寬線距、孔徑、板厚或良率 |\n| TPCA Show焦點 | 聚焦玻纖布、HVLP銅箔、CCL發展與高縱深比設備 | 來源未標示日期 | 未標示 TPCA Show 年份、場次、展會期間或參展廠商 |\n| GB200 / GB300 / VR200 板件升級比較 | [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 將 ComputeTray 從 GB200 / GB300 的 5層22L列到 VR200 的 6層26L，NVSwitch Tray 從 24L HLC 列到 32L (N+N HLC)，並列出 VR200 Midplane 44L(N+N HLC) | GB200：25Q1試產、25Q2量產；GB300：25H2樣機/2026放量；VR200：26H2樣機/2027放量；來源發布日期未標示 | 未定義試產、量產、樣機、放量；未提供板厚、孔徑、線寬線距、良率、出貨量或平台驗證證據 |\n| VR200 材料升級與供應商列名 | [[HSD PCB image 11]] 列出 VR200 計算板斗山(M8+LDK+HVLP4)+M4、交換板M8(LDK2+HVLP4) 生益科技/台光電/南亞(交期最快)、HVLP4銅箔三井/古河/盧森堡/金居/福田 | VR200：26H2樣機/2027放量；來源發布日期未標示 | 與 [[HSD PCB image 1]] 既有抄錄「南亞(交期最長)」矛盾；未說明南亞完整公司名稱、交期數字、材料型號、認證狀態或供應關係 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+          },
+          "score": 9.555011
+         },
+         {
+          "text": "AI 伺服器 PCB 供應鏈升級\n[[AI 伺服器 PCB 供應鏈升級]] 是此 vault 用來記錄市場來源中把 [[AI伺服器]]、[[ASIC平台]]、[[PCB]] 材料、製程與設備升級放在同一張表格中的說法；所有量產、推出與製程數字都必須保留來源日期或明示來源未標示日期。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+          },
+          "score": 5.972084
+         },
+         {
+          "text": "AI 資料中心基礎設施 › 來源中的說法\n- [[0. AI Data Center image 1]]（來源未標示日期）以 **Enabling AI** 為主題，使用資料中心 / 機房插圖表達 AI 基礎設施與資料中心場景的關聯。\n- [[0. AI Data Center image 1]]（來源未標示日期）右側列出三個重點標籤：[[Connectivity]]、[[Power]]、[[Resilience]]。\n- [[0. AI Data Center image 1]]（來源未標示日期）沒有提供數值資料、座標軸、單位、趨勢線或比較柱狀，因此此頁不將其解讀為市場規模、出貨量、占比或成長趨勢證據。\n- [[0. AI Data Center image 1]]（來源未標示日期）沒有標示公司、產品或型號，因此此頁不把圖中的資料中心、機櫃或電路板機箱視為特定產品。\n- [[0. AI Data Center image 2]]（來源未標示日期）以資料中心 / 機房解決方案的 3D 示意圖呈現一套整合基礎設施組成，分類包含 [[Power Management]]、[[Rack & Accessories]]、[[Management System]]、[[Precision Cooling]] 與 [[Service]]。\n- [[0. AI Data Center image 2]]（來源未標示日期）在 [[Power Management]] 下列出 [[UPS]]、[[Power Distribution Unit]]、[[Rack-Mount Remote Power Panel]]、[[Rack Power Distribution Unit]]、[[Rack-Mount Static Transfer Switch]]。\n- [[0. AI Data Center image 2]]（來源未標示日期）在 [[Rack & Accessories]] 下列出 [[Modular Rack]] 與 [[Rack Accessories]]。\n- [[0. AI Data Center image 2]]（來源未標示日期）在 [[Management System]] 下列出 [[InfraSuite Manager]]、[[EnviroStation]]、[[EnviroProbe]]。\n- [[0. AI Data Center image 2]]（來源未標示日期）在 [[Precision Cooling]] 下列出 [[RowCool]]。\n- [[0. AI Data Center image 2]]（來源未標示日期）在 [[Service]] 下列出 [[System Design and Planning]] 與 [[Rapid and Comprehensive Services]]。\n- [[0. AI Data Center image 2]]（來源未標示日期）沒有提供座標軸、單位、時間序列、數值比較或趨勢線，因此此頁不將其解讀為市場規模、出貨量、占比、成長率或產品性能數值證據。\n- [[0. AI Data Center image 2]]（來源未標示日期）沒有標示公司名稱、可辨識品牌標誌或型號，因此此頁不將 InfraSuite Manager、EnviroStation、EnviroProbe、RowCool 等名稱歸屬於特定供應商或產品線。\n- [[0. AI Data Center image 3]]（來源未標示日期）以 **Enabling AI** 為主題，從資料中心 / 機房 / 基礎設施視角表達支援 AI 運算所需的底層能力。\n- [[0. AI Data Center image 3]]（來源未標示日期）圖上可辨識文字包含 **Enabling AI**、[[Connectivity]]、[[Power]]、[[Resilience]]。\n- [[0. AI Data Center image 3]]（來源未標示日期）描述的畫面組成包含中央資料中心或機房、多排機櫃 / 伺服器機架、冷卻或管線配置、左側電塔、上方小型建築群、右上電子設備 / 機箱、通訊 / 連線線路、鎖頭圖示與人員。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+          },
+          "score": 11.924919
+         },
+         {
+          "text": "AI 資料中心基礎設施 › 可追溯範圍\n本頁根據五張圖像來源建立：[[0. AI Data Center image 1]]、[[0. AI Data Center image 2]]、[[0. AI Data Center image 3]]、[[0. AI Data Center image]] 與 [[4 AI Data Center Eco-Chain image 1]]。\n\n- [[0. AI Data Center image 1]] 可追溯的主張限於：AI / data center 場景與 **Enabling AI**、[[Connectivity]]、[[Power]]、[[Resilience]] 的視覺關聯。\n- [[0. AI Data Center image 2]] 可追溯的主張限於：資料中心 / 機房 solution diagram 中列出的子系統分類與 1–11 編號設備 / 系統名稱。\n- [[0. AI Data Center image 3]] 可追溯的主張限於：**Enabling AI** 與資料中心 / 機房 / 基礎設施場景的視覺關聯，以及 [[Connectivity]]、[[Power]]、[[Resilience]] 三個明示重點方塊。\n- [[0. AI Data Center image]] 可追溯的主張限於：資料中心 / 機房 solution diagram 中列出的子系統分類、1–11 編號設備 / 系統名稱，以及「2 or 3」共同標示造成的位置未決問題。\n- [[4 AI Data Center Eco-Chain image 1]] 可追溯的主張限於：12/10/2025（日期格式未標示）頁面上的 ecosystem map 分類、公司 / 品牌 / logo 列名、頁尾 Rohde & Schwarz / COMPANY RESTRICT / RS / 頁碼 25 等可見資訊。\n- 由於前四份來源都未標示日期，所有與時序、市場現況、供應商名單、產品導入、客戶採用、出貨量或市場占比相關的判斷都需要其他來源補強。\n- 即使 [[4 AI Data Center Eco-Chain image 1]] 有頁尾日期 12/10/2025，它仍未提供市場數值、排名、關係線或採用狀態，因此不能單獨支持市場份額、導入狀態、供應鏈上下游關係或 R&S 往來關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+          },
+          "score": 9.839154
+         },
+         {
+          "text": "AI 資料中心基礎設施\nAI 資料中心基礎設施是此 vault 用來記錄支撐 AI 部署或運作的資料中心能力組合；在 [[0. AI Data Center image 1]] 與 [[0. AI Data Center image 3]] 中，來源未標示日期的圖像明示其核心面向包含 **Connectivity**、**Power**、**Resilience**，而 [[0. AI Data Center image 2]] 與 [[0. AI Data Center image]] 則以未標示日期的 3D 機房示意圖列出 Power Management、Rack & Accessories、Management System、Precision Cooling 與 Service 等資料中心 solution components。[[4 AI Data Center Eco-Chain image 1]] 則在頁尾標示 12/10/2025（日期格式未標示）的 ecosystem map 中，補充 cloud service、datacenter、AI server、compute 與 peripheral 的市場參與者 / 品牌分類視角。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+          },
+          "score": 9.369266
+         },
+         {
+          "text": "4 AI Data Center Eco-Chain image 9 › 重點摘要\n- 這是一張標題拼作 **Ecosytem** 的 [[AI 資料中心生態系]] / supply-chain 分類圖，圖上可辨識日期為 **12/10/2025**；日期格式未標示，不能自行判定為 2025-12-10 或 2025-10-12。\n- 圖上頁尾可辨識 **RS**、**25**、**Rohde & Schwarz**、**12/10/2025**、**COMPANY RESTRICT**；右下角字樣可能被截斷。\n- 圖中沒有座標軸、單位、時間序列、數值、占比、營收、出貨量、市占率或排名，因此只能作為 market participants / company logo 分類盤點來源，不能作為市場規模、份額、成長率或排名證據。\n- 圖中沒有箭頭、流程線或因果連線；各方塊只表示分類式編排，不代表供應、採購、合作、投資、競爭、客戶或 R&S 往來關係。\n- 上方分類包含 [[Cloud Service]]、[[Datacenter]]、[[AI Server]]、上排 [[Power]]、[[Cooling]]、[[Security]]。\n- 左側縱向分類為 [[Compute]] 與 [[Periphery]]；其中 [[Compute]] 包含 [[IP Core]]、[[CPU]]、[[GPU]]、[[Special AI Chips]]，[[Periphery]] 包含 [[HDD]]、[[SSD]]、下排 [[Power]]、[[PMIC]]、[[PCB]]、[[HS connection]]、[[Optical Module]]、[[Switch]]。\n- 此來源與 [[4 AI Data Center Eco-Chain image 1]] 同樣標示 12/10/2025、頁碼 25、Rohde & Schwarz / RS 與 AI data center ecosystem map 類內容，應視為高度重疊來源；詳見 [[AI data center ecosystem map 12-10-2025 重複來源]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/4 AI Data Center Eco-Chain image 9.md"
+          },
+          "score": 8.507954
+         },
+         {
+          "text": "4 AI Data Center Eco-Chain image 9 › 原文未解的問題\n- 來源只標示 **12/10/2025**，日期格式未標示；不得推論為 2025-12-10 或 2025-10-12。\n- 來源未標示原簡報完整標題、文件版次、作者、發布範圍或資料來源。\n- 圖上 **Ecosytem** 拼字是否為原圖錯字，來源只可照抄，不自行更正為 Ecosystem。\n- 圖上 **COMPANY RESTRICT** 可能被截斷；不能補成 COMPANY RESTRICTED。\n- [[Cloud Service]] 中數個 logo 無清楚文字，不能補猜公司名稱。\n- [[Cooling]] 中兩個 logo 無法辨識或無文字。\n- [[Special AI Chips]] 中 G、Q 與其他 logo 的完整公司名稱未標示。\n- [[PMIC]] 中左側藍色 Q 的完整公司名稱未標示。\n- [[Optical Module]] 中圓形 logo 對應公司名稱無法辨識。\n- [[TRIPOD]] 下方小字無法辨識。\n- [[GPU]] 分類在同一 raw 轉換內出現逐字段落與結構化整理表差異：逐字段落未列 [[AMD]]，結構化表列 [[AMD]]。\n- [[Datacenter]] 分類在逐字段落列 [[Google]]、[[Meta]]、[[IBM]]，結構化整理表另列 aws；需回看原圖確認。\n- 下排 [[Power]] 的 [[HONTO]] 與既有相關頁面中的 [[HONOTO]] 是否同一品牌或 OCR 差異，尚未裁決。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/4 AI Data Center Eco-Chain image 9.md"
+          },
+          "score": 8.215296
+         },
+         {
+          "text": "4 AI Data Center Eco-Chain image 9 › 與既有知識的關係\n- [[AI 資料中心生態系]] 已整理多張 AI data center ecosystem / industrial chain 圖；本來源新增另一份頁尾標示 12/10/2025、頁碼 25、Rohde & Schwarz 的 ecosystem map OCR 版本。\n- [[AI 資料中心基礎設施]] 已收錄 [[4 AI Data Center Eco-Chain image 1]] 的 12/10/2025 ecosystem map；本來源在結構、分類、日期、頁碼與多數列名上與其高度重疊。\n- [[4 AI Data Center Eco-Chain image 9]] 與 [[4 AI Data Center Eco-Chain image 1]] 不應被當作兩個獨立市場驗證來源；兩者更可能是同一張或相近版本圖像的不同 OCR / conversion 結果。\n- 本來源中的 [[HONTO]] 與既有 [[4 AI Data Center Eco-Chain image 1]] 相關頁面中的 [[HONOTO]] 可能是圖像辨識差異；目前未裁決，不自行合併。\n- 本來源逐字抄錄段落的 [[GPU]] 未列 [[AMD]]，但結構化整理表列出 [[AMD]]；此為同一 raw 轉換內部差異，先記入未決事項，不據此判定 [[AMD]] 是否應列入 GPU 分類。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/4 AI Data Center Eco-Chain image 9.md"
+          },
+          "score": 5.997593
+         },
+         {
+          "text": "full-spectrum-data-center-connectivity-brochure › 原文未解的問題\n- 來源未標示正式發布日期、文件版次、brochure 編號或產品資料表版本。\n- 來源未說明 PDF 原始發布頁、QR code 目標頁、各 featured product 的 order number、料號、可訂購狀態或量產狀態。\n- 來源未提供 224 Gb/s PAM4、448G、32DP–128DP、1.6T、300G、60 contacts per port、0.6 mm pitch、60 A、+54V、high-current、very low energy loss、leak detection 或 quick disconnect 等數字 / 能力的測試條件、合規文件或第三方驗證。\n- 來源未提供客戶、導入案例、市占率、營收、出貨量或排名；所有產品能力只能視為 brochure claim。\n- 來源中的文字由 PDF 轉檔而來，版面欄位有串接風險，例如 `System with Integrated Liquid Cage Systems Cooling`、`XtremePass™448G`、`L C P A C M A M M 2 M` 等需回看原 PDF 圖像確認。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/full-spectrum-data-center-connectivity-brochure.md"
+          },
+          "score": 12.272847
+         },
+         {
+          "text": "full-spectrum-data-center-connectivity-brochure › 與既有知識的關係\n- 本來源延伸既有 [[Amphenol Communications Solutions]]、[[Data center server 高速互連產品組合]]、[[高速伺服器儲存互連]] 與 [[Compute tray component solutions]]，但比 [[compute-tray-flyer]] 與 [[data-center-server-solutions-guide]] 更強調 full-spectrum coverage：high-speed I/O、backplane、mezzanine、optical、fiber、power 與 cooling 同頁並列。\n- 本來源與 [[HSD Cable test image 1]]、[[HSD Cable test image 2]]、[[HSD Cable test image 3]]、[[HSD Cable test image 4]]、[[HSD Cable test image 6]]、[[HSD Cable test image 7]]、[[HSD Cable test image]]、[[compute-tray-flyer]] 與 [[data-center-server-solutions-guide]] 都屬 Amphenol 型錄 / brochure 類資料；不可把多個型錄 / 轉檔重疊內容視為獨立市場驗證。\n- 本來源補充 [[BarKlip Busbar Connectors]] 的 high-current power distribution 應用描述，但未提供比既有來源更精確的 current rating 表、測試條件或 order number。\n- 本來源新增 optical 與 fiber deployment 相關線索，例如 [[Amphenol XPO-LPO]]、[[1.6T OSFP Transceivers]]、[[Amphenol Co-packaged Optics]]、[[LEAP On-Board Transceiver]]、[[300G CXP2 Active Optical Cable]] 與 [[CommScope Rapid Fiber Connect Platform]]；這些在既有 Amphenol compute tray / server guide 頁面中尚未完整展開。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/full-spectrum-data-center-connectivity-brochure.md"
+          },
+          "score": 9.071602
+         },
+         {
+          "text": "full-spectrum-data-center-connectivity-brochure › 關鍵實體與概念\n- [[Amphenol Communications Solutions]] — 來源頁面與頁尾社群帳號皆以 amphenol-cs.com / Amphenol CS 呈現，支撐其 data center connectivity portfolio 語境。\n- [[Amphenol OverPass Cable Systems]] — 來源稱其提供 broad range of next gen capabilities，讓 high-speed signal 從 ASIC packages 到 system endpoints 傳輸。\n- [[ExtremePort OSFP Connectors]] — 來源稱 ExtremePort OSFP connectors and cages have 60 contacts per port and a 0.6 mm pitch form factor，optimized for signal integrity、thermal management and multi-lane pluggable architecture。\n- [[Amphenol XtremePass]] — 來源稱 XtremePass 448G connector solution 提供 best-in-class SI performance、maximize substrate density，支援 32DP 到 128DP form factors，並跨 Ethernet、NVLink、PCIe 與 InfiniBand systems。\n- [[Sentry HD High-Speed Backplane Connector]] — 來源稱 Sentry HD 是 Amphenol next-generation high-speed backplane connector platform，purpose-built to power future AI data center architectures。\n- [[Celerity 224 Gb-s BGA Mezzanine Connectors]] — 來源稱 Celerity / Celerity LP 224 Gb/s BGA mezzanine connectors support up to 224 Gb/s PAM4，並有 hermaphroditic mating interfaces。\n- [[Amphenol XPO-LPO]] — 來源稱 XPO-LPO addresses the power and density wall of traditional OSFP form factors，224 Gb/s per lane across 64 channels，面向 AI scale-up deployments。\n- [[Amphenol Co-packaged Optics]] — 來源稱 Amphenol CPO extends end-to-end ownership to the chip，從 high-density electrical interposer 到 optical conversion module 再到 fiber plant。\n- [[BarKlip Busbar Connectors]] — 來源補充 BarKlip I/O products 用於 busbars、cables 與 circuit boards 間 high-current power distribution，且 direct pluggable connection to an uninsulated busbar generates very low energy loss。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/full-spectrum-data-center-connectivity-brochure.md"
+          },
+          "score": 5.509419
+         },
+         {
+          "text": "Amphenol XtremePass › 未決事項\n- 來源未提供 [[Amphenol XtremePass]] 的完整正式產品名稱、料號、datasheet、發布日期、測試條件、form factor 定義或 lane / differential pair 口徑。\n- 來源未說明 448G 對應 lane rate、aggregate rate、modulation、connector configuration 或 protocol mapping。\n- 來源未提供 Ethernet、NVLink、PCIe、InfiniBand integration 的合規版本或 interoperability 測試證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amphenol XtremePass.md"
+          },
+          "score": 6.092096
+         },
+         {
+          "text": "Amphenol XtremePass › 可追溯限制\n- 來源未標示正式內容日期、產品資料表版次、order number 或測試條件。\n- `448G`、`32DP to 128DP`、best-in-class SI performance 與 seamless integration 都只能視為 brochure claim；不可寫成已驗證性能、量產狀態或客戶導入狀態。\n- 來源文字由 PDF 轉檔而來，`XtremePass™448G` 中產品名稱與速率標籤需回看原 PDF 或官方產品頁確認。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amphenol XtremePass.md"
+          },
+          "score": 5.668716
+         },
+         {
+          "text": "Amphenol XtremePass\n[[Amphenol XtremePass]] 是 [[full-spectrum-data-center-connectivity-brochure]] 中列出的 co-packaged copper / high-speed connector solution，來源稱其為 XtremePass 448G connector solution，面向 AI data center / high-speed system interconnect。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amphenol XtremePass.md"
+          },
+          "score": 1.815775
+         },
+         {
+          "text": "Amphenol OverPass Cable Systems › 未決事項\n- 來源未提供 OverPass cable system 的完整產品系列、料號、支援速率、支援協定、線纜長度、connector form factor 或相容平台。\n- 來源未提供 next gen capabilities 的具體清單或驗證條件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amphenol OverPass Cable Systems.md"
+          },
+          "score": 4.808169
+         },
+         {
+          "text": "Amphenol OverPass Cable Systems › 可追溯限制\n- 來源未標示正式內容日期、產品型號、料號、datasheet 版次或測試條件。\n- `broad range of next gen capabilities` 與 `high-speed signal transmission` 是 brochure-level claim；不可推論實際傳輸距離、loss budget、BER、eye diagram、量產狀態或客戶導入。\n- 來源未明確說明 [[Amphenol OverPass Cable Systems]] 與既有 [[OSFP OverPass Assemblies]]、[[Direct Attached Copper Cables]] 或 [[OSFP Cable Assemblies]] 的產品階層關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amphenol OverPass Cable Systems.md"
+          },
+          "score": 3.991949
+         },
+         {
+          "text": "Amphenol OverPass Cable Systems › 來源中的說法\n- [[full-spectrum-data-center-connectivity-brochure]]（來源未標示日期；raw converted 2026-09-17）在 High-Speed I/O OverPass Cable Systems 區塊稱 Amphenol's OverPass cable systems offer a broad range of next gen capabilities。\n- 來源稱這些 capabilities enable high-speed signal transmission from ASIC packages to end-points across the system。\n- 來源的 featured product 區塊另列 [[OSFP Cable Assemblies]]，並提到 active electrical cables / direct attached cables and cable solutions。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amphenol OverPass Cable Systems.md"
+          },
+          "score": 0.968017
+         },
+         {
+          "text": "HSD Cable test image 3 › 與既有知識的關係\n- [[HSD Cable test image 1]] 與 [[HSD Cable test image 2]] 已整理 [[Amphenol Communications Solutions]] 在 high-density server / storage / data center interconnect solutions 中的 connector、cable connector、power connector 與 CXL / PCIe 語彙；本來源補充編號 6–8 的另一組產品說明。\n- [[Mini Cool Edge IO]] 在 [[HSD Cable test image 1]] 與 [[HSD Cable test image 2]] 中被描述為 up to 128 Gb/s PAM4、PCIe Gen 4/5/6/7 over 1.0m 的 high-speed I/O connector / cables & connectors；本來源改以 [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]] 呈現，提供 112 GT/s PAM4、64 GT/s PAM4 PCIe Gen 6、85/92Ohm、0.6mm pitch 與 27A per power pin 等不同層次的圖上說法。兩者未構成矛盾，因為名稱與描述口徑不同。\n- [[CoolPower HD Connector]] 在 [[HSD Cable test image 2]] 中提供 100A to 350A per contact 的 power connector 說法；本來源的 [[BarKlip Busbar Connectors]] 則提供 150A to 5000A (45°C T-rise) 的 busbar / high power cable connector 說法。兩者是不同產品名稱，不合併為同一規格。\n- [[高速伺服器儲存互連]] 可把本來源視為 Amphenol product view 的補充，但不可把來源中的 tooled and mass production ready 或 available 寫成有日期的市場現況、出貨狀態、客戶採用或完整供應鏈交易證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 3.md"
+          },
+          "score": 8.731539
+         },
+         {
+          "text": "HSD Cable test image 3 › 關鍵實體與概念\n- [[Amphenol]] / [[Amphenol Communications Solutions]]：圖上品牌與業務名稱標示。\n- [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]]：來源中編號 6 的 Mini Cool Edge 0.60mm card edge connector 產品 / 類別。\n- [[Mini Cool Edge IO]]：既有 Amphenol high-speed I/O connector / cable connector 產品名稱；本來源的編號 6 與 Mini Cool Edge / card edge connector 語彙相關，但圖上完整名稱不是 Mini Cool Edge IO。\n- [[BarKlip Busbar Connectors]]：來源中編號 7 的 high power cable connector / busbar connector。\n- [[Paladin HD2 224Gb-s Backplane Interconnect System]]：來源中編號 8 的 224Gb/s backplane interconnect system。\n- [[高速伺服器儲存互連]]：本來源補充 high-speed signal、high-power cable connector 與 backplane interconnect 三類產品在同一機箱 / 系統示意中的位置。\n- [[PAM4]]、[[PCIe Gen 6]]、[[EDSFF]]、[[SFF-TA-1002]]、[[OCP NIC 3.0]]、[[DC-SCM]]、[[JEDEC]]、[[Ethernet]]、[[AIC]]、[[SI]]、[[PCB]]：圖上出現的技術與規格語彙。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 3.md"
+          },
+          "score": 6.940892
+         },
+         {
+          "text": "HSD Cable test image 3 › 重點摘要\n- 來源未標示日期；以下所有產品、規格、量產準備狀態與應用說法都只能寫成來源未標示日期、取得於 2026-09-04 的圖上說法。\n- 圖左下標示 [[Amphenol]]、[[Amphenol Communications Solutions]]，並寫有 WHERE INNOVATION MEETS INFRASTRUCTURE 與 SCAN TO LEARN MORE!。\n- 來源不是統計圖表，沒有座標軸、時間序列、市占率、出貨量、營收、排名或客戶導入資料。\n- 左側是伺服器 / 加速卡 / 機箱內部結構示意圖，以編號 6、7、8 的指示線對應右側三個產品說明區塊。\n- 圖中標號 6 是 [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]]，小標包含 112 GT/s PAM4 與 High-speed 64 GT/s PAM4 PCIe Gen 6。\n- 圖中標號 7 是 [[BarKlip Busbar Connectors]]，小標為 High Power Cable Connector，並列出 12V、48V、150A to 5000A 與 45°C T-rise 等文字。\n- 圖中標號 8 是 [[Paladin HD2 224Gb-s Backplane Interconnect System]]，小標為 224 Gb/s，並列出 224Gb/s data rates、SI performance、hybrid board attach technology 與 Paladin HD direct upgrade path 等文字。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 3.md"
+          },
+          "score": 6.063636
+         },
+         {
+          "text": "OCP Accelerator Module (OAM) › 未決事項\n- 尚缺 OCP official final OAM spec 與完整 version history。\n- 尚缺 Rev 0.85 的正式發布日期、核准狀態、PDF metadata 與 OCP document ID。\n- 尚缺 OAM 與後續 OAM v1.0 / v1.5 / v2.x 規格的差異。\n- 尚缺 OAM connector、power、thermal、management interface 的正式測試條件與 compliance requirement。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/OCP Accelerator Module (OAM).md"
+          },
+          "score": 10.37184
+         },
+         {
+          "text": "OCP Accelerator Module (OAM) › 可追溯限制\n- 本頁目前只由 [[OCP Accelerator Module OAM Specifications]] 支撐。\n- 來源未標示正式發布日期；本頁不把 Rev 0.85 規格寫成 final / ratified OCP specification。\n- 來源提供的是規格簡報與 call to action，不等同任何特定 vendor product、供應鏈名單、量產板或客戶導入證據。\n- 本頁不由 OAM spec 推論既有 [[UBB底板]] 市場圖片中的特定 connector、尺寸、OAM numbering 或 PCB layout 正確性。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/OCP Accelerator Module (OAM).md"
+          },
+          "score": 8.87046
+         },
+         {
+          "text": "OCP Accelerator Module (OAM) › 為什麼不是 PCIe AIC / PCIe CEM\n[[OCP Accelerator Module OAM Specifications]]（來源未標示正式發布日期；Rev 0.85 context）指出 [[PCIe CEM]] / [[PCIe AIC]] form factor 對 [[HPC]] accelerator system 的限制包含：\n\n- multi cards in system；\n- high interconnect bandwidth needed between card to card；\n- too much signal loss from ASIC to high-speed connectors in PCIe form factor；\n- inter-card cabling difficult and limited in supported topologies。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/OCP Accelerator Module (OAM).md"
+          },
+          "score": 4.854583
+         },
+         {
+          "text": "SerDes › 使用限制\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 1]]（來源未標示日期；取得於 2026-09-04）只把 [[SerDes]] 列為 D2D 互連方式之一，沒有提供任何數值規格。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 3]]（來源未標示日期；取得於 2026-09-04）只把 **SerDes** 標在封裝示意圖的模組上，沒有說明它是 chip-to-chip、die-to-die、package-to-package、board-level 或 optical interface 前端介面。\n- [[Serdes IC-IP companies image 1]] 與 [[Serdes IC-IP companies image 3]]（來源未標示日期；取得於 2026-09-04）只在 SoC IP 組成圖中列出 Serdes 可對應的介面名稱；不能由此推論任何 IP 已授權、已驗證、已量產或已出貨。\n- [[Serdes IC-IP companies image 1]] 與 [[Serdes IC-IP companies image 3]] 沒有提供 Serdes 區塊的資料率、通道模型、clocking、equalization、FEC、測試條件、製程節點或供應商。\n- 本頁不把 [[SerDes]] 的圖上出現解讀為特定公司、IP 供應商、產品、標準版本或市場導入。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 1]]（來源未標示日期；取得於 2026-09-04）沒有說明 [[SerDes]] 與 [[Parallel Wires]] 的取捨條件。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 3]]（來源未標示日期；取得於 2026-09-04）沒有說明 SerDes 與 [[Optical I-O]] 的關係；不可推論 SerDes 已連接到光 I/O，也不可推論其支援 [[CPO]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes.md"
+          },
+          "score": 6.834265
+         },
+         {
+          "text": "SerDes › SoC IP 組成方塊圖中的 Serdes\n| 圖上分類 | 圖上列出的項目 | 日期 / 期間 | 來源 | 限制 |\n|---|---|---|---|---|\n| Serdes | SATA；LVDS, sub-LVDS；MIPI D-PHY, DSI-2/CSI2 controller；HDMI2.1 with HDCP2.0；Ethernet | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 1]]；[[Serdes IC-IP companies image 3]] | 來源未標示資料率、lane 數、通道條件、controller / PHY 拆分、IP vendor、製程節點、驗證狀態或量產狀態。 |\n| High Speed Serial I/F | USB3.2/3.1/3.0/2.0；PCI-Express Gen5/Gen4/Gen3 | 來源未標示日期；取得於 2026-09-04 | [[Serdes IC-IP companies image 1]]；[[Serdes IC-IP companies image 3]] | 來源沒有說明此區塊與 Serdes 區塊的分類邊界；不可自動合併為同一產品能力清單。 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes.md"
+          },
+          "score": 6.494611
+         },
+         {
+          "text": "SerDes › 重複來源限制\n- [[Serdes IC-IP companies image 3]] 與 [[Serdes IC-IP companies image 1]] 在 Serdes 區塊與 High Speed Serial I/F 區塊的內容高度一致。\n- 依 [[Serdes IC-IP companies image 1 與 3 重複來源]]，兩者不可被視為兩份獨立市場驗證，也不可用來加倍計算 SerDes IP 類別覆蓋。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes.md"
+          },
+          "score": 5.647574
+         },
+         {
+          "text": "IO Serdes in AI ASIC-TPU-Chiplet › 與既有知識的關係\n- 本來源把已分散整理於圖像來源中的 [[SerDes]]、[[Die-to-Die 互連]]、[[D2D PHY]]、[[UCIe]]、[[HBM]]、[[異質整合封裝]]、[[Google TPU 晶片藍圖]] 與 [[Eliyan]] 放在同一個 OneNote 彙整脈絡下。\n- 已有圖像來源可支撐具體圖上文字；本來源只能支撐「這些圖像與外部待讀資料被同一 OneNote 頁彙整在 IO Serdes / AI ASIC / TPU / Chiplet 主題下」。\n- 本來源補充 [[Eliyan]] 的 `Products - Eliyan` 外部待讀連結，但未擷取該頁內容；因此不改寫 [[Eliyan]] 的產品規格、商用狀態或官方說法。\n- 本來源補充 [[Cadence]]、[[Synopsys]]、SemiWiki、EET China、Zhihu、Medium、Substack 與 Google Cloud blog 的待讀入口；未擷取正文前，不能用來更新正式技術比較或供應商能力頁。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/IO Serdes in AI ASIC-TPU-Chiplet.md"
+          },
+          "score": 4.845979
+         },
+         {
+          "text": "IO Serdes in AI ASIC-TPU-Chiplet › 重點摘要\n- 這是一份 OneNote link hub / 圖像彙整頁，raw frontmatter 標示 converted: 2026-09-17，來源正文未標示正式發布日期；路徑資料夾含 `2026-8-7`，但不可推論為內容發布日。\n- 來源列出多個與 [[SerDes]]、[[Die-to-Die 互連]]、[[Chiplet]]、[[UCIe]]、[[TPU]]、[[HBM]] 與 [[異質整合封裝]] 相關的外部待讀連結與本機 PDF 附件。\n- 來源嵌入多張既有圖像來源：[[IO Serdes in AI ASIC-TPU-Chiplet image 7]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 3]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 8]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 4]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 9]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 10]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 11]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 12]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 5]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 13]]。\n- 本來源本身沒有擷取外部網頁或本機 PDF 正文；因此只能作為 [[IO SerDes ASIC TPU Chiplet 外部資料清單]]，不能把連結標題或檔名直接改寫成已驗證的技術主張。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/IO Serdes in AI ASIC-TPU-Chiplet.md"
+          },
+          "score": 2.404088
+         },
+         {
+          "text": "IO Serdes in AI ASIC-TPU-Chiplet › 外部網頁連結\n- `TPU Deep Dive` / `Google TPU 架构深度分析 - 知乎`：連到 Zhihu，與 [[Google TPU 晶片藍圖]]、[[Google TPU V6]]、[[TPU 8t]]、[[TPU v8e]]、[[TPU v8p]]、[[TPU v9]] 可能相關，但本文未擷取正文。\n- `后摩尔时代的 Chiplet D2D解决方案-电子工程专辑`：連到 EET China，與 [[Chiplet]]、[[Die-to-Die 互連]]、[[D2D PHY]] 可能相關，但本文未擷取正文。\n- `Ultra Ethernet/Ethernet Controller | Cadence`：連到 [[Cadence]] 的 Ethernet controller 頁，與 [[Ethernet]]、[[SerDes]]、[[Ultra Ethernet]] 可能相關，但本文未擷取正文。\n- `Ultra-Short Reach PHY IP Optimized for Advanced Packaging Technology - SemiWiki`：連到 SemiWiki 文章，與 [[USR PHY]]、[[XSR PHY]]、[[Advanced Packaging]]、[[SerDes]] 可能相關，但本文未擷取正文。\n- `Die-to-Die IP | Synopsys`：連到 [[Synopsys]] DesignWare IP 頁，與 [[Die-to-Die 互連]]、[[UCIe]]、[[D2D PHY]] 可能相關，但本文未擷取正文。\n- `Products - Eliyan`：連到 [[Eliyan]] products 頁，與 [[D2D PHY]]、[[D2M PHY]]、[[C2C PHY]] 與 [[Eliyan HBM Base Die Chiplet]] 可能相關，但本文未擷取正文。\n- `GoogleTPU 架构演进及十大经验-电子工程专辑`：連到 EET China，與 [[Google TPU 晶片藍圖]] 可能相關，但本文未擷取正文。\n- `AI Chips Technology Trends & Landscape (GPU + TPU + FPGA + Startups)`：連到 Medium，與 [[AI GPU 性能比較]]、[[TPU]]、[[FPGA]]、[[AI accelerator]] 可能相關，但本文未擷取正文。\n- `https://ytyuted.substack.com/p/ep48-google-tpu-v8-ai`：連到 Substack，疑似與 Google TPU v8 AI 相關；本文未擷取正文。\n- `https://cloud.google.com/blog/products/compute/tpu-8t-and-tpu-8i-technical-deep-dive`：連到 Google Cloud blog，標題含 TPU 8t 與 TPU 8i technical deep dive；本文未擷取正文。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/IO Serdes in AI ASIC-TPU-Chiplet.md"
+          },
+          "score": 2.340755
+         },
+         {
+          "text": "112G PAM4 PCB 工程測試資料清單 › 使用限制\n- 本頁不得把 `112G PAM4` 推論為特定標準、特定 lane rate、特定 connector、特定 PCB material 或特定 compliance requirement。\n- 本頁不得把 `VNA` 推論為 R&S、Keysight 或其他廠牌的特定 [[Vector Network Analyzer]]。\n- 本頁不得把 `Probe`、`Station/Handler`、`Software`、`VNA` 四個欄位解讀為完整測試設備清單，因來源沒有資料列。\n- 本頁不得把 lossy markdown 未轉出的內容補寫成原 PDF 內容；若需要工程細節，必須回讀原始 PDF 或取得更完整 OCR。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+          },
+          "score": 10.265274
+         },
+         {
+          "text": "112G PAM4 PCB 工程測試資料清單 › 可追溯線索\n| 線索 | 來源明示文字 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| 題名 | 112G PAM4 PCB Engineering | [[112G PAM4 PCB Engineering]] | 正式日期來源未標示；raw converted 2026-09-17 | 不足以推論標準版本、測試範圍或應用場景 |\n| 存取標記 | COMPANY RESTRICTED | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未說明限制範圍或文件控管規則 |\n| 章節 / 主題 | Transmission Lines on PCB | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 transmission line geometry、stackup、impedance 或 loss 數值 |\n| 測試配置欄位 | Probe | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 probe 型號、頻寬、pitch、供應商或 calibration method |\n| 測試配置欄位 | Station/Handler | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 station / handler 型號、夾治具或 automation context |\n| 測試配置欄位 | Software | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供軟體名稱、版本、script 或 license |\n| 測試配置欄位 | VNA | [[112G PAM4 PCB Engineering]] | 來源未標示 | 未提供 [[Vector Network Analyzer]] 型號、port 數、頻率範圍、校準件或 S-parameter 設定 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+          },
+          "score": 7.80792
+         },
+         {
+          "text": "112G PAM4 PCB 工程測試資料清單 › 未決事項\n- 原 PDF 的正式日期、版次、作者、部門、頁數與頁碼未標示。\n- 來源未說明 `112G PAM4` 的資料率口徑、標準版本、channel model、fixture、test coupon 或量測頻率範圍。\n- 來源未提供 transmission lines on PCB 的幾何、stackup、阻抗、loss、via、connector、launch 或 S-parameter 目標。\n- 來源未提供 probe、station / handler、software、VNA 的型號、供應商、設定或校準方式。\n- 來源未說明是否與 [[R&S PCB test solutions]]、[[高頻高速 PCB 測試解決方案]] 或任何正式產品方案直接相關。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/112G PAM4 PCB 工程測試資料清單.md"
+          },
+          "score": 6.165452
+         },
+         {
+          "text": "112G PAM4 PCB Engineering › 關鍵實體與概念\n- [[112G PAM4 PCB 工程測試資料清單]] — 本來源可作為 112G PAM4 PCB engineering / transmission line 測試資料的待讀索引。\n- [[112G PAM4]] — 只出現在來源標題；來源未提供 PAM4 定義、symbol rate、baud rate、lane 數或標準版本。\n- [[PCB Engineering]] — 只出現在來源標題；來源未展開工程範圍。\n- [[Transmission Lines on PCB]] — 來源正文標題；未提供 transmission line geometry、stackup、impedance、loss 或 test coupon。\n- [[Probe]] — 表格欄位標題；未列出 probe 型號、頻寬或供應商。\n- [[Station-Handler]] — 表格欄位標題；未列出 station、handler 或 probing platform 型號。\n- [[Software]] — 表格欄位標題；未列出軟體名稱、版本或 license。\n- [[VNA]] — 表格欄位標題；未列出 [[Vector Network Analyzer]] 型號、port 數、頻率範圍、calibration kit 或 measurement setup。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/112G PAM4 PCB Engineering.md"
+          },
+          "score": 5.265875
+         },
+         {
+          "text": "112G PAM4 PCB Engineering › 重點摘要\n- 本來源是由 `112G PAM4 PCB Engineering.pdf` 轉出的 lossy markdown derivative，raw frontmatter 顯示 converted 日期為 2026-09-17；正式發布日期、內容日期或資料期間：**來源未標示**。\n- 來源正文只保留少量文字：`COMPANY RESTRICTED`、`Transmission Lines on PCB`，以及一個空表格的欄位標題：`Probe`、`Station/Handler`、`Software`、`VNA`。\n- 來源標題含 [[112G PAM4]]、[[PCB Engineering]]，正文含 [[Transmission Lines on PCB]] 與 [[VNA]] 測試配置線索；但沒有提供測試流程、儀器型號、頻率範圍、fixture、校準方法、量測數值或 pass/fail 條件。\n- 因來源是 PDF 轉 markdown 的 lossy derivative，且表格沒有資料列，本頁只保存可追溯的表頭與缺漏，不推論原 PDF 中未轉出的內容。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/112G PAM4 PCB Engineering.md"
+          },
+          "score": 4.547057
+         },
+         {
+          "text": "112G PAM4 PCB Engineering › 與既有知識的關係\n- 既有 [[SerDes 與 SI PI 測試概覽]] 與 [[R&S PCB test solutions]] 已保存 high-speed digital / PCB SI 測試流程、[[TDR 阻抗測量]]、[[Dk-Df]]、[[Delta-L]]、[[Insertion Loss]] 等測試語彙；本來源只新增一個更稀疏的 112G PAM4 PCB engineering 題名與表頭線索。\n- 既有 [[高頻高速 PCB 測試解決方案]] 來自 Keysight 圖像，包含原材料表徵、材料選擇、抽樣測試與量產監控流程；本來源沒有提供等同流程，不可用來補強該頁的工具清單或測試方法。\n- 既有 [[High speed SerDes standards]] 中已保存多種 high-speed SerDes standards 名稱；本來源只在標題出現 112G PAM4，不足以建立標準版本或 compliance 測試主張。\n- 本來源可連到 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]] 與 [[PCB]] 脈絡，但目前只支撐「有一份題為 112G PAM4 PCB Engineering 的公司限制資料，內容轉出後只保留 transmission line table header」這一層主張。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/112G PAM4 PCB Engineering.md"
+          },
+          "score": 3.528832
+         },
+         {
+          "text": "112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors › 可追溯限制\n- 來源未標示內容日期；本頁不得把 tooled and mass production ready、mass production-ready 或 available 改寫成特定日期的量產、可訂購、出貨或導入狀態。\n- 來源未提供 order number、datasheet 版次、合規證書、測試條件、pin count 清單、AIC / host board thickness 範圍或客戶導入資料。\n- [[HSD Cable test image 3]] 與 [[HSD Cable test image 7]] 內容高度重疊；兩者不可被視為獨立市場驗證。詳見 [[HSD Cable test image 3 與 7 重複來源]]。\n- [[HSD Cable test image 3]] 與既有 [[Mini Cool Edge IO]] 來源使用的產品名稱不同；本頁只記錄圖上名稱與文字，不推論兩者為完全相同料號。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors.md"
+          },
+          "score": 6.724464
+         },
+         {
+          "text": "112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors › 未決事項\n- 來源未標示產品發布日期、型錄版本、文件編號、料號或產品系列層級。\n- 來源未說明 85/92Ohm Ethernet applications 的具體 configuration、測試條件或 pin count。\n- 來源未提供 tooled and mass production ready 的日期、量產定義、可購買地區、客戶或第三方驗證。\n- 來源未說明 [[Mini Cool Edge IO]] 與本頁圖上完整名稱的精確命名 / 系列關係。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors.md"
+          },
+          "score": 6.579968
+         },
+         {
+          "text": "112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors › 來源中的說法\n- [[HSD Cable test image 3]]（來源未標示日期；取得於 2026-09-04）在編號 6 標示 112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors。\n- [[HSD Cable test image 3]]（來源未標示日期；取得於 2026-09-04）在同一區塊列出 112 GT/s PAM4。\n- [[HSD Cable test image 3]]（來源未標示日期；取得於 2026-09-04）寫有 High-speed 64 GT/s PAM4 PCIe Gen 6。\n- [[HSD Cable test image 3]]（來源未標示日期；取得於 2026-09-04）寫有 112 GT/s PAM4 85/92Ohm for Ethernet applications are tooled and mass production ready。\n- [[HSD Cable test image 3]]（來源未標示日期；取得於 2026-09-04）寫有 supports EDSFF、SFF-TA-1002 (1006/1007/1008/1020/1021)、OCP NIC 3.0、DC-SCM and JEDEC specifications。\n- [[HSD Cable test image 3]]（來源未標示日期；取得於 2026-09-04）寫有 hybrid connector with signal pin pitch at 0.6mm and 4 power pins at 27A per power pin。\n- [[HSD Cable test image 3]]（來源未標示日期；取得於 2026-09-04）寫有 vertical、right-angle、straddle-mount and orthogonal connector options with high-speed cable are available。\n- [[HSD Cable test image 3]]（來源未標示日期；取得於 2026-09-04）寫有 tooled and mass production-ready: customizable pin count connector for application-specific AIC and host board thickness。\n- [[HSD Cable test image 7]]（來源未標示日期；轉檔於 2026-09-04）在編號 6 標示 112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors。\n- [[HSD Cable test image 7]]（來源未標示日期；轉檔於 2026-09-04）同樣列出 112 GT/s PAM4、High-speed 64 GT/s PAM4 PCIe Gen 6、85/92Ohm for Ethernet applications、EDSFF / SFF-TA-1002 / OCP NIC 3.0 / DC-SCM / JEDEC、0.6mm signal pin pitch、4 power pins at 27A per power pin、vertical / right-angle / straddle-mount / orthogonal connector options，以及 customizable pin count for application-specific AIC and host board thickness。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors.md"
+          },
+          "score": 2.333391
+         },
+         {
+          "text": "HSD Cable test image 7 › 原文未解的問題\n- 來源未標示內容日期、發布日期、文件版次、型錄編號、datasheet 版次或原始網頁。\n- 來源未提供三項產品的 order number、料號、可訂購狀態、量產日期、地區範圍、客戶導入、出貨證據或第三方認證。\n- 來源未提供 112 GT/s PAM4、64 GT/s PAM4 PCIe Gen 6、85/92Ohm、27A per power pin、150A to 5000A、45°C T-rise、224Gb/s、1.00mm connector de-mate 等數字的測試條件。\n- 來源未說明 `tooled and mass production ready`、`available`、`industry leading SI performance` 的定義、日期、比較對象或驗證方式。\n- 來源未說明圖中硬體模組 / 機板示意圖是否為真實產品、reference design、概念圖或行銷素材。\n- 來源未說明 [[Paladin HD2 224Gb-s Backplane Interconnect System]] 與 [[Paladin HD]] 的完整機構 / 電性相容條件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 7.md"
+          },
+          "score": 8.308355
+         },
+         {
+          "text": "HSD Cable test image 7 › 重點摘要\n[[HSD Cable test image 7]] 是未標示內容日期、由圖片轉出的 [[Amphenol Communications Solutions]] 產品 / 系統示意圖，主題是高速度、高功率連接器與背板互連方案，圖上列出三個編號產品：[[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]]、[[BarKlip Busbar Connectors]] 與 [[Paladin HD2 224Gb-s Backplane Interconnect System]]。\n\n- 來源原始圖片檔名：`HSD Cable test image 7.png`。\n- raw 轉檔時間：2026-09-04。\n- 來源未標示內容日期、發布日期、文件版本、型錄編號或 datasheet 版次。\n- 圖片類型是 product solution graphic / system diagram，不是市場份額、時間序列或統計圖表。\n- 左下角品牌文字標示：Amphenol、COMMUNICATIONS SOLUTIONS、WHERE INNOVATION MEETS INFRASTRUCTURE、SCAN TO LEARN MORE!。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 7.md"
+          },
+          "score": 4.082647
+         },
+         {
+          "text": "HSD Cable test image 7 › 與既有知識的關係\n- [[HSD Cable test image 7]] 與 [[HSD Cable test image 3]] 內容高度重疊，皆為 [[Amphenol Communications Solutions]] 同一類產品 / 系統示意圖，且三個產品編號 6、7、8 對應一致；見 [[HSD Cable test image 3 與 7 重複來源]]。\n- 本來源補充 / 重複支援 [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]] 的 112 GT/s PAM4、64 GT/s PAM4 PCIe Gen 6、0.6mm pitch、27A per power pin 與多種 connector options 圖上說法。\n- 本來源補充 / 重複支援 [[BarKlip Busbar Connectors]] 的 12V / 48V、150A to 5000A、45°C T-rise、ultrasonically welded 與 supplemental grounding 圖上說法。\n- 本來源補充 [[Paladin HD2 224Gb-s Backplane Interconnect System]]，並與既有頁面中從 [[HSD Cable test image 3]] 抄錄的 `coupled decoupled PCB launch` 形成讀圖差異；新來源可辨識為 `broadside coupled PCB launch`。\n- 本來源可補強 [[高速伺服器儲存互連]] 對 high-speed connector、busbar connector、backplane interconnect 的分類，但不可視為獨立市場驗證，因為它與 [[HSD Cable test image 3]] 高度重疊。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 7.md"
+          },
+          "score": 3.495753
+         },
+         {
+          "text": "HSD Cable test image 2 › 原文未解的問題\n- unresolved: 來源未標示內容日期、發布日期、年份、季度、型錄版本、文件編號或產品 datasheet 版次。\n- unresolved: `converted: 2026-09-04` 是轉檔日 / 取得日，不是內容日期。\n- unresolved: 來源未提供產品 order number、可訂購狀態、樣品 / 量產狀態、客戶導入案例、出貨量、營收、市占率或市場排名。\n- unresolved: 來源未提供 PCIe、CXL、PAM4、OSFP、QSFP DD、CDFP、NVME、SAS、SFP(+) 與 QSFP 等規格的測試條件、標準文件版次、合規證書或互通性測試資訊。\n- unresolved: 來源未說明 targeted for Gen 7 128GT/s 是否為 roadmap、設計目標、測試中能力或認證狀態。\n- unresolved: 來源未說明左側主圖代表真實產品、reference design、概念示意或行銷素材。\n- unresolved: QR code 對應目標頁面未在轉檔文字中解析。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 2.md"
+          },
+          "score": 12.897513
+         },
+         {
+          "text": "HSD Cable test image 2 › 與既有知識的關係\n- [[HSD Cable test image 1]] 已整理 [[Amphenol Communications Solutions]] 在 high-density server storage architectures 中的互連產品；本來源同樣是 Amphenol 產品型錄 / 示意圖，但產品清單改為 1–5 並新增 [[CoolPower HD Connector]]、[[Direct Attached Copper Cables]] 與 [[PCI Express Gen 6 CEM Card Edge Connectors]] 的更明確說法。\n- [[Amphenol CoolExpress Link]] 在 [[HSD Cable test image 1]] 中被描述為 EDSFF SFF-TA-1044 hybrid orthogonal PCIe Gen 5/6 cable connector；本來源補充 EDSFF E3 1C & 2C、dual-port、expandable to E3 4C、die-cast cage 與 hybrid design routes power / sideband 等說法。兩者未構成矛盾，但規格層次不同。\n- [[CXL 3.x]] 在 [[HSD Cable test image 1]] 與本來源都只出現在 [[Amphenol CoolExpress Link]] 的產品條列中；兩份來源都沒有提供 CXL 標準文件、合規測試、interoperability 或實際導入案例。\n- [[高速伺服器儲存互連]] 可把本來源視為 connector、cable connector、card edge connector、DAC 與 power connector 的產品型錄補充；不可把它推論為完整市場名單、供應鏈交易、出貨狀態或客戶採用證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 2.md"
+          },
+          "score": 8.679055
+         },
+         {
+          "text": "HSD Cable test image 2 › 重點摘要\n- 來源圖上沒有日期；本頁所有產品、規格、應用與速度 / 電流數字都只能視為來源未標示日期、取得於 2026-09-04 的圖上說法。\n- 圖左下標示 [[Amphenol]]、[[Amphenol Communications Solutions]]，並寫有 WHERE INNOVATION MEETS INFRASTRUCTURE 與 SCAN TO LEARN MORE!。\n- 來源不是統計圖表，沒有座標軸、數值刻度、時間序列、市占率、出貨量、營收、排名或客戶導入資料。\n- 左側主圖是伺服器或加速卡 / 運算板卡內部的 3D 產品配置示意圖，以編號 1–5 對應右側產品說明。\n- 圖上主打高速傳輸與高功率供電，涵蓋 [[PCIe Gen 5]]、[[PCIe Gen 6]]、[[PCIe Gen 7]]、[[CXL 3.x]]、[[EDSFF]]、[[PAM4]]、[[OSFP]]、[[QSFP DD]] 與 [[CDFP]] 等語彙。\n- 來源列出的數字包含 up to 128 Gb/s PAM4、PCIe Gen 4/5/6/7 over 1.0m、0.60mm pitch、100A to 350A per contact、112G、224G、200G / 400G / 800G / 1.6T、PCIe Gen 6 64GT/s 與 targeted for Gen 7 128GT/s。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 2.md"
+          },
+          "score": 3.63958
+         },
+         {
+          "text": "Data center server 高速互連產品組合 › 使用限制\n- 這是一份 Market 類產品 / solution guide 來源，但缺正式日期；所有主張需標示 `來源未標示正式日期`。\n- 來源未提供文件版次；不得把內容視為最新產品狀態。\n- 來源未提供 order number 或 datasheet 版次；產品名稱應作為 guide 中的圖上列名，而不是正式可訂購料號。\n- 來源未提供測試條件；速率、current rating、stack height、impedance、pin count 與 compliance 語彙只能視為來源文字宣稱。\n- 來源未提供市占率、出貨量或客戶名單；不可用來支持供應商 ranking、導入狀態或商業關係。\n- 來源與多個既有 Amphenol image / flyer 來源高度重疊；重複來源不可視為獨立市場驗證。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 12,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center server 高速互連產品組合.md"
+          },
+          "score": 12.014256
+         },
+         {
+          "text": "Data center server 高速互連產品組合 › Memory module sockets\n來源列出 memory module sockets，包含：\n\n- [[DDR5 Memory Module Sockets]]\n- [[DDR4 Ultra Low Profile]]\n- [[DDR4 Memory Module Sockets]]\n\n來源文字提到 DDR5 SMT memory module connector、high system-level shock and vibration testing、287-terminal / 288-pin、DDR4 vertical DIMM sockets、0.85mm pitch 與 2.4mm seat height；但未標示 JEDEC 版本或完整 socket 型號。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center server 高速互連產品組合.md"
+          },
+          "score": 9.216063
+         },
+         {
+          "text": "Data center server 高速互連產品組合 › Power connectors / power cables\n來源列出 power connectors 與 power cables，包含：\n\n- [[AirMax Power Connectors]]\n- [[Minitek Pwr 4.2 High Current Connector]]\n- [[PwrBlade MiniMezz Connector Series]]\n- [[Minitek Pwr 3.0 Connector System]]\n- [[PwrBlade ULTRA Connector System]]\n- [[OCP ORv3 AC Input Cable Assemblies]]\n- [[Minitek Pwr 5.7 Connector System]]\n- [[PwrBlade+ Cable Connectors]]\n- [[Minitek Pwr CEM-5 PCIe Connector]]\n\n來源列出若干 current rating、stack height、wire gauge 與 GPU power connector 語彙，例如 13A per contact、5A per circuit、>200A、24% height reduction、16AWG–12AWG、28A、12VHPWR、12V-2x6、600W GPU cards；但未提供完整測試條件、熱條件或 UL / safety 認證文件。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center server 高速互連產品組合.md"
+          },
+          "score": 6.519459
+         },
+         {
+          "text": "336G SerDes › 來源中的說法\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 6]]（來源未標示日期；取得於 2026-09-04；表內時程 4Q27）列出 [[TPU v8e]] 的 I/O 晶粒製程為 3奈米 336G SerDes。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 6]]（來源未標示日期；取得於 2026-09-04；表內時程 2028）列出 [[TPU v9]] 的 I/O 晶粒製程為 3奈米 336G SerDes。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/336G SerDes.md"
+          },
+          "score": 1.951953
+         },
+         {
+          "text": "336G SerDes › 使用限制\n- 來源沒有說明 336G 的單位、lane 數、單 lane 速率、aggregate 速率、PAM4 / NRZ、FEC、reach、功耗或測試條件。\n- 來源沒有說明 336G SerDes 的 IP 供應商、標準版本或連接對象。\n- 來源沒有說明 3奈米 336G SerDes 是否對應 [[聯發科]] 的 I/O 設計服務範圍；不可自行推論。\n- 本頁不把 336G SerDes 與既有 [[SerDes]] 頁中的 [[XSR PHY]]、[[D2D PHY]]、[[Optical I-O]] 或 [[CPO]] 自動連結為同一規格。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/336G SerDes.md"
+          },
+          "score": 0.981853
+         },
+         {
+          "text": "336G SerDes › 未決事項\n- 來源未標示 336G SerDes 的技術規格、標準組織、產品名稱或供應商。\n- 來源未標示 3奈米的晶圓代工廠、節點版本或製程條件。\n- 來源未說明 [[TPU v8e]] 與 [[TPU v9]] 的 I/O 晶粒是否使用相同 SerDes IP 或不同版本。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/336G SerDes.md"
+          },
+          "score": 0.969289
+         },
+         {
+          "text": "Data center full-spectrum connectivity › 相關來源\n- [[full-spectrum-data-center-connectivity-brochure]] — 來源未標示正式日期、raw converted 2026-09-17 的 Amphenol full-spectrum data center connectivity brochure。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+          },
+          "score": 1.857678
+         },
+         {
+          "text": "Data center full-spectrum connectivity\n[[Data center full-spectrum connectivity]] 是 [[full-spectrum-data-center-connectivity-brochure]] 呈現的 portfolio 視角：把 AI / data center 的 high-speed electrical interconnect、optical interconnect、fiber deployment、rack power distribution、busbar、liquid cooling 與 leak detection 放在同一張 data center connectivity brochure 中。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+          },
+          "score": 1.758064
+         },
+         {
+          "text": "Data center full-spectrum connectivity › Optical 與 fiber connectivity\n- [[Amphenol XPO-LPO]] — 來源稱其以 224 Gb/s per lane across 64 channels，面向 AI scale-up deployments。\n- [[1.6T OSFP Transceivers]] — 來源稱 Amphenol 200G/lane optical modules support DR4、FR4、2×DR4、2×FR4、AOC、breakout AOC configurations with LC or MPO ports。\n- [[Amphenol Co-packaged Optics]] — 來源稱 Amphenol offers an architecture from high-density electrical interposer to linear optical conversion module to fiber plant。\n- [[LEAP On-Board Transceiver]] — 來源稱其為 12-channel duplex optical transceiver，up to 25Gbps per channel，300Gbps cumulative on multi-mode fiber。\n- [[300G CXP2 Active Optical Cable]] — 來源稱 CXP2 to CXP2 AOC provides cost-effective plug and play cabling solution，delivers high hardware faceplate port density among existing SFF industry standards。\n- [[CommScope Rapid Fiber Connect Platform]] — 來源稱其 simplifies and accelerates AI scaling by pre-integrating optics off-site and reducing on-site fiber connections。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+          },
+          "score": 1.733989
+         },
+         {
+          "text": "Data center full-spectrum connectivity › Power 與 cooling connectivity\n- [[Amphenol BarKlip I-O products]] / [[BarKlip Busbar Connectors]] — 來源稱其 distribute high-current power between busbars、cables and circuit boards，適用 power-dense data centers、OCP rack and power solutions。\n- [[60 A Universal AC Input Connector and Cable Assemblies]] — 來源稱其 meet 2OU power distribution architecture standards，將 power 從 busway routing 到 power shelf。\n- [[M-CRPS +54V Connectors and Cable Assemblies]] — 來源稱其 meet OCP M-CRPS power supply input specifications。\n- [[PwrBlade ULTRA HD+ Cable Assembly]] — 來源稱其 Cable-to-Board serves as high-power I/O cable configuration in a low-profile design。\n- [[OSFP-RHS 224G Cold Plate and Cage Assembly]] — 來源稱其 optimizes port thermal efficiency and reliability，meeting MSA requirements，並提供 one-step press assembly。\n- [[Amphenol Liquid Cooling Leakage Detection Sensor Cable Assembly]] — 來源稱其 detects coolant leaks and ensures system reliability。\n- [[Liquid Cooling Quick Disconnect Connectors]] — 來源稱其用於 high-efficiency thermal management。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+          },
+          "score": 1.581072
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 3.083958
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 可追溯限制\n- 本來源是 lossy markdown derivative，多數圖像未 OCR；不可把未擷取的圖片內容當成已驗證主張。\n- Slide 11 的頁腳日期 **6/13/2025** 與封面日期 **2026.3.4** 並存，未能判定何者是內容日期。\n- 本頁不推論 R&S 具備所有列名儀器或方案，也不把儀器類型轉換成正式 product configuration。\n- 本頁不提供 [[Signal Integrity]]、[[Power Integrity]] 或 [[SerDes]] 的標準定義；只保存來源明示的測試區塊與儀器類型。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 2.921983
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽\n[[SerDes 與 SI PI 測試概覽]] 是依 [[0 Digital Test - What are SIPI and Serdes]] 建立的 high-speed digital 測試主題頁，用來連接 [[SerDes]]、[[Signal Integrity]]、[[Power Integrity]]、[[PCB]] / [[PCBA]] 與相關驗證儀器類型。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 1.799379
+         },
+         {
+          "text": "SerDes 與 SI PI 測試概覽 › 相關來源\n- [[0 Digital Test - What are SIPI and Serdes]] — 2026.3.4 的 R&S / RSTW high-speed digital 測試簡報來源摘要。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+          },
+          "score": 0.120992
+         },
+         {
+          "text": "AISeverEcosystem R&S solution mapping › 未決事項\n- `unresolved`: [[ZISO]]、[[OSP]]、PSA、[[ThinkLands]]、[[GOCA]]、[[Newkey]]、BMS test 在本來源中未展開正式名稱、版本或配置。\n- `unresolved`: Sales kits 連結需要後續擷取簡報正文，才能確認 solution package、scope 與限制。\n- `unresolved`: [[R&S ZNL]]、[[MXO]]、[[R&S FSWP]]、[[R&S ZNA]]、[[R&S ZNB]]、[[R&S ZNA67EXT]] 在此表中的對應未提供 option / firmware / fixture / calibration 條件。\n- `unresolved`: 來源未說明這份 mapping 是市場研究、sales targeting、account plan、training material 還是個人筆記。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+          },
+          "score": 7.520985
+         },
+         {
+          "text": "AISeverEcosystem R&S solution mapping › 來源中的 mapping\n| 分類 | 對象 / 企業欄 | 來源中的 R&S Solution | 來源日期 / 期間 | 限制 |\n|---|---|---|---|---|\n| [[IC]] / 矽智財 / 製程 | [[智原]] | [[R&S ZNA]] + [[R&S ZNA67EXT]]、[[R&S FSWP]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明量測對象是 SerDes、jitter、phase noise、probe station 或 wafer / package |\n| [[測試介面]] | [[旺矽]] | [[R&S ZNA67EXT]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明 probe card / socket / fixture / frequency range |\n| 高速傳輸 IC | [[譜瑞-KY]] | [[R&S ZNA]] + [[R&S FSWP]] | 來源未標示正式日期；raw converted 2026-09-17 | 未說明高速傳輸 IC 類型、SerDes 速率或測試項目 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+          },
+          "score": 4.363619
+         },
+         {
+          "text": "AISeverEcosystem R&S solution mapping › 可追溯限制\n- 本頁只追溯到 [[AISeverEcosystem]] 的 Excel 轉檔內容。\n- 來源未標示正式日期，因此本頁不可用來判斷 2026-09-18 當下市場狀態或客戶優先順序。\n- [[R&S Solution]] 欄不是 formal datasheet、application note、configuration guide 或 ordering guide；不得據此報價或建立正式測試配置。\n- 表內 SharePoint sales kit 連結未擷取正文；目前只可作為待讀材料索引。\n- 公司列名與 solution 同列不代表該公司已購買、正在評估、已合作、已導入、已被拜訪或為 R&S 客戶。\n- 表內 `NaN` 不代表無 solution 或無商機，只代表轉檔來源該欄未提供可讀文字。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 9,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+          },
+          "score": 4.327888
+         },
+         {
+          "text": "AISeverEcosystem R&S solution mapping › Power integrity / power rail / PDN\n- [[R&S ZNL]] 被列為 PDN Target Z 線索。\n- [[MXO]] 被列於 power rail、multiphase DC、PI，以及 motor driver analysis。\n- [[ZISO]] 在 [[伺服器主機板]]與[[電源供應器]]分類出現，但來源未展開其正式名稱或用途。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+          },
+          "score": 4.137295
+         },
+         {
+          "text": "AISeverEcosystem R&S solution mapping\n[[AISeverEcosystem R&S solution mapping]] 是用來保存 [[AISeverEcosystem]] 中 AI server ecosystem 分類與 [[R&S Solution]] 欄位對應關係的概念頁；它只表示該 Excel 表中的銷售 / 測試方案線索，不代表正式產品配置、客戶關係或已驗證商機。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+          },
+          "score": 3.670905
+         },
+         {
+          "text": "AI 伺服器 PCB 供應鏈升級 › 未決事項\n- [[AI Server PCB test image 4]] 未標示內容日期、年份、季度或資料期間。\n- [[AI Server PCB test image 4]] 未標示 TPCA Show 的年份、場次或展會期間。\n- [[AI Server PCB test image 4]] 未說明量產的定義、量產時間、出貨量、平台規格或供應鏈名單。\n- [[AI Server PCB test image 4]] 未說明 HVLP銅箔第4、5代的技術定義或供應商。\n- [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 皆未標示發布日期、報告名稱、頁碼、網址或文件版次。\n- [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 未定義 GB200 / GB300 / VR200 的試產、量產、樣機與放量。\n- [[HSD PCB image 11]] 未說明載板供應商、CCL 材料供應商、PCB 供應商百分比的分母、期間、地區、平台範圍或樣本來源。\n- [[HSD PCB image 11]] 未說明南亞完整公司名稱、交期數字或供應狀態。\n- [[HSD PCB image 11]] 未說明 `盧森堡` 在銅箔欄中的公司 / 地區 / 實體指涉。\n- [[HSD PCB image 11]] 與 [[HSD PCB image 1]] 在南亞交期、GB200 / GB300 ComputeTray PCB 供應商欄與「單擴 / 單擋版本採用M7」有讀圖差異。\n- [[HSD PCB image 11]] 中 VR200 CPX 的 PCB 供應商欄為「無法辨識」。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+          },
+          "score": 4.35719
+         },
+         {
+          "text": "AI 伺服器 PCB 供應鏈升級 › 來源中的說法\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）標題為「PCB供應鏈升級重點」。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 AI伺服器趨勢推升 [[PCB]] 邁向高層數、大面積與高速傳輸，供應鏈全面翻新。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 [[AWS Trainium 2 Max]]、[[Google TPU V6]]、[[Meta MTIA 2]] 量產，並稱 2026年新平台將陸續推出。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 [[HVLP銅箔]] 進入第4、5代，[[CCL]] 以 [[M8]] 為主，導入低介電、低損耗與高散熱設計。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱主板層數達 30～40 層，縱深比需達 12～14 倍，並需應對厚銅、雷射鑽孔等高階製程。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 TPCA Show 焦點聚焦玻纖布、HVLP銅箔、CCL 發展與高縱深比設備，反映材料與製程全面升級。\n- [[HSD PCB image 1]]（來源發布日期未標示；取得於 2026-09-04）以「GB200/GB300/VR200規格：南亞和臻鼎為亮點」為標題，比較 [[GB200]] NVL72(72GPU)、[[GB300]] NVL72(72GPU) 與 [[VR200]] NVL144(72GPU) 的時間、製程、功耗、載板、CCL 材料、上游材料、ComputeTray、NVSwitch Tray、CPX 與 Midplane。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）與 [[HSD PCB image 1]] 高度重疊，同樣以「GB200/GB300/VR200規格：南亞和臻鼎為亮點」為標題，右上角標示「資料來源：產業調研、福邦投顧整理」。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[GB200]] / [[GB300]] ComputeTray 為 **5層22L**，[[VR200]] ComputeTray 為 **6層26L**；[[GB200]] / [[GB300]] NVSwitch Tray 為 **24L HLC**，[[VR200]] NVSwitch Tray 為 **32L (N+N HLC)**，[[VR200]] Midplane 為 **44L(N+N HLC)**。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[GB300]] 使用 **HVLP3銅箔**，[[VR200]] 使用 **HVLP4銅箔**，並將 [[VR200]] 交換板 CCL 材料列為 **M8(LDK2+HVLP4) 生益科技/台光電/南亞(交期最快)**。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[VR200]] ComputeTray PCB 供應商 / 占比為 **欣興35~40% > 臻鼎25~30% = 勝宏25~30%**。\n\n⚠️ [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）說 [[VR200]] 交換板 CCL 材料供應為「生益科技/台光電/南亞(交期最快)」，但既有頁面 [[AI 伺服器 PCB 供應鏈升級]] 說 [[HSD PCB image 1]] 的對應欄位為「生益科技/台光電/南亞(交期最長)」。判斷：最快 / 最長方向相反，影響對 [[南亞]] 供應鏈定位的解讀；在回看原圖前不得擇一。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+          },
+          "score": 2.088095
+         },
+         {
+          "text": "AI 伺服器 PCB 供應鏈升級 › 來源中的說法\n⚠️ [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）說 [[GB200]] ComputeTray 的 `PCB供應商/欣興` 欄為「無」，但既有頁面 [[AI 伺服器 PCB 供應鏈升級]] 說 [[HSD PCB image 1]] 的 GB200 / GB300 ComputeTray 供應商欄曾整理為「勝宏? / 欣興」。判斷：此處至少對 [[GB200]] 構成讀圖差異；需回看原圖確認，不可把「無」改寫成「無供應商」或「欣興無供應」。\n\n⚠️ [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）說 [[VR200]] CPX 欄為「單擴版本採用M7」，但既有頁面 [[AI 伺服器 PCB 供應鏈升級]] 說 [[HSD PCB image 1]] 為「單擋版本採用M7」。判斷：疑似 OCR / 讀圖差異；在人工裁決前保留兩種字樣。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+          },
+          "score": 2.013349
+         },
+         {
+          "text": "AI 伺服器 PCB 供應鏈升級 › 相關來源\n- [[AI Server PCB test image 4]] — 未標示日期的「PCB供應鏈升級重點」表格，整理 AI伺服器趨勢、ASIC平台進展、材料升級方向、製程挑戰與 TPCA Show 焦點。\n- [[HSD PCB image 1]] — 來源發布日期未標示、取得於 2026-09-04 的 GB200 / GB300 / VR200 規格比較表。\n- [[HSD PCB image 11]] — 來源發布日期未標示、raw 轉換於 2026-09-04 的 GB200 / GB300 / VR200 規格比較表。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+          },
+          "score": 1.027116
+         },
+         {
+          "text": "AI 伺服器 PCB 供應鏈升級 › 與既有知識的關係\n- [[CCL 產品規格分級]] 記錄既有來源中的 M6 / M7 / M8 分級、[[Df]] 範圍與公司產品狀態；本頁新增的是 [[AI Server PCB test image 4]] 對 AI server PCB 供應鏈升級方向中的 M8 說法，以及 [[HSD PCB image 1]] / [[HSD PCB image 11]] 對 GB200 / GB300 / VR200 CCL 材料欄的 M8、M7、LDK、LDK2、HVLP3、HVLP4 說法。\n- [[AI 伺服器 PCB 原物料台日韓供應鏈]] 記錄 [[TrendForce]]（Nov., 2025）對原材料、CCL、PCB、EMS 與下游 AI伺服器的供應鏈分類；本頁不把 [[HSD PCB image 11]] 的供應商列名與 TrendForce 圖表合併為同一口徑。\n- [[GB200]]、[[GB300]] 與 [[VR200]] 分別記錄 [[HSD PCB image 1]] 與 [[HSD PCB image 11]] 中三個平台欄位的具體說法。\n- [[HSD PCB image 1 與 11 規格比較表差異]] 專門保存兩份高度重疊來源的讀圖差異。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+          },
+          "score": 0.218932
+         },
+         {
+          "text": "AI 資料中心基礎設施 › 來源中的說法\n- [[0. AI Data Center image 3]]（來源未標示日期）沒有座標軸、單位、趨勢線、數據比較或表格，因此此頁不將其解讀為市場規模、出貨量、占比、成長率或產品性能數值證據。\n- [[0. AI Data Center image 3]]（來源未標示日期）沒有可辨識的公司名稱、具體產品名稱或型號，因此此頁不把圖中的資料中心、機櫃、電塔或電子設備機箱視為特定供應商、產品線或型號。\n- [[0. AI Data Center image]]（來源未標示日期）以資料中心 / 機房解決方案示意圖呈現一套整合基礎設施組成，分類包含 [[Power Management]]、[[Rack & Accessories]]、[[Management System]]、[[Precision Cooling]] 與 [[Service]]。\n- [[0. AI Data Center image]]（來源未標示日期）在 [[Power Management]] 下列出 5 個項目：[[UPS]]、[[Power Distribution Unit]]、[[Rack-Mount Remote Power Panel]]、[[Rack Power Distribution Unit]]、[[Rack-Mount Static Transfer Switch]]。\n- [[0. AI Data Center image]]（來源未標示日期）在 [[Rack & Accessories]] 下列出 2 個項目：[[Modular Rack]] 與 [[Rack Accessories]]。\n- [[0. AI Data Center image]]（來源未標示日期）在 [[Management System]] 下列出 3 個項目：[[InfraSuite Manager]]、[[EnviroStation]]、[[EnviroProbe]]。\n- [[0. AI Data Center image]]（來源未標示日期）在 [[Precision Cooling]] 下列出 1 個項目：[[RowCool]]。\n- [[0. AI Data Center image]]（來源未標示日期）在 [[Service]] 下列出 [[System Design and Planning]] 與 [[Rapid and Comprehensive Services]]。\n- [[0. AI Data Center image]]（來源未標示日期）沒有座標軸、單位、統計數據、時間序列、數值比較或趨勢線，因此此頁不將其解讀為市場規模、出貨量、占比、成長率或產品性能數值證據。\n- [[0. AI Data Center image]]（來源未標示日期）未明確出現公司名；若有品牌標誌，來源文字標示為無法辨識，因此此頁不將 InfraSuite Manager、EnviroStation、EnviroProbe、RowCool 等名稱歸屬於特定供應商或產品線。\n- [[4 AI Data Center Eco-Chain image 1]]（12/10/2025，日期格式未標示）以 **Ecosytem** 為標題，將 AI / datacenter / server / semiconductor / peripheral 相關企業與品牌整理在 ecosystem map 中。\n- [[4 AI Data Center Eco-Chain image 1]]（12/10/2025，日期格式未標示）列出上方分類：[[Cloud Service]]、[[Datacenter]]、[[AI Server]]、[[Power]]、[[Cooling]]、[[Security]]。\n- [[4 AI Data Center Eco-Chain image 1]]（12/10/2025，日期格式未標示）在 [[Compute]] 下列出 [[IP Core]]、[[CPU]]、[[GPU]]、[[Special AI Chips]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+          },
+          "score": 9.155687
+         },
+         {
+          "text": "AI 資料中心基礎設施 › 未決事項\n- [[4 AI Data Center Eco-Chain image 1]] 中 Azure、Google Cloud、Vertiv、Microsoft、Qualcomm、Source Photonics 等部分項目以 logo 或單字母呈現，完整文字無法辨識或未清楚顯示。\n- [[4 AI Data Center Eco-Chain image 1]] 中星號代表意義未說明。\n- [[0. AI Data Center image 1]]、[[0. AI Data Center image 2]]、[[0. AI Data Center image 3]] 與 [[0. AI Data Center image]] 是否來自同一份簡報、同一供應商或同一敘事脈絡，來源未標示。\n- [[4 AI Data Center Eco-Chain image 1]] 是否與前四張 AI Data Center image 來源來自同一份簡報、同一供應商或同一敘事脈絡，來源未標示。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 12,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+          },
+          "score": 7.339875
+         },
+         {
+          "text": "AI 資料中心基礎設施 › 未決事項\n- [[0. AI Data Center image 1]] 來源未標示日期；不得將圖中敘事寫成特定時間點的市場現況。\n- [[0. AI Data Center image 2]] 來源未標示日期；不得將圖中列出的 solution components 寫成特定時間點的市場現況、導入狀態或供應鏈狀態。\n- [[0. AI Data Center image 3]] 來源未標示日期；不得將圖中敘事寫成特定時間點的市場現況。\n- [[0. AI Data Center image]] 來源未標示日期；不得將圖中列出的 solution components 寫成特定時間點的市場現況、導入狀態或供應鏈狀態。\n- [[4 AI Data Center Eco-Chain image 1]] 頁尾日期為 12/10/2025，但日期格式未標示；不得推論為 2025-12-10 或 2025-10-12。\n- [[0. AI Data Center image 1]] 來源未標示發布者或公司；不得推論此圖代表某特定廠商觀點。\n- [[0. AI Data Center image 2]] 來源未標示公司名稱、發布者、品牌或可辨識 logo；不得推論 InfraSuite Manager、EnviroStation、EnviroProbe、RowCool 等名稱的供應商歸屬。\n- [[0. AI Data Center image 3]] 來源未標示公司名稱、發布者、品牌或可辨識 logo；不得推論此圖代表某特定廠商觀點。\n- [[0. AI Data Center image]] 來源未標示公司名稱、發布者、品牌或可辨識 logo；不得推論 InfraSuite Manager、EnviroStation、EnviroProbe、RowCool 等名稱的供應商歸屬。\n- [[4 AI Data Center Eco-Chain image 1]] 未標示圖中公司是否為 R&S 往來對象、外部市場參與者、範例名單或內部關注名單。\n- [[0. AI Data Center image 1]] 來源未標示產品或型號；不得推論圖中設備為特定產品線。\n- [[0. AI Data Center image 2]] 來源未標示產品型號或文件版次；不得推論圖中設備為特定型號。\n- [[0. AI Data Center image 3]] 來源未標示具體產品名稱或型號；不得推論圖中設備為特定產品線或型號。\n- [[0. AI Data Center image]] 來源未標示產品型號或文件版次；不得推論圖中設備為特定型號。\n- [[4 AI Data Center Eco-Chain image 1]] 未標示任何產品型號或文件版次；不得把圖中品牌名稱推論成特定產品型號。\n- [[0. AI Data Center image 2]] 中編號 2 or 3 在圖中以同一指示區域呈現，來源未能清楚區分 [[Power Distribution Unit]] 與 [[Rack-Mount Remote Power Panel]] 在圖上的個別位置。\n- [[0. AI Data Center image]] 中編號 2 or 3 在圖中以同一指示區域呈現，來源未能清楚區分 [[Power Distribution Unit]] 與 [[Rack-Mount Remote Power Panel]] 在圖上的個別位置。\n- [[0. AI Data Center image 3]] 中建築外側線路與鎖頭圖示是否代表 cybersecurity、network security、physical security 或其他安全概念，來源未明示。\n- [[0. AI Data Center image 3]] 中上方小型建築群代表資料中心園區、外部設施群、城市、客戶端基礎設施或其他場景，來源未明示。\n- [[0. AI Data Center image 3]] 中右上設備機箱代表運算、網路、硬體設備或特定測試 / 供電設備，來源未明示。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 11,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+          },
+          "score": 7.126606
+         },
+         {
+          "text": "AI 資料中心基礎設施 › 上方區塊\n| 分類 | 圖上列名 | 日期 |\n|---|---|---|\n| [[Cloud Service]] | aws、SAP、Oracle；Microsoft Azure 與 Google Cloud 以 logo 呈現但完整文字未清楚顯示 | 12/10/2025 |\n| [[Datacenter]] | Google、aws、Meta、IBM | 12/10/2025 |\n| [[AI Server]] | DELL、SUPERMICRO、HYGON、H3C、Lenovo | 12/10/2025 |\n| [[Power]] | ABB、Schneider Electric | 12/10/2025 |\n| [[Cooling]] | ABB、legrand；另有中間黑白圖樣品牌名稱無法辨識 | 12/10/2025 |\n| [[Security]] | e-shelter security、Securitas | 12/10/2025 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 6,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+          },
+          "score": 6.200322
+         },
+         {
+          "text": "AI 資料中心基礎設施 › AI data center ecosystem map（12/10/2025）\n以下僅整理 [[4 AI Data Center Eco-Chain image 1]]（12/10/2025，日期格式未標示）圖上分類與列名，不代表 R&S 往來對象、採購名單、客戶名單、供應鏈上下游關係或市場排名。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+          },
+          "score": 5.809923
+         },
+         {
+          "text": "4 AI Data Center Eco-Chain image 9 › Compute\n| 子分類 | 圖上可辨識列名 | 日期 |\n|---|---|---|\n| [[IP Core]] | [[ARM]]、[[synopsys]]、[[Cambricon]]、[[VeriSilicon]] | 12/10/2025 |\n| [[CPU]] | [[UNISOC]]、[[intel]]、[[LOONGSON]]、[[AMD]] | 12/10/2025 |\n| [[GPU]] | 逐字抄錄段落列 [[NVIDIA]]、[[Enflame]]、[[META X]]；結構化整理表另列 [[AMD]] | 12/10/2025 |\n| [[Special AI Chips]] | G、Q；另有 Meta、Microsoft logo，但來源要求不補猜 | 12/10/2025 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/4 AI Data Center Eco-Chain image 9.md"
+          },
+          "score": 3.00081
+         },
+         {
+          "text": "4 AI Data Center Eco-Chain image 9 › 上方區塊\n| 分類 | 圖上可辨識列名 | 日期 |\n|---|---|---|\n| [[Cloud Service]] | aws、[[SAP]]；其他雲服務圖示無額外可辨識文字 | 12/10/2025 |\n| [[Datacenter]] | [[Google]]、[[Meta]]、[[IBM]]；結構化整理表另列 aws | 12/10/2025 |\n| [[AI Server]] | [[DELL]]、[[SUPERMICRO]]、[[HYGON]]、[[H3C]]、[[Lenovo]] | 12/10/2025 |\n| 上排 [[Power]] | [[ABB]]、[[Schneider Electric]] | 12/10/2025 |\n| [[Cooling]] | [[legrand]]；中間兩個圖示文字無法辨識或無文字 | 12/10/2025 |\n| [[Security]] | [[Securitas]]、[[e-shelter security]] | 12/10/2025 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/4 AI Data Center Eco-Chain image 9.md"
+          },
+          "score": 1.537139
+         },
+         {
+          "text": "4 AI Data Center Eco-Chain image 9 › Periphery\n| 子分類 | 圖上可辨識列名 | 日期 |\n|---|---|---|\n| [[HDD]] | [[SEAGATE]]、[[WD]]、[[TOSHIBA]] | 12/10/2025 |\n| [[SSD]] | [[SanDisk]]、[[SK hynix]]、[[micron]] | 12/10/2025 |\n| 下排 [[Power]] | [[EMERSON]]、[[DELTA]]、[[歐陸通]]、[[HONTO]] | 12/10/2025 |\n| [[PMIC]] | Q、[[TEXAS INSTRUMENTS]]、[[VISHAY]] | 12/10/2025 |\n| [[PCB]] | [[samtec]]、[[TRIPOD]]、[[YAZAKI]]、[[YAMAHA]]、[[JAE]]、[[HRS]] | 12/10/2025 |\n| [[HS connection]] | [[Amphenol]]、[[molex]]、[[TE connectivity]]、[[LUXSHARE]]、[[KINGSIGNAL]]、[[Rosenberger]] | 12/10/2025 |\n| [[Optical Module]] | [[INNO LIGHT]]、[[AcceLink]]、[[CIG]]、[[FUJITSU]]、[[Gigalight]]；中間圓形 logo 旁小字無法辨識 | 12/10/2025 |\n| [[Switch]] | [[ARISTA]]、[[cisco]] | 12/10/2025 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/4 AI Data Center Eco-Chain image 9.md"
+          },
+          "score": 0.200778
+         },
+         {
+          "text": "full-spectrum-data-center-connectivity-brochure › 重點摘要\n- 本來源是由 `full-spectrum-data-center-connectivity-brochure.pdf` 轉出的 lossy derivative；原檔路徑在 raw frontmatter 中標示，正式內容日期、文件編號與版本未標示。\n- 來源以 [[Amphenol Communications Solutions]] / amphenol-cs.com 的 data center connectivity portfolio 為主，涵蓋 high-speed I/O、backplane、mezzanine、optical、CPO / NPO、fiber deployment、rack power input、busbar power distribution、liquid cooling 與 leak detection。\n- High-speed electrical interconnect 方面，來源列出 [[Amphenol OverPass Cable Systems]]、[[ExtremePort OSFP Connectors]]、[[Amphenol XtremePass]]、[[OSFP Cable Assemblies]]、[[Sentry HD High-Speed Backplane Connector]] 與 [[Celerity 224 Gb-s BGA Mezzanine Connectors]]。\n- Optical connectivity 方面，來源列出 [[Amphenol XPO-LPO]]、[[1.6T OSFP Transceivers]]、[[Amphenol Co-packaged Optics]]、[[LEAP On-Board Transceiver]]、[[300G CXP2 Active Optical Cable]] 與 [[CommScope Rapid Fiber Connect Platform]]。\n- Power 與 cooling 方面，來源列出 [[BarKlip Busbar Connectors]] / [[Amphenol BarKlip I-O products]]、[[60 A Universal AC Input Connector and Cable Assemblies]]、[[M-CRPS +54V Connectors and Cable Assemblies]]、[[PwrBlade ULTRA HD+ Cable Assembly]]、[[OSFP-RHS 224G Cold Plate and Cage Assembly]]、[[Amphenol Liquid Cooling Leakage Detection Sensor Cable Assembly]] 與 [[Liquid Cooling Quick Disconnect Connectors]]。\n- 來源底部以圖上清單方式列出多個既有 Amphenol connector 類別：[[CompacLink PCIe Gen 6 Compression Board-to-Board Connectors]]、[[SOCAMM and LPCAMM CAMM2 Connectors]]、[[Mini Cool Edge IO]] / [[Multi-Trak]]、[[Titen]]、[[Cool Express Link]]、[[DDR5 and Next Gen Memory Connector]]、[[Double & Single Density Mini Cool Edge]]、[[U.2 SFF8639]]、[[PCIe CEM 7 Connectors]]、[[Direct Attached PCIe CEM Cable Connectors]] 等。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/full-spectrum-data-center-connectivity-brochure.md"
+          },
+          "score": 1.665079
+         },
+         {
+          "text": "Amphenol XtremePass › 相關來源\n- [[full-spectrum-data-center-connectivity-brochure]] — Amphenol full-spectrum data center connectivity brochure，來源未標示正式日期。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amphenol XtremePass.md"
+          },
+          "score": 0.743395
+         },
+         {
+          "text": "Amphenol XtremePass › 來源中的說法\n- [[full-spectrum-data-center-connectivity-brochure]]（來源未標示日期；raw converted 2026-09-17）在 high-speed I/O / XtremePass 區塊寫有 `XtremePass™448G connector solution`。\n- 來源稱該 solution delivers best-in-class SI performance while maximizing density on the substrate。\n- 來源稱其 supports scalable form factors from 32DP to 128DP。\n- 來源稱其 offers seamless integration across Ethernet、[[NVLink]]、[[PCIe]] and [[InfiniBand]] systems。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amphenol XtremePass.md"
+          },
+          "score": 0.524225
+         },
+         {
+          "text": "Amphenol OverPass Cable Systems › 相關來源\n- [[full-spectrum-data-center-connectivity-brochure]] — Amphenol full-spectrum data center connectivity brochure，來源未標示正式日期。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amphenol OverPass Cable Systems.md"
+          },
+          "score": 0.727559
+         },
+         {
+          "text": "Amphenol OverPass Cable Systems\n[[Amphenol OverPass Cable Systems]] 是 [[full-spectrum-data-center-connectivity-brochure]] 中列出的 high-speed I/O OverPass cable system，來源描述其讓 high-speed signal 從 ASIC packages 傳輸到 system endpoints。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Amphenol OverPass Cable Systems.md"
+          },
+          "score": 0.674994
+         },
+         {
+          "text": "HSD Cable test image 3 › 原文未解的問題\n- unresolved: 來源未標示內容日期、發布日期、年份、季度、型錄版本、文件編號或產品 datasheet 版次。\n- unresolved: `converted: 2026-09-04` 是轉檔日 / 取得日，不是內容日期。\n- unresolved: 來源寫有 tooled and mass production ready、mass production-ready 與 available，但未標示日期、量產定義、可訂購地區、料號、客戶導入或出貨證據。\n- unresolved: 來源未提供 PCIe Gen 6、112 GT/s PAM4、64 GT/s PAM4、224Gb/s、150A to 5000A、45°C T-rise、27A per power pin、85/92Ohm 等數字的測試條件、合規證書、測試方法或標準文件版次。\n- unresolved: 來源未說明左側系統圖代表真實產品、reference design、概念示意或行銷素材。\n- unresolved: QR code 對應的目標頁面未在轉檔文字中解析。\n- unresolved: 來源未提供客戶、導入案例、出貨量、營收、市占率、排名或供應鏈交易證據。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 3.md"
+          },
+          "score": 5.825463
+         },
+         {
+          "text": "HSD Cable test image 3 › 可擷取的規格資訊\n| 項目 | 圖上文字 | 日期 |\n|---|---|---|\n| [[Paladin HD2 224Gb-s Backplane Interconnect System]] | Industry leading SI performance supporting 224Gb/s data rates | 來源未標示日期 |\n| [[Paladin HD2 224Gb-s Backplane Interconnect System]] | Revolutionary hybrid board attach technology to enable coupled decoupled PCB launch while maintaining density advantage | 來源未標示日期 |\n| [[Paladin HD2 224Gb-s Backplane Interconnect System]] | Impedance control over 1.00mm connector de-mate | 來源未標示日期 |\n| [[Paladin HD2 224Gb-s Backplane Interconnect System]] | Backwards compatible with Paladin HD for direct upgrade path | 來源未標示日期 |\n| [[Paladin HD2 224Gb-s Backplane Interconnect System]] | Exceptional density to maximize signal count and minimize air flow restrictions | 來源未標示日期 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 3.md"
+          },
+          "score": 3.09931
+         },
+         {
+          "text": "HSD Cable test image 3 › 可擷取的規格資訊\n| 項目 | 圖上文字 | 日期 |\n|---|---|---|\n| [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]] | 112 GT/s PAM4 | 來源未標示日期 |\n| [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]] | High-speed 64 GT/s PAM4 PCIe Gen 6 | 來源未標示日期 |\n| [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]] | 112 GT/s PAM4 85/92Ohm for Ethernet applications are tooled and mass production ready | 來源未標示日期 |\n| [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]] | Supports EDSFF, SFF-TA-1002 (1006/1007/1008/1020/1021), OCP NIC 3.0, DC-SCM, and JEDEC specifications | 來源未標示日期 |\n| [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]] | Hybrid connector with signal pin pitch at 0.6mm and 4 power pins at 27A per power pin | 來源未標示日期 |\n| [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]] | Vertical, right-angle, straddle-mount, and orthogonal connector options with high-speed cable are available | 來源未標示日期 |\n| [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]] | Tooled and mass production-ready: customizable pin count connector for application-specific AIC and host board thickness | 來源未標示日期 |\n| [[BarKlip Busbar Connectors]] | Supports 12V and 48V architecture | 來源未標示日期 |\n| [[BarKlip Busbar Connectors]] | Ultra-low resistance at end-of-life conditions | 來源未標示日期 |\n| [[BarKlip Busbar Connectors]] | Wide product portfolio accommodating current ratings of 150A to 5000A (45°C T-rise) | 來源未標示日期 |\n| [[BarKlip Busbar Connectors]] | Ultrasonically welded between wire and contact, ensuring low voltage drop and high reliability | 來源未標示日期 |\n| [[BarKlip Busbar Connectors]] | Secondary chassis grounding contacts provide supplemental grounding to the rack | 來源未標示日期 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 3.md"
+          },
+          "score": 2.269223
+         },
+         {
+          "text": "HSD Cable test image 3 › 圖中產品對應表\n| 編號 | 圖上產品名稱 | 圖上主要說法 | 日期 |\n|---|---|---|---|\n| 6 | [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]] | 112 GT/s PAM4；High-speed 64 GT/s PAM4 PCIe Gen 6；85/92Ohm for Ethernet applications are tooled and mass production ready；supports EDSFF、SFF-TA-1002、OCP NIC 3.0、DC-SCM、JEDEC | 來源未標示日期 |\n| 7 | [[BarKlip Busbar Connectors]] | High Power Cable Connector；supports 12V and 48V architecture；150A to 5000A at 45°C T-rise；ultrasonically welded between wire and contact；secondary chassis grounding contacts | 來源未標示日期 |\n| 8 | [[Paladin HD2 224Gb-s Backplane Interconnect System]] | 224 Gb/s；industry leading SI performance supporting 224Gb/s data rates；hybrid board attach technology；impedance control over 1.00mm connector de-mate；backwards compatible with Paladin HD | 來源未標示日期 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 3.md"
+          },
+          "score": 0.918738
+         },
+         {
+          "text": "HSD Cable test image 3\n這份來源是未標示內容日期、取得於 2026-09-04 的 [[Amphenol Communications Solutions]] 產品 / 系統示意圖與產品特點說明頁，列出 [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]]、[[BarKlip Busbar Connectors]] 與 [[Paladin HD2 224Gb-s Backplane Interconnect System]] 三類互連 / 供電產品。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 3.md"
+          },
+          "score": 0.328856
+         },
+         {
+          "text": "Compute tray component solutions › 高速 cable / connector\n- [[Mini Cool Edge IO]] — 來源列出 128 Gb/s PAM4、PCIe Gen 4/5/6/7 over 1.0 m transmission distance、0.60 mm pitch vertical and right-angle configurations、cable and card applications with one identical connector、92Ω / 85Ω / 95Ω impedance options。\n- [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]] — 來源列出 64 GT/s PAM4 PCIe Gen 6、112 GT/s PAM4 85/92Ohm for Ethernet applications、EDSFF、SFF-TA-1002、OCP NIC 3.0、DC-SCM、JEDEC、4 power pins at 27A per power pin。\n- [[Direct Attached Copper Cables]] — 來源列出 200G / 400G / 800G / 1.6T，並描述為 112G and 224G high-speed I/O PCIe Gen 5/6 passive and active cables for data centers、networking、HPC、telecom、server and storage solutions。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Compute tray component solutions.md"
+          },
+          "score": 17.046827
+         },
+         {
+          "text": "compute-tray-flyer › 關鍵實體與概念\n- [[Amphenol Communications Solutions]] — flyer 中的品牌 / 業務名稱，提供 compute tray connector、cable 與 power / backplane interconnect 元件。\n- [[Mini Cool Edge IO]] — 128 Gb/s PAM4、PCIe Gen 4/5/6/7 over 1.0 m、0.60 mm pitch、92Ω / 85Ω / 95Ω impedance options 的 cable & connector solution。\n- [[CoolPower HD Connector]] — 100A to 350A per contact 的 cable-to-board / pin & socket power connector solution。\n- [[Amphenol CoolExpress Link]] — EDSFF E3 1C & 2C PCIe Gen 5/6 orthogonal cable connectors，與 CXL 3x / CXL 3.x 語彙相關。\n- [[Direct Attached Copper Cables]] — 112G / 224G PCIe Gen 5/6 passive and active copper cables，應用語境包含 data centers、networking、HPC、telecom、server and storage。\n- [[PCI Express Gen 6 CEM Card Edge Connectors]] — 1.00 mm pitch card edge connectors，支援 PCIe Gen 6 64GT/s 並 targeted for Gen 7 128GT/s。\n- [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]] — 112 GT/s PAM4、64 GT/s PAM4 PCIe Gen 6、EDSFF / OCP NIC 3.0 / DC-SCM / JEDEC 語境下的 card edge connector。\n- [[BarKlip Busbar Connectors]] — 12V / 48V architecture、150A to 5000A busbar / high power cable connector。\n- [[Paladin HD2 224Gb-s Backplane Interconnect System]] — 224Gb/s backplane interconnect system，來源本次清楚支撐 broadside coupled PCB launch 讀法。\n- [[Compute tray component solutions]] — 由本來源抽出的 compute tray 元件方案概念，涵蓋 connector、cable、power connector、busbar 與 backplane interconnect。\n- [[高速伺服器儲存互連]]、[[CXL 3.x]]、[[PCIe Gen 7]]、[[PAM4]]、[[DC-SCM]]、[[JEDEC]]、[[EDSFF]]、[[OCP NIC 3.0]]、[[Paladin HD]]。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/compute-tray-flyer.md"
+          },
+          "score": 14.373694
+         },
+         {
+          "text": "Mini Cool Edge IO\n[[Mini Cool Edge IO]] 是 [[HSD Cable test image 1]] 與 [[HSD Cable test image 2]] 中 [[Amphenol Communications Solutions]] 列出的 high-speed I/O connector / cables & connectors 產品名稱，圖上與 [[PAM4]]、[[PCIe Gen 5]]、[[PCIe Gen 6]]、[[PCIe Gen 7]] 等語彙共同出現；[[HSD Cable test image 3]] 另以 [[112G PAM4 & PCIe Gen 6 Mini Cool Edge 0.60mm Card Edge Connectors]] 這個較完整的圖上名稱呈現相關 0.60mm card edge connector 產品。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/Mini Cool Edge IO.md"
+          },
+          "score": 14.075944
+         },
+         {
+          "text": "HSD Cable test image 2 與 6 重複來源 › 重疊內容\n| 編號 | 兩份來源共同出現的產品 / 類別 | 重疊規格文字 |\n|---|---|---|\n| 1 | [[Mini Cool Edge IO]] Cables & Connectors | 128 Gb/s PAM4、PCIe Gen 4/5/6/7 over 1.0m、0.60mm pitch、92Ω / 85Ω / 95Ω、PCIe / NVMe / SAS / SFP(+) / QSFP |\n| 2 | [[CoolPower HD Connector]] / Cable-to-Board Connector | 5.7mm to 10.3mm pin diameters、100A to 350A per contact、ultra-low contact resistance、Pin & Socket Solution |\n| 3 | [[Amphenol CoolExpress Link]] EDSFF E3 1C & 2C PCIe Gen 5/6 Orthogonal Cable Connectors | EDSFF E3、PCIe Gen 5/6、dual-port、E3 1C & 2C expandable to E3 4C、midplane、CXL 相容說法 |\n| 4 | [[Direct Attached Copper Cables]] | 112G / 224G high-speed I/O PCIe Gen 5/6 passive and active cables、OSFP、OSFP-XD、QSFP DD、CDFP、200G / 400G / 800G / 1.6T |\n| 5 | [[PCI Express Gen 6 CEM Card Edge Connectors]] | 1.00mm pitch、X1 / X4 / X8 / X16、PCIe Gen 6 64GT/s、targeted for Gen 7 128GT/s、backward compatible with Gen 1/2/3/4/5 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/HSD Cable test image 2 與 6 重複來源.md"
+          },
+          "score": 18.976381
+         },
+         {
+          "text": "HSD Cable test image 5 › 圖中產品對應表\n| 編號 | 圖上名稱 | 圖上主要說法 | 日期 |\n|---|---|---|---|\n| 6 | [[PCIe CEM7 Connectors]] | 主板上標註 PCIe CEM7 Connectors；來源未提供右側產品說明區塊文字 | 來源未標示日期 |\n| 7 | [[PCIe M.2]] | 67 contacts、0.50 mm pitch、PCI-SIG PCIe M.2 specifications、PCIe Gen 5、targeted for PCIe Gen 6、dual-stacked / shielded versions、right angle / vertical / various connector heights and keying options | 來源未標示日期 |\n| 8 | [[Mini Cool Edge IO]] / [[Multi-Trak]] | Mini Cool Edge IO Series up to 128 Gb/s PAM4、PCIe Gen 4/5/6/7 over 1.0 meter；cable/card insertion dual applications；Multi-Trak combines original PCIe and Mini Cool Edge IO in one connector to provide power 21 A | 來源未標示日期 |\n| 9 | [[Mini and Hyper Cool Edge]] for [[EDSFF]] / [[SFF-TA-1002]] / [[SFF-TA-1037]] / [[OCP]] / [[Gen Z]] | 0.60 mm pitch card edge connectors；meet PCIe Gen 5 / Gen 6 / 12G PAM4 specs；targeted for PCIe Gen 7；designed to meet SFF TA 1002、SFF TA 1037、EDSFF E1/E3、OCP NIC 3.0 and Gen Z specifications | 來源未標示日期 |\n| 10 | [[Amphenol CoolExpress Link]] EDSFF PCIe Gen 5/6 | EDSFF SFF-TA-1044 hybrid orthogonal PCIe Gen 5/6 cable connector；supports CXL 3.x memory low latency、high bandwidth and high-speed data transmission；hybrid connector design streamlines midplane design | 來源未標示日期 |\n| 11 | [[EDSFF]]、[[OCP]]、[[Power Shelf]] and DirectAttached [[PCIe CEM Cable Connectors]] | PCIe DirectAttached cable riser solution supports up to PCIe Gen 6；EDSFF cable connectors for E1 / E3；OCP cable connectors for OCP NIC 3.0；Power Shelf cable connectors for ORv3 | 來源未標示日期 |\n| 12 | [[U.2 SFF8639]] Gen 5/6 Connectors and Cables | SFF 8639 connectors for NVME U.2 SSD；compatible with SATA/SAS form factor SSDs and HDDs；2 SAS lanes up to 24 G and 4 PCIe lanes up to 64 G PSAS 6.0；U.2 DA cable connectors available in standard and right angle versions；後續文字無法辨識 | 來源未標示日期 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 3,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 5.md"
+          },
+          "score": 18.776096
+         },
+         {
+          "text": "HSD Cable test image 1 › 可擷取的規格資訊\n| 項目 | 圖上文字 | 日期 |\n|---|---|---|\n| [[PCIe M.2]] | 67 contacts on 0.50 mm pitch fully compliant with PCI-SIG PCIe M.2 specification | 來源未標示日期 |\n| [[PCIe M.2]] | Meets PCIe Gen 5 specs and targeted for PCIe Gen 6 | 來源未標示日期 |\n| [[Mini Cool Edge IO]] | Up to 128 Gb/s PAM4、PCIe Gen 4/5/6/7 over 1.0 meter transmission distance | 來源未標示日期 |\n| [[Multi-Trak]] | Combines original PCIe and Mini Cool Edge IO in one connector to provide both power 21 A | 來源未標示日期 |\n| [[Mini and Hyper Cool Edge]] | 0.60 mm pitch card edge connectors；meet PCIe Gen 5/Gen 6/12G PAM4 specs；targeted for PCIe Gen 7 | 來源未標示日期 |\n| [[Amphenol CoolExpress Link]] | EDSFF SFF-TA-1044 hybrid orthogonal PCIe Gen 5/6 cable connector | 來源未標示日期 |\n| [[Amphenol CoolExpress Link]] | Supports CXL 3.x memory low latency、high bandwidth and high-speed data transmission for next-gen AI/HPC applications | 來源未標示日期 |\n| [[PCIe CEM Cable Connectors]] | PCIe DirectAttach cable riser solution supports up to PCIe Gen 6 | 來源未標示日期 |\n| [[U.2 SFF8639]] | 2 SAS lanes supporting up to 24 G data rate and 4 PCIe lanes supporting up to 64G PSAS 6.0 data rates | 來源未標示日期 |\n| [[U.2 SFF8639]] | U.2 DA cable connectors can support 38 A current | 來源未標示日期 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/sources/HSD Cable test image 1.md"
+          },
+          "score": 18.684304
+         },
+         {
+          "text": "低軌衛星零組件與地面終端供應鏈 › 衛星本體零組件\n| 廠商 | 技術定位 | 關鍵規格 / 能力 | 來源中的市場地位 | 日期 |\n|---|---|---|---|---|\n| [[華通]] / Compeq | 衛星用高頻高密度連接板 / [[HDI]] | 來源稱掌握 [[SpaceX]]、[[Amazon Leo]]、[[OneWeb]]等四大低軌衛星業者訂單；泰國新廠專門生產衛星板與伺服器板，以因應非中非台供應鏈需求 | 全球低軌衛星 PCB 龍頭；來源稱星鏈太空板市占率約 9 成 | 2026-09-15 |\n| [[昇達科]] / GCS | 微波與毫米波 RF 元件 | 來源稱 2026 年首季衛星營收占比約 8 成，主要供應濾波器、雙工器等高頻元件 | 台股中血統最純的低軌衛星概念股，毛利率高 | 2026-09-15 |\n| [[同欣電]] / Sunwaytop | 高頻陶瓷封裝 RF transceiver module | 來源稱以高頻陶瓷封裝技術切入 [[SpaceX]] 衛星本體 RF transceiver module | 高技術門檻太空零組件供應商 | 2026-09-15 |\n| [[穩懋]] / WIN Semiconductors | [[GaAs]] 晶圓代工 | 來源稱產品涵蓋衛星間高頻連結與手機直連技術所需 RF 元件 | 全球最大 GaAs 晶圓代工廠；早期即參與 SpaceX 計畫的晶圓代工夥伴 | 2026-09-15 |\n| [[台燿]] / Elite Material | 高頻高速 [[CCL]] | 來源稱供應低軌衛星與基地台用高頻材料 | 衛星板上游關鍵材料供應商 | 2026-09-15 |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/低軌衛星零組件與地面終端供應鏈.md"
+          },
+          "score": 12.724092
+         },
+         {
+          "text": "Optical I-O › 未決事項\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 3]] 未標示日期、年份、季度或資料期間。\n- [[AI Server PCB test image 77]] 未標示日期、年份、季度或資料期間。\n- [[Switch server- optical switch image 11]] 未標示日期、年份、季度或資料期間。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 3]] 未標示 Optical I/O 的光學規格、速率、通道數、波長、封裝方式或供應商。\n- [[AI Server PCB test image 77]] 與 [[Switch server- optical switch image 11]] 未標示 Optical I/O 的光學規格、速率、通道數、波長、封裝方式或供應商。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 3]] 未說明 Optical I/O 與 SerDes、XPU 或封裝基板的實際連接方式。\n- [[IO Serdes in AI ASIC-TPU-Chiplet image 3]] 未說明 Optical I/O 是否對應 [[CPO]]、near-package optics、pluggable optics 或其他架構。\n- [[AI Server PCB test image 77]] 與 [[Switch server- optical switch image 11]] 未說明 TODAY 區塊中的 Optical I/O 是具體產品、功能方塊、介面名稱或概念標籤。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/Optical I-O.md"
+          },
+          "score": 12.685963
+         },
+         {
+          "text": "HSD PCB 外部資料清單 › 與既有知識的關係\n- [[高頻高速 PCB 測試解決方案]] 已由 [[AI Server PCB test image 24]] 與 [[AI Server PCB test image 50]] 支撐；[[HSD PCB]] 中的 Polar Instruments、Allion、TI PCIE5 PCB 與 112G PAM4 檔名只能作為後續待讀線索，不能補強既有測試流程主張。\n- [[TDR 阻抗測量]] 目前只由 [[AI Server PCB test image 24]] 支撐；[[HSD PCB]] 中的 Si8000 URL 不能在未讀正文前補入 TDR 或 impedance 的規格。\n- [[SerDes]] 目前由 [[IO Serdes in AI ASIC-TPU-Chiplet image 1]]、[[IO Serdes in AI ASIC-TPU-Chiplet image 3]]、[[Serdes IC-IP companies image 1]] 與 [[Serdes IC-IP companies image 3]] 支撐；`What are SIPI and Serdes` 檔名只能標示待讀，不可作為 SerDes 定義來源。\n- [[AI 伺服器 PCB 板層與 CCL 材料]] 目前由 [[AI Server PCB test]] 的 `2024/04` 段落支撐；[[HSD PCB]] 的 link hub 未新增板層、材料或 CCL loss grade 數字。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/HSD PCB 外部資料清單.md"
+          },
+          "score": 12.392213
+         },
+         {
+          "text": "O-RU NES testing › 來源中的測試配置\n依 [[R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT]]（March 2025）Slide 11：\n\n- Solution title：`Solution for O-RU NES testing`。\n- Power supply：[[R&S NGP800]] Power Supply；圖中文字也說 [[R&S NGT3600]] / R&S NGT Power Supply powers the O-RU and monitors voltage and current statistics over time。\n- Oscilloscope / RF quality monitoring：[[R&S RTO6]] Oscilloscope + VSE / VSA。\n- O-RU test control：[[VIAVI TMA]] / O-RU Test Manager。\n- O-DU emulation / tester：[[VIAVI TM500 O-RU Tester]]。\n- 目的：accurately measure and gauge [[Network energy saving]]。\n- [[R&S RTO6]] Oscilloscope + VSE monitors dynamic power consumption of the O-RU versus its broadcasting activities。\n- VIAVI TM500 O-RU Tester offers energy efficiency focused O-DU emulation test scripts for O-RU testing。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/O-RU NES testing.md"
+          },
+          "score": 11.464658
+         },
+         {
+          "text": "AI 伺服器 HGX B300 系統配置 › 未決事項\n- [[HBM-CXL memory pooling in AI Server image 4]] 與 [[HBM-CXL memory pooling in AI Server image]] 均未標示內容日期、發布者、文件版次或產品頁 URL。\n- 圖上未說明 [[G894-SD3-AAX7]] 的製造商、上市狀態或產品定位。\n- 圖上未說明 HGX B300、Blackwell Ultra SXM、ConnectX-8 SuperNIC、PEX89072 與 retimer 的完整 lane mapping。\n- 圖上 **Gen6** 的介面脈絡未標示。\n- 圖上未說明 **8 x 800 Gb/s OSFP InfiniBand XDR / Dual 400 Gb/s Ethernet GPU networking ports** 的實際 port mapping。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 8,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI 伺服器 HGX B300 系統配置.md"
+          },
+          "score": 10.0101
+         },
+         {
+          "text": "R&S FSW8 › 適用硬體 options（摘錄）\n| Option code | 名稱 | Order No. | 原文限制 |\n|---|---|---|---|\n| R&S FSW-B2071 | Oscilloscope baseband inputs | 1331.8302.02 | 適用所有 FSW models |",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 7,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/entities/R&S FSW8.md"
+          },
+          "score": 9.743991
+         },
+         {
+          "text": "高速互連 probing 與 de-embedding 測試案例\n[[高速互連 probing 與 de-embedding 測試案例]] 是從 [[TRI_AMD_RSKR Sharing1]] 抽出的 Market 層級案例集合，描述以 VNA、probe、mount-kit、de-embedding tool 與 local partner 解決 PCB、socket、connector 與 SoC validation 量測問題。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/高速互連 probing 與 de-embedding 測試案例.md"
+          },
+          "score": 53.701554
+         },
+         {
+          "text": "HSD Cable test image 1 與 5 重複來源 › 相關來源\n- [[HSD Cable test image 1]] — 未標示日期、取得於 2026-09-04 的 [[Amphenol Communications Solutions]] 高密度伺服器儲存高速互連產品型錄 / 架構示意資訊圖。\n- [[HSD Cable test image 5]] — 未標示日期、取得於 2026-09-04 的 [[Amphenol Communications Solutions]] 高密度伺服器儲存高速互連產品型錄 / 架構示意資訊圖，內容與 [[HSD Cable test image 1]] 高度重疊。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 5,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/syntheses/HSD Cable test image 1 與 5 重複來源.md"
+          },
+          "score": 40.716946
+         },
+         {
+          "text": "AI Server 供應鏈總覽\n[[AI Server 供應鏈總覽]] 是此 vault 用來記錄市場圖像來源中把 AI server 從需求端、運算核心、系統整合、高速互連、PCB / interconnect、power、cooling 到 data center infrastructure 串成一條 supply-chain overview 的概念頁。",
+          "citation": {
+           "kind": "wiki",
+           "source": null,
+           "raw_ref": null,
+           "section": 1,
+           "page": null,
+           "slide": null,
+           "wiki_page": "wiki/concepts/AI Server 供應鏈總覽.md"
+          },
+          "score": 39.64472
+         },
+         {
+          "text": "![[4 AI Data Center Eco-Chain image.jpg]]",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-a2f4895069637a2e",
+            "original_ref": "raw/Market/OneNote/AI DATA CENTER (2026-8-20)/4 AI Data Center Eco-Chain.md",
+            "sha256": "a2f4895069637a2e7ea9c51e2ec1914ceb90a2ce1dca703d0459225e9c9405ad",
+            "raw_ref": "raw/Market/OneNote/AI DATA CENTER (2026-8-20)/4 AI Data Center Eco-Chain.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/AI DATA CENTER (2026-8-20)/4 AI Data Center Eco-Chain.md",
+           "section": 4,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 14.555564
+         },
+         {
+          "text": "![[4 AI Data Center Eco-Chain image.png]]",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-a2f4895069637a2e",
+            "original_ref": "raw/Market/OneNote/AI DATA CENTER (2026-8-20)/4 AI Data Center Eco-Chain.md",
+            "sha256": "a2f4895069637a2e7ea9c51e2ec1914ceb90a2ce1dca703d0459225e9c9405ad",
+            "raw_ref": "raw/Market/OneNote/AI DATA CENTER (2026-8-20)/4 AI Data Center Eco-Chain.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/AI DATA CENTER (2026-8-20)/4 AI Data Center Eco-Chain.md",
+           "section": 15,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 14.555564
+         },
+         {
+          "text": "![[4 AI Data Center Eco-Chain - Ink.svg]]",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-a2f4895069637a2e",
+            "original_ref": "raw/Market/OneNote/AI DATA CENTER (2026-8-20)/4 AI Data Center Eco-Chain.md",
+            "sha256": "a2f4895069637a2e7ea9c51e2ec1914ceb90a2ce1dca703d0459225e9c9405ad",
+            "raw_ref": "raw/Market/OneNote/AI DATA CENTER (2026-8-20)/4 AI Data Center Eco-Chain.md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/AI DATA CENTER (2026-8-20)/4 AI Data Center Eco-Chain.md",
+           "section": 36,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 14.555564
+         },
+         {
+          "text": "<!-- Slide number: 1 -->\nTaiwan 5G FWA CPE\nIndustry Analysis 2024\nMarket Overview | Supply Chain | Growth Opportunities\nCOMPANY RESTRICTED",
+          "citation": {
+           "kind": "raw",
+           "source": {
+            "source_id": "src-75d3180ed93f6430",
+            "original_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024 (1).md",
+            "sha256": "75d3180ed93f6430daaae5b26ffeae196785c3c9773c826ad56622fd0323af37",
+            "raw_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024 (1).md",
+            "page": null,
+            "slide": null,
+            "parent_source_id": null
+           },
+           "raw_ref": "raw/Market/OneNote/Taiwan CPE Industry 2024 (1).md",
+           "section": 2,
+           "page": null,
+           "slide": null,
+           "wiki_page": null
+          },
+          "score": 14.373205
+         }
+        ],
+        "text": "### Chain mapping\n| AI market requirement | Measurable parameter / test item | Required Oscilloscope capability supported by passages | Evidence / gap |\n|---|---|---|---|\n| AI data center infrastructure emphasizes **Connectivity** as a core capability, and the data-center connectivity portfolio includes high-speed electrical interconnect, optical interconnect, fiber deployment, rack power distribution, busbar, liquid cooling, and leak detection. [15][62] | High-speed interface / signal-integrity validation can include **Eye diagram**, plus IL / Xtalk and TDR impedance in the SI flow. [65] | The oscilloscope requirement supported by the passages is **Interface Test using scopes**; the passages do not specify oscilloscope bandwidth, sample rate, model, software option, or pass/fail limits. [65][4][5] | Supported chain: **Connectivity → Eye diagram / interface validation → oscilloscope used for Interface Test**, with detailed scope capability unspecified. [15][65][4][5] |\n| AI server PCB trends are described as pushing PCB toward high layer count, large area, and **high-speed transmission**. [75] | The SI/PI overview lists **IL / Xtalk / Eye diagram** and **TDR Impedance** as high-speed PCB / PCBA signal-integrity flow items. [65] | The passages support oscilloscope involvement only at the level of **scopes for Interface Test**; they do not state a formal oscilloscope configuration for 112G / 224G / 448G AI interconnect validation. [65][66] | Supported chain: **AI server high-speed transmission → Eye diagram / SI validation → scope-based Interface Test**, but exact oscilloscope capability is not given. [75][65][66] |\n| AI data center infrastructure also emphasizes **Power** as a core capability. [15] | The SI/PI overview maps **Power Distribution Network** testing to scopes and network analyzers, and the R&S AI server mapping lists **Power rail**, **multiphase DC**, and **PI** under MXO. [65][72] | The oscilloscope capability supported by the passages is **power rail / multiphase DC / PI measurement with MXO**; PDN Target Z is separately mapped to R&S ZNL, not to the oscilloscope. [72] | Supported chain: **Power → PDN / power rail / multiphase DC / PI → MXO oscilloscope power-analysis role**, with option, fixture, and calibration details not provided. [65][72][69] |\n### Minimal conclusion\n【推論】The clearest oscilloscope chain in the passages is **AI Connectivity / high-speed transmission → Eye diagram or interface validation → oscilloscope used for Interface Test**, but the required oscilloscope bandwidth, data rate coverage, probes, and compliance software are not specified. [15][75][65][4][5]  \n【推論】For AI power requirements, the supported oscilloscope chain is **Power → PDN / power rail / multiphase DC / PI → MXO power-analysis role**, while formal options and test setup remain unspecified. [15][65][72][69]",
+        "synthesized_by": "company",
+        "failure": null
+       },
+       "cited_passages": [
+        {
+         "text": "SerDes 與 SI PI 測試概覽 › 測試脈絡整理\n| 區塊 | 來源明示文字 | 相關儀器 / 方法 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Interface Test | Scopes、BERTs、AWGs、Switch Matrices | [[Oscilloscope]]、[[BERT]]、[[AWG]]、[[Switch Matrix]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4；Slide 11 頁腳 6/13/2025 未決 | 未提供型號、頻寬、資料率或測試標準 |\n| Transmission Channel | Tx Package、PCBs、Connectors、Rx Package | Channel / test board / switch matrices | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 channel loss、fixture、connector 型號或 PCB stackup |\n| RefClk and PLL Jitter Performance | Phase Noise Analyzers、Signal Generators | [[Phase Noise Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 jitter mask、phase noise offset 或 PLL 規格 |\n| Power Distribution Network | Scopes、Network Analyzers | [[Oscilloscope]]、[[Network Analyzer]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 PDN impedance 目標值或測試方法 |\n| ADC / DAC Frontend Performance | Spectrum Analyzers、Signal Generators | [[Spectrum Analyzer]]、[[Signal Generator]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 ADC / DAC 指標或頻率 |\n| Signal integrity flow | IL / Xtalk / Eye diagram；TDR Impedance；Stackup Planner；TL Calculator | [[Insertion Loss]]、[[Crosstalk]]、[[Eye diagram]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供工具名稱、標準版本或 pass/fail 條件 |",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 3,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+         },
+         "score": 10.177968
+        },
+        {
+         "text": "SerDes 與 SI PI 測試概覽 › 未決事項\n- Slide 11 未標示各測試區塊對應的標準版本、測試流程、儀器型號、軟體 option 或測試條件。\n- Slide 20 未標示 IL、Xtalk、Eye diagram、TDR impedance、Stackup Planner 與 TL Calculator 的工具、供應商或規格。\n- 需回看原始 PPTX 才能確認圖片中的 waveform、diagram 與 instrument details。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 7,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+         },
+         "score": 5.701661
+        },
+        {
+         "text": "AI 資料中心基礎設施\nAI 資料中心基礎設施是此 vault 用來記錄支撐 AI 部署或運作的資料中心能力組合；在 [[0. AI Data Center image 1]] 與 [[0. AI Data Center image 3]] 中，來源未標示日期的圖像明示其核心面向包含 **Connectivity**、**Power**、**Resilience**，而 [[0. AI Data Center image 2]] 與 [[0. AI Data Center image]] 則以未標示日期的 3D 機房示意圖列出 Power Management、Rack & Accessories、Management System、Precision Cooling 與 Service 等資料中心 solution components。[[4 AI Data Center Eco-Chain image 1]] 則在頁尾標示 12/10/2025（日期格式未標示）的 ecosystem map 中，補充 cloud service、datacenter、AI server、compute 與 peripheral 的市場參與者 / 品牌分類視角。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md"
+         },
+         "score": 9.369266
+        },
+        {
+         "text": "Data center full-spectrum connectivity\n[[Data center full-spectrum connectivity]] 是 [[full-spectrum-data-center-connectivity-brochure]] 呈現的 portfolio 視角：把 AI / data center 的 high-speed electrical interconnect、optical interconnect、fiber deployment、rack power distribution、busbar、liquid cooling 與 leak detection 放在同一張 data center connectivity brochure 中。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 1,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+         },
+         "score": 1.758064
+        },
+        {
+         "text": "SerDes 與 SI PI 測試概覽 › 來源中的說法\n- [[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）封面標題為 **What is Serdes and SI/PI?**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）把 R&S Group div 1 targets 寫成 **Digital**、**Power**、**RF**。\n- [[0 Digital Test - What are SIPI and Serdes]]（2026.3.4）在 Slide 11 以 **Transmission Channel and validation challenges electrical Interfaces** 描述高速電性介面的驗證挑戰。\n- Slide 11 的資料路徑示意包含 Tx、Rx、Channel、Tx Package、PCBs、Connectors、Rx Package、EQ (FFE)、EQ (CTLE, DFE)、ADC + DSP、DSP + DAC 等圖上文字。\n- Slide 11 將測試 / 驗證區塊連到儀器類型：Interface Test 對應 scopes、BERTs、AWGs、switch matrices；RefClk and PLL jitter performance 對應 phase noise analyzers 與 signal generators；[[Power Distribution Network]] 對應 scopes 與 network analyzers；ADC / DAC frontend performance 對應 spectrum analyzers 與 signal generators。\n- Slide 20 題為 **Signal integrity flow of high speed PCB/PCBA**，列出 [[IL]] / [[Xtalk]] / [[Eye diagram]]、[[TDR Impedance]]、[[Stackup Planner]]、[[TL Calculator]]。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+         },
+         "score": 3.083958
+        },
+        {
+         "text": "SerDes 與 SI PI 測試概覽 › 可追溯限制\n- 本來源是 lossy markdown derivative，多數圖像未 OCR；不可把未擷取的圖片內容當成已驗證主張。\n- Slide 11 的頁腳日期 **6/13/2025** 與封面日期 **2026.3.4** 並存，未能判定何者是內容日期。\n- 本頁不推論 R&S 具備所有列名儀器或方案，也不把儀器類型轉換成正式 product configuration。\n- 本頁不提供 [[Signal Integrity]]、[[Power Integrity]] 或 [[SerDes]] 的標準定義；只保存來源明示的測試區塊與儀器類型。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md"
+         },
+         "score": 2.921983
+        },
+        {
+         "text": "AISeverEcosystem R&S solution mapping › 未決事項\n- `unresolved`: [[ZISO]]、[[OSP]]、PSA、[[ThinkLands]]、[[GOCA]]、[[Newkey]]、BMS test 在本來源中未展開正式名稱、版本或配置。\n- `unresolved`: Sales kits 連結需要後續擷取簡報正文，才能確認 solution package、scope 與限制。\n- `unresolved`: [[R&S ZNL]]、[[MXO]]、[[R&S FSWP]]、[[R&S ZNA]]、[[R&S ZNB]]、[[R&S ZNA67EXT]] 在此表中的對應未提供 option / firmware / fixture / calibration 條件。\n- `unresolved`: 來源未說明這份 mapping 是市場研究、sales targeting、account plan、training material 還是個人筆記。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 11,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+         },
+         "score": 7.520985
+        },
+        {
+         "text": "AISeverEcosystem R&S solution mapping › Power integrity / power rail / PDN\n- [[R&S ZNL]] 被列為 PDN Target Z 線索。\n- [[MXO]] 被列於 power rail、multiphase DC、PI，以及 motor driver analysis。\n- [[ZISO]] 在 [[伺服器主機板]]與[[電源供應器]]分類出現，但來源未展開其正式名稱或用途。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 5,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+         },
+         "score": 4.137295
+        },
+        {
+         "text": "AI 伺服器 PCB 供應鏈升級 › 來源中的說法\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）標題為「PCB供應鏈升級重點」。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 AI伺服器趨勢推升 [[PCB]] 邁向高層數、大面積與高速傳輸，供應鏈全面翻新。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 [[AWS Trainium 2 Max]]、[[Google TPU V6]]、[[Meta MTIA 2]] 量產，並稱 2026年新平台將陸續推出。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 [[HVLP銅箔]] 進入第4、5代，[[CCL]] 以 [[M8]] 為主，導入低介電、低損耗與高散熱設計。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱主板層數達 30～40 層，縱深比需達 12～14 倍，並需應對厚銅、雷射鑽孔等高階製程。\n- [[AI Server PCB test image 4]]（來源未標示日期；取得於 2026-09-04）稱 TPCA Show 焦點聚焦玻纖布、HVLP銅箔、CCL 發展與高縱深比設備，反映材料與製程全面升級。\n- [[HSD PCB image 1]]（來源發布日期未標示；取得於 2026-09-04）以「GB200/GB300/VR200規格：南亞和臻鼎為亮點」為標題，比較 [[GB200]] NVL72(72GPU)、[[GB300]] NVL72(72GPU) 與 [[VR200]] NVL144(72GPU) 的時間、製程、功耗、載板、CCL 材料、上游材料、ComputeTray、NVSwitch Tray、CPX 與 Midplane。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）與 [[HSD PCB image 1]] 高度重疊，同樣以「GB200/GB300/VR200規格：南亞和臻鼎為亮點」為標題，右上角標示「資料來源：產業調研、福邦投顧整理」。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[GB200]] / [[GB300]] ComputeTray 為 **5層22L**，[[VR200]] ComputeTray 為 **6層26L**；[[GB200]] / [[GB300]] NVSwitch Tray 為 **24L HLC**，[[VR200]] NVSwitch Tray 為 **32L (N+N HLC)**，[[VR200]] Midplane 為 **44L(N+N HLC)**。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[GB300]] 使用 **HVLP3銅箔**，[[VR200]] 使用 **HVLP4銅箔**，並將 [[VR200]] 交換板 CCL 材料列為 **M8(LDK2+HVLP4) 生益科技/台光電/南亞(交期最快)**。\n- [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）列出 [[VR200]] ComputeTray PCB 供應商 / 占比為 **欣興35~40% > 臻鼎25~30% = 勝宏25~30%**。\n\n⚠️ [[HSD PCB image 11]]（來源發布日期未標示；raw 轉換於 2026-09-04）說 [[VR200]] 交換板 CCL 材料供應為「生益科技/台光電/南亞(交期最快)」，但既有頁面 [[AI 伺服器 PCB 供應鏈升級]] 說 [[HSD PCB image 1]] 的對應欄位為「生益科技/台光電/南亞(交期最長)」。判斷：最快 / 最長方向相反，影響對 [[南亞]] 供應鏈定位的解讀；在回看原圖前不得擇一。",
+         "citation": {
+          "kind": "wiki",
+          "source": null,
+          "raw_ref": null,
+          "section": 2,
+          "page": null,
+          "slide": null,
+          "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+         },
+         "score": 2.088095
+        }
+       ],
+       "assessment": {
+        "status": "covered",
+        "facets": [
+         {
+          "name": "market_segment",
+          "citations": [
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 7,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 8,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 2,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 5,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 4,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+           },
+           {
+            "kind": "wiki",
+            "source": null,
+            "raw_ref": null,
+            "section": 1,
+            "page": null,
+            "slide": null,
+            "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md"
+           }
+          ],
+          "attempts": 1
+         }
+        ],
+        "missing_facets": [],
+        "relation_required": false,
+        "relation_citations": [],
+        "relations": []
+       },
+       "citation_policy": "wiki_primary",
+       "wiki_provenance": [
+        {
+         "wiki_page": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+         "raw_refs": [
+          "raw/Market/OneNote/0 Digital Test - What are SIPI and Serdes.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/AI 資料中心基礎設施.md",
+         "raw_refs": [
+          "raw/Market/0. AI Data Center image 1.md",
+          "raw/Market/0. AI Data Center image 2.md",
+          "raw/Market/0. AI Data Center image 3.md",
+          "raw/Market/0. AI Data Center image.md",
+          "raw/Market/4 AI Data Center Eco-Chain image 1.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/Data center full-spectrum connectivity.md",
+         "raw_refs": [
+          "raw/Market/OneNote/full-spectrum-data-center-connectivity-brochure.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+         "raw_refs": [
+          "raw/Market/OneNote/AISeverEcosystem.md"
+         ]
+        },
+        {
+         "wiki_page": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md",
+         "raw_refs": [
+          "raw/Market/AI Server PCB test image 4.md",
+          "raw/Market/HSD PCB image 1.md",
+          "raw/Market/HSD PCB image 11.md"
+         ]
+        }
+       ]
+      },
+      "failure": null,
+      "warnings": [],
+      "handler_invoked": true
+     },
+     "workflow": null,
+     "run": null,
+     "unrecorded": null
+    },
+    "harness": {
+     "plan": {
+      "task_id": "knowledge-195800f6a96d425bb1dac670c051d1a5",
+      "task_sha256": "f1da9b59e0ff1261af079e7793873f7cf07eff74ae347183e5057587bb9466d7",
+      "domain": "knowledge",
+      "skill": {
+       "namespace": "company-agent",
+       "name": "knowledge-query",
+       "version": "1.12.0"
+      },
+      "stages": [
+       "collect_context",
+       "execute",
+       "validate"
+      ],
+      "requested_capabilities": [
+       {
+        "namespace": "knowledge-query",
+        "name": "ask",
+        "version": "1.0.0"
+       }
+      ],
+      "host_checks": [
+       "answer_nonempty",
+       "facet_coverage",
+       "claim_support"
+      ],
+      "skill_evidence": [
+       "raw_citations"
+      ],
+      "fallback": "retry",
+      "retry_budget": 1,
+      "retry_from": "first",
+      "exhausted_code": "host_check_failed"
+     },
+     "phase": "validated",
+     "retry_count": 0,
+     "events": [
+      {
+       "sequence": 0,
+       "kind": "started",
+       "evidence_ref": null
+      },
+      {
+       "sequence": 1,
+       "kind": "context_observed",
+       "evidence_ref": "knowledge_asset_selected"
+      },
+      {
+       "sequence": 2,
+       "kind": "execution_observed",
+       "evidence_ref": "bridge_knowledge_answer"
+      },
+      {
+       "sequence": 3,
+       "kind": "validated",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "checks": [
+      {
+       "check_id": "answer_nonempty",
+       "status": "passed",
+       "evidence_ref": "bridge_raw_record"
+      },
+      {
+       "check_id": "facet_coverage",
+       "status": "passed",
+       "evidence_ref": "bridge_facet_assessment"
+      },
+      {
+       "check_id": "claim_support",
+       "status": "passed",
+       "evidence_ref": "bridge_claim_overlap"
+      }
+     ],
+     "failure_code": null
+    },
+    "evidence": {
+     "raw_citations": 9,
+     "facet_status": "covered",
+     "missing_facets": [],
+     "relation_status": "not_requested",
+     "retrieval_attempts": {
+      "market_segment": 1
+     },
+     "claim_status": "supported"
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

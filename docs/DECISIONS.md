@@ -2243,3 +2243,10 @@ evidence budget. Kept after core-013: answerable coverage 0.477 -> 0.508, median
 at the end (no effect, the budget was already full) and ahead of deeper sections (more
 reference pages but fewer reference quotes).
 Caveats: one run; run.py PASS fell 28 -> 25 with changes in both directions; p90 +26%.
+
+## 2026-10-12: Proposal 1 rolled back after a repeat run
+
+Decision (owner): revert 677e18a. A repeat run (core-014) put the coverage gain at about
+0.02 (0.477 -> mean 0.500), near run-to-run noise, while Q1041 and Q1061 turned from
+answered to "not validated" in both runs. Grader 1.4 (48 cited passages) is kept.
+Making wider evidence pass validation would touch the validation rules (proposal 2).

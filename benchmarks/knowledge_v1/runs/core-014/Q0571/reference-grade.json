@@ -1,0 +1,67 @@
+{
+ "id": "Q0571",
+ "grader": "1.2",
+ "coverage": 0.188,
+ "points": [
+  {
+   "n": 1,
+   "point": "The Vault's automotive requirement notes map to the R&S CMX500 (NG eCall / EN 17240:2024 verification), not to a VNA.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention NG eCall/CMX500 or that automotive requirement notes map to non-VNA CMX500"
+  },
+  {
+   "n": 2,
+   "point": "The other automotive-specific R&S instrument recorded is the AREG800A automotive radar echo generator, covering 76–81 GHz radar echo generation rather than S-parameter measurement.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention AREG800A or 76–81 GHz radar echo generation rather than S-parameters"
+  },
+  {
+   "n": 3,
+   "point": "Automotive high-speed requirements in the Vault are expressed as ADAS and V2X needing high-speed signal transmission, and as Automotive SerDes Alliance standards for in-vehicle high-speed data links — with no measurement parameter attached.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "mentions Automotive SerDes links but maps them to SI parameters, whereas reference says no measurement parameter is attached"
+  },
+  {
+   "n": 4,
+   "point": "In-vehicle high-speed links appear only as a standards category, without stated test parameters or instrument requirements.",
+   "verified": true,
+   "label": "contradicted",
+   "why": "treats in-vehicle high-speed links as leading to parameters and VNA needs, not only as a standards category"
+  },
+  {
+   "n": 5,
+   "point": "The only automotive-to-parameter hint is material-level: Low DK glass fabric is listed for high-frequency/high-speed PCB, server, automotive and communication use, making Dk/Df the associated measurable parameter.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions DK/DF among PCB parameters but omits Low DK glass fabric and the material-level automotive hint"
+  },
+  {
+   "n": 6,
+   "point": "The Vault states these dielectric/loss parameters are extracted with VNA-based solutions (Delta-L loss, TDR impedance, Dk/Df extraction), though the cited instruments are competitor ENA/PNA.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions IL/TDR impedance/DK/DF but not VNA-based extraction via Delta-L/TDR/Dk-Df or competitor ENA/PNA context"
+  },
+  {
+   "n": 7,
+   "point": "R&S VNA cases in the Vault tie measurable parameters (impedance, insertion loss, return loss) to a required capability set of multi-port VNA plus probe, mount-kit and de-embedding tool — but for PCB/SoC/connector DUTs, not automotive ones.",
+   "verified": true,
+   "label": "partial",
+   "why": "mentions IL/impedance and deembedding with a VNA, but omits return loss, multi-port/probe/mount-kit tooling, and PCB/SoC/connector limitation"
+  },
+  {
+   "n": 8,
+   "point": "A concrete VNA capability the Vault documents is the 4-port R&S ZNB3044 covering 9 kHz to 43.5 GHz with 1.85 mm ports.",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention 4-port R&S ZNB3044, 9 kHz to 43.5 GHz, or 1.85 mm ports"
+  }
+ ],
+ "contradicted": 2,
+ "invented": [
+  "Automotive in-vehicle high-speed data links → PCB/channel SI parameters ... → VNA capability requiring sufficient frequency coverage, dynamic range, measurement bandwidth, and calibration/deembedding support"
+ ]
+}

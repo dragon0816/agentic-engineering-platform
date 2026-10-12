@@ -1729,3 +1729,6 @@ s-k-20261011T102952` (not published).
   originals. Regraded PASS: core-009 23, core-010 28, core-011 29, core-012 33 (FAIL 1),
   core-013 30 (FAIL 4: two harness not-validated, two overreach). core-013 still has
   fewer PASS than core-012, so the same configuration is run again (core-014).
+- [x] core-014 repeated proposal 1: coverage 0.492 (two-run mean 0.500 vs 0.477),
+  grader-1.4 PASS 30 vs 33; Q1041 and Q1061 failed validation in both runs (product
+  option facet). Owner rolled proposal 1 back (2df2faf1); live is core-012's setup.

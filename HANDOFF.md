@@ -64,7 +64,9 @@ Lint -> Benchmark -> Push) and the K1-K3 specs; progress rows are in `docs/TASKS
   (passes on rerun) is unidentified (see TASKS); the OCNG image failure is fixed
   (b293aeb). Next stage after validation: K4 (Excel, HTML, .ppt, images).
 
-Knowledge answer quality update (2026-10-12, latest): owner proposal 1 is live at
+Knowledge answer quality update (2026-10-12, latest): owner proposal 1 was tried at
+677e18a and ROLLED BACK (2df2faf1) after core-014; live is the core-012 setup.
+Earlier note: proposal 1 was live at
 677e18a (the last search plan's queries run, pages added beyond the budget).
 core-013: answerable coverage 0.508 (target 0.50), median 83 s, p90 144 s. To roll it
 back, revert 677e18a and restart Agent Web. Proposals 2-4 below are not implemented.

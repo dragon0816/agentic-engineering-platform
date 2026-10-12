@@ -1,0 +1,65 @@
+{
+ "id": "Q1021",
+ "grader": "1.2",
+ "coverage": 0.688,
+ "points": [
+  {
+   "n": 1,
+   "point": "Numerology μ 定義 OFDM 的 time-frequency resolution，決定 OFDM symbol 時間長度與 Subcarrier Spacing（SCS = 2^μ × 15 kHz）",
+   "verified": true,
+   "label": "covered",
+   "why": "states μ determines symbol duration and SCS, with SCS formula"
+  },
+  {
+   "n": 2,
+   "point": "Cyclic prefix 加在每個 OFDM symbol 前方作為 guard interval，用於消除 inter-symbol interference（ISI）；Normal CP 14 symbols/slot、Extended CP 12 symbols/slot",
+   "verified": true,
+   "label": "covered",
+   "why": "states CP is prepended as guard interval to eliminate ISI, and Normal/Extended CP symbol counts"
+  },
+  {
+   "n": 3,
+   "point": "OFDM 的 time-domain symbol 與 frequency-domain subcarriers 組成 resource grid，Resource Element 是 one subcarrier in one OFDM symbol and on one antenna port",
+   "verified": true,
+   "label": "covered",
+   "why": "states grid is OFDM symbols and subcarriers; RE definition included"
+  },
+  {
+   "n": 4,
+   "point": "OFDM 訊號因 many random QAM symbols 經 IFFT 線性組合而具有 high PAPR，需要 transmitter back-off PA 操作點，這驅動 UL 使用 DFT-s-OFDM / transform precoding 與 low-PAPR sequence",
+   "verified": true,
+   "label": "partial",
+   "why": "covers QAM/IFFT high PAPR and PA back-off, but not that this drives UL DFT-s-OFDM/transform precoding and low-PAPR sequence use"
+  },
+  {
+   "n": 5,
+   "point": "OFDM waveform 的 sample rate 由 NFFT 與 SCS 決定（sampling rate = NFFT × 2^μ × 15 kHz），並對應到 maximum bandwidth，影響所需儀器頻寬",
+   "verified": true,
+   "label": "partial",
+   "why": "covers sample-rate formula from NFFT and SCS, but not maximum bandwidth mapping or instrument bandwidth decision clearly"
+  },
+  {
+   "n": 6,
+   "point": "產品選件決策：OFDM 訊號產生與分析需專用 software option，例如 SMW200A 的 OFDM signal generation（K114）與 FSW 的 OFDM signal analysis（K96）",
+   "verified": true,
+   "label": "covered",
+   "why": "lists OFDM generation/analysis options including SMW200A K114 and FSW K96"
+  },
+  {
+   "n": 7,
+   "point": "Conformance 測項直接以 OFDM symbol 定義：TS 38.141-1 6.3.3 Total power dynamic range 是 OFDM symbol maximum 與 minimum transmit power 的差值（使用 TM2 / TM2a，Middle frequency）",
+   "verified": true,
+   "label": "partial",
+   "why": "covers Total power dynamic range as OFDM-symbol max/min power difference, but omits TS 38.141-1 6.3.3 details such as TM2/TM2a and Middle frequency"
+  },
+  {
+   "n": 8,
+   "point": "測試設定決策：OCNG pattern 以 OFDM resource grid 的 unused REs 為作用點（per-slot 14-bit OFDM symbol mask、RB resolution），用於 modelling unused resources 給 virtual UEs",
+   "verified": true,
+   "label": "missing",
+   "why": "does not mention OCNG pattern, unused REs, 14-bit symbol mask, RB resolution, or virtual UEs"
+  }
+ ],
+ "contradicted": 0,
+ "invented": []
+}

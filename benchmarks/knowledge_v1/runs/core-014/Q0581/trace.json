@@ -1,0 +1,1993 @@
+{
+ "question": {
+  "id": "Q0581",
+  "text": "How do changes in automotive radar technology affect the measurement capability required from Vector Network Analyzer?",
+  "market": "Automotive",
+  "product": "Vector Network Analyzer",
+  "type": "cross_domain",
+  "difficulty": "L4"
+ },
+ "session_id": "conversation-7a4a9ca7675a472a95b02153c5e29356",
+ "exchange": {
+  "sent": "How do changes in automotive radar technology affect the measurement capability required from Vector Network Analyzer?",
+  "http_status": 200,
+  "seconds": 86.563,
+  "timed_out": false,
+  "reply": {
+   "ok": true,
+   "conversation": {
+    "session_id": "conversation-7a4a9ca7675a472a95b02153c5e29356",
+    "actor": "leo.chi",
+    "title": "How do changes in automotive radar technology affect the measurement cap…",
+    "backend": "gateway",
+    "data_classification": "UNCLASSIFIED",
+    "classified_by": null,
+    "created_at": "2026-10-12T03:41:54.040651Z",
+    "updated_at": "2026-10-12T03:43:20.351952Z",
+    "messages": [
+     {
+      "message_id": "message-f8dc99d94e134beebd2034e40504d218",
+      "role": "user",
+      "text": "How do changes in automotive radar technology affect the measurement capability required from Vector Network Analyzer?",
+      "created_at": "2026-10-12T03:41:54.059871Z",
+      "status": "submitted",
+      "trace": null,
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": null,
+      "attachments": []
+     },
+     {
+      "message_id": "message-c9911cfced65411a8f7e1ce6a97c84e0",
+      "role": "assistant",
+      "text": "【推論】For the automotive-radar cases described, moving to 76 GHz to 81 GHz operation, multi-GHz instantaneous bandwidth, dynamic artificial objects, angular directions and Doppler means the VNA needs higher mmWave frequency coverage, wider swept spans, time-domain capability, group-delay/amplitude-flatness measurement, and higher dynamic range.[28][30][26][25][2][27]\nThe passages list automotive radar RF bands of 24 GHz to 24.25 GHz and 76 GHz to 81 GHz, while QAT100 with AREG800A supports 76 GHz to 77 GHz and 77 GHz to 81 GHz with 4 GHz RF instantaneous bandwidth.[30][28]\n【推論】If direct RF-path VNA measurement is needed for 76 GHz to 81 GHz radar hardware, a 67 GHz base VNA does not cover the full band, while a 10 MHz to 110 GHz ZNA67EXT VNA system does.[15][21][28]\nThe AREG800A IF side expands to 1 GHz, 2 GHz or 5 GHz instantaneous IF bandwidth, with IF frequency ranges listed as 1.1 GHz to 2.1 GHz, 0.7 GHz to 2.7 GHz and 0.7 GHz to 5.7 GHz.[30]\nVNA measurement conditions for AREG800A IF transfer characteristics require 2.5 MHz frequency step size, 1 kHz measurement bandwidth, –10 dBm source power and spans matching 1.1 GHz to 2.1 GHz, 0.7 GHz to 2.7 GHz or 0.7 GHz to 5.7 GHz.[3]\nSuppression of ghost objects is measured with a vector network analyzer in time domain, using 125 kHz frequency step size, 100 kHz measurement bandwidth, –10 dBm source power and the same IF-span families.[2]\nRF transfer-characteristic measurements for AREG8-81S / AREG8-81D use 2.5 MHz frequency step size, 1 kHz measurement bandwidth, a Hann normal gate and bandpass filter from RX waveguide input to TX waveguide output.[27]\nThose RF transfer-characteristic measurements include amplitude flatness over 1 GHz, 2 GHz and 4 GHz bandwidths and group-delay flatness over 1 GHz, 2 GHz and 4 GHz bandwidths.[27]\nThe AREG800A supports dynamic artificial object generation, with hybrid analog/digital echo generation to 3000 m or digital FMCW echo generation to 3000 m.[26]\nThe AREG800A also supports individual Doppler frequency shift per artificial object, ±500 km/h velocity setting range and 0.001 km/h velocity step size with AREG8-B9 and AREG8-B63.[25]\nThe AREG800A dynamic RCS range is 90 dB for all artificial objects on one IF path with listed mmWave frontends and 60 dB for multiple objects per IF path with those frontends.[3]\n【推論】Because the radar echo tests specify ghost suppression, dynamic RCS range and multi-object behavior, VNA dynamic range and sensitivity become important measurement capabilities; the ZNA series lists dynamic range above 129 dB without options, 147 dB typical with options and up to 170 dB maximum attainable range.[2][3][7]\nFor the 75 GHz to 80 GHz and 80 GHz to 90 GHz regions, the ZNA67EXT dynamic range is specified as above 100 dB and above 105 dB respectively at 10 Hz measurement bandwidth without user correction.[55]\nThe ZNA series also supports time domain analysis as software options and supports mmWave converter setups, while its 4-port architecture provides true parallel and coherent data acquisition for antenna array tests and antenna test systems.[42][37][38]\n\n來源：\n[2] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[3] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[7] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[15] Wiki：R&S ZNA67（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[21] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[25] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[26] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[27] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[28] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[30] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[37] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[38] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[42] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[55] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）",
+      "created_at": "2026-10-12T03:43:20.351952Z",
+      "status": "answered",
+      "trace": {
+       "trace_id": "trace-ac86c8beb9bc4abab91d5736d8be08fa",
+       "request_id": "request-ac86c8beb9bc4abab91d5736d8be08fa",
+       "span_id": "span-ac86c8beb9bc4abab91d5736d8be08fa",
+       "parent_span_id": null
+      },
+      "reply_to": null,
+      "feedback": null,
+      "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+      "attachments": []
+     }
+    ]
+   },
+   "answer": {
+    "tool_summary": "- knowledge__rs-knowledge: succeeded {}",
+    "ok": true,
+    "answer": "【推論】For the automotive-radar cases described, moving to 76 GHz to 81 GHz operation, multi-GHz instantaneous bandwidth, dynamic artificial objects, angular directions and Doppler means the VNA needs higher mmWave frequency coverage, wider swept spans, time-domain capability, group-delay/amplitude-flatness measurement, and higher dynamic range.[28][30][26][25][2][27]\nThe passages list automotive radar RF bands of 24 GHz to 24.25 GHz and 76 GHz to 81 GHz, while QAT100 with AREG800A supports 76 GHz to 77 GHz and 77 GHz to 81 GHz with 4 GHz RF instantaneous bandwidth.[30][28]\n【推論】If direct RF-path VNA measurement is needed for 76 GHz to 81 GHz radar hardware, a 67 GHz base VNA does not cover the full band, while a 10 MHz to 110 GHz ZNA67EXT VNA system does.[15][21][28]\nThe AREG800A IF side expands to 1 GHz, 2 GHz or 5 GHz instantaneous IF bandwidth, with IF frequency ranges listed as 1.1 GHz to 2.1 GHz, 0.7 GHz to 2.7 GHz and 0.7 GHz to 5.7 GHz.[30]\nVNA measurement conditions for AREG800A IF transfer characteristics require 2.5 MHz frequency step size, 1 kHz measurement bandwidth, –10 dBm source power and spans matching 1.1 GHz to 2.1 GHz, 0.7 GHz to 2.7 GHz or 0.7 GHz to 5.7 GHz.[3]\nSuppression of ghost objects is measured with a vector network analyzer in time domain, using 125 kHz frequency step size, 100 kHz measurement bandwidth, –10 dBm source power and the same IF-span families.[2]\nRF transfer-characteristic measurements for AREG8-81S / AREG8-81D use 2.5 MHz frequency step size, 1 kHz measurement bandwidth, a Hann normal gate and bandpass filter from RX waveguide input to TX waveguide output.[27]\nThose RF transfer-characteristic measurements include amplitude flatness over 1 GHz, 2 GHz and 4 GHz bandwidths and group-delay flatness over 1 GHz, 2 GHz and 4 GHz bandwidths.[27]\nThe AREG800A supports dynamic artificial object generation, with hybrid analog/digital echo generation to 3000 m or digital FMCW echo generation to 3000 m.[26]\nThe AREG800A also supports individual Doppler frequency shift per artificial object, ±500 km/h velocity setting range and 0.001 km/h velocity step size with AREG8-B9 and AREG8-B63.[25]\nThe AREG800A dynamic RCS range is 90 dB for all artificial objects on one IF path with listed mmWave frontends and 60 dB for multiple objects per IF path with those frontends.[3]\n【推論】Because the radar echo tests specify ghost suppression, dynamic RCS range and multi-object behavior, VNA dynamic range and sensitivity become important measurement capabilities; the ZNA series lists dynamic range above 129 dB without options, 147 dB typical with options and up to 170 dB maximum attainable range.[2][3][7]\nFor the 75 GHz to 80 GHz and 80 GHz to 90 GHz regions, the ZNA67EXT dynamic range is specified as above 100 dB and above 105 dB respectively at 10 Hz measurement bandwidth without user correction.[55]\nThe ZNA series also supports time domain analysis as software options and supports mmWave converter setups, while its 4-port architecture provides true parallel and coherent data acquisition for antenna array tests and antenna test systems.[42][37][38]\n\n來源：\n[2] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[3] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[7] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[15] Wiki：R&S ZNA67（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[21] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[25] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[26] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[27] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[28] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[30] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[37] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[38] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[42] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[55] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）",
+    "status": "answered",
+    "outcome": {
+     "trace": {
+      "trace_id": "trace-ac86c8beb9bc4abab91d5736d8be08fa",
+      "request_id": "request-ac86c8beb9bc4abab91d5736d8be08fa",
+      "span_id": "span-ac86c8beb9bc4abab91d5736d8be08fa",
+      "parent_span_id": null
+     },
+     "ingress": "local",
+     "actor": "leo.chi",
+     "refusal": null,
+     "conversation": {
+      "trace": {
+       "trace_id": "trace-ac86c8beb9bc4abab91d5736d8be08fa",
+       "request_id": "request-ac86c8beb9bc4abab91d5736d8be08fa",
+       "span_id": "span-ac86c8beb9bc4abab91d5736d8be08fa",
+       "parent_span_id": null
+      },
+      "status": "answered",
+      "text": "【推論】For the automotive-radar cases described, moving to 76 GHz to 81 GHz operation, multi-GHz instantaneous bandwidth, dynamic artificial objects, angular directions and Doppler means the VNA needs higher mmWave frequency coverage, wider swept spans, time-domain capability, group-delay/amplitude-flatness measurement, and higher dynamic range.[28][30][26][25][2][27]\nThe passages list automotive radar RF bands of 24 GHz to 24.25 GHz and 76 GHz to 81 GHz, while QAT100 with AREG800A supports 76 GHz to 77 GHz and 77 GHz to 81 GHz with 4 GHz RF instantaneous bandwidth.[30][28]\n【推論】If direct RF-path VNA measurement is needed for 76 GHz to 81 GHz radar hardware, a 67 GHz base VNA does not cover the full band, while a 10 MHz to 110 GHz ZNA67EXT VNA system does.[15][21][28]\nThe AREG800A IF side expands to 1 GHz, 2 GHz or 5 GHz instantaneous IF bandwidth, with IF frequency ranges listed as 1.1 GHz to 2.1 GHz, 0.7 GHz to 2.7 GHz and 0.7 GHz to 5.7 GHz.[30]\nVNA measurement conditions for AREG800A IF transfer characteristics require 2.5 MHz frequency step size, 1 kHz measurement bandwidth, –10 dBm source power and spans matching 1.1 GHz to 2.1 GHz, 0.7 GHz to 2.7 GHz or 0.7 GHz to 5.7 GHz.[3]\nSuppression of ghost objects is measured with a vector network analyzer in time domain, using 125 kHz frequency step size, 100 kHz measurement bandwidth, –10 dBm source power and the same IF-span families.[2]\nRF transfer-characteristic measurements for AREG8-81S / AREG8-81D use 2.5 MHz frequency step size, 1 kHz measurement bandwidth, a Hann normal gate and bandpass filter from RX waveguide input to TX waveguide output.[27]\nThose RF transfer-characteristic measurements include amplitude flatness over 1 GHz, 2 GHz and 4 GHz bandwidths and group-delay flatness over 1 GHz, 2 GHz and 4 GHz bandwidths.[27]\nThe AREG800A supports dynamic artificial object generation, with hybrid analog/digital echo generation to 3000 m or digital FMCW echo generation to 3000 m.[26]\nThe AREG800A also supports individual Doppler frequency shift per artificial object, ±500 km/h velocity setting range and 0.001 km/h velocity step size with AREG8-B9 and AREG8-B63.[25]\nThe AREG800A dynamic RCS range is 90 dB for all artificial objects on one IF path with listed mmWave frontends and 60 dB for multiple objects per IF path with those frontends.[3]\n【推論】Because the radar echo tests specify ghost suppression, dynamic RCS range and multi-object behavior, VNA dynamic range and sensitivity become important measurement capabilities; the ZNA series lists dynamic range above 129 dB without options, 147 dB typical with options and up to 170 dB maximum attainable range.[2][3][7]\nFor the 75 GHz to 80 GHz and 80 GHz to 90 GHz regions, the ZNA67EXT dynamic range is specified as above 100 dB and above 105 dB respectively at 10 Hz measurement bandwidth without user correction.[55]\nThe ZNA series also supports time domain analysis as software options and supports mmWave converter setups, while its 4-port architecture provides true parallel and coherent data acquisition for antenna array tests and antenna test systems.[42][37][38]\n\n來源：\n[2] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[3] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[7] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[15] Wiki：R&S ZNA67（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[21] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[25] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[26] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[27] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[28] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[30] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[37] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[38] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[42] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[55] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）",
+      "model_turns": 1,
+      "tools": [
+       {
+        "call_id": "call_PR3h17SkAWZ5u0ST3JUBWT4P",
+        "name": "knowledge__rs-knowledge",
+        "decision": null,
+        "capability": null,
+        "workflow": null,
+        "host": {
+         "status": "succeeded",
+         "data": {
+          "knowledge_harness": "validated",
+          "answer": "【推論】For the automotive-radar cases described, moving to 76 GHz to 81 GHz operation, multi-GHz instantaneous bandwidth, dynamic artificial objects, angular directions and Doppler means the VNA needs higher mmWave frequency coverage, wider swept spans, time-domain capability, group-delay/amplitude-flatness measurement, and higher dynamic range.[28][30][26][25][2][27]\nThe passages list automotive radar RF bands of 24 GHz to 24.25 GHz and 76 GHz to 81 GHz, while QAT100 with AREG800A supports 76 GHz to 77 GHz and 77 GHz to 81 GHz with 4 GHz RF instantaneous bandwidth.[30][28]\n【推論】If direct RF-path VNA measurement is needed for 76 GHz to 81 GHz radar hardware, a 67 GHz base VNA does not cover the full band, while a 10 MHz to 110 GHz ZNA67EXT VNA system does.[15][21][28]\nThe AREG800A IF side expands to 1 GHz, 2 GHz or 5 GHz instantaneous IF bandwidth, with IF frequency ranges listed as 1.1 GHz to 2.1 GHz, 0.7 GHz to 2.7 GHz and 0.7 GHz to 5.7 GHz.[30]\nVNA measurement conditions for AREG800A IF transfer characteristics require 2.5 MHz frequency step size, 1 kHz measurement bandwidth, –10 dBm source power and spans matching 1.1 GHz to 2.1 GHz, 0.7 GHz to 2.7 GHz or 0.7 GHz to 5.7 GHz.[3]\nSuppression of ghost objects is measured with a vector network analyzer in time domain, using 125 kHz frequency step size, 100 kHz measurement bandwidth, –10 dBm source power and the same IF-span families.[2]\nRF transfer-characteristic measurements for AREG8-81S / AREG8-81D use 2.5 MHz frequency step size, 1 kHz measurement bandwidth, a Hann normal gate and bandpass filter from RX waveguide input to TX waveguide output.[27]\nThose RF transfer-characteristic measurements include amplitude flatness over 1 GHz, 2 GHz and 4 GHz bandwidths and group-delay flatness over 1 GHz, 2 GHz and 4 GHz bandwidths.[27]\nThe AREG800A supports dynamic artificial object generation, with hybrid analog/digital echo generation to 3000 m or digital FMCW echo generation to 3000 m.[26]\nThe AREG800A also supports individual Doppler frequency shift per artificial object, ±500 km/h velocity setting range and 0.001 km/h velocity step size with AREG8-B9 and AREG8-B63.[25]\nThe AREG800A dynamic RCS range is 90 dB for all artificial objects on one IF path with listed mmWave frontends and 60 dB for multiple objects per IF path with those frontends.[3]\n【推論】Because the radar echo tests specify ghost suppression, dynamic RCS range and multi-object behavior, VNA dynamic range and sensitivity become important measurement capabilities; the ZNA series lists dynamic range above 129 dB without options, 147 dB typical with options and up to 170 dB maximum attainable range.[2][3][7]\nFor the 75 GHz to 80 GHz and 80 GHz to 90 GHz regions, the ZNA67EXT dynamic range is specified as above 100 dB and above 105 dB respectively at 10 Hz measurement bandwidth without user correction.[55]\nThe ZNA series also supports time domain analysis as software options and supports mmWave converter setups, while its 4-port architecture provides true parallel and coherent data acquisition for antenna array tests and antenna test systems.[42][37][38]\n\n來源：\n[2] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[3] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[7] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[15] Wiki：R&S ZNA67（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[21] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）\n[25] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[26] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[27] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[28] Wiki：R&S AREG800A（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[30] Wiki：AREG800A_specs_en_3609-8015-22_v0900（來源：`AREG800A_specs_en_3609-8015-22_v0900.md`）\n[37] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[38] Wiki：R&S ZNA（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[42] Wiki：ZNA_specs_en_5215-4652-22_v2400（來源：`ZNA_specs_en_5215-4652-22_v2400.md`）\n[55] Wiki：R&S ZNA67EXT（來源：`ZNA67EXT_specs_en_5216-3743-22_v0900.md`、`ZNA_specs_en_5215-4652-22_v2400.md`）",
+          "evidence": {
+           "raw_citations": 14,
+           "facet_status": "covered",
+           "missing_facets": [],
+           "relation_status": "not_requested",
+           "retrieval_attempts": {
+            "technical_knowledge": 1
+           },
+           "claim_status": "supported"
+          },
+          "phase": "validated",
+          "failure_code": null,
+          "record": {
+           "asset": {
+            "namespace": "engineering",
+            "name": "rs-knowledge",
+            "version": "1.0.2"
+           },
+           "trace": {
+            "trace_id": "trace-a28e58fc3f9146a08b7794ed510b4a28",
+            "request_id": "request-a28e58fc3f9146a08b7794ed510b4a28",
+            "span_id": "span-a28e58fc3f9146a08b7794ed510b4a28",
+            "parent_span_id": null
+           },
+           "answer": {
+            "question": "How do changes in automotive radar technology affect the measurement capability required from Vector Network Analyzer?",
+            "status": "answered",
+            "passages": [
+             {
+              "text": "R&S AREG800A › 文件與適用條件\n- 來源文件：[[AREG800A_specs_en_3609-8015-22_v0900]]。\n- 文件編號：`PD 3609.8015.22`。\n- 文件版本：`Version 09.00`。\n- 文件日期：`September 2025（LA）`。\n- 文件名稱：`AREG800A Automotive Radar Echo Generator`。\n- Copyright：`© 2021–2025 Rohde & Schwarz`。\n- 資料註記：無 tolerance limits 的資料不具 binding 效力；資料 `subject to change`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 於環境溫度儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格定義（Version 09.00, September 2025）：\n\n- `Specifications with limits`：以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示保證產品性能。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：表示保證產品性能，通常為 dimensions 或 setting parameter resolution 等值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依 GUM 計算。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 21.249118
+             },
+             {
+              "text": "R&S AREG800A › Level 與 IF transfer characteristics\n| 項目 | 條件 | 規格 |\n|---|---|---:|\n| Spurious free dynamic range | RX IF input to TX IF output connector at AREG800A base unit, measured at –10 dBm signal level, [[R&S AREG8-B9]] | `> 35 dBc (typ.)` |\n| Spurious free dynamic range | [[R&S AREG8-B9]] with [[R&S AREG8-K527]] | `> 35 dBc (typ.)` |\n| Spurious free dynamic range | [[R&S AREG8-B9]] with 未完整標示 option | `> 30 dBc (typ.)` |\n| Suppression of ghost objects | measured from IF input to IF output connector at AREG800A base unit, [[R&S AREG8-B9]] | `> 40 dBc (meas.)` |\n| Suppression of ghost objects | [[R&S AREG8-B9]] with 未完整標示 option | `> 40 dBc (meas.)` |\n\nSuppression of ghost objects 量測條件：vector network analyzer in time domain；frequency step size `125 kHz`；measurement bandwidth `100 kHz`；source power `–10 dBm`；distance to wanted artificial object `2 m`；span 依 bandwidth 為 `1.1 GHz to 2.1 GHz`、`0.7 GHz to 2.7 GHz`、`0.7 GHz to 5.7 GHz`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 16,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 16.633544
+             },
+             {
+              "text": "R&S AREG800A › Level 與 IF transfer characteristics\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Dynamic RCS range for all artificial objects on one IF path：with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 為 `90 dB`；with [[R&S QAT100]] 為 `> 60 dB`。\n- Dynamic RCS range for multiple objects per IF path：with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 為 `60 dB`；with [[R&S QAT100]] 為 `–`。\n- RCS control step size：`0.1 dB`。\n- Maximum input power at RX IF in connector of AREG800A base unit：`10 dBm (meas.)`。\n- Recommended input power at RX IF in：`≤ 0 dBm (meas.)`。\n- Maximum output power at TX IF out：`–3 dBm (meas.)`。\n- IF attenuation accuracy of AREG800A base unit：`±2 dB (meas.)`。\n\nVector network analyzer 量測條件：frequency step size `2.5 MHz`，measurement bandwidth `1 kHz`，source power `–10 dBm`；span 依 bandwidth 為 `1.1 GHz to 2.1 GHz`、`0.7 GHz to 2.7 GHz`、`0.7 GHz to 5.7 GHz`。\n\n[[R&S AREG8-B9]] IF transfer characteristics：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 16.468209
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n這份來源是 [[R&S AREG800A]] Automotive Radar Echo Generator 的 specifications，文件編號 `PD 3609.8015.22`，文件版本 `Version 09.00`，文件日期 `September 2025（LA）`，文件標題為 `AREG800A Automotive Radar Echo Generator`，Copyright `© 2021–2025 Rohde & Schwarz`。\n\n[[R&S AREG800A]] 的 echo generator type 為 `dynamic artificial object generation`。Echo generation concept 分為：\n\n- `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n- `digital`：針對 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 `air gap value`；maximum generated distance 為 `3000 m`。\n\n產品資料適用條件（Version 09.00, September 2025）：\n\n- 在環境溫度下儲存 3 小時後，進行 30 分鐘 warm-up operation。\n- 符合指定 environmental conditions。\n- 遵守 recommended calibration interval。\n- 已執行所有適用的 internal automatic adjustments。\n\n規格資料定義：\n\n- `Specifications with limits`：代表保證的產品效能，以 `<`、`≤`、`>`、`≥`、`±`、maximum、minimum 等限制符號表示。\n- `Non-traceable specifications with limits (n. trc.)`：依 specifications with limits 的方式指定與測試，但因缺乏可追溯至 national metrology standards 的量測設備，Rohde & Schwarz 不保證。\n- `Specifications without limits`：代表保證的產品效能，通常為 dimensions 或 setting parameter resolution 等無偏差或偏差可忽略的值。\n- `Typical data (typ.)`、`Nominal values (nom.)`、`Measured values (meas.)` 不由 Rohde & Schwarz 保證。\n- `Uncertainties`：coverage factor 為 2，依據 GUM 計算，納入 environmental conditions、aging、wear and tear。\n- `Data without tolerance limits is not binding`；文件 `subject to change`。\n\n主要能力與限制：",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 17.275411
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 與既有知識的關係\n本來源已對應既有來源頁 [[AREG800A_specs_en_3609-8015-22_v0900]] 與實體頁 [[R&S AREG800A]]。本次 ingest 依同一 raw source 重新校對既有頁面，補入或修正：\n\n- [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 的 AUX IF output、RX power output、AUX IF input 與 connector 資訊。\n- [[R&S QAT100]] 搭配 [[R&S AREG800A]] 的 IF level 與 amplitude flatness 摘要。\n- 讀圖補充 p001、p021、p022、p023 的低可信度註記。\n- `0.7 GHz to 5.7 GHz` 條件、RF transfer characteristics 中未完整保留 option code 的 unresolved 記錄。\n\n本來源與其他 Rohde & Schwarz Productions 頁面（如 [[R&S SGU100A]]、[[R&S SGT100A]]、[[R&S SMW200A]]）同屬 test & measurement 產品資料，但用途為 automotive radar echo generation，不屬 RF signal generator 或 spectrum analyzer。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 7.901844
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG800A]] — Automotive Radar Echo Generator；本來源主要產品實體。\n- [[Rohde & Schwarz]] — 製造商與文件發布者。\n- [[R&S AREG8-B9]] — Digital baseband，1 GHz IF bandwidth、1 IF path、1 individual artificial object；Order No. `1437.8011.02`。\n- [[R&S AREG8-B63]] — Analog stepped delay line，用於 short object generation；Order No. `1437.8205.02`。\n- [[R&S AREG8-K527]] — Baseband extension from 1 GHz to 2 GHz IF bandwidth；Order No. `1437.9882.02`。\n- [[R&S AREG8-K528]] — Baseband extension from 2 GHz to 5 GHz IF bandwidth；Order No. `1437.9799.02`。\n- [[R&S AREG8-K570]] — Activation of second IF path；Order No. `1437.9899.02`。\n- [[R&S AREG8-K812]] — One additional artificial object；Order No. `1437.9853.02`。\n- [[R&S AREG8-K813]] — Extended Doppler frequency shift up to 10 MHz；Order No. `1437.9901.02`。\n- [[R&S AREG8-K814]] — Near object range for FMCW；Order No. `1437.9776.02`。\n- [[R&S AREG8-K740]] — Analog IF output interfaces；Order No. `1437.9830.02`。\n- [[R&S AREG8-K741]] — Analog IF input interface；Order No. `1437.9847.02`。\n- [[R&S AREG8-K109]] — Hardware-in-the-loop control interface；Order No. `1437.9860.02`。\n- [[R&S AREG8-K549]] — Synchronization interface；Order No. `1437.9876.02`。\n- [[R&S AREG8-K986]] — Remote control GPIB；Order No. `1437.9818.02`。\n- [[R&S AREG8-B97]] — System alignment backend；Order No. `1437.9001.02`。\n- [[R&S AREG-P1]] / [[R&S AREG-DBP1]]、[[R&S AREG-P2]] / [[R&S AREG-DBP2]]、[[R&S AREG-P3]] / [[R&S AREG-DBP3]] — automotive radar production configurations / production base unit options。\n- [[R&S AREG8-24S]]、[[R&S AREG8-24D]]、[[R&S AREG8-81S]]、[[R&S AREG8-81D]]、[[R&S AREG8-81WS]]、[[R&S AREG8-81WD]]、[[R&S FE44S]] — 支援的 mmWave 或 external frontends。\n- [[R&S QAT100]]、[[R&S QAT-B2]]、[[R&S QAT-Z50]] — advanced antenna array 及其相關 option/accessory。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 4.227759
+             },
+             {
+              "text": "R&S ZNA › Key performance（Version 24.00）\n- Dynamic range：> 129 dB specification without options；147 dB typical with options；maximum attainable range up to 170 dB allowing full 2-port correction。\n- Sensitivity：> –120 dBm，1 Hz IF bandwidth，specification without options；–162 dBm，1 Hz IF bandwidth，measured with options。來源註明 –162 dBm 是以 1 kHz measurement bandwidth 量測後 normalized to 1 Hz。\n- Power sweep range：100 dB typical continuous electronic sweep range；可使用 mechanical step attenuators 位移 sweep range。\n- Source power linearity：0.2 dB typical，範圍 –40 dBm to +10 dBm。\n- Receiver compression：0.05 dB typical，up to +8 dBm at test port，referenced to –10 dBm。\n- Trace noise：0.005 dB specification RMS、0.002 dB typical RMS，條件為 10 GHz、100 kHz measurement bandwidth、0 dB reflection。\n- Speed example：10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 10.305484
+             },
+             {
+              "text": "R&S ZNA › Measurement speed\n- Measurement speed 測試條件：firmware version 3.20、Windows 11 (64 bit)。\n- Acquisition time per point：1 MHz measurement bandwidth、IF filter analog wideband 時 1 µs；30 MHz measurement bandwidth 時 32 ns。\n- Linear frequency sweep 條件 201 points、10 GHz center frequency、200 MHz span：1 MHz measurement bandwidth、IF filter analog normal 時 time per sweep < 3.9 ms；sweep cycle time < 4.9 ms。\n- IEC/IEEE VXI11 over 1 Gbit/s LAN：201 measurement points、800 MHz start frequency、1 GHz stop frequency、1 MHz measurement bandwidth 的 measurement and data transfer time 為 14 ms / 13 ms；201 measurement points magnitude 的 data transfer time 為 1.7 ms / 0.9 ms。\n- Switching time between channels with a maximum of 2001 points：< 2 ms。\n- Continuous mode 不需要額外 data transfer time，因為 data transfer 與 measurement 同時進行。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 9.822182
+             },
+             {
+              "text": "R&S ZNA\n[[R&S ZNA]] 是 Rohde & Schwarz 的 Vector Network Analyzer 系列，依 Version 24.00（April 2026）規格書涵蓋 [[R&S ZNA26]]、[[R&S ZNA43]]、[[R&S ZNA50]]、[[R&S ZNA67]]，頻率範圍從 10 MHz 延伸到最高 67 GHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 7.788259
+             },
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › 與既有知識的關係\n- 本來源補齊 [[R&S ZNA]] 主系列，與既有 [[R&S ZNA67EXT]] 形成關聯：[[R&S ZNA67EXT]] 是 1.0 mm Vector Network Analyzer System，量測範圍 10 MHz to 110 GHz；本來源的 [[R&S ZNA67]] 是 67 GHz base VNA 型號，並可透過 [[mmWave converter support]] 與 accessories 延伸應用。\n- 本來源與既有 [[R&S FSW]]、[[R&S FSWP]]、[[R&S FSWX]] 等 spectrum / phase-noise analyzer 頁面在 [[Spectrum analyzer mode]]、[[Phase noise]]、[[Noise figure measurement]] 等功能上有橫向關聯，但本來源屬於 VNA 產品規格，不應與市場或技術背景合併。\n- [[R&S ZNA-K980]] HUMS 與既有其他產品頁的 [[Health and utilization monitoring service]] 有橫向關聯；本來源列出 SNMP、REST JSON、SCPI、device web 等 readout/display protocols。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 19.686783
+             },
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › 規格條件與資料定義\n- Specifications with limits：表示 warranted product performance；以 <、≤、>、≥、±、maximum、limit of、minimum 等符號標示；compliance 由 testing 確保或由 design 推導。\n- Non-traceable specifications with limits（n. trc.）：依 specifications with limits 指定與測試，但因缺乏可追溯至 national metrology standards 的 measuring equipment，product performance 不保證。\n- Specifications without limits：表示 warranted product performance；未特別標記時表示數值沒有或只有可忽略偏差。\n- Typical data（typ.）：representative information；若標示 <、> 或 range，代表約 80% instruments 在 production time 可達成的 performance，其他情況代表 mean value。\n- Nominal values（nom.）：representative value；production 期間不測試該 parameter。\n- Measured values（meas.）：individual samples 的 measurement results。\n- Uncertainties：coverage factor 2，依 Guide to the Expression of Uncertainty in Measurement（GUM），並考量 environmental conditions、aging、wear and tear。\n- 來源明確說明：non-traceable specifications with limits、typical data、nominal values、measured values 不由 Rohde & Schwarz 保證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 14.188372
+             },
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › 關鍵實體與概念\n- [[R&S ZNA]] — Vector Network Analyzer 系列，涵蓋 26.5 GHz、43.5 GHz、50 GHz、67 GHz 型號。\n- [[R&S ZNA26]] — 26.5 GHz 型號，3.5 mm ruggedized male connector。\n- [[R&S ZNA43]] — 43.5 GHz 型號，2.92 mm 或 2.4 mm ruggedized male connector。\n- [[R&S ZNA50]] — 50 GHz 型號，2.4 mm ruggedized male connector。\n- [[R&S ZNA67]] — 67 GHz 型號，1.85 mm ruggedized male connector。\n- [[Vector Network Analyzer]]、[[Dynamic range]]、[[Measurement bandwidth]]、[[Direct source and receiver access]]、[[Noise figure measurement]]、[[mmWave converter support]]、[[Phase-coherent source control]]、[[Health and utilization monitoring service]]、[[Time domain analysis]]、[[Deembedding]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 9.120078
+             },
+             {
+              "text": "R&S ZNA67 › Software options\n[[R&S ZNA67]] 可使用 [[R&S ZNA]] 系列 software / measurement options。需注意 [[R&S ZNA-K1]] spectrum analyzer mode 不能與 R&S®ZNA67-B312、R&S®ZNA67-B511 組合；此限制為來源原文列出的 excludes / cannot be combined 關係。\n\n[[R&S ZNA67]] 與既有 [[R&S ZNA67EXT]] 相關但不是同一頁：[[R&S ZNA67EXT]] 是 1.0 mm Vector Network Analyzer System，依既有 index 記錄量測範圍 10 MHz to 110 GHz；本頁為 67 GHz base VNA 型號。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67.md"
+              },
+              "score": 15.874459
+             },
+             {
+              "text": "R&S ZNA67\n[[R&S ZNA67]] 是 [[R&S ZNA]] 系列的 67 GHz Vector Network Analyzer 型號，依 Version 24.00（April 2026）規格書提供 2-port 與 4-port base unit。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67.md"
+              },
+              "score": 5.36693
+             },
+             {
+              "text": "R&S ZNA67 › 基本規格\n- Frequency range：10 MHz to 67 GHz。\n- Test port connector：1.85 mm, male, ruggedized。\n- Number of test ports：2 or 4。\n- Impedance：50 Ω。\n- DC block：standard。\n- Frequency resolution：1 Hz。\n- Number of measurement points per trace：1 to 100001。\n- Measurement bandwidth：base unit 1 Hz to 1.5 MHz；with [[R&S ZNA-K17]] increased IF bandwidth 30 MHz option 時為 1 Hz to 30 MHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67.md"
+              },
+              "score": 4.848032
+             },
+             {
+              "text": "R&S ZNA50\n[[R&S ZNA50]] 是 [[R&S ZNA]] 系列的 50 GHz Vector Network Analyzer 型號，依 Version 24.00（April 2026）規格書提供 2-port 與 4-port base unit。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA50.md"
+              },
+              "score": 6.331332
+             },
+             {
+              "text": "R&S ZNA50 › Software options\n[[R&S ZNA50]] 可使用 [[R&S ZNA]] 系列 software / measurement options。需注意 [[R&S ZNA-K1]] spectrum analyzer mode 不能與 R&S®ZNA50-B312、R&S®ZNA50-B511 組合；此限制為來源原文列出的 excludes / cannot be combined 關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA50.md"
+              },
+              "score": 5.705463
+             },
+             {
+              "text": "R&S ZNA50 › 文件依據\n- 來源：[[ZNA_specs_en_5215-4652-22_v2400]]。\n- 文件：R&S®ZNA Vector Network Analyzer Specifications。\n- 文件編號：PD 5215.4652.22。\n- 文件版本：Version 24.00。\n- 發布時間：April 2026。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA50.md"
+              },
+              "score": 5.452587
+             },
+             {
+              "text": "R&S ZNA67EXT › 型號與 base units\n來源列出同一 type `R&S®ZNA67EXT` 的 6 個 order no. / model suffix variants：\n\n| 說明 | Type | Order No. | Port / power 摘要 |\n|---|---|---:|---|\n| Vector network analyzer system, 110 GHz, 2 test ports, complete system based on R&S®ZNA67, 2-port model, two millimeterwave converter heads, standard power | R&S®ZNA67EXT | 1352.1888K12 | models .12；2 test ports；standard power |\n| Vector network analyzer system, 110 GHz, 2 test ports, complete system based on R&S®ZNA67, 4-port model, two millimeterwave converter heads, standard power | R&S®ZNA67EXT | 1352.1888K13 | models .13；2 test ports；standard power |\n| Vector network analyzer system, 110 GHz, 4 test ports, four millimeterwave converter heads, standard power | R&S®ZNA67EXT | 1352.1888K14 | models .14；4 test ports；standard power |\n| Vector network analyzer system, 110 GHz, 2 test ports, complete system based on R&S®ZNA67, 2-port model, two millimeterwave converter heads, high power | R&S®ZNA67EXT | 1352.1888K15 | models .15；2 test ports；high power |\n| Vector network analyzer system, 110 GHz, 2 test ports, two millimeterwave converter heads, high power | R&S®ZNA67EXT | 1352.1888K16 | models .16；2 test ports；high power |\n| Vector network analyzer system, 110 GHz, 4 test ports, four millimeterwave converter heads, high power | R&S®ZNA67EXT | 1352.1888K17 | models .17；4 test ports；high power |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 12.546652
+             },
+             {
+              "text": "R&S ZNA67EXT › 系統構成與適用條件\n依 [[ZNA67EXT_specs_en_5216-3743-22_v0900]]，[[R&S ZNA67EXT]] system consists of one [[R&S ZNA67]] vector network analyzer and up to four external test sets。\n\n來源明確限制：規格只適用於作為 **1.0 mm vector network analyzer system** 操作，且 system configuration 必須與 [[R&S ZNA67]] rear panel designation scheme 中的 type、serial numbers 及正確 port position 完全一致。\n\nProduct data 適用條件：\n\n- Three hours of storage at ambient temperature followed by 90 minutes of warm-up operation。\n- Specified environmental conditions met。\n- Recommended calibration interval adhered to。\n- All internal automatic adjustments performed, if applicable。\n\n資料定義依來源：specifications with limits 表示 warranted product performance；typical data、nominal values、measured values 與 non-traceable specifications with limits 不由 Rohde & Schwarz 保證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 9.639783
+             },
+             {
+              "text": "R&S ZNA67EXT\n[[R&S ZNA67EXT]] 是 Rohde & Schwarz 的 1.0 mm [[Vector Network Analyzer]] system，依 [[ZNA67EXT_specs_en_5216-3743-22_v0900]] Version 09.00（July 2025）涵蓋 **10 MHz to 110 GHz**。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 8.486095
+             },
+             {
+              "text": "R&S ZNB3044 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3044 2-port | Vector network analyzer，2-port，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.42 |\n| R&S®ZNB3044 4-port | Vector network analyzer，4-port，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.44 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3044.md"
+              },
+              "score": 6.538695
+             },
+             {
+              "text": "R&S ZNB3044\n[[R&S ZNB3044]] 是 [[R&S ZNB3000]] 系列的 43.5 GHz Vector Network Analyzer 型號，依 Version 09.00（July 2026）base frequency range 為 9 kHz to 43.5 GHz，搭配 frequency upgrade option 可到 54.0 GHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3044.md"
+              },
+              "score": 5.397214
+             },
+             {
+              "text": "R&S ZNB3044 › 文件依據\n- 來源：[[ZNB3000_specs_en_3647-5184-22_v0900]]。\n- 文件：R&S®ZNB3000 Vector Network Analyzer Specifications。\n- 文件編號：PD 3647.5184.22。\n- 文件版本：Version 09.00。\n- 發布時間：July 2026。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3044.md"
+              },
+              "score": 4.74596
+             },
+             {
+              "text": "R&S AREG800A › Radial velocity 與 Doppler\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- 每個 artificial object 支援 individual Doppler frequency shift：`yes`。\n- Velocity setting range with [[R&S AREG8-B9]] and [[R&S AREG8-B63]]：`±500 km/h`。\n- Velocity step size：\n  - [[R&S AREG8-B9]] and [[R&S AREG8-B63]]：`0.001 km/h`。\n  - [[R&S AREG-DBP1]] / [[R&S AREG-DBP2]] / [[R&S AREG-DBP3]] with [[R&S AREG-MFP]] / [[R&S AREG-BFP]]：`0.05 km/h`。\n- Doppler frequency offset accuracy：在 IF domain 以 spectrum analyzer 量測 base unit IF input 與 IF output signal 的 frequency offset，不含 frontend，`< 1 Hz`。\n- Velocity accuracy：Doppler shift velocity error 由公式 `v_error = 3.6 × (f_error/f_center) × ½ × 299 700 000 m/s` 決定；`f_center` 為 `78 GHz` 或 `79 GHz`，適用於 [[R&S AREG8-81S]] / [[R&S AREG8-81WS]] 與 [[R&S AREG8-81D]] / [[R&S AREG8-81WD]]；velocity accuracy `< 0.05 km/h`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 13,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 11.516038
+             },
+             {
+              "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 10.307225
+             },
+             {
+              "text": "R&S AREG800A › R&S AREG8-81S / R&S AREG8-81D\nRF transfer characteristics 量測條件：with diplexer between RX and TX，frequency step size `2.5 MHz`，measurement bandwidth `1 kHz`，window function normal gate（Hann），type bandpass filter，measured from RX waveguide input to waveguide TX output connector。\n\n- Amplitude flatness：[[R&S AREG8-B9]] `< ±1 dB in 1 GHz bandwidth (meas.)`；[[R&S AREG8-B9]] with 未完整標示 option `< ±2 dB in 2 GHz bandwidth (meas.)`；[[R&S AREG8-B9]] with 未完整標示 option `< ±5 dB in 4 GHz bandwidth (meas.)`。\n- Group delay flatness：[[R&S AREG8-B9]] `< ±0.5 ns in 1 GHz bandwidth (meas.)`；[[R&S AREG8-B9]] with 未完整標示 option `< ±1 ns in 2 GHz bandwidth (meas.)`；[[R&S AREG8-B9]] with 未完整標示 option `< ±1 ns in 4 GHz bandwidth (meas.)`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 25,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 9.392006
+             },
+             {
+              "text": "R&S AREG800A › R&S QAT100 with AREG800A\n- RF frequency range：`76 GHz to 77 GHz`、`77 GHz to 81 GHz`。\n- RF instantaneous bandwidth：`4 GHz`。\n- Required bandwidth at AREG800A：[[R&S AREG8-B9]] with `1 GHz instantaneous bandwidth` due to 4 × multiplication concept of [[R&S QAT100]]。\n- Number of individual angular directions：with [[R&S QAT100]] `4`；with [[R&S QAT100]] and [[R&S QAT-B2]] option `8`。\n- Maximum number of individual artificial objects per AREG800A IF path：`1`。\n- Maximum number of supported [[R&S QAT100]] per AREG800A base unit：`8`；with one individual IF path per [[R&S QAT100]] and one individual angular direction。\n- RX power at frontend：`+60 dBm EIRP at 0.5 m distance to sensor`。\n- TX power at frontend：`+10 dBm EIRP at 0 dBm TX input power`。\n- Maximum deviation：`±3 dB between TX`。\n- Minimum input power：`+20 dBm EIRP at 0.5 m distance` for `76.0 GHz to 77.0 GHz`；`+25 dBm EIRP at 0.5 m distance` for `77.0 GHz to 81.0 GHz`。\n- Total RX to TX attenuation range：`0 dB to –80 dB (nom.)`，with AREG800A base unit and [[R&S QAT100]]，RX antenna to TX antenna（incl. antennas）。\n- IF level：maximum output power at IF RX ports `–6 dBm (nom.)`；maximum input power at IF TX ports `0 dBm`；minimum input power at IF TX ports `–25 dBm`。\n- Amplitude flatness：with [[R&S QAT100]]，RX antenna to TX antenna，`< ±5 dB (R&S QAT100 standalone) in 4 GHz bandwidth`。\n- Antenna configuration：1 central receive antenna connected to all 4 segments；96 transmit antennas in total；或 4 individual receive antennas each connected to an individual segment；with [[R&S QAT-B2]] additional 4 segments，up to 8 individual segments total。\n- Antenna type and gain：waveguide antennas，`6 dBi gain at 77 GHz center frequency (nom.)`。\n- Antenna polarization：`45° linear polarization`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 29,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 8.970131
+             },
+             {
+              "text": "R&S AREG800A › Automotive radar production configurations\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- [[R&S AREG-P1]] radar mini configuration / [[R&S AREG-DBP1]] base unit option：one digital channel，one object per channel，5 GHz instantaneous bandwidth，near object range possibility，analog IF output interfaces，remote control interfaces，[[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option one frontend per channel required。\n- [[R&S AREG-P2]] radar golden configuration / [[R&S AREG-DBP2]] base unit option：two digital channels。\n- [[R&S AREG-P3]] radar pro configuration / [[R&S AREG-DBP3]] base unit option：搭配 [[R&S AREG-MFP]] / [[R&S AREG-BFP]] frontend option；frontend 支援 monostatic 或 bistatic；three digital channels；one object per channel。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 31,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 8.569699
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n- Base unit instantaneous IF bandwidth 依 option 為 `1 GHz`、`2 GHz` 或 `5 GHz`；overrange 分別為 `1.2 GHz (meas.)`、`2.2 GHz (meas.)`、`5.2 GHz (meas.)`。\n- AREG800A base unit IF frequency range：[[R&S AREG8-B9]] 為 `1.1 GHz to 2.1 GHz`；[[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 2.7 GHz`；來源另列 [[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 5.7 GHz`，但 5 GHz bandwidth ordering information 顯示還涉及 [[R&S AREG8-K528]]，此處未自行推論修正。\n- RF frequency bands：[[R&S AREG8-24S]] / [[R&S AREG8-24D]] 為 `24 GHz to 24.25 GHz`；[[R&S AREG8-81S]] / [[R&S AREG8-81D]] 與 [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]]、[[R&S QAT100]] 為 `76 GHz to 81 GHz`；[[R&S FE44S]] 為 `24 GHz to 44 GHz`。\n- 每台 [[R&S AREG800A]] base unit 支援 conventional mmWave frontends 最多 4 個，[[R&S QAT100]] 最多 8 個，[[R&S FE44S]] 最多 8 個 external frontends（4 個 TX、4 個 RX，共 4 pairs）。\n- Artificial object distance 可依 option 涵蓋 `< 17 m to 3000 m (meas.)`、`< 4 m to 3000 m (meas.)`、`≥ air gap to 3000 m (meas.)`；production frontend 組合列為 FMCW `≥ air gap to 350 m (meas.)`，non FMCW `< 17 m to 350 m (meas.)`。\n- Radial velocity：每個 artificial object 支援 individual Doppler frequency shift；with [[R&S AREG8-B9]] and [[R&S AREG8-B63]] velocity setting range 為 `±500 km/h`，velocity step size 為 `0.001 km/h`。\n- Remote control interfaces 包含 Ethernet 與 [[R&S AREG8-K986]] GPIB；remote control command set 為 `SCPI`。\n- HiL interface option 為 [[R&S AREG8-K109]]；open-standard protocol support 為 open simulation interface（OSI）；time synchronization protocol 為 `gPTP`、`NTP`。\n- Base unit `AREG800A` Order No. `1437.4400.02`，包含 power cable 與 quick start guide。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 3.327441
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 讀圖補充\n以下內容來自讀圖補充，可信度低於正文，不用於推翻正文。\n\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p001：封面可辨識 `AREG800A`、`AUTOMOTIVE RADAR ECHO GENERATOR`、`Specifications`、`Specifications | Version 09.00`、`R&S`；產品本體可辨識 `R&S® AREG800A Automotive Radar Echo Generator`、`AREG`；螢幕欄位可勉強辨識 `User Ligths`、`Instrument Setup`、`System Config`、`Update Setup`；左側按鍵可辨識 `Home`、`Loc`、`Preset`、`Help`；另可辨識 `Esc`、`Enter`、`On/Off`。主機螢幕內大部分內容、多數按鍵小字、外接模組細小標示無法辨識。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p021：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `21`；無表格、圖表、方塊圖、曲線圖或螢幕截圖等實質內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p022：可見 `Version 09.00, September 2025`、頁碼 `22`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`；除文件資訊外無其他可辨識內容。\n- [[AREG800A_specs_en_3609-8015-22_v0900]]（讀圖）p023：可見 `Version 09.00, September 2025`、`Rohde & Schwarz AREG800A Automotive Radar Echo Generator`、頁碼 `23`；無圖表、方塊圖、曲線圖、表格、螢幕截圖或內文。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 2.827145
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 關鍵實體與概念\n- [[R&S AREG-MFP]]、[[R&S AREG-BFP]] — production frontend options，支援 monostatic 或 bistatic。\n- [[Automotive radar echo generation]]、[[FMCW radar]]、[[Radar cross-section]]、[[Doppler frequency shift]]、[[Hardware-in-the-loop]]、[[Open Simulation Interface]]、[[SCPI]]、[[Air gap]] — 本來源涉及的技術概念。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.754071
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 讀圖頁面\n> 以下段落引用的內容來自這幾頁的圖片。模型讀圖沒有信心分數，請以圖片為準。\n\n**p001**\n\n![[AREG800A_specs_en_3609-8015-22_v0900-p001.png]]\n\n**p021**\n\n![[AREG800A_specs_en_3609-8015-22_v0900-p021.png]]\n\n**p022**\n\n![[AREG800A_specs_en_3609-8015-22_v0900-p022.png]]\n\n**p023**\n\n![[AREG800A_specs_en_3609-8015-22_v0900-p023.png]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.695835
+             },
+             {
+              "text": "AREG800A_specs_en_3609-8015-22_v0900 › 原文未解的問題\n- `AREG800A base unit IF frequency range` 中來源列出 [[R&S AREG8-B9]] with [[R&S AREG8-K527]]：`0.7 GHz to 5.7 GHz`；同份來源 ordering information 顯示 5 GHz IF bandwidth extension 為 [[R&S AREG8-K528]]。本頁未自行推論修正，需回查原始 datasheet 表格。\n- `AUX IF output frequency range` 也出現 [[R&S AREG8-B9]] with [[R&S AREG8-K527]]：`0.7 GHz to 5.7 GHz`；同樣需回查是否漏列 [[R&S AREG8-K528]]。\n- 多處 RF transfer characteristics 條件萃取為 `R&S®AREG8-B9 with 未完整標示 option`，未保留完整 option code；不得自行補碼。\n- Datasheet 未列出價格。\n- Datasheet 未列出 service plan 具體 order code。\n- Extended warranty periods 需聯絡 Rohde & Schwarz sales office；datasheet 未列出具體 code 或期限組合。\n- 本次提供的 raw 摘要包含圖片補充文字，但未提供可嵌入的圖片 wikilink；因此 wiki 僅保留讀圖文字註記，未新增圖片嵌入。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+              },
+              "score": 1.29456
+             },
+             {
+              "text": "R&S ZNA › R&S®ZNA-B15 RFFE GPIO interface 規格摘錄\n- Models .02 and .03 提供 two independent MIPI RFFE busses。\n- Connector type：25-pin D-Sub，female。\n- RFFE port 1 / 2 的 VIO、DATA、CLK 電壓範圍為 0 V to +2 V，1 mV step，maximum current 20 mA。\n- CLK configurable clock rate：31.25 kHz to 26 MHz。\n- GPIO 1 to GPIO 8：voltage range –5 V to +10 V；typ. –6 V to +12 V；voltage step size 5 mV；maximum current 20 mA。\n- GPIO 9 and 10：voltage range –5 V to +10 V；typ. –6 V to +12 V；voltage step size 5 mV；maximum current 100 mA。\n- Model .03 提供 voltage and current measurement with switchable source resistance；32 internal ADC channels 可同時量測每個 RFFE 與 GPIO pin 的 voltage and current。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 11,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 7.074852
+             },
+             {
+              "text": "R&S ZNA › 文件依據\n- 來源：[[ZNA_specs_en_5215-4652-22_v2400]]。\n- 文件：R&S®ZNA Vector Network Analyzer Specifications。\n- 文件編號：PD 5215.4652.22。\n- 文件版本：Version 24.00。\n- 發布時間：April 2026。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 6.936881
+             },
+             {
+              "text": "R&S ZNA › 重要 recommended setups\n- [[R&S ZNA-K5]] vector corrected converter measurements：recommended setup 為 4-port R&S®ZNA；需要 R&S®ZNA-K4、R&S®ZNA-B5、R&S®ZNA-B8 mmWave converter LO、R&S®ZN-ZM292 calibration mixer 與 calibration accessories。\n- [[R&S ZNA-K8]] mmWave converter support：two mmWave converters with 2-port R&S®ZNA，或 four mmWave converters with 4-port R&S®ZNA；需要 R&S®ZNA-K8、R&S®ZNA-B8、R&S®ZNA-B26、R&S®ZCAKN 與 accessories。Alternative setup：two mmWave converters with 4-port R&S®ZNA，需要 R&S®ZNA-K8、R&S®ZNAxx-B16、R&S®ZCAKN 與 accessories。\n- [[R&S ZNA-K9]] group delay measurements：4-port R&S®ZNA recommended setup 需要 R&S®ZNAxx-B213、R&S®ZNA-B5、R&S®ZNA-K9；2-port R&S®ZNA recommended setup 需要 R&S®ZNAxx-B212、R&S®ZNAxx-B52、R&S®ZNA-K9。\n- [[R&S ZNA-K30]] noise figure measurement：recommended setup 使用 port 1 as driving and port 2 as receiving port；需要 R&S®ZNAxx-B16、R&S®ZNAxx-B21、R&S®ZNAxx-B32、R&S®ZNAxx-B161、R&S®ZNAxx-B302、diode power sensor（例如 R&S®NRP40S）與 accessories（test cables、fixed attenuators 3 dB / 6 dB / 10 dB 等）。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 15,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 6.06301
+             },
+             {
+              "text": "R&S ZNA › 2-port / 4-port 架構\n依 [[ZNA_specs_en_5215-4652-22_v2400]]（Version 24.00, April 2026）：\n\n- 4-port instruments：最多 4 sources，independently configurable、phase coherent、phase controlled；另有第 5 source 可作為 LO supply。\n- 2-port instruments：最多 2 sources，independently configurable、phase coherent、phase controlled；另有第 3 source 可作為 LO supply。\n- 4-port model 每 port 有 2 true receivers，總計 8 true receivers；2-port model 每 port 有 2 true receivers，總計 4 true receivers；來源明確說明無 multiplexing。\n- 支援 true parallel and coherent data acquisition，例如 antenna array tests 與 antenna test systems，從 100 kHz 開始。\n- Optional rear panel LO out 可支援 mmWave converters；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters，無需 external signal generator。\n- Rear panel LO out 提供 high-power LO signal，typ. +25 dBm，最高 26.5 GHz，可作為 mixer measurements 的 LO source。\n- Optional second LO source 可讓 mixer/frequency convertor measurements 速度加倍並最佳化 trace noise。\n- 使用 [[R&S ZNA-K9]] option、1 kHz measurement bandwidth 時，mixer group delay 與 deviation from linear phase 的 group delay trace noise peak-to-peak 可由 200 ps 降至 15 ps。\n- 最多 4 pulse modulators、最多 8 pulse generators（4-port）；最多 2 pulse modulators、最多 4 pulse generators（2-port）。\n- Minimum pulse width：40 ns。\n- Optional direct IF access（in/out）：IF input 可用於 mmWave converter 與 antenna measurement systems，bandwidth 1 GHz；IF output up to 2 GHz bandwidth 可用於 external pulse analysis。\n- Selectable reference signal access：1 GHz external reference，可同步 external equipment，例如 signal generators，改善 mmWave converters up to terahertz frequencies 的 performance。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 5.504985
+             },
+             {
+              "text": "R&S ZNA › 讀圖補充\n[[ZNA_specs_en_5215-4652-22_v2400]]（讀圖）包含 4 頁無文字層頁面的模型讀圖結果；可信度低於正文，不應用來推翻正文。來源摘錄未提供圖片嵌入 wikilink，因此本頁無法帶入原圖附件。\n\n- p001（讀圖）：封面可辨識 R&S®ZNA、VECTOR NETWORK ANALYZER、Specifications、Version 24.00、ROHDE&SCHWARZ、Make ideas real；前面板可辨識 Port 1、Port 3、Port 2。\n- p044（讀圖）：圖說為 Test set configuration for R&S®ZNAXx-B501 low power spurious reduction port 1；可辨識 R&S®ZNAXx-B21、R&S®ZNAXx-B161、R&S®ZNAXx-B501、R&S®ZNAXx-B31 與 Source / Meas / Ref 連接標示。\n- p050（讀圖）：Side view of the R&S®ZNA，尺寸數值 452.1、407.6、131、272.43、272.43、116.1、161.95、56.3、110.5；尺寸單位無法辨識。\n- p059（讀圖）：頁面幾乎空白，無實質內容。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 19,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA.md"
+              },
+              "score": 5.302813
+             },
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › 讀圖補充\n來源包含「【讀圖補充】原文這幾頁沒有文字層」；以下內容可信度低於正文，引用時應標示「[[ZNA_specs_en_5215-4652-22_v2400]]（讀圖）」。本次輸入的來源摘錄未提供圖片嵌入 wikilink，因此無法在 wiki 頁帶入原圖附件。\n\n- p001（讀圖）：封面可辨識 R&S®ZNA、VECTOR NETWORK ANALYZER、Specifications、Version 24.00、ROHDE&SCHWARZ、Make ideas real、ZNA - Vector Network Analyzer、R&S；背景有類似 Smith chart 的大型圓形網格圖；設備螢幕顯示多個黑底網格曲線圖視窗；前面板可辨識 Port 1、Port 3、Port 2；可辨識數值只有 Version 24.00。\n- p044（讀圖）：頁首 Version 24.00, April 2026；圖說為 Test set configuration for R&S®ZNAXx-B501 low power spurious reduction port 1。可辨識 Source、–20 dB、R&S®ZNAXx-B21 source step attenuator 0 dB to 70 dB / 10 dB、R&S®ZNAXx-B161 direct source monitor access、R&S®ZNAXx-B501 low-power spurious reduction 30 dB、R&S®ZNAXx-B31 receiver step attenuators 0 dB to 35 dB / 5 dB、Meas receiver、Ref receiver、Port 1、Source Out、Source In、Meas Out、Meas In、Ref Out、Ref In、Src Mon Out、10 dB。\n- p050（讀圖）：頁首 Version 24.00, April 2026；圖說為 Side view of the R&S®ZNA；可辨識尺寸數值 452.1、407.6、131、272.43、272.43、116.1、161.95、56.3、110.5；尺寸數值旁單位無法辨識。\n- p059（讀圖）：頁面幾乎空白，無實質內容；可辨識 Version 24.00, April 2026；Rohde & Schwarz R&S®ZNA Vector Network Analyzer；59。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 7.551544
+             },
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › 重點摘要\n- 型號頻率範圍：\n  - [[R&S ZNA26]]：10 MHz to 26.5 GHz。\n  - [[R&S ZNA43]]：10 MHz to 43.5 GHz，可為 2.92 mm 或 2.4 mm ruggedized male test port connector。\n  - [[R&S ZNA50]]：10 MHz to 50 GHz。\n  - [[R&S ZNA67]]：10 MHz to 67 GHz。\n- 各型號提供 2 ports 或 4 ports base unit；test port impedance 為 50 Ω，DC block 為 standard。\n- Key performance 包含：dynamic range > 129 dB specification without options、147 dB typical with options、maximum attainable range up to 170 dB allowing full 2-port correction；sensitivity > –120 dBm at 1 Hz IF bandwidth specification without options，並有 –162 dBm measured with options（1 kHz measurement bandwidth normalized to 1 Hz）。\n- Measurement bandwidth：base unit 1 Hz to 1.5 MHz；搭配 [[R&S ZNA-K17]] increased IF bandwidth 30 MHz option 時為 1 Hz to 30 MHz。\n- Measurement speed 條件包含 firmware version 3.20、Windows 11 (64 bit)；例：10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。\n- 4-port instruments：最多 4 sources，independently configurable、phase coherent、phase controlled；另有第 5 source 可作為 LO supply；每 port 有 2 true receivers，4-port model 總計 8 true receivers，無 multiplexing。\n- 2-port instruments：最多 2 sources，independently configurable、phase coherent、phase controlled；另有第 3 source 可作為 LO supply；每 port 有 2 true receivers，2-port model 總計 4 true receivers，無 multiplexing。\n- Optional rear panel LO out 可支援 mmWave converters；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters，無需 external signal generator；rear panel LO out typ. +25 dBm，最高 26.5 GHz。\n- [[R&S ZNA-K28]] continuous data recording 支援 infinite data point capture、circular buffer，並可透過 LAN 或 USB 連續資料傳輸。\n- [[R&S ZNA-B26]] direct IF access：IF input 可用於 mmWave converter 與 antenna measurement systems，bandwidth 1 GHz；IF output up to 2 GHz bandwidth 可用於 external pulse analysis。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 6.561883
+             },
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › Option 與 licence 摘要\n- Hardware options：[[R&S ZNA-B4]] precision frequency reference、[[R&S ZNA-B5]] 2nd internal LO source、[[R&S ZNA-B7]] data streaming memory、[[R&S ZNA-B8]] mmWave converter LO、[[R&S ZNA-B12]] device control、[[R&S ZNA-B15]] RFFE GPIO interface、[[R&S ZNA-B19]] additional removable hard disk、[[R&S ZNA-B26]] direct IF access、[[R&S ZNA-B91]] trigger and control I/O board。\n- 型號依附 hardware options：direct source and receiver access、source step attenuators、receiver step attenuators、internal pulse modulators、3rd and 4th internal sources、2nd internal source and LO、source monitor access、low-noise amplifier、low-power spurious reduction、internal combiner。\n- Software / measurement options：[[R&S ZNA-K1]] spectrum analyzer mode、[[R&S ZNA-K2]] time domain analysis、[[R&S ZNA-K20]] extended time domain analysis、[[R&S ZNA-K4]] scalar mixer measurements、[[R&S ZNA-K5]] vector mixer measurements、[[R&S ZNA-K6]] phase coherent source control、[[R&S ZNA-K61]] true differential mode、[[R&S ZNA-K7]] measurements on pulsed signals、[[R&S ZNA-K17]] increased IF bandwidth 30 MHz、[[R&S ZNA-K8]] mmWave converter support、[[R&S ZNA-K9]] group delay measurements、[[R&S ZNA-K19]] 1 mHz frequency resolution、[[R&S ZNA-K28]] continuous data recording、[[R&S ZNA-K30]] noise figure measurement、[[R&S ZNA-K50]] uncertainty analysis、[[R&S ZNA-K51]] security write protection、[[R&S ZNA-K66]] speed improvement、[[R&S ZNA-K100]] SNP assistant、[[R&S ZNA-K121]] RF off boot up、[[R&S ZNA-K210]] EaZy deembedding、[[R&S ZNA-K220]] in-situ deembedding、[[R&S ZNA-K230]] smart fixture deembedding、[[R&S ZNA-K231]] Delta-L PCB characterization、[[R&S ZNA-K980]] health and utilization monitoring service。\n- 明確 excludes：[[R&S ZNA-K1]] spectrum analyzer mode cannot be combined with R&S®ZNA50-B312、R&S®ZNA67-B312、R&S®ZNA50-B511、R&S®ZNA67-B511。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 4.169748
+             },
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › 重點摘要\n這份來源是 **R&S®ZNA Vector Network Analyzer Specifications**，文件編號 **PD 5215.4652.22**，**Version 24.00**，發布時間 **April 2026**，涵蓋 [[R&S ZNA]] 系列與 [[R&S ZNA26]]、[[R&S ZNA43]]、[[R&S ZNA50]]、[[R&S ZNA67]] 四個型號。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 3.977407
+             },
+             {
+              "text": "ZNA_specs_en_5215-4652-22_v2400 › 重點摘要\n- Product data 適用條件：ambient temperature 下 storage 3 hours，接著 warm-up operation 90 minutes，符合 specified environmental conditions，遵守 recommended calibration interval，且已執行 applicable internal automatic adjustments。\n- Effective system data 主要條件：+18 °C to +28 °C、calibration 後溫度變化不超過 1 °C、measurement 與 calibration 的 frequency points / measurement bandwidth / sweep time 相同、不使用 calibration interpolation、measurement bandwidth 10 Hz、nominal source power 0 dBm。\n- General data：operating temperature +5 °C to +40 °C、storage temperature –20 °C to +60 °C、calibration interval 1 year、2-port models power consumption ≤ 450 W spec. / 300 W typ.、4-port models ≤ 550 W spec. / 350 W typ.。\n- Internal PC：Removable PC IPS 15/8、AMD R2000、3.35 GHz to 3.7 GHz、16 Gbyte DDR4、Windows 11 IoT Enterprise 2024 LTSC、SSD ≥ 256 Gbyte；來源註明 Internal PC is subject to change without notice。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+              },
+              "score": 3.828361
+             },
+             {
+              "text": "R&S ZNA67 › 文件依據\n- 來源：[[ZNA_specs_en_5215-4652-22_v2400]]。\n- 文件：R&S®ZNA Vector Network Analyzer Specifications。\n- 文件編號：PD 5215.4652.22。\n- 文件版本：Version 24.00。\n- 發布時間：April 2026。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67.md"
+              },
+              "score": 4.729637
+             },
+             {
+              "text": "R&S ZNA67 › Effective system data（R&S®ZN-Z218 calibration kit）\n條件：+18 °C to +28 °C；calibration 後溫度變化不超過 1 °C；measurement bandwidth 10 Hz；nominal source power 0 dBm；measurement 與 calibration 使用相同 frequency points、measurement bandwidth、sweep time；不使用 calibration interpolation。\n\n| Frequency range | Directivity spec./typ. | Source match spec./typ. | Load match spec./typ. | Reflection tracking spec./typ. | Transmission tracking spec./typ. |\n|---|---|---|---|---|---|\n| 10 MHz to 10 GHz | 46/49 dB | 43/46 dB | 45/48 dB | 0.03/0.02 dB | 0.02/0.01 dB |\n| 10 GHz to 20 GHz | 44/47 dB | 40/43 dB | 43/46 dB | 0.04/0.03 dB | 0.03/0.02 dB |\n| 20 GHz to 40 GHz | 42/45 dB | 38/41 dB | 41/44 dB | 0.04/0.03 dB | 0.04/0.03 dB |\n| 40 GHz to 50 GHz | 40/43 dB | 36/39 dB | 39/42 dB | 0.06/0.05 dB | 0.06/0.05 dB |\n| 50 GHz to 67 GHz | 37/40 dB | 34/37 dB | 36/39 dB | 0.07/0.06 dB | 0.06/0.05 dB |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67.md"
+              },
+              "score": 3.031112
+             },
+             {
+              "text": "R&S ZNA67 › Measurement accuracy 條件與摘錄\nR&S®ZNA67 measurement accuracy 的有效條件：+18 °C to +28 °C；calibration 後溫度變化不超過 1 °C；使用 R&S®ZN-Z218 calibration kit；frequency points、measurement bandwidth、sweep time 必須與 measurement 和 calibration 相同；不使用 interpolation of the calibration；base unit without options 條件為 measurement bandwidth 10 Hz、nominal source power 0 dBm。\n\nTransmission uncertainty 可見數值摘錄：\n\n| Frequency range | Transmission level | Magnitude / phase uncertainty |\n|---|---:|---|\n| 10 MHz to 40 MHz | 0 dB to –20 dB | 0.04 dB、0.5° |\n| 10 MHz to 40 MHz | –20 dB to –30 dB | 0.23 dB、1.0° |\n| 10 MHz to 40 MHz | –30 dB to –40 dB | 0.60 dB、3.0° |\n| 10 MHz to 40 MHz | –40 dB to –50 dB | 1.50 dB、5.0° |\n| 10 MHz to 40 MHz | –50 dB to –60 dB | 4.50 dB（來源摘錄未列 phase） |\n| > 40 MHz to 200 MHz | 0 dB to –30 dB | 0.04 dB、0.5° |\n| > 200 MHz to 10 GHz | 0 dB to –30 dB | 0.04 dB、0.7° |\n| > 10 GHz to 26.5 GHz | 0 dB to –30 dB | 0.05 dB、1.3° |\n| > 26.5 GHz to 40 GHz | 0 dB to –30 dB | 0.06 dB、1.8° |\n| > 40 GHz to 50 GHz | 0 dB to –30 dB | 0.07 dB、2.0° |\n| > 50 GHz to 67 GHz | 0 dB to –30 dB | 0.07 dB、2.1° |\n| > 50 GHz to 67 GHz | –50 dB to –60 dB | 0.47 dB、4.3° |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67.md"
+              },
+              "score": 2.836518
+             },
+             {
+              "text": "R&S ZNA67 › Dynamic range 與 noise level 摘錄\n- R&S®ZNA50 / R&S®ZNA67 搭配 R&S®ZNA-B3n receiver step attenuator 時：\n  - 40 GHz to 50 GHz：> 106 dB spec.、116 dB typ.；另一組 measured spec. > 112 dB、typ. meas. 122 dB。\n  - 50 GHz to 67 GHz：> 102 dB spec.、112 dB typ.；另一組 measured spec. > 107 dB、typ. meas. 117 dB。\n- Standard configuration noise level，1 kHz measurement bandwidth normalized to 1 Hz，base unit：\n  - 40 GHz to 50 GHz：spec. < –105 dBm、typ. –120 dBm。\n  - 50 GHz to 67 GHz：spec. < –104 dBm、typ. –119 dBm。\n- Reversed coupler configuration noise level，base unit + R&S®ZNAxx-B16 + R&S®ZNAxx-B3n：50 GHz to 67 GHz spec. < –116 dBm、typ. –130 dBm。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67.md"
+              },
+              "score": 1.286134
+             },
+             {
+              "text": "R&S ZNA67 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---|\n| R&S®ZNA67 2 ports | 67 GHz，1.85 mm connectors | 1332.4500.62 |\n| R&S®ZNA67 4 ports | 67 GHz，1.85 mm connectors | 1332.4500.64 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67.md"
+              },
+              "score": 0.477759
+             },
+             {
+              "text": "R&S ZNA50 › 基本規格\n- Frequency range：10 MHz to 50 GHz。\n- Test port connector：2.4 mm, male, ruggedized。\n- Number of test ports：2 or 4。\n- Impedance：50 Ω。\n- DC block：standard。\n- Frequency resolution：1 Hz。\n- Number of measurement points per trace：1 to 100001。\n- Measurement bandwidth：base unit 1 Hz to 1.5 MHz；with [[R&S ZNA-K17]] increased IF bandwidth 30 MHz option 時為 1 Hz to 30 MHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA50.md"
+              },
+              "score": 4.850176
+             },
+             {
+              "text": "R&S ZNA50 › Measurement accuracy 條件與摘錄\nR&S®ZNA50 measurement accuracy 的有效條件：+18 °C to +28 °C；calibration 後溫度變化不超過 1 °C；使用 R&S®ZN-Z224 calibration kit；frequency points、measurement bandwidth、sweep time 必須與 measurement 和 calibration 相同；不使用 interpolation of the calibration；base unit without options 條件為 measurement bandwidth 10 Hz、nominal source power 0 dBm。\n\nTransmission uncertainty 摘錄：\n\n| Frequency range | Transmission level | Magnitude / phase uncertainty |\n|---|---:|---|\n| > 26.5 GHz to 40 GHz | 0 dB to –30 dB | 0.06 dB、1.8° |\n| > 40 GHz to 50 GHz | 0 dB to –30 dB | 0.07 dB、2.0° |\n| > 40 GHz to 50 GHz | –50 dB to –60 dB | 0.47 dB、3.6° |\n\nReflection uncertainty 摘錄：\n\n| Frequency range | Reflection | Magnitude / phase uncertainty |\n|---|---:|---|\n| 0.01 GHz to 10 GHz | 0 dB reflection | 0.10 dB、0.6° |\n| > 20 GHz to 40 GHz | 0 dB reflection | 0.17 dB、1.2° |\n| > 40 GHz to 50 GHz | 0 dB reflection | 0.20 dB、1.6° |\n| > 40 GHz to 50 GHz | –35 dB reflection | 3.88 dB、32.0° |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA50.md"
+              },
+              "score": 3.029709
+             },
+             {
+              "text": "R&S ZNA50 › Effective system data（R&S®ZN-Z224 calibration kit）\n條件：+18 °C to +28 °C；calibration 後溫度變化不超過 1 °C；measurement bandwidth 10 Hz；nominal source power 0 dBm；measurement 與 calibration 使用相同 frequency points、measurement bandwidth、sweep time；不使用 calibration interpolation。\n\n| Frequency range | Directivity spec./typ. | Source match spec./typ. | Load match spec./typ. | Reflection tracking spec./typ. | Transmission tracking spec./typ. |\n|---|---|---|---|---|---|\n| 10 MHz to 10 GHz | 46/49 dB | 43/46 dB | 45/48 dB | 0.03/0.02 dB | 0.02/0.01 dB |\n| 10 GHz to 20 GHz | 44/47 dB | 40/43 dB | 43/46 dB | 0.04/0.03 dB | 0.03/0.02 dB |\n| 20 GHz to 40 GHz | 42/45 dB | 38/41 dB | 41/44 dB | 0.04/0.03 dB | 0.04/0.03 dB |\n| 40 GHz to 50 GHz | 40/43 dB | 36/39 dB | 39/42 dB | 0.06/0.05 dB | 0.06/0.05 dB |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA50.md"
+              },
+              "score": 2.909832
+             },
+             {
+              "text": "R&S ZNA50 › Dynamic range 與 noise level 摘錄\n- R&S®ZNA50 / R&S®ZNA67 搭配 R&S®ZNA-B3n receiver step attenuator 時，40 GHz to 50 GHz system dynamic range：> 106 dB spec.、116 dB typ.；另一組 measured spec. > 112 dB、typ. meas. 122 dB。\n- 50 GHz to 67 GHz 數值不適用 [[R&S ZNA50]] 的 base frequency range，但來源在共用表格中列給 [[R&S ZNA67]]。\n- Standard configuration noise level，1 kHz measurement bandwidth normalized to 1 Hz，base unit 40 GHz to 50 GHz：spec. < –105 dBm、typ. –120 dBm。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA50.md"
+              },
+              "score": 2.766036
+             },
+             {
+              "text": "R&S ZNA50 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---|\n| R&S®ZNA50 2 ports | 50 GHz，2.4 mm connectors | 1332.4500.52 |\n| R&S®ZNA50 4 ports | 50 GHz，2.4 mm connectors | 1332.4500.54 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA50.md"
+              },
+              "score": 0.696851
+             },
+             {
+              "text": "R&S ZNA67EXT › Dynamic range\n條件：receiver noise floor 為 transmission magnitude data trace RMS，test ports short-circuited；規格適用於 **10 Hz measurement bandwidth**，without user correction applied。來源說明 dynamic range 可用 **1 Hz measurement bandwidth** 增加；crosstalk does not limit the dynamic range。Dynamic range performance specified between port 1 and port 2 and between port 3 and port 4（4-port model）；otherwise typical。\n\n| Frequency range | Dynamic range |\n|---|---:|\n| 10 MHz to 30 MHz | > 85 dB (spec.) |\n| 30 MHz to 100 MHz | > 100 dB (spec.) |\n| 100 MHz to 500 MHz | > 120 dB (spec.) |\n| 500 MHz to 10 GHz | > 130 dB (spec.) |\n| 10 GHz to 20 GHz | > 125 dB (spec.) |\n| 20 GHz to 30 GHz | > 115 dB (spec.) |\n| 30 GHz to 40 GHz | > 120 dB (spec.) |\n| 40 GHz to 50 GHz | > 100 dB (spec.) |\n| 50 GHz to 65 GHz | > 95 dB (spec.) |\n| 65 GHz to 75 GHz | > 90 dB (spec.) |\n| 75 GHz to 80 GHz | > 100 dB (spec.) |\n| 80 GHz to 90 GHz | > 105 dB (spec.) |\n| 90 GHz to 100 GHz | > 95 dB (spec.) for models .12/.13/.14；> 100 dB (spec.) for models .15/.16/.17 |\n| 100 GHz to 110 GHz | > 90 dB (spec.) for models .12/.13/.14；> 95 dB (spec.) for models .15/.16/.17 |\n\n註：來源 footnote 2 說若 [[R&S ZNA]] base unit 存在下列 options，68 GHz 以下 dynamic range 最多 reduced up to 18 dB：R&S®ZNA-B161, R&S®ZNA-B163, R&S®ZNA-B212, R&S®ZNA-B213, R&S®ZNA-B302, R&S®ZNA-B312, R&S®ZNA-B501 or R&S®ZNA-B511。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 6.500892
+             },
+             {
+              "text": "R&S ZNA67EXT › 文件依據\n- 來源：[[ZNA67EXT_specs_en_5216-3743-22_v0900]]\n- 文件：**PD 5216.3743.22 | Version 09.00 | July 2025 (ja)**\n- 頁首版本：**Version 09.00, July 2025**\n- 產品名稱：**R&S®ZNA67EXT Vector Network Analyzer System**",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 6.396622
+             },
+             {
+              "text": "R&S ZNA67EXT › 核心規格\n以下規格皆來自 [[ZNA67EXT_specs_en_5216-3743-22_v0900]] Version 09.00（July 2025）。\n\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Impedance | measurement range | 50 Ω |\n| Test port connector | measurement range | 1.0 mm, male |\n| Number of test ports | models .12/.13/.15/.16 | 2 |\n| Number of test ports | models .14/.17 | 4 |\n| Frequency range | measurement range | 10 MHz to 110 GHz |\n| Frequency resolution | measurement range | 1 Hz |\n| Number of measurement points | user-selectable | 1 to 100001 |\n| Measurement bandwidths | 1/1.5/2/3/5/7 steps | 1 Hz to 1.5 MHz |\n| Calibration interval | general data | 1 year |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 6.015657
+             },
+             {
+              "text": "R&S ZNA67EXT › General data\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Weight | R&S®ZNA67 | 29 kg (63.9 lb) |\n| Weight | each external test set consisting of R&S®ZVA-Z110D | 3.5 kg (7.7 lb) |\n| Shipping weight | R&S®ZNA67 | 35 kg (77.2 lb) |\n| Shipping weight | each external test set consisting of R&S®ZVA-Z110D | 5.5 kg (12.1 lb) |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 5.888296
+             },
+             {
+              "text": "R&S ZNA67EXT › 讀圖頁面\n> 以下段落引用的內容來自這幾頁的圖片。模型讀圖沒有信心分數，請以圖片為準。\n\n**p001**\n\n![[ZNA_specs_en_5215-4652-22_v2400-p001.png]]",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 26,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+              },
+              "score": 5.251835
+             },
+             {
+              "text": "R&S ZNB3044 › Dynamic range（with or without frequency upgrade option）\n條件：10 Hz measurement bandwidth，without user correction applied；receiver noise floor 為 transmission magnitude data trace RMS，test ports short-circuited。\n\n| Frequency range | System dynamic range |\n|---|---:|\n| 9 kHz to 300 kHz | specification ≥115 dB；typical 125 dB |\n| 300 kHz to 1 MHz | specification ≥135 dB；typical 145 dB |\n| 1 MHz to 10 MHz | specification ≥140 dB；typical 150 dB；2 MHz 可能 typically degraded |\n| 10 MHz to 100 MHz | specification ≥143 dB；typical 153 dB |\n| 100 MHz to 20 GHz | specification ≥140 dB；typical 150 dB |\n| 20 GHz to 24 GHz | specification ≥135 dB；typical 145 dB |\n| 24 GHz to 45 GHz | specification ≥133 dB；typical 143 dB |\n| 45 GHz to 54 GHz | specification ≥130 dB；typical 138 dB |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3044.md"
+              },
+              "score": 4.34327
+             },
+             {
+              "text": "R&S ZNB3044 › Software options 注意事項\n- [[R&S ZNB3-K8]] mmWave converter support 支援 [[R&S ZNB3044]]；recommended setup 包含 R&S®ZNB3-K8、R&S®ZNB3-B8、R&S®ZCAKN、accessories。\n- [[R&S ZNB3-K30]] noise figure measurement 可用於 R&S®ZNB3000 with 2 or 4 ports；external LNA 詳情需聯絡 local Rohde & Schwarz sales office。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3044.md"
+              },
+              "score": 4.230731
+             },
+             {
+              "text": "R&S ZNB3044 › Hardware options（R&S®ZNB3044）\n| Code | 名稱 / 原文說明 | Order No. | 相依關係 / 限制 |\n|---|---|---:|---|\n| R&S®ZNB3-B542 | R&S®ZNB3044 2-port upgrade to 54 GHz | 1351.5096.02 | 2-port model；Retrofit |\n| R&S®ZNB3-B544 | R&S®ZNB3044 4-port upgrade to 54 GHz | 1351.5096.04 | 4-port model；Retrofit |\n| R&S®ZNB3-B2 | Second internal generator for 4-port R&S®ZNB3044 | 1351.5167.02 | 4-port model；Retrofit |\n| R&S®ZNB3-B8 | mmWave converter LO/IF，2-port model | 1351.5109.02 | 適用 [[R&S ZNB3044]] |\n| R&S®ZNB3-B8 | mmWave converter LO/IF，4-port model | 1351.5109.04 | 適用 [[R&S ZNB3044]] |\n| R&S®ZNB3-B22 | Extended power range for 2-port R&S®ZNB3044 base unit | 1351.5238.02 | Retrofit |\n| R&S®ZNB3-B24 | Extended power range for 4-port R&S®ZNB3044 base unit | 1351.5244.02 | Retrofit |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3044.md"
+              },
+              "score": 3.991118
+             },
+             {
+              "text": "R&S ZNB3044 › Measurement accuracy 摘錄\n資料有效條件：+18 °C to +28 °C；calibration 後溫度變化不超過 1 °C；使用 R&S®ZN-Z218（with 1.85 mm test port adapter connector）calibration kit 時資料有效性為 conditional；measurement 與 calibration 的 frequency points、measurement bandwidth、sweep time 必須相同；不允許 interpolation。\n\nTransmission uncertainty 條件：EDR mode on；matched DUT、measurement bandwidth 10 Hz、nominal source power –10 dBm。\n\n| Frequency range | Transmission level | Magnitude / phase uncertainty |\n|---|---:|---|\n| 9 kHz to 300 kHz | 0 dB to –20 dB | 0.05 dB、0.4° |\n| >300 kHz to 1 MHz | 0 dB to –20 dB | 0.04 dB、0.4° |\n| >1 MHz to 4 GHz | 0 dB to –20 dB | 0.04 dB、0.4° |\n| >4 GHz to 9 GHz | 0 dB to –20 dB | 0.04 dB、0.6° |\n| >9 GHz to 26.5 GHz | 0 dB to –20 dB | 0.05 dB、1.3° |\n| >26.5 GHz to 40 GHz | 0 dB to –20 dB | 0.07 dB、1.7° |\n| >40 GHz to 54 GHz | 0 dB to –20 dB | 0.07 dB、2.4° |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3044.md"
+              },
+              "score": 3.326266
+             },
+             {
+              "text": "R&S ZNB3044 › 基本規格\n- Frequency range：9 kHz to 43.5 GHz。\n- Frequency range with [[R&S ZNB3-B542]] / [[R&S ZNB3-B544]]：9 kHz to 54.0 GHz。\n- Test port connector：1.85 mm, male, ruggedized。\n- Number of test ports：2 or 4。\n- Impedance：50 Ω。\n- Frequency resolution：1 Hz。\n- Number of measurement points per trace：1 to 100001。\n- Measurement bandwidth：base unit 1 Hz to 1 MHz；with [[R&S ZNB3-K17]] option 1 Hz to 10 MHz。\n\n⚠️ [[ZNB3000_specs_en_3647-5184-22_v0900]]（July 2026）萃取文字的 dynamic range 小節標題說 [[R&S ZNB3044]] 為「with or without R&S®ZNB3-B442 / -B444」，但既有頁面 [[R&S ZNB3044]] 說 frequency upgrade option 是 [[R&S ZNB3-B542]] / [[R&S ZNB3-B544]]。判斷：同一來源的 frequency range 與 ordering information 明列 [[R&S ZNB3-B542]] / [[R&S ZNB3-B544]]，暫視 dynamic range 小節標題為來源萃取或表頭錯位；報價時仍需回查原 PDF。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3044.md"
+              },
+              "score": 2.278438
+             },
+             {
+              "text": "R&S ZNB3020 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3020 2-port | Vector network analyzer，2-port，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.22 |\n| R&S®ZNB3020 4-port | Vector network analyzer，4-port，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.24 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3020.md"
+              },
+              "score": 6.435318
+             },
+             {
+              "text": "R&S AREG800A › 相關來源\n- [[AREG800A_specs_en_3609-8015-22_v0900]] — R&S AREG800A Automotive Radar Echo Generator Specifications，Version 09.00，September 2025。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 50,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S AREG800A.md"
+              },
+              "score": 5.811304
+             },
+             {
+              "text": "朋程 › 來源中的說法\n- [[Power IC - Power Management IC image 1]]（來源未標示日期；取得於 2026-09-04）將 [[朋程]] 列於產業分類「整流/車用二極體」。\n- [[Power IC - Power Management IC image 1]]（來源未標示日期；取得於 2026-09-04）在核心能力欄寫「車用整流二極體全球第一」。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/朋程.md"
+              },
+              "score": 3.908414
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › TTC 毫米波測試量能線索\n[[低軌衛星通信終端設備技術規範與相關檢測]]（來源標示 111年08月）介紹[[電信技術中心]]毫米波頻段測試量能：\n\n- 5G FR2 毫米波天線縮距量測場 CATR。\n- 來源稱該 chamber 依據 3GPP 技術規範標準，已通過 TAF 認證。\n- 可支援主波發射頻段 3–40 GHz。\n- 不必要發射至 90 GHz。\n- 可量測 TRP、TIS、EVM。\n- Quiet Zone 可達 90 cm。\n\n同一來源另描述[[電信技術中心]]提供電信設備審驗認證服務，並協助研擬電信技術標準規範。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 6,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 16.434508
+             },
+             {
+              "text": "電信技術中心 › 毫米波測試量能\n[[低軌衛星通信終端設備技術規範與相關檢測]]介紹電信技術中心毫米波頻段測試量能：\n\n- 5G FR2 毫米波天線縮距量測場 CATR。\n- 來源稱該 chamber 依據 3GPP 技術規範標準，已通過 TAF 認證。\n- 支援主波發射頻段 3–40 GHz。\n- 不必要發射可至 90 GHz。\n- 可量測 TRP、TIS、EVM。\n- Quiet Zone 可達 90 cm。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/電信技術中心.md"
+              },
+              "score": 10.877477
+             },
+             {
+              "text": "R&S PCB test solutions\n[[R&S PCB test solutions]] 是 [[0 Digital Test - What are SIPI and Serdes]] Slide 21 對 PCB Fabricator and System House 的 PCB / high-speed digital 測試流程摘要，涵蓋 material measurement、stackup selection、signal integrity modeling/testing、sampling testing 與 process monitoring。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 3.606005
+             },
+             {
+              "text": "NG eCall EN 17240 2024 verification › 與既有 NGeCall / hybrid eCall 頁面的關係\n- [[NGeCall over LTE]] 整理 CMW500 與 CMX500 capability lists，本頁只整理 PR 中的 Qualcomm / Snapdragon verification event。\n- [[CMX500 NGeCall configuration]] 整理 configuration guide 的 mandatory / optional items，本頁不取代正式 configuration 或 quote。\n- [[Hybrid eCall testing]] 以 EN 18052:2025 與 hybrid fallback 為核心；本頁聚焦 EN 17240:2024 NG eCall verification，不描述 classic CS fallback 或 EN 18052 test scope。\n- [[cetecom advanced certifies Rohde & Schwarz test solution for hybrid and Next Generation eCall testing]] 提到 EN 17240:2024+A1:2026 與 cetecom advanced certification testing；本頁來源只提 EN 17240:2024，且未說第三方 certification report。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              },
+              "score": 1.588172
+             },
+             {
+              "text": "欣銓 › 來源中的說法\n- [[Power IC - Power Management IC]] 在功率半導體封測區塊將 [[欣銓]] 寫為「車用與功率IC測試核心廠」。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/欣銓.md"
+              },
+              "score": 2.8079
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing\n[[Wi-Fi 7 R&D and production testing]] 是 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]] 中描述的測試方案組合：以 [[R&S CMX500]] 覆蓋 R&D signaling / interworking 測試，以 [[R&S CMP180]] 覆蓋 production non-signaling RF 測試。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 2.937203
+             },
+             {
+              "text": "R&S CMX500 › 產品定位\n依 [[CMX500_specs_en_5216-4127-22_v1100]]，[[R&S CMX500]] 是 universal one-box network emulation and measurement test solution，支援最新 3GPP [[5G NR]] technology，適用於 device testing，涵蓋 [[LTE]]、[[NR FR1]]、[[NR FR2]]，並支援 non-standalone（NSA）、standalone（SA）、FDD 與 TDD。\n\n依 [[CMX500_Features_CSW9-20-0_en_32]]，[[R&S CMX500]] 也提供：\n\n- [[NR FR1]] / [[NR FR2]] signaling 與 TX measurements。\n- [[LTE]] signaling、LTE-DTC / direct-to-cell communication、LTE measurements。\n- [[NB-IoT]] / NB-NTN signaling。\n- [[WLAN]] signaling 與 WLAN TX measurements，涵蓋 802.11a/b/g/n/ac、802.11ax、802.11be、802.11bn 與 2x2 MIMO。\n- [[Fading]]、[[AWGN]]、[[BLER]]、[[CSI report]]、[[Throughput measurement]]、[[PER measurement]]。\n- Application test、IP traffic analysis、IMS / audio / [[POLQA]]。\n- GUI、graphical scripting、Python-based [[XLAPI]] 與 [[SCPI]] remote control。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMX500.md"
+              },
+              "score": 9.745089
+             },
+             {
+              "text": "R&S ZNB3020\n[[R&S ZNB3020]] 是 [[R&S ZNB3000]] 系列的 20 GHz Vector Network Analyzer 型號，依 Version 09.00（July 2026）base frequency range 為 9 kHz to 20.0 GHz，搭配 frequency upgrade option 可到 26.5 GHz。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3020.md"
+              },
+              "score": 5.117661
+             },
+             {
+              "text": "R&S ZNA26 › Software options\n[[R&S ZNA26]] 可使用 [[R&S ZNA]] 系列 software / measurement options，例如 [[R&S ZNA-K1]] spectrum analyzer mode、[[R&S ZNA-K6]] phase coherent source control、[[R&S ZNA-K7]] measurements on pulsed signals、[[R&S ZNA-K8]] mmWave converter support、[[R&S ZNA-K9]] group delay measurements、[[R&S ZNA-K30]] noise figure measurement、[[R&S ZNA-K980]] HUMS。各 option 的 order no. 與相依關係見 [[R&S ZNA]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA26.md"
+              },
+              "score": 3.49565
+             },
+             {
+              "text": "朋程 › 限制與不可推論事項\n- 「全球第一」是圖上用語；來源未提供排名口徑、市占率、年度、產品範圍或資料來源拆分。\n- 來源未標示日期，因此不能把上述列名寫成特定時間點的市場現況。\n- 來源是概念股整理表，不構成投資建議或供應鏈驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/朋程.md"
+              },
+              "score": 0.803056
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單\n[[無線通訊認證實驗室資料清單]]原本由 [[Test House]] 提供待讀材料索引；[[低軌衛星通信終端設備技術規範與相關檢測]]新增了[[電信技術中心]]在 111年08月簡報中的毫米波頻段測試量能描述；[[無線通訊認證實驗室]]則補入 `無線通訊認證實驗室.pptx` 的簡報正文摘要。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 8.529319
+             },
+             {
+              "text": "R&S PCB test solutions › 來源中的說法\n[[0 Digital Test - What are SIPI and Serdes]]（封面日期 2026.3.4）Slide 21 題為 **R&S PCB test solutions**，副標為 **PCB Fabricator and System House**，列出以下流程與項目：\n\n- **Material Measurement**：Impedance ([[TDR]])、DK/DF extraction。\n- **Material/Stackup selection**：IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram。\n- **Signal Integrity modeling/testing**：IL、DK/DF、roughness、impedance。\n- **Sampling testing**：IL、DK/DF、impedance。\n- **PL/Process Monitoring**：來源列在同一流程上，但未展開 PL。\n- 圖上另列 [[SPEAG]]、[[SWISSTO12]]、[[QWED]]、[[KEYCOM]]、[[RSTW]]、TDR、Delta-L、ISD/ADK、ISD/ADK、w/ cable / connector testing 等文字。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 2.354196
+             },
+             {
+              "text": "NG eCall EN 17240 2024 verification › 驗證範圍\n依 [[Rohde & Schwarz verifies Next Generation eCall for EN 17240_2024 Standard]]：\n\n- 驗證對象：[[Snapdragon Auto 5G Modem-RF]] 的 [[Next Generation eCall]] functionality。\n- 合作方：[[Rohde & Schwarz]] 與 [[Qualcomm Technologies]]。\n- 測試設備：[[R&S CMX500]] mobile radio tester。\n- Software context：來源稱 [[R&S CMX500]] with [[R&S CMX-KA098]] software option can be effectively used for NG eCall testing under realistic network conditions。\n- 標準：[[EN 17240]]:2024。\n- 測試情境：simulating a [[PSAP]]。\n- 驗證內容：NG eCall including voice and data transmission，並 validated the compliance of the implementation at both ends with EN 17240:2024。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              },
+              "score": 1.219887
+             },
+             {
+              "text": "欣銓 › 限制與不可推論事項\n- 來源未標示 Threads 原文發布日期。\n- 來源未提供 [[欣銓]] 的測試項目、車用 / 功率 IC 占比、客戶、營收、產能或市占率。\n- 「核心廠」是來源用語，缺少排名或供應關係證據。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/欣銓.md"
+              },
+              "score": 2.213529
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › R&D：R&S CMX500 single-box signaling testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- [[R&S CMX500]] 是 multi-technology multi-channel signaling tester。\n- 來源稱其已新增 integrated [[Wi-Fi 7]] test functionality。\n- 目的在 single instrument setup 中測試 wireless device 在 cellular 與 non-cellular latest-generation standards 下的 operation。\n- Wi-Fi 7 R&D 測試需在 signaling mode 與 real-world conditions 下量測 RF TX / RX characteristics。\n- [[MLO]] 是 [[Wi-Fi 7]] key feature，因此提供 multiple RF chains 的 test environment 很重要。\n- 來源列出的 Wi‑Fi 7-specific tests 包含 2x2 [[MIMO]]、6 GHz band with out-of-band discovery、coexistence 與 E2E test capabilities。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 2.89976
+             },
+             {
+              "text": "R&S CMP180 › Base unit 與硬體配置\n依 [[CMP180 Specifications Version 08.00]] ordering information：\n\n| Designation | Type | Order no. |\n|---|---|---|\n| Radio communication tester, including power cables and getting started guide | CMP180 | 1201.0002K18 |\n| CMP180 basic assembly | R&S CMP-PB18I | 1212.1986.10 |\n| Single instrument interface | R&S CMP-B40J | 1212.3372.11 |\n| Multi-instrument interface | R&S CMP-B41J | 1212.3389.11 |\n| RF unit 250（basic function, 6 GHz/250 MHz） | R&S CMP-B802I | 1212.3408.10 |\n| RF unit 500（basic function, 6 GHz/250 MHz） | R&S CMP-B805I | 1212.3414.10 |\n| Performance uprating for RF unit 500 | R&S CMP-KB805 | 1212.3866.02 |\n\n依 [[CMP180 Features and Functions Version 09]] 的 RF unit 描述：\n\n- **R&S CMP-B802x**：僅支援 **250 MHz bandwidth**。\n- **R&S CMP-B805x**：支援 **250 MHz bandwidth**，可用 **R&S CMP-K185** 啟用 **500 MHz**。\n\n依 [[CMP180 Specifications Version 08.00]]：\n\n- RF generator/analyzer no. 1：**8 × SnapN**，RF input/output to DUT，RF 1.1 to RF 1.8。\n- RF generator/analyzer no. 2：**8 × SnapN**，RF input/output to DUT，RF 2.1 to RF 2.8；requires **R&S CMP-K102** or **R&S CMP-K105** software license key。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S CMP180.md"
+              },
+              "score": 4.403995
+             },
+             {
+              "text": "R&S ZNB3020 › 文件依據\n- 來源：[[ZNB3000_specs_en_3647-5184-22_v0900]]。\n- 文件：R&S®ZNB3000 Vector Network Analyzer Specifications。\n- 文件編號：PD 3647.5184.22。\n- 文件版本：Version 09.00。\n- 發布時間：July 2026。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3020.md"
+              },
+              "score": 4.936505
+             },
+             {
+              "text": "R&S SGU100A › Spectral purity\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Harmonics | `f > 12 GHz, level ≤ 8 dBm` | `< –30 dBc` |\n| Nonharmonics | `level > –10 dBm, offset > 10 kHz from carrier`, `12 GHz < f ≤ 20 GHz` | `< –56 dBc (meas.)` |\n| Nonharmonics | `level > –10 dBm, offset > 10 kHz from carrier`, `f > 20 GHz` | `< –50 dBc (meas.)` |\n| Subharmonics | `f > 12 GHz` | `< –55 dBc, < –65 dBc (typ.)` |\n\nWideband noise 條件：`carrier offset = 30 MHz, level = 10 dBm, measurement bandwidth 1 Hz`，註明 in combination with [[R&S SGS100A]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 8,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SGU100A.md"
+              },
+              "score": 3.377521
+             },
+             {
+              "text": "R&S ZNA43 › Software options\n[[R&S ZNA43]] 可使用 [[R&S ZNA]] 系列 software / measurement options，例如 [[R&S ZNA-K1]] spectrum analyzer mode、[[R&S ZNA-K6]] phase coherent source control、[[R&S ZNA-K7]] measurements on pulsed signals、[[R&S ZNA-K8]] mmWave converter support、[[R&S ZNA-K9]] group delay measurements、[[R&S ZNA-K30]] noise figure measurement、[[R&S ZNA-K980]] HUMS。各 option 的 order no. 與相依關係見 [[R&S ZNA]]。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNA43.md"
+              },
+              "score": 3.620264
+             },
+             {
+              "text": "雷虎科技 › 可追溯限制\n- 來源未提供雷虎科技的無人機型號、客戶、出貨、認證、營收或得標資料。\n- [[4. UAV Eco-chain in Taiwan]] 的 System Integrator 分類與 [[0. UAV產業分析報告架構]] 的下游分類並列保存；目前不判定哪個分類較正式。\n- [[4. UAV Eco-chain in Taiwan]] 未擷取公司網站正文；不可由 URL 推論產品規格、供應關係或政府採購狀態。\n- 本頁不把來源列名改寫為已確認供應、量產或採購關係。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/雷虎科技.md"
+              },
+              "score": 2.381431
+             },
+             {
+              "text": "無線通訊認證實驗室資料清單 › 台灣認證實驗室線索\n[[無線通訊認證實驗室]]列出台灣領先認證實驗室：\n\n| 實驗室 | 來源列出的核心能力 | 來源列出的特色 |\n|---|---|---|\n| [[耕興]]（SPORTON） | 5G / Wi‑Fi / mmWave | 全球最大發證量、首張 Wi‑Fi 8 證書 |\n| [[SGS]] | EMC / RF / 安規 | 國際認可、GMA 一站式 |\n| [[電信技術中心]] / [[ISL]] | RF 認證、測試 | 台灣政府 6G 研究支援 |\n\n來源另列[[耕興]]亮點：30 MHz–325 GHz 全頻段測試能力、108 座測試場地、連續 10 年 FCC 最佳實驗室認證、10 米半電波暗室、OTA / SAR / [[相控陣列天線]]測試。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 5,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/無線通訊認證實驗室資料清單.md"
+              },
+              "score": 5.717181
+             },
+             {
+              "text": "R&S PCB test solutions › 流程整理\n| 流程階段 | 來源明示量測 / 分析項目 | 相關概念 | 來源 | 日期 / 期間 | 限制 |\n|---|---|---|---|---|---|\n| Material Measurement | Impedance (TDR)、DK/DF extraction | [[TDR 阻抗測量]]、[[Dk-Df]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 fixture、頻率、標準或儀器型號 |\n| Material/Stackup selection | IL、DK/DF、roughness、impedance、Xtalk、TL modeling、Eye diagram | [[Insertion Loss]]、[[Dk-Df]]、[[表面粗糙度]]、[[阻抗變化]]、[[Crosstalk]]、[[Eye diagram]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 stackup rule、材料型號或 TL calculator 工具 |\n| Signal Integrity modeling/testing | IL、DK/DF、roughness、impedance | [[Signal Integrity]]、[[Dk-Df]]、[[TDR 阻抗測量]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供 S-parameter、模型格式或驗證流程 |\n| Sampling testing | IL、DK/DF、impedance | [[高頻高速 PCB 測試解決方案]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | 未提供抽樣頻率、樣本數或允收條件 |\n| PL / Process Monitoring | IL、DK/DF、impedance 等流程語境 | [[Process Monitoring]] | [[0 Digital Test - What are SIPI and Serdes]] | 封面日期 2026.3.4 | PL 未展開；未提供 control limit 或 SPC 指標 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/R&S PCB test solutions.md"
+              },
+              "score": 2.082402
+             },
+             {
+              "text": "NG eCall EN 17240 2024 verification › Regulatory transition context\n同一來源提供下列背景，但未列 regulation 文件編號：\n\n- [[eCall]] automated vehicle emergency call system introduced in 2015。\n- eCall 自 2018 年起是 all new cars sold within the European Union 的 mandatory requirement。\n- 來源稱 2G / 3G circuit-switched cellular networks become obsolete，因此 emergency call systems 需要 adapted to 4G / 5G packet-switched cellular networks。\n- 來源稱 [[European Commission]] most recent regulation 定義 NG eCall will be obligatory starting **2026-01-01**。\n- 來源稱 EN 17240:2024 establishes guidelines for testing eCall systems over [[IMS]] networks, including advanced 4G LTE and 5G NR technologies。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/NG eCall EN 17240 2024 verification.md"
+              },
+              "score": 1.129084
+             },
+             {
+              "text": "R&S SGT100A › General data\nPower supply：\n\n| 項目 | 規格 |\n|---|---|\n| AC input voltage range | `100 V to 240 V`, `±10 %` |\n| AC supply frequency | `50 Hz to 60 Hz`, `±5 %` |\n| Maximum input current | `1.7 A` |\n| Power consumption | `65 W (meas.)` |\n| Power factor correction | complies with `EN 61000-3-2` |\n\nCompliance / environmental：\n\n- Electrical safety compliance：`IEC 61010-1`, `EN 61010-1`, `CAN/CSA-C22.2 No. 61010-1-04`, `UL 61010-1`。\n- Test marks：`VDE-GS`, `CSA C US`。\n- EMC：`EN 55011 class A`, `EN 61326-1 (industrial environment)`, `EN 61326-2-1`。\n- Vibration sinusoidal：`5 Hz to 150 Hz`，55 Hz 時 max. `2 g`，55 Hz to 150 Hz 時 const. `0.5 g`，符合 `EN 60068-2-6`。\n- Vibration random：`10 Hz to 300 Hz`，acceleration `1.2 g (RMS)`，符合 `EN 60068-2-64`。\n- Shock：`40 g shock spectrum`，符合 `MIL-STD-810E`, method no. 516.4, procedure I。\n- Operating temperature range：`0 °C to +50 °C`，符合 `EN 60068-2-1`, `EN 60068-2-2`。\n- Storage temperature range：`–40 °C to +71 °C`。\n- Climatic resistance：`+40 °C / 95 % relative humidity`，符合 `EN 60068-2-30`。\n- Altitude：operating up to `4600 m`；storage up to `4600 m`。\n\nDimensions / weight：\n\n| 條件 | Dimensions | Weight |\n|---|---|---|\n| without `R&S®SGT-B88` option | `246 mm × 52.5 mm × 401 mm (9.69 in × 2.07 in × 15.79 in)`, `1 HU`, `½ 19 inch rack width` | fully equipped `4.0 kg (8.82 lb)` |\n| with `R&S®SGT-B88` option | `246 mm × 98 mm × 401 mm (9.69 in × 3.86 in × 15.79 in)`, `2 HU`, `½ 19 inch rack width` | `4.6 kg (10.14 lb)` |\n\nCalibration interval：recommended calibration interval `3 years`，條件 `40 h/week operation in the full range of the specified environmental conditions`。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 23,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SGT100A.md"
+              },
+              "score": 2.490012
+             },
+             {
+              "text": "欣銓\n[[欣銓]] 是 [[Power IC - Power Management IC]]（原文未標示日期；raw converted 2026-09-16）列於 [[功率半導體封測]] 分類的公司名稱。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/欣銓.md"
+              },
+              "score": 0.154007
+             },
+             {
+              "text": "艾姆勒\n[[艾姆勒]] 是 [[Power IC - Power Management IC image 3]]（來源未標示日期；取得於 2026-09-04）列於「下游：模組、散熱與終端系統應用」中「車用/功率散熱模組機構件」分類的公司名稱，圖上代號為 2241。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/艾姆勒.md"
+              },
+              "score": 0.493055
+             },
+             {
+              "text": "Wi-Fi 7 R&D and production testing › Production：R&S CMP180 non-signaling RF testing\n依 [[Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024]]：\n\n- WLAN device production phase 中，所有 RF measurements 以 non-signaling mode 執行以節省時間。\n- [[R&S CMP180]] 被定位為 optimized for this purpose 的 radio communication tester。\n- 來源稱 [[R&S CMP180]] 支援 many cellular and non-cellular technologies，包括 [[Wi-Fi 6E]]、[[Wi-Fi 7]] 與 [[5G NR FR1]] up to 8 GHz，bandwidths up to 500 MHz。\n- [[R&S CMP180]] 將展示 loopback mode 驗證 **480 MHz bandwidth** 的 [[WLAN]] waveform。\n- 來源稱 480 MHz WLAN waveform 是 yet-to-be-defined [[Wi-Fi 8]] / [[IEEE 802.11bn]] 的 potential waveform candidate；這不是正式 Wi‑Fi 8 規格。\n- 來源稱 [[R&S CMP180]] integrated two analyzers, two generators and two sets of eight RF ports，可在 single box 支援 2x2 [[MIMO]] testing。\n- 來源稱 two [[R&S CMP180]] instruments can be combined and scaled to support four analyzers and generators for efficient testing of 4x4 [[MIMO]] access points。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Wi-Fi 7 R&D and production testing.md"
+              },
+              "score": 2.613149
+             },
+             {
+              "text": "R&S ZNB3032 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3032 2-port | Vector network analyzer，2-port，9 kHz to 32 GHz，2.92 mm connector | 1351.5050.32 |\n| R&S®ZNB3032 4-port | Vector network analyzer，4-port，9 kHz to 32 GHz，2.92 mm connector | 1351.5050.34 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3032.md"
+              },
+              "score": 6.530238
+             },
+             {
+              "text": "R&S SGT100A › Spectral purity\n| 項目 | 條件 | 規格 |\n|---|---|---|\n| Harmonics | `level ≤ 8 dBm`, CW, I/Q wideband off | `< –30 dBc` |\n| Nonharmonics | `level > –10 dBm`, `offset > 10 kHz from carrier`, `f ≤ 1500 MHz` | `< –76 dBc` |\n| Nonharmonics | `level > –10 dBm`, `offset > 10 kHz from carrier`, `1500 MHz < f ≤ 3000 MHz` | `< –70 dBc` |\n| Nonharmonics | `level > –10 dBm`, `offset > 10 kHz from carrier`, `3000 MHz < f ≤ 6000 MHz` | `< –64 dBc` |\n| Subharmonics | `level > –10 dBm`, `f ≤ 3000 MHz` | `< –76 dBc` |\n| Subharmonics | `level > –10 dBm`, `3000 MHz < f ≤ 6000 MHz` | `< –68 dBc` |\n| Wideband noise | `1 MHz ≤ f ≤ 6 GHz`, `10 MHz carrier offset`, `level > 5 dBm`, setting characteristic `auto`, `1 Hz measurement bandwidth`, CW | `< –145 dBc` |\n| Wideband noise | same condition, I/Q | `< –135 dBc` |\n\nSSB phase noise 條件：`20 kHz carrier offset`, `1 Hz measurement bandwidth`。\n\n| Frequency | SSB phase noise |\n|---|---|\n| `f = 1 GHz` | `< –126 dBc`; `–133 dBc (meas.)` |\n| `f = 2 GHz` | `< –120 dBc`; `–127 dBc (meas.)` |\n| `f = 6 GHz` | `< –110 dBc`; `–117 dBc (meas.)` |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 9,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S SGT100A.md"
+              },
+              "score": 4.793389
+             },
+             {
+              "text": "Kneron Product Roadmap › Roadmap 方塊整理\n| 型號 | [[Edge AI Chips image 23]] 既有讀圖 | [[Edge AI Chips image 49]] 讀圖 | 限制 |\n|---|---|---|---|\n| [[KL730]] | Up to 12Mp、Fisheye/Single cam、3.6e TOPS、Security、AIoT、Automotive | Up to 12MP、Fisheye/Single cam、36 TOPS、Security、AIoT、Automotive | `3.6e TOPS` / `36 TOPS` 未決。 |\n| [[KL830]] | Up to 16e TOPS、Security、Automotive | Up to 16 TOPS、Security、Automotive | `e` 是否存在未決。 |\n| [[KL1140]] | Gen AI Chip、up to 40e TOPS、Support cascading、Automotive、Edge Server | Gen AI Chip、up to 40 TOPS、Support cascading、Automotive、Edge Server | `e` 是否存在未決。 |\n| [[KL840]] | Gen AI Chip、30e TOPS、Support cascading、Smart device、Edge server | Gen AI Chip、30 TOPS、Support cascading、Smart device、Edge server | `e` 是否存在未決。 |\n| [[KL1150]] | Gen AI Chip、up to 200e TOPS、Support cascading、Automotive、Edge Server | Gen AI Chip、up to 200 TOPS、Support cascading、Automotive、Edge Server | `e` 是否存在未決。 |\n| [[KL720]] | Higher frame rate、Edge Server、CM4 / F9-DSP、1.5 TOPS | CM4 / F?DSP、1.5 TOPS、Higher frame rate、Edge Server | DSP 字樣無法完全辨識。 |\n| [[KL630]] | Up to 5mp Fisheye、1e TOPS、Security、AIoT、Automotive | Up to 5mp Fisheye、10 TOPS、Security、AIoT、Automotive | `1e TOPS` / `10 TOPS` 未決。 |\n| [[KL640]] | Always-on、Up to 8mp@30、Fisheye、2e TOPS、Security | Always on、Up to 8mp@30、Fisheye、2e TOPS、Security | 基本一致，但 `2e TOPS` 仍標示無法完全辨識。 |\n| [[KL650]] | Up to 8Mp@60、Fisheye、2e TOPS、Security | Up to 8mp@60、Fisheye、2e TOPS、Security | 基本一致，大小寫差異不裁決。 |\n| [[KL520]] | Low power battery devices、Security、AIoT、0.5 TOPS | 0.5 TOPS、Low power battery devices、Security、AIoT | 基本一致。 |\n| [[KL530]] | Security、AIoT、Automotive、3Mp Fisheye | 3Mp Fisheye、Security、AIoT、Automotive | 基本一致。 |\n| [[KL540]] | Up to 8Mp@15、Fisheye、2e TOPS、Security | Up to 8Mp@15、Fisheye、2e TOPS、Security | 基本一致。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/Kneron Product Roadmap.md"
+              },
+              "score": 10.902057
+             },
+             {
+              "text": "台灣 SerDes IC-IP 公司名單 › SiPho / CPO 與 Automotive\n| 分類 | 企業 | English | website 欄 | 來源限制 |\n|---|---|---|---|---|\n| SiPho / CPO | [[源傑]] | [[Centera Photonics]] | Centera Photonics Official Website | 來源未提供 SiPho / CPO 產品型號、資料率或量產狀態。 |\n| Automotive | [[鴻軒]] | [[SiliconAuto]] | SiliconAuto Official Website | 來源未提供 automotive IC 類別或 SerDes 標準。 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 14,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/台灣 SerDes IC-IP 公司名單.md"
+              },
+              "score": 10.083767
+             },
+             {
+              "text": "UAV Technologies 外部資料清單 › 使用限制\n- 本頁是 link hub / 待讀資料清單，不是 UAV 技術白皮書。\n- 不得把連結標題、PDF 檔名、URL path、OneNote 內部頁標題或圖片檔名改寫為已驗證主張。\n- 不得由 [[Brochure-NXP-Suggested-Components-Drones-Rovers]] 或 [[NXP DroneSystem_HOVERGAMES-DRONE-SYSTEM]] 推論 [[NXP]] 與特定 UAV 供應鏈、R&S 專案或 drone / rover BOM 的關係。\n- 不得由 [[Continental ARS 4-B radar sensor]] URL 推論 automotive radar sensor 已用於 UAV、counter-UAV 或特定客戶方案。\n- 不得由 [[Link budget calculator]] URL 補上 link budget 公式或測試參數；需要後續技術來源支撐。\n- 不得由 [[Textron Systems]] / [[Aerosonde UAS]] payload list 推論完整 payload catalogue、採購、整合狀態或產品規格。\n- 不得由 [[Counter UAV tech]] 推論 [[RF Jammers]]、[[GPS Spoofers]]、[[High-Power Microwave Devices]]、[[High-Energy Lasers]] 或 [[Cyber Takeover Systems]] 在任一地區可合法部署。\n- 不得把 [[UAV 通訊頻段]] 的一般頻段整理自動套用到 [[Counter-UAV 技術]] 的偵測或干擾頻段。\n- 與 [[UAV Regulation and Policy 外部資料清單]] 重複的標準 / directive 線索不可視為獨立來源驗證。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV Technologies 外部資料清單.md"
+              },
+              "score": 9.353718
+             },
+             {
+              "text": "ZNB3000_specs_en_3647-5184-22_v0900 › Base units\n| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3004 2-port | Vector network analyzer，9 kHz to 4.5 GHz (N) | 1351.5050.02 |\n| R&S®ZNB3004 4-port | Vector network analyzer，9 kHz to 4.5 GHz (N) | 1351.5050.04 |\n| R&S®ZNB3020 2-port | Vector network analyzer，9 kHz to 20 GHz (3.5 mm) | 1351.5050.22 |\n| R&S®ZNB3020 4-port | Vector network analyzer，9 kHz to 20 GHz (3.5 mm) | 1351.5050.24 |\n| R&S®ZNB3032 2-port | Vector network analyzer，9 kHz to 32 GHz (2.92 mm) | 1351.5050.32 |\n| R&S®ZNB3032 4-port | Vector network analyzer，9 kHz to 32 GHz (2.92 mm) | 1351.5050.34 |\n| R&S®ZNB3044 2-port | Vector network analyzer，9 kHz to 43.5 GHz (1.85 mm) | 1351.5050.42 |\n| R&S®ZNB3044 4-port | Vector network analyzer，9 kHz to 43.5 GHz (1.85 mm) | 1351.5050.44 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+              },
+              "score": 22.939136
+             },
+             {
+              "text": "R&S ZNB3000 › Base units 與 ordering information\n| 型號 | 原文說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3004 2-port | Vector network analyzer，9 kHz to 4.5 GHz，N connector | 1351.5050.02 |\n| R&S®ZNB3004 4-port | Vector network analyzer，9 kHz to 4.5 GHz，N connector | 1351.5050.04 |\n| R&S®ZNB3020 2-port | Vector network analyzer，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.22 |\n| R&S®ZNB3020 4-port | Vector network analyzer，9 kHz to 20 GHz，3.5 mm connector | 1351.5050.24 |\n| R&S®ZNB3032 2-port | Vector network analyzer，9 kHz to 32 GHz，2.92 mm connector | 1351.5050.32 |\n| R&S®ZNB3032 4-port | Vector network analyzer，9 kHz to 32 GHz，2.92 mm connector | 1351.5050.34 |\n| R&S®ZNB3044 2-port | Vector network analyzer，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.42 |\n| R&S®ZNB3044 4-port | Vector network analyzer，9 kHz to 43.5 GHz，1.85 mm connector | 1351.5050.44 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3000.md"
+              },
+              "score": 22.804722
+             },
+             {
+              "text": "R&S ZNB3004 › Base unit 與 ordering information\n| 型號 | 說明 | Order No. |\n|---|---|---:|\n| R&S®ZNB3004 2-port | Vector network analyzer，2-port，9 kHz to 4.5 GHz，N connector | 1351.5050.02 |\n| R&S®ZNB3004 4-port | Vector network analyzer，4-port，9 kHz to 4.5 GHz，N connector | 1351.5050.04 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNB3004.md"
+              },
+              "score": 19.855331
+             },
+             {
+              "text": "ZNB3000_specs_en_3647-5184-22_v0900 › p001（讀圖）\n- 可見文字：R&S®ZNB3000、VECTOR NETWORK ANALYZER、Specifications、Version 09.00、ROHDE&SCHWARZ、Make ideas real、ZNB Vector Network Analyzer。\n- 頁面為文件封面樣式，主體是 R&S ZNB3000 VECTOR NETWORK ANALYZER 儀器照片。\n- 儀器正面有大螢幕、右側實體按鍵與旋鈕、左右把手、前面板下方多個射頻連接埠。\n- 螢幕顯示多個網路分析儀量測圖窗；圖表細部標示、座標數值與按鍵文字多數無法辨識。\n- 可清楚辨識的數值只有 Version 09.00。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 10,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/ZNB3000_specs_en_3647-5184-22_v0900.md"
+              },
+              "score": 43.737202
+             },
+             {
+              "text": "台灣 AI 晶片開發工具 › 工具功能分類\n[[Edge AI Chips image 11]] 與 [[Edge AI Chips image 37]] 可支持以下功能分類，但不支持市場份額或採用量：\n\n- 資料處理：[[ACraft]] 自動標註；[[NuEdgeWise]] Labeling Data。\n- 模型訓練 / 驗證 / 測試：[[NuEdgeWise]] Training Model、Vali. Model、Testing Model。\n- 模型壓縮 / 優化：[[PCraft]] 模型剪枝、[[QCraft]] 量化、[[AndesAIRE NN SDK]] 的 Pruning、Operator fusion、Compensation / Compression、Calibration、Quantization。\n- 模型轉換與部署：[[NuML Toolkit]] Load Model、Convert Model、Deploy model to target；[[MediaTek]] 區塊的 Deploy、Edge、[[MTK AI Engine]]。\n- 開發底層：[[NeuroPilot SDK]] 的 compiler、runtime、driver、API、command-line tools；[[AndesAIRE NN SDK]] 的 driver and runtime、NN library。\n- 視覺化與分析：[[Neuron Studio]] 提供圖形化介面、模型開發、優化、調試與分析；圖上另列「神經網路自動調優」與「跨模型全鏈路分析」。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 3,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/台灣 AI 晶片開發工具.md"
+              },
+              "score": 34.297443
+             },
+             {
+              "text": "UAV 通訊 › 通訊鏈路類型\n[[Communication of UAVs]] 將 UAV 通訊鏈路分成：\n\n- UAV-to-GCS：UAV 與 [[Ground Control Station]] 之間交換 command、telemetry 與 data。\n- UAV-to-UAV：UAV 之間為 swarm 或 collaborative operations 進行 coordination，可使用 [[Mesh Networks]] 或 custom protocols。\n- UAV-to-Cloud：real-time data upload 到 cloud platforms，用於 analysis、storage 與 AI-based decision-making。\n- UAV-to-Human：透過 mobile apps 或 displays 與 operators / field personnel 溝通。\n\n這些是高階鏈路分類；來源沒有提供網路拓樸、routing、handover、security、interoperability 或測試流程。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/UAV 通訊.md"
+              },
+              "score": 29.273739
+             },
+             {
+              "text": "R&S ZNL14\n[[R&S ZNL14]] 是 [[R&S ZNL]] 系列的 14 GHz 2-port Vector Network Analyzer，依 [[ZNL_specs_en_3607-1071-22_v1000]] Version 10.00（September 2025）標示，VNA frequency range 為 5 kHz to 14 GHz，test port connector 為 N, female。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNL14.md"
+              },
+              "score": 13.45197
+             },
+             {
+              "text": "R&S ZNL3\n[[R&S ZNL3]] 是 [[R&S ZNL]] 系列的 3 GHz 2-port Vector Network Analyzer，依 [[ZNL_specs_en_3607-1071-22_v1000]] Version 10.00（September 2025）標示，VNA frequency range 為 5 kHz to 3 GHz，test port connector 為 N, female。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNL3.md"
+              },
+              "score": 13.45197
+             },
+             {
+              "text": "R&S ZNL4\n[[R&S ZNL4]] 是 [[R&S ZNL]] 系列的 4.5 GHz 2-port Vector Network Analyzer，依 [[ZNL_specs_en_3607-1071-22_v1000]] Version 10.00（September 2025）標示，VNA frequency range 為 5 kHz to 4.5 GHz，test port connector 為 N, female。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 1,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/R&S ZNL4.md"
+              },
+              "score": 13.38151
+             },
+             {
+              "text": "6G NTN 展望 › ISAC\n[[ISAC]] 將 sensing capability 整合進 communications network。\n\n- satellite sensing 可為 active / passive、imaging / non-imaging、monostatic / bistatic / multistatic。\n- ISAC 可能支援 drones、transportation、refrigerated logistics、rural sensing 等 multi-operator collaboration use cases。\n- challenge 包含 high bandwidth、radar equation、power density、spectrum coexistence 與 waveform design。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 7,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/concepts/6G NTN 展望.md"
+              },
+              "score": 19.788187
+             },
+             {
+              "text": "Aerosonde UAS › 來源中的 payload 摘錄\n[[Block Diagram of UAV]] 在 [[Aerosonde UAS]] URL 後列出 Over 40 payloads available including；[[UAV Payload (OneNote)]] 也直接保存同一段清單：\n\n- Full-Motion Video (FMV) and day/night imaging。\n- Maritime Wide Area Search。\n- Synthetic Aperture Radar (SAR)。\n- Automatic Identification Systems (AIS)。\n- Automatic Dependent Surveillance-Broadcast (ADS-B)。\n- Electronic Warfare (EW)。\n- Signals Intelligence (SIGINT)。\n- Communications Intelligence (COMINT)。\n- Light Detection and Ranging (LiDAR)。\n- 3D mapping。\n- Voice communications relay。\n- Ad-hoc networking (MANET)。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/entities/Aerosonde UAS.md"
+              },
+              "score": 15.585952
+             },
+             {
+              "text": "Counter UAV tech › Counter-UAV detection / tracking\n- [[RF Detection]] / [[RF Analyzers]] — 監測 drone communication signals；來源指出對依賴 RF communication 的 drones 有效，但對不發射 RF 的 autonomous drones 較不有效。\n- [[Radar Systems]] — 長距離與低能見度條件下 tracking drones。\n- [[Optical Sensors]] — 使用 visual 與 thermal imaging detect drones。\n- [[Acoustic Sensors]] — 透過 sound patterns 辨識 drones。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/Counter UAV tech.md"
+              },
+              "score": 15.464972
+             },
+             {
+              "text": "HSD PCB image 4 與 14 重複來源 › OCR / 讀圖差異\n| 欄位 | [[HSD PCB image 4]] | [[HSD PCB image 14]] 既有整理 | 狀態 |\n|---|---|---|---|\n| H-VLP2 用途示例 | 支持5G消費、毫米波雷達 | 支持5G設備、毫米波雷達 | 未決差異 |\n| H-VLP 用途示例 | 高端服務器、高端路由器 | 高頻服務器、高端路由器 | 未決差異 |\n| HVLP 條列尾端 | 傳用核心材料 | 核心材料 | [[HSD PCB image 4]] 的「傳用」疑似 OCR / 讀圖不穩，未裁決 |\n| 金居描述 | 金居為使數通過認真的台廠 | 金居為使數通過認真的台廠 | 兩者同樣無法可靠解讀 |\n\n⚠️ [[HSD PCB image 4]]（來源未標示日期；轉換於 2026-09-04）說 H-VLP2 用途示例為「支持5G消費、毫米波雷達」，H-VLP 用途示例為「高端服務器、高端路由器」，但既有頁面 [[HVLP銅箔]] 說 [[HSD PCB image 14]] 抄錄為「支持5G設備、毫米波雷達」以及「高頻服務器、高端路由器」。判斷為兩份高度重疊圖像的 OCR / 讀圖差異，未裁決前並列保留，不合併改寫。",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/syntheses/HSD PCB image 4 與 14 重複來源.md"
+              },
+              "score": 88.348256
+             },
+             {
+              "text": "HSD PCB image 14 › 用途示例\n| 圖上用途示例 | 支持來源 | 日期 / 期間 |\n|---|---|---|\n| 支持5G設備、毫米波雷達 | [[HSD PCB image 14]] | 來源未標示日期；取得於 2026-09-04 |\n| 高頻服務器、高端路由器 | [[HSD PCB image 14]] | 來源未標示日期；取得於 2026-09-04 |\n| 各種FPC（智能手機等） | [[HSD PCB image 14]] | 來源未標示日期；取得於 2026-09-04 |\n| 服務器、路由器 | [[HSD PCB image 14]] | 來源未標示日期；取得於 2026-09-04 |\n| 家電、各種電子設備 | [[HSD PCB image 14]] | 來源未標示日期；取得於 2026-09-04 |",
+              "citation": {
+               "kind": "wiki",
+               "source": null,
+               "raw_ref": null,
+               "section": 4,
+               "page": null,
+               "slide": null,
+               "wiki_page": "wiki/sources/HSD PCB image 14.md"
+              },
+              "score": 57.778056
+             },
+             {
+              "text": "R&S®ZNA\nVECTOR NETWORK ANALYZER",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-f1351a1b7fda64ad",
+                "original_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+                "sha256": "f1351a1b7fda64ad785212c8f7a8d8b142ebc59d7ba52185cda0819016cc0533",
+                "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 22.833339
+             },
+             {
+              "text": "R&S®ZNL\nVECTOR NETWORK ANALYZER",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-9b0b29b71d0a06d2",
+                "original_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+                "sha256": "9b0b29b71d0a06d220ca923e588ced6eceab3b355fca18cedd1f7092c8cb29f0",
+                "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/ZNL_specs_en_3607-1071-22_v1000.md",
+               "section": 2,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 22.833339
+             },
+             {
+              "text": "Ordering information\nDesignation\nBase units\nVector network analyzer, 2-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 4-port, 9 kHz to 4.5 GHz (N)\nVector network analyzer, 2-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 4-port, 9 kHz to 20 GHz (3.5 mm)\nVector network analyzer, 2-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 4-port 9 kHz to 32 GHz (2.92 mm)\nVector network analyzer, 2-port 9 kHz to 43.5 GHz (1.85 mm)\nVector network analyzer, 4-port 9 kHz to 43.5 GHz (1.85 mm)\nOptions\nFrequency upgrade",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-eca8f030d797ca58",
+                "original_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+                "sha256": "eca8f030d797ca582f839557d9c3e7f42b1c17f02f069d3f8be510e8231aeae8",
+                "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Productions/ZNB3000_specs_en_3647-5184-22_v0900.md",
+               "section": 596,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 22.8204
+             },
+             {
+              "text": "Network analyzer\nVector signal generator\nBroadband Amplifier",
+              "citation": {
+               "kind": "raw",
+               "source": {
+                "source_id": "src-4a179a13677acd8f",
+                "original_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "sha256": "4a179a13677acd8f8f1f6cf2ce0d2483f6c52416b3681a552524d280050ec2d2",
+                "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+                "page": null,
+                "slide": null,
+                "parent_source_id": null
+               },
+               "raw_ref": "raw/Market/OneNote/Regulatory test for wireless devices with cellular technology.md",
+               "section": 177,
+               "page": null,
+               "slide": null,
+               "wiki_page": null
+              },
+              "score": 22.268578
+             }
+            ],
+            "text": "【推論】For the automotive-radar cases described, moving to 76 GHz to 81 GHz operation, multi-GHz instantaneous bandwidth, dynamic artificial objects, angular directions and Doppler means the VNA needs higher mmWave frequency coverage, wider swept spans, time-domain capability, group-delay/amplitude-flatness measurement, and higher dynamic range.[28][30][26][25][2][27]\nThe passages list automotive radar RF bands of 24 GHz to 24.25 GHz and 76 GHz to 81 GHz, while QAT100 with AREG800A supports 76 GHz to 77 GHz and 77 GHz to 81 GHz with 4 GHz RF instantaneous bandwidth.[30][28]\n【推論】If direct RF-path VNA measurement is needed for 76 GHz to 81 GHz radar hardware, a 67 GHz base VNA does not cover the full band, while a 10 MHz to 110 GHz ZNA67EXT VNA system does.[15][21][28]\nThe AREG800A IF side expands to 1 GHz, 2 GHz or 5 GHz instantaneous IF bandwidth, with IF frequency ranges listed as 1.1 GHz to 2.1 GHz, 0.7 GHz to 2.7 GHz and 0.7 GHz to 5.7 GHz.[30]\nVNA measurement conditions for AREG800A IF transfer characteristics require 2.5 MHz frequency step size, 1 kHz measurement bandwidth, –10 dBm source power and spans matching 1.1 GHz to 2.1 GHz, 0.7 GHz to 2.7 GHz or 0.7 GHz to 5.7 GHz.[3]\nSuppression of ghost objects is measured with a vector network analyzer in time domain, using 125 kHz frequency step size, 100 kHz measurement bandwidth, –10 dBm source power and the same IF-span families.[2]\nRF transfer-characteristic measurements for AREG8-81S / AREG8-81D use 2.5 MHz frequency step size, 1 kHz measurement bandwidth, a Hann normal gate and bandpass filter from RX waveguide input to TX waveguide output.[27]\nThose RF transfer-characteristic measurements include amplitude flatness over 1 GHz, 2 GHz and 4 GHz bandwidths and group-delay flatness over 1 GHz, 2 GHz and 4 GHz bandwidths.[27]\nThe AREG800A supports dynamic artificial object generation, with hybrid analog/digital echo generation to 3000 m or digital FMCW echo generation to 3000 m.[26]\nThe AREG800A also supports individual Doppler frequency shift per artificial object, ±500 km/h velocity setting range and 0.001 km/h velocity step size with AREG8-B9 and AREG8-B63.[25]\nThe AREG800A dynamic RCS range is 90 dB for all artificial objects on one IF path with listed mmWave frontends and 60 dB for multiple objects per IF path with those frontends.[3]\n【推論】Because the radar echo tests specify ghost suppression, dynamic RCS range and multi-object behavior, VNA dynamic range and sensitivity become important measurement capabilities; the ZNA series lists dynamic range above 129 dB without options, 147 dB typical with options and up to 170 dB maximum attainable range.[2][3][7]\nFor the 75 GHz to 80 GHz and 80 GHz to 90 GHz regions, the ZNA67EXT dynamic range is specified as above 100 dB and above 105 dB respectively at 10 Hz measurement bandwidth without user correction.[55]\nThe ZNA series also supports time domain analysis as software options and supports mmWave converter setups, while its 4-port architecture provides true parallel and coherent data acquisition for antenna array tests and antenna test systems.[42][37][38]",
+            "synthesized_by": "company",
+            "failure": null
+           },
+           "cited_passages": [
+            {
+             "text": "R&S AREG800A › Level 與 IF transfer characteristics\n| 項目 | 條件 | 規格 |\n|---|---|---:|\n| Spurious free dynamic range | RX IF input to TX IF output connector at AREG800A base unit, measured at –10 dBm signal level, [[R&S AREG8-B9]] | `> 35 dBc (typ.)` |\n| Spurious free dynamic range | [[R&S AREG8-B9]] with [[R&S AREG8-K527]] | `> 35 dBc (typ.)` |\n| Spurious free dynamic range | [[R&S AREG8-B9]] with 未完整標示 option | `> 30 dBc (typ.)` |\n| Suppression of ghost objects | measured from IF input to IF output connector at AREG800A base unit, [[R&S AREG8-B9]] | `> 40 dBc (meas.)` |\n| Suppression of ghost objects | [[R&S AREG8-B9]] with 未完整標示 option | `> 40 dBc (meas.)` |\n\nSuppression of ghost objects 量測條件：vector network analyzer in time domain；frequency step size `125 kHz`；measurement bandwidth `100 kHz`；source power `–10 dBm`；distance to wanted artificial object `2 m`；span 依 bandwidth 為 `1.1 GHz to 2.1 GHz`、`0.7 GHz to 2.7 GHz`、`0.7 GHz to 5.7 GHz`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 16,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 16.633544
+            },
+            {
+             "text": "R&S AREG800A › Level 與 IF transfer characteristics\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Dynamic RCS range for all artificial objects on one IF path：with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 為 `90 dB`；with [[R&S QAT100]] 為 `> 60 dB`。\n- Dynamic RCS range for multiple objects per IF path：with [[R&S AREG8-24S]] / [[R&S AREG8-24D]] / [[R&S AREG8-81S]] / [[R&S AREG8-81D]] 為 `60 dB`；with [[R&S QAT100]] 為 `–`。\n- RCS control step size：`0.1 dB`。\n- Maximum input power at RX IF in connector of AREG800A base unit：`10 dBm (meas.)`。\n- Recommended input power at RX IF in：`≤ 0 dBm (meas.)`。\n- Maximum output power at TX IF out：`–3 dBm (meas.)`。\n- IF attenuation accuracy of AREG800A base unit：`±2 dB (meas.)`。\n\nVector network analyzer 量測條件：frequency step size `2.5 MHz`，measurement bandwidth `1 kHz`，source power `–10 dBm`；span 依 bandwidth 為 `1.1 GHz to 2.1 GHz`、`0.7 GHz to 2.7 GHz`、`0.7 GHz to 5.7 GHz`。\n\n[[R&S AREG8-B9]] IF transfer characteristics：",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 14,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 16.468209
+            },
+            {
+             "text": "R&S ZNA › Key performance（Version 24.00）\n- Dynamic range：> 129 dB specification without options；147 dB typical with options；maximum attainable range up to 170 dB allowing full 2-port correction。\n- Sensitivity：> –120 dBm，1 Hz IF bandwidth，specification without options；–162 dBm，1 Hz IF bandwidth，measured with options。來源註明 –162 dBm 是以 1 kHz measurement bandwidth 量測後 normalized to 1 Hz。\n- Power sweep range：100 dB typical continuous electronic sweep range；可使用 mechanical step attenuators 位移 sweep range。\n- Source power linearity：0.2 dB typical，範圍 –40 dBm to +10 dBm。\n- Receiver compression：0.05 dB typical，up to +8 dBm at test port，referenced to –10 dBm。\n- Trace noise：0.005 dB specification RMS、0.002 dB typical RMS，條件為 10 GHz、100 kHz measurement bandwidth、0 dB reflection。\n- Speed example：10 MHz to 43.5 GHz、500 kHz measurement bandwidth、1601 points、2-port calibration 時 sweep time 96 ms nominal。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA.md"
+             },
+             "score": 10.305484
+            },
+            {
+             "text": "R&S ZNA67 › 基本規格\n- Frequency range：10 MHz to 67 GHz。\n- Test port connector：1.85 mm, male, ruggedized。\n- Number of test ports：2 or 4。\n- Impedance：50 Ω。\n- DC block：standard。\n- Frequency resolution：1 Hz。\n- Number of measurement points per trace：1 to 100001。\n- Measurement bandwidth：base unit 1 Hz to 1.5 MHz；with [[R&S ZNA-K17]] increased IF bandwidth 30 MHz option 時為 1 Hz to 30 MHz。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA67.md"
+             },
+             "score": 4.848032
+            },
+            {
+             "text": "R&S ZNA67EXT\n[[R&S ZNA67EXT]] 是 Rohde & Schwarz 的 1.0 mm [[Vector Network Analyzer]] system，依 [[ZNA67EXT_specs_en_5216-3743-22_v0900]] Version 09.00（July 2025）涵蓋 **10 MHz to 110 GHz**。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 1,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+             },
+             "score": 8.486095
+            },
+            {
+             "text": "R&S AREG800A › Radial velocity 與 Doppler\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- 每個 artificial object 支援 individual Doppler frequency shift：`yes`。\n- Velocity setting range with [[R&S AREG8-B9]] and [[R&S AREG8-B63]]：`±500 km/h`。\n- Velocity step size：\n  - [[R&S AREG8-B9]] and [[R&S AREG8-B63]]：`0.001 km/h`。\n  - [[R&S AREG-DBP1]] / [[R&S AREG-DBP2]] / [[R&S AREG-DBP3]] with [[R&S AREG-MFP]] / [[R&S AREG-BFP]]：`0.05 km/h`。\n- Doppler frequency offset accuracy：在 IF domain 以 spectrum analyzer 量測 base unit IF input 與 IF output signal 的 frequency offset，不含 frontend，`< 1 Hz`。\n- Velocity accuracy：Doppler shift velocity error 由公式 `v_error = 3.6 × (f_error/f_center) × ½ × 299 700 000 m/s` 決定；`f_center` 為 `78 GHz` 或 `79 GHz`，適用於 [[R&S AREG8-81S]] / [[R&S AREG8-81WS]] 與 [[R&S AREG8-81D]] / [[R&S AREG8-81WD]]；velocity accuracy `< 0.05 km/h`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 13,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 11.516038
+            },
+            {
+             "text": "R&S AREG800A › Echo generation\n依 [[AREG800A_specs_en_3609-8015-22_v0900]] Version 09.00（September 2025）：\n\n- Echo generator type：`dynamic artificial object generation`。\n- Echo generation concept：\n  - `hybrid`：短物距 `< 17 m` 使用 analog stepped delay line；較長距離至 `3000 m` 使用 fully digital implementation。\n  - `digital`：用於 [[FMCW radar]]；minimum generated distance 等於 radar under test 的 air gap value；maximum generated distance 為 `3000 m`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 4,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 10.307225
+            },
+            {
+             "text": "R&S AREG800A › R&S AREG8-81S / R&S AREG8-81D\nRF transfer characteristics 量測條件：with diplexer between RX and TX，frequency step size `2.5 MHz`，measurement bandwidth `1 kHz`，window function normal gate（Hann），type bandpass filter，measured from RX waveguide input to waveguide TX output connector。\n\n- Amplitude flatness：[[R&S AREG8-B9]] `< ±1 dB in 1 GHz bandwidth (meas.)`；[[R&S AREG8-B9]] with 未完整標示 option `< ±2 dB in 2 GHz bandwidth (meas.)`；[[R&S AREG8-B9]] with 未完整標示 option `< ±5 dB in 4 GHz bandwidth (meas.)`。\n- Group delay flatness：[[R&S AREG8-B9]] `< ±0.5 ns in 1 GHz bandwidth (meas.)`；[[R&S AREG8-B9]] with 未完整標示 option `< ±1 ns in 2 GHz bandwidth (meas.)`；[[R&S AREG8-B9]] with 未完整標示 option `< ±1 ns in 4 GHz bandwidth (meas.)`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 25,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 9.392006
+            },
+            {
+             "text": "R&S AREG800A › R&S QAT100 with AREG800A\n- RF frequency range：`76 GHz to 77 GHz`、`77 GHz to 81 GHz`。\n- RF instantaneous bandwidth：`4 GHz`。\n- Required bandwidth at AREG800A：[[R&S AREG8-B9]] with `1 GHz instantaneous bandwidth` due to 4 × multiplication concept of [[R&S QAT100]]。\n- Number of individual angular directions：with [[R&S QAT100]] `4`；with [[R&S QAT100]] and [[R&S QAT-B2]] option `8`。\n- Maximum number of individual artificial objects per AREG800A IF path：`1`。\n- Maximum number of supported [[R&S QAT100]] per AREG800A base unit：`8`；with one individual IF path per [[R&S QAT100]] and one individual angular direction。\n- RX power at frontend：`+60 dBm EIRP at 0.5 m distance to sensor`。\n- TX power at frontend：`+10 dBm EIRP at 0 dBm TX input power`。\n- Maximum deviation：`±3 dB between TX`。\n- Minimum input power：`+20 dBm EIRP at 0.5 m distance` for `76.0 GHz to 77.0 GHz`；`+25 dBm EIRP at 0.5 m distance` for `77.0 GHz to 81.0 GHz`。\n- Total RX to TX attenuation range：`0 dB to –80 dB (nom.)`，with AREG800A base unit and [[R&S QAT100]]，RX antenna to TX antenna（incl. antennas）。\n- IF level：maximum output power at IF RX ports `–6 dBm (nom.)`；maximum input power at IF TX ports `0 dBm`；minimum input power at IF TX ports `–25 dBm`。\n- Amplitude flatness：with [[R&S QAT100]]，RX antenna to TX antenna，`< ±5 dB (R&S QAT100 standalone) in 4 GHz bandwidth`。\n- Antenna configuration：1 central receive antenna connected to all 4 segments；96 transmit antennas in total；或 4 individual receive antennas each connected to an individual segment；with [[R&S QAT-B2]] additional 4 segments，up to 8 individual segments total。\n- Antenna type and gain：waveguide antennas，`6 dBi gain at 77 GHz center frequency (nom.)`。\n- Antenna polarization：`45° linear polarization`。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 29,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S AREG800A.md"
+             },
+             "score": 8.970131
+            },
+            {
+             "text": "AREG800A_specs_en_3609-8015-22_v0900 › 重點摘要\n- Base unit instantaneous IF bandwidth 依 option 為 `1 GHz`、`2 GHz` 或 `5 GHz`；overrange 分別為 `1.2 GHz (meas.)`、`2.2 GHz (meas.)`、`5.2 GHz (meas.)`。\n- AREG800A base unit IF frequency range：[[R&S AREG8-B9]] 為 `1.1 GHz to 2.1 GHz`；[[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 2.7 GHz`；來源另列 [[R&S AREG8-B9]] with [[R&S AREG8-K527]] 為 `0.7 GHz to 5.7 GHz`，但 5 GHz bandwidth ordering information 顯示還涉及 [[R&S AREG8-K528]]，此處未自行推論修正。\n- RF frequency bands：[[R&S AREG8-24S]] / [[R&S AREG8-24D]] 為 `24 GHz to 24.25 GHz`；[[R&S AREG8-81S]] / [[R&S AREG8-81D]] 與 [[R&S AREG8-81WS]] / [[R&S AREG8-81WD]]、[[R&S QAT100]] 為 `76 GHz to 81 GHz`；[[R&S FE44S]] 為 `24 GHz to 44 GHz`。\n- 每台 [[R&S AREG800A]] base unit 支援 conventional mmWave frontends 最多 4 個，[[R&S QAT100]] 最多 8 個，[[R&S FE44S]] 最多 8 個 external frontends（4 個 TX、4 個 RX，共 4 pairs）。\n- Artificial object distance 可依 option 涵蓋 `< 17 m to 3000 m (meas.)`、`< 4 m to 3000 m (meas.)`、`≥ air gap to 3000 m (meas.)`；production frontend 組合列為 FMCW `≥ air gap to 350 m (meas.)`，non FMCW `< 17 m to 350 m (meas.)`。\n- Radial velocity：每個 artificial object 支援 individual Doppler frequency shift；with [[R&S AREG8-B9]] and [[R&S AREG8-B63]] velocity setting range 為 `±500 km/h`，velocity step size 為 `0.001 km/h`。\n- Remote control interfaces 包含 Ethernet 與 [[R&S AREG8-K986]] GPIB；remote control command set 為 `SCPI`。\n- HiL interface option 為 [[R&S AREG8-K109]]；open-standard protocol support 為 open simulation interface（OSI）；time synchronization protocol 為 `gPTP`、`NTP`。\n- Base unit `AREG800A` Order No. `1437.4400.02`，包含 power cable 與 quick start guide。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 2,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+             },
+             "score": 3.327441
+            },
+            {
+             "text": "R&S ZNA › 重要 recommended setups\n- [[R&S ZNA-K5]] vector corrected converter measurements：recommended setup 為 4-port R&S®ZNA；需要 R&S®ZNA-K4、R&S®ZNA-B5、R&S®ZNA-B8 mmWave converter LO、R&S®ZN-ZM292 calibration mixer 與 calibration accessories。\n- [[R&S ZNA-K8]] mmWave converter support：two mmWave converters with 2-port R&S®ZNA，或 four mmWave converters with 4-port R&S®ZNA；需要 R&S®ZNA-K8、R&S®ZNA-B8、R&S®ZNA-B26、R&S®ZCAKN 與 accessories。Alternative setup：two mmWave converters with 4-port R&S®ZNA，需要 R&S®ZNA-K8、R&S®ZNAxx-B16、R&S®ZCAKN 與 accessories。\n- [[R&S ZNA-K9]] group delay measurements：4-port R&S®ZNA recommended setup 需要 R&S®ZNAxx-B213、R&S®ZNA-B5、R&S®ZNA-K9；2-port R&S®ZNA recommended setup 需要 R&S®ZNAxx-B212、R&S®ZNAxx-B52、R&S®ZNA-K9。\n- [[R&S ZNA-K30]] noise figure measurement：recommended setup 使用 port 1 as driving and port 2 as receiving port；需要 R&S®ZNAxx-B16、R&S®ZNAxx-B21、R&S®ZNAxx-B32、R&S®ZNAxx-B161、R&S®ZNAxx-B302、diode power sensor（例如 R&S®NRP40S）與 accessories（test cables、fixed attenuators 3 dB / 6 dB / 10 dB 等）。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 15,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA.md"
+             },
+             "score": 6.06301
+            },
+            {
+             "text": "R&S ZNA › 2-port / 4-port 架構\n依 [[ZNA_specs_en_5215-4652-22_v2400]]（Version 24.00, April 2026）：\n\n- 4-port instruments：最多 4 sources，independently configurable、phase coherent、phase controlled；另有第 5 source 可作為 LO supply。\n- 2-port instruments：最多 2 sources，independently configurable、phase coherent、phase controlled；另有第 3 source 可作為 LO supply。\n- 4-port model 每 port 有 2 true receivers，總計 8 true receivers；2-port model 每 port 有 2 true receivers，總計 4 true receivers；來源明確說明無 multiplexing。\n- 支援 true parallel and coherent data acquisition，例如 antenna array tests 與 antenna test systems，從 100 kHz 開始。\n- Optional rear panel LO out 可支援 mmWave converters；4-port model 最多 4 個 converters，2-port model 最多 2 個 converters，無需 external signal generator。\n- Rear panel LO out 提供 high-power LO signal，typ. +25 dBm，最高 26.5 GHz，可作為 mixer measurements 的 LO source。\n- Optional second LO source 可讓 mixer/frequency convertor measurements 速度加倍並最佳化 trace noise。\n- 使用 [[R&S ZNA-K9]] option、1 kHz measurement bandwidth 時，mixer group delay 與 deviation from linear phase 的 group delay trace noise peak-to-peak 可由 200 ps 降至 15 ps。\n- 最多 4 pulse modulators、最多 8 pulse generators（4-port）；最多 2 pulse modulators、最多 4 pulse generators（2-port）。\n- Minimum pulse width：40 ns。\n- Optional direct IF access（in/out）：IF input 可用於 mmWave converter 與 antenna measurement systems，bandwidth 1 GHz；IF output up to 2 GHz bandwidth 可用於 external pulse analysis。\n- Selectable reference signal access：1 GHz external reference，可同步 external equipment，例如 signal generators，改善 mmWave converters up to terahertz frequencies 的 performance。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 5,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA.md"
+             },
+             "score": 5.504985
+            },
+            {
+             "text": "ZNA_specs_en_5215-4652-22_v2400 › Option 與 licence 摘要\n- Hardware options：[[R&S ZNA-B4]] precision frequency reference、[[R&S ZNA-B5]] 2nd internal LO source、[[R&S ZNA-B7]] data streaming memory、[[R&S ZNA-B8]] mmWave converter LO、[[R&S ZNA-B12]] device control、[[R&S ZNA-B15]] RFFE GPIO interface、[[R&S ZNA-B19]] additional removable hard disk、[[R&S ZNA-B26]] direct IF access、[[R&S ZNA-B91]] trigger and control I/O board。\n- 型號依附 hardware options：direct source and receiver access、source step attenuators、receiver step attenuators、internal pulse modulators、3rd and 4th internal sources、2nd internal source and LO、source monitor access、low-noise amplifier、low-power spurious reduction、internal combiner。\n- Software / measurement options：[[R&S ZNA-K1]] spectrum analyzer mode、[[R&S ZNA-K2]] time domain analysis、[[R&S ZNA-K20]] extended time domain analysis、[[R&S ZNA-K4]] scalar mixer measurements、[[R&S ZNA-K5]] vector mixer measurements、[[R&S ZNA-K6]] phase coherent source control、[[R&S ZNA-K61]] true differential mode、[[R&S ZNA-K7]] measurements on pulsed signals、[[R&S ZNA-K17]] increased IF bandwidth 30 MHz、[[R&S ZNA-K8]] mmWave converter support、[[R&S ZNA-K9]] group delay measurements、[[R&S ZNA-K19]] 1 mHz frequency resolution、[[R&S ZNA-K28]] continuous data recording、[[R&S ZNA-K30]] noise figure measurement、[[R&S ZNA-K50]] uncertainty analysis、[[R&S ZNA-K51]] security write protection、[[R&S ZNA-K66]] speed improvement、[[R&S ZNA-K100]] SNP assistant、[[R&S ZNA-K121]] RF off boot up、[[R&S ZNA-K210]] EaZy deembedding、[[R&S ZNA-K220]] in-situ deembedding、[[R&S ZNA-K230]] smart fixture deembedding、[[R&S ZNA-K231]] Delta-L PCB characterization、[[R&S ZNA-K980]] health and utilization monitoring service。\n- 明確 excludes：[[R&S ZNA-K1]] spectrum analyzer mode cannot be combined with R&S®ZNA50-B312、R&S®ZNA67-B312、R&S®ZNA50-B511、R&S®ZNA67-B511。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+             },
+             "score": 4.169748
+            },
+            {
+             "text": "R&S ZNA67EXT › Dynamic range\n條件：receiver noise floor 為 transmission magnitude data trace RMS，test ports short-circuited；規格適用於 **10 Hz measurement bandwidth**，without user correction applied。來源說明 dynamic range 可用 **1 Hz measurement bandwidth** 增加；crosstalk does not limit the dynamic range。Dynamic range performance specified between port 1 and port 2 and between port 3 and port 4（4-port model）；otherwise typical。\n\n| Frequency range | Dynamic range |\n|---|---:|\n| 10 MHz to 30 MHz | > 85 dB (spec.) |\n| 30 MHz to 100 MHz | > 100 dB (spec.) |\n| 100 MHz to 500 MHz | > 120 dB (spec.) |\n| 500 MHz to 10 GHz | > 130 dB (spec.) |\n| 10 GHz to 20 GHz | > 125 dB (spec.) |\n| 20 GHz to 30 GHz | > 115 dB (spec.) |\n| 30 GHz to 40 GHz | > 120 dB (spec.) |\n| 40 GHz to 50 GHz | > 100 dB (spec.) |\n| 50 GHz to 65 GHz | > 95 dB (spec.) |\n| 65 GHz to 75 GHz | > 90 dB (spec.) |\n| 75 GHz to 80 GHz | > 100 dB (spec.) |\n| 80 GHz to 90 GHz | > 105 dB (spec.) |\n| 90 GHz to 100 GHz | > 95 dB (spec.) for models .12/.13/.14；> 100 dB (spec.) for models .15/.16/.17 |\n| 100 GHz to 110 GHz | > 90 dB (spec.) for models .12/.13/.14；> 95 dB (spec.) for models .15/.16/.17 |\n\n註：來源 footnote 2 說若 [[R&S ZNA]] base unit 存在下列 options，68 GHz 以下 dynamic range 最多 reduced up to 18 dB：R&S®ZNA-B161, R&S®ZNA-B163, R&S®ZNA-B212, R&S®ZNA-B213, R&S®ZNA-B302, R&S®ZNA-B312, R&S®ZNA-B501 or R&S®ZNA-B511。",
+             "citation": {
+              "kind": "wiki",
+              "source": null,
+              "raw_ref": null,
+              "section": 7,
+              "page": null,
+              "slide": null,
+              "wiki_page": "wiki/entities/R&S ZNA67EXT.md"
+             },
+             "score": 6.500892
+            }
+           ],
+           "assessment": {
+            "status": "covered",
+            "facets": [
+             {
+              "name": "technical_knowledge",
+              "citations": [
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 16,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S AREG800A.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 14,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S AREG800A.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 5,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 4,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S ZNA.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 8,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/entities/R&S ZNA.md"
+               },
+               {
+                "kind": "wiki",
+                "source": null,
+                "raw_ref": null,
+                "section": 10,
+                "page": null,
+                "slide": null,
+                "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md"
+               }
+              ],
+              "attempts": 1
+             }
+            ],
+            "missing_facets": [],
+            "relation_required": false,
+            "relation_citations": [],
+            "relations": []
+           },
+           "citation_policy": "wiki_primary",
+           "wiki_provenance": [
+            {
+             "wiki_page": "wiki/entities/R&S AREG800A.md",
+             "raw_refs": [
+              "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S ZNA.md",
+             "raw_refs": [
+              "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S ZNA67.md",
+             "raw_refs": [
+              "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/entities/R&S ZNA67EXT.md",
+             "raw_refs": [
+              "raw/Productions/ZNA67EXT_specs_en_5216-3743-22_v0900.md",
+              "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/AREG800A_specs_en_3609-8015-22_v0900.md",
+             "raw_refs": [
+              "raw/Productions/AREG800A_specs_en_3609-8015-22_v0900.md"
+             ]
+            },
+            {
+             "wiki_page": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md",
+             "raw_refs": [
+              "raw/Productions/ZNA_specs_en_5215-4652-22_v2400.md"
+             ]
+            }
+           ]
+          },
+          "instruction": "This answer passed the Host's evidence checks and is shown to the person as it is."
+         },
+         "failure": null
+        },
+        "failure": null
+       }
+      ],
+      "failure": null
+     },
+     "runs": [],
+     "unrecorded": []
+    }
+   },
+   "draft": null,
+   "approvals": []
+  }
+ }
+}

@@ -1,0 +1,92 @@
+{
+ "id": "Q0571",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 83.0,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 46,
+   "kind": "wiki",
+   "ref": "wiki/concepts/台灣 SerDes IC-IP 公司名單.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 30,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 55,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 62,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S ZNA.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 8,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S ZNA.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 71,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S ZNA26.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 75,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S ZNA43.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 57,
+   "kind": "wiki",
+   "ref": "wiki/sources/ZNA_specs_en_5215-4652-22_v2400.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "return/reflection-related behavior",
+   "VNA capability requiring sufficient frequency coverage, dynamic range, measurement bandwidth, and calibration/deembedding support"
+  ],
+  "reason": "The answer’s core chain is backed by the passages: Automotive SerDes is tied to in-vehicle high-speed links, the SI/PCB passages list measurable items such as IL, Xtalk, eye diagram and TDR impedance, and the ZNA passages list relevant VNA capabilities. The requirement link from those measurable parameters to specific VNA capabilities is partly inferential, but the answer flags that the passages do not state an Automotive-specific ZNA configuration, making the overall framing reasonable.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}
