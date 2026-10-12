@@ -1,6 +1,18 @@
 # Handoff
 
-Updated: 2026-10-12 (Asia/Taipei), by Claude Code
+Updated: 2026-10-13 (Asia/Taipei), by Claude Code
+
+## Latest (2026-10-13): re-ingest with the current rules
+
+- Built (b2781e41): Pull explains that already-ingested originals are already in the
+  sandbox as Raw and can tick them in step 4; step 4 re-ingests ticked Raw in the
+  background (Stop / Continue, flagged plans wait for Review). Decision in
+  `docs/DECISIONS.md` (2026-10-13); row in `docs/TASKS.md`.
+- Verified: ruff, mypy src, full suite 2543 passed / 6 skipped; headless page check;
+  live on `sb-c6-market-c6abe5` (8 KB Raw applied in 85 s; 994 KB NTN white paper timed
+  out after 15 min). Agent Web restarted on this code.
+- Open for the owner: (1) a Pull "convert again" option would change write-once Raw,
+  not built; (2) very large Raw cannot be planned in one call: decide split or skip.
 
 ## Where the current work stopped (2026-10-09)
 

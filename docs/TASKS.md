@@ -1788,3 +1788,14 @@ s-k-20261011T102952` (not published).
   above the editable Current file (line-number gutter, added lines green), aligned while
   scrolling, collapsible; Preview shows the current file only; splitter to the AI
   session. Headless check passed; full suite 2538 passed.
+- [x] Re-ingest with the current rules (owner, 2026-10-13): Pull explains that already
+  ingested originals are already in the sandbox as Raw and offers to tick them in step 4
+  (`PullResult.already_raw`, also for legacy `source_sha` Raw); Ingest gets Raw ticks,
+  "Tick folder", a time estimate and a background "Re-ingest ticked" run with Stop and
+  Continue (`/api/knowledge/reingest[/start|/stop]`). Clean plans are applied in the
+  sandbox; flagged plans wait for Review. Pull re-convert not built (Raw is write-once;
+  owner decision). Headless check passed; full suite 2543 passed, 6 skipped.
+  Live on the copy sandbox `sb-c6-market-c6abe5`: `PDSCH (NR)` (8 KB) applied in 85 s;
+  the 994 KB NTN white paper failed with `timeout` after 15 min (one plan call cannot
+  hold it: an existing single-document ingest limit, not the batch). Open: split or skip
+  very large Raw before planning.

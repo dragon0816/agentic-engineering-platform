@@ -2299,3 +2299,22 @@ authoring tools keep returning statuses and codes.
 Rejected: letting Copilot read the vault folders directly (no access control, no
 record, not pinned to the published version); a stdio MCP server per turn (rebuilds
 the Host each time).
+
+## 2026-10-13: Rule changes are tried by re-ingesting Raw, not by pulling again
+
+Decision (owner accepted the proposal): Pull keeps skipping originals that are already
+ingested, because their Raw is already in the sandbox; its message now says so, names
+the Raw documents and can tick them in the Ingest step. After a skill change the
+maintainer re-ingests ticked Raw (a folder or a hand-picked sample) with the current
+rules as a background run (`host_runtime/knowledge_reingest.py`): each document goes
+through the same `ingest-plan` and `ingest-apply` steps a person presses, a clean plan
+is applied in the sandbox, and a plan with problems or contradictions waits for the
+person to compare and apply. The run can be stopped and continued; its record lives in
+the sandbox's `.reingest/`. Recommended practice: try a small sample first, then the
+whole folder, then benchmark and push.
+Not done: a Pull option to convert already-ingested originals again. Raw is write-once
+and content-addressed, so the same original converts to `duplicate`; re-converting
+would change that architecture and is only needed when the converter itself changes,
+which vault skills do not control. Left for the owner to decide.
+Rejected: re-ingesting everything automatically after each rule save (hours of model
+calls, many shared pages changed at once, more push conflicts).
