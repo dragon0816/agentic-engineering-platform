@@ -1780,3 +1780,7 @@ s-k-20261011T102952` (not published).
 - [ ] A second load-sensitive browser test: `tests/test_agent_web.py::
   test_capability_workspace_is_interactive_in_a_real_browser` showed the boot error once
   under full-suite load; passes alone (3/3) and with its file (82/82).
+- [x] Rule editor as three resizable panes (owner, 2026-10-12): Before / After / AI
+  session side by side, Preview and Markdown tabs, red removals and green additions in
+  Markdown view, splitters remembered per browser, maximize/restore per pane. Headless
+  check passed; full suite 2538 passed.
