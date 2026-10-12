@@ -111,3 +111,20 @@ def test_push_and_refresh_routes_need_the_token_and_a_sandbox(
                                body={"base": "k-test"}).body)
     assert refresh == {"ok": False, "code": "refresh_unavailable"}
     assert 'id="kp-push"' in PAGE and "/api/knowledge/push/start" in PAGE
+
+
+def test_the_skill_assistant_route_only_edits_rule_files(
+    served_pipeline: tuple[AgentWebServer, Path],
+) -> None:
+    server, _ = served_pipeline
+    url = base(server) + "/api/knowledge/skill-assist"
+    sandbox = _step(server, "sandbox-create", {"base": "k-test", "label": "assist"})
+    body: dict[str, Any] = {"sandbox_id": sandbox["data"]["sandbox_id"], "path": "wiki/x.md",
+                            "current": "", "turns": [{"role": "user", "text": "hi"}]}
+    assert fetch(url, body=body).status == 401
+    refused = json.loads(fetch(url, token=server.token, body=body).body)
+    assert refused == {"ok": False, "code": "not_a_rule_file"}
+    body["path"] = "skills/ingest-market/SKILL.md"
+    # This test host has no Knowledge asking model installed.
+    reply = json.loads(fetch(url, token=server.token, body=body).body)
+    assert reply == {"ok": False, "code": "skill_assist_unavailable"}

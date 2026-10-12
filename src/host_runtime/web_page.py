@@ -103,6 +103,10 @@ body {
 .kp-sticky { position: sticky; top: 0; z-index: 5; }
 .kp-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .kp-advanced summary { cursor: pointer; font-weight: 600; }
+.kp-assist { margin-top: 12px; border-top: 1px solid var(--line, #ddd); padding-top: 8px; }
+#kp-assist-input { width: 100%; }
+.kp-turn { margin: 6px 0; padding: 6px 8px; border-radius: 6px; }
+.kp-user { background: var(--soft, #eef3fb); }
 #kp-rule-text { width: 100%; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
 .kp-markdown { max-height: 70vh; overflow: auto; }
 pre.kp-added { background: var(--ok-bg, #e8f5e9); white-space: pre-wrap; padding: 8px; }
@@ -845,7 +849,20 @@ tr:last-child td { border-bottom: none; }
               <button class="go" id="kp-rule-save" type="button">Save</button>
               <button id="kp-rule-preview" type="button">Preview</button>
               <button id="kp-rule-close" type="button">Close</button>
-            </div></div></div>
+            </div>
+            <div class="kp-assist">
+              <h4>Skill assistant</h4>
+              <p class="note">Describe in your own words what should change; the assistant
+                asks what it needs and proposes the whole file. Nothing is saved until you
+                use the proposal and press Save.</p>
+              <div id="kp-assist-log"></div>
+              <textarea id="kp-assist-input" rows="3"
+                        placeholder="e.g. every market claim must carry a date"
+                        aria-label="Message to the Skill assistant"></textarea>
+              <div class="kp-actions">
+                <button class="go" id="kp-assist-send" type="button">Send</button>
+                <button id="kp-assist-reset" type="button">New conversation</button>
+              </div></div></div></div>
         <div class="card" id="kp-viewer" hidden><h3 id="kp-viewer-title">Preview</h3>
           <div class="kp-actions"><button id="kp-viewer-close" type="button">Close</button></div>
           <div id="kp-viewer-body" class="kp-markdown"></div></div>
@@ -3897,6 +3914,41 @@ el("kp-viewer-close").addEventListener("click", () => { el("kp-viewer").hidden =
 el("kp-rule-close").addEventListener("click", () => {
   el("kp-rule-editor").hidden = true; kpRulePath = null;
 });
+let kpAssistTurns = [];
+function kpAssistShow() {
+  const log = el("kp-assist-log"); log.replaceChildren();
+  for (const turn of kpAssistTurns) {
+    const item = document.createElement("div"); item.className = "kp-turn kp-" + turn.role;
+    item.append(turn.role === "user" ? text(turn.text) : renderMarkdown(turn.text));
+    if (turn.proposal) {
+      const row = document.createElement("div"); row.className = "kp-actions";
+      row.append(kpButton("Compare", () => kpViewer(kpRulePath + " \u2014 proposed change",
+                   kpLineDiff(el("kp-rule-text").value, turn.proposal))),
+                 kpButton("Use this version", () => {
+                   el("kp-rule-text").value = turn.proposal;
+                   kpStatus("The proposal is in the editor; press Save to keep it.");
+                 }));
+      item.append(row);
+    }
+    log.append(item);
+  }
+}
+el("kp-assist-reset").addEventListener("click", () => { kpAssistTurns = []; kpAssistShow(); });
+el("kp-assist-send").addEventListener("click", () => kpRun("Asking the assistant", async () => {
+  const message = el("kp-assist-input").value.trim();
+  if (!message || !kpRulePath) return;
+  kpAssistTurns.push({role: "user", text: message}); kpAssistShow();
+  el("kp-assist-input").value = "";
+  const reply = await call("/api/knowledge/skill-assist", {
+    sandbox_id: kpSandbox.sandbox_id, path: kpRulePath, current: el("kp-rule-text").value,
+    turns: kpAssistTurns.map(({role, text}) => ({role, text}))});
+  if (!reply.ok) {
+    kpAssistTurns.pop(); kpAssistShow();
+    const problem = new Error(reply.code); problem.code = reply.code; throw problem;
+  }
+  kpAssistTurns.push({role: "assistant", text: reply.reply, proposal: reply.proposal});
+  kpAssistShow();
+}));
 el("kp-rule-preview").addEventListener("click", () => {
   kpViewer((kpRulePath || "") + " (unsaved preview)", renderMarkdown(el("kp-rule-text").value));
 });

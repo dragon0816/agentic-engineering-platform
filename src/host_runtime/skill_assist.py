@@ -1,0 +1,85 @@
+"""The Knowledge page's Skill assistant (owner, 2026-10-12).
+
+A domain expert describes in plain words how their data should be processed
+or how questions should be answered; the company model, given the writing
+guide, the matching template, the skill as it is now and a sample source of
+its category, asks what it needs and proposes a complete new SKILL.md. The
+assistant only proposes: nothing is written until the person puts the
+proposal in the editor and saves it, in their sandbox.
+"""
+
+from __future__ import annotations
+
+import re
+from typing import Literal
+
+from common.base import Contract
+from common.execution import TraceIdentifiers
+from models.contracts import ModelClient, ModelMessage, ModelRequest
+
+MAX_TURNS = 20
+MAX_TEXT = 12_000
+SAMPLE_CHARS = 3000
+FENCE = re.compile(r"```(?:markdown|md)?\s*\n(---\n.*?)\n```", re.DOTALL)
+
+SYSTEM = """You help a domain expert write one rule file (SKILL.md) for a company knowledge
+base. Ingest skills (mode: procedure) decide how raw sources become wiki pages; answer
+skills (mode: answer) decide how questions are judged and answered. Follow the writing
+guide and template below.
+
+How to work:
+- Reply in the expert's language. Be brief.
+- If the request is unclear, ask at most three short questions before proposing.
+- When you propose a change, explain it in two or three sentences, then give the
+  COMPLETE new file in one ```markdown fenced block, starting with its frontmatter.
+- Keep the frontmatter valid: name, description, mode, and applies_to (ingest) or
+  optional topics (answer). Keep every existing rule unless the expert asked to change
+  it; say which rules you changed or removed.
+- Write rules with a reason and an example. Never write facts about what data
+  exists today. Never ask answers to include uncited sections (follow-up questions,
+  reading lists): every answer line must cite evidence.
+
+===== writing guide =====
+{guide}
+
+===== template =====
+{template}"""
+
+
+class Turn(Contract):
+    role: Literal["user", "assistant"]
+    text: str
+
+
+class AssistReply(Contract):
+    reply: str
+    proposal: str | None = None  # the complete proposed SKILL.md, when there is one
+
+
+def proposal_of(text: str) -> str | None:
+    found = FENCE.findall(text)
+    return found[-1].strip() + "\n" if found else None
+
+
+def assist(model: ModelClient, alias: str, *, guide: str, template: str, path: str,
+           current: str, sample: str | None, turns: list[Turn],
+           trace: TraceIdentifiers) -> AssistReply:
+    if not turns or turns[-1].role != "user":
+        raise ValueError("the last turn is the expert's")
+    context = (f"The file being edited: {path}\n\n===== current file =====\n"
+               f"{current[:MAX_TEXT] or '(new file)'}"
+               + (f"\n\n===== a sample source of this category (excerpt) =====\n"
+                  f"{sample[:SAMPLE_CHARS]}" if sample else ""))
+    # replace(), not format(): a guide or template may contain braces.
+    system = SYSTEM.replace("{guide}", guide).replace("{template}", template)
+    messages = [ModelMessage(role="system", text=system),
+                ModelMessage(role="user", text=context),
+                ModelMessage(role="assistant", text="I have the file. What should change?")]
+    messages += [ModelMessage(role=turn.role, text=turn.text[:MAX_TEXT])
+                 for turn in turns[-MAX_TURNS:]]
+    response = model.generate(ModelRequest(trace=trace, model_alias=alias,
+                                           messages=tuple(messages), max_output_tokens=6000))
+    if response.failure is not None:
+        raise RuntimeError(response.failure.code)
+    text = (response.text or "").strip()
+    return AssistReply(reply=text, proposal=proposal_of(text))

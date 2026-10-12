@@ -164,6 +164,7 @@ from host_runtime.reference_sets import (
     REFERENCE_SETS_FILE,
     ReferenceSetStore,
 )
+from host_runtime.skill_assist import Turn, assist
 from host_runtime.slash_commands import (
     COMMANDS,
     SlashCommandError,
@@ -2638,6 +2639,42 @@ class AgentWeb:
                 return {"ok": False, "code": error.code}
         return {"ok": True, "restart_required": True, "data": result.model_dump(mode="json")}
 
+    def skill_assist(self, sandbox_id: str, path: str, current: str,
+                     turns: list[dict[str, Any]]) -> dict[str, Any]:
+        """One reply of the Skill assistant; it proposes, the person saves."""
+        pipeline = self._pipeline()
+        if pipeline is None:
+            return {"ok": False, "code": "knowledge_pipeline_disabled"}
+        if not (path == "CLAUDE.md" or re.fullmatch(
+                r"skills/[A-Za-z0-9][A-Za-z0-9._-]*/SKILL\.md", path)):
+            return {"ok": False, "code": "not_a_rule_file"}
+        try:
+            _, vault = pipeline.sandboxes.open(sandbox_id)
+            chat = [Turn.model_validate(turn) for turn in turns]
+        except (SandboxError, ValueError):
+            return {"ok": False, "code": "skill_assist_request_invalid"}
+        installed = self.runtime.agent.gateway.bridge.installed.get(KNOWLEDGE_QUERY_SPEC.identity)
+        model = getattr(getattr(installed, "handler", None), "model", None)
+        alias = getattr(getattr(installed, "handler", None), "alias", None)
+        if model is None or alias is None:
+            return {"ok": False, "code": "skill_assist_unavailable"}
+        guide = pipeline.skill_guide()
+        answering = "mode: answer" in current or path.startswith("skills/ask-")
+        scope = re.search(r"^applies_to:\s*(raw/\S+)", current, re.MULTILINE)
+        sample = None
+        if scope and not answering:
+            folder = vault.root / scope.group(1)
+            first = next(iter(sorted(folder.rglob("*.md"))), None) if folder.is_dir() else None
+            if first is not None:
+                sample = first.read_text(encoding="utf-8", errors="ignore")
+        try:
+            reply = assist(model, alias, guide=guide.guide,
+                           template=guide.answer_template if answering else guide.ingest_template,
+                           path=path, current=current, sample=sample, turns=chat, trace=_trace())
+        except (RuntimeError, ValueError) as error:
+            return {"ok": False, "code": f"skill_assist_failed:{error}"[:80]}
+        return {"ok": True, **reply.model_dump(mode="json")}
+
     def benchmark_status(self, sandbox_id: str) -> dict[str, Any]:
         boxes = self._sandboxes()
         if boxes is None:
@@ -2855,6 +2892,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/knowledge/benchmark/start",
             "/api/knowledge/push/start",
             "/api/knowledge/refresh",
+            "/api/knowledge/skill-assist",
             "/api/settings/model",
             "/api/settings/telegram",
             "/api/mcp/save",
@@ -2918,6 +2956,14 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, self.server.web.start_push(
                 str(body.get("sandbox_id") or ""), [str(x) for x in body["sets"]],
                 {str(k): str(v) for k, v in dict(body.get("resolutions") or {}).items()}))
+            return
+        if path == "/api/knowledge/skill-assist":
+            if not isinstance(body, dict) or not isinstance(body.get("turns"), list):
+                self._json(400, {"ok": False, "code": "skill_assist_request_invalid"})
+                return
+            self._json(200, self.server.web.skill_assist(
+                str(body.get("sandbox_id") or ""), str(body.get("path") or ""),
+                str(body.get("current") or ""), list(body["turns"])))
             return
         if path == "/api/knowledge/refresh":
             if not isinstance(body, dict):
