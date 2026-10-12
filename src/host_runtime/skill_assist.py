@@ -11,6 +11,7 @@ proposal in the editor and saves it, in their sandbox.
 from __future__ import annotations
 
 import re
+from collections.abc import Callable
 from typing import Literal
 
 from common.base import Contract
@@ -54,6 +55,25 @@ class Turn(Contract):
 class AssistReply(Contract):
     reply: str
     proposal: str | None = None  # the complete proposed SKILL.md, when there is one
+    warnings: tuple[str, ...] = ()  # what the Host found missing in the proposal
+
+
+def check_proposal(text: str) -> tuple[str, ...]:
+    """Frontmatter a rule file needs before it can be saved and used."""
+    if not text.startswith("---\n") or "\n---\n" not in text[4:]:
+        return ("the proposal has no frontmatter",)
+    head = text[4:].split("\n---\n", 1)[0]
+    fields = {line.split(":", 1)[0].strip(): line.split(":", 1)[1].strip()
+              for line in head.splitlines() if ":" in line and not line.startswith(" ")}
+    found = []
+    if not fields.get("name"):
+        found.append("frontmatter has no name")
+    mode = fields.get("mode", "")
+    if mode not in ("procedure", "answer"):
+        found.append("mode should be procedure (ingest) or answer")
+    if mode == "procedure" and not fields.get("applies_to", "").startswith("raw/"):
+        found.append("an ingest rule needs applies_to: raw/<category>")
+    return tuple(found)
 
 
 def proposal_of(text: str) -> str | None:
@@ -63,7 +83,10 @@ def proposal_of(text: str) -> str | None:
 
 def assist(model: ModelClient, alias: str, *, guide: str, template: str, path: str,
            current: str, sample: str | None, turns: list[Turn],
-           trace: TraceIdentifiers) -> AssistReply:
+           trace: TraceIdentifiers,
+           on_state: Callable[[str], None] | None = None) -> AssistReply:
+    """`on_state` hears `asking` and `checking`, so a page can show progress."""
+    report = on_state or (lambda _state: None)
     if not turns or turns[-1].role != "user":
         raise ValueError("the last turn is the expert's")
     context = (f"The file being edited: {path}\n\n===== current file =====\n"
@@ -77,9 +100,13 @@ def assist(model: ModelClient, alias: str, *, guide: str, template: str, path: s
                 ModelMessage(role="assistant", text="I have the file. What should change?")]
     messages += [ModelMessage(role=turn.role, text=turn.text[:MAX_TEXT])
                  for turn in turns[-MAX_TURNS:]]
+    report("asking")
     response = model.generate(ModelRequest(trace=trace, model_alias=alias,
                                            messages=tuple(messages), max_output_tokens=6000))
     if response.failure is not None:
         raise RuntimeError(response.failure.code)
+    report("checking")
     text = (response.text or "").strip()
-    return AssistReply(reply=text, proposal=proposal_of(text))
+    proposal = proposal_of(text)
+    return AssistReply(reply=text, proposal=proposal,
+                       warnings=check_proposal(proposal) if proposal else ())

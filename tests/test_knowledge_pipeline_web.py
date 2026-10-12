@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import threading
+import time
 from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
@@ -122,12 +123,26 @@ def test_the_skill_assistant_route_only_edits_rule_files(
     body: dict[str, Any] = {"sandbox_id": sandbox["data"]["sandbox_id"], "path": "wiki/x.md",
                             "current": "", "turns": [{"role": "user", "text": "hi"}]}
     assert fetch(url, body=body).status == 401
-    refused = json.loads(fetch(url, token=server.token, body=body).body)
+
+    def finished(reply: dict[str, Any]) -> dict[str, Any]:
+        # The reply runs in the background; the page polls its state.
+        assert reply["ok"] and reply["job_id"]
+        for _ in range(50):
+            status = json.loads(fetch(url + "?job=" + reply["job_id"], token=server.token).body)
+            if status["state"] in ("done", "failed"):
+                assert status["history"][0] == "collecting"
+                return dict(status["result"])
+            time.sleep(0.1)
+        raise AssertionError("the assistant never finished")
+
+    refused = finished(json.loads(fetch(url, token=server.token, body=body).body))
     assert refused == {"ok": False, "code": "not_a_rule_file"}
     body["path"] = "skills/ingest-market/SKILL.md"
     # This test host has no Knowledge asking model installed.
-    reply = json.loads(fetch(url, token=server.token, body=body).body)
+    reply = finished(json.loads(fetch(url, token=server.token, body=body).body))
     assert reply == {"ok": False, "code": "skill_assist_unavailable"}
+    unknown = json.loads(fetch(url + "?job=nope", token=server.token).body)
+    assert unknown == {"ok": False, "code": "unknown_job"}
 
 
 def test_the_experience_review_routes_keep_settings_and_report(

@@ -57,5 +57,23 @@ def test_a_question_back_has_no_proposal_and_failures_are_reported() -> None:
 
 
 def test_the_page_offers_the_assistant() -> None:
-    for hook in ('id="kp-assist-send"', "/api/knowledge/skill-assist", "Use this version"):
+    # The proposal goes straight into the editor, whose tabs show it three ways.
+    for hook in ('id="kp-assist-send"', "/api/knowledge/skill-assist", 'data-tab="preview"',
+                 'data-tab="md"', 'data-tab="diff"', 'id="kp-rule-revert"', "avatarWorking(1)"):
         assert hook in PAGE
+    assert "Use this version" not in PAGE
+
+
+def test_the_assistant_reports_its_states_and_checks_the_frontmatter() -> None:
+    from host_runtime.skill_assist import check_proposal
+
+    states: list[str] = []
+    reply = assist(_Model(f"Done.\n\n```markdown\n{PROPOSAL}```\n"), "company", guide="G",
+                   template="T", path="skills/ingest-market/SKILL.md", current="old",
+                   sample=None, turns=[Turn(role="user", text="x")], trace=TRACE,
+                   on_state=states.append)
+    assert states == ["asking", "checking"] and reply.warnings == ()
+    assert check_proposal("---\nname: x\nmode: procedure\n---\nbody\n") == (
+        "an ingest rule needs applies_to: raw/<category>",)
+    assert check_proposal("no frontmatter") == ("the proposal has no frontmatter",)
+    assert check_proposal("---\nmode: answer\n---\nx\n") == ("frontmatter has no name",)

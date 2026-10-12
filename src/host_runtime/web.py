@@ -2778,8 +2778,39 @@ class AgentWeb:
                 return {"ok": False, "code": error.code}
         return {"ok": True, "restart_required": True, "data": result.model_dump(mode="json")}
 
+    def skill_assist_start(self, sandbox_id: str, path: str, current: str,
+                           turns: list[dict[str, Any]]) -> dict[str, Any]:
+        """Start one reply in the background; the page follows its state:
+        collecting -> asking -> checking -> done | failed."""
+        job_id = uuid.uuid4().hex[:12]
+        job: dict[str, Any] = {"ok": True, "job_id": job_id, "state": "collecting",
+                               "started": time.monotonic(), "history": ["collecting"]}
+        self._assist_jobs = getattr(self, "_assist_jobs", {})
+        self._assist_jobs[job_id] = job
+
+        def state(name: str) -> None:
+            job["state"] = name
+            job["history"].append(name)
+
+        def run() -> None:
+            result = self.skill_assist(sandbox_id, path, current, turns, on_state=state)
+            job["result"] = result
+            state("done" if result.get("ok") else "failed")
+
+        threading.Thread(target=run, name="skill-assist", daemon=True).start()
+        return {"ok": True, "job_id": job_id}
+
+    def skill_assist_status(self, job_id: str) -> dict[str, Any]:
+        job = getattr(self, "_assist_jobs", {}).get(job_id)
+        if job is None:
+            return {"ok": False, "code": "unknown_job"}
+        return {"ok": True, "state": job["state"], "history": job["history"],
+                "elapsed_s": round(time.monotonic() - job["started"], 1),
+                "result": job.get("result")}
+
     def skill_assist(self, sandbox_id: str, path: str, current: str,
-                     turns: list[dict[str, Any]]) -> dict[str, Any]:
+                     turns: list[dict[str, Any]],
+                     on_state: Any = None) -> dict[str, Any]:
         """One reply of the Skill assistant; it proposes, the person saves."""
         pipeline = self._pipeline()
         if pipeline is None:
@@ -2809,7 +2840,8 @@ class AgentWeb:
         try:
             reply = assist(model, alias, guide=guide.guide,
                            template=guide.answer_template if answering else guide.ingest_template,
-                           path=path, current=current, sample=sample, turns=chat, trace=_trace())
+                           path=path, current=current, sample=sample, turns=chat,
+                           trace=_trace(), on_state=on_state)
         except (RuntimeError, ValueError) as error:
             return {"ok": False, "code": f"skill_assist_failed:{error}"[:80]}
         return {"ok": True, **reply.model_dump(mode="json")}
@@ -3004,6 +3036,9 @@ class _Handler(BaseHTTPRequestHandler):
         elif parsed.path == "/api/assistant/mcp-config":
             host, port = self.server.server_address[:2]
             self._json(200, web.assistant_mcp_config(f"http://127.0.0.1:{port}"))
+        elif parsed.path == "/api/knowledge/skill-assist":
+            query = parse_qs(parsed.query)
+            self._json(200, web.skill_assist_status((query.get("job") or [""])[0]))
         elif parsed.path == "/api/experience":
             self._json(200, web.experience())
         elif parsed.path == "/api/knowledge/push":
@@ -3153,7 +3188,7 @@ class _Handler(BaseHTTPRequestHandler):
             if not isinstance(body, dict) or not isinstance(body.get("turns"), list):
                 self._json(400, {"ok": False, "code": "skill_assist_request_invalid"})
                 return
-            self._json(200, self.server.web.skill_assist(
+            self._json(200, self.server.web.skill_assist_start(
                 str(body.get("sandbox_id") or ""), str(body.get("path") or ""),
                 str(body.get("current") or ""), list(body["turns"])))
             return

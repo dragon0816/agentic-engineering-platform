@@ -107,6 +107,18 @@ body {
 #kp-assist-input { width: 100%; }
 .kp-turn { margin: 6px 0; padding: 6px 8px; border-radius: 6px; }
 .kp-user { background: var(--soft, #eef3fb); }
+.kp-running { border: 1px dashed var(--accent, #2b6cb0); }
+.kp-steps { margin: 4px 0 0 18px; padding: 0; }
+.kp-steps .kp-now { font-weight: 600; }
+.kp-steps .kp-later { opacity: 0.55; }
+.kp-tabs { display: flex; gap: 4px; margin: 6px 0; }
+.kp-tabs [role="tab"][aria-selected="true"] { background: var(--accent, #2b6cb0); color: #fff; }
+.kp-diff pre { white-space: pre-wrap; font-family: ui-monospace, Consolas, monospace;
+  font-size: 13px; max-height: 60vh; overflow: auto; }
+.kp-add { background: #e6f4ea; color: #137333; }
+.kp-del { background: #fce8e6; color: #a50e0e; }
+.kp-same { opacity: 0.7; }
+#kp-assist-log { max-height: 50vh; overflow: auto; }
 #kp-rule-text { width: 100%; font-family: ui-monospace, Consolas, monospace; font-size: 13px; }
 .kp-markdown { max-height: 70vh; overflow: auto; }
 pre.kp-added { background: var(--ok-bg, #e8f5e9); white-space: pre-wrap; padding: 8px; }
@@ -855,19 +867,27 @@ tr:last-child td { border-bottom: none; }
             a push brings the change to the project vault.</p>
           <div id="kp-rules" class="kp-list"></div>
           <div id="kp-rule-editor" hidden>
-            <p><strong id="kp-rule-path"></strong></p>
-            <textarea id="kp-rule-text" rows="18" spellcheck="false"
+            <p><strong id="kp-rule-path"></strong>
+              <span class="note" id="kp-rule-dirty"></span></p>
+            <div class="kp-tabs" role="tablist">
+              <button type="button" role="tab" data-tab="preview">Preview</button>
+              <button type="button" role="tab" data-tab="md" aria-selected="true">Markdown</button>
+              <button type="button" role="tab" data-tab="diff">Diff</button>
+            </div>
+            <div id="kp-tab-preview" class="kp-markdown kp-tab" hidden></div>
+            <textarea id="kp-rule-text" class="kp-tab" rows="18" spellcheck="false"
                       aria-label="Rule file text"></textarea>
+            <div id="kp-tab-diff" class="kp-diff kp-tab" hidden></div>
             <div class="kp-actions">
               <button class="go" id="kp-rule-save" type="button">Save</button>
-              <button id="kp-rule-preview" type="button">Preview</button>
+              <button id="kp-rule-revert" type="button">Revert to saved</button>
               <button id="kp-rule-close" type="button">Close</button>
             </div>
             <div class="kp-assist">
               <h4>Skill assistant</h4>
               <p class="note">Describe in your own words what should change; the assistant
-                asks what it needs and proposes the whole file. Nothing is saved until you
-                use the proposal and press Save.</p>
+                asks what it needs and puts its proposal in the editor above (see Diff).
+                Nothing is saved until you press Save.</p>
               <div id="kp-assist-log"></div>
               <textarea id="kp-assist-input" rows="3"
                         placeholder="e.g. every market claim must carry a date"
@@ -3810,6 +3830,7 @@ async function kpLoadRules() {
       const file = await pipeline("file-read", {sandbox_id: kpSandbox.sandbox_id, path});
       kpRulePath = path; el("kp-rule-editor").hidden = false;
       el("kp-rule-path").textContent = path; el("kp-rule-text").value = file.text;
+      kpRuleSaved = file.text; kpTab("md");
     }))]));
   const guide = await pipeline("skill-guide", {});
   const add = kpButton("New skill", () => {
@@ -3820,6 +3841,7 @@ async function kpLoadRules() {
     const category = answering ? "" : name.replace(/^ingest-/, "");
     kpRulePath = "skills/" + name + "/SKILL.md"; el("kp-rule-editor").hidden = false;
     el("kp-rule-path").textContent = kpRulePath;
+    kpRuleSaved = ""; kpTab("md");
     el("kp-rule-text").value = (answering ? guide.answer_template : guide.ingest_template)
       .replaceAll("ingest-<category>", name).replaceAll("ask-knowledge", name)
       .replaceAll("<Category>", category.charAt(0).toUpperCase() + category.slice(1));
@@ -3953,48 +3975,157 @@ el("kp-viewer-close").addEventListener("click", () => { el("kp-viewer").hidden =
 el("kp-rule-close").addEventListener("click", () => {
   el("kp-rule-editor").hidden = true; kpRulePath = null;
 });
+let kpRuleSaved = "";
+function kpDiffLines(before, after) {
+  // A line diff in file order (longest common subsequence), so additions and
+  // removals show where they happen.
+  const lines = (value) => value.replace(/\r\n?/g, "\n").split("\n");
+  const a = lines(before), b = lines(after);
+  if (a.length * b.length > 4000000) {
+    return [...a.map((line) => ["-", line]), ...b.map((line) => ["+", line])];
+  }
+  const table = Array.from({length: a.length + 1}, () => new Uint16Array(b.length + 1));
+  for (let i = a.length - 1; i >= 0; i--) {
+    for (let j = b.length - 1; j >= 0; j--) {
+      table[i][j] = a[i] === b[j] ? table[i + 1][j + 1] + 1
+        : Math.max(table[i + 1][j], table[i][j + 1]);
+    }
+  }
+  const out = [];
+  let i = 0, j = 0;
+  while (i < a.length || j < b.length) {
+    if (i < a.length && j < b.length && a[i] === b[j]) { out.push([" ", a[i]]); i++; j++; }
+    else if (i < a.length && (j >= b.length || table[i + 1][j] >= table[i][j + 1])) {
+      out.push(["-", a[i]]); i++;  // a removal is listed before what replaces it
+    } else { out.push(["+", b[j]]); j++; }
+  }
+  return out;
+}
+function kpRenderDiff() {
+  const box = el("kp-tab-diff"); box.replaceChildren();
+  const lines = kpDiffLines(kpRuleSaved, el("kp-rule-text").value);
+  const added = lines.filter(([kind]) => kind === "+").length;
+  const removed = lines.filter(([kind]) => kind === "-").length;
+  const head = document.createElement("p"); head.className = "note";
+  head.append(text(added || removed ? "+" + added + " added, −" + removed + " removed"
+    + " compared with the saved file" : "No changes from the saved file."));
+  box.append(head);
+  const pre = document.createElement("pre");
+  for (const [kind, line] of lines) {
+    const row = document.createElement("div");
+    row.className = kind === "+" ? "kp-add" : kind === "-" ? "kp-del" : "kp-same";
+    row.append(text((kind === " " ? "  " : kind + " ") + line));
+    pre.append(row);
+  }
+  box.append(pre);
+}
+function kpRuleDirty() {
+  const changed = el("kp-rule-text").value !== kpRuleSaved;
+  el("kp-rule-dirty").textContent = changed ? " — unsaved changes" : "";
+}
+function kpTab(name) {
+  for (const button of document.querySelectorAll(".kp-tabs [data-tab]")) {
+    button.setAttribute("aria-selected", String(button.dataset.tab === name));
+  }
+  el("kp-tab-preview").hidden = name !== "preview";
+  el("kp-rule-text").hidden = name !== "md";
+  el("kp-tab-diff").hidden = name !== "diff";
+  if (name === "preview") {
+    el("kp-tab-preview").replaceChildren(renderMarkdown(el("kp-rule-text").value));
+  }
+  if (name === "diff") kpRenderDiff();
+  kpRuleDirty();
+}
+for (const button of document.querySelectorAll(".kp-tabs [data-tab]")) {
+  button.addEventListener("click", () => kpTab(button.dataset.tab));
+}
+el("kp-rule-text").addEventListener("input", kpRuleDirty);
+el("kp-rule-revert").addEventListener("click", () => {
+  el("kp-rule-text").value = kpRuleSaved; kpTab("md");
+});
+
+const KP_ASSIST_STATES = [["collecting", "Reading the file, guide and a sample"],
+  ["asking", "The model is writing"], ["checking", "Checking the proposal"]];
 let kpAssistTurns = [];
-function kpAssistShow() {
+function kpAssistShow(progress) {
   const log = el("kp-assist-log"); log.replaceChildren();
   for (const turn of kpAssistTurns) {
     const item = document.createElement("div"); item.className = "kp-turn kp-" + turn.role;
     item.append(turn.role === "user" ? text(turn.text) : renderMarkdown(turn.text));
     if (turn.proposal) {
-      const row = document.createElement("div"); row.className = "kp-actions";
-      row.append(kpButton("Compare", () => kpViewer(kpRulePath + " \u2014 proposed change",
-                   kpLineDiff(el("kp-rule-text").value, turn.proposal))),
-                 kpButton("Use this version", () => {
-                   el("kp-rule-text").value = turn.proposal;
-                   kpStatus("The proposal is in the editor; press Save to keep it.");
-                 }));
-      item.append(row);
+      const note = document.createElement("p"); note.className = "note";
+      note.append(text("The proposal is in the editor above (Diff shows the change); "
+        + "press Save to keep it."));
+      item.append(note);
+    }
+    for (const warning of turn.warnings || []) {
+      const line = document.createElement("p"); line.className = "bad";
+      line.append(text("⚠ " + warning)); item.append(line);
     }
     log.append(item);
   }
+  if (progress) {
+    const item = document.createElement("div"); item.className = "kp-turn kp-running";
+    const title = document.createElement("strong");
+    title.append(text("Working… " + progress.elapsed_s + " s")); item.append(title);
+    const steps = document.createElement("ol"); steps.className = "kp-steps";
+    const reached = progress.history || [];
+    for (const [key, label] of KP_ASSIST_STATES) {
+      const li = document.createElement("li");
+      const done = reached.includes(key) && progress.state !== key;
+      li.className = progress.state === key ? "kp-now" : done ? "kp-done" : "kp-later";
+      li.append(text((done ? "✓ " : progress.state === key ? "▶ " : "· ") + label));
+      steps.append(li);
+    }
+    item.append(steps); log.append(item);
+  }
+  log.scrollTop = log.scrollHeight;
 }
 el("kp-assist-reset").addEventListener("click", () => { kpAssistTurns = []; kpAssistShow(); });
-el("kp-assist-send").addEventListener("click", () => kpRun("Asking the assistant", async () => {
+el("kp-assist-send").addEventListener("click", async () => {
   const message = el("kp-assist-input").value.trim();
   if (!message || !kpRulePath) return;
-  kpAssistTurns.push({role: "user", text: message}); kpAssistShow();
+  kpAssistTurns.push({role: "user", text: message});
   el("kp-assist-input").value = "";
-  const reply = await call("/api/knowledge/skill-assist", {
-    sandbox_id: kpSandbox.sandbox_id, path: kpRulePath, current: el("kp-rule-text").value,
-    turns: kpAssistTurns.map(({role, text}) => ({role, text}))});
-  if (!reply.ok) {
+  el("kp-assist-send").disabled = true;
+  avatarWorking(1);
+  try {
+    kpAssistShow({state: "collecting", history: ["collecting"], elapsed_s: 0});
+    const started = await call("/api/knowledge/skill-assist", {
+      sandbox_id: kpSandbox.sandbox_id, path: kpRulePath, current: el("kp-rule-text").value,
+      turns: kpAssistTurns.map(({role, text}) => ({role, text}))});
+    if (!started.ok) throw Object.assign(new Error(started.code), {code: started.code});
+    let status;
+    for (;;) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      status = await call("/api/knowledge/skill-assist?job=" + encodeURIComponent(started.job_id));
+      if (!status.ok || status.state === "done" || status.state === "failed") break;
+      kpAssistShow(status);
+    }
+    const result = status && status.result;
+    if (!result || !result.ok) {
+      throw Object.assign(new Error(result ? result.code : "skill_assist_failed"),
+                          {code: result ? result.code : "skill_assist_failed"});
+    }
+    kpAssistTurns.push({role: "assistant", text: result.reply, proposal: result.proposal,
+                        warnings: result.warnings});
+    kpAssistShow();
+    if (result.proposal) { el("kp-rule-text").value = result.proposal; kpTab("diff"); }
+  } catch (failure) {
     kpAssistTurns.pop(); kpAssistShow();
-    const problem = new Error(reply.code); problem.code = reply.code; throw problem;
+    kpStatus("The assistant did not answer: " + (failure.code || failure.message), true);
+  } finally {
+    el("kp-assist-send").disabled = false;
+    avatarWorking(-1);
   }
-  kpAssistTurns.push({role: "assistant", text: reply.reply, proposal: reply.proposal});
-  kpAssistShow();
-}));
-el("kp-rule-preview").addEventListener("click", () => {
-  kpViewer((kpRulePath || "") + " (unsaved preview)", renderMarkdown(el("kp-rule-text").value));
 });
 el("kp-rule-save").addEventListener("click", () => kpRun("Saving the rule", async () => {
   if (!kpRulePath) return;
+  const textNow = el("kp-rule-text").value;
   await pipeline("rule-write", {sandbox_id: kpSandbox.sandbox_id, path: kpRulePath,
-                                text: el("kp-rule-text").value});
+                                text: textNow});
+  kpRuleSaved = textNow; kpRuleDirty();
+  if (!el("kp-tab-diff").hidden) kpRenderDiff();
   kpStatus("Saved " + kpRulePath + "; the next ingest uses it.");
   await kpLoadRules();
 }));
