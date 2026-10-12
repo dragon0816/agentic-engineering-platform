@@ -1,0 +1,52 @@
+{
+ "id": "Q0871",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "failed",
+ "tools": [],
+ "seconds": 96.875,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 70,
+   "kind": "wiki",
+   "ref": "wiki/sources/snla426.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 33,
+   "kind": "wiki",
+   "ref": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "Semiconductor / high-speed interface requirement",
+   "若 oscilloscope 用於 PCIe Gen5 interface / eye validation，則它至少要能量測 mV 等級 eye height 與 ps 等級 eye width"
+  ],
+  "reason": "The cited passages support the PCIe Gen5 data rate/layout concerns, the eye-height/eye-width measurable parameters, and the limited statement that interface testing involves scopes while lacking scope specifications. The answer reasonably flags the oscilloscope capability as an inference and explicitly notes that the knowledge base does not support a full market-segment or scope-spec recommendation.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

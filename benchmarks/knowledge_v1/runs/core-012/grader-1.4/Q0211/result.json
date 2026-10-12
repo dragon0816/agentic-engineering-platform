@@ -1,0 +1,94 @@
+{
+ "id": "Q0211",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 46.844,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 28,
+   "kind": "wiki",
+   "ref": "wiki/concepts/UAV UAS Drones T&M Solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 38,
+   "kind": "wiki",
+   "ref": "wiki/concepts/UAV signaling test solution.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 16,
+   "kind": "wiki",
+   "ref": "wiki/concepts/DO-160 airborne equipment EMC testing.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 43,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 GPRF Generator.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 44,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 GPRF Generator.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 45,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 GPRF Generator.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 19,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 21,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S AREG800A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "military / aviation drone testing",
+   "In an Aerospace / Defense radar workflow, place the Signaling Tester on the communications-validation branch and the Non-signaling Tester on auxiliary RF waveform replay / TX-measurement tasks"
+  ],
+  "reason": "The answer’s core distinction is well supported: the cited passages separate CMX500 signaling for LTE/5G/Wi‑Fi UE and de-sense validation from EMC/EME testing, and separately support CMX500 GPRF non-signaling waveform replay plus AREG800A radar echo generation. Some workflow placement and Aerospace/Defense framing are extrapolations from UAV/DO-160/radar passages, but they are cautious and fair rather than contradictory.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

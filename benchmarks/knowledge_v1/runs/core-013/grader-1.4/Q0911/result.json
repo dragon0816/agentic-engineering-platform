@@ -1,0 +1,55 @@
+{
+ "id": "Q0911",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 33.75,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 60,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G device testing value chain.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Virtual tester.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 86,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NTN signal generator solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "RFIC/DUT",
+   "stimulate the RFIC/DUT",
+   "during test and validation"
+  ],
+  "reason": "The answer’s core placement of SMW200A/FSW in the RF / parametric / characterization layer is directly supported by [60], and the broader implementation → test → debug → validation workflow is supported by [1]. The component-test setup of DUT + SMW200A + FSW is supported by [86]; applying it specifically to an RFIC is a modest inference rather than explicitly stated evidence.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

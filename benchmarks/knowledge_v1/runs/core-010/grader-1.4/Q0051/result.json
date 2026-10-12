@@ -1,0 +1,84 @@
+{
+ "id": "Q0051",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 40.297,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 9,
+   "kind": "wiki",
+   "ref": "wiki/sources/無線通訊認證實驗室.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 43,
+   "kind": "wiki",
+   "ref": "wiki/concepts/無線通訊認證實驗室資料清單.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 67,
+   "kind": "raw",
+   "ref": "raw/Market/OneNote/R-S-portfolio-for-O-RU-testing_MARCH_2025_R-S_INTERNAL_ONLY_SHORT.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 7,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": false,
+  "reasonable": true,
+  "overreach": [
+   "High-speed PCB/PCBA signal integrity flow includes insertion loss, crosstalk, eye diagram, TDR impedance, stackup planner, and transmission-line calculator [2].",
+   "The same signal integrity flow is mapped to insertion loss, crosstalk, eye diagram, and TDR impedance measurement methods [4].",
+   "PCB material/stackup selection includes insertion loss, Dk/Df, roughness, impedance, crosstalk, transmission-line modeling, and eye diagram [7].",
+   "Signal integrity modeling/testing includes insertion loss, Dk/Df, roughness, and impedance [7].",
+   "Interface testing is associated with scopes, BERTs, AWGs, and switch matrices [4].",
+   "RefClk and PLL jitter performance is associated with phase noise analyzers and signal generators [4].",
+   "Power distribution network testing is associated with scopes and network analyzers [4].",
+   "ADC/DAC frontend performance is associated with spectrum analyzers and signal generators [4]."
+  ],
+  "reason": "Most individual statements are directly supported as general wireless-certification or general SI/PI/PCB capabilities, but the cited passages do not clearly establish that the SerDes/PCB/PDN/ADC-DAC items are the most important signal-integrity capabilities specifically for wireless communication applications. The answer is nevertheless a reasonable evidence-based list rather than a fabricated ranking, with useful wireless context and no major contradiction.",
+  "confidence": "medium"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: Most individual statements are directly supported as general wireless-certification or general SI/PI/PCB capabilities, but the cited passages do not clearly establish that the SerDes/PCB/PDN/ADC-DAC items are the most important signal-integrity capabilities specifically for wireless communication ap"
+}

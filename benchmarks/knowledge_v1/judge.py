@@ -24,9 +24,12 @@ from models.catalog import ModelEndpoint  # noqa: E402
 from models.contracts import ModelMessage, ModelRequest, ModelRequirements  # noqa: E402
 from models.openai_compatible import OpenAICompatible  # noqa: E402
 
-JUDGE_VERSION = "1.0"
+JUDGE_VERSION = "1.1"
 MAX_PASSAGE_CHARS = 1500
-MAX_PASSAGES = 16
+# 1.1 (owner, 2026-10-12): 16 passages hid the later citations of answers built
+# on wider evidence, so supported claims were judged unsupported. 48 passages of
+# at most 1,500 characters stay well inside the reviewer's context.
+MAX_PASSAGES = 48
 
 RUBRIC = """You review one answer from a company knowledge assistant. You get the
 question, the answer, and the numbered passages the answer cites. Judge only

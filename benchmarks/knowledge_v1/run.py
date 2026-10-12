@@ -8,6 +8,9 @@ Vault lacks the evidence) is acceptable too, as the question file says.
 
     python benchmarks/knowledge_v1/run.py --run-id <id> [--set sample|all|Q0001,Q0002] [--workers 2]
     python benchmarks/knowledge_v1/run.py --run-id <id> --regrade   # grade stored traces again
+    python benchmarks/knowledge_v1/run.py --run-id <id> --regrade --into grader-1.4
+        # grade stored traces again into runs/<id>/grader-1.4/, leaving the
+        # original verdicts and report as they were
 
 Each question gets a new conversation; the questions are sent as written,
 without naming a knowledge base. Traces, verdicts and reasons are kept per
@@ -48,7 +51,7 @@ from telemetry.benchmark import BenchmarkTelemetry, agent_strategy, trace_ids  #
 # host record and cited like the direct route.
 # 1.3 (2026-10-09): a tool-route answer the Harness refused to validate is a
 # FAIL with VALIDATION_GAP, not a SYSTEM_ERROR.
-GRADER_VERSION = "1.3"
+GRADER_VERSION = "1.4"  # 1.4: the reviewer sees up to 48 passages
 TIMEOUT_S = 600.0
 HOST_JSON = Path(os.path.expandvars(r"%LOCALAPPDATA%\AgenticEngineeringPlatform\preview-0.1.0\host.json"))
 STATUSES = ("PASS", "INSUFFICIENT_KNOWLEDGE", "FAIL", "NEEDS_HUMAN_REVIEW", "SYSTEM_ERROR")
@@ -208,7 +211,12 @@ def main() -> int:
     parser.add_argument("--workers", type=int, default=2)
     parser.add_argument("--force", action="store_true", help="ask again questions already recorded")
     parser.add_argument("--regrade", action="store_true", help="grade stored traces without asking")
+    parser.add_argument("--into", default="",
+                        help="with --regrade: write verdicts and report under runs/<id>/<into>/")
     args = parser.parse_args()
+    plain = args.into.replace("-", "").replace(".", "").isalnum()
+    if args.into and (not args.regrade or not plain):
+        parser.error("--into needs --regrade and a plain folder name")
     bank = load()
     by_id = {q["id"]: q for q in bank}
     chosen = (sample(bank) if args.set == "sample" else bank if args.set == "all"
@@ -237,9 +245,12 @@ def main() -> int:
     meta.setdefault("telemetry_runs", []).append(bench.run_id)
     meta_path.write_text(json.dumps(meta, indent=1) + "\n", encoding="utf-8")
 
+    out_dir = run_dir / args.into if args.into else run_dir
+
     def one(question: dict[str, Any]) -> dict[str, Any] | None:
         folder = run_dir / question["id"]
-        result_path = folder / "result.json"
+        result_path = out_dir / question["id"] / "result.json"
+        result_path.parent.mkdir(parents=True, exist_ok=True)
         if result_path.exists() and not args.force and not args.regrade:
             kept = json.loads(result_path.read_text(encoding="utf-8"))
             bench.case_completed(question["id"], kept["status"], reused=True,
@@ -264,9 +275,9 @@ def main() -> int:
     started = time.monotonic()
     with ThreadPoolExecutor(max_workers=max(1, args.workers)) as pool:
         results = [r for r in pool.map(one, chosen) if r is not None]
-    report(run_dir, results, by_id, meta)
+    report(out_dir, results, by_id, meta)
     bench.finish()
-    print(f"done: {len(results)} graded in {round(time.monotonic() - started)} s; see {run_dir / 'report.md'}")
+    print(f"done: {len(results)} graded in {round(time.monotonic() - started)} s; see {out_dir / 'report.md'}")
     return 0
 
 

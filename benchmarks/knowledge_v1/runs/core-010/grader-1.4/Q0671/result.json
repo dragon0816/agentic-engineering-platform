@@ -1,0 +1,60 @@
+{
+ "id": "Q0671",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 84.609,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 10,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 50,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 17,
+   "kind": "wiki",
+   "ref": "wiki/sources/AISeverEcosystem.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "Oscilloscope must support PDN / power-rail / multiphase DC / PI analysis",
+   "the most defensible measurable oscilloscope-facing parameter in the passages is Eye diagram"
+  ],
+  "reason": "The main chains are backed by the passages: AI server PCB trends in [10], SI flow items and interface-test instrument mapping in [50]/[5], and AI server PCBA power/PI solution mapping including MXO in [17]. A few phrasings such as “must support” and calling eye diagram the most defensible oscilloscope-facing parameter are interpretive rather than directly stated, but they are fair readings and the answer clearly notes missing scope specifications.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

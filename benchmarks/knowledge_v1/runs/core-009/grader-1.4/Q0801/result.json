@@ -1,0 +1,188 @@
+{
+ "id": "Q0801",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 151.515,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 17,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 18,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 7,
+   "kind": "wiki",
+   "ref": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "wiki",
+   "ref": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 24,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 21,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 11,
+   "kind": "wiki",
+   "ref": "wiki/sources/MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 12,
+   "kind": "wiki",
+   "ref": "wiki/sources/MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 25,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500 OBT.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 50,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NTN test and measurement aspects.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 33,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMP180.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 20,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 22,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 9,
+   "kind": "wiki",
+   "ref": "wiki/sources/Rohde & Schwarz presents its Wi-Fi 7 multi-channel single-box test solutions for R&D and production at MWC 2024.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 15,
+   "kind": "wiki",
+   "ref": "wiki/sources/MVG OTA test systems now support full WLAN OTA signaling testing alongside cellular coverage with CMX500 OBT from Rohde & Schwarz.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 29,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500 OBT.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/sources/Rohde & Schwarz and Broadcom showcase first Wi-Fi 8 RF signaling tests, paving way for next-gen connectivity.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 54,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NTN test and measurement aspects.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "Modern wireless chipsets/devices need cellular and WLAN validation in one environment",
+   "Cellular modem validation needs NR signaling plus RF parametric testing",
+   "Wi-Fi chipset/device validation needs AP/STA signaling for current and next-generation WLAN",
+   "Wi-Fi 7 R&D requires real-world RF TX/RX, multi-link and multi-RF-chain testing",
+   "Multi-antenna WLAN and cellular devices require MIMO validation",
+   "its NR signaling enabler includes DL 2x2/4x4 MIMO",
+   "Semiconductor validation labs need repeatable automated test execution",
+   "Production test may need high-throughput RF generator/analyzer capability"
+  ],
+  "reason": "The answer’s core capability list is largely backed by the cited passages for CMX500/OBT/CMP180 support across LTE/NR/WLAN, Wi‑Fi 7/8, OTA, NTN, application/IP/audio, fading/metrics, and automation, and it appropriately notes that the passages do not provide a direct ranked semiconductor-specific list. Some semiconductor-specific importance statements and a few details such as cellular DL 2x2/4x4 MIMO and high-throughput production framing go beyond the provided passages, but they do not undermine the overall evidence-backed answer.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

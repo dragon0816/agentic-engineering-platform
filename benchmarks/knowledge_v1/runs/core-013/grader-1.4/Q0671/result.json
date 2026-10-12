@@ -1,0 +1,118 @@
+{
+ "id": "Q0671",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [],
+ "seconds": 53.032,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 52,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AI 伺服器 PCB 供應鏈升級.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 9,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 61,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 79,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 20,
+   "kind": "wiki",
+   "ref": "wiki/concepts/R&S PCB test solutions.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Data center full-spectrum connectivity.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 7,
+   "kind": "wiki",
+   "ref": "wiki/concepts/SerDes 與 SI PI 測試概覽.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 40,
+   "kind": "wiki",
+   "ref": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 42,
+   "kind": "wiki",
+   "ref": "wiki/concepts/PCIe Gen5 high-speed PCB layout.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 11,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 68,
+   "kind": "wiki",
+   "ref": "wiki/concepts/AISeverEcosystem R&S solution mapping.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "Oscilloscope 可對接的部分是 eye / interface waveform 類驗證",
+   "Oscilloscope 需求可被表述為支援高速介面測試與 eye diagram 觀察",
+   "Oscilloscope 的核心能力應落在高速 electrical interface waveform / eye diagram 驗證",
+   "可把 AI server 的 Oscilloscope 切入點分成高速介面 eye validation 與 power rail / PI validation 兩條線"
+  ],
+  "reason": "The answer’s main chains are supported by the cited passages: AI server PCB/material trends, measurable SI/eye/PCIe/PDN parameters, and mappings from interface/PDN tests to scopes or MXO. Some oscilloscope capability wording is synthesized rather than explicitly stated, but it is framed with caveats and does not invent concrete specs.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

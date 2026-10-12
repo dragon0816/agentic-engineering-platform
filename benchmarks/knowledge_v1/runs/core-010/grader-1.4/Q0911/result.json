@@ -1,0 +1,111 @@
+{
+ "id": "Q0911",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 39.578,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 1,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Virtual tester.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Virtual tester.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 28,
+   "kind": "wiki",
+   "ref": "wiki/sources/AIW_Products_Customer_Questionnaire.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 31,
+   "kind": "wiki",
+   "ref": "wiki/sources/AIW_Products_Customer_Questionnaire.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 30,
+   "kind": "wiki",
+   "ref": "wiki/sources/AIW_Products_Customer_Questionnaire.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 37,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Validated results.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 48,
+   "kind": "wiki",
+   "ref": "wiki/concepts/OneWeb UT 測試流程.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 14,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S FSW.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 6,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S SMW200A.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "wiki",
+   "ref": "wiki/concepts/Virtual tester.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "For Semiconductor RFIC validation",
+   "Signal Generator is the stimulus/source side and the Signal Analyzer or spectrum analyzer is the measurement/analysis side",
+   "the orchestration or Virtual tester layer would automate/control them"
+  ],
+  "reason": "The cited passages support that Virtual tester is a workflow spanning implementation/test/debug/validation, that instruments and lab equipment interfaces are part of the standard test stack, and that RF lab testing uses signal generators and spectrum/signal analyzers for RF measurements. The answer reasonably places these instruments at the test execution/measurement layer, though it extrapolates from generic/RF lab evidence to the specific Semiconductor RFIC validation setting and adds some operational detail not stated verbatim.",
+  "confidence": "medium"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}

@@ -1724,3 +1724,8 @@ s-k-20261011T102952` (not published).
   (target 0.50 reached), median 74 -> 83 s, p90 114 -> 144 s; run.py PASS 28 -> 25
   (status churn both ways). Kept under the acceptance rule; single run, gain only
   slightly above run-to-run noise. Review: runs/core-013/review.zh-TW.md.
+- [x] Owner proposal 3 (2026-10-12): knowledge_v1 grader 1.4, the reviewer sees up to 48
+  cited passages (was 16); `--regrade --into grader-1.4` writes verdicts beside the
+  originals. Regraded PASS: core-009 23, core-010 28, core-011 29, core-012 33 (FAIL 1),
+  core-013 30 (FAIL 4: two harness not-validated, two overreach). core-013 still has
+  fewer PASS than core-012, so the same configuration is run again (core-014).

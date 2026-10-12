@@ -1,0 +1,155 @@
+{
+ "id": "Q1021",
+ "route": "tool",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "validated",
+ "tools": [
+  "knowledge__rs-knowledge"
+ ],
+ "seconds": 64.265,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 29,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR frame structure.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 37,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NR resource grid.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 23,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NR cyclic prefix.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 33,
+   "kind": "wiki",
+   "ref": "wiki/concepts/NR sample rate.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 31,
+   "kind": "wiki",
+   "ref": "wiki/sources/NR Frame Structure.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 28,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G NR frame structure.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 8,
+   "kind": "wiki",
+   "ref": "wiki/concepts/PSBCH.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 4,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CORESET.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CORESET.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 19,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 18,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 53,
+   "kind": "wiki",
+   "ref": "wiki/concepts/EVM.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 57,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 SRS RF measurements.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 43,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 SRS RF measurements.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 16,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": false,
+  "reasonable": false,
+  "overreach": [
+   "OFDM is described ... as a symbol-based 5G NR waveform",
+   "choosing NR numerology, SCS, slot/symbol timing, and sample-rate assumptions before configuring or interpreting NR measurements",
+   "They include CMX500 NR FR1 uplink TX measurement setup",
+   "They include CMX500 NR generator setup",
+   "They include selecting CMX500 measurement options",
+   "They include EVM measurement configuration and pass/fail interpretation",
+   "They include spectrum-analysis setup only at the instrument-setting level"
+  ],
+  "reason": "The passages support the NR grid facts, CP, sample-rate formula, and several measurement/specification facts, but they do not establish that many listed product choices—especially CMX500 option selection, general FR1/generator setup, EVM pass/fail interpretation, or spectrum-analysis settings—depend on understanding OFDM. The answer is therefore overinclusive and presents inferred dependencies as evidence-backed conclusions.",
+  "confidence": "high"
+ },
+ "status": "FAIL",
+ "gap": "REASONING_GAP",
+ "why": "reviewer: The passages support the NR grid facts, CP, sample-rate formula, and several measurement/specification facts, but they do not establish that many listed product choices—especially CMX500 option selection, general FR1/generator setup, EVM pass/fail interpretation, or spectrum-analysis settings—depend"
+}

@@ -1,0 +1,133 @@
+{
+ "id": "Q0221",
+ "route": "direct",
+ "knowledge_status": "succeeded",
+ "failure": null,
+ "phase": "failed",
+ "tools": [],
+ "seconds": 94.766,
+ "grader": "1.4",
+ "partial": false,
+ "citations": [
+  {
+   "number": 2,
+   "kind": "wiki",
+   "ref": "wiki/entities/Randy Schnell.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 5,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G private network resilience against smart jamming.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 3,
+   "kind": "wiki",
+   "ref": "wiki/concepts/5G private network resilience against smart jamming.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 30,
+   "kind": "wiki",
+   "ref": "wiki/sources/2025-12-19 Making Deployed 5G Private Networks more Resilient.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 45,
+   "kind": "wiki",
+   "ref": "wiki/sources/5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 46,
+   "kind": "wiki",
+   "ref": "wiki/sources/5G-hardening-against-smart-jammer-attacks_wp_en_3610-1591-52_v0100.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 9,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 12,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 13,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 11,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 18,
+   "kind": "wiki",
+   "ref": "wiki/concepts/CMX500 Callbox.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 51,
+   "kind": "wiki",
+   "ref": "wiki/sources/Signaling test solution.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  },
+  {
+   "number": 14,
+   "kind": "wiki",
+   "ref": "wiki/entities/R&S CMX500.md",
+   "ok": true,
+   "text_found": 1.0,
+   "why": ""
+  }
+ ],
+ "review": {
+  "ok": true,
+  "version": "1.1",
+  "supported": true,
+  "reasonable": true,
+  "overreach": [
+   "DL/UL pattern 7:2, DL MCS 10, UL MCS 4, SISO, 100 Hz ping, and 2 Mbit/s target uplink / downlink rate",
+   "R&S CMX-KS600B/M/X ... DL 2x2/4x4 MIMO, one CC and UL 256QAM",
+   "R&S CMX-KS610B/M/X for UL 2x2 MIMO and CA up to 9 CC"
+  ],
+  "reason": "The answer’s main chain—Aerospace/Defense smart-jamming resilience need → inter-frequency handover/frequency-hopping behavior → handover interruption, RTT, iPerf/WebRTC/throughput measurements → CMX500 network emulation/signaling and RF/non-signaling capabilities—is a fair reading of the cited passages. A few granular test-condition and option details are not visible in the provided passage text, but they do not undermine the overall mapping.",
+  "confidence": "high"
+ },
+ "status": "PASS",
+ "gap": "",
+ "why": ""
+}
