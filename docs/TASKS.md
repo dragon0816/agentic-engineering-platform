@@ -1763,3 +1763,13 @@ s-k-20261011T102952` (not published).
   `navigation_failed: WebSocketError` only under full-suite load; passes 5/5 alone.
 - [ ] Next for experience review: E3 (route proposals into sandboxes, gap list, draft
   test questions; Reviews page), after the owner reads the first reports.
+- [x] Copilot integration CP1 (6614f866): assistant tools over MCP at Agent Web's
+  `/mcp` (Knowledge search/read/ask, installed Workflows; read-only Workflows only),
+  stable assistant token, `/api/assistant/mcp-config` for VS Code and the CLI.
+- [x] Copilot integration CP2: "GitHub Copilot (agent, AEP tools)" conversation mode.
+- [ ] CP3 live check: the Copilot CLI is installed (`npm.cmd install -g @github/copilot`);
+  the owner's GitHub account dragon0816 belongs to no organization, so the company
+  Copilot seat must be requested first. Sign-in: `$env:GH_TOKEN = $null; copilot.cmd
+  login` (a classic GH_TOKEN in the user environment blocks it; PowerShell's execution
+  policy blocks the .ps1 shims, so use the .cmd ones).
+- [ ] CP4: knowledge_v1 through the Copilot mode vs the AEP harness (core-015).

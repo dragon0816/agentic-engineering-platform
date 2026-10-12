@@ -64,7 +64,14 @@ Lint -> Benchmark -> Push) and the K1-K3 specs; progress rows are in `docs/TASKS
   (passes on rerun) is unidentified (see TASKS); the OCNG image failure is fixed
   (b293aeb). Next stage after validation: K4 (Excel, HTML, .ppt, images).
 
-Knowledge answer rules (2026-10-12, latest): vault skills with `mode: answer` now shape
+Copilot integration (2026-10-12, latest): design `docs/phases/COPILOT_INTEGRATION.md`.
+CP1 (assistant tools at `/mcp`) and CP2 (Copilot agent conversation mode) are committed.
+CP3 waits for the owner's company Copilot seat: dragon0816 has no organization. The
+Copilot CLI is installed. Experience review E1-E2 is live (Knowledge tab, nightly).
+claude-mem 13.35.0 was installed for Claude Code at the owner's request (worker on
+port 37777, local only).
+
+Knowledge answer rules (2026-10-12): vault skills with `mode: answer` now shape
 answers; the rewritten ask-knowledge measured better in core-015 (coverage 0.503,
 invented 31 vs 67) and is LIVE as rs-knowledge 1.0.3 (`AEP\rs-k-v1.0.3`, published
 2026-10-12; host.json backup `host.json.bak-20261012-143652-before-rs-knowledge-1.0.3`,
