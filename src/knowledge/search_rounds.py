@@ -25,7 +25,6 @@ MAX_SHOWN = 30
 MAX_RELEVANT = 20
 SECTIONS_PER_PAGE = 3
 SNIPPET_CHARS = 160
-FINAL_PAGES_PER_QUERY = 3
 PLANNER_PROMPT = (
     "You gather evidence from a bilingual (English / Traditional Chinese) engineering "
     "knowledge base to answer a question. You see search results: page titles with a "
@@ -78,7 +77,7 @@ def search_rounds(
     snapshot: RetrievalSnapshot, model: ModelClient, alias: str, trace: TraceIdentifiers,
     question: str, first: tuple[Passage, ...], *, rounds: int,
     k: int = 36, max_chars: int = 40000, per_page: int = SECTIONS_PER_PAGE,
-    rank_text: str | None = None, final_queries: bool = True,
+    rank_text: str | None = None,
 ) -> tuple[Passage, ...]:
     """The evidence set: pages the model marked relevant lead, then the first
     retrieval's Wiki passages fill the budget, then its Raw passages.
@@ -102,8 +101,7 @@ def search_rounds(
             shown.append(passage)
     relevant: list[str] = []
     queries: list[str] = []
-    pending: list[str] = []  # searches the last plan asked for that no round ran
-    for round_number in range(rounds + 1):
+    for _ in range(rounds + 1):
         for query in queries[:MAX_QUERIES]:
             found = snapshot.search_wiki_pages(query, exclude=seen)
             seen.update(item.citation.wiki_page or "" for item in found)
@@ -123,16 +121,14 @@ def search_rounds(
         shown = []
         if decision.get("done") is True or not queries:
             break
-        if round_number == rounds:
-            pending = queries
     selected: list[Passage] = []
     keys: set[tuple[str | None, int | None]] = set()
     chars = 0
 
-    def add(passage: Passage, limit: int = k) -> None:
+    def add(passage: Passage) -> None:
         nonlocal chars
         key = (passage.citation.wiki_page, passage.citation.section)
-        if key in keys or len(selected) >= limit or chars + len(passage.text) > max_chars:
+        if key in keys or len(selected) >= k or chars + len(passage.text) > max_chars:
             return
         keys.add(key)
         selected.append(passage)
@@ -149,15 +145,4 @@ def search_rounds(
     for passage in first:
         if passage.citation.kind == "wiki":
             add(passage)
-    # The last plan's searches used to be dropped. They are run and the best
-    # section of each page they find is added on top of the budget, displacing
-    # nothing (owner, 2026-10-12): most missed key points were on pages no
-    # search reached, and putting them inside the budget pushed out deeper
-    # sections that held more reference quotes.
-    if final_queries:
-        extra = k + FINAL_PAGES_PER_QUERY * MAX_QUERIES
-        for query in pending[:MAX_QUERIES]:
-            for passage in snapshot.search_wiki_pages(
-                    query, exclude=set(relevant))[:FINAL_PAGES_PER_QUERY]:
-                add(passage, extra)
     return (*selected, *(item for item in first if item.citation.kind == "raw"))
