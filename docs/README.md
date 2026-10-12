@@ -38,6 +38,7 @@ in [archive/](archive/); they are kept for history, not for current work.
 | [HARNESS_6_LAYER_STATUS.md](HARNESS_6_LAYER_STATUS.md) | Six-layer harness status |
 | [phases/HARNESS_6_LAYER_INCREMENTAL.md](phases/HARNESS_6_LAYER_INCREMENTAL.md) | Six-layer harness plan |
 | [phases/HARNESS_UNIFICATION.md](phases/HARNESS_UNIFICATION.md) | One harness skeleton, domains as Skills and adapters |
+| [phases/EXPERIENCE_REVIEW.md](phases/EXPERIENCE_REVIEW.md) | Learning from use: failures become reviewed, versioned proposals (design) |
 | [phases/CODING_ON_BRIDGE.md](phases/CODING_ON_BRIDGE.md) | Coding on the Bridge |
 | [phases/CONVERSATIONAL_AUTHORING.md](phases/CONVERSATIONAL_AUTHORING.md) | Conversational authoring and candidates |
 | [phases/EXTERNAL_AUTHORING.md](phases/EXTERNAL_AUTHORING.md) | External coding agents author Skills and Workflows |

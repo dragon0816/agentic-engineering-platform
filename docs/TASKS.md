@@ -1748,3 +1748,8 @@ s-k-20261011T102952` (not published).
   binding and the `rs-k` pipeline base switched (backup
   `host.json.bak-20261012-143652-before-rs-knowledge-1.0.3`); 1.0.2 kept for rollback.
   Agent Web restarted on 1.0.3.
+- [x] Experience review design `docs/phases/EXPERIENCE_REVIEW.md` (owner request,
+  2026-10-12): failures and ratings become experience cases; a scheduled review proposes
+  versioned changes through existing paths; nothing applies without a person.
+- [ ] Owner decisions on the experience review (signals, schedule, review model input,
+  reviewers, retention), then slices E1-E6.
