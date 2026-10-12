@@ -2250,3 +2250,22 @@ Decision (owner): revert 677e18a. A repeat run (core-014) put the coverage gain 
 0.02 (0.477 -> mean 0.500), near run-to-run noise, while Q1041 and Q1061 turned from
 answered to "not validated" in both runs. Grader 1.4 (48 cited passages) is kept.
 Making wider evidence pass validation would touch the validation rules (proposal 2).
+
+## 2026-10-12: Answer rules live in the vault too
+
+Decision (owner): domain experts must be able to change how questions are answered, not
+only how data is ingested. A vault skill with `mode: answer` (optional `topics: [..]`)
+is appended to the synthesis prompt after the installed Knowledge Skill's guidance and
+before the citation form; the platform's citation and grounding rules still apply. A
+vault without answering skills answers exactly as before. Each skill is capped at
+6,000 characters. Existing `skills/ask-*` files without `mode: answer` are ignored, so
+nothing changes until a rule is written for this platform.
+
+The owner's `ask-knowledge` came from another project (code graph, Hermes and Claude
+Code examples, an uncited follow-up section that would fail citation checks); it is
+rewritten as `src/knowledge/skill_guide/answer.SKILL.md`. The writing guide and the
+ingest template ship beside it and are shown on the Knowledge page.
+
+Rejected: routing questions to an ask skill by a model call (one more call per
+question); concatenating every `ask-*` file regardless of `mode` (old files would
+change answers unannounced).

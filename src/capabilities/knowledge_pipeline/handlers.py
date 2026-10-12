@@ -37,6 +37,7 @@ from capabilities.knowledge_pipeline.contracts import (
     SandboxListRequest,
     SandboxRecord,
     SandboxRef,
+    SkillGuideRequest,
 )
 from capabilities.runtime import CapabilityRefused
 from common.base import Contract
@@ -86,6 +87,7 @@ RULE_WRITE_SPEC = _spec("rule-write", "Save the schema or a skill file in a sand
 PLAN_PAGE_SPEC = _spec("plan-page", "Show a planned page before and after", "read")
 QUESTION_SETS_SPEC = _spec("question-sets", "List a sandbox's benchmark question sets",
                            "read")
+SKILL_GUIDE_SPEC = _spec("skill-guide", "The skill writing guide and templates", "read")
 MERGE_SPEC = _spec("merge", "Preview or write a three-way merge of a sandbox into a new "
                    "candidate vault; the published vault is never edited", "write", "medium")
 INDEX_BUILD_SPEC = _spec("index-build", "Preview or write the layered index of a sandbox",
@@ -320,4 +322,14 @@ class QuestionSetsHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = SandboxRef.model_validate(inputs)
         result: Contract = await _run(lambda: self.pipeline.question_sets(request.sandbox_id))
+        return result
+
+
+class SkillGuideHandler:
+    def __init__(self, pipeline: KnowledgePipeline) -> None:
+        self.pipeline = pipeline
+
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        SkillGuideRequest.model_validate(inputs)
+        result: Contract = await _run(self.pipeline.skill_guide)
         return result

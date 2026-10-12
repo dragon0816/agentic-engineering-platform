@@ -56,3 +56,21 @@ def test_the_knowledge_tab_offers_preview_compare_and_the_rule_editor() -> None:
     for hook in ('id="kp-rules"', 'id="kp-rule-text"', 'id="kp-viewer"', '"plan-page"',
                  '"rule-write"', '"file-read"'):
         assert hook in PAGE
+
+
+def test_the_guide_and_templates_ship_and_the_answer_template_applies(tmp_path: Path) -> None:
+    from knowledge.schema import MAX_ANSWER_RULE_CHARS, answer_rules, ingest_conventions
+    from knowledge.vault import Vault
+
+    pipeline, base = _pipeline(tmp_path)
+    guide = pipeline.skill_guide()
+    assert "mode: answer" in guide.answer_template and "mode: procedure" in guide.ingest_template
+    assert "Skill 撰寫指引" in guide.guide
+    (base / "skills/ask-knowledge").mkdir(parents=True)
+    (base / "skills/ask-knowledge/SKILL.md").write_text(guide.answer_template, encoding="utf-8")
+    rules = answer_rules(Vault(base), "EVM 怎麼量？")
+    assert [name for name, _ in rules] == ["ask-knowledge"]
+    assert len(rules[0][1]) < MAX_ANSWER_RULE_CHARS  # nothing of the template is cut
+    # An answering skill is never sent as ingest rules.
+    assert ingest_conventions(Vault(base), "raw/notes/a.md", "b").skill is None
+    assert '"skill-guide"' in PAGE and "Writing guide" in PAGE

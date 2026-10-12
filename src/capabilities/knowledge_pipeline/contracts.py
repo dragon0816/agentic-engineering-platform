@@ -147,3 +147,7 @@ class PlanPageRequest(Contract):
     sandbox_id: Text
     plan_id: Text
     path: Text
+
+
+class SkillGuideRequest(Contract):
+    pass

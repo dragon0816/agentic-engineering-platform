@@ -398,3 +398,23 @@ def test_a_cached_snapshot_ranks_like_a_fresh_one(tmp_path: Path) -> None:
     queries = ("ZNA option", "eye diagram time domain")
     cached = RetrievalSnapshot.cached(vault).wiki_primary_passages(queries)
     assert cached == RetrievalSnapshot(vault).wiki_primary_passages(queries)
+
+
+def test_the_vaults_answer_rules_reach_the_synthesis_prompt(tmp_path: Path) -> None:
+    vault = _wiki_vault(tmp_path)
+    for name, front in {"ask-knowledge": "mode: answer\n",
+                        "ask-market": "mode: answer\ntopics: [市場, market share]\n",
+                        "ingest-knowledge": "mode: procedure\napplies_to: raw/Knowledge\n"}.items():
+        folder = tmp_path / "skills" / name
+        folder.mkdir(parents=True)
+        (folder / "SKILL.md").write_text(
+            f"---\nname: {name}\n{front}---\nRule of {name}: keep {{braces}} literal.\n",
+            encoding="utf-8")
+    model = _Synth(lambda prompt: (
+        f"ZNA-K2 provides time domain TDR analysis [{_number(prompt, 'ZNA-K2 | time domain')}]."))
+    _ask(vault, _procedure(), model)
+    prompt = model.requests[0].messages[0].text
+    assert "Knowledge base answer rules" in prompt
+    assert "Rule of ask-knowledge: keep {braces} literal." in prompt  # no topics: always
+    assert "Rule of ask-market" not in prompt  # its topics are not in the question
+    assert "Rule of ingest-knowledge" not in prompt  # not an answering skill

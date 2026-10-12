@@ -23,6 +23,7 @@ in [archive/](archive/); they are kept for history, not for current work.
 |---|---|
 | [phases/KNOWLEDGE_PIPELINE_RELEASE.zh-TW.md](phases/KNOWLEDGE_PIPELINE_RELEASE.zh-TW.md) | Release plan for convert, ingest, query and lint/conflict (K1–K6) |
 | [phases/KNOWLEDGE_COLLAB.md](phases/KNOWLEDGE_COLLAB.md) | Multi-maintainer workflow: pull, benchmark, push |
+| [../src/knowledge/skill_guide/GUIDE.zh-TW.md](../src/knowledge/skill_guide/GUIDE.zh-TW.md) | How to write ingest and answer skills (also shown on the Knowledge page), with templates |
 | [phases/KNOWLEDGE_K1.md](phases/KNOWLEDGE_K1.md) | K1: the pipeline in the Agent, sandboxes |
 | [phases/KNOWLEDGE_K2.md](phases/KNOWLEDGE_K2.md) | K2: layered bilingual index and its measurement |
 | [phases/KNOWLEDGE_K3.md](phases/KNOWLEDGE_K3.md) | K3: vault rules, section-level writes, merge and publish |

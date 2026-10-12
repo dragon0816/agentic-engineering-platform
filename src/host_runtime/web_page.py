@@ -3755,15 +3755,22 @@ async function kpLoadRules() {
       kpRulePath = path; el("kp-rule-editor").hidden = false;
       el("kp-rule-path").textContent = path; el("kp-rule-text").value = file.text;
     }))]));
+  const guide = await pipeline("skill-guide", {});
   const add = kpButton("New skill", () => {
-    const name = (prompt("Skill folder name, e.g. ingest-competitor") || "").trim();
+    const name = (prompt("Skill folder name: ingest-<category> for processing data, "
+      + "ask-<topic> for answering, e.g. ingest-competitor") || "").trim();
     if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(name)) return;
+    const answering = name.startsWith("ask-");
+    const category = answering ? "" : name.replace(/^ingest-/, "");
     kpRulePath = "skills/" + name + "/SKILL.md"; el("kp-rule-editor").hidden = false;
     el("kp-rule-path").textContent = kpRulePath;
-    el("kp-rule-text").value = "---\nname: " + name + "\nmode: procedure\n"
-      + "applies_to: raw/<Category>\n---\n\n# " + name + "\n";
+    el("kp-rule-text").value = (answering ? guide.answer_template : guide.ingest_template)
+      .replaceAll("ingest-<category>", name).replaceAll("ask-knowledge", name)
+      .replaceAll("<Category>", category.charAt(0).toUpperCase() + category.slice(1));
   });
-  box.append(add);
+  const help = kpButton("Writing guide", () => kpViewer("Skill writing guide",
+                                                        renderMarkdown(guide.guide)));
+  box.append(add, help);
 }
 
 function kpFileBase64(file) {

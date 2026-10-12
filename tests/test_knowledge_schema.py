@@ -69,3 +69,23 @@ def test_a_product_line_skill_adds_to_the_shared_category_rules(tmp_path: Path) 
     assert "Bandwidth first." not in rules.text
     assert ingest_conventions(Vault(root), "raw/Productions/x.md", "b").skill == (
         "ingest-productions")
+
+
+def test_answering_skills_apply_by_topic_and_ignore_other_skills(tmp_path: Path) -> None:
+    from knowledge.schema import answer_rules
+
+    root = _base(tmp_path)
+    for name, front in {"ask-knowledge": "mode: answer\n",
+                        "ask-market": "mode: answer\ntopics: [市場, Market share]\n",
+                        "ask-legacy": "", "ingest-market": "mode: procedure\n"}.items():
+        _skill(root, name, None, f"{name} rules.")
+        if front:
+            path = root / "skills" / name / "SKILL.md"
+            path.write_text(path.read_text(encoding="utf-8").replace("mode: procedure\n", front),
+                            encoding="utf-8")
+    vault = Vault(root)
+    names = [name for name, _ in answer_rules(vault, "5G 市場的主要客戶是誰？")]
+    assert names == ["ask-knowledge", "ask-market"]
+    assert [n for n, _ in answer_rules(vault, "What is the MARKET SHARE?")] == [
+        "ask-knowledge", "ask-market"]
+    assert [n for n, _ in answer_rules(vault, "EVM 怎麼量？")] == ["ask-knowledge"]

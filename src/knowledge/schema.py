@@ -82,3 +82,55 @@ def ingest_conventions(vault: Vault, raw_ref: str, built_in: str) -> Conventions
         f"\n\n---\n\n# Rules for this source's category ({name})\n\n{rules}"
         for name, rules in found)
     return Conventions(text, "vault", " + ".join(name for name, _ in found))
+
+
+# -- answer rules (owner, 2026-10-12) -------------------------------------------
+
+MAX_ANSWER_RULE_CHARS = 6000
+
+
+def _topics(value: str) -> tuple[str, ...]:
+    inner = value.strip().strip("[]")
+    return tuple(part.strip().strip("\"'").casefold() for part in inner.split(",") if part.strip())
+
+
+def answer_rules(vault: Vault, question: str) -> list[tuple[str, str]]:
+    """(name, rules) of the vault's answering skills for this question.
+
+    A skill whose frontmatter says `mode: answer` is an answering skill, so
+    domain experts edit how questions are answered the same way they edit
+    ingest rules. A skill with `topics: [..]` applies when the question
+    contains one of them; without topics it applies to every question. Each
+    skill's text is capped so a long file cannot crowd out the evidence."""
+    folder = vault.root / SKILLS_DIR
+    if not folder.is_dir():
+        return []
+    asked = question.casefold()
+    found: list[tuple[str, str]] = []
+    for path in sorted(folder.glob(f"*/{SKILL_FILE}")):
+        rel = path.relative_to(vault.root).as_posix()
+        try:
+            fields, body = _front(vault.read(rel))
+        except (VaultError, UnicodeDecodeError):
+            continue
+        if fields.get("mode", "").strip().casefold() != "answer":
+            continue
+        topics = _topics(fields.get("topics", ""))
+        if topics and not any(topic in asked for topic in topics):
+            continue
+        found.append((fields.get("name") or path.parent.name,
+                      body.strip()[:MAX_ANSWER_RULE_CHARS]))
+    return found
+
+
+def answer_rules_text(vault: Vault, question: str) -> str:
+    """The prompt section for the vault's answering skills, braces escaped for
+    the synthesis prompt template; empty when the vault has none."""
+    rules = answer_rules(vault, question)
+    if not rules:
+        return ""
+    text = "".join(f"\n\n## {name}\n{body}" for name, body in rules)
+    section = ("\n\nKnowledge base answer rules, written by the knowledge base's "
+               "maintainers (they refine the guidance above; citation rules still apply):"
+               + text)
+    return section.replace("{", "{{").replace("}", "}}")

@@ -99,6 +99,7 @@ from capabilities.knowledge_pipeline.contracts import (
     SandboxListRequest,
     SandboxRecord,
     SandboxRef,
+    SkillGuideRequest,
 )
 from capabilities.knowledge_pipeline.handlers import (
     ADOPT_SPEC,
@@ -121,6 +122,7 @@ from capabilities.knowledge_pipeline.handlers import (
     SANDBOX_CREATE_SPEC,
     SANDBOX_DISCARD_SPEC,
     SANDBOX_LIST_SPEC,
+    SKILL_GUIDE_SPEC,
     AdoptHandler,
     ConvertHandler,
     DropAddHandler,
@@ -141,6 +143,7 @@ from capabilities.knowledge_pipeline.handlers import (
     SandboxCreateHandler,
     SandboxDiscardHandler,
     SandboxListHandler,
+    SkillGuideHandler,
 )
 from capabilities.knowledge_query.handlers import (
     KNOWLEDGE_QUERY_SPEC,
@@ -310,6 +313,7 @@ from knowledge.pipeline import (
     RuleFiles,
     SandboxContents,
     SandboxFile,
+    SkillGuide,
 )
 from knowledge.sandbox import Sandboxes
 from knowledge.vault import Vault, VaultError
@@ -1932,6 +1936,7 @@ def _register_knowledge_pipeline(
         (FILE_READ_SPEC, FileReadHandler(pipeline), FileRequest, SandboxFile),
         (RULE_WRITE_SPEC, RuleWriteHandler(pipeline), RuleWriteRequest, SandboxFile),
         (PLAN_PAGE_SPEC, PlanPageHandler(pipeline), PlanPageRequest, PlanPage),
+        (SKILL_GUIDE_SPEC, SkillGuideHandler(pipeline), SkillGuideRequest, SkillGuide),
         (DROP_ADD_SPEC, DropAddHandler(pipeline), DropAddRequest, DropAdded),
         (SANDBOX_CONTENTS_SPEC, SandboxContentsHandler(pipeline), SandboxRef,
          SandboxContents),

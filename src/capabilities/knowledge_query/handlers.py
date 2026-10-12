@@ -35,6 +35,7 @@ from knowledge.query import (
     cited_numbers,
 )
 from knowledge.query_rewrite import content_words, rewrite_queries
+from knowledge.schema import answer_rules_text
 from knowledge.search_rounds import search_rounds
 from knowledge.vault import Vault
 from models.contracts import ModelClient
@@ -156,7 +157,7 @@ class KnowledgeQueryHandler:
             "\n\nInstalled Knowledge Skill guidance: " + request.procedure.answer_guidance
             if request.procedure is not None and request.procedure.answer_guidance
             else ""
-        )
+        ) + answer_rules_text(vault, request.question)
         inference_label = (
             request.procedure.inference_label if request.procedure is not None else None
         )
@@ -347,6 +348,7 @@ class KnowledgeQueryHandler:
                 "\n\nInstalled Knowledge Skill guidance: " + procedure.answer_guidance
                 if procedure.answer_guidance else ""
             )
+            + answer_rules_text(vault, request.question)
             + (
                 "\n\nThe retrieved evidence does not establish every requested facet or "
                 "direct relationship. Still state every independently supported fact "

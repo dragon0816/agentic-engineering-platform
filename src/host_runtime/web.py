@@ -78,6 +78,7 @@ from capabilities.knowledge_pipeline.handlers import (
     SANDBOX_CREATE_SPEC,
     SANDBOX_DISCARD_SPEC,
     SANDBOX_LIST_SPEC,
+    SKILL_GUIDE_SPEC,
 )
 from capabilities.knowledge_query.handlers import KNOWLEDGE_QUERY_SPEC, MARKET_MATRIX_SPEC
 from capabilities.script_tools import load_script_tools
@@ -216,7 +217,7 @@ PIPELINE_STEPS = {spec.identity.name: spec for spec in (
     DROP_ADD_SPEC, CONVERT_SPEC, INGEST_PLAN_SPEC, INGEST_APPLY_SPEC, LINT_SPEC,
     ADOPT_SPEC, INDEX_ENRICH_SPEC, INDEX_BUILD_SPEC, MERGE_SPEC, DROP_FOLDERS_SPEC,
     PULL_SPEC, QUESTION_SETS_SPEC, RULE_FILES_SPEC, FILE_READ_SPEC, RULE_WRITE_SPEC,
-    PLAN_PAGE_SPEC)}
+    PLAN_PAGE_SPEC, SKILL_GUIDE_SPEC)}
 AUTHORING_ROUTES = (
     "/api/authoring/start", "/api/authoring/get", "/api/authoring/discuss",
     "/api/authoring/preview", "/api/authoring/install",

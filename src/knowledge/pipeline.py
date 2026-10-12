@@ -264,6 +264,14 @@ class KnowledgePipeline:
                         for p in (vault.root / "skills").glob("*/SKILL.md"))
         return RuleFiles(sandbox_id=sandbox_id, files=tuple(found))
 
+    def skill_guide(self) -> SkillGuide:
+        """The writing guide and the two templates shipped with the platform."""
+        folder = Path(__file__).parent / "skill_guide"
+        return SkillGuide(
+            guide=(folder / "GUIDE.zh-TW.md").read_text(encoding="utf-8"),
+            ingest_template=(folder / "ingest.SKILL.md").read_text(encoding="utf-8"),
+            answer_template=(folder / "answer.SKILL.md").read_text(encoding="utf-8"))
+
     def read_file(self, sandbox_id: str, path: str) -> SandboxFile:
         """One Markdown file of the sandbox, for preview."""
         vault = self._open(sandbox_id)
@@ -701,3 +709,10 @@ def _legacy_source_shas(vault: Vault) -> set[str]:
             continue
         found.update(match.group(1) for match in _LEGACY_SHA.finditer(head.split("\n---", 1)[0]))
     return found
+
+
+
+class SkillGuide(Contract):
+    guide: str
+    ingest_template: str
+    answer_template: str
