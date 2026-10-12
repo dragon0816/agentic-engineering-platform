@@ -1,0 +1,20 @@
+CHECKS PASSED
+- all worksheet names preserved
+- Report period/condition metadata set
+- Orders, Expenses and Quotes contain only template header rows
+- Invoices sheet has all 13 downloaded September invoices, text IDs, date fields, and numeric TWD balances
+- Summary groups unpaid BalanceTWD by nonblank ProjectID; other source amount columns remain blank; total formulas extended
+- Exceptions marks only Balance > 0 and DueDate before 2026-09-30; invoices due on 2026-09-30 are not overdue
+OUTPUT_FILE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\W03\workspace\output\project_invoice_report_2026-09.xlsx
+INVOICE_COUNT 13
+SUMMARY_ROWS
+['P001', None, 386445, None, None]
+['P002', None, 156256, None, None]
+['P003', None, 0, None, None]
+['P004', None, 78750, None, None]
+['P005', None, 236371.2, None, None]
+EXCEPTION_ROWS
+('Invoices', '0090000207', None, 'Overdue')
+('Invoices', '0090000209', 'P005', 'Overdue')
+('Invoices', '0090000212', 'P002', 'Overdue')
+('Invoices', '0090000217', 'P002', 'Overdue')

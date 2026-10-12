@@ -1,0 +1,16 @@
+Inputs:
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\D01\workspace\input\expense_template.xlsx exists= True size= 10969
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\D01\workspace\input\fx_rates.csv exists= True size= 276
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\D01\workspace\output\expense_export_E001_2026-09.xlsx exists= True size= 6179
+fx header: ['Currency', 'RateToTWD', 'Note']
+rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+export headers: ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+export row count: 13
+sample rows: [{'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': False}, {'ExpenseID': 'EXP-00002', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-02', 'Category': 'Hotel', 'Currency': 'USD', 'Amount': '200.00', 'Status': 'Approved', 'ReceiptID': 'RC138828', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': False}]
+Saved C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\D01\workspace\output\E001_september_expenses.xlsx 12769
+Validation OK
+detail_rows 13
+summary_rows 7 [['Approved', None, 'EUR', 102.5, 3587.5, 2], ['Approved', None, 'TWD', 5050, 5050, 3], ['Approved', None, 'USD', 200, 6400, 1], ['Draft', None, 'USD', 124.15, 3972.8, 2], ['Rejected', None, 'EUR', 155, 5425, 1], ['Rejected', None, 'USD', 12.3, 393.6, 1], ['Submitted', None, 'TWD', 7049, 7049, 3]]
+exceptions 1
+TWD total 31877.90
+output file E001_september_expenses.xlsx

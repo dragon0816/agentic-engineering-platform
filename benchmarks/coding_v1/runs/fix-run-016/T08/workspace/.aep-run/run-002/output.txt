@@ -1,0 +1,53 @@
+CSV report_a.csv headers: ['DUT', 'Item', 'Result', 'Measurement', 'Unit']
+CSV report_a.csv records: 2
+JSON report_b.json records: 2
+MD report_c.md headers: ['Device', 'Test', 'Status', 'Value', 'Unit']
+MD report_c.md records: 2
+Wrote C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-016\T08\workspace\output\reports.json with 6 records
+VERIFICATION PASSED
+Checked: output filename reports.json, JSON array, 6 records retained, exact unified fields/order, device_id text, status mappings OK/PASS->Pass and NG/FAIL->Fail, missing/blank value or unit as null.
+Output preview:
+[
+  {
+    "device_id": "D001",
+    "test_name": "TxPower",
+    "status": "Pass",
+    "value": 12.5,
+    "unit": "dBm"
+  },
+  {
+    "device_id": "D002",
+    "test_name": "TxPower",
+    "status": "Fail",
+    "value": null,
+    "unit": "dBm"
+  },
+  {
+    "device_id": "D003",
+    "test_name": "EVM",
+    "status": "Pass",
+    "value": -35.2,
+    "unit": "dB"
+  },
+  {
+    "device_id": "D004",
+    "test_name": "EVM",
+    "status": "Fail",
+    "value": -20.1,
+    "unit": null
+  },
+  {
+    "device_id": "D005",
+    "test_name": "Sensitivity",
+    "status": "Pass",
+    "value": -90,
+    "unit": "dBm"
+  },
+  {
+    "device_id": "D006",
+    "test_name": "Sensitivity",
+    "status": "Fail",
+    "value": -70,
+    "unit": "dBm"
+  }
+]

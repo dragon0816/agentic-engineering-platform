@@ -1,0 +1,16 @@
+workflow params: {'start_date': '2026-09-01', 'end_date': '2026-09-30', 'status': 'Open', 'output_filename': 'september_open_orders.xlsx'}
+using files: {'csv': 'C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-012\\W01\\workspace\\output\\downloads\\sales_orders_export.csv', 'template': 'C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-012\\W01\\workspace\\input\\sales_template.xlsx', 'fx': 'C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-012\\W01\\workspace\\input\\fx_rates.csv', 'output': 'C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-012\\W01\\workspace\\output\\september_open_orders.xlsx'}
+downloaded row count: 14
+downloaded columns: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+downloaded sample: [{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}, {'OrderID': '0045000110', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-09-02', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '293572.50'}]
+fx currencies: ['EUR', 'TWD', 'USD']
+wrote: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\W01\workspace\output\september_open_orders.xlsx
+CHECK output_file_exists True
+CHECK detail_row_count_matches_export True
+CHECK sorted_orderid True
+CHECK status_matches True
+CHECK date_range True
+CHECK orderid_text_type True
+CHECK summary_formula True
+CHECK summary_total_twd True
+OUTPUT_FILES: ['output\\september_open_orders.xlsx']

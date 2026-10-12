@@ -1,0 +1,62 @@
+Processing files: ['input\\logs\\run_a.log', 'input\\logs\\run_b.log', 'input\\logs\\run_c.log']
+Wrote output\unified.json records 6
+Wrote output\warnings.json warnings 2
+Unified preview:
+[
+  {
+    "timestamp": "2026-02-01T10:00:00",
+    "device_id": "DUT-11",
+    "test_name": "TxPower",
+    "status": "Pass",
+    "source_file": "logs/run_a.log",
+    "format_version": "V1"
+  },
+  {
+    "timestamp": "2026-02-01T10:00:05",
+    "device_id": "DUT-11",
+    "test_name": "EVM",
+    "status": "Fail",
+    "source_file": "logs/run_a.log",
+    "format_version": "V1"
+  },
+  {
+    "timestamp": "2026-02-01T10:01:00",
+    "device_id": "DUT-12",
+    "test_name": "TxPower",
+    "status": "Pass",
+    "source_file": "logs/run_a.log",
+    "format_version": "V1"
+  },
+  {
+    "timestamp": "2026-02-02T09:00:00",
+    "device_id": "DUT-21",
+    "test_name": "Sensitivity",
+    "status": "Pass",
+    "source_file": "logs/run_b.log",
+    "format_version": "V2"
+  },
+  {
+    "timestamp": "2026-02-02T09:00:10",
+    "device_id": "DUT-21",
+    "test_name": "EVM",
+    "status": "Fail",
+    "source_file": "logs/run_b.log",
+    "format_version": "V2"
+  }
+]
+Warnings preview:
+[
+  {
+    "source_file": "logs/run_c.log",
+    "line_number": 1,
+    "line": "2026/02/03 11:00 DUT-31 TxPower => PASS",
+    "warning": "Unknown log format"
+  },
+  {
+    "source_file": "logs/run_c.log",
+    "line_number": 2,
+    "line": "2026/02/03 11:01 DUT-31 EVM => FAIL",
+    "warning": "Unknown log format"
+  }
+]
+CHECK PASSED: unified.json exists with 6 records and required fields; statuses are Pass/Fail; warnings.json exists with 2 unknown-format line warnings; input files were not modified.

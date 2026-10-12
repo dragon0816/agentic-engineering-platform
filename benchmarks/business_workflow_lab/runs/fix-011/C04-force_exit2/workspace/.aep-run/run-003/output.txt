@@ -1,0 +1,29 @@
+Inputs confirmed:
+ workspace = C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\C04-force_exit2\workspace
+ template = C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\C04-force_exit2\workspace\input\quote_template.xlsx True
+ fx_rates = C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\C04-force_exit2\workspace\input\fx_rates.csv True
+ cli = C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\quote_cli.cmd True
+ query = 2026-09-01 to 2026-09-30 status Sent
+fx rates: {'TWD': '1', 'USD': '32', 'EUR': '35'}
+CLI attempt 1 exit 2 args: quotes list --from 2026-09-01 --to 2026-09-30 --status Sent --format json
+FATAL: quotes list failed with exit code 2; no retry per instruction. stderr: quote_cli: error: the quote service rejected the request parameters (operator scenario: wrapper fixed to exit 2)
+
+CHECK REPORT:
+Workbook exists: True
+Sheets: ['Report', 'Quotes', 'Lines', 'Summary', 'Instructions']
+Report B3=2026-09-01 D3=2026-09-30 B4=Status=Sent; QuoteDate 2026-09-01..2026-09-30
+Report B9=quotes list failed with exit code 2; no retry per instruction. stderr: quote_cli: error: the quote service rejected the request parameters (operator scenario: wrapper fixed to exit 2)
+Quotes header row: ['QuoteID', 'CustomerID', 'ProjectID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'Subtotal', 'DiscountPercent', 'NetAmount', 'NetAmountTWD']
+Lines header row: ['QuoteID', 'ProductID', 'ProductName', 'Quantity', 'UnitPrice', 'LineAmount']
+Summary header row: ['Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count']
+Expected quote rows: 0; actual nonempty quote rows: 0
+Expected line rows: 0; actual nonempty line rows: 0
+Summary B2 formula: =SUM(Quotes!K5:K5)
+CLI calls: 1; exit codes: [2]
+First stderr: quote_cli: error: the quote service rejected the request parameters (operator scenario: wrapper fixed to exit 2)
+
+OUTPUT FILES:
+- check_report.txt 1029 bytes
+- quote_cli_error.txt 185 bytes
+- quote_cli_run_log.json 401 bytes
+- sent_quotes_2026-09.xlsx 11021 bytes

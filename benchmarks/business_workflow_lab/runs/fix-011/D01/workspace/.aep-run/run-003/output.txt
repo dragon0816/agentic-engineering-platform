@@ -1,0 +1,12 @@
+INPUT EXPORT C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\D01\workspace\output\expense_export_E001_2026-09-01_2026-09-30.csv True 1715
+export headers ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+export row count 13
+export sample [{'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': 'False'}, {'ExpenseID': 'EXP-00002', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-02', 'Category': 'Hotel', 'Currency': 'USD', 'Amount': '200.00', 'Status': 'Approved', 'ReceiptID': 'RC138828', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': 'False'}]
+rates {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+wrote C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\D01\workspace\output\E001_september_expenses.xlsx 12818
+verified output workbook
+detail rows 13
+summary groups 7 [('Status', 'Approved', 'EUR', 102.5, 3587.5, 2), ('Status', 'Approved', 'TWD', 5050, 5050, 3), ('Status', 'Approved', 'USD', 200, 6400, 1), ('Status', 'Draft', 'USD', 124.15, 3972.8, 2), ('Status', 'Rejected', 'EUR', 155, 5425, 1), ('Status', 'Rejected', 'USD', 12.3, 393.6, 1), ('Status', 'Submitted', 'TWD', 7049, 7049, 3)]
+exceptions 1
+TWD total 31877.90
+files: output\E001_september_expenses.xlsx output\expense_export_E001_2026-09-01_2026-09-30.csv

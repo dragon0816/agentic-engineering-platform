@@ -1,0 +1,15 @@
+from pathlib import Path
+import json
+base=Path('input')
+print('Workspace input exists:', base.exists())
+for p in sorted(base.iterdir() if base.exists() else []):
+    if p.is_file():
+        print('\nFILE', p.name, 'size', p.stat().st_size)
+        try:
+            text=p.read_text(encoding='utf-8')
+        except UnicodeDecodeError:
+            text=p.read_text(encoding='utf-8-sig', errors='replace')
+        lines=text.splitlines()
+        print('line_count', len(lines))
+        for i,line in enumerate(lines[:5],1):
+            print(f'{i}: {line[:300]}')

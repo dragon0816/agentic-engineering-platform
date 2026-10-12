@@ -1,0 +1,418 @@
+{
+ "session_id": "conversation-d04b34cd780041dda79cea8d115fc10f",
+ "exchanges": [
+  {
+   "sent": "從提供的產品列表 URL 進入每個 detail page，取得 Name、Price、Currency、CPU、MemoryGB、URL，輸出 details.xlsx。記憶體統一為 GB，欄位缺少時留空。\n\n產品列表 URL：http://127.0.0.1:64493/t11/list\n\n---\n工作目錄：C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T11\\workspace\n題目中的相對路徑以工作目錄為準，輸入檔在 C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T11\\workspace\\input。\n請把所有輸出檔寫到 C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T11\\workspace\\output。不要修改 input 下的任何檔案。\n",
+   "http_status": 200,
+   "seconds": 63.453,
+   "timed_out": false,
+   "reply": {
+    "ok": true,
+    "conversation": {
+     "session_id": "conversation-d04b34cd780041dda79cea8d115fc10f",
+     "actor": "leo.chi",
+     "title": "從提供的產品列表 URL 進入每個 detail page，取得 Name、Price、Currency、CPU、MemoryGB、URL，輸出…",
+     "backend": "gateway",
+     "data_classification": "UNCLASSIFIED",
+     "classified_by": null,
+     "created_at": "2026-10-09T06:45:26.689774Z",
+     "updated_at": "2026-10-09T06:46:30.019280Z",
+     "messages": [
+      {
+       "message_id": "message-c27fdf0f39144991ab62cadb461cb23d",
+       "role": "user",
+       "text": "從提供的產品列表 URL 進入每個 detail page，取得 Name、Price、Currency、CPU、MemoryGB、URL，輸出 details.xlsx。記憶體統一為 GB，欄位缺少時留空。\n\n產品列表 URL：http://127.0.0.1:64493/t11/list\n\n---\n工作目錄：C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T11\\workspace\n題目中的相對路徑以工作目錄為準，輸入檔在 C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T11\\workspace\\input。\n請把所有輸出檔寫到 C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T11\\workspace\\output。不要修改 input 下的任何檔案。\n",
+       "created_at": "2026-10-09T06:45:26.710144Z",
+       "status": "submitted",
+       "trace": null,
+       "reply_to": null,
+       "feedback": null,
+       "tool_summary": null,
+       "attachments": []
+      },
+      {
+       "message_id": "message-ab2ef83ea9364961a9c0e60a94872b15",
+       "role": "assistant",
+       "text": "已完成，輸出檔已寫到：\n\n`C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T11\\workspace\\output\\details.xlsx`\n\n我已重新開啟檔案檢查：\n\n- 檔案存在且非空\n- 工作表：`details`\n- 欄位順序正確：`Name`, `Price`, `Currency`, `CPU`, `MemoryGB`, `URL`\n- 共 4 筆資料，符合列表中的 4 個 detail page\n- `Price` 為數值\n- `MemoryGB` 已統一為 GB 數值\n- 缺少的 CPU 欄位留空\n- URL 為各 detail page 的完整 URL\n\n解析到的資料包含 Laptop 13、Laptop 15、Mini PC、Tablet 11。",
+       "created_at": "2026-10-09T06:46:30.019280Z",
+       "status": "answered",
+       "trace": {
+        "trace_id": "trace-3b870b737ddb47f1977c65c7fe7b6681",
+        "request_id": "request-3b870b737ddb47f1977c65c7fe7b6681",
+        "span_id": "span-3b870b737ddb47f1977c65c7fe7b6681",
+        "parent_span_id": null
+       },
+       "reply_to": null,
+       "feedback": null,
+       "tool_summary": "- coding__run: succeeded {\"exit_code\": 0, \"script\": \".aep-run/run-001/script.py\"}\n- coding__run: succeeded {\"exit_code\": 0, \"files\": [\"output/details.xlsx\"], \"script\": \".aep-run/run-002/script.py\"}\n- coding__run: succeeded {\"exit_code\": 0, \"files\": [\"output/details.xlsx\"], \"script\": \".aep-run/run-003/script.py\"}",
+       "attachments": []
+      }
+     ]
+    },
+    "answer": {
+     "tool_summary": "- coding__run: succeeded {\"exit_code\": 0, \"script\": \".aep-run/run-001/script.py\"}\n- coding__run: succeeded {\"exit_code\": 0, \"files\": [\"output/details.xlsx\"], \"script\": \".aep-run/run-002/script.py\"}\n- coding__run: succeeded {\"exit_code\": 0, \"files\": [\"output/details.xlsx\"], \"script\": \".aep-run/run-003/script.py\"}",
+     "ok": true,
+     "answer": "已完成，輸出檔已寫到：\n\n`C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T11\\workspace\\output\\details.xlsx`\n\n我已重新開啟檔案檢查：\n\n- 檔案存在且非空\n- 工作表：`details`\n- 欄位順序正確：`Name`, `Price`, `Currency`, `CPU`, `MemoryGB`, `URL`\n- 共 4 筆資料，符合列表中的 4 個 detail page\n- `Price` 為數值\n- `MemoryGB` 已統一為 GB 數值\n- 缺少的 CPU 欄位留空\n- URL 為各 detail page 的完整 URL\n\n解析到的資料包含 Laptop 13、Laptop 15、Mini PC、Tablet 11。",
+     "status": "answered",
+     "outcome": {
+      "trace": {
+       "trace_id": "trace-3b870b737ddb47f1977c65c7fe7b6681",
+       "request_id": "request-3b870b737ddb47f1977c65c7fe7b6681",
+       "span_id": "span-3b870b737ddb47f1977c65c7fe7b6681",
+       "parent_span_id": null
+      },
+      "ingress": "local",
+      "actor": "leo.chi",
+      "refusal": null,
+      "conversation": {
+       "trace": {
+        "trace_id": "trace-3b870b737ddb47f1977c65c7fe7b6681",
+        "request_id": "request-3b870b737ddb47f1977c65c7fe7b6681",
+        "span_id": "span-3b870b737ddb47f1977c65c7fe7b6681",
+        "parent_span_id": null
+       },
+       "status": "answered",
+       "text": "已完成，輸出檔已寫到：\n\n`C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T11\\workspace\\output\\details.xlsx`\n\n我已重新開啟檔案檢查：\n\n- 檔案存在且非空\n- 工作表：`details`\n- 欄位順序正確：`Name`, `Price`, `Currency`, `CPU`, `MemoryGB`, `URL`\n- 共 4 筆資料，符合列表中的 4 個 detail page\n- `Price` 為數值\n- `MemoryGB` 已統一為 GB 數值\n- 缺少的 CPU 欄位留空\n- URL 為各 detail page 的完整 URL\n\n解析到的資料包含 Laptop 13、Laptop 15、Mini PC、Tablet 11。",
+       "model_turns": 4,
+       "tools": [
+        {
+         "call_id": "call_zGO3Izy2RYAE4wmZnxGciBo4",
+         "name": "coding__run",
+         "decision": {
+          "kind": "workflow",
+          "target": {
+           "namespace": "engineering",
+           "name": "run-python",
+           "version": "1.0.0"
+          },
+          "reason": "Model selected an installed conversation tool"
+         },
+         "capability": null,
+         "workflow": {
+          "run": {
+           "run_id": "run-e96df430b56542d3883e384b01a2a12d",
+           "workflow": {
+            "namespace": "engineering",
+            "name": "run-python",
+            "version": "1.0.0"
+           },
+           "trace": {
+            "trace_id": "trace-3b870b737ddb47f1977c65c7fe7b6681",
+            "request_id": "request-3b870b737ddb47f1977c65c7fe7b6681",
+            "span_id": "span-3b870b737ddb47f1977c65c7fe7b6681",
+            "parent_span_id": null
+           },
+           "status": "succeeded",
+           "completed_steps": 1,
+           "failure": null,
+           "resumed_from": null
+          },
+          "log": [
+           "start workflow engineering/run-python@1.0.0",
+           "step 1 coding/run-python@1.0.0 succeeded",
+           "workflow succeeded"
+          ],
+          "step_results": [
+           {
+            "trace": {
+             "trace_id": "trace-3b870b737ddb47f1977c65c7fe7b6681",
+             "request_id": "request-3b870b737ddb47f1977c65c7fe7b6681",
+             "span_id": "span-3b870b737ddb47f1977c65c7fe7b6681",
+             "parent_span_id": null
+            },
+            "status": "succeeded",
+            "data": {
+             "exit_code": 0,
+             "timed_out": false,
+             "output": "workspace: C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T11\\workspace\ninput files: []\nlist url: http://127.0.0.1:64493/t11/list\nstatus: fetched\nmarkup sample:\n<!doctype html><html><head><meta charset=\"utf-8\"><title>List</title></head><body><ul id=\"products\"><li><a href=\"/t11/item/1\">Laptop 13</a></li><li><a href=\"/t11/item/2\">Laptop 15</a></li><li><a href=\"/t11/item/3\">Mini PC</a></li><li><a href=\"/t11/item/4\">Tablet 11</a></li></ul></body></html>\n",
+             "files": [],
+             "script_path": ".aep-run/run-001/script.py"
+            },
+            "failure": null,
+            "warnings": [],
+            "handler_invoked": true
+           }
+          ],
+          "attempts": [
+           {
+            "step_index": 0,
+            "attempt": 1,
+            "status": "succeeded",
+            "code": null,
+            "handler_invoked": true
+           }
+          ]
+         },
+         "host": null,
+         "failure": null
+        },
+        {
+         "call_id": "call_PAOgxQWk4SNTmat0ecDSNjYW",
+         "name": "coding__run",
+         "decision": {
+          "kind": "workflow",
+          "target": {
+           "namespace": "engineering",
+           "name": "run-python",
+           "version": "1.0.0"
+          },
+          "reason": "Model selected an installed conversation tool"
+         },
+         "capability": null,
+         "workflow": {
+          "run": {
+           "run_id": "run-e82dbd294783481baa777c3e2ffccc8f",
+           "workflow": {
+            "namespace": "engineering",
+            "name": "run-python",
+            "version": "1.0.0"
+           },
+           "trace": {
+            "trace_id": "trace-3b870b737ddb47f1977c65c7fe7b6681",
+            "request_id": "request-3b870b737ddb47f1977c65c7fe7b6681",
+            "span_id": "span-3b870b737ddb47f1977c65c7fe7b6681",
+            "parent_span_id": null
+           },
+           "status": "succeeded",
+           "completed_steps": 1,
+           "failure": null,
+           "resumed_from": null
+          },
+          "log": [
+           "start workflow engineering/run-python@1.0.0",
+           "step 1 coding/run-python@1.0.0 succeeded",
+           "workflow succeeded"
+          ],
+          "step_results": [
+           {
+            "trace": {
+             "trace_id": "trace-3b870b737ddb47f1977c65c7fe7b6681",
+             "request_id": "request-3b870b737ddb47f1977c65c7fe7b6681",
+             "span_id": "span-3b870b737ddb47f1977c65c7fe7b6681",
+             "parent_span_id": null
+            },
+            "status": "succeeded",
+            "data": {
+             "exit_code": 0,
+             "timed_out": false,
+             "output": "Fetched product list: http://127.0.0.1:64493/t11/list\nList markup sample: <!doctype html><html><head><meta charset=\"utf-8\"><title>List</title></head><body><ul id=\"products\"><li><a href=\"/t11/item/1\">Laptop 13</a></li><li><a href=\"/t11/item/2\">Laptop 15</a></li><li><a href=\"/t11/item/3\">Mini PC</a></li><li><a href=\"/t11/item/4\">Tablet 11</a></li></ul></body></html>\nDetail links found: 4 [('http://127.0.0.1:64493/t11/item/1', 'Laptop 13'), ('http://127.0.0.1:64493/t11/item/2', 'Laptop 15'), ('http://127.0.0.1:64493/t11/item/3', 'Mini PC'), ('http://127.0.0.1:64493/t11/item/4', 'Tablet 11')]\nDetail 1 URL: http://127.0.0.1:64493/t11/item/1\nDetail markup sample: <!doctype html><html><head><meta charset=\"utf-8\"><title>Laptop 13</title></head><body><h1 class=\"name\">Laptop 13</h1><table class=\"spec\"><tr><th>Price</th><td>NT$32,900</td></tr><tr><th>CPU</th><td>Intel i5-1340P</td></tr><tr><th>Memory</th><td>16 GB</td></tr></table></body></html>\nParsed record: {'Name': '', 'Price': 32900, 'Currency': 'USD', 'CPU': 'Intel i5-1340P', 'MemoryGB': 16, 'URL': 'http://127.0.0.1:64493/t11/item/1'}\nDetail 2 URL: http://127.0.0.1:64493/t11/item/2\nDetail markup sample: <!doctype html><html><head><meta charset=\"utf-8\"><title>Laptop 15</title></head><body><h1 class=\"name\">Laptop 15</h1><table class=\"spec\"><tr><th>Price</th><td>NT$45,500</td></tr><tr><th>CPU</th><td>Intel i7-1360P</td></tr><tr><th>Memory</th><td>32GB</td></tr></table></body></html>\nParsed record: {'Name': '', 'Price': 45500, 'Currency': 'USD', 'CPU': 'Intel i7-1360P', 'MemoryGB': 32, 'URL': 'http://127.0.0.1:64493/t11/item/2'}\nDetail 3 URL: http://127.0.0.1:64493/t11/item/3\nDetail markup sample: <!doctype html><html><head><meta charset=\"utf-8\"><title>Mini PC</title></head><body><h1 class=\"name\">Mini PC</h1><table class=\"spec\"><tr><th>Price</th><td>NT$18,800</td></tr><tr><th>Memory</th><td>16 GB</td></tr></table></body></html>\nParsed record: {'Name': '', 'Price': 18800, 'Currency': 'USD', 'CPU': '', 'MemoryGB': 16, 'URL': 'http://127.0.0.1:64493/t11/item/3'}\nDetail 4 URL: http://127.0.0.1:64493/t11/item/4\nDetail markup sample: <!doctype html><html><head><meta charset=\"utf-8\"><title>Tablet 11</title></head><body><h1 class=\"name\">Tablet 11</h1><table class=\"spec\"><tr><th>Price</th><td>NT$12,300</td></tr><tr><th>CPU</th><td>ARM A78</td></tr><tr><th>Memory</th><td>8 GB</td></tr></table></body></html>\nParsed record: {'Name': '', 'Price': 12300, 'Currency': 'USD', 'CPU': 'ARM A78', 'MemoryGB': 8, 'URL': 'http://127.0.0.1:64493/t11/item/4'}\nWrote: C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T11\\workspace\\output\\details.xlsx\nCHECK file exists: True size: 5075\nCHECK sheet: details\nCHECK headers: ['Name', 'Price', 'Currency', 'CPU', 'MemoryGB', 'URL']\nCHECK row_count: 4 expected: 4\nCHECK row 2: Price type=int, MemoryGB=16 type=int, URL=http://127.0.0.1:64493/t11/item/1\nCHECK row 3: Price type=int, MemoryGB=32 type=int, URL=http://127.0.0.1:64493/t11/item/2\nCHECK row 4: Price type=int, MemoryGB=16 type=int, URL=http://127.0.0.1:64493/t11/item/3\nCHECK row 5: Price type=int, MemoryGB=8 type=int, URL=http://127.0.0.1:64493/t11/item/4\nAll checks passed.\n",
+             "files": [
+              {
+               "path": "output/details.xlsx",
+               "bytes": 5075
+              }
+             ],
+             "script_path": ".aep-run/run-002/script.py"
+            },
+            "failure": null,
+            "warnings": [],
+            "handler_invoked": true
+           }
+          ],
+          "attempts": [
+           {
+            "step_index": 0,
+            "attempt": 1,
+            "status": "succeeded",
+            "code": null,
+            "handler_invoked": true
+           }
+          ]
+         },
+         "host": null,
+         "failure": null
+        },
+        {
+         "call_id": "call_F3fisPiUU4WuHJeYTFivqM6l",
+         "name": "coding__run",
+         "decision": {
+          "kind": "workflow",
+          "target": {
+           "namespace": "engineering",
+           "name": "run-python",
+           "version": "1.0.0"
+          },
+          "reason": "Model selected an installed conversation tool"
+         },
+         "capability": null,
+         "workflow": {
+          "run": {
+           "run_id": "run-fa90aa2b981b4649b174d8911af8e0f8",
+           "workflow": {
+            "namespace": "engineering",
+            "name": "run-python",
+            "version": "1.0.0"
+           },
+           "trace": {
+            "trace_id": "trace-3b870b737ddb47f1977c65c7fe7b6681",
+            "request_id": "request-3b870b737ddb47f1977c65c7fe7b6681",
+            "span_id": "span-3b870b737ddb47f1977c65c7fe7b6681",
+            "parent_span_id": null
+           },
+           "status": "succeeded",
+           "completed_steps": 1,
+           "failure": null,
+           "resumed_from": null
+          },
+          "log": [
+           "start workflow engineering/run-python@1.0.0",
+           "step 1 coding/run-python@1.0.0 succeeded",
+           "workflow succeeded"
+          ],
+          "step_results": [
+           {
+            "trace": {
+             "trace_id": "trace-3b870b737ddb47f1977c65c7fe7b6681",
+             "request_id": "request-3b870b737ddb47f1977c65c7fe7b6681",
+             "span_id": "span-3b870b737ddb47f1977c65c7fe7b6681",
+             "parent_span_id": null
+            },
+            "status": "succeeded",
+            "data": {
+             "exit_code": 0,
+             "timed_out": false,
+             "output": "Fetched product list: http://127.0.0.1:64493/t11/list\nList markup sample: <!doctype html><html><head><meta charset=\"utf-8\"><title>List</title></head><body><ul id=\"products\"><li><a href=\"/t11/item/1\">Laptop 13</a></li><li><a href=\"/t11/item/2\">Laptop 15</a></li><li><a href=\"/t11/item/3\">Mini PC</a></li><li><a href=\"/t11/item/4\">Tablet 11</a></li></ul></body></html>\nDetail links found: 4 [('http://127.0.0.1:64493/t11/item/1', 'Laptop 13'), ('http://127.0.0.1:64493/t11/item/2', 'Laptop 15'), ('http://127.0.0.1:64493/t11/item/3', 'Mini PC'), ('http://127.0.0.1:64493/t11/item/4', 'Tablet 11')]\nDetail 1 URL: http://127.0.0.1:64493/t11/item/1\nDetail markup sample: <!doctype html><html><head><meta charset=\"utf-8\"><title>Laptop 13</title></head><body><h1 class=\"name\">Laptop 13</h1><table class=\"spec\"><tr><th>Price</th><td>NT$32,900</td></tr><tr><th>CPU</th><td>Intel i5-1340P</td></tr><tr><th>Memory</th><td>16 GB</td></tr></table></body></html>\nParsed record: {'Name': 'Laptop 13', 'Price': 32900, 'Currency': 'NT$', 'CPU': 'Intel i5-1340P', 'MemoryGB': 16, 'URL': 'http://127.0.0.1:64493/t11/item/1'}\nDetail 2 URL: http://127.0.0.1:64493/t11/item/2\nDetail markup sample: <!doctype html><html><head><meta charset=\"utf-8\"><title>Laptop 15</title></head><body><h1 class=\"name\">Laptop 15</h1><table class=\"spec\"><tr><th>Price</th><td>NT$45,500</td></tr><tr><th>CPU</th><td>Intel i7-1360P</td></tr><tr><th>Memory</th><td>32GB</td></tr></table></body></html>\nParsed record: {'Name': 'Laptop 15', 'Price': 45500, 'Currency': 'NT$', 'CPU': 'Intel i7-1360P', 'MemoryGB': 32, 'URL': 'http://127.0.0.1:64493/t11/item/2'}\nDetail 3 URL: http://127.0.0.1:64493/t11/item/3\nDetail markup sample: <!doctype html><html><head><meta charset=\"utf-8\"><title>Mini PC</title></head><body><h1 class=\"name\">Mini PC</h1><table class=\"spec\"><tr><th>Price</th><td>NT$18,800</td></tr><tr><th>Memory</th><td>16 GB</td></tr></table></body></html>\nParsed record: {'Name': 'Mini PC', 'Price': 18800, 'Currency': 'NT$', 'CPU': '', 'MemoryGB': 16, 'URL': 'http://127.0.0.1:64493/t11/item/3'}\nDetail 4 URL: http://127.0.0.1:64493/t11/item/4\nDetail markup sample: <!doctype html><html><head><meta charset=\"utf-8\"><title>Tablet 11</title></head><body><h1 class=\"name\">Tablet 11</h1><table class=\"spec\"><tr><th>Price</th><td>NT$12,300</td></tr><tr><th>CPU</th><td>ARM A78</td></tr><tr><th>Memory</th><td>8 GB</td></tr></table></body></html>\nParsed record: {'Name': 'Tablet 11', 'Price': 12300, 'Currency': 'NT$', 'CPU': 'ARM A78', 'MemoryGB': 8, 'URL': 'http://127.0.0.1:64493/t11/item/4'}\nWrote: C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T11\\workspace\\output\\details.xlsx\nCHECK file exists: True size: 5104\nCHECK sheet: details\nCHECK headers: ['Name', 'Price', 'Currency', 'CPU', 'MemoryGB', 'URL']\nCHECK row_count: 4 expected: 4\nCHECK row 2: {'Name': 'Laptop 13', 'Price': 32900, 'Currency': 'NT$', 'CPU': 'Intel i5-1340P', 'MemoryGB': 16, 'URL': 'http://127.0.0.1:64493/t11/item/1'}\nCHECK row 3: {'Name': 'Laptop 15', 'Price': 45500, 'Currency': 'NT$', 'CPU': 'Intel i7-1360P', 'MemoryGB': 32, 'URL': 'http://127.0.0.1:64493/t11/item/2'}\nCHECK row 4: {'Name': 'Mini PC', 'Price': 18800, 'Currency': 'NT$', 'CPU': None, 'MemoryGB': 16, 'URL': 'http://127.0.0.1:64493/t11/item/3'}\nCHECK row 5: {'Name': 'Tablet 11', 'Price': 12300, 'Currency': 'NT$', 'CPU': 'ARM A78', 'MemoryGB': 8, 'URL': 'http://127.0.0.1:64493/t11/item/4'}\nAll checks passed.\n",
+             "files": [
+              {
+               "path": "output/details.xlsx",
+               "bytes": 5104
+              }
+             ],
+             "script_path": ".aep-run/run-003/script.py"
+            },
+            "failure": null,
+            "warnings": [],
+            "handler_invoked": true
+           }
+          ],
+          "attempts": [
+           {
+            "step_index": 0,
+            "attempt": 1,
+            "status": "succeeded",
+            "code": null,
+            "handler_invoked": true
+           }
+          ]
+         },
+         "host": null,
+         "failure": null
+        }
+       ],
+       "failure": null
+      },
+      "runs": [
+       {
+        "run_id": "run-e96df430b56542d3883e384b01a2a12d",
+        "actor": "leo.chi",
+        "on_behalf_of": null,
+        "workflow": {
+         "namespace": "engineering",
+         "name": "run-python",
+         "version": "1.0.0"
+        },
+        "status": "succeeded",
+        "updated_at": "2026-10-09T06:46:29.992159Z"
+       },
+       {
+        "run_id": "run-e82dbd294783481baa777c3e2ffccc8f",
+        "actor": "leo.chi",
+        "on_behalf_of": null,
+        "workflow": {
+         "namespace": "engineering",
+         "name": "run-python",
+         "version": "1.0.0"
+        },
+        "status": "succeeded",
+        "updated_at": "2026-10-09T06:46:30.003918Z"
+       },
+       {
+        "run_id": "run-fa90aa2b981b4649b174d8911af8e0f8",
+        "actor": "leo.chi",
+        "on_behalf_of": null,
+        "workflow": {
+         "namespace": "engineering",
+         "name": "run-python",
+         "version": "1.0.0"
+        },
+        "status": "succeeded",
+        "updated_at": "2026-10-09T06:46:30.011153Z"
+       }
+      ],
+      "unrecorded": []
+     }
+    },
+    "draft": null,
+    "approvals": []
+   }
+  }
+ ],
+ "fixture_requests": [
+  {
+   "t": 1791528336.1664362,
+   "method": "GET",
+   "path": "/t11/list",
+   "status": 200
+  },
+  {
+   "t": 1791528362.6879995,
+   "method": "GET",
+   "path": "/t11/list",
+   "status": 200
+  },
+  {
+   "t": 1791528362.7032585,
+   "method": "GET",
+   "path": "/t11/item/1",
+   "status": 200
+  },
+  {
+   "t": 1791528362.725633,
+   "method": "GET",
+   "path": "/t11/item/2",
+   "status": 200
+  },
+  {
+   "t": 1791528362.7458718,
+   "method": "GET",
+   "path": "/t11/item/3",
+   "status": 200
+  },
+  {
+   "t": 1791528362.766144,
+   "method": "GET",
+   "path": "/t11/item/4",
+   "status": 200
+  },
+  {
+   "t": 1791528386.0742228,
+   "method": "GET",
+   "path": "/t11/list",
+   "status": 200
+  },
+  {
+   "t": 1791528386.098121,
+   "method": "GET",
+   "path": "/t11/item/1",
+   "status": 200
+  },
+  {
+   "t": 1791528386.1172845,
+   "method": "GET",
+   "path": "/t11/item/2",
+   "status": 200
+  },
+  {
+   "t": 1791528386.1274471,
+   "method": "GET",
+   "path": "/t11/item/3",
+   "status": 200
+  },
+  {
+   "t": 1791528386.1378806,
+   "method": "GET",
+   "path": "/t11/item/4",
+   "status": 200
+  }
+ ]
+}

@@ -1,0 +1,60 @@
+workspace= C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace
+output files=
+ - output\downloads\sap_invoices_C001_2026-09.csv bytes= 346 mtime= 2026-10-09T15:45:01
+ - output\downloads\sap_invoices_export.csv bytes= 346 mtime= 2026-10-09T15:51:49
+ - output\downloads\sap_orders_C001_2026-09.csv bytes= 402 mtime= 2026-10-09T15:45:00
+ - output\downloads\sap_orders_export.csv bytes= 402 mtime= 2026-10-09T15:51:48
+ - output\expenses_all_approved_2026-09.csv bytes= 1843 mtime= 2026-10-09T15:48:25
+ - output\expenses_all_approved_export.csv bytes= 1843 mtime= 2026-10-09T15:52:31
+ - output\expenses_P001_2026-09_approved.csv bytes= 704 mtime= 2026-10-09T15:46:14
+ - output\expenses_P003_2026-09_approved.csv bytes= 609 mtime= 2026-10-09T15:47:08
+ - output\project_report_C001_2026-09-01_2026-09-30.xlsx bytes= 15906 mtime= 2026-10-09T15:52:38
+ - output\project_report_C001_2026-09.xlsx bytes= 15904 mtime= 2026-10-09T15:50:00
+ - output\quotes_C001_2026-09-01_2026-09-30.json bytes= 1323 mtime= 2026-10-09T15:52:38
+ - output\quotes_C001_2026-09.json bytes= 1323 mtime= 2026-10-09T15:50:00
+PASS report_exists_nonempty C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\output\project_report_C001_2026-09-01_2026-09-30.xlsx bytes=15906
+PASS quotes_json_exists_nonempty C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\output\quotes_C001_2026-09-01_2026-09-30.json bytes=1323
+PASS orders_export_exists_nonempty C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\output\downloads\sap_orders_export.csv bytes=402
+PASS invoices_export_exists_nonempty C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\output\downloads\sap_invoices_export.csv bytes=346
+PASS expenses_export_exists_nonempty C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\output\expenses_all_approved_export.csv bytes=1843
+workbook_sheets= ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+PASS template_sheets_present ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+Orders: headers=['OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD'] rows=3 sample=[{'OrderID': '0045000109', 'ProjectID': 'P003', 'CustomerID': 'C001', 'OrderDate': datetime.datetime(2026, 9, 1, 0, 0), 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': 150000, 'AmountTWD': 150000}, {'OrderID': '0045000119', 'ProjectID': 'P001', 'CustomerID': 'C001', 'OrderDate': datetime.datetime(2026, 9, 15, 0, 0), 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': 8775, 'AmountTWD': 307125}]
+Invoices: headers=['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD'] rows=3 sample=[{'InvoiceID': '0090000208', 'OrderID': '0045000109', 'ProjectID': 'P003', 'CustomerID': 'C001', 'InvoiceDate': datetime.datetime(2026, 9, 2, 0, 0), 'DueDate': datetime.datetime(2026, 9, 12, 0, 0), 'Currency': 'TWD', 'Amount': 150000, 'PaidAmount': 150000, 'Balance': 0, 'BalanceTWD': 0}, {'InvoiceID': '0090000214', 'OrderID': '0045000119', 'ProjectID': 'P001', 'CustomerID': 'C001', 'InvoiceDate': datetime.datetime(2026, 9, 16, 0, 0), 'DueDate': datetime.datetime(2026, 10, 16, 0, 0), 'Currency': 'EUR', 'Amount': 8775, 'PaidAmount': 8775, 'Balance': 0, 'BalanceTWD': 0}]
+Expenses: headers=['ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD'] rows=9 sample=[{'ExpenseID': 'EXP-00001', 'ProjectID': 'P001', 'EmployeeID': 'E001', 'ExpenseDate': datetime.datetime(2026, 9, 1, 0, 0), 'Status': 'Approved', 'Currency': 'TWD', 'Amount': 1280, 'AmountTWD': 1280}, {'ExpenseID': 'EXP-00002', 'ProjectID': 'P001', 'EmployeeID': 'E001', 'ExpenseDate': datetime.datetime(2026, 9, 2, 0, 0), 'Status': 'Approved', 'Currency': 'USD', 'Amount': 200, 'AmountTWD': 6400}]
+Quotes: headers=['QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD'] rows=4 sample=[{'QuoteID': 'Q0010', 'ProjectID': 'P001', 'CustomerID': 'C001', 'QuoteDate': datetime.datetime(2026, 9, 1, 0, 0), 'ValidUntil': datetime.datetime(2026, 9, 20, 0, 0), 'Status': 'Sent', 'Currency': 'TWD', 'NetAmount': 207629.63, 'AmountTWD': 207629.63}, {'QuoteID': 'Q0011', 'ProjectID': 'P001', 'CustomerID': 'C001', 'QuoteDate': datetime.datetime(2026, 9, 3, 0, 0), 'ValidUntil': datetime.datetime(2026, 10, 3, 0, 0), 'Status': 'Accepted', 'Currency': 'USD', 'NetAmount': 10350, 'AmountTWD': 331200}]
+Summary: headers=['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD'] rows=2 sample=[{'ProjectID': 'P001', 'OrderTWD': 693570, 'InvoiceBalanceTWD': 386445, 'ApprovedExpenseTWD': 18305, 'AcceptedQuoteTWD': 331200}, {'ProjectID': 'P003', 'OrderTWD': 150000, 'InvoiceBalanceTWD': 0, 'ApprovedExpenseTWD': 13037.5, 'AcceptedQuoteTWD': 0}]
+Exceptions: headers=['Source', 'DocumentID', 'ProjectID', 'Reason'] rows=4 sample=[{'Source': 'Invoices', 'DocumentID': '0090000219', 'ProjectID': 'P001', 'Reason': 'Overdue unpaid invoice as of 2026-09-30; Balance=386445.00 TWD'}, {'Source': 'Expenses', 'DocumentID': 'EXP-00006', 'ProjectID': 'P001', 'Reason': 'Approved expense missing receipt'}]
+PASS orders_count_3 3
+PASS invoices_count_3 3
+PASS expenses_count_9 9
+PASS quotes_count_4_all_retained 4
+PASS exceptions_count_4 4
+PASS orders_exclude_cancelled ['Closed', 'Open']
+PASS expenses_approved_only ['Approved']
+PASS expenses_only_c001_projects ['P001', 'P003']
+PASS customer_scope_orders_invoices_quotes {'Orders': ['C001'], 'Invoices': ['C001'], 'Quotes': ['C001']}
+PASS summary_projects_p001_p003 [{'ProjectID': 'P001', 'OrderTWD': 693570, 'InvoiceBalanceTWD': 386445, 'ApprovedExpenseTWD': 18305, 'AcceptedQuoteTWD': 331200}, {'ProjectID': 'P003', 'OrderTWD': 150000, 'InvoiceBalanceTWD': 0, 'ApprovedExpenseTWD': 13037.5, 'AcceptedQuoteTWD': 0}]
+PASS id_fields_text_preserve_leading_zero [('Orders', 'OrderID', '0045000109', 'str'), ('Invoices', 'InvoiceID', '0090000208', 'str'), ('Expenses', 'ExpenseID', 'EXP-00001', 'str'), ('Quotes', 'QuoteID', 'Q0010', 'str'), ('Exceptions', 'DocumentID', '0090000219', 'str')]
+PASS twd_values_numeric [('Orders', 'AmountTWD', 150000, 'int'), ('Orders', 'AmountTWD', 307125, 'int'), ('Orders', 'AmountTWD', 386445, 'int'), ('Invoices', 'BalanceTWD', 0, 'int'), ('Invoices', 'BalanceTWD', 0, 'int'), ('Invoices', 'BalanceTWD', 386445, 'int'), ('Expenses', 'AmountTWD', 1280, 'int'), ('Expenses', 'AmountTWD', 6400, 'int'), ('Expenses', 'AmountTWD', 6300, 'int'), ('Expenses', 'AmountTWD', 1487.5, 'float'), ('Expenses', 'AmountTWD', 620, 'int'), ('Expenses', 'AmountTWD', 3150, 'int')]
+PASS expected_attention_documents {"Source": "Invoices", "DocumentID": "0090000219", "ProjectID": "P001", "Reason": "Overdue unpaid invoice as of 2026-09-30; Balance=386445.00 TWD"}
+{"Source": "Expenses", "DocumentID": "EXP-00006", "ProjectID": "P001", "Reason": "Approved expense missing receipt"}
+{"Source": "Quotes", "DocumentID": "Q0010", "ProjectID": "P001", "Reason": "Quote expired before 2026-09-30 and not Accepted; Status=Sent"}
+{"Source": "Quotes", "DocumentID": "Q0014", "ProjectID": "P001", "Reason": "Quote expired before 2026-09-30 and not Accepted; Status=Expired"}
+PASS attention_invoice_overdue_unpaid {"Source": "Invoices", "DocumentID": "0090000219", "ProjectID": "P001", "Reason": "Overdue unpaid invoice as of 2026-09-30; Balance=386445.00 TWD"}
+{"Source": "Expenses", "DocumentID": "EXP-00006", "ProjectID": "P001", "Reason": "Approved expense missing receipt"}
+{"Source": "Quotes", "DocumentID": "Q0010", "ProjectID": "P001", "Reason": "Quote expired before 2026-09-30 and not Accepted; Status=Sent"}
+{"Source": "Quotes", "DocumentID": "Q0014", "ProjectID": "P001", "Reason": "Quote expired before 2026-09-30 and not Accepted; Status=Expired"}
+PASS attention_missing_receipt {"Source": "Invoices", "DocumentID": "0090000219", "ProjectID": "P001", "Reason": "Overdue unpaid invoice as of 2026-09-30; Balance=386445.00 TWD"}
+{"Source": "Expenses", "DocumentID": "EXP-00006", "ProjectID": "P001", "Reason": "Approved expense missing receipt"}
+{"Source": "Quotes", "DocumentID": "Q0010", "ProjectID": "P001", "Reason": "Quote expired before 2026-09-30 and not Accepted; Status=Sent"}
+{"Source": "Quotes", "DocumentID": "Q0014", "ProjectID": "P001", "Reason": "Quote expired before 2026-09-30 and not Accepted; Status=Expired"}
+PASS attention_expired_quotes_nonaccepted {"Source": "Invoices", "DocumentID": "0090000219", "ProjectID": "P001", "Reason": "Overdue unpaid invoice as of 2026-09-30; Balance=386445.00 TWD"}
+{"Source": "Expenses", "DocumentID": "EXP-00006", "ProjectID": "P001", "Reason": "Approved expense missing receipt"}
+{"Source": "Quotes", "DocumentID": "Q0010", "ProjectID": "P001", "Reason": "Quote expired before 2026-09-30 and not Accepted; Status=Sent"}
+{"Source": "Quotes", "DocumentID": "Q0014", "ProjectID": "P001", "Reason": "Quote expired before 2026-09-30 and not Accepted; Status=Expired"}
+quotes_json schema= 1 count_field= 4
+quotes_json_items_sample= [{'QuoteID': 'Q0010', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-01', 'ValidUntil': '2026-09-20', 'Status': 'Sent', 'Currency': 'TWD', 'Subtotal': '218557.50', 'DiscountPercent': '5', 'NetAmount': '207629.63'}, {'QuoteID': 'Q0011', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-03', 'ValidUntil': '2026-10-03', 'Status': 'Accepted', 'Currency': 'USD', 'Subtotal': '11500.00', 'DiscountPercent': '10', 'NetAmount': '10350.00'}]
+PASS quotes_json_has_four_items 4
+PASS quotes_json_customer_c001 ['C001']
+All verification checks passed.

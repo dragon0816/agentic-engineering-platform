@@ -1,0 +1,154 @@
+{
+ "run_id": "fix-run-015",
+ "task_id": "T05",
+ "attempt": 1,
+ "status": "PASS",
+ "task_success": true,
+ "first_attempt_success": null,
+ "repair_loops": null,
+ "tool_calls": 3,
+ "duration_seconds": 34.95,
+ "clarification_wait_seconds": null,
+ "human_interventions": 0,
+ "intervention_details": [],
+ "checks": [
+  {
+   "name": "matched has the 3 tests",
+   "passed": true,
+   "expected": [
+    "001",
+    "001",
+    "002"
+   ],
+   "actual": [
+    "001",
+    "001",
+    "002"
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "matched rows carry device data",
+   "passed": true,
+   "expected": {
+    "001": "Alpha",
+    "002": "Beta"
+   },
+   "actual": {
+    "001": "Alpha",
+    "002": "Beta"
+   },
+   "evidence_path": null
+  },
+  {
+   "name": "unmatched is device 003 and test 999",
+   "passed": true,
+   "expected": [
+    [
+     "devices",
+     "003"
+    ],
+    [
+     "tests",
+     "999"
+    ]
+   ],
+   "actual": [
+    [
+     "devices",
+     "003"
+    ],
+    [
+     "tests",
+     "999"
+    ]
+   ],
+   "evidence_path": null
+  },
+  {
+   "name": "IDs keep leading zeros as text",
+   "passed": true,
+   "expected": "str",
+   "actual": null,
+   "evidence_path": null
+  },
+  {
+   "name": "input files unchanged",
+   "passed": true,
+   "expected": "same SHA-256",
+   "actual": "same",
+   "evidence_path": null
+  }
+ ],
+ "failure_category": null,
+ "failure_reason": null,
+ "telemetry_limitations": [
+  "repair loops and first-attempt success are not observable: the Gateway trace records tool calls per turn, not program edits or reruns",
+  "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry"
+ ],
+ "artifact_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-015\\T05\\workspace\\output\\merged_devices_tests.xlsx"
+ ],
+ "trace_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-015\\T05\\trace.json",
+ "tools": [
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-ead308b68039481d828b794d898df229",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-dfb7f6304635480e990fdd3eec8f024e",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-6fd20f6509f54e4e93050d35bc87b8e7",
+   "authored_run_id": null,
+   "approval_id": null
+  }
+ ],
+ "model_turns": [
+  4
+ ],
+ "repo_commit": "01573936ba57fe0c6cd5d41120224fc74c2938ed",
+ "agent_backend": "aep-agent-web-chat (gateway)",
+ "model": "gpt-5.5",
+ "skill_versions": {
+  "company-agent/knowledge-query": "1.5.0",
+  "company-agent/market-alignment": "1.1.0",
+  "company-agent/personal-proof": "1.1.0",
+  "company-agent/workflow-author": "1.1.0",
+  "engineering/coding": "1.7.0",
+  "engineering/knowledge-query": "1.0.0",
+  "engineering/rs-ncc-improvement-plan-skill": "1.0.0",
+  "engineering/team-tickets": "2.1.0",
+  "engineering/weekly-report": "2.0.0",
+  "preview/checklist-review-skill": "1.0.0"
+ },
+ "fixture_manifest_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\fixtures\\MANIFEST.json",
+ "validator_version": "1.4"
+}

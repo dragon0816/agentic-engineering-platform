@@ -1,0 +1,11 @@
+FX rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+Invoice rows read: 13
+Invoice headers: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+First rows: [{'InvoiceID': '0090000207', 'OrderID': '0045000108', 'CustomerID': 'C006', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Amount': '3028.95', 'PaidAmount': '0.00', 'Balance': '3028.95'}, {'InvoiceID': '0090000208', 'OrderID': '0045000109', 'CustomerID': 'C001', 'ProjectID': 'P003', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': '150000.00', 'PaidAmount': '150000.00', 'Balance': '0.00'}, {'InvoiceID': '0090000209', 'OrderID': '0045000112', 'CustomerID': 'C007', 'ProjectID': 'P005', 'InvoiceDate': '2026-09-05', 'DueDate': '2026-09-20', 'Currency': 'USD', 'Amount': '12311.00', 'PaidAmount': '4924.40', 'Balance': '7386.60'}]
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\W03\workspace\.aep-run\run-003\script.py", line 118, in <module>
+    copy_row_style(inv_ws, 4, idx, len(expected_inv))
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\W03\workspace\.aep-run\run-003\script.py", line 50, in copy_row_style
+    dst._style = src._style.copy()
+                 ^^^^^^^^^^^^^^^
+AttributeError: 'StyleArray' object has no attribute 'copy'

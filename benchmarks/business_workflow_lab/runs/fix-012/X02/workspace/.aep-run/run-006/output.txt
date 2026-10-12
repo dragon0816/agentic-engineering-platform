@@ -1,0 +1,35 @@
+Inputs:
+ - expense_manual.md
+ - fx_rates.csv
+ - project_template.xlsx
+ - quote_cli_manual.md
+ - sap_manual.md
+Source files expected:
+ - C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\output\downloads\sap_orders_C001_2026-09.csv exists= True bytes= 402
+ - C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\output\downloads\sap_invoices_C001_2026-09.csv exists= True bytes= 346
+ - C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\output\expenses_all_approved_2026-09.csv exists= True bytes= 1843
+FX rates loaded from attachment: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+quote cli returncode: 0
+C001 projects from orders/invoices/quotes: ['P001', 'P003']
+Counts: {'orders_raw': 4, 'orders_after_excluding_cancelled': 3, 'invoices': 3, 'expenses_all_approved': 15, 'expenses_after_project_filter': 9, 'quotes': 4}
+Order sample: [{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}, {'OrderID': '0045000119', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-09-15', 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': '8775.00'}]
+Invoice sample: [{'InvoiceID': '0090000208', 'OrderID': '0045000109', 'CustomerID': 'C001', 'ProjectID': 'P003', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': '150000.00', 'PaidAmount': '150000.00', 'Balance': '0.00'}, {'InvoiceID': '0090000214', 'OrderID': '0045000119', 'CustomerID': 'C001', 'ProjectID': 'P001', 'InvoiceDate': '2026-09-16', 'DueDate': '2026-10-16', 'Currency': 'EUR', 'Amount': '8775.00', 'PaidAmount': '8775.00', 'Balance': '0.00'}]
+Expense sample: [{'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': 'False'}, {'ExpenseID': 'EXP-00002', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-02', 'Category': 'Hotel', 'Currency': 'USD', 'Amount': '200.00', 'Status': 'Approved', 'ReceiptID': 'RC138828', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': 'False'}]
+Quote sample: [{'QuoteID': 'Q0010', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-01', 'ValidUntil': '2026-09-20', 'Status': 'Sent', 'Currency': 'TWD', 'Subtotal': '218557.50', 'DiscountPercent': '5', 'NetAmount': '207629.63'}, {'QuoteID': 'Q0011', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-03', 'ValidUntil': '2026-10-03', 'Status': 'Accepted', 'Currency': 'USD', 'Subtotal': '11500.00', 'DiscountPercent': '10', 'NetAmount': '10350.00'}]
+
+Validation checks:
+ - report_exists_nonempty: True
+ - orders_exclude_cancelled: True
+ - expenses_approved_only: True
+ - expenses_project_limited: True
+ - quotes_all_kept_count: True
+ - id_text_preserved: True
+ - amounts_numeric: True
+ - row_counts: True
+ - exception_ids: True
+ - summary_formula_updated: True
+
+Output workbook: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\output\project_report_C001_2026-09.xlsx
+Output quotes JSON: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\output\quotes_C001_2026-09.json
+Final row counts: {'Orders': 3, 'Invoices': 3, 'Expenses': 9, 'Quotes': 4, 'Summary': 2, 'Exceptions': 4}
+Exceptions: [('Invoices', '0090000219', 'P001', 'Overdue unpaid invoice as of 2026-09-30; Balance=386445.00 TWD'), ('Expenses', 'EXP-00006', 'P001', 'Approved expense missing receipt'), ('Quotes', 'Q0010', 'P001', 'Quote expired before 2026-09-30 and not Accepted; Status=Sent'), ('Quotes', 'Q0014', 'P001', 'Quote expired before 2026-09-30 and not Accepted; Status=Expired')]

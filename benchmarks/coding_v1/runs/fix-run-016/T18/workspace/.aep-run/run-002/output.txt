@@ -1,0 +1,13 @@
+INPUT_METADATA_BEFORE {'DEPENDENCIES.txt': (22, 1791286510806067600), 'export.py': (1082, 1791286510804397400), 'input.csv': (39, 1791286510802053700)}
+CSV_FIELDNAMES ['Model', 'Value']
+CSV_ROW_COUNT 5
+CSV_ROWS [{'Model': 'M1', 'Value': '10'}, {'Model': 'M1', 'Value': '20'}, {'Model': 'M1', 'Value': ''}, {'Model': 'M2', 'Value': '5'}, {'Model': 'M2', 'Value': '15'}]
+EXPECTED {'M1': (15.0, 2), 'M2': (10.0, 2)}
+WROTE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-016\T18\workspace\output\export.py size= 1204
+RUNNING C:\Users\Chi_L\AppData\Local\AgenticEngineeringPlatform\coding-runner\cpython-3.12.14-windows-x86_64-none\python.exe C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-016\T18\workspace\output\export.py --input C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-016\T18\workspace\input\input.csv --output C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-016\T18\workspace\output\summary.xlsx
+CLI_EXIT_CODE 0
+CLI_STDOUT 
+CLI_STDERR 
+SUMMARY_ROWS [('Model', 'Average', 'ValidCount'), ('M1', 15, 2), ('M2', 10, 2)]
+INPUT_METADATA_AFTER {'DEPENDENCIES.txt': (22, 1791286510806067600), 'export.py': (1082, 1791286510804397400), 'input.csv': (39, 1791286510802053700)}
+VERIFICATION_OK {'export_py': 'C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T18\\workspace\\output\\export.py', 'summary_xlsx': 'C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T18\\workspace\\output\\summary.xlsx', 'sheet': 'summary', 'header': ('Model', 'Average', 'ValidCount'), 'data_rows': 2, 'actual': {'M1': (15.0, 2), 'M2': (10.0, 2)}}

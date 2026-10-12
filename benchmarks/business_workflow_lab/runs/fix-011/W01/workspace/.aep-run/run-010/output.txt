@@ -1,0 +1,20 @@
+workflow parameter type: dict
+workflow parameter keys: ['url', 'data', 'items', 'downloads', 'page']
+detail records returned: 36
+using csv: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\W01\workspace\output\downloads\sales_orders_export.csv
+fx header: ['Currency', 'RateToTWD', 'Note']
+fx rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+csv headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+csv rows: 4
+derived filter: 2026-08-03 2026-08-27 Closed
+saved: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\W01\workspace\output\sales_orders_2026-08-03_2026-08-27_Closed.xlsx
+CHECK output exists: True
+CHECK output name: sales_orders_2026-08-03_2026-08-27_Closed.xlsx
+CHECK Details headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+CHECK row count: 4
+CHECK OrderID sorted: True
+CHECK all statuses in workbook: ['Closed']
+CHECK dates min/max: ('2026-08-03', '2026-08-27')
+CHECK Summary B2 formula: =SUM(Details!I5:I8)
+CHECK Summary rows: [['Currency Total', None, 'TWD', 323745, 323745, 2], ['Currency Total', None, 'USD', 10345, 331040, 2], ['Grand Total', 'All currencies', 'TWD', None, 654785, 4]]
+CHECK grand TWD: 654785.00

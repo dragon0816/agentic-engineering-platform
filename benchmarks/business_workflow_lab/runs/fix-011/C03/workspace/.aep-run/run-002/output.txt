@@ -1,0 +1,64 @@
+Instructions full:
+('填寫說明 Instructions（請勿修改本工作表）', None, None)
+(None, None, None)
+('Sheet', 'Cell / Range', 'Content and rule')
+('Report', 'A1:F1', '合併儲存格標題，保留不改。')
+('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。')
+('Report', 'B4', '本次查詢條件的文字說明。')
+('Report', 'B5', '產出時間（ISO 8601）。')
+('Report', 'B7 / D7', '資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。')
+('Report', 'B9', '備註：缺少的資料、例外或限制。')
+('Report', 'A20 與頁尾', '固定 footer，保留不改。')
+('All detail sheets', 'Row 4', '欄名，保留不改；資料自第 5 列起，一筆一列，不留空列。')
+('All detail sheets', 'Formats', 'ID 一律存為文字（保留前導零）；日期 YYYY-MM-DD；金額為數字並使用兩位小數格式 0.00。')
+('All sheets', '-', '不可刪除或改名工作表、不可取消合併儲存格、不可移除公式；可新增資料列並延伸公式範圍。')
+('All sheets', 'Layout', '欄寬、凍結窗格、自動篩選、字型與填色保留模板設定，不要調整或自動調整欄寬。')
+('All detail sheets', 'Missing values', '來源沒有的值留空（空白儲存格），不要填 N/A、0 或自行推測的值。')
+('All sheets', 'AmountTWD', '原幣金額 × 匯率（fx_rates.csv），四捨五入 ROUND_HALF_UP 至兩位小數；不同幣別的原幣金額不可直接相加。')
+('Quotes', 'A4', 'QuoteID: text (文字，保留前導零)')
+('Quotes', 'B4', 'CustomerID: text (文字，保留前導零)')
+('Quotes', 'C4', 'ProjectID: text (文字，保留前導零)')
+('Quotes', 'D4', 'QuoteDate: date YYYY-MM-DD')
+('Quotes', 'E4', 'ValidUntil: date YYYY-MM-DD')
+('Quotes', 'F4', 'Status: text')
+('Quotes', 'G4', 'Currency: text')
+('Quotes', 'H4', 'Subtotal: number, 2 decimals (0.00)')
+('Quotes', 'I4', 'DiscountPercent: number')
+('Quotes', 'J4', 'NetAmount: number, 2 decimals (0.00)')
+('Quotes', 'K4', 'NetAmountTWD: number, 2 decimals (0.00)')
+('Lines', 'A4', 'QuoteID: text (文字，保留前導零)')
+('Lines', 'B4', 'ProductID: text (文字，保留前導零)')
+('Lines', 'C4', 'ProductName: text')
+('Lines', 'D4', 'Quantity: number')
+('Lines', 'E4', 'UnitPrice: number, 2 decimals (0.00)')
+('Lines', 'F4', 'LineAmount: number, 2 decimals (0.00)')
+('Quotes', 'I', 'DiscountPercent 為百分比數字，例如 5 代表 5%。')
+('Lines', 'A', '每個明細列都要有對應的 QuoteID（與 Quotes 工作表 join）。')
+('Summary', 'B2', '公式 =SUM(Quotes!K5:K{最後資料列})：Quotes 的 NetAmountTWD 合計；填入資料後把範圍延伸到最後一列，零筆時保留 K5:K5。')
+('Summary', 'A4:F4 / row 5+', '彙總表：Group、SubGroup 為分組鍵（依題目要求，例如 Status、Currency、EmployeeID、Category；不用時留空），Currency 為原幣，Amount 為該組原幣合計，AmountTWD 為該組 TWD 合計，Count 為筆數；全部 TWD 總額不得混加不同原幣。')
+
+Existing formulas/styles relevant:
+SHEET Report
+["A1:'Quotation Report 報價報表'", 'B1:None', 'C1:None', 'D1:None', 'E1:None', 'F1:None']
+['A2:None', 'B2:None', 'C2:None', 'D2:None', 'E2:None', 'F2:None']
+["A3:'起始日期 From'", 'B3:None', "C3:'結束日期 To'", 'D3:None', 'E3:None', 'F3:None']
+["A4:'條件 Condition'", 'B4:None', 'C4:None', 'D4:None', 'E4:None', 'F4:None']
+["A5:'產出時間 Generated at'", 'B5:None', 'C5:None', 'D5:None', 'E5:None', 'F5:None']
+['A6:None', 'B6:None', 'C6:None', 'D6:None', 'E6:None', 'F6:None']
+["A7:'資料來源 Source'", 'B7:None', "C7:'取得時間 Fetched at'", 'D7:None', 'E7:None', 'F7:None']
+['A8:None', 'B8:None', 'C8:None', 'D8:None', 'E8:None', 'F8:None']
+SHEET Quotes
+["A1:'Quote headers'", 'B1:None', 'C1:None', 'D1:None', 'E1:None', 'F1:None', 'G1:None', 'H1:None', 'I1:None', 'J1:None', 'K1:None']
+["A2:'第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。'", 'B2:None', 'C2:None', 'D2:None', 'E2:None', 'F2:None', 'G2:None', 'H2:None', 'I2:None', 'J2:None', 'K2:None']
+['A3:None', 'B3:None', 'C3:None', 'D3:None', 'E3:None', 'F3:None', 'G3:None', 'H3:None', 'I3:None', 'J3:None', 'K3:None']
+["A4:'QuoteID'", "B4:'CustomerID'", "C4:'ProjectID'", "D4:'QuoteDate'", "E4:'ValidUntil'", "F4:'Status'", "G4:'Currency'", "H4:'Subtotal'", "I4:'DiscountPercent'", "J4:'NetAmount'", "K4:'NetAmountTWD'"]
+SHEET Lines
+["A1:'Quote line items'", 'B1:None', 'C1:None', 'D1:None', 'E1:None', 'F1:None']
+["A2:'第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。'", 'B2:None', 'C2:None', 'D2:None', 'E2:None', 'F2:None']
+['A3:None', 'B3:None', 'C3:None', 'D3:None', 'E3:None', 'F3:None']
+["A4:'QuoteID'", "B4:'ProductID'", "C4:'ProductName'", "D4:'Quantity'", "E4:'UnitPrice'", "F4:'LineAmount'"]
+SHEET Summary
+["A1:'Quote summary'", 'B1:None', 'C1:None', 'D1:None', 'E1:None', 'F1:None']
+["A2:'總計 TWD Totals'", "B2:'=SUM(Quotes!K5:K5)'", 'C2:None', 'D2:None', 'E2:None', 'F2:None']
+['A3:None', 'B3:None', 'C3:None', 'D3:None', 'E3:None', 'F3:None']
+["A4:'Group'", "B4:'SubGroup'", "C4:'Currency'", "D4:'Amount'", "E4:'AmountTWD'", "F4:'Count'"]

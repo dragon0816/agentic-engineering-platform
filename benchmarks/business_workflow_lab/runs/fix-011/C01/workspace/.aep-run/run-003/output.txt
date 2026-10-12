@@ -1,0 +1,25 @@
+Listing quotes...
+CLI: quotes list --customer C001 --from 2026-09-01 --to 2026-09-30 --format json exit 0
+schema 1 count 4 items 4
+sample item {'QuoteID': 'Q0010', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-01', 'ValidUntil': '2026-09-20', 'Status': 'Sent', 'Currency': 'TWD', 'Subtotal': '218557.50', 'DiscountPercent': '5', 'NetAmount': '207629.63'}
+sample item {'QuoteID': 'Q0011', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-03', 'ValidUntil': '2026-10-03', 'Status': 'Accepted', 'Currency': 'USD', 'Subtotal': '11500.00', 'DiscountPercent': '10', 'NetAmount': '10350.00'}
+sample item {'QuoteID': 'Q0014', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-09', 'ValidUntil': '2026-09-28', 'Status': 'Expired', 'Currency': 'EUR', 'Subtotal': '18072.00', 'DiscountPercent': '0', 'NetAmount': '18072.00'}
+sample item {'QuoteID': 'Q0018', 'CustomerID': 'C001', 'ProjectID': 'P001', 'QuoteDate': '2026-09-21', 'ValidUntil': '2026-10-21', 'Status': 'Draft', 'Currency': 'TWD', 'Subtotal': '572130.00', 'DiscountPercent': '10', 'NetAmount': '514917.00'}
+CLI: quotes get Q0010 --format json exit 0
+CLI: quotes get Q0011 --format json exit 0
+CLI: quotes get Q0014 --format json exit 0
+CLI: quotes get Q0018 --format json exit 0
+got docs 4
+rates {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+wrote C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\C01\workspace\output\quote_report_C001_2026-09-01_2026-09-30.xlsx
+CHECK output exists True 12033
+CHECK report dates 2026-09-01 2026-09-30 condition CustomerID=C001; QuoteDate between 2026-09-01 and 2026-09-30 (inclusive)
+CHECK quotes header ['QuoteID', 'CustomerID', 'ProjectID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'Subtotal', 'DiscountPercent', 'NetAmount', 'NetAmountTWD']
+CHECK lines header ['QuoteID', 'ProductID', 'ProductName', 'Quantity', 'UnitPrice', 'LineAmount']
+CHECK summary header ['Group', 'SubGroup', 'Currency', 'Amount', 'AmountTWD', 'Count']
+CHECK quote rows 4 sheet max row 8
+CHECK line rows 11 sheet max row 15
+CHECK summary rows 4 formula =SUM(Quotes!K5:K8)
+CHECK first quote ['Q0010', 'C001', 'P001', '2026-09-01', '2026-09-20', 'Sent', 'TWD', 218557.5, 5, 207629.63, 207629.63]
+CHECK first line ['Q0010', 'MAT-1003', '校正服務 (Calibration)', 1, 12600, 12600]
+CHECK summary data [['Status', 'Accepted', 'USD', 10350, 331200, 1], ['Status', 'Draft', 'TWD', 514917, 514917, 1], ['Status', 'Expired', 'EUR', 18072, 632520, 1], ['Status', 'Sent', 'TWD', 207629.63, 207629.63, 1]]

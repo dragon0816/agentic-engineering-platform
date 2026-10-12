@@ -1,0 +1,17 @@
+Using template: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\W03\workspace\input\project_template.xlsx
+Using invoices CSV: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\W03\workspace\output\downloads\invoices_2026-09.csv
+Using fx CSV: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\W03\workspace\input\fx_rates.csv
+fx header: ['Currency', 'RateToTWD', 'Note']
+rates: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+invoice headers: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+invoice count from CSV: 13
+invoice sample: [{'InvoiceID': '0090000207', 'OrderID': '0045000108', 'CustomerID': 'C006', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Amount': '3028.95', 'PaidAmount': '0.00', 'Balance': '3028.95'}, {'InvoiceID': '0090000208', 'OrderID': '0045000109', 'CustomerID': 'C001', 'ProjectID': 'P003', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': '150000.00', 'PaidAmount': '150000.00', 'Balance': '0.00'}, {'InvoiceID': '0090000209', 'OrderID': '0045000112', 'CustomerID': 'C007', 'ProjectID': 'P005', 'InvoiceDate': '2026-09-05', 'DueDate': '2026-09-20', 'Currency': 'USD', 'Amount': '12311.00', 'PaidAmount': '4924.40', 'Balance': '7386.60'}]
+calculated invoice rows: 13
+summary projects: {'P001': '386445.00', 'P002': '156256.00', 'P003': '0.00', 'P004': '78750.00', 'P005': '236371.20'}
+exceptions: [{'Source': 'Invoices', 'DocumentID': '0090000207', 'ProjectID': '', 'Reason': 'Overdue'}, {'Source': 'Invoices', 'DocumentID': '0090000209', 'ProjectID': 'P005', 'Reason': 'Overdue'}, {'Source': 'Invoices', 'DocumentID': '0090000212', 'ProjectID': 'P002', 'Reason': 'Overdue'}, {'Source': 'Invoices', 'DocumentID': '0090000217', 'ProjectID': 'P002', 'Reason': 'Overdue'}]
+saved C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\W03\workspace\output\project_invoice_report_2026-09.xlsx
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\W03\workspace\.aep-run\run-003\script.py", line 203, in <module>
+    assert sh.cell(idx,5).value == source['InvoiceDate'], (idx, sh.cell(idx,5).value, source['InvoiceDate'])
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: (5, datetime.datetime(2026, 9, 1, 0, 0), datetime.date(2026, 9, 1))

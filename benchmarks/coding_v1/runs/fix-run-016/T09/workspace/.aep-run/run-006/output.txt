@@ -1,0 +1,55 @@
+workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-016\T09\workspace
+input files: ['login_sop.md']
+output files: ['data.json', 't09_worker.py']
+login_sop.md size: 525
+login_sop required max-3 line present: True
+login_sop required wait line present: True
+login_sop required no-data-on-failure line present: True
+data.json exists: True size: 127
+t09_worker.py exists: True size: 3505
+data.json JSON type: dict
+data.json keys: ['items']
+worker relevant lines:
+013: URL_A = BASE + "/login"
+014: URL_B = BASE + "/data"
+015: LIMIT = 3
+016: PAUSE = 0.1
+020: md = INP / "login_sop.md"
+022:     raise SystemExit("login_sop.md not found under input")
+024: print("login_sop.md size:", md.stat().st_size)
+025: print("attempt limit:", LIMIT)
+029:     raise SystemExit("could not parse login fields from login_sop.md; /data not requested")
+042:     req = request.Request(url, data=body, method=method, headers=hdr)
+050:             data = json.loads(raw) if raw else {}
+052:             data = {"error": raw}
+053:         return exc.code, data
+058: def why(status, data):
+059:     if isinstance(data, dict):
+061:             if data.get(key):
+062:                 return f"HTTP {status}: {data[key]}"
+063:         return f"HTTP {status}: {json.dumps(data, ensure_ascii=False)}"
+064:     return f"HTTP {status}: {data!r}"
+066: last = "login was not attempted"
+068: for n in range(1, LIMIT + 1):
+071:     print(f"login attempt {n}: status={status}, ok={ok}")
+075:             raise SystemExit(f"login attempt {n} returned ok=true but no token; /data not requested")
+078:     time.sleep(PAUSE)
+081:     old = OUT / "data.json"
+084:     raise SystemExit(f"login failed after {LIMIT} attempts; /data not requested; reason: {last}")
+086: status, data = call_json("GET", URL_B, headers={"Authorization": f"Bearer {tk}"})
+088:     raise SystemExit(f"/data request failed after successful login: {why(status, data)}")
+090: out = OUT / "data.json"
+091: out.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+093: if loaded != data:
+094:     raise SystemExit("verification failed: saved data.json does not match /data response")
+096:     raise SystemExit("verification failed: data.json is empty")
+098: print("verified data.json: valid JSON, non-empty, matches /data response")
+worker constants: {'LIMIT': 3, 'PAUSE': 0.1}
+found range args: [1, 4]
+check - runtime produced output/data.json as non-empty valid JSON: True
+check - worker posts to /login: True
+check - worker gets /data only after token path: True
+check - worker loop is bounded to exactly 3 attempts: True
+check - worker waits 0.1 seconds between failed attempts: True
+check - worker stops and reports if all login attempts fail: True
+CHECK PASSED: output/data.json and output/t09_worker.py satisfy the requested workflow behavior. This verification did not call /login or /data again.

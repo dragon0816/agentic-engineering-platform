@@ -1,0 +1,29 @@
+inputs really used:
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\X02\workspace\input\project_template.xlsx exists= True bytes= 14209
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\X02\workspace\input\fx_rates.csv exists= True bytes= 276
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\X02\workspace\output\downloads\sap_orders_C001_2026-09.csv exists= True bytes= 402
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\X02\workspace\output\downloads\sap_invoices_C001_2026-09.csv exists= True bytes= 346
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\X02\workspace\output\expense_all_approved_2026-09.csv exists= True bytes= 1843
+fx header/sample= ['Currency', 'RateToTWD', 'Note']
+fx= {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+orders raw rows= 4 headers= ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+invoices raw rows= 3 headers= ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+expenses all approved rows= 15 headers= ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+C001 projects from non-cancelled orders= ['P001', 'P003']
+quote cli return= 0
+quotes rows= 4 headers= ['QuoteID', 'CustomerID', 'ProjectID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'Subtotal', 'DiscountPercent', 'NetAmount']
+saved C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\X02\workspace\output\project_report_C001_2026-09-01_to_2026-09-30.xlsx
+orders_rows = 3
+orders_no_cancelled = True
+orders_customer = True
+invoices_rows = 3
+expenses_rows = 9
+expenses_approved_projects = True
+quotes_rows = 4
+exceptions_rows = 3
+summary_rows = 2
+summary_formula_B2 = =SUM(B5:B6)
+id_text_formats = True
+numeric_amounts = True
+row detail counts: {'Orders': 3, 'Invoices': 3, 'Expenses': 9, 'Quotes': 4, 'Summary': 2, 'Exceptions': 3}
+exceptions= [['Expenses', 'EXP-00006', 'P001', 'Missing receipt'], ['Quotes', 'Q0010', 'P001', 'Expired/non-accepted quote: ValidUntil 2026-09-20 < 2026-09-30, Status Sent'], ['Quotes', 'Q0014', 'P001', 'Expired/non-accepted quote: ValidUntil 2026-09-28 < 2026-09-30, Status Expired']]

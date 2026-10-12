@@ -1,0 +1,21 @@
+inputs: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\W01\workspace\output\downloads\orders_export.csv True C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\W01\workspace\input\sales_template.xlsx True C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\W01\workspace\input\fx_rates.csv True
+csv columns: dict_keys(['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'])
+csv row count: 14
+csv sample: [{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}, {'OrderID': '0045000110', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-09-02', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '293572.50'}]
+fx: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+detail headers: ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+wrote C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\W01\workspace\output\september_open_orders.xlsx
+check rows: 14
+first/last OrderID: 0045000109 0045000128
+sorted: True
+all status Open: True
+all Sep 2026: True
+OrderID text format first: @ str 0045000109
+summary formula B2: =SUM(Details!I5:I18)
+summary rows:
+['Currency', 'EUR', 'EUR', 28936.37, 1012772.95, 4]
+['Currency', 'TWD', 'TWD', 637522.5, 637522.5, 6]
+['Currency', 'USD', 'USD', 32014, 1024448, 4]
+['Total', 'All', 'TWD', None, 2674743.45, 14]
+computed total twd: 2674743.45
+output exists bytes: 11456

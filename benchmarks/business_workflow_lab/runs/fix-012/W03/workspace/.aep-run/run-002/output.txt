@@ -1,0 +1,74 @@
+Downloads:
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\W03\workspace\output\downloads\invoices_2026-09.csv 1142
+['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+['0090000207', '0045000108', 'C006', '', '2026-09-01', '2026-09-16', 'EUR', '3028.95', '0.00', '3028.95']
+['0090000208', '0045000109', 'C001', 'P003', '2026-09-02', '2026-09-12', 'TWD', '150000.00', '150000.00', '0.00']
+['0090000209', '0045000112', 'C007', 'P005', '2026-09-05', '2026-09-20', 'USD', '12311.00', '4924.40', '7386.60']
+['0090000210', '0045000111', 'C003', 'P004', '2026-09-08', '2026-10-08', 'EUR', '2250.00', '0.00', '2250.00']
+['0090000211', '0045000115', 'C005', '', '2026-09-10', '2026-09-30', 'USD', '6391.00', '0.00', '6391.00']
+['0090000212', '0045000117', 'C002', 'P002', '2026-09-12', '2026-09-22', 'TWD', '90000.00', '0.00', '90000.00']
+['0090000213', '0045000113', 'C004', '', '2026-09-15', '2026-09-30', 'TWD', '15390.00', '3847.50', '11542.50']
+['0090000214', '0045000119', 'C001', 'P001', '2026-09-16', '2026-10-16', 'EUR', '8775.00', '8775.00', '0.00']
+['0090000215', '0045000120', 'C006', '', '2026-09-18', '2026-09-28', 'EUR', '461.70', '461.70', '0.00']
+['0090000216', '0045000116', 'C008', '', '2026-09-20', '2026-10-20', 'TWD', '29400.00', '17640.00', '11760.00']
+['0090000217', '0045000122', 'C002', 'P002', '2026-09-22', '2026-09-27', 'USD', '4141.00', '2070.50', '2070.50']
+['0090000218', '0045000124', 'C004', '', '2026-09-25', '2026-10-25', 'TWD', '45000.00', '0.00', '45000.00']
+['0090000219', '0045000125', 'C001', 'P001', '2026-09-30', '2026-09-30', 'TWD', '386445.00', '0.00', '386445.00']
+
+Instructions all:
+('填寫說明 Instructions（請勿修改本工作表）', None, None)
+(None, None, None)
+('Sheet', 'Cell / Range', 'Content and rule')
+('Report', 'A1:F1', '合併儲存格標題，保留不改。')
+('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。')
+('Report', 'B4', '本次查詢條件的文字說明。')
+('Report', 'B5', '產出時間（ISO 8601）。')
+('Report', 'B7 / D7', '資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。')
+('Report', 'B9', '備註：缺少的資料、例外或限制。')
+('Report', 'A20 與頁尾', '固定 footer，保留不改。')
+('All detail sheets', 'Row 4', '欄名，保留不改；資料自第 5 列起，一筆一列，不留空列。')
+('All detail sheets', 'Formats', 'ID 一律存為文字（保留前導零）；日期 YYYY-MM-DD；金額為數字並使用兩位小數格式 0.00。')
+('All sheets', '-', '不可刪除或改名工作表、不可取消合併儲存格、不可移除公式；可新增資料列並延伸公式範圍。')
+('All sheets', 'Layout', '欄寬、凍結窗格、自動篩選、字型與填色保留模板設定，不要調整或自動調整欄寬。')
+('All detail sheets', 'Missing values', '來源沒有的值留空（空白儲存格），不要填 N/A、0 或自行推測的值。')
+('All sheets', 'AmountTWD', '原幣金額 × 匯率（fx_rates.csv），四捨五入 ROUND_HALF_UP 至兩位小數；不同幣別的原幣金額不可直接相加。')
+('Orders', 'A4', 'OrderID: text (文字，保留前導零)')
+('Orders', 'B4', 'ProjectID: text (文字，保留前導零)')
+('Orders', 'C4', 'CustomerID: text (文字，保留前導零)')
+('Orders', 'D4', 'OrderDate: date YYYY-MM-DD')
+('Orders', 'E4', 'Status: text')
+('Orders', 'F4', 'Currency: text')
+('Orders', 'G4', 'NetAmount: number, 2 decimals (0.00)')
+('Orders', 'H4', 'AmountTWD: number, 2 decimals (0.00)')
+('Invoices', 'A4', 'InvoiceID: text (文字，保留前導零)')
+('Invoices', 'B4', 'OrderID: text (文字，保留前導零)')
+('Invoices', 'C4', 'ProjectID: text (文字，保留前導零)')
+('Invoices', 'D4', 'CustomerID: text (文字，保留前導零)')
+('Invoices', 'E4', 'InvoiceDate: date YYYY-MM-DD')
+('Invoices', 'F4', 'DueDate: date YYYY-MM-DD')
+('Invoices', 'G4', 'Currency: text')
+('Invoices', 'H4', 'Amount: number, 2 decimals (0.00)')
+('Invoices', 'I4', 'PaidAmount: number, 2 decimals (0.00)')
+('Invoices', 'J4', 'Balance: number, 2 decimals (0.00)')
+('Invoices', 'K4', 'BalanceTWD: number, 2 decimals (0.00)')
+('Expenses', 'A4', 'ExpenseID: text (文字，保留前導零)')
+('Expenses', 'B4', 'ProjectID: text (文字，保留前導零)')
+('Expenses', 'C4', 'EmployeeID: text (文字，保留前導零)')
+('Expenses', 'D4', 'ExpenseDate: date YYYY-MM-DD')
+('Expenses', 'E4', 'Status: text')
+('Expenses', 'F4', 'Currency: text')
+('Expenses', 'G4', 'Amount: number, 2 decimals (0.00)')
+('Expenses', 'H4', 'AmountTWD: number, 2 decimals (0.00)')
+('Quotes', 'A4', 'QuoteID: text (文字，保留前導零)')
+('Quotes', 'B4', 'ProjectID: text (文字，保留前導零)')
+('Quotes', 'C4', 'CustomerID: text (文字，保留前導零)')
+('Quotes', 'D4', 'QuoteDate: date YYYY-MM-DD')
+('Quotes', 'E4', 'ValidUntil: date YYYY-MM-DD')
+('Quotes', 'F4', 'Status: text')
+('Quotes', 'G4', 'Currency: text')
+('Quotes', 'H4', 'NetAmount: number, 2 decimals (0.00)')
+('Quotes', 'I4', 'AmountTWD: number, 2 decimals (0.00)')
+('Invoices', 'J / K', 'Balance = Amount − PaidAmount；BalanceTWD 為 Balance 換算 TWD。')
+('Summary', 'A4:E4 / row 5+', '每個專案一列：OrderTWD 訂單金額、InvoiceBalanceTWD 發票未收金額、ApprovedExpenseTWD 核准支出、AcceptedQuoteTWD 已接受報價，皆為 TWD；各來源分開彙總，不互相加總。')
+('Summary', 'B2:E2', '公式 =SUM(B5:B{最後資料列}) 等，填入資料後延伸到最後一列；沒有資料時保留 B5:B5。')
+('Exceptions', 'A4:D4 / row 5+', 'Source 為 Orders / Invoices / Expenses / Quotes，DocumentID 為來源文件 ID，Reason 為原因（例如 Overdue）。')

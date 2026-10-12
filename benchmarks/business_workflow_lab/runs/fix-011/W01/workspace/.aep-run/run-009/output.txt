@@ -1,0 +1,55 @@
+WORKSPACE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\W01\workspace
+FILES
+ - input\sales_template.xlsx exists=True size=9844
+ - input\fx_rates.csv exists=True size=276
+ - output\downloads\sales_orders_export.csv exists=True size=1129
+ - output\september_open_orders.xlsx exists=True size=11390
+CSV_HEADERS ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+CSV_ROW_COUNT 14
+CSV_FIRST_LAST {'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'} {'OrderID': '0045000128', 'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'ProjectID': 'P004', 'OrderDate': '2026-09-30', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '104160.00'}
+FX_HEADERS ['Currency', 'RateToTWD', 'Note']
+FX_RATES {'EUR': '35', 'TWD': '1', 'USD': '32'}
+TEMPLATE_SHEETS ['Report', 'Details', 'Summary', 'Instructions']
+OUTPUT_SHEETS ['Report', 'Details', 'Summary', 'Instructions']
+REPORT_B3_D3_B4 2026-09-01 2026-09-30 Sales Orders; Status=Open; Sort by OrderID asc; all filtered rows exported and detail pages read
+DETAIL_HEADERS ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'NetAmountTWD', 'CustomerContact', 'PaymentTerms']
+DETAIL_ROW_COUNT 14
+DETAIL_FIRST {'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': datetime.datetime(2026, 9, 1, 0, 0), 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': 150000, 'NetAmountTWD': 150000, 'CustomerContact': 'Grace Lin <grace.lin@acme-precision.example>', 'PaymentTerms': 'NET10'}
+DETAIL_LAST {'OrderID': '0045000128', 'CustomerID': 'C003', 'CustomerName': 'Northwind Components GmbH', 'ProjectID': 'P004', 'OrderDate': datetime.datetime(2026, 9, 30, 0, 0), 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': 104160, 'NetAmountTWD': 104160, 'CustomerContact': 'Jonas Krüger <jk@northwind.example>', 'PaymentTerms': 'NET5'}
+EXPECTED_SUMMARY {'EUR': {'amount': '28936.37', 'twd': '1012772.95', 'count': 4}, 'TWD': {'amount': '637522.50', 'twd': '637522.50', 'count': 6}, 'USD': {'amount': '32014.00', 'twd': '1024448.00', 'count': 4}}
+EXPECTED_TOTAL_TWD 2674743.45
+SUMMARY_B2_FORMULA =SUM(Details!I5:I18)
+SUMMARY_BY_CUR {'EUR': {'amount': '28936.37', 'twd': '1012772.95', 'count': 4}, 'TWD': {'amount': '637522.50', 'twd': '637522.50', 'count': 6}, 'USD': {'amount': '32014.00', 'twd': '1024448.00', 'count': 4}}
+GRAND {'currency': 'TWD', 'twd': '2674743.45', 'count': 14}
+BLANK_COUNTS {'ProjectID_csv': 6, 'ProjectID_workbook': 6, 'CustomerContact_workbook': 2}
+CHECKS PASSED
+{
+  "checked_files": [
+    "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-011\\W01\\workspace\\output\\downloads\\sales_orders_export.csv",
+    "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-011\\W01\\workspace\\output\\september_open_orders.xlsx"
+  ],
+  "detail_rows": 14,
+  "sorted_by_order_id": true,
+  "status": "Open",
+  "date_range": "2026-09-01..2026-09-30",
+  "summary": {
+    "EUR": {
+      "amount": "28936.37",
+      "twd": "1012772.95",
+      "count": 4
+    },
+    "TWD": {
+      "amount": "637522.50",
+      "twd": "637522.50",
+      "count": 6
+    },
+    "USD": {
+      "amount": "32014.00",
+      "twd": "1024448.00",
+      "count": 4
+    }
+  },
+  "grand_total_twd": "2674743.45",
+  "workflow_output_workbook": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-011\\W01\\workspace\\output\\september_open_orders.xlsx",
+  "workflow_download_csv": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-011\\W01\\workspace\\output\\downloads\\sales_orders_export.csv"
+}

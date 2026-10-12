@@ -1,0 +1,28 @@
+Input files: ['input\\fx_rates.csv', 'input\\project_template.xlsx', 'input\\sap_manual.md']
+Downloaded invoice csv exists: True 1142
+FX header: ['Currency', 'RateToTWD', 'Note']
+FX rates: {'TWD': '1', 'USD': '32', 'EUR': '35'}
+Invoice headers: ['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance']
+Invoice rows read: 13
+Sample rows: [{'InvoiceID': '0090000207', 'OrderID': '0045000108', 'CustomerID': 'C006', 'ProjectID': '', 'InvoiceDate': '2026-09-01', 'DueDate': '2026-09-16', 'Currency': 'EUR', 'Amount': '3028.95', 'PaidAmount': '0.00', 'Balance': '3028.95'}, {'InvoiceID': '0090000208', 'OrderID': '0045000109', 'CustomerID': 'C001', 'ProjectID': 'P003', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': '150000.00', 'PaidAmount': '150000.00', 'Balance': '0.00'}]
+Template sheets: ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+Wrote: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\W03\workspace\output\project_report_2026-09_invoices.xlsx
+Summary computed: {'P003': '0.00', 'P005': '236371.20', 'P004': '78750.00', 'P002': '156256.00', 'P001': '386445.00'}
+Exceptions computed: [{'Source': 'Invoices', 'DocumentID': '0090000207', 'ProjectID': None, 'Reason': 'Overdue'}, {'Source': 'Invoices', 'DocumentID': '0090000209', 'ProjectID': 'P005', 'Reason': 'Overdue'}, {'Source': 'Invoices', 'DocumentID': '0090000212', 'ProjectID': 'P002', 'Reason': 'Overdue'}, {'Source': 'Invoices', 'DocumentID': '0090000217', 'ProjectID': 'P002', 'Reason': 'Overdue'}]
+CHECK output_file_exists_nonempty: PASS
+CHECK sheets_intact: PASS
+CHECK Orders_blank_after_row4: PASS
+CHECK Expenses_blank_after_row4: PASS
+CHECK Quotes_blank_after_row4: PASS
+CHECK invoice_row_count_13: PASS
+CHECK invoice_headers_preserved: PASS
+CHECK invoice_id_text_and_amount_numeric_ok: PASS
+CHECK balance_twd_calculation_ok: PASS
+CHECK summary_project_count: PASS
+CHECK summary_projects_match: PASS
+CHECK summary_values_ok: PASS
+CHECK summary_formulas_extended: PASS
+CHECK exceptions_match_overdue_rule: PASS
+CHECK due_on_base_date_not_overdue: PASS
+All verification checks passed.
+Output file: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\W03\workspace\output\project_report_2026-09_invoices.xlsx

@@ -1,0 +1,11 @@
+from pathlib import Path
+from openpyxl import load_workbook
+ws=Path.cwd()
+wb=load_workbook(ws/'input'/'quote_template.xlsx', data_only=False)
+sh=wb['Instructions']
+for row in sh.iter_rows(values_only=True):
+    print(row)
+print('\nMerged ranges:')
+for s in wb.sheetnames:
+    print(s, list(wb[s].merged_cells.ranges))
+print('\nDefined names:', list(wb.defined_names))

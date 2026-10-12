@@ -1,0 +1,23 @@
+Workflow parameters: {'customer_id': 'C001', 'from_date': '2026-09-01', 'to_date': '2026-09-30', 'as_of_date': '2026-09-30'}
+Input files: ['expense_manual.md', 'fx_rates.csv', 'project_template.xlsx', 'quote_cli_manual.md', 'sap_manual.md']
+Source C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\output\downloads\sap_orders_export.csv exists= True bytes= 402
+Source C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\output\downloads\sap_invoices_export.csv exists= True bytes= 346
+Source C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\output\expenses_all_approved_export.csv exists= True bytes= 1843
+FX rates loaded from attachment only: {'TWD': Decimal('1'), 'USD': Decimal('32'), 'EUR': Decimal('35')}
+quote cli returncode: 0
+Customer related projects: ['P001', 'P003']
+Counts: {'orders_raw': 4, 'orders_after_excluding_cancelled': 3, 'invoices': 3, 'expenses_all_approved': 15, 'expenses_after_project_filter': 9, 'quotes': 4}
+Validation checks:
+report_nonempty True
+orders_exclude_cancelled True
+expenses_approved_only True
+expenses_limited_to_customer_projects True
+quotes_all_kept True
+ids_text_preserved True
+amounts_numeric True
+summary_formula_updated True
+OUTPUT_FILES
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\output\project_report_C001_2026-09-01_2026-09-30.xlsx
+C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\output\quotes_C001_2026-09-01_2026-09-30.json
+Final row counts: {'Orders': 3, 'Invoices': 3, 'Expenses': 9, 'Quotes': 4, 'Summary': 2, 'Exceptions': 4}
+Exceptions: [('Invoices', '0090000219', 'P001', 'Overdue unpaid invoice as of 2026-09-30; Balance=386445.00 TWD'), ('Expenses', 'EXP-00006', 'P001', 'Approved expense missing receipt'), ('Quotes', 'Q0010', 'P001', 'Quote expired before 2026-09-30 and not Accepted; Status=Sent'), ('Quotes', 'Q0014', 'P001', 'Quote expired before 2026-09-30 and not Accepted; Status=Expired')]

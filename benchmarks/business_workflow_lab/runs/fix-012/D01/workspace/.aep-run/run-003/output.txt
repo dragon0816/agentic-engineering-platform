@@ -1,0 +1,39 @@
+# Expense Viewer（模擬原生桌面費用程式）使用說明
+
+> 合成測試資料。這是 Windows 桌面視窗程式（WinForms），不是網頁。
+
+- 在 AEP 中已登記為桌面應用程式 `expense`（由平台啟動，需要已登入的互動式 Windows 桌面）。
+- 視窗標題：`Expense Viewer (synthetic lab)`
+- 控制項名稱（UI Automation id）：EmployeeFilter、ProjectFilter、DateFrom、DateTo、StatusFilter、QueryButton、ResultsList、PreviousButton、NextButton、CountLabel、DetailsButton、ExportCsvButton、ExportExcelButton；明細視窗為 Detail<欄位>（例如 DetailReceiptID）與 CloseButton。
+
+## 主視窗
+
+| 控制項 | 說明 |
+|---|---|
+| Employee 員工 | 下拉選單 E001～E006，空白代表全部 |
+| Project 專案 | 下拉選單 P001～P005，空白代表全部 |
+| Date from 起 / Date to 迄 | YYYY-MM-DD，含起訖兩日（ExpenseDate） |
+| Status 狀態 | Draft、Submitted、Approved、Rejected，空白代表全部 |
+| Query 查詢 | 執行查詢，完成後跳出「查詢完成，共 N 筆」或「查無資料（0 筆）」 |
+
+- 結果表格每頁 8 筆，下方顯示 `Total N rows · Page x / y`，用 **Previous 上一頁** / **Next 下一頁** 換頁。
+- 表格欄位：ExpenseID、EmployeeID、EmployeeName、ProjectID、ExpenseDate、Category、Currency、Amount、Status。
+- 選一列後按 **Details 明細**（或雙擊該列）開啟明細視窗，內含 ReceiptID、Category、Description（可能含中文與換行）、MissingReceipt；按 **Close 返回** 關閉。
+- **Export CSV 匯出 CSV**、**Export Excel 匯出 Excel**：開啟 Windows「另存新檔」對話框，匯出目前篩選條件的全部結果（不只目前這一頁），欄位包含 ReceiptID、Description、MissingReceipt。
+- 匯出若顯示「暫時無法寫入，請重試」，表示這次沒有產生檔案，可以再按一次匯出。
+- 程式沒有其他資料介面；請透過視窗操作與匯出取得資料。
+
+headers ['ExpenseID', 'EmployeeID', 'EmployeeName', 'ProjectID', 'ExpenseDate', 'Category', 'Currency', 'Amount', 'Status', 'ReceiptID', 'Description', 'MissingReceipt']
+{'ExpenseID': 'EXP-00001', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-01', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '1280.00', 'Status': 'Approved', 'ReceiptID': 'RC702658', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': False}
+{'ExpenseID': 'EXP-00002', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-02', 'Category': 'Hotel', 'Currency': 'USD', 'Amount': '200.00', 'Status': 'Approved', 'ReceiptID': 'RC138828', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': False}
+{'ExpenseID': 'EXP-00003', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P003', 'ExpenseDate': '2026-09-03', 'Category': 'Meals', 'Currency': 'TWD', 'Amount': '450.00', 'Status': 'Submitted', 'ReceiptID': 'RC162210', 'Description': '加班餐費', 'MissingReceipt': False}
+{'ExpenseID': 'EXP-00004', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P003', 'ExpenseDate': '2026-09-05', 'Category': 'Supplies', 'Currency': 'EUR', 'Amount': '42.50', 'Status': 'Approved', 'ReceiptID': 'RC358881', 'Description': '治具耗材', 'MissingReceipt': False}
+{'ExpenseID': 'EXP-00005', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-08', 'Category': 'Travel', 'Currency': 'USD', 'Amount': '88.40', 'Status': 'Draft', 'ReceiptID': 'RC920686', 'Description': 'Taxi to customer site', 'MissingReceipt': False}
+{'ExpenseID': 'EXP-00006', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-10', 'Category': 'Meals', 'Currency': 'TWD', 'Amount': '620.00', 'Status': 'Approved', 'ReceiptID': None, 'Description': 'Team dinner after install', 'MissingReceipt': True}
+{'ExpenseID': 'EXP-00007', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P003', 'ExpenseDate': '2026-09-12', 'Category': 'Hotel', 'Currency': 'EUR', 'Amount': '155.00', 'Status': 'Rejected', 'ReceiptID': 'RC483886', 'Description': '出差住宿\n(含早餐)', 'MissingReceipt': False}
+{'ExpenseID': 'EXP-00008', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P003', 'ExpenseDate': '2026-09-15', 'Category': 'Supplies', 'Currency': 'TWD', 'Amount': '2399.00', 'Status': 'Submitted', 'ReceiptID': 'RC301050', 'Description': 'RF 接頭與轉接器\nSMA x4', 'MissingReceipt': False}
+{'ExpenseID': 'EXP-00009', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P003', 'ExpenseDate': '2026-09-17', 'Category': 'Travel', 'Currency': 'TWD', 'Amount': '3150.00', 'Status': 'Approved', 'ReceiptID': 'RC254438', 'Description': '機票 TPE-FRA\n含行李費', 'MissingReceipt': False}
+{'ExpenseID': 'EXP-00010', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-19', 'Category': 'Meals', 'Currency': 'USD', 'Amount': '35.75', 'Status': 'Draft', 'ReceiptID': 'RC939068', 'Description': '加班餐費', 'MissingReceipt': False}
+{'ExpenseID': 'EXP-00011', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P003', 'ExpenseDate': '2026-09-23', 'Category': 'Hotel', 'Currency': 'TWD', 'Amount': '4200.00', 'Status': 'Submitted', 'ReceiptID': 'RC551107', 'Description': '客戶驗收住宿 2 晚', 'MissingReceipt': False}
+{'ExpenseID': 'EXP-00012', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P001', 'ExpenseDate': '2026-09-26', 'Category': 'Supplies', 'Currency': 'USD', 'Amount': '12.30', 'Status': 'Rejected', 'ReceiptID': 'RC129370', 'Description': 'RF 接頭與轉接器\nSMA x4', 'MissingReceipt': False}
+{'ExpenseID': 'EXP-00013', 'EmployeeID': 'E001', 'EmployeeName': '陳怡君 (Yi-Chun Chen)', 'ProjectID': 'P003', 'ExpenseDate': '2026-09-30', 'Category': 'Travel', 'Currency': 'EUR', 'Amount': '60.00', 'Status': 'Approved', 'ReceiptID': 'RC126979', 'Description': '高鐵 台北-新竹 往返', 'MissingReceipt': False}

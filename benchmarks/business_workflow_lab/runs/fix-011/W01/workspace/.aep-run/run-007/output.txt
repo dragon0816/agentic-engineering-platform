@@ -1,0 +1,18 @@
+WORKSPACE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\W01\workspace
+INPUT FILES
+ - input\fx_rates.csv 276
+ - input\sales_template.xlsx 9844
+ - input\sap_manual.md 2077
+OUTPUT FILES
+ - output\downloads\sales_orders_2026-09-01_2026-09-30_Open.csv 1129
+ - output\downloads\sales_orders_export.csv 1129
+ - output\september_open_orders.xlsx 11390
+EXPECTED EXISTS {'csv': True, 'xlsx': True, 'fx': True, 'template': True}
+CSV HEADERS ['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount']
+CSV ROW COUNT 14
+CSV SAMPLE [{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}, {'OrderID': '0045000110', 'CustomerID': 'C002', 'CustomerName': '台灣精密股份有限公司', 'ProjectID': 'P002', 'OrderDate': '2026-09-02', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '293572.50'}]
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\W01\workspace\.aep-run\run-007\script.py", line 38, in <module>
+    fx[cur] = Decimal(str(rate).strip())
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^
+decimal.InvalidOperation: [<class 'decimal.ConversionSyntax'>]

@@ -1,0 +1,23 @@
+inputs really are:
+ workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\C04\workspace
+ template: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\C04\workspace\input\quote_template.xlsx True
+ fx: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\C04\workspace\input\fx_rates.csv True
+ cli: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\quote_cli_mock\quote_cli.cmd True
+ filter: 2026-09-01 2026-09-30 Sent
+fx header: ['Currency', 'RateToTWD', 'Note']
+fx rates: {'TWD': '1', 'USD': '32', 'EUR': '35'}
+CLI attempt 1: exit=4 args=quotes list --from 2026-09-01 --to 2026-09-30 --status Sent --format json stderr='quote_cli: error: quote service temporarily unavailable, retry later'
+CLI attempt 2: exit=0 args=quotes list --from 2026-09-01 --to 2026-09-30 --status Sent --format json stderr=''
+quote count: 4 declared: 4
+CLI attempt 1: exit=0 args=quotes get Q0010 --format json stderr=''
+CLI attempt 1: exit=0 args=quotes get Q0016 --format json stderr=''
+CLI attempt 1: exit=0 args=quotes get Q0017 --format json stderr=''
+CLI attempt 1: exit=0 args=quotes get Q0019 --format json stderr=''
+line count: 8
+saved: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\C04\workspace\output\sent_quotes_2026-09.xlsx
+saved: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\C04\workspace\output\quote_cli_run_log.json
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\C04\workspace\.aep-run\run-003\script.py", line 238, in <module>
+    assert isinstance(row[0], str) and isinstance(row[1], str) and isinstance(row[2], str), row[:3]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: ('Q0016', 'C005', None)

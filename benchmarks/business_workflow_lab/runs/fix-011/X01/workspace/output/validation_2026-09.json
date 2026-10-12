@@ -1,0 +1,42 @@
+{
+  "period": {
+    "from_date": "2026-09-01",
+    "to_date": "2026-09-30",
+    "period_label": "2026-09"
+  },
+  "generated_at": "2026-10-09T14:20:53+08:00",
+  "files": {
+    "workbook": "output\\project_integration_report_2026-09.xlsx",
+    "sap_orders_open": "output\\downloads\\sap_orders_open_2026-09.csv",
+    "sap_orders_closed": "output\\downloads\\sap_orders_closed_2026-09.csv",
+    "sap_invoices": "output\\downloads\\sap_invoices_2026-09.csv",
+    "expenses": "output\\downloads\\expenses_approved_2026-09.csv",
+    "quotes_csv": "output\\downloads\\quotes_accepted_2026-09.csv",
+    "quotes_json": "output\\downloads\\quotes_accepted_2026-09.json"
+  },
+  "row_counts": {
+    "Orders": 12,
+    "Invoices": 7,
+    "Expenses": 15,
+    "Quotes": 3,
+    "Summary": 5,
+    "Exceptions": 13
+  },
+  "source_counts_after_filters": {
+    "orders": 18,
+    "invoices": 13,
+    "expenses": 15,
+    "quotes": 4
+  },
+  "checks": [
+    "filled a copy of input/project_template.xlsx",
+    "joined and summarized by ProjectID, not customer name",
+    "excluded Cancelled orders by using Open and Closed SAP exports and rechecking status",
+    "included only Approved expenses",
+    "included only Accepted quotes",
+    "kept OrderTWD, InvoiceBalanceTWD, ApprovedExpenseTWD, and AcceptedQuoteTWD separate",
+    "used input/fx_rates.csv for TWD conversion",
+    "reopened workbook and validated headers, statuses, and row counts"
+  ],
+  "exceptions_count": 13
+}

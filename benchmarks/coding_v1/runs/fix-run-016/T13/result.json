@@ -1,0 +1,127 @@
+{
+ "run_id": "fix-run-016",
+ "task_id": "T13",
+ "attempt": 1,
+ "status": "PASS",
+ "task_success": true,
+ "first_attempt_success": null,
+ "repair_loops": null,
+ "tool_calls": 2,
+ "duration_seconds": 71.75,
+ "clarification_wait_seconds": null,
+ "human_interventions": 0,
+ "intervention_details": [],
+ "checks": [
+  {
+   "name": "five rows kept",
+   "passed": true,
+   "expected": 5,
+   "actual": 5,
+   "evidence_path": null
+  },
+  {
+   "name": "complete pages correct",
+   "passed": true,
+   "expected": "Phone A/B with price, CPU, ok",
+   "actual": null,
+   "evidence_path": null
+  },
+  {
+   "name": "missing values are N/A",
+   "passed": true,
+   "expected": "Phone C price N/A, Phone D CPU N/A",
+   "actual": null,
+   "evidence_path": null
+  },
+  {
+   "name": "500 page kept as error with N/A",
+   "passed": true,
+   "expected": "error, N/A, URL kept",
+   "actual": {
+    "Name": "Phone E",
+    "Price": "N/A",
+    "Currency": "N/A",
+    "CPU": "N/A",
+    "URL": "http://127.0.0.1:64493/t13/item/5",
+    "FetchStatus": "error"
+   },
+   "evidence_path": null
+  },
+  {
+   "name": "500 page tried exactly 3 times",
+   "passed": true,
+   "expected": 3,
+   "actual": {
+    "delivered program's run": 3,
+    "whole session": 3
+   },
+   "evidence_path": null
+  },
+  {
+   "name": "warnings.json locates the failed URL",
+   "passed": true,
+   "expected": "/t13/item/5",
+   "actual": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T13\\workspace\\output\\warnings.json",
+   "evidence_path": null
+  }
+ ],
+ "failure_category": null,
+ "failure_reason": null,
+ "telemetry_limitations": [
+  "repair loops and first-attempt success are not observable: the Gateway trace records tool calls per turn, not program edits or reruns",
+  "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry"
+ ],
+ "artifact_paths": [
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T13\\workspace\\output\\robust_products.xlsx",
+  "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T13\\workspace\\output\\warnings.json"
+ ],
+ "trace_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\runs\\fix-run-016\\T13\\trace.json",
+ "tools": [
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-edaf6974f38d4b499d196f60b5c2c2bb",
+   "authored_run_id": null,
+   "approval_id": null
+  },
+  {
+   "name": "coding__run",
+   "target": {
+    "namespace": "engineering",
+    "name": "run-python",
+    "version": "1.0.0"
+   },
+   "status": "succeeded",
+   "failure": null,
+   "workflow_run_id": "run-b2d8e92ebc3b4e19ae81712d28cc7689",
+   "authored_run_id": null,
+   "approval_id": null
+  }
+ ],
+ "model_turns": [
+  3
+ ],
+ "repo_commit": "b363f500e8166f35a1715d99e501c8ed701fcc95",
+ "agent_backend": "aep-agent-web-chat (gateway)",
+ "model": "gpt-5.5",
+ "skill_versions": {
+  "company-agent/knowledge-query": "1.6.0",
+  "company-agent/market-alignment": "1.1.0",
+  "company-agent/personal-proof": "1.1.0",
+  "company-agent/workflow-author": "1.1.0",
+  "engineering/coding": "1.7.0",
+  "engineering/knowledge-query": "1.0.0",
+  "engineering/rs-ncc-improvement-plan-skill": "1.0.0",
+  "engineering/team-tickets": "2.1.0",
+  "engineering/weekly-report": "2.0.0",
+  "preview/checklist-review-skill": "1.0.0"
+ },
+ "fixture_manifest_path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\coding_v1\\fixtures\\MANIFEST.json",
+ "validator_version": "1.4"
+}

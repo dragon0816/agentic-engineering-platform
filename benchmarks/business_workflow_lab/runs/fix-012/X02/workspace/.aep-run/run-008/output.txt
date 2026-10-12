@@ -1,0 +1,27 @@
+workspace= C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace
+input files= ['expense_manual.md', 'fx_rates.csv', 'project_template.xlsx', 'quote_cli_manual.md', 'sap_manual.md']
+output files=
+ - output\downloads\sap_invoices_C001_2026-09.csv bytes= 346 mtime= 2026-10-09T15:45:01
+ - output\downloads\sap_invoices_export.csv bytes= 346 mtime= 2026-10-09T15:51:49
+ - output\downloads\sap_orders_C001_2026-09.csv bytes= 402 mtime= 2026-10-09T15:45:00
+ - output\downloads\sap_orders_export.csv bytes= 402 mtime= 2026-10-09T15:51:48
+ - output\expenses_all_approved_2026-09.csv bytes= 1843 mtime= 2026-10-09T15:48:25
+ - output\expenses_all_approved_export.csv bytes= 1843 mtime= 2026-10-09T15:52:31
+ - output\expenses_P001_2026-09_approved.csv bytes= 704 mtime= 2026-10-09T15:46:14
+ - output\expenses_P003_2026-09_approved.csv bytes= 609 mtime= 2026-10-09T15:47:08
+ - output\project_report_C001_2026-09-01_2026-09-30.xlsx bytes= 15906 mtime= 2026-10-09T15:52:38
+ - output\project_report_C001_2026-09.xlsx bytes= 15904 mtime= 2026-10-09T15:50:00
+ - output\quotes_C001_2026-09-01_2026-09-30.json bytes= 1323 mtime= 2026-10-09T15:52:38
+ - output\quotes_C001_2026-09.json bytes= 1323 mtime= 2026-10-09T15:50:00
+workbook_sheets= ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+Summary: headers=['總計 TWD Totals', '=SUM(B5:B6)', '=SUM(C5:C6)', '=SUM(D5:D6)', '=SUM(E5:E6)'] rows=3 sample=[{'總計 TWD Totals': 'ProjectID', '=SUM(B5:B6)': 'OrderTWD', '=SUM(C5:C6)': 'InvoiceBalanceTWD', '=SUM(D5:D6)': 'ApprovedExpenseTWD', '=SUM(E5:E6)': 'AcceptedQuoteTWD'}, {'總計 TWD Totals': 'P001', '=SUM(B5:B6)': 693570, '=SUM(C5:C6)': 386445, '=SUM(D5:D6)': 18305, '=SUM(E5:E6)': 331200}]
+Orders: headers=['OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD'] rows=3 sample=[{'OrderID': '0045000109', 'ProjectID': 'P003', 'CustomerID': 'C001', 'OrderDate': datetime.datetime(2026, 9, 1, 0, 0), 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': 150000, 'AmountTWD': 150000}, {'OrderID': '0045000119', 'ProjectID': 'P001', 'CustomerID': 'C001', 'OrderDate': datetime.datetime(2026, 9, 15, 0, 0), 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': 8775, 'AmountTWD': 307125}]
+Invoices: headers=['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD'] rows=3 sample=[{'InvoiceID': '0090000208', 'OrderID': '0045000109', 'ProjectID': 'P003', 'CustomerID': 'C001', 'InvoiceDate': datetime.datetime(2026, 9, 2, 0, 0), 'DueDate': datetime.datetime(2026, 9, 12, 0, 0), 'Currency': 'TWD', 'Amount': 150000, 'PaidAmount': 150000, 'Balance': 0, 'BalanceTWD': 0}, {'InvoiceID': '0090000214', 'OrderID': '0045000119', 'ProjectID': 'P001', 'CustomerID': 'C001', 'InvoiceDate': datetime.datetime(2026, 9, 16, 0, 0), 'DueDate': datetime.datetime(2026, 10, 16, 0, 0), 'Currency': 'EUR', 'Amount': 8775, 'PaidAmount': 8775, 'Balance': 0, 'BalanceTWD': 0}]
+Expenses: headers=['ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD'] rows=9 sample=[{'ExpenseID': 'EXP-00001', 'ProjectID': 'P001', 'EmployeeID': 'E001', 'ExpenseDate': datetime.datetime(2026, 9, 1, 0, 0), 'Status': 'Approved', 'Currency': 'TWD', 'Amount': 1280, 'AmountTWD': 1280}, {'ExpenseID': 'EXP-00002', 'ProjectID': 'P001', 'EmployeeID': 'E001', 'ExpenseDate': datetime.datetime(2026, 9, 2, 0, 0), 'Status': 'Approved', 'Currency': 'USD', 'Amount': 200, 'AmountTWD': 6400}]
+Quotes: headers=['QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD'] rows=4 sample=[{'QuoteID': 'Q0010', 'ProjectID': 'P001', 'CustomerID': 'C001', 'QuoteDate': datetime.datetime(2026, 9, 1, 0, 0), 'ValidUntil': datetime.datetime(2026, 9, 20, 0, 0), 'Status': 'Sent', 'Currency': 'TWD', 'NetAmount': 207629.63, 'AmountTWD': 207629.63}, {'QuoteID': 'Q0011', 'ProjectID': 'P001', 'CustomerID': 'C001', 'QuoteDate': datetime.datetime(2026, 9, 3, 0, 0), 'ValidUntil': datetime.datetime(2026, 10, 3, 0, 0), 'Status': 'Accepted', 'Currency': 'USD', 'NetAmount': 10350, 'AmountTWD': 331200}]
+Exceptions: headers=['Source', 'DocumentID', 'ProjectID', 'Reason'] rows=4 sample=[{'Source': 'Invoices', 'DocumentID': '0090000219', 'ProjectID': 'P001', 'Reason': 'Overdue unpaid invoice as of 2026-09-30; Balance=386445.00 TWD'}, {'Source': 'Expenses', 'DocumentID': 'EXP-00006', 'ProjectID': 'P001', 'Reason': 'Approved expense missing receipt'}]
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X02\workspace\.aep-run\run-008\script.py", line 87, in <module>
+    add_check('orders_exclude_cancelled', all(str(key(r,'Status') or '') != 'Cancelled' for r in orders), [key(r,'OrderID'), key(r,'Status')] if orders else 'no rows')
+                                                                                                               ^
+NameError: name 'r' is not defined

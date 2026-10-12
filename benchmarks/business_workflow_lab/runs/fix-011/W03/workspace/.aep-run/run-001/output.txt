@@ -1,0 +1,104 @@
+workspace C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\W03\workspace
+input files:
+- fx_rates.csv 276
+- project_template.xlsx 14209
+- sap_manual.md 2077
+workbook sheets: ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+
+SHEET Report max_row 20 max_col 6
+('Project Integration Report 專案整合報表', None, None, None, None, None)
+(None, None, None, None, None, None)
+('起始日期 From', None, '結束日期 To', None, None, None)
+('條件 Condition', None, None, None, None, None)
+('產出時間 Generated at', None, None, None, None, None)
+(None, None, None, None, None, None)
+('資料來源 Source', None, '取得時間 Fetched at', None, None, None)
+(None, None, None, None, None, None)
+
+SHEET Orders max_row 4 max_col 8
+('Sales orders by project', None, None, None, None, None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)
+(None, None, None, None, None, None, None, None)
+('OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD')
+
+SHEET Invoices max_row 4 max_col 11
+('Invoices by project', None, None, None, None, None, None, None, None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None, None, None)
+(None, None, None, None, None, None, None, None, None, None, None)
+('InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD')
+
+SHEET Expenses max_row 4 max_col 8
+('Expenses by project', None, None, None, None, None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None)
+(None, None, None, None, None, None, None, None)
+('ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD')
+
+SHEET Quotes max_row 4 max_col 9
+('Quotes by project', None, None, None, None, None, None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None, None, None, None, None, None)
+(None, None, None, None, None, None, None, None, None)
+('QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD')
+
+SHEET Summary max_row 4 max_col 5
+('Project summary (TWD)', None, None, None, None)
+('總計 TWD Totals', '=SUM(B5:B5)', '=SUM(C5:C5)', '=SUM(D5:D5)', '=SUM(E5:E5)')
+(None, None, None, None, None)
+('ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD')
+
+SHEET Exceptions max_row 4 max_col 4
+('Exceptions 例外與關注項目', None, None, None)
+('第 4 列為欄名，第 5 列起為資料；欄位格式見 Instructions。', None, None, None)
+(None, None, None, None)
+('Source', 'DocumentID', 'ProjectID', 'Reason')
+
+SHEET Instructions max_row 56 max_col 3
+('填寫說明 Instructions（請勿修改本工作表）', None, None)
+(None, None, None)
+('Sheet', 'Cell / Range', 'Content and rule')
+('Report', 'A1:F1', '合併儲存格標題，保留不改。')
+('Report', 'B3 / D3', '查詢期間起 / 迄，格式 YYYY-MM-DD（含起訖兩日）。')
+('Report', 'B4', '本次查詢條件的文字說明。')
+('Report', 'B5', '產出時間（ISO 8601）。')
+('Report', 'B7 / D7', '資料來源系統名稱 / 取得資料的時間；多個來源以分號分隔。')
+
+fx_rates.csv sample:
+['Currency', 'RateToTWD', 'Note']
+['TWD', '1', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+['USD', '32', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+['EUR', '35', '測試固定匯率，非真實行情 (fixed test rate', ' not a market quote)']
+
+sap_manual.md:
+# Lab ERP（模擬 SAP 類查詢網頁）使用說明
+
+> 合成測試資料。介面只是類似企業查詢系統的模擬，不是真實 SAP。
+
+- 網址：http://127.0.0.1:8810/
+- 登入：公司帳號自動登入（SSO）。開啟網址後若出現登入頁，按 **使用公司帳號登入 Continue with company account** 即可，不需要輸入帳號或密碼。
+- 登出：右上角 **Log out**。
+
+## 查詢頁
+
+上方選單有 **Customers**、**Sales Orders**、**Invoices** 三個查詢頁。
+
+篩選欄位（輸入後按 **Search**）：
+
+| 欄位 | 說明 |
+|---|---|
+| Customer ID | 客戶代碼，完全相符，例如 C001 |
+| Project | 專案代碼，完全相符，例如 P001 |
+| Date from / Date to | YYYY-MM-DD，含起訖兩日；Sales Orders 用 OrderDate，Invoices 用 InvoiceDate |
+| Status | 只在 Sales Orders：Open、Closed、Cancelled |
+| Sort by / Order | 排序欄位與 asc / desc |
+
+- 每頁 10 筆，頁面顯示 `Total: N rows · Page x of y`；用 **Next ›** / **‹ Previous** 換頁。
+- 沒有符合資料時顯示「查無資料（0 筆）」。
+- 點文件編號（OrderID / InvoiceID）進入 detail 頁。訂單 detail 有列表沒有的欄位：
+  **CustomerContact**、**PaymentTerms**、SalesRep，以及 Line items（LineNo、ProductID、Quantity、UnitPrice、LineAmount）。
+- **Export CSV (all filtered rows)** 會下載目前篩選條件的全部結果（不只目前這一頁），UTF-8 CSV。
+- 列表欄位：
+  - Sales Orders：OrderID、CustomerID、CustomerName、ProjectID、OrderDate、Status、Currency、NetAmount
+  - Invoices：InvoiceID、OrderID、CustomerID、ProjectID、InvoiceDate、DueDate、Currency、Amount、PaidAmount、Balance（Balance = Amount − PaidAmount）
+- 文件編號有前導零（例如 0045000101），請當成文字處理。
+- 工作階段可能逾時：此時會回到登入頁並顯示「工作階段已逾時，請重新登入」，再按一次 **使用公司帳號登入** 即可繼續。
+- 金額為原幣；不同幣別不可直接相加。
+

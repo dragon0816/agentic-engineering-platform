@@ -1,0 +1,231 @@
+Inputs actually present: ['expense_manual.md', 'fx_rates.csv', 'project_template.xlsx', 'quote_cli_manual.md', 'sap_manual.md']
+Outputs actually present:
+ - output\downloads\expenses_approved.csv 1843
+ - output\downloads\expenses_approved_2026-09.csv 1843
+ - output\downloads\quotes_accepted_2026-09.csv 389
+ - output\downloads\quotes_accepted_2026-09.json 1282
+ - output\downloads\sap_invoices.csv 1142
+ - output\downloads\sap_invoices_2026-09.csv 1142
+ - output\downloads\sap_orders_closed.csv 409
+ - output\downloads\sap_orders_closed_2026-09.csv 409
+ - output\downloads\sap_orders_open.csv 1129
+ - output\downloads\sap_orders_open_2026-09.csv 1129
+ - output\project_integration_report_2026-09.xlsx 16992
+ - output\validation_2026-09.json 1495
+
+Workbook summary projects: ['P001', 'P002', 'P003', 'P004', 'P005']
+Detail row counts: {'Orders': 12, 'Invoices': 7, 'Expenses': 15, 'Quotes': 3}
+Exception count: 13
+Computed totals: {'OrderTWD': {'P001': 693570.0, 'P002': 516084.5, 'P003': 150000.0, 'P004': 794876.25, 'P005': 770874.2}, 'InvoiceBalanceTWD': {'P001': 386445.0, 'P002': 156256.0, 'P003': 0.0, 'P004': 78750.0, 'P005': 236371.2}, 'ApprovedExpenseTWD': {'P001': 18305.0, 'P002': 9100.0, 'P003': 13037.5, 'P004': 8840.0, 'P005': 6424.0}, 'AcceptedQuoteTWD': {'P001': 331200.0, 'P002': 97450.85, 'P004': 282150.0}}
+
+Checks:
+PASS - file exists: output\project_integration_report_2026-09.xlsx
+PASS - file exists: output\validation_2026-09.json
+PASS - file exists: output\downloads\sap_orders_open_2026-09.csv
+PASS - file exists: output\downloads\sap_orders_closed_2026-09.csv
+PASS - file exists: output\downloads\sap_invoices_2026-09.csv
+PASS - file exists: output\downloads\expenses_approved_2026-09.csv
+PASS - file exists: output\downloads\quotes_accepted_2026-09.csv
+PASS - file exists: output\downloads\quotes_accepted_2026-09.json
+PASS - expected workbook sheets exist
+PASS - Summary row 4 has required separate fields
+PASS - Summary has no CustomerID join key field
+PASS - Summary has no combined revenue column
+PASS - Summary OrderTWD numeric at row 5
+PASS - Summary InvoiceBalanceTWD numeric at row 5
+PASS - Summary ApprovedExpenseTWD numeric at row 5
+PASS - Summary AcceptedQuoteTWD numeric at row 5
+PASS - Summary OrderTWD numeric at row 6
+PASS - Summary InvoiceBalanceTWD numeric at row 6
+PASS - Summary ApprovedExpenseTWD numeric at row 6
+PASS - Summary AcceptedQuoteTWD numeric at row 6
+PASS - Summary OrderTWD numeric at row 7
+PASS - Summary InvoiceBalanceTWD numeric at row 7
+PASS - Summary ApprovedExpenseTWD numeric at row 7
+PASS - Summary AcceptedQuoteTWD numeric at row 7
+PASS - Summary OrderTWD numeric at row 8
+PASS - Summary InvoiceBalanceTWD numeric at row 8
+PASS - Summary ApprovedExpenseTWD numeric at row 8
+PASS - Summary AcceptedQuoteTWD numeric at row 8
+PASS - Summary OrderTWD numeric at row 9
+PASS - Summary InvoiceBalanceTWD numeric at row 9
+PASS - Summary ApprovedExpenseTWD numeric at row 9
+PASS - Summary AcceptedQuoteTWD numeric at row 9
+PASS - Summary has project IDs only, not customer names
+PASS - Summary contains 5 projects
+PASS - Orders row 4 headers match expected
+PASS - Orders row 5 status allowed
+PASS - Orders row 5 date in Sep 2026
+PASS - Orders row 5 ProjectID present
+PASS - Orders row 5 ProjectID format
+PASS - Orders row 6 status allowed
+PASS - Orders row 6 date in Sep 2026
+PASS - Orders row 6 ProjectID present
+PASS - Orders row 6 ProjectID format
+PASS - Orders row 7 status allowed
+PASS - Orders row 7 date in Sep 2026
+PASS - Orders row 7 ProjectID present
+PASS - Orders row 7 ProjectID format
+PASS - Orders row 8 status allowed
+PASS - Orders row 8 date in Sep 2026
+PASS - Orders row 8 ProjectID present
+PASS - Orders row 8 ProjectID format
+PASS - Orders row 9 status allowed
+PASS - Orders row 9 date in Sep 2026
+PASS - Orders row 9 ProjectID present
+PASS - Orders row 9 ProjectID format
+PASS - Orders row 10 status allowed
+PASS - Orders row 10 date in Sep 2026
+PASS - Orders row 10 ProjectID present
+PASS - Orders row 10 ProjectID format
+PASS - Orders row 11 status allowed
+PASS - Orders row 11 date in Sep 2026
+PASS - Orders row 11 ProjectID present
+PASS - Orders row 11 ProjectID format
+PASS - Orders row 12 status allowed
+PASS - Orders row 12 date in Sep 2026
+PASS - Orders row 12 ProjectID present
+PASS - Orders row 12 ProjectID format
+PASS - Orders row 13 status allowed
+PASS - Orders row 13 date in Sep 2026
+PASS - Orders row 13 ProjectID present
+PASS - Orders row 13 ProjectID format
+PASS - Orders row 14 status allowed
+PASS - Orders row 14 date in Sep 2026
+PASS - Orders row 14 ProjectID present
+PASS - Orders row 14 ProjectID format
+PASS - Orders row 15 status allowed
+PASS - Orders row 15 date in Sep 2026
+PASS - Orders row 15 ProjectID present
+PASS - Orders row 15 ProjectID format
+PASS - Orders row 16 status allowed
+PASS - Orders row 16 date in Sep 2026
+PASS - Orders row 16 ProjectID present
+PASS - Orders row 16 ProjectID format
+PASS - Invoices row 4 headers match expected
+PASS - Invoices row 5 date in Sep 2026
+PASS - Invoices row 5 ProjectID present
+PASS - Invoices row 5 ProjectID format
+PASS - Invoices row 6 date in Sep 2026
+PASS - Invoices row 6 ProjectID present
+PASS - Invoices row 6 ProjectID format
+PASS - Invoices row 7 date in Sep 2026
+PASS - Invoices row 7 ProjectID present
+PASS - Invoices row 7 ProjectID format
+PASS - Invoices row 8 date in Sep 2026
+PASS - Invoices row 8 ProjectID present
+PASS - Invoices row 8 ProjectID format
+PASS - Invoices row 9 date in Sep 2026
+PASS - Invoices row 9 ProjectID present
+PASS - Invoices row 9 ProjectID format
+PASS - Invoices row 10 date in Sep 2026
+PASS - Invoices row 10 ProjectID present
+PASS - Invoices row 10 ProjectID format
+PASS - Invoices row 11 date in Sep 2026
+PASS - Invoices row 11 ProjectID present
+PASS - Invoices row 11 ProjectID format
+PASS - Expenses row 4 headers match expected
+PASS - Expenses row 5 status allowed
+PASS - Expenses row 5 date in Sep 2026
+PASS - Expenses row 5 ProjectID present
+PASS - Expenses row 5 ProjectID format
+PASS - Expenses row 6 status allowed
+PASS - Expenses row 6 date in Sep 2026
+PASS - Expenses row 6 ProjectID present
+PASS - Expenses row 6 ProjectID format
+PASS - Expenses row 7 status allowed
+PASS - Expenses row 7 date in Sep 2026
+PASS - Expenses row 7 ProjectID present
+PASS - Expenses row 7 ProjectID format
+PASS - Expenses row 8 status allowed
+PASS - Expenses row 8 date in Sep 2026
+PASS - Expenses row 8 ProjectID present
+PASS - Expenses row 8 ProjectID format
+PASS - Expenses row 9 status allowed
+PASS - Expenses row 9 date in Sep 2026
+PASS - Expenses row 9 ProjectID present
+PASS - Expenses row 9 ProjectID format
+PASS - Expenses row 10 status allowed
+PASS - Expenses row 10 date in Sep 2026
+PASS - Expenses row 10 ProjectID present
+PASS - Expenses row 10 ProjectID format
+PASS - Expenses row 11 status allowed
+PASS - Expenses row 11 date in Sep 2026
+PASS - Expenses row 11 ProjectID present
+PASS - Expenses row 11 ProjectID format
+PASS - Expenses row 12 status allowed
+PASS - Expenses row 12 date in Sep 2026
+PASS - Expenses row 12 ProjectID present
+PASS - Expenses row 12 ProjectID format
+PASS - Expenses row 13 status allowed
+PASS - Expenses row 13 date in Sep 2026
+PASS - Expenses row 13 ProjectID present
+PASS - Expenses row 13 ProjectID format
+PASS - Expenses row 14 status allowed
+PASS - Expenses row 14 date in Sep 2026
+PASS - Expenses row 14 ProjectID present
+PASS - Expenses row 14 ProjectID format
+PASS - Expenses row 15 status allowed
+PASS - Expenses row 15 date in Sep 2026
+PASS - Expenses row 15 ProjectID present
+PASS - Expenses row 15 ProjectID format
+PASS - Expenses row 16 status allowed
+PASS - Expenses row 16 date in Sep 2026
+PASS - Expenses row 16 ProjectID present
+PASS - Expenses row 16 ProjectID format
+PASS - Expenses row 17 status allowed
+PASS - Expenses row 17 date in Sep 2026
+PASS - Expenses row 17 ProjectID present
+PASS - Expenses row 17 ProjectID format
+PASS - Expenses row 18 status allowed
+PASS - Expenses row 18 date in Sep 2026
+PASS - Expenses row 18 ProjectID present
+PASS - Expenses row 18 ProjectID format
+PASS - Expenses row 19 status allowed
+PASS - Expenses row 19 date in Sep 2026
+PASS - Expenses row 19 ProjectID present
+PASS - Expenses row 19 ProjectID format
+PASS - Quotes row 4 headers match expected
+PASS - Quotes row 5 status allowed
+PASS - Quotes row 5 date in Sep 2026
+PASS - Quotes row 5 ProjectID present
+PASS - Quotes row 5 ProjectID format
+PASS - Quotes row 6 status allowed
+PASS - Quotes row 6 date in Sep 2026
+PASS - Quotes row 6 ProjectID present
+PASS - Quotes row 6 ProjectID format
+PASS - Quotes row 7 status allowed
+PASS - Quotes row 7 date in Sep 2026
+PASS - Quotes row 7 ProjectID present
+PASS - Quotes row 7 ProjectID format
+PASS - Summary OrderTWD equals detail sum for P001
+PASS - Summary OrderTWD equals detail sum for P002
+PASS - Summary OrderTWD equals detail sum for P003
+PASS - Summary OrderTWD equals detail sum for P004
+PASS - Summary OrderTWD equals detail sum for P005
+PASS - Summary InvoiceBalanceTWD equals detail sum for P001
+PASS - Summary InvoiceBalanceTWD equals detail sum for P002
+PASS - Summary InvoiceBalanceTWD equals detail sum for P003
+PASS - Summary InvoiceBalanceTWD equals detail sum for P004
+PASS - Summary InvoiceBalanceTWD equals detail sum for P005
+PASS - Summary ApprovedExpenseTWD equals detail sum for P001
+PASS - Summary ApprovedExpenseTWD equals detail sum for P002
+PASS - Summary ApprovedExpenseTWD equals detail sum for P003
+PASS - Summary ApprovedExpenseTWD equals detail sum for P004
+PASS - Summary ApprovedExpenseTWD equals detail sum for P005
+PASS - Summary AcceptedQuoteTWD equals detail sum for P001
+PASS - Summary AcceptedQuoteTWD equals detail sum for P002
+PASS - Summary AcceptedQuoteTWD equals detail sum for P003
+PASS - Summary AcceptedQuoteTWD equals detail sum for P004
+PASS - Summary AcceptedQuoteTWD equals detail sum for P005
+PASS - Exceptions row 4 has Source/DocumentID/ProjectID/Reason
+PASS - Exceptions rows are missing ProjectID/FX exclusion notes
+PASS - Validation period is 2026-09-01 to 2026-09-30
+PASS - Validation row count for Orders
+PASS - Validation row count for Invoices
+PASS - Validation row count for Expenses
+PASS - Validation row count for Quotes
+PASS - Validation exception count matches workbook
+PASS - Validation states ProjectID, not customer name
+PASS - Validation states orders and quotes kept separate
+ALL_CHECKS_PASSED

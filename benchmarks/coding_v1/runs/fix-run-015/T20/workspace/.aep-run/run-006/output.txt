@@ -1,0 +1,26 @@
+Workspace: C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-015\T20\workspace
+Input files:
+ - input\data\test_results.csv 81 bytes
+ - input\manifest.json 50 bytes
+ - input\supplied_sop.md 395 bytes
+Output files:
+ - output\failures.xlsx 4950 bytes
+ - output\summary.md 73 bytes
+CSV headers: ['Device ID', 'Status', 'Value']
+Workbook sheet: Failures
+Workbook headers: ['Device ID', 'Status', 'Value', 'Urgent']
+Workbook rows: 3
+Workbook data: [('D01', 'Fail', 10, False), ('D03', 'Fail', 20, False), ('D05', 'Fail', 30, True)]
+Summary.md contents:
+# Test Failure Summary
+
+- Total: 5
+- Pass: 2
+- Fail: 3
+- Urgent: 1
+
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\coding_v1\runs\fix-run-015\T20\workspace\.aep-run\run-006\script.py", line 61, in <module>
+    assert frag in summary, f'Missing summary fragment: {frag}'
+           ^^^^^^^^^^^^^^^
+AssertionError: Missing summary fragment: Total records: 5

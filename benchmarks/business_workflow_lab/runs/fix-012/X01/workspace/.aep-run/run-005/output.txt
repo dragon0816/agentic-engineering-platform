@@ -1,0 +1,225 @@
+CHECK_WORKSPACE C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-012\X01\workspace
+OUTPUT_EXISTS True
+OUTPUT_FILES
+output\downloads\sap_invoices.csv 1142
+output\downloads\sap_invoices_2026-09.csv 1142
+output\downloads\sap_orders.csv 1616
+output\downloads\sap_orders_2026-09.csv 1616
+output\expenses_2026-09_approved.csv 1843
+output\expenses_approved.csv 1843
+output\project_integration_2026-09.xlsx 18045
+output\quotes_2026-09_accepted.json 1321
+output\sap_invoices_2026-09.csv 1142
+output\sap_orders_2026-09.csv 1616
+CHECKS_JSON
+{
+  "sap_orders_2026-09.csv": {
+    "exists": true,
+    "size": 1616,
+    "header": [
+      "OrderID",
+      "CustomerID",
+      "CustomerName",
+      "ProjectID",
+      "OrderDate",
+      "Status",
+      "Currency",
+      "NetAmount"
+    ],
+    "data_rows": 20,
+    "sample": [
+      "0045000109",
+      "C001",
+      "Acme Precision Taiwan Ltd.",
+      "P003",
+      "2026-09-01"
+    ]
+  },
+  "sap_invoices_2026-09.csv": {
+    "exists": true,
+    "size": 1142,
+    "header": [
+      "InvoiceID",
+      "OrderID",
+      "CustomerID",
+      "ProjectID",
+      "InvoiceDate",
+      "DueDate",
+      "Currency",
+      "Amount",
+      "PaidAmount",
+      "Balance"
+    ],
+    "data_rows": 13,
+    "sample": [
+      "0090000207",
+      "0045000108",
+      "C006",
+      "",
+      "2026-09-01"
+    ]
+  },
+  "expenses_2026-09_approved.csv": {
+    "exists": true,
+    "size": 1843,
+    "header": [
+      "ExpenseID",
+      "EmployeeID",
+      "EmployeeName",
+      "ProjectID",
+      "ExpenseDate",
+      "Category",
+      "Currency",
+      "Amount",
+      "Status",
+      "ReceiptID",
+      "Description",
+      "MissingReceipt"
+    ],
+    "data_rows": 15,
+    "sample": [
+      "EXP-00001",
+      "E001",
+      "陳怡君 (Yi-Chun Chen)",
+      "P001",
+      "2026-09-01"
+    ]
+  },
+  "quotes_2026-09_accepted.json": {
+    "exists": true,
+    "size": 1321,
+    "type": "dict",
+    "items": 3,
+    "sample_keys": [
+      "schema_version",
+      "items",
+      "count"
+    ]
+  },
+  "project_integration_2026-09.xlsx": {
+    "exists": true,
+    "size": 18045,
+    "sheets": [
+      "Report",
+      "Orders",
+      "Invoices",
+      "Expenses",
+      "Quotes",
+      "Summary",
+      "Exceptions",
+      "Instructions"
+    ],
+    "sheet_info": {
+      "Report": {
+        "max_row": 20,
+        "max_column": 6,
+        "nonempty_rows": 7,
+        "headers_first_row": [
+          "Project Integration Report 專案整合報表",
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Orders": {
+        "max_row": 22,
+        "max_column": 8,
+        "nonempty_rows": 21,
+        "headers_first_row": [
+          "Sales orders by project",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Invoices": {
+        "max_row": 17,
+        "max_column": 11,
+        "nonempty_rows": 16,
+        "headers_first_row": [
+          "Invoices by project",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Expenses": {
+        "max_row": 19,
+        "max_column": 8,
+        "nonempty_rows": 18,
+        "headers_first_row": [
+          "Expenses by project",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Quotes": {
+        "max_row": 8,
+        "max_column": 9,
+        "nonempty_rows": 7,
+        "headers_first_row": [
+          "Quotes by project",
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Summary": {
+        "max_row": 9,
+        "max_column": 5,
+        "nonempty_rows": 8,
+        "headers_first_row": [
+          "Project summary (TWD)",
+          null,
+          null,
+          null,
+          null
+        ]
+      },
+      "Exceptions": {
+        "max_row": 24,
+        "max_column": 4,
+        "nonempty_rows": 23,
+        "headers_first_row": [
+          "Exceptions 例外與關注項目",
+          null,
+          null,
+          null
+        ]
+      },
+      "Instructions": {
+        "max_row": 56,
+        "max_column": 3,
+        "nonempty_rows": 55,
+        "headers_first_row": [
+          "填寫說明 Instructions（請勿修改本工作表）",
+          null,
+          null
+        ]
+      }
+    }
+  }
+}

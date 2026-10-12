@@ -1,0 +1,40 @@
+report= C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\X02\workspace\output\project_report_C001_2026-09-01_to_2026-09-30.xlsx
+sheets= ['Report', 'Orders', 'Invoices', 'Expenses', 'Quotes', 'Summary', 'Exceptions', 'Instructions']
+Orders: headers=['OrderID', 'ProjectID', 'CustomerID', 'OrderDate', 'Status', 'Currency', 'NetAmount', 'AmountTWD']; data_rows=3
+ sample= [{'OrderID': '0045000109', 'ProjectID': 'P003', 'CustomerID': 'C001', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': 150000, 'AmountTWD': 150000}, {'OrderID': '0045000119', 'ProjectID': 'P001', 'CustomerID': 'C001', 'OrderDate': '2026-09-15', 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': 8775, 'AmountTWD': 307125}, {'OrderID': '0045000125', 'ProjectID': 'P001', 'CustomerID': 'C001', 'OrderDate': '2026-09-25', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': 386445, 'AmountTWD': 386445}]
+Invoices: headers=['InvoiceID', 'OrderID', 'ProjectID', 'CustomerID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance', 'BalanceTWD']; data_rows=3
+ sample= [{'InvoiceID': '0090000208', 'OrderID': '0045000109', 'ProjectID': 'P003', 'CustomerID': 'C001', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': 150000, 'PaidAmount': 150000, 'Balance': 0, 'BalanceTWD': 0}, {'InvoiceID': '0090000214', 'OrderID': '0045000119', 'ProjectID': 'P001', 'CustomerID': 'C001', 'InvoiceDate': '2026-09-16', 'DueDate': '2026-10-16', 'Currency': 'EUR', 'Amount': 8775, 'PaidAmount': 8775, 'Balance': 0, 'BalanceTWD': 0}, {'InvoiceID': '0090000219', 'OrderID': '0045000125', 'ProjectID': 'P001', 'CustomerID': 'C001', 'InvoiceDate': '2026-09-30', 'DueDate': '2026-09-30', 'Currency': 'TWD', 'Amount': 386445, 'PaidAmount': 0, 'Balance': 386445, 'BalanceTWD': 386445}]
+Expenses: headers=['ExpenseID', 'ProjectID', 'EmployeeID', 'ExpenseDate', 'Status', 'Currency', 'Amount', 'AmountTWD']; data_rows=9
+ sample= [{'ExpenseID': 'EXP-00001', 'ProjectID': 'P001', 'EmployeeID': 'E001', 'ExpenseDate': '2026-09-01', 'Status': 'Approved', 'Currency': 'TWD', 'Amount': 1280, 'AmountTWD': 1280}, {'ExpenseID': 'EXP-00002', 'ProjectID': 'P001', 'EmployeeID': 'E001', 'ExpenseDate': '2026-09-02', 'Status': 'Approved', 'Currency': 'USD', 'Amount': 200, 'AmountTWD': 6400}, {'ExpenseID': 'EXP-00014', 'ProjectID': 'P003', 'EmployeeID': 'E002', 'ExpenseDate': '2026-09-04', 'Status': 'Approved', 'Currency': 'EUR', 'Amount': 180, 'AmountTWD': 6300}]
+Quotes: headers=['QuoteID', 'ProjectID', 'CustomerID', 'QuoteDate', 'ValidUntil', 'Status', 'Currency', 'NetAmount', 'AmountTWD']; data_rows=4
+ sample= [{'QuoteID': 'Q0010', 'ProjectID': 'P001', 'CustomerID': 'C001', 'QuoteDate': '2026-09-01', 'ValidUntil': '2026-09-20', 'Status': 'Sent', 'Currency': 'TWD', 'NetAmount': 207629.63, 'AmountTWD': 207629.63}, {'QuoteID': 'Q0011', 'ProjectID': 'P001', 'CustomerID': 'C001', 'QuoteDate': '2026-09-03', 'ValidUntil': '2026-10-03', 'Status': 'Accepted', 'Currency': 'USD', 'NetAmount': 10350, 'AmountTWD': 331200}, {'QuoteID': 'Q0014', 'ProjectID': 'P001', 'CustomerID': 'C001', 'QuoteDate': '2026-09-09', 'ValidUntil': '2026-09-28', 'Status': 'Expired', 'Currency': 'EUR', 'NetAmount': 18072, 'AmountTWD': 632520}]
+Summary: headers=['ProjectID', 'OrderTWD', 'InvoiceBalanceTWD', 'ApprovedExpenseTWD', 'AcceptedQuoteTWD']; data_rows=2
+ sample= [{'ProjectID': 'P001', 'OrderTWD': 693570, 'InvoiceBalanceTWD': 386445, 'ApprovedExpenseTWD': 18305, 'AcceptedQuoteTWD': 331200}, {'ProjectID': 'P003', 'OrderTWD': 150000, 'InvoiceBalanceTWD': 0, 'ApprovedExpenseTWD': 13037.5, 'AcceptedQuoteTWD': 0}]
+Exceptions: headers=['Source', 'DocumentID', 'ProjectID', 'Reason']; data_rows=3
+ sample= [{'Source': 'Expenses', 'DocumentID': 'EXP-00006', 'ProjectID': 'P001', 'Reason': 'Missing receipt'}, {'Source': 'Quotes', 'DocumentID': 'Q0010', 'ProjectID': 'P001', 'Reason': 'Expired/non-accepted quote: ValidUntil 2026-09-20 < 2026-09-30, Status Sent'}, {'Source': 'Quotes', 'DocumentID': 'Q0014', 'ProjectID': 'P001', 'Reason': 'Expired/non-accepted quote: ValidUntil 2026-09-28 < 2026-09-30, Status Expired'}]
+quote statuses retained= ['Accepted', 'Draft', 'Expired', 'Sent']
+exceptions= [
+  {
+    "Source": "Expenses",
+    "DocumentID": "EXP-00006",
+    "ProjectID": "P001",
+    "Reason": "Missing receipt"
+  },
+  {
+    "Source": "Quotes",
+    "DocumentID": "Q0010",
+    "ProjectID": "P001",
+    "Reason": "Expired/non-accepted quote: ValidUntil 2026-09-20 < 2026-09-30, Status Sent"
+  },
+  {
+    "Source": "Quotes",
+    "DocumentID": "Q0014",
+    "ProjectID": "P001",
+    "Reason": "Expired/non-accepted quote: ValidUntil 2026-09-28 < 2026-09-30, Status Expired"
+  }
+]
+Traceback (most recent call last):
+  File "C:\Users\Chi_L\Documents\ChatGPT\agentic-engineering-platform\benchmarks\business_workflow_lab\runs\fix-011\X02\workspace\.aep-run\run-009\script.py", line 79, in <module>
+    assert any('ValidUntil 2026-09-20' in r and 'not Accepted' in r for r in reasons), 'Q0010 quote exception rule absent'
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Q0010 quote exception rule absent

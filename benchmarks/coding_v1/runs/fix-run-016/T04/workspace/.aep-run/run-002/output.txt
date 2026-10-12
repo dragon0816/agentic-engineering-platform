@@ -1,0 +1,16 @@
+WROTE_MANIFEST: output/manifest.csv
+SOURCE_FILE_COUNT: 8
+MANIFEST_RECORD_COUNT: 8
+MANIFEST_COLUMNS: ['original_path', 'new_path', 'sha256']
+CATEGORY_COUNTS: {'PDF': 2, 'Excel': 2, 'Image': 2, 'Other': 2}
+OUTPUT_FILES:
+ - output/classified/Excel/budget.xls size= 16
+ - output/classified/Excel/plan.xlsx size= 35
+ - output/classified/Image/logo.png size= 9
+ - output/classified/Image/photo.JPG size= 13
+ - output/classified/Other/notes.txt size= 11
+ - output/classified/Other/README size= 12
+ - output/classified/PDF/dir1/report.PDF size= 20
+ - output/classified/PDF/dir2/report.PDF size= 30
+ - output/manifest.csv size= 1021
+CHECKS_PASSED: manifest columns, row count, classified category paths, preserved relative paths, SHA-256 source/copy equality, output under output/classified

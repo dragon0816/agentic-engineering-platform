@@ -1,0 +1,73 @@
+downloads: ['sap_invoices_C001_2026-09.csv', 'sap_orders_C001_2026-09.csv']
+
+--- sap_orders_C001_2026-09.csv ---
+count 4 headers dict_keys(['OrderID', 'CustomerID', 'CustomerName', 'ProjectID', 'OrderDate', 'Status', 'Currency', 'NetAmount'])
+{'OrderID': '0045000109', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P003', 'OrderDate': '2026-09-01', 'Status': 'Open', 'Currency': 'TWD', 'NetAmount': '150000.00'}
+{'OrderID': '0045000114', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-09-08', 'Status': 'Cancelled', 'Currency': 'USD', 'NetAmount': '11956.00'}
+{'OrderID': '0045000119', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-09-15', 'Status': 'Open', 'Currency': 'EUR', 'NetAmount': '8775.00'}
+{'OrderID': '0045000125', 'CustomerID': 'C001', 'CustomerName': 'Acme Precision Taiwan Ltd.', 'ProjectID': 'P001', 'OrderDate': '2026-09-25', 'Status': 'Closed', 'Currency': 'TWD', 'NetAmount': '386445.00'}
+
+--- sap_invoices_C001_2026-09.csv ---
+count 3 headers dict_keys(['InvoiceID', 'OrderID', 'CustomerID', 'ProjectID', 'InvoiceDate', 'DueDate', 'Currency', 'Amount', 'PaidAmount', 'Balance'])
+{'InvoiceID': '0090000208', 'OrderID': '0045000109', 'CustomerID': 'C001', 'ProjectID': 'P003', 'InvoiceDate': '2026-09-02', 'DueDate': '2026-09-12', 'Currency': 'TWD', 'Amount': '150000.00', 'PaidAmount': '150000.00', 'Balance': '0.00'}
+{'InvoiceID': '0090000214', 'OrderID': '0045000119', 'CustomerID': 'C001', 'ProjectID': 'P001', 'InvoiceDate': '2026-09-16', 'DueDate': '2026-10-16', 'Currency': 'EUR', 'Amount': '8775.00', 'PaidAmount': '8775.00', 'Balance': '0.00'}
+{'InvoiceID': '0090000219', 'OrderID': '0045000125', 'CustomerID': 'C001', 'ProjectID': 'P001', 'InvoiceDate': '2026-09-30', 'DueDate': '2026-09-30', 'Currency': 'TWD', 'Amount': '386445.00', 'PaidAmount': '0.00', 'Balance': '386445.00'}
+
+CMD ['C:\\Users\\Chi_L\\AppData\\Local\\AgenticEngineeringPlatform\\coding-runner\\cpython-3.12.14-windows-x86_64-none\\python.exe', 'C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\run_quote_cli.py', 'quotes', 'list', '--customer', 'C001', '--from', '2026-09-01', '--to', '2026-09-30', '--format', 'json']
+returncode 0
+stderr 
+stdout {
+ "schema_version": 1,
+ "items": [
+  {
+   "QuoteID": "Q0010",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "QuoteDate": "2026-09-01",
+   "ValidUntil": "2026-09-20",
+   "Status": "Sent",
+   "Currency": "TWD",
+   "Subtotal": "218557.50",
+   "DiscountPercent": "5",
+   "NetAmount": "207629.63"
+  },
+  {
+   "QuoteID": "Q0011",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "QuoteDate": "2026-09-03",
+   "ValidUntil": "2026-10-03",
+   "Status": "Accepted",
+   "Currency": "USD",
+   "Subtotal": "11500.00",
+   "DiscountPercent": "10",
+   "NetAmount": "10350.00"
+  },
+  {
+   "QuoteID": "Q0014",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "QuoteDate": "2026-09-09",
+   "ValidUntil": "2026-09-28",
+   "Status": "Expired",
+   "Currency": "EUR",
+   "Subtotal": "18072.00",
+   "DiscountPercent": "0",
+   "NetAmount": "18072.00"
+  },
+  {
+   "QuoteID": "Q0018",
+   "CustomerID": "C001",
+   "ProjectID": "P001",
+   "QuoteDate": "2026-09-21",
+   "ValidUntil": "2026-10-21",
+   "Status": "Draft",
+   "Currency": "TWD",
+   "Subtotal": "572130.00",
+   "DiscountPercent": "10",
+   "NetAmount": "514917.00"
+  }
+ ],
+ "count": 4
+}
+

@@ -1,0 +1,806 @@
+{
+ "session_id": "conversation-b1483c83c13d4a3995967bfb8d302c78",
+ "exchanges": [
+  {
+   "sent": "請使用你之前為三系統專案整合產生的 workflow，把期間改成 2026-10-01 到 2026-10-31，僅整理 P003，输出 october_P003.xlsx。請直接使用既有 workflow 與設定參數，不重新寫一套解題程式。\n\n---\n環境說明（操作者提供）\n- 今天日期：2026-10-06（Asia/Taipei）\n- 本題 workspace：C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-011\\X03\\workspace\n- 附件（在 workspace 的 input 資料夾）：\n  - input\\project_template.xlsx\n  - input\\fx_rates.csv\n  - input\\sap_manual.md\n  - input\\expense_manual.md\n  - input\\quote_cli_manual.md\n- 交付物請寫到 workspace 的 output 資料夾；需要可重跑的 workflow 時，請建立成本平台的 workflow。",
+   "http_status": 200,
+   "seconds": 34.25,
+   "timed_out": false,
+   "reply": {
+    "ok": true,
+    "conversation": {
+     "session_id": "conversation-b1483c83c13d4a3995967bfb8d302c78",
+     "actor": "leo.chi",
+     "title": "請使用你之前為三系統專案整合產生的 workflow，把期間改成 2026-10-01 到 2026-10-31，僅整理 P003，输出 oct…",
+     "backend": "gateway",
+     "data_classification": "UNCLASSIFIED",
+     "classified_by": null,
+     "created_at": "2026-10-09T06:33:42.873710Z",
+     "updated_at": "2026-10-09T06:34:17.040889Z",
+     "messages": [
+      {
+       "message_id": "message-05baf8398eb64fa18c1ed636a52fbabc",
+       "role": "user",
+       "text": "請使用你之前為三系統專案整合產生的 workflow，把期間改成 2026-10-01 到 2026-10-31，僅整理 P003，输出 october_P003.xlsx。請直接使用既有 workflow 與設定參數，不重新寫一套解題程式。\n\n---\n環境說明（操作者提供）\n- 今天日期：2026-10-06（Asia/Taipei）\n- 本題 workspace：C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-011\\X03\\workspace\n- 附件（在 workspace 的 input 資料夾）：\n  - input\\project_template.xlsx\n  - input\\fx_rates.csv\n  - input\\sap_manual.md\n  - input\\expense_manual.md\n  - input\\quote_cli_manual.md\n- 交付物請寫到 workspace 的 output 資料夾；需要可重跑的 workflow 時，請建立成本平台的 workflow。",
+       "created_at": "2026-10-09T06:33:42.882849Z",
+       "status": "submitted",
+       "trace": null,
+       "reply_to": null,
+       "feedback": null,
+       "tool_summary": null,
+       "attachments": []
+      },
+      {
+       "message_id": "message-9f9e8861ba7c43ac9055294d718f64a8",
+       "role": "assistant",
+       "text": "我已查過既有 workflow，不能在「不改 workflow／不重寫程式」的前提下正確完成這次要求。\n\n目前可用的三系統專案整合 workflow 狀況：\n\n1. `engineering/project-financial-integration-report@1.0.2`\n   - 參數只有：\n     - `from_date`\n     - `to_date`\n     - `period_label`\n   - 沒有 `ProjectID` 篩選參數，所以無法指定「僅 P003」。\n   - 輸出檔名是 workflow 內固定邏輯產生，不能直接指定 `october_P003.xlsx`。\n   - workflow 內 workspace 固定在舊路徑 `fix-011\\X01\\workspace`，不是這次指定的 `fix-011\\X03\\workspace`。\n\n2. `engineering/monthly-project-integration-report@1.0.2`\n   - 參數是 customer/date/cutoff，沒有 ProjectID 與輸出檔名參數。\n   - workspace 固定在 `fix-011\\X02\\workspace`，也不是本題 workspace。\n\n3. `engineering/project-monthly-integration-report@1.0.2`\n   - 也是期間與 period label，沒有 ProjectID 篩選或輸出檔名參數。\n   - workspace 固定在 `fix-010\\X01\\workspace`。\n\n所以我沒有直接執行，避免產出錯誤範圍或錯誤檔名的報表。\n\n下一步請你確認要我怎麼做：\n\n- **選項 A：** 允許我「修訂既有 workflow」加入這次需要的參數：`workspace`、`project_id`、`output_filename`，然後用平台 workflow 跑出 `output\\october_P003.xlsx`。  \n- **選項 B：** 仍要使用既有 workflow 不改；那它只能依目前支援的參數跑完整期間資料，無法保證只含 P003，也無法指定精確檔名。",
+       "created_at": "2026-10-09T06:34:17.040889Z",
+       "status": "answered",
+       "trace": {
+        "trace_id": "trace-50c86cd468594ecbb6011605a636d4d6",
+        "request_id": "request-50c86cd468594ecbb6011605a636d4d6",
+        "span_id": "span-50c86cd468594ecbb6011605a636d4d6",
+        "parent_span_id": null
+       },
+       "reply_to": null,
+       "feedback": null,
+       "tool_summary": "- authoring__list_workflows: succeeded 30 item(s) [{\"candidate_id\": \"wf-20261009-063009-f6e358\", \"workflow\": \"engineering/monthly-project-integration-report@1.0.2\", \"status\": \"installed\"}, {\"candidate_id\": \"wf-20261009-061851-9b4177\", \"workflow\": \"engineering/project-financial-integration-report@1.0.2\", \"status\": \"installed\"}, {\"candidate_id\": \"wf-20261009-060856-a8de98\", \"workflow\": \"engineering/quote-cli-report@1.0.1\", \"status\": \"installed\"}, {\"candidate_id\": \"wf-20261009-055828-be43e0\", \"workflow\": \"engineering/expense-report-from-desktop-export@1.0.1\", \"status\": \"installed\"}, {\"candidate_id\": \"wf-20261009-054626-36ef4d\", \"workflow\": \"engineering/sap-sales-orders-template@1.0.1\", \"status\": \"installed\"}]\n- authoring__get_workflow: succeeded {}\n- authoring__get_workflow: succeeded {\"candidate_id\": \"wf-20261009-063009-f6e358\", \"workflow\": \"engineering/monthly-project-integration-report@1.0.2\", \"digest\": \"4609b0b22365cd5090fbad02c818ab73734733092da1abfcb7c17c4a1187153d\", \"status\": \"installed\"}\n- authoring__get_workflow: succeeded {}",
+       "attachments": []
+      }
+     ]
+    },
+    "answer": {
+     "tool_summary": "- authoring__list_workflows: succeeded 30 item(s) [{\"candidate_id\": \"wf-20261009-063009-f6e358\", \"workflow\": \"engineering/monthly-project-integration-report@1.0.2\", \"status\": \"installed\"}, {\"candidate_id\": \"wf-20261009-061851-9b4177\", \"workflow\": \"engineering/project-financial-integration-report@1.0.2\", \"status\": \"installed\"}, {\"candidate_id\": \"wf-20261009-060856-a8de98\", \"workflow\": \"engineering/quote-cli-report@1.0.1\", \"status\": \"installed\"}, {\"candidate_id\": \"wf-20261009-055828-be43e0\", \"workflow\": \"engineering/expense-report-from-desktop-export@1.0.1\", \"status\": \"installed\"}, {\"candidate_id\": \"wf-20261009-054626-36ef4d\", \"workflow\": \"engineering/sap-sales-orders-template@1.0.1\", \"status\": \"installed\"}]\n- authoring__get_workflow: succeeded {}\n- authoring__get_workflow: succeeded {\"candidate_id\": \"wf-20261009-063009-f6e358\", \"workflow\": \"engineering/monthly-project-integration-report@1.0.2\", \"digest\": \"4609b0b22365cd5090fbad02c818ab73734733092da1abfcb7c17c4a1187153d\", \"status\": \"installed\"}\n- authoring__get_workflow: succeeded {}",
+     "ok": true,
+     "answer": "我已查過既有 workflow，不能在「不改 workflow／不重寫程式」的前提下正確完成這次要求。\n\n目前可用的三系統專案整合 workflow 狀況：\n\n1. `engineering/project-financial-integration-report@1.0.2`\n   - 參數只有：\n     - `from_date`\n     - `to_date`\n     - `period_label`\n   - 沒有 `ProjectID` 篩選參數，所以無法指定「僅 P003」。\n   - 輸出檔名是 workflow 內固定邏輯產生，不能直接指定 `october_P003.xlsx`。\n   - workflow 內 workspace 固定在舊路徑 `fix-011\\X01\\workspace`，不是這次指定的 `fix-011\\X03\\workspace`。\n\n2. `engineering/monthly-project-integration-report@1.0.2`\n   - 參數是 customer/date/cutoff，沒有 ProjectID 與輸出檔名參數。\n   - workspace 固定在 `fix-011\\X02\\workspace`，也不是本題 workspace。\n\n3. `engineering/project-monthly-integration-report@1.0.2`\n   - 也是期間與 period label，沒有 ProjectID 篩選或輸出檔名參數。\n   - workspace 固定在 `fix-010\\X01\\workspace`。\n\n所以我沒有直接執行，避免產出錯誤範圍或錯誤檔名的報表。\n\n下一步請你確認要我怎麼做：\n\n- **選項 A：** 允許我「修訂既有 workflow」加入這次需要的參數：`workspace`、`project_id`、`output_filename`，然後用平台 workflow 跑出 `output\\october_P003.xlsx`。  \n- **選項 B：** 仍要使用既有 workflow 不改；那它只能依目前支援的參數跑完整期間資料，無法保證只含 P003，也無法指定精確檔名。",
+     "status": "answered",
+     "outcome": {
+      "trace": {
+       "trace_id": "trace-50c86cd468594ecbb6011605a636d4d6",
+       "request_id": "request-50c86cd468594ecbb6011605a636d4d6",
+       "span_id": "span-50c86cd468594ecbb6011605a636d4d6",
+       "parent_span_id": null
+      },
+      "ingress": "local",
+      "actor": "leo.chi",
+      "refusal": null,
+      "conversation": {
+       "trace": {
+        "trace_id": "trace-50c86cd468594ecbb6011605a636d4d6",
+        "request_id": "request-50c86cd468594ecbb6011605a636d4d6",
+        "span_id": "span-50c86cd468594ecbb6011605a636d4d6",
+        "parent_span_id": null
+       },
+       "status": "answered",
+       "text": "我已查過既有 workflow，不能在「不改 workflow／不重寫程式」的前提下正確完成這次要求。\n\n目前可用的三系統專案整合 workflow 狀況：\n\n1. `engineering/project-financial-integration-report@1.0.2`\n   - 參數只有：\n     - `from_date`\n     - `to_date`\n     - `period_label`\n   - 沒有 `ProjectID` 篩選參數，所以無法指定「僅 P003」。\n   - 輸出檔名是 workflow 內固定邏輯產生，不能直接指定 `october_P003.xlsx`。\n   - workflow 內 workspace 固定在舊路徑 `fix-011\\X01\\workspace`，不是這次指定的 `fix-011\\X03\\workspace`。\n\n2. `engineering/monthly-project-integration-report@1.0.2`\n   - 參數是 customer/date/cutoff，沒有 ProjectID 與輸出檔名參數。\n   - workspace 固定在 `fix-011\\X02\\workspace`，也不是本題 workspace。\n\n3. `engineering/project-monthly-integration-report@1.0.2`\n   - 也是期間與 period label，沒有 ProjectID 篩選或輸出檔名參數。\n   - workspace 固定在 `fix-010\\X01\\workspace`。\n\n所以我沒有直接執行，避免產出錯誤範圍或錯誤檔名的報表。\n\n下一步請你確認要我怎麼做：\n\n- **選項 A：** 允許我「修訂既有 workflow」加入這次需要的參數：`workspace`、`project_id`、`output_filename`，然後用平台 workflow 跑出 `output\\october_P003.xlsx`。  \n- **選項 B：** 仍要使用既有 workflow 不改；那它只能依目前支援的參數跑完整期間資料，無法保證只含 P003，也無法指定精確檔名。",
+       "model_turns": 5,
+       "tools": [
+        {
+         "call_id": "call_pnpaz37cIsaIaBMrJ33sHXw5",
+         "name": "authoring__list_workflows",
+         "decision": null,
+         "capability": null,
+         "workflow": null,
+         "host": {
+          "status": "succeeded",
+          "data": [
+           {
+            "candidate_id": "wf-20261009-063009-f6e358",
+            "title": "Monthly project integration report",
+            "workflow": "engineering/monthly-project-integration-report@1.0.2",
+            "status": "installed",
+            "digest": "4609b0b22365cd5090fbad02c818ab73734733092da1abfcb7c17c4a1187153d",
+            "description": "Collect monthly orders, invoices, approved project expenses, and quotes for one customer, convert amounts using attached FX rates, fill the project template, and flag attention items.",
+            "parameters": [
+             "customer_id",
+             "from_date",
+             "to_date",
+             "attention_cutoff"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261009-061851-9b4177",
+            "title": "Project financial integration report",
+            "workflow": "engineering/project-financial-integration-report@1.0.2",
+            "status": "installed",
+            "digest": "1b68a11a709e97c44f81c60435f4cb53e28bd188f422b4b0919c02e76b8a2dc7",
+            "description": "Collect SAP orders and invoices, approved expenses, and accepted quotes for a period, then fill the project template by ProjectID with separate financial totals.",
+            "parameters": [
+             "from_date",
+             "to_date",
+             "period_label"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261009-060856-a8de98",
+            "title": "Quote CLI 報價報表產生器",
+            "workflow": "engineering/quote-cli-report@1.0.1",
+            "status": "installed",
+            "digest": "ca847f2d3bec0c08167c6a7497a98105c693a6f46f6c316a4485e4ad9e9690c3",
+            "description": "使用模擬報價系統 CLI 依客戶與日期區間取得報價，填入 quote_template.xlsx 的 Quotes、Lines 與依 status/currency 彙總的 Summary。",
+            "parameters": [
+             "customer_id",
+             "from_date",
+             "to_date",
+             "cli_path"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261009-055828-be43e0",
+            "title": "Expense report from desktop export",
+            "workflow": "engineering/expense-report-from-desktop-export@1.0.1",
+            "status": "installed",
+            "digest": "ce31a1fdb2cd0731643fcd806f3fb3070ad5a46bcdfaaad0e72f2fe3160588e6",
+            "description": "Export expenses from the Expense desktop app for an employee/date range and fill the expense template with details, status/currency summary, TWD total, and missing-receipt exceptions.",
+            "parameters": [
+             "employee_id",
+             "date_from",
+             "date_to"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261009-054626-36ef4d",
+            "title": "SAP Sales Orders Template",
+            "workflow": "engineering/sap-sales-orders-template@1.0.1",
+            "status": "installed",
+            "digest": "08e84cafdd0bb5ecc208c9385750d14f6b2c761542cba113356f8c128a5151ba",
+            "description": "Export SAP-like Sales Orders for a date/status filter, enrich details, convert with attached FX rates, and fill the sales template workbook.",
+            "parameters": [
+             "start_date",
+             "end_date",
+             "status"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261009-054057-de90f0",
+            "title": "supplied SOP failure report",
+            "workflow": "engineering/supplied-sop-failure-report@1.0.1",
+            "status": "draft",
+            "digest": "19e1653a12497f621a82d656894594a82d5dedf6e392dbc2ed5e97d786e6bf7d",
+            "description": "Read the supplied SOP and test CSV, keep all Fail rows, flag Urgent by threshold, and write failures.xlsx plus summary.md.",
+            "parameters": [
+             "threshold"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261009-053250-4fe8fb",
+            "title": "T09 login retry data download",
+            "workflow": "engineering/t09-login-retry-data-download@1.0.0",
+            "status": "draft",
+            "digest": "600b223b9635c1fb31b437307b3d4330583e538f72e4aa29467fc632262fc756",
+            "description": "Read the T09 SOP at run time, sign in with up to three attempts, and save /data as data.json only after success.",
+            "parameters": [
+             "base_url"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261008-013937-41d639",
+            "title": "Yahoo 股市成交價查詢（瀏覽器版）",
+            "workflow": "engineering/yahoo-stock-last-price@1.0.1",
+            "status": "installed",
+            "digest": "9fa2b80c00f55d393417e1e79aa71eac2c7c2f80f14103cc823b2ced1a421cee",
+            "description": "Open a Yahoo Taiwan stock quote page and return the visible page text so the latest trade price can be read without writing files.",
+            "parameters": [
+             "stock_query"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261007-145854-646905",
+            "title": "Test failure tracking",
+            "workflow": "engineering/test-failure-tracking@1.0.1",
+            "status": "draft",
+            "digest": "8061937684f422101ce6a250c3f50d2ef93eef594080ca3c577715bd9d2da2d8",
+            "description": "Read the supplied test CSV, keep all Fail rows, mark Urgent when Value is greater than 20, and write failures.xlsx plus summary.md without modifying inputs.",
+            "parameters": []
+           },
+           {
+            "candidate_id": "wf-20261007-144208-cdda9e",
+            "title": "登入並下載資料",
+            "workflow": "engineering/login-and-download-data@1.0.0",
+            "status": "draft",
+            "digest": "f8a7d98d81d275ff53e87eba52d7f678837ae12359e69a5e430756072eb0bd47",
+            "description": "依 SOP 進行登入重試，成功後下載資料並輸出 data.json。",
+            "parameters": [
+             "base_url",
+             "login_user",
+             "login_secret"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261007-115633-a08405",
+            "title": "CSV Failures Summary",
+            "workflow": "engineering/csv-failures-summary@1.0.1",
+            "status": "draft",
+            "digest": "b10485527b24948b9f341cee0c3ffbde7a5b60c1c465d4d3ac68331d5a52bd50",
+            "description": "Read the test CSV from the task input folder, keep all Fail rows, mark Urgent by Value threshold, and write failures.xlsx plus summary.md to output.",
+            "parameters": [
+             "urgent_threshold"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261007-114841-b46a52",
+            "title": "登入並下載資料",
+            "workflow": "engineering/login-download-data@1.0.0",
+            "status": "draft",
+            "digest": "8083dd04057d916aa488444e3aadc76ab8c4c34cc64ee5f5593107f657aaa18b",
+            "description": "依 input/login_sop.md 最多嘗試 3 次，成功後取得 /data 並輸出 data.json。",
+            "parameters": []
+           },
+           {
+            "candidate_id": "wf-20261007-113605-1f3bf4",
+            "title": "Customer Project Monthly Report",
+            "workflow": "engineering/customer-project-monthly-report@1.0.2",
+            "status": "installed",
+            "digest": "76c5debc207b0219c13e46b51b31707d10f9f7b9d56fde5ead144ea1a0d50eaf",
+            "description": "Gather ERP orders/invoices, approved expenses, and quotes for a customer/date range, convert by attached FX rates, fill the project workbook, and flag exceptions.",
+            "parameters": [
+             "customer_id",
+             "from_date",
+             "to_date",
+             "as_of_date"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261007-112555-1c6179",
+            "title": "Project monthly integration report",
+            "workflow": "engineering/project-monthly-integration-report@1.0.2",
+            "status": "installed",
+            "digest": "d849f8e0a6caf17ffcaa03a7c6bef5535afa63a4aea26c45be880d1347313f03",
+            "description": "Collect non-cancelled SAP orders and invoices, approved expenses, and accepted quotes for a period, then fill the project template by ProjectID using supplied FX rates.",
+            "parameters": [
+             "date_from",
+             "date_to",
+             "period_label"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261007-111732-b3da1b",
+            "title": "Quote report from CLI",
+            "workflow": "engineering/quote-report-from-cli@1.0.0",
+            "status": "installed",
+            "digest": "47c0166679d85551ea72c21e28641a1506520ddfad8e4997526cb51a87200421",
+            "description": "Fetch quotes from the configured quote CLI for a customer and date range, then fill the provided quote workbook template with quote headers, line items, and status/currency summary.",
+            "parameters": [
+             "customer_id",
+             "from_date",
+             "to_date",
+             "cli_path"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261007-110526-752934",
+            "title": "Reusable Expense Export Report",
+            "workflow": "engineering/expense-export-report@1.0.1",
+            "status": "installed",
+            "digest": "27f5c2c3ae4b36ffcdfa8effe2b096f0c8d83b03917b3a86e38d72abe5c94961",
+            "description": "Export all Expense Viewer rows for an employee and inclusive date range, fill the expense template, and summarize by status and currency with TWD total.",
+            "parameters": [
+             "employee_id",
+             "from_date",
+             "to_date"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261007-105612-3e2939",
+            "title": "SAP Sales Orders workbook",
+            "workflow": "engineering/sap-sales-orders-workbook@1.0.1",
+            "status": "installed",
+            "digest": "6683f0d082d21461c4d1573a933961ce3d3633466641c2dd3e9f46815ce2cccf",
+            "description": "Export filtered SAP-like Sales Orders and fill the sales template workbook with FX-converted TWD summary.",
+            "parameters": [
+             "date_from",
+             "date_to",
+             "status",
+             "output_filename"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261007-073142-bd3d1b",
+            "title": "Test failure tracking",
+            "workflow": "engineering/test-failure-tracking@1.0.1",
+            "status": "draft",
+            "digest": "e473e5c031799c04eccbe82e37e16c296fad879af5f6a00b293e7428128c01c0",
+            "description": "Read the SOP/manifest test CSV, keep Fail rows, flag Value > 20 as urgent, and write failures.xlsx and summary.md under the workspace output folder without changing inputs.",
+            "parameters": []
+           },
+           {
+            "candidate_id": "wf-20261007-071904-d64f9b",
+            "title": "T09 login and download data",
+            "workflow": "engineering/t09-login-download-data@1.0.0",
+            "status": "draft",
+            "digest": "a09eeaed33caca0c318a8edcc26b597ee61ecdd947392d4915954de19d599719",
+            "description": "Call the T09 service entry endpoint up to three times, then save the returned data JSON only after success.",
+            "parameters": [
+             "u",
+             "s"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261007-060310-6cc451",
+            "title": "expense report from desktop export reusable",
+            "workflow": "engineering/expense-report-from-desktop-export-reusable@1.0.4",
+            "status": "draft",
+            "digest": "263b2616852ba252f49c45b9657be10f3f516634dfcce7b00ea3cd6d3bdbec59",
+            "description": "Export filtered expenses from the Expense Viewer desktop app and create a parameterized Excel expense report.",
+            "parameters": [
+             "employee_id",
+             "date_from",
+             "date_to"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261007-055116-c19f63",
+            "title": "SAP Sales Orders Report",
+            "workflow": "engineering/sap-sales-orders-report@1.0.1",
+            "status": "draft",
+            "digest": "23d9da4013643a900622ab58d1a8f9dda9355294a8eb4168a48dd81ec8a597c5",
+            "description": "Export SAP sales orders for a date range/status, convert amounts to TWD with the attached FX table, and fill the sales workbook template.",
+            "parameters": [
+             "start_date",
+             "end_date",
+             "status",
+             "output_filename"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261007-054635-1bebe7",
+            "title": "Build test failure outputs",
+            "workflow": "engineering/build-test-failure-outputs@1.0.1",
+            "status": "draft",
+            "digest": "f176e309206c49fa1d42da459232c3b256594a471956a0e2d6a3af209c0d6548",
+            "description": "Read test results CSV from the workspace input manifest, keep failed rows, flag urgent failures, and write failures.xlsx and summary.md under output.",
+            "parameters": []
+           },
+           {
+            "candidate_id": "wf-20261007-053654-c96fae",
+            "title": "T09 Login and Data Download",
+            "workflow": "engineering/t09-login-data-download@1.0.0",
+            "status": "draft",
+            "digest": "ea5a580fdfbe5a3327b372a36b1476ed089b948126307e86d48e6648f627b8eb",
+            "description": "Log in to the T09 service with up to three attempts, then download /data to data.json only after successful authentication.",
+            "parameters": []
+           },
+           {
+            "candidate_id": "wf-20261007-045712-532043",
+            "title": "T09 login data fetch",
+            "workflow": "engineering/t09-login-data-fetch@1.0.0",
+            "status": "draft",
+            "digest": "0235017ef02f1cb54cfecd2f46c35983315d72c97e70f2e3cd38d29953366854",
+            "description": "Read the local SOP at runtime, retry sign-in at most three times with a 0.1 second wait, and save the protected data endpoint response as data.json only after success.",
+            "parameters": []
+           },
+           {
+            "candidate_id": "wf-20261007-045441-358d3a",
+            "title": "T09 login data fetch workflow",
+            "workflow": "engineering/t09-login-data-fetch@1.0.0",
+            "status": "draft",
+            "digest": "a0d58f943227ff1af3a11fa8667e5659ff1388ac758f115d4f564e24a607d27a",
+            "description": "Follow input/login_sop.md to log in with up to three attempts, wait 0.1 seconds after each failed login, and write /data to output/data.json only after success.",
+            "parameters": []
+           },
+           {
+            "candidate_id": "wf-20261007-043406-065bb9",
+            "title": "C001 monthly project cost report",
+            "workflow": "engineering/c001-monthly-project-cost-report@1.0.0",
+            "status": "installed",
+            "digest": "e39f773203d12c55b26315c5fa80b1e04b48760a7d73d0aed5857dda64d29160",
+            "description": "Fetch C001 monthly orders, invoices, approved project expenses, and quotes, convert with the attached FX table, fill project_template.xlsx, and flag attention items.",
+            "parameters": [
+             "workspace",
+             "customer_id",
+             "from_date",
+             "to_date",
+             "cutoff_date",
+             "expense_project_1",
+             "expense_project_2"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261007-041943-57bde2",
+            "title": "Project integration report",
+            "workflow": "engineering/project-integration-report@1.0.3",
+            "status": "draft",
+            "digest": "6a0f6be73051a2ae881f23d2255a94a242f093cb737e946a238b02c470c0803f",
+            "description": "Download SAP orders and invoices, export approved expenses, fetch accepted quotes, then create a project integration report from the provided Excel template.",
+            "parameters": [
+             "from_date",
+             "to_date"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261007-041049-e6371f",
+            "title": "Quote CLI Excel report",
+            "workflow": "engineering/quote-cli-excel-report@1.0.0",
+            "status": "installed",
+            "digest": "23a899422c2da0ca511eae666bdaca973c03e664ffe23592e0c2020838691c01",
+            "description": "Use the configurable quote CLI to export quote headers and lines into the Excel template and summarize by status and currency.",
+            "parameters": [
+             "customer_id",
+             "from_date",
+             "to_date",
+             "cli_path"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261007-035156-4a50c4",
+            "title": "Expense report from desktop export",
+            "workflow": "engineering/expense-report-from-desktop-export@1.0.3",
+            "status": "draft",
+            "digest": "46bbd67bd7bdeba963c342a5376ea75e22d26c4a58bb13b4bb12511c801b0c85",
+            "description": "Export the currently filtered Expense Viewer rows and build the expense report workbook from the template.",
+            "parameters": [
+             "employee_id",
+             "date_from",
+             "date_to",
+             "output_file"
+            ]
+           },
+           {
+            "candidate_id": "wf-20261007-034006-e9febf",
+            "title": "SAP Sales Orders Report",
+            "workflow": "engineering/sap-sales-orders-report@1.0.2",
+            "status": "installed",
+            "digest": "9090f9840002ae88cb597a62592c93ddca573553fd162b60efa029fb9f694969",
+            "description": "Download filtered SAP-like sales orders and fill the sales template with FX-converted TWD summary.",
+            "parameters": [
+             "start_date",
+             "end_date",
+             "status"
+            ]
+           }
+          ],
+          "failure": null
+         },
+         "failure": null
+        },
+        {
+         "call_id": "call_ItKA083lR7eWqmdDIYBJyU85",
+         "name": "authoring__get_workflow",
+         "decision": null,
+         "capability": null,
+         "workflow": null,
+         "host": {
+          "status": "succeeded",
+          "data": {
+           "truncated": true,
+           "preview": "{\"candidate_id\": \"wf-20261009-061851-9b4177\", \"workflow\": \"engineering/project-financial-integration-report@1.0.2\", \"status\": \"installed\", \"digest\": \"1b68a11a709e97c44f81c60435f4cb53e28bd188f422b4b0919c02e76b8a2dc7\", \"parameters\": [{\"name\": \"from_date\", \"label\": \"查詢起始日期 YYYY-MM-DD\", \"kind\": \"date\", \"scope\": \"runtime\", \"description\": null, \"required\": true, \"options\": [], \"minimum\": null, \"maximum\": null}, {\"name\": \"to_date\", \"label\": \"查詢結束日期 YYYY-MM-DD\", \"kind\": \"date\", \"scope\": \"runtime\", \"description\": null, \"required\": true, \"options\": [], \"minimum\": null, \"maximum\": null}, {\"name\": \"period_label\", \"label\": \"輸出檔名期間標籤，例如 2026-09\", \"kind\": \"text\", \"scope\": \"runtime\", \"description\": null, \"required\": true, \"options\": [], \"minimum\": null, \"maximum\": null}], \"steps\": [{\"capability\": {\"namespace\": \"browser\", \"name\": \"operate\", \"version\": \"1.0.0\"}, \"inputs\": {\"workspace\": {\"source\": \"fixed\", \"value\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-011\\\\X01\\\\workspace\"}, \"values\": {\"source\": \"run\", \"path\": []}, \"actions\": {\"source\": \"fixed\", \"value\": [{\"do\": \"open\", \"url\": \"http://127.0.0.1:8810/\"}, {\"do\": \"click\", \"target\": {\"label\": \"Sales Orders\"}}, {\"do\": \"fill\", \"target\": {\"css\": \"#f-from\", \"kind\": \"field\"}, \"value\": \"{from_date}\"}, {\"do\": \"fill\", \"target\": {\"css\": \"#f-to\", \"kind\": \"field\"}, \"value\": \"{to_date}\"}, {\"do\": \"fill\", \"target\": {\"css\": \"#f-status\", \"kind\": \"field\"}, \"value\": \"Open\"}, {\"do\": \"click\", \"target\": {\"css\": \"#search\"}}, {\"do\": \"download\", \"target\": {\"css\": \"#export-csv\"}, \"save_as\": \"sap_orders_open.csv\"}, {\"do\": \"fill\", \"target\": {\"css\": \"#f-status\", \"kind\": \"field\"}, \"value\": \"Closed\"}, {\"do\": \"click\", \"target\": {\"css\": \"#search\"}}, {\"do\": \"download\", \"target\": {\"css\": \"#export-csv\"}, \"save_as\": \"sap_orders_closed.csv\"}, {\"do\": \"click\", \"target\": {\"label\": \"Invoices\"}}, {\"do\": \"fill\", \"target\": {\"css\": \"#f-from\", \"kind\": \"field\"}, \"value\": \"{from_date}\"}, {\"do\": \"fill\", \"target\": {\"css\": \"#f-to\", \"kind\": \"field\"}, \"value\": \"{to_date}\"}, {\"do\": \"click\", \"target\": {\"css\": \"#search\"}}, {\"do\": \"download\", \"target\": {\"css\": \"#export-csv\"}, \"save_as\": \"sap_invoices.csv\"}]}}, \"retry\": {\"max_attempts\": 1, \"delay_ms\": 100}}, {\"capability\": {\"namespace\": \"desktop\", \"name\": \"operate\", \"version\": \"1.0.0\"}, \"inputs\": {\"app\": {\"source\": \"fixed\", \"value\": \"expense\"}, \"values\": {\"source\": \"run\", \"path\": []}, \"actions\": {\"source\": \"fixed\", \"value\": [{\"do\": \"clear_dialogs\"}, {\"do\": \"set\", \"id\": \"DateFrom\", \"value\": \"{from_date}\"}, {\"do\": \"set\", \"id\": \"DateTo\", \"value\": \"{to_date}\"}, {\"do\": \"set\", \"id\": \"StatusFilter\", \"value\": \"Approved\"}, {\"do\": \"invoke\", \"id\": \"QueryButton\"}, {\"do\": \"wait_dialog\", \"title\": \"查詢完成\", \"seconds\": 5}, {\"do\": \"dismiss\"}, {\"do\": \"invoke\", \"id\": \"ExportCsvButton\"}, {\"do\": \"save_as\", \"path\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-011\\\\X01\\\\workspace\\\\output\\\\downloads\\\\expenses_approved.csv\", \"replace\": true}, {\"do\": \"dismiss\"}]}}, \"retry\": {\"max_attempts\": 1, \"delay_ms\": 100}}, {\"capability\": {\"namespace\": \"coding\", \"name\": \"run-python\", \"version\": \"1.0.0\"}, \"inputs\": {\"request\": {\"source\": \"fixed\", \"value\": {\"workspace\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-011\\\\X01\\\\workspace\", \"script\": \"import os, json, csv, sys, subprocess, shutil\\nfrom pathlib import Path\\nfrom decimal import Decimal, ROUND_HALF_UP\\nfrom datetime import datetime, timezone, timedelta\\nfrom openpyxl import load_workbook\\n\\nparams = json.load(open(os.environ['AEP_WORKFLOW_PARAMS'], encoding='utf-8'))\\nFROM = params['from_date']\\nTO = params['to_date']\\nPERIOD = params['period_label']\\nws = Path.cwd()\\nout = ws / 'output'\\ndownloads = out / 'downloads'\\nout.mkdir(exist_ok=True)\\ndownloads.mkdir(parents=True, exist_ok=True)\\nprint('Inputs:', {'workspace': str(ws), 'from_date': FROM, 'to_date': TO, 'period_label': PERIOD})\\nprint('Input files:', sorted(p.name for p in (ws/'input').glob('*')))\\nprint('Download files before processing:', sorted(p.name for p in downloads.glob('*')))\\n\\nTW = timezone(timedelta(hours=8))\\nnow = datetime.now(TW).replace(microsecond=0).isoformat()\\nq2 = Decimal('0.01')\\ndef dec(value):\\n    if value is None or str(value).strip() == '':\\n        return Decimal('0.00')\\n    return Decimal(str(value).replace(',', '').strip()).quantize(q2, rounding=ROUND_HALF_UP)\\ndef twd(amount, currency, fx):\\n    return (dec(amount) * fx[currency]).quantize(q2, rounding=ROUND_HALF_UP)\\ndef read_csv(path):\\n    with open(path, newline='', encoding='utf-8-sig') as f:\\n        return list(csv.DictReader(f))\\ndef require_cols(rows, cols, source):\\n    if not rows:\\n        print(f'{source}: 0 rows')\\n        return\\n    missing = [c for c in cols if c not in rows[0]]\\n    if missing:\\n        raise RuntimeError(f'{source} missing columns: {missing}; headers={list(rows[0].keys())}')\\ndef archive_download(src_name, dst_name):\\n    src = downloads / src_name\\n    if not src.exists():\\n        raise FileNotFoundError(src)\\n    dst = downloads / dst_name\\n    shutil.copyfile(src, dst)\\n    return dst\\n\\n# Read FX rates from the attachment.\\nfx = {}\\nwith open(ws/'input'/'fx_rates.csv', newline='', encoding='utf-8-sig') as f:\\n    for r in csv.DictReader(f):\\n        cur = (r.get('Currency') or '').strip()\\n        rate = (r.get('RateToTWD') or '').strip()\\n        if cur and rate:\\n            fx[cur] = Decimal(rate)\\nprint('FX currencies:', sorted(fx.keys()))\\nif not fx:\\n    raise RuntimeError('No FX rates loaded from input/fx_rates.csv')\\n\\n# Archive browser/desktop fixed download names with the requested period label.\\nopen_path = archive_download('sap_orders_open.csv', f'sap_orders_open_{PERIOD}.csv')\\nclosed_path = archive_download('sap_orders_closed.csv', f'sap_orders_closed_{PERIOD}.csv')\\ninv_path = archive_download('sap_invoices.csv', f'sap_invoices_{PERIOD}.csv')\\nexp_path = archive_download('expenses_approved.csv', f'expenses_approved_{PERIOD}.csv')\\n\\norders = read_csv(open_path) + read_csv(closed_path)\\nrequire_cols(orders, ['OrderID','CustomerID','ProjectID','OrderDate','Status','Currency','NetAmount'], 'SAP orders')\\norders = [r for r in orders if FROM <= r['OrderDate'] <= TO and r['Status'] != 'Cancelled']\\n\\ninvoices = read_csv(inv_path)\\nrequire_cols(invoices, ['InvoiceID','OrderID','CustomerID','ProjectID','InvoiceDate','DueDate','Currency','Amount','PaidAmount','Balance'], 'SAP invoices')\\ninvoices = [r for r in invoices if FROM <= r['InvoiceDate'] <= TO]\\n\\nexpenses = read_csv(exp_path)\\nrequire_cols(expenses, ['ExpenseID','EmployeeID','ProjectID','ExpenseDate','Status','Currency','Amount'], 'Expenses')\\nexpenses = [r for r in expenses if FROM <= r['ExpenseDate'] <= TO and r['Status'] == 'Approved']\\n\\n# Quote CLI: Accepted quotes only, filtered by the same period.\\ncli = r'C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\quote_cli_mock\\\\run_quote_cli.py'\\ncmd = [sys.executable, cli, 'quotes', 'list', '--from', FROM, '--to', TO, '--status', 'Accepted', '--format', 'json']\\nprint('Running quote CLI:', cmd)\\ncp = subprocess.run(cmd, capture_output=True, text=True)\\nprint('quote_cli exit:', cp.returncode)\\nif cp.stderr:\\n    print('quote_cli stderr:', cp.stderr)\\nif cp.returncode != 0:\\n    raise RuntimeError(f'quote_cli failed: {cp.returncode}')\\nquote_data = json.loads(cp.stdout)\\nquotes = quote_data.get('items', quote_data if isinstance(quote_data, list) else [])\\nrequire_cols(quotes, ['QuoteID','CustomerID','ProjectID','QuoteDate','Status','Currency','NetAmount'], 'Quotes')\\nquotes = [r for r in quotes if FROM <= r['QuoteDate'] <= TO and r['Status'] == 'Accepted']\\n(downloads / f'quotes_accepted_{PERIOD}.json').write_text(json.dumps({'items': quotes}, ensure_ascii=False, indent=2), encoding='utf-8')\\nquote_cols = ['QuoteID','CustomerID','ProjectID','QuoteDate','ValidUntil','Status','Currency','Subtotal','DiscountPercent','NetAmount']\\nwith open(downloads / f'quotes_accepted_{PERIOD}.csv', 'w', newline='', encoding='utf-8-sig') as f:\\n    w = csv.DictWriter(f, fieldnames=quote_cols)\\n    w.writeheader()\\n    for r in quotes:\\n        w.writerow({c: r.get(c, '') for c in quote_cols})\\n\\n# Fill a copy of the real workbook template.\\ntemplate = ws/'input'/'project_template.xlsx'\\nif not template.exists():\\n    raise FileNotFoundError(template)\\noutput_xlsx = out / f'project_integration_report_{PERIOD}.xlsx'\\nshutil.copyfile(template, output_xlsx)\\nwb = load_workbook(output_xlsx)\\nrequired_sheets = ['Report','Orders','Invoices','Expenses','Quotes','Summary','Exceptions']\\nmissing_sheets = [s for s in required_sheets if s not in wb.sheetnames]\\nif missing_sheets:\\n    raise RuntimeError(f'Template missing sheets: {missing_sheets}')\\nfor sheet in ['Orders','Invoices','Expenses','Quotes','Summary','Exceptions']:\\n    sh = wb[sheet]\\n    if sh.max_row >= 5:\\n        sh.delete_rows(5, sh.max_row - 4)\\n\\nexceptions = []\\nsummary = {}\\ndef project_bucket(pid):\\n    summary.setdefault(pid, {'OrderTWD': Decimal('0.00'), 'InvoiceBalanceTWD': Decimal('0.00'), 'ApprovedExpenseTWD': Decimal('0.00'), 'AcceptedQuoteTWD': Decimal('0.00')})\\n    return summary[pid]\\ndef add_exception(source, doc, pid, reason):\\n    exceptions.append({'Source': source, 'DocumentID': doc or '', 'ProjectID': pid or '', 'Reason': reason})\\ndef usable(source, doc, pid, currency):\\n    if not pid:\\n        add_exception(source, doc, pid, 'Missing ProjectID; excluded from project summary')\\n        return False\\n    if currency not in fx:\\n        add_exception(source, doc, pid, f'Missing FX rate for {currency}; excluded from project summary')\\n        return False\\n    project_bucket(pid)\\n    return True\\ndef set_text(cell):\\n    cell.number_format = '@'\\n\\ndef write_row(sh, row, vals, text_cols):\\n    for c, v in enumerate(vals, 1):\\n        sh.cell(row, c, v)\\n    for c in text_cols:\\n        set_text(sh.cell(row, c))\\n\\n# Detail sheets and separate project totals.\\nsh = wb['Orders']; row = 5\\nfor r in sorted(orders, key=lambda x: (x.get('ProjectID',''), x.get('OrderID',''))):\\n    if not usable('Orders', r.get('OrderID'), r.get('ProjectID'), r.get('Currency')):\\n        continue\\n    amount_twd = twd(r['NetAmount'], r['Currency'], fx)\\n    write_row(sh, row, [r['OrderID'], r['ProjectID'], r['CustomerID'], r['OrderDate'], r['Status'], r['Currency'], float(dec(r['NetAmount'])), float(amount_twd)], [1,2,3,4,5,6])\\n    summary[r['ProjectID']]['OrderTWD'] += amount_twd\\n    row += 1\\n\\nsh = wb['Invoices']; row = 5\\nfor r in sorted(invoices, key=lambda x: (x.get('ProjectID',''), x.get('InvoiceID',''))):\\n    if not usable('Invoices', r.get('InvoiceID'), r.get('ProjectID'), r.get('Currency')):\\n        continue\\n    balance_twd = twd(r['Balance'], r['Currency'], fx)\\n    write_row(sh, row, [r['InvoiceID'], r['OrderID'], r['ProjectID'], r['CustomerID'], r['InvoiceDate'], r['DueDate'], r['Currency'], float(dec(r['Amount'])), float(dec(r['PaidAmount'])), float(dec(r['Balance'])), float(balance_twd)], [1,2,3,4,5,6,7])\\n    summary[r['ProjectID']]['InvoiceBalanceTWD'] += balance_twd\\n    row += 1\\n\\nsh = wb['Expenses']; row = 5\\nfor r in sorted(expenses, key=lambda x: (x.get('ProjectID',''), x.get('ExpenseID',''))):\\n    if not usable('Expenses', r.get('ExpenseID'), r.get('ProjectID'), r.get('Currency')):\\n        continue\\n    amount_twd = twd(r['Amount'], r['Currency'], fx)\\n    write_row(sh, row, [r['ExpenseID'], r['ProjectID'], r['EmployeeID'], r['ExpenseDate'], r['Status'], r['Currency'], float(dec(r['Amount'])), float(amount_twd)], [1,2,3,4,5,6])\\n    summary[r['ProjectID']]['ApprovedExpenseTWD'] += amount_twd\\n    row += 1\\n\\nsh = wb['Quotes']; row = 5\\nfor r in sorted(quotes, key=lambda x: (x.get('ProjectID',''), x.get('QuoteID',''))):\\n    if not usable('Quotes', r.get('QuoteID'), r.get('ProjectID'), r.get('Currency')):\\n        continue\\n    amount_twd = twd(r['NetAmount'], r['Currency'], fx)\\n    write_row(sh, row, [r['QuoteID'], r['ProjectID'], r['CustomerID'], r['QuoteDate'], r.get('ValidUntil',''), r['Status'], r['Currency'], float(dec(r['NetAmount'])), float(amount_twd)], [1,2,3,4,5,6,7])\\n    summary[r['ProjectID']]['AcceptedQuoteTWD'] += amount_twd\\n    row += 1\\n\\nsh = wb['Summary']; row = 5\\nfor pid in sorted(summary):\\n    s = summary[pid]\\n    write_row(sh, row, [pid, float(s['OrderTWD']), float(s['InvoiceBalanceTWD']), float(s['ApprovedExpenseTWD']), float(s['AcceptedQuoteTWD'])], [1])\\n    row += 1\\nlast = max(5, row - 1)\\nfor col in ['B','C','D','E']:\\n    sh[f'{col}2'] = f'=SUM({col}5:{col}{last})'\\n\\nsh = wb['Exceptions']; row = 5\\nfor e in exceptions:\\n    write_row(sh, row, [e['Source'], e['DocumentID'], e['ProjectID'], e['Reason']], [1,2,3,4])\\n    row += 1\\n\\nrep = wb['Report']\\nrep['B3'] = FROM\\nrep['D3'] = TO\\nrep['B4'] = 'SAP Sales Orders: Open/Closed only (non-Cancelled); SAP Invoices by invoice date; Expense Viewer: Approved only; quote_cli: Accepted only; integrated by ProjectID; FX from input/fx_rates.csv; orders and quotes are reported separately, not added as revenue.'\\nrep['B5'] = now\\nrep['B7'] = 'SAP web, Expense desktop, quote CLI, fx_rates.csv'\\nrep['D7'] = now\\nwb.save(output_xlsx)\\n\\n# Reopen and validate saved outputs.\\nwb2 = load_workbook(output_xlsx, data_only=False)\\nheaders = {sheet: [wb2[sheet].cell(4, c).value for c in range(1, wb2[sheet].max_column + 1)] for sheet in ['Orders','Invoices','Expenses','Quotes','Summary','Exceptions']}\\ncounts = {}\\nfor sheet in ['Orders','Invoices','Expenses','Quotes','Summary','Exceptions']:\\n    sh = wb2[sheet]\\n    counts[sheet] = sum(1 for rr in range(5, sh.max_row + 1) if any(sh.cell(rr, cc).value is not None for cc in range(1, sh.max_column + 1)))\\nsummary_headers = [h for h in headers['Summary'] if h]\\nif 'CustomerName' in summary_headers or 'Customer' in summary_headers:\\n    raise RuntimeError('Summary "
+          },
+          "failure": null
+         },
+         "failure": null
+        },
+        {
+         "call_id": "call_tz2Aou6BQcHcOjCEZSj5dblt",
+         "name": "authoring__get_workflow",
+         "decision": null,
+         "capability": null,
+         "workflow": null,
+         "host": {
+          "status": "succeeded",
+          "data": {
+           "candidate_id": "wf-20261009-063009-f6e358",
+           "workflow": "engineering/monthly-project-integration-report@1.0.2",
+           "status": "installed",
+           "digest": "4609b0b22365cd5090fbad02c818ab73734733092da1abfcb7c17c4a1187153d",
+           "parameters": [
+            {
+             "name": "customer_id",
+             "label": "Customer ID，例如 C001",
+             "kind": "text",
+             "scope": "runtime",
+             "description": null,
+             "required": true,
+             "options": [],
+             "minimum": null,
+             "maximum": null
+            },
+            {
+             "name": "from_date",
+             "label": "查詢起日 YYYY-MM-DD",
+             "kind": "date",
+             "scope": "runtime",
+             "description": null,
+             "required": true,
+             "options": [],
+             "minimum": null,
+             "maximum": null
+            },
+            {
+             "name": "to_date",
+             "label": "查詢迄日 YYYY-MM-DD",
+             "kind": "date",
+             "scope": "runtime",
+             "description": null,
+             "required": true,
+             "options": [],
+             "minimum": null,
+             "maximum": null
+            },
+            {
+             "name": "attention_cutoff",
+             "label": "關注判定截止日 YYYY-MM-DD",
+             "kind": "date",
+             "scope": "runtime",
+             "description": null,
+             "required": true,
+             "options": [],
+             "minimum": null,
+             "maximum": null
+            }
+           ],
+           "steps": [
+            {
+             "capability": {
+              "namespace": "coding",
+              "name": "run-python",
+              "version": "1.0.0"
+             },
+             "inputs": {
+              "request": {
+               "source": "fixed",
+               "value": {
+                "workspace": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-011\\X02\\workspace",
+                "script": "import json, os\nfrom pathlib import Path\nparams=json.load(open(os.environ['AEP_WORKFLOW_PARAMS'], encoding='utf-8'))\nws=Path.cwd(); out=ws/'output'; dl=out/'downloads'\npaths=[dl/'sap_orders_workflow.csv', dl/'sap_invoices_workflow.csv', out/f\"expense_all_approved_{params['from_date']}_to_{params['to_date']}.csv\"]\nfor p in paths:\n    if p.exists():\n        p.unlink()\n        print('removed temp', p)\nprint('cleanup complete')\n"
+               }
+              },
+              "arguments": {
+               "source": "run",
+               "path": []
+              }
+             },
+             "retry": {
+              "max_attempts": 1,
+              "delay_ms": 100
+             }
+            },
+            {
+             "capability": {
+              "namespace": "browser",
+              "name": "operate",
+              "version": "1.0.0"
+             },
+             "inputs": {
+              "workspace": {
+               "source": "fixed",
+               "value": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-011\\X02\\workspace"
+              },
+              "values": {
+               "source": "run",
+               "path": []
+              },
+              "actions": {
+               "source": "fixed",
+               "value": [
+                {
+                 "do": "open",
+                 "url": "http://127.0.0.1:8810/"
+                },
+                {
+                 "do": "click",
+                 "target": {
+                  "label": "Sales Orders"
+                 }
+                },
+                {
+                 "do": "fill",
+                 "target": {
+                  "label": "Customer ID",
+                  "kind": "field"
+                 },
+                 "value": "{customer_id}"
+                },
+                {
+                 "do": "fill",
+                 "target": {
+                  "label": "Date from (YYYY-MM-DD)",
+                  "kind": "field"
+                 },
+                 "value": "{from_date}"
+                },
+                {
+                 "do": "fill",
+                 "target": {
+                  "label": "Date to (YYYY-MM-DD)",
+                  "kind": "field"
+                 },
+                 "value": "{to_date}"
+                },
+                {
+                 "do": "click",
+                 "target": {
+                  "label": "Search"
+                 }
+                },
+                {
+                 "do": "download",
+                 "target": {
+                  "label": "Export CSV (all filtered rows)"
+                 },
+                 "save_as": "sap_orders_workflow.csv"
+                },
+                {
+                 "do": "click",
+                 "target": {
+                  "label": "Invoices"
+                 }
+                },
+                {
+                 "do": "fill",
+                 "target": {
+                  "label": "Customer ID",
+                  "kind": "field"
+                 },
+                 "value": "{customer_id}"
+                },
+                {
+                 "do": "fill",
+                 "target": {
+                  "label": "Date from (YYYY-MM-DD)",
+                  "kind": "field"
+                 },
+                 "value": "{from_date}"
+                },
+                {
+                 "do": "fill",
+                 "target": {
+                  "label": "Date to (YYYY-MM-DD)",
+                  "kind": "field"
+                 },
+                 "value": "{to_date}"
+                },
+                {
+                 "do": "click",
+                 "target": {
+                  "label": "Search"
+                 }
+                },
+                {
+                 "do": "download",
+                 "target": {
+                  "label": "Export CSV (all filtered rows)"
+                 },
+                 "save_as": "sap_invoices_workflow.csv"
+                }
+               ]
+              }
+             },
+             "retry": {
+              "max_attempts": 1,
+              "delay_ms": 100
+             }
+            },
+            {
+             "capability": {
+              "namespace": "desktop",
+              "name": "operate",
+              "version": "1.0.0"
+             },
+             "inputs": {
+              "app": {
+               "source": "fixed",
+               "value": "expense"
+              },
+              "values": {
+               "source": "run",
+               "path": []
+              },
+              "actions": {
+               "source": "fixed",
+               "value": [
+                {
+                 "do": "clear_dialogs"
+                },
+                {
+                 "do": "set",
+                 "id": "ProjectFilter",
+                 "value": ""
+                },
+                {
+                 "do": "set",
+                 "id": "DateFrom",
+                 "value": "{from_date}"
+                },
+                {
+                 "do": "set",
+                 "id": "DateTo",
+                 "value": "{to_date}"
+                },
+                {
+                 "do": "set",
+                 "id": "StatusFilter",
+                 "value": "Approved"
+                },
+                {
+                 "do": "invoke",
+                 "id": "QueryButton"
+                },
+                {
+                 "do": "wait_dialog",
+                 "title": "查詢完成",
+                 "seconds": 5
+                },
+                {
+                 "do": "dismiss"
+                },
+                {
+                 "do": "invoke",
+                 "id": "ExportCsvButton"
+                },
+                {
+                 "do": "save_as",
+                 "path": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-011\\X02\\workspace\\output\\expense_all_approved_{from_date}_to_{to_date}.csv",
+                 "replace": true
+                },
+                {
+                 "do": "dismiss"
+                },
+                {
+                 "do": "clear_dialogs"
+                }
+               ]
+              }
+             },
+             "retry": {
+              "max_attempts": 1,
+              "delay_ms": 100
+             }
+            },
+            {
+             "capability": {
+              "namespace": "coding",
+              "name": "run-python",
+              "version": "1.0.0"
+             },
+             "inputs": {
+              "request": {
+               "source": "fixed",
+               "value": {
+                "workspace": "C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\runs\\fix-011\\X02\\workspace",
+                "script": "import csv, json, subprocess, sys, os, shutil\nfrom pathlib import Path\nfrom decimal import Decimal, ROUND_HALF_UP\nfrom datetime import datetime\nfrom openpyxl import load_workbook\nfrom openpyxl.styles import PatternFill\n\nparams=json.load(open(os.environ['AEP_WORKFLOW_PARAMS'], encoding='utf-8'))\ncustomer_id=params['customer_id']\nstart=params['from_date']\nend=params['to_date']\ncutoff=params['attention_cutoff']\nws=Path.cwd(); input_dir=ws/'input'; out_dir=ws/'output'; dl_dir=out_dir/'downloads'; out_dir.mkdir(exist_ok=True); dl_dir.mkdir(exist_ok=True)\n\ndef read_csv(path):\n    with open(path, newline='', encoding='utf-8-sig') as f:\n        return list(csv.DictReader(f))\n\ndef money(x):\n    return Decimal(str(x)).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n\nfx={}\nwith open(input_dir/'fx_rates.csv', newline='', encoding='utf-8-sig') as f:\n    rdr=csv.reader(f); next(rdr)\n    for row in rdr:\n        if len(row)>=2 and row[0]: fx[row[0]]=Decimal(row[1])\n\ndef twd(amount, currency):\n    if currency not in fx: raise ValueError(f'Missing FX rate for {currency}')\n    return (Decimal(str(amount))*fx[currency]).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)\n\ndef parse_date(s):\n    return datetime.strptime(s, '%Y-%m-%d').date()\n\norders_path=dl_dir/'sap_orders_workflow.csv'\ninvoices_path=dl_dir/'sap_invoices_workflow.csv'\nexpenses_path=out_dir/f'expense_all_approved_{start}_to_{end}.csv'\nprint('input files:', orders_path, orders_path.exists(), invoices_path, invoices_path.exists(), expenses_path, expenses_path.exists())\norders_raw=read_csv(orders_path); invoices_raw=read_csv(invoices_path); expenses_all=read_csv(expenses_path)\norders=[r for r in orders_raw if r['CustomerID']==customer_id and start <= r['OrderDate'] <= end and r['Status']!='Cancelled']\nprojects=sorted({r['ProjectID'] for r in orders if r.get('ProjectID')})\ninvoices=[r for r in invoices_raw if r['CustomerID']==customer_id and start <= r['InvoiceDate'] <= end]\nexpenses=[r for r in expenses_all if r.get('ProjectID') in projects and r.get('Status')=='Approved' and start <= r.get('ExpenseDate','') <= end]\ncmd=[sys.executable, r'C:\\Users\\Chi_L\\Documents\\ChatGPT\\agentic-engineering-platform\\benchmarks\\business_workflow_lab\\quote_cli_mock\\run_quote_cli.py','quotes','list','--customer',customer_id,'--from',start,'--to',end,'--format','json']\ncp=subprocess.run(cmd,capture_output=True,text=True)\nprint('quote_cli return', cp.returncode)\nif cp.returncode!=0:\n    print(cp.stderr); raise SystemExit(cp.returncode)\nquotes=json.loads(cp.stdout)['items']\n\noutfile=out_dir/f'project_report_{customer_id}_{start}_to_{end}.xlsx'\nshutil.copy2(input_dir/'project_template.xlsx', outfile)\nwb=load_workbook(outfile)\nnow=datetime.now().astimezone().isoformat(timespec='seconds')\nrep=wb['Report']; rep['B3']=start; rep['D3']=end\nrep['B4']=f'CustomerID={customer_id}; orders exclude Cancelled; expenses Approved only for customer projects {\",\".join(projects)}; quotes all statuses; FX from fx_rates.csv only; attention cutoff {cutoff}.'\nrep['B5']=now; rep['B7']='Lab ERP; Expense Viewer; quote_cli; fx_rates.csv'; rep['D7']=now\nrep['B9']='關注條件：截至 cutoff 已逾期未收發票（DueDate < cutoff 且 Balance > 0）、缺收據費用、ValidUntil < cutoff 且非 Accepted 的報價。'\ntext_cols={'Orders':['A','B','C','E','F'],'Invoices':['A','B','C','D','G'],'Expenses':['A','B','C','E','F'],'Quotes':['A','B','C','F','G'],'Summary':['A'],'Exceptions':['A','B','C','D']}\ndef clear(sheet):\n    sh=wb[sheet]\n    if sh.max_row>=5: sh.delete_rows(5, sh.max_row-4)\ndef write(sheet, rows):\n    sh=wb[sheet]; clear(sheet)\n    for i,row in enumerate(rows, start=5):\n        for j,val in enumerate(row, start=1):\n            cell=sh.cell(i,j,val); col=cell.column_letter\n            if col in text_cols.get(sheet,[]): cell.number_format='@'; cell.value='' if val is None else str(val)\n            elif isinstance(val, Decimal): cell.value=float(val); cell.number_format='0.00'\n            if sheet in ['Orders','Invoices','Expenses','Quotes'] and col in ['G','H','I','J','K'] and isinstance(cell.value,(int,float)): cell.number_format='0.00'\norders_rows=[[r['OrderID'],r['ProjectID'],r['CustomerID'],r['OrderDate'],r['Status'],r['Currency'],money(r['NetAmount']),twd(r['NetAmount'],r['Currency'])] for r in orders]\ninvoice_rows=[[r['InvoiceID'],r['OrderID'],r['ProjectID'],r['CustomerID'],r['InvoiceDate'],r['DueDate'],r['Currency'],money(r['Amount']),money(r['PaidAmount']),money(r['Balance']),twd(r['Balance'],r['Currency'])] for r in invoices]\nexpense_rows=[[r['ExpenseID'],r['ProjectID'],r['EmployeeID'],r['ExpenseDate'],r['Status'],r['Currency'],money(r['Amount']),twd(r['Amount'],r['Currency'])] for r in expenses]\nquote_rows=[[r['QuoteID'],r['ProjectID'],r['CustomerID'],r['QuoteDate'],r['ValidUntil'],r['Status'],r['Currency'],money(r['NetAmount']),twd(r['NetAmount'],r['Currency'])] for r in quotes]\nfor s,rows in [('Orders',orders_rows),('Invoices',invoice_rows),('Expenses',expense_rows),('Quotes',quote_rows)]: write(s,rows)\nsummary_projects=sorted(set([r[1] for r in orders_rows]+[r[2] for r in invoice_rows]+[r[1] for r in expense_rows]+[r[1] for r in quote_rows if r[5]=='Accepted']))\nsummary=[]\nfor p in summary_projects:\n    summary.append([p, sum((r[7] for r in orders_rows if r[1]==p),Decimal('0.00')), sum((r[10] for r in invoice_rows if r[2]==p),Decimal('0.00')), sum((r[7] for r in expense_rows if r[1]==p),Decimal('0.00')), sum((r[8] for r in quote_rows if r[1]==p and r[5]=='Accepted'),Decimal('0.00'))])\nwrite('Summary', summary); last=max(5,4+len(summary))\nfor c in ['B','C','D','E']: wb['Summary'][f'{c}2']=f'=SUM({c}5:{c}{last})'\ncut=parse_date(cutoff); exceptions=[]\nfor r in invoices:\n    if parse_date(r['DueDate']) < cut and Decimal(r['Balance']) > 0: exceptions.append(['Invoices',r['InvoiceID'],r['ProjectID'],f\"Overdue unpaid invoice: DueDate {r['DueDate']} < {cutoff}, Balance {r['Balance']} {r['Currency']}\"])\nfor r in expenses:\n    if str(r.get('MissingReceipt','')).strip().lower()=='true': exceptions.append(['Expenses',r['ExpenseID'],r['ProjectID'],'Missing receipt'])\nfor r in quotes:\n    if parse_date(r['ValidUntil']) < cut and r['Status']!='Accepted': exceptions.append(['Quotes',r['QuoteID'],r['ProjectID'],f\"Expired/non-accepted quote: ValidUntil {r['ValidUntil']} < {cutoff}, Status {r['Status']}\"])\nwrite('Exceptions', exceptions)\nfill=PatternFill(fill_type='solid', fgColor='FFF2CC'); ids={e[1] for e in exceptions}\nfor sheet in ['Invoices','Expenses','Quotes']:\n    sh=wb[sheet]\n    for row in range(5, sh.max_row+1):\n        if sh.cell(row,1).value in ids:\n            for col in range(1, sh.max_column+1): sh.cell(row,col).fill=fill\nwb.save(outfile)\n# verification\nwb2=load_workbook(outfile, data_only=False)\ndef n(sheet): return max(0, wb2[sheet].max_row-4)\nprint('saved', outfile)\nprint('verified counts', {'Orders':n('Orders'),'Invoices':n('Invoices'),'Expenses':n('Expenses'),'Quotes':n('Quotes'),'Summary':n('Summary'),'Exceptions':n('Exceptions')})\nprint('projects', projects)\nprint('exceptions', exceptions)\n"
+               }
+              },
+              "arguments": {
+               "source": "run",
+               "path": []
+              }
+             },
+             "retry": {
+              "max_attempts": 1,
+              "delay_ms": 100
+             }
+            }
+           ]
+          },
+          "failure": null
+         },
+         "failure": null
+        },
+        {
+         "call_id": "call_kJxNw1IhU2nwqDbwzAIblkHY",
+         "name": "authoring__get_workflow",
+         "decision": null,
+         "capability": null,
+         "workflow": null,
+         "host": {
+          "status": "succeeded",
+          "data": {
+           "truncated": true,
+           "preview": "{\"candidate_id\": \"wf-20261007-112555-1c6179\", \"workflow\": \"engineering/project-monthly-integration-report@1.0.2\", \"status\": \"installed\", \"digest\": \"d849f8e0a6caf17ffcaa03a7c6bef5535afa63a4aea26c45be880d1347313f03\", \"parameters\": [{\"name\": \"date_from\", \"label\": \"查詢起始日期 (YYYY-MM-DD)\", \"kind\": \"date\", \"scope\": \"runtime\", \"description\": null, \"required\": true, \"options\": [], \"minimum\": null, \"maximum\": null}, {\"name\": \"date_to\", \"label\": \"查詢結束日期 (YYYY-MM-DD)\", \"kind\": \"date\", \"scope\": \"runtime\", \"description\": null, \"required\": true, \"options\": [], \"minimum\": null, \"maximum\": null}, {\"name\": \"period_label\", \"label\": \"輸出檔名期間標籤，例如 2026-09\", \"kind\": \"text\", \"scope\": \"runtime\", \"description\": null, \"required\": true, \"options\": [], \"minimum\": null, \"maximum\": null}], \"steps\": [{\"capability\": {\"namespace\": \"browser\", \"name\": \"operate\", \"version\": \"1.0.0\"}, \"inputs\": {\"actions\": {\"source\": \"fixed\", \"value\": [{\"do\": \"open\", \"url\": \"http://127.0.0.1:8810/orders?from={date_from}&to={date_to}&status=Open&sort=OrderID&dir=asc\"}, {\"do\": \"download\", \"target\": {\"label\": \"Export CSV (all filtered rows)\"}, \"save_as\": \"sap_orders_open.csv\"}, {\"do\": \"open\", \"url\": \"http://127.0.0.1:8810/orders?from={date_from}&to={date_to}&status=Closed&sort=OrderID&dir=asc\"}, {\"do\": \"download\", \"target\": {\"label\": \"Export CSV (all filtered rows)\"}, \"save_as\": \"sap_orders_closed.csv\"}, {\"do\": \"open\", \"url\": \"http://127.0.0.1:8810/invoices?from={date_from}&to={date_to}&sort=InvoiceID&dir=asc\"}, {\"do\": \"download\", \"target\": {\"label\": \"Export CSV (all filtered rows)\"}, \"save_as\": \"sap_invoices.csv\"}]}, \"values\": {\"source\": \"run\", \"path\": []}, \"workspace\": {\"source\": \"fixed\", \"value\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-010\\\\X01\\\\workspace\"}}, \"retry\": {\"max_attempts\": 1, \"delay_ms\": 100}}, {\"capability\": {\"namespace\": \"desktop\", \"name\": \"operate\", \"version\": \"1.0.0\"}, \"inputs\": {\"app\": {\"source\": \"fixed\", \"value\": \"expense\"}, \"actions\": {\"source\": \"fixed\", \"value\": [{\"do\": \"clear_dialogs\"}, {\"do\": \"set\", \"id\": \"DateFrom\", \"value\": \"{date_from}\"}, {\"do\": \"set\", \"id\": \"DateTo\", \"value\": \"{date_to}\"}, {\"do\": \"set\", \"id\": \"StatusFilter\", \"value\": \"Approved\"}, {\"do\": \"invoke\", \"id\": \"QueryButton\"}, {\"do\": \"wait_dialog\", \"title\": \"查詢完成 Query complete\", \"seconds\": 5}, {\"do\": \"dialog\", \"save_as\": \"query_result\"}, {\"do\": \"dismiss\"}, {\"do\": \"invoke\", \"id\": \"ExportCsvButton\"}, {\"do\": \"save_as\", \"path\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-010\\\\X01\\\\workspace\\\\output\\\\expense_approved.csv\", \"replace\": true}, {\"do\": \"wait_dialog\", \"title\": \"匯出完成 Export complete\", \"seconds\": 5}, {\"do\": \"dialog\", \"save_as\": \"export_result\"}, {\"do\": \"dismiss\"}, {\"do\": \"clear_dialogs\"}]}, \"values\": {\"source\": \"run\", \"path\": []}}, \"retry\": {\"max_attempts\": 1, \"delay_ms\": 100}}, {\"capability\": {\"namespace\": \"coding\", \"name\": \"run-python\", \"version\": \"1.0.0\"}, \"inputs\": {\"request\": {\"source\": \"fixed\", \"value\": {\"workspace\": \"C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\runs\\\\fix-010\\\\X01\\\\workspace\", \"script\": \"import os, json, csv, shutil, subprocess, sys\\nfrom pathlib import Path\\nfrom decimal import Decimal, ROUND_HALF_UP\\nfrom datetime import datetime\\nfrom openpyxl import load_workbook\\n\\nprint('Inspecting workflow inputs and files...')\\nparams = json.load(open(os.environ['AEP_WORKFLOW_PARAMS'], encoding='utf-8'))\\ndate_from = params['date_from']\\ndate_to = params['date_to']\\nperiod_label = params['period_label']\\nbase = Path('.')\\ninp = base/'input'\\nout = base/'output'\\ndownloads = out/'downloads'\\nout.mkdir(exist_ok=True)\\nprint('Run values:', json.dumps(params, ensure_ascii=False))\\nprint('Input files:', sorted(p.name for p in inp.iterdir() if p.is_file()))\\nprint('Download files:', sorted(p.name for p in downloads.iterdir()) if downloads.exists() else [])\\n\\nTWOPL = Decimal('0.01')\\ndef money(x):\\n    if x is None or str(x).strip() == '':\\n        return Decimal('0')\\n    return Decimal(str(x).replace(',', '').strip())\\ndef q2(d):\\n    return Decimal(d).quantize(TWOPL, rounding=ROUND_HALF_UP)\\ndef read_csv(path):\\n    with open(path, newline='', encoding='utf-8-sig') as f:\\n        rows = list(csv.DictReader(f))\\n    print(f'{path}: headers={list(rows[0].keys()) if rows else []}, rows={len(rows)}, sample={rows[:2]}')\\n    return rows\\ndef require_file(path):\\n    if not path.exists():\\n        raise FileNotFoundError(str(path))\\n    return path\\n\\nfx = {}\\nwith open(inp/'fx_rates.csv', newline='', encoding='utf-8-sig') as f:\\n    rdr = csv.DictReader(f)\\n    print('fx headers:', rdr.fieldnames)\\n    for row in rdr:\\n        keys = list(row.keys())\\n        cur = (row.get('Currency') or row.get(keys[0]) or '').strip()\\n        rate = (row.get('TWD') or row.get('Rate') or row.get(keys[1]) or '').strip() if len(keys) > 1 else ''\\n        if cur and rate:\\n            fx[cur] = Decimal(rate)\\nif not fx:\\n    raise RuntimeError('No FX rates loaded')\\nprint('FX loaded:', {k: str(v) for k,v in fx.items()})\\n\\norders = []\\nfor status in ['open', 'closed']:\\n    p = require_file(downloads/f'sap_orders_{status}.csv')\\n    for r in read_csv(p):\\n        if r.get('Status') != 'Cancelled':\\n            orders.append(r)\\norders = [r for r in orders if date_from <= r.get('OrderDate','') <= date_to and r.get('Status') != 'Cancelled']\\ninvoices = [r for r in read_csv(require_file(downloads/'sap_invoices.csv')) if date_from <= r.get('InvoiceDate','') <= date_to]\\nexpenses = [r for r in read_csv(require_file(out/'expense_approved.csv')) if date_from <= r.get('ExpenseDate','') <= date_to and r.get('Status') == 'Approved']\\n\\ncli_candidates = [Path(r'C:\\\\Users\\\\Chi_L\\\\Documents\\\\ChatGPT\\\\agentic-engineering-platform\\\\benchmarks\\\\business_workflow_lab\\\\quote_cli_mock\\\\run_quote_cli.py'), base/'quote_cli_mock'/'run_quote_cli.py', base.parent.parent/'quote_cli_mock'/'run_quote_cli.py']\\ncli = next((p for p in cli_candidates if p.exists()), None)\\nif cli is None:\\n    raise FileNotFoundError('quote CLI not found in candidates: ' + ', '.join(str(p) for p in cli_candidates))\\ncmd = [sys.executable, str(cli), 'quotes', 'list', '--from', date_from, '--to', date_to, '--status', 'Accepted', '--format', 'json']\\nprint('Running quote CLI:', ' '.join(cmd))\\nproc = subprocess.run(cmd, text=True, capture_output=True)\\nprint('quote CLI returncode:', proc.returncode)\\nif proc.stderr:\\n    print('quote CLI stderr:', proc.stderr)\\nif proc.returncode != 0:\\n    raise RuntimeError(f'quote_cli failed with exit {proc.returncode}: {proc.stderr}')\\nqdata = json.loads(proc.stdout)\\nquotes = [r for r in qdata.get('items', qdata if isinstance(qdata, list) else []) if date_from <= r.get('QuoteDate','') <= date_to and r.get('Status') == 'Accepted']\\nprint('Quote rows:', len(quotes), 'sample:', quotes[:2])\\n\\nexceptions = []\\ndef twd(row, amount_field, docid, source):\\n    cur = (row.get('Currency') or '').strip()\\n    amt = money(row.get(amount_field))\\n    pid = (row.get('ProjectID') or '').strip()\\n    if not pid:\\n        exceptions.append({'Source': source, 'DocumentID': str(docid or ''), 'ProjectID': '', 'Reason': 'Missing ProjectID; not included in project summary'})\\n    if cur not in fx:\\n        exceptions.append({'Source': source, 'DocumentID': str(docid or ''), 'ProjectID': pid, 'Reason': f'Missing FX rate for {cur}'})\\n        return None\\n    return q2(amt * fx[cur])\\n\\noutfile = out/f'project_integration_{period_label}.xlsx'\\nshutil.copyfile(inp/'project_template.xlsx', outfile)\\nwb = load_workbook(outfile)\\n\\ndef clear_from(ws, start=5):\\n    if ws.max_row >= start:\\n        ws.delete_rows(start, ws.max_row - start + 1)\\n\\ndef write_rows(wsname, headers, rows):\\n    ws = wb[wsname]\\n    clear_from(ws, 5)\\n    for idx, row in enumerate(rows, start=5):\\n        for col, h in enumerate(headers, start=1):\\n            c = ws.cell(idx, col)\\n            val = row.get(h, '')\\n            if h.endswith('TWD') or h in ['NetAmount','Amount','PaidAmount','Balance']:\\n                c.value = float(val) if val not in ('', None) else None\\n                c.number_format = '0.00'\\n            else:\\n                c.value = str(val) if val is not None else ''\\n                if h.endswith('ID') or h in ['OrderID','InvoiceID','ExpenseID','QuoteID','CustomerID','EmployeeID','ProjectID']:\\n                    c.number_format = '@'\\n                if 'Date' in h or h == 'ValidUntil':\\n                    c.number_format = 'yyyy-mm-dd'\\n\\norder_rows=[]\\nfor r in orders:\\n    amount_twd = twd(r, 'NetAmount', r.get('OrderID',''), 'Sales Orders')\\n    order_rows.append({'OrderID':r.get('OrderID',''), 'ProjectID':r.get('ProjectID',''), 'CustomerID':r.get('CustomerID',''), 'OrderDate':r.get('OrderDate',''), 'Status':r.get('Status',''), 'Currency':r.get('Currency',''), 'NetAmount':q2(money(r.get('NetAmount'))), 'AmountTWD':amount_twd if amount_twd is not None else ''})\\ninvoice_rows=[]\\nfor r in invoices:\\n    balance_twd = twd(r, 'Balance', r.get('InvoiceID',''), 'Invoices')\\n    invoice_rows.append({'InvoiceID':r.get('InvoiceID',''), 'OrderID':r.get('OrderID',''), 'ProjectID':r.get('ProjectID',''), 'CustomerID':r.get('CustomerID',''), 'InvoiceDate':r.get('InvoiceDate',''), 'DueDate':r.get('DueDate',''), 'Currency':r.get('Currency',''), 'Amount':q2(money(r.get('Amount'))), 'PaidAmount':q2(money(r.get('PaidAmount'))), 'Balance':q2(money(r.get('Balance'))), 'BalanceTWD':balance_twd if balance_twd is not None else ''})\\nexpense_rows=[]\\nfor r in expenses:\\n    amount_twd = twd(r, 'Amount', r.get('ExpenseID',''), 'Expenses')\\n    expense_rows.append({'ExpenseID':r.get('ExpenseID',''), 'ProjectID':r.get('ProjectID',''), 'EmployeeID':r.get('EmployeeID',''), 'ExpenseDate':r.get('ExpenseDate',''), 'Status':r.get('Status',''), 'Currency':r.get('Currency',''), 'Amount':q2(money(r.get('Amount'))), 'AmountTWD':amount_twd if amount_twd is not None else ''})\\nquote_rows=[]\\nfor r in quotes:\\n    amount_twd = twd(r, 'NetAmount', r.get('QuoteID',''), 'Quotes')\\n    quote_rows.append({'QuoteID':r.get('QuoteID',''), 'ProjectID':r.get('ProjectID',''), 'CustomerID':r.get('CustomerID',''), 'QuoteDate':r.get('QuoteDate',''), 'ValidUntil':r.get('ValidUntil',''), 'Status':r.get('Status',''), 'Currency':r.get('Currency',''), 'NetAmount':q2(money(r.get('NetAmount'))), 'AmountTWD':amount_twd if amount_twd is not None else ''})\\n\\nwrite_rows('Orders', ['OrderID','ProjectID','CustomerID','OrderDate','Status','Currency','NetAmount','AmountTWD'], order_rows)\\nwrite_rows('Invoices', ['InvoiceID','OrderID','ProjectID','CustomerID','InvoiceDate','DueDate','Currency','Amount','PaidAmount','Balance','BalanceTWD'], invoice_rows)\\nwrite_rows('Expenses', ['ExpenseID','ProjectID','EmployeeID','ExpenseDate','Status','Currency','Amount','AmountTWD'], expense_rows)\\nwrite_rows('Quotes', ['QuoteID','ProjectID','CustomerID','QuoteDate','ValidUntil','Status','Currency','NetAmount','AmountTWD'], quote_rows)\\n\\nsummary = {}\\ndef add(pid, key, val):\\n    if not pid or val in ('', None):\\n        return\\n    summary.setdefault(pid, {'ProjectID':pid, 'OrderTWD':Decimal('0'), 'InvoiceBalanceTWD':Decimal('0'), 'ApprovedExpenseTWD':Decimal('0'), 'AcceptedQuoteTWD':Decimal('0')})\\n    summary[pid][key] += Decimal(str(val))\\nfor r in order_rows: add(r['ProjectID'], 'OrderTWD', r['AmountTWD'])\\nfor r in invoice_rows: add(r['ProjectID'], 'InvoiceBalanceTWD', r['BalanceTWD'])\\nfor r in expense_rows: add(r['ProjectID'], 'ApprovedExpenseTWD', r['AmountTWD'])\\nfor r in quote_rows: add(r['ProjectID'], 'AcceptedQuoteTWD', r['AmountTWD'])\\nsummary_rows = []\\nfor pid in sorted(summary):\\n    d = summary[pid]\\n    summary_rows.append({'ProjectID':pid, 'OrderTWD':q2(d['OrderTWD']), 'InvoiceBalanceTWD':q2(d['InvoiceBalanceTWD']), 'ApprovedExpenseTWD':q2(d['ApprovedExpenseTWD']), 'AcceptedQuoteTWD':q2(d['AcceptedQuoteTWD'])})\\nwrite_rows('Summary', ['ProjectID','OrderTWD','InvoiceBalanceTWD','ApprovedExpenseTWD','AcceptedQuoteTWD'], summary_rows)\\nlast = max(5, 4 + len(summary_rows))\\nfor col in range(2,6):\\n    letter = chr(ord('A') + col - 1)\\n    wb['Summary'].cell(2, col).value = f'=SUM({letter}5:{letter}{last})'\\n\\nwrite_rows('Exceptions', ['Source','DocumentID','ProjectID','Reason'], exceptions)\\n\\nws = wb['Report']\\nws['B3'] = date_from\\nws['D3'] = date_to\\nws['B4'] = 'Sales Orders Status Open/Closed only (non-Cancelled); Invoices by InvoiceDate; Expenses Approved; Quotes Accepted; grouped by ProjectID.'\\nws['B5'] = datetime.now().astimezone().isoformat(timespec='seconds')\\nws['B7'] = 'Lab ERP SAP-like web; Expense Viewer; quote_cli; fx_rates.csv'\\nws['D7'] = datetime.now().astimezone().isoformat(timespec='seconds')\\nws['B9'] = f'Orders and accepted quotes are reported separately and are not combined as revenue. Join/group key is ProjectID only; customer name is not used. Exceptions: {len(exceptions)}.'\\n\\nwb.save(outfile)\\n\\ncheck = load_workbook(outfile, data_only=False)\\nexpected_headers = {\\n 'Orders':['OrderID','ProjectID','CustomerID','OrderDate','Status','Currency','NetAmount','AmountTWD'],\\n 'Invoices':['InvoiceID','OrderID','ProjectID','CustomerID','InvoiceDate','DueDate','Currency','Amount','PaidAmount','Balance','BalanceTWD'],\\n 'Expenses':['ExpenseID','ProjectID','EmployeeID','ExpenseDate','Status','Currency','Amount','AmountTWD'],\\n 'Quotes':['QuoteID','ProjectID','CustomerID','QuoteDate','ValidUntil','Status','Currency','NetAmount','AmountTWD'],\\n 'Summary':['ProjectID','OrderTWD','InvoiceBalanceTWD','ApprovedExpenseTWD','AcceptedQuoteTWD'],\\n 'Exceptions':['Source','DocumentID','ProjectID','Reason'],\\n}\\nfor s, heads in expected_headers.items():\\n    got = [check[s].cell(4,c).value for c in range(1,len(heads)+1)]\\n    assert got == heads, (s, got)\\nassert all(r['Status'] != 'Cancelled' for r in order_rows)\\nassert all(r['Status'] == 'Approved' for r in expense_rows)\\nassert all(r['Status'] "
+          },
+          "failure": null
+         },
+         "failure": null
+        }
+       ],
+       "failure": null
+      },
+      "runs": [],
+      "unrecorded": []
+     }
+    },
+    "draft": null,
+    "approvals": []
+   }
+  }
+ ]
+}
