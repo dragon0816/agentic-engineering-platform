@@ -1773,3 +1773,10 @@ s-k-20261011T102952` (not published).
   login` (a classic GH_TOKEN in the user environment blocks it; PowerShell's execution
   policy blocks the .ps1 shims, so use the .cmd ones).
 - [ ] CP4: knowledge_v1 through the Copilot mode vs the AEP harness (core-015).
+- [x] Rule editor and Skill assistant usability (owner, 2026-10-12; bfb04b24): progress
+  states with elapsed time and the animated avatar; Preview / Markdown / Diff tabs (line
+  diff against the saved file, green added, red removed); proposals open in the Diff;
+  frontmatter check of proposals. Headless check passed, no page errors.
+- [ ] A second load-sensitive browser test: `tests/test_agent_web.py::
+  test_capability_workspace_is_interactive_in_a_real_browser` showed the boot error once
+  under full-suite load; passes alone (3/3) and with its file (82/82).
