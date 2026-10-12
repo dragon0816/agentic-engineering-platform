@@ -99,6 +99,8 @@ from extensions.package import PortableExtensionPackage
 from extensions.runtime import ExtensionLifecycleStore
 from host_runtime import telemetry_api
 from host_runtime.answers import readable
+from host_runtime.assistant_tools import AssistantTools, assistant_token
+from host_runtime.assistant_tools import handle as assistant_handle
 from host_runtime.attachments import (
     AttachmentError,
     AttachmentStore,
@@ -1000,6 +1002,24 @@ class AgentWeb:
         except ValueError as error:
             return {"ok": False, "code": "mcp_settings_invalid", "message": str(error)[:300]}
         return {"ok": True, **self.mcp_servers()}
+
+    # -- assistant tools for GitHub Copilot (COPILOT_INTEGRATION CP1) -------
+
+    @property
+    def assistant_token(self) -> str:
+        return assistant_token(self.runtime.layout.workspace_root)
+
+    def assistant_mcp(self, message: dict[str, Any]) -> dict[str, Any] | None:
+        if getattr(self, "_assistant_tools", None) is None:
+            self._assistant_tools = AssistantTools(self)
+        return assistant_handle(self._assistant_tools, message)
+
+    def assistant_mcp_config(self, base_url: str) -> dict[str, Any]:
+        """The MCP blocks for VS Code (`.vscode/mcp.json`) and the Copilot CLI."""
+        server = {"type": "http", "url": base_url.rstrip("/") + "/mcp",
+                  "headers": {"Authorization": f"Bearer {self.assistant_token}"}}
+        return {"ok": True, "vscode": {"servers": {"aep": server}},
+                "copilot_cli": {"mcpServers": {"aep": {**server, "tools": ["*"]}}}}
 
     # -- experience review (docs/phases/EXPERIENCE_REVIEW.md, E1-E2) ---------
 
@@ -2832,6 +2852,42 @@ class _Handler(BaseHTTPRequestHandler):
         host = (self.headers.get("Host") or "").rsplit(":", 1)[0].strip("[]")
         return host in ("127.0.0.1", "localhost", "::1")
 
+    def _assistant_mcp(self) -> None:
+        """MCP over HTTP for the assistant tools: its own stable token, or the
+        session's (COPILOT_INTEGRATION CP1)."""
+        header = self.headers.get("Authorization") or ""
+        given = header[len(BEARER):].strip() if header.startswith(BEARER) else ""
+        if not given or not (hmac.compare_digest(given, self.server.web.assistant_token)
+                             or hmac.compare_digest(given, self.server.token)):
+            self._refuse_unread(401, {"error": "this request carried no usable token"})
+            return
+        try:
+            length = int(self.headers.get("Content-Length") or "0")
+        except ValueError:
+            length = -1
+        if not 0 < length <= MAX_BODY_BYTES:
+            self._refuse_unread(400, {"error": "the request did not say how long it was"})
+            return
+        try:
+            message = json.loads(self.rfile.read(length))
+        except (ValueError, TypeError):
+            self._json(400, {"jsonrpc": "2.0", "id": None,
+                             "error": {"code": -32700, "message": "parse error"}})
+            return
+        batch = message if isinstance(message, list) else [message]
+        replies = [reply for item in batch if isinstance(item, dict)
+                   for reply in [self.server.web.assistant_mcp(item)] if reply is not None]
+        if not replies:
+            self.send_response(202)
+            self.send_header("Content-Length", "0")
+            self.end_headers()
+            return
+        if isinstance(message, list):
+            self._send(200, json.dumps(replies, ensure_ascii=False).encode("utf-8"),
+                       "application/json; charset=utf-8")
+        else:
+            self._json(200, replies[0])
+
     def _authorized(self) -> bool:
         header = self.headers.get("Authorization") or ""
         if not header.startswith(BEARER):
@@ -2945,6 +3001,9 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.readiness())
         elif parsed.path == "/api/knowledge/pipeline":
             self._json(200, web.knowledge_pipeline())
+        elif parsed.path == "/api/assistant/mcp-config":
+            host, port = self.server.server_address[:2]
+            self._json(200, web.assistant_mcp_config(f"http://127.0.0.1:{port}"))
         elif parsed.path == "/api/experience":
             self._json(200, web.experience())
         elif parsed.path == "/api/knowledge/push":
@@ -2994,6 +3053,9 @@ class _Handler(BaseHTTPRequestHandler):
         if not self._host_is_loopback():
             refusal = {"error": "this interface answers on the loopback address only"}
             self._refuse_unread(403, refusal)
+            return
+        if urlparse(self.path).path == "/mcp":
+            self._assistant_mcp()
             return
         if not self._authorized():
             self._refuse_unread(401, {"error": "this request carried no usable token"})
