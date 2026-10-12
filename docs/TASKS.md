@@ -1799,3 +1799,10 @@ s-k-20261011T102952` (not published).
   the 994 KB NTN white paper failed with `timeout` after 15 min (one plan call cannot
   hold it: an existing single-document ingest limit, not the batch). Open: split or skip
   very large Raw before planning.
+- [x] Laya reachable again (owner, 2026-10-13): loopback relay to the LAN service by the
+  owner's choice (SSH key rejected); shadow replay recorded in
+  `docs/JEV_ADAPTER_READINESS.md`; active mode not enabled (64 answered decisions, 3 of 15
+  narrowed tool turns would hide the model's tool). A probe accidentally ran the weekly
+  report once (scratch sheet written, backup kept, no mail draft); recorded there.
+- [ ] Collect answered Laya shadow decisions (relay running) and re-evaluate active mode
+  with a non-Workflow probe set.

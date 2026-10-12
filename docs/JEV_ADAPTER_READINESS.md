@@ -191,3 +191,25 @@ Shadow mode is built (DECISIONS 2026-10-05) and off until the owner adds an
 
 plus `{"secret": "jev_api_key", "environment_variable": "AEP_JEV_API_KEY"}` in
 `credentials`, the SSH tunnel running, and an Agent Web restart.
+
+### Laya reachable again; active-mode question (2026-10-13)
+
+The Laya host answers on the LAN again (`laya-serve` 0.1.0, `/health` ok). SSH as
+`openlab` rejects this PC's keys, so by the owner's choice a scratch loopback relay
+(127.0.0.1:18000 -> 172.25.228.141:8000, not in the repository) stands in for the tunnel;
+host.json is unchanged (shadow, threshold 0.9, at most 3 tools).
+
+Shadow log replay (`evaluation.jev_shadow_report`, 1,556 turns since 2026-10-05): only
+64 decisions answered; 1,492 were tunnel errors. At the live settings Laya would have
+narrowed 30 turns: 12 kept the model's tool, 3 hid it, 15 had no tool use (precision
+0.8). Two live decisions today took 300-500 ms; in active mode that sits on every turn's
+path (up to the 1,500 ms timeout when Laya is down). Today's catalogue has only six
+Skills, so narrowing saves little prompt. Not enabled: too few answered decisions to
+justify hiding tools.
+
+Incident: a probe set sent through Agent Web assumed installed Skill Workflows wait for
+approval; they do not. "Run this week's SDE weekly report" ran
+`engineering/sde-weekly-report@1.0.0` and wrote the scratch sheet of the team workbook
+(backup `SDE_Weekly_Report.backup-20261013-073548.xlsx` beside it); the mail step failed,
+so no draft. A second case failed at apply (`workbook_open`). Probes for decision
+quality must not use requests that run Workflows.
