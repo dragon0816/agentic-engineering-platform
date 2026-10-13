@@ -161,6 +161,11 @@ body {
 .kp-ai > .kp-actions { margin: 0; padding-right: 44px; align-items: center; }
 .kp-ai #kp-assist-log { flex: 1; overflow: auto; max-height: none; min-height: 0; }
 .kp-ai #kp-assist-input { width: 100%; box-sizing: border-box; }
+.laya-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px 14px; }
+.laya-grid label { display: flex; flex-direction: column; gap: 2px; }
+.settings .laya-check { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.settings .laya-check input { width: auto; margin: 0; flex: none; }
 .kp-add { background: #e6f4ea; color: #137333; }
 .kp-del { background: #fce8e6; color: #a50e0e; }
 .kp-same { opacity: 0.7; }
@@ -665,6 +670,40 @@ tr:last-child td { border-bottom: none; }
           <button id="telegram-check" type="button">Check who messaged the bot</button></p>
         <p id="telegram-result" class="note" role="status"></p>
         <div id="telegram-unknown"></div>
+      </form>
+    </div>
+    <h2>Laya decision acceleration</h2>
+    <p class="note">Laya answers small routing decisions fast. The Agent reaches it only
+      through an SSH tunnel to a port on this computer, so nothing travels unencrypted to
+      the other machine. Shadow asks Laya in the background and only records its choice;
+      active lets confident choices narrow the Skills the model sees. A mode change applies
+      after Agent Web restarts; the tunnel follows at once.</p>
+    <div class="card settings">
+      <form id="laya-settings" autocomplete="off">
+        <div class="laya-grid">
+          <label>Remote host <input id="laya-host" placeholder="172.25.228.141"></label>
+          <label>SSH port <input id="laya-ssh-port" type="number" min="1" max="65535"></label>
+          <label>Account <input id="laya-user" placeholder="openlab"></label>
+          <label>Remote port (Laya) <input id="laya-remote-port" type="number" min="1"
+                 max="65535"></label>
+          <label>Local port <input id="laya-local-port" type="number" min="1024"
+                 max="65535"></label>
+          <label>Mode <select id="laya-mode">
+            <option value="off">Off</option><option value="shadow">Shadow (record only)</option>
+            <option value="active">Active</option></select></label>
+          <label>Confidence threshold (%) <input id="laya-threshold" type="number" min="0"
+                 max="100" step="1"></label>
+          <label>Timeout (ms) <input id="laya-timeout" type="number" min="100" max="5000"
+                 step="100"></label>
+          <label>Owner approval reference <input id="laya-approval"
+                 placeholder="needed for shadow or active"></label>
+        </div>
+        <label class="laya-check"><input type="checkbox" id="laya-auto"> Agent Web opens the
+          SSH tunnel and
+          reopens it when it drops (the SSH key must be accepted by the remote host)</label>
+        <p><button class="go" id="laya-save" type="submit">Save Laya settings</button>
+          <button id="laya-check" type="button">Check connection</button></p>
+        <p id="laya-status" class="note" role="status"></p>
       </form>
     </div>
     <div class="card settings" id="mcp-card" style="margin-top: 14px">
@@ -2547,6 +2586,7 @@ async function loadSettings() {
   el("persona-introduction").value = persona.introduction;
   el("persona-soul").value = persona.soul;
   showTelegram(settings.telegram);
+  loadLaya().catch(() => {});
   el("persona-result").textContent =
     "Saved locally. Changes apply to the next natural-language turn.";
   el("model-provider").value = model.provider || "openai_compatible";
@@ -2748,6 +2788,75 @@ const TELEGRAM_PROBLEMS = {
   page_expired: "This page is from an earlier start of Agent Web. Open the newest Agent Web "
     + "tab and save again.",
 };
+
+// -- Laya decision acceleration (owner 2026-10-13) ---------------------------
+const LAYA_PROBLEMS = {
+  egress_approval_missing: "shadow and active send the latest user message to Laya; "
+    + "enter the owner's approval reference first",
+  credential_unmapped: "the Laya key is not mapped in host.json credentials",
+  laya_settings_invalid: "check the host, account and numbers",
+  settings_read_only: "this Agent Web was started without its host file",
+};
+
+function showLaya(info) {
+  const s = info.settings;
+  el("laya-host").value = s.ssh_host; el("laya-ssh-port").value = s.ssh_port;
+  el("laya-user").value = s.ssh_user; el("laya-remote-port").value = s.remote_port;
+  el("laya-local-port").value = s.local_port; el("laya-mode").value = s.mode;
+  el("laya-threshold").value = Math.round(s.confidence_threshold * 100);
+  el("laya-timeout").value = s.timeout_ms; el("laya-approval").value = s.approval_ref || "";
+  el("laya-auto").checked = s.auto_tunnel;
+  const tunnel = info.tunnel || {}, probe = info.probe || {}, last = info.last_decision;
+  const parts = [
+    probe.reachable ? "Connected: Laya answered in " + probe.ms + " ms"
+      : "Not connected through 127.0.0.1:" + s.local_port,
+    tunnel.state === "not_managed" ? "tunnel not opened by Agent Web"
+      : "tunnel " + tunnel.state + (tunnel.error ? " (" + tunnel.error + ")" : "")
+        + (tunnel.restarts ? ", reopened " + tunnel.restarts + " times" : ""),
+    last ? "last decision " + (last.at || "").slice(0, 19).replace("T", " ") + " UTC, "
+      + last.outcome + (last.latency_ms != null ? ", " + last.latency_ms + " ms" : "") : "",
+    info.running_mode !== s.mode ? "running in " + info.running_mode
+      + " until Agent Web restarts" : "",
+  ].filter(Boolean);
+  el("laya-status").textContent = parts.join(" · ");
+}
+
+async function loadLaya() {
+  const info = await call("/api/settings/laya");
+  if (info.ok) showLaya(info);
+}
+
+el("laya-check").addEventListener("click", () => {
+  el("laya-status").textContent = "Checking…";
+  loadLaya().catch((failure) => { el("laya-status").textContent = failure.message; });
+});
+
+el("laya-settings").addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const number = (id) => Number(el(id).value);
+  const body = {
+    ssh_host: el("laya-host").value.trim(), ssh_port: number("laya-ssh-port"),
+    ssh_user: el("laya-user").value.trim(), remote_port: number("laya-remote-port"),
+    local_port: number("laya-local-port"), auto_tunnel: el("laya-auto").checked,
+    mode: el("laya-mode").value, confidence_threshold: number("laya-threshold") / 100,
+    timeout_ms: number("laya-timeout"),
+    approval_ref: el("laya-approval").value.trim() || null,
+  };
+  const button = el("laya-save"); button.disabled = true;
+  el("laya-status").textContent = "Saving…";
+  try {
+    const saved = await call("/api/settings/laya", body);
+    if (saved.ok === false) throw Object.assign(new Error(saved.code), {code: saved.code});
+    showLaya(saved);
+    if (saved.restart_required) {
+      el("laya-status").textContent += " · Saved; restart Agent Web for the new mode.";
+    }
+  } catch (failure) {
+    const code = failure.code || "";
+    el("laya-status").textContent = "Not saved: " + (LAYA_PROBLEMS[code] || code
+      || failure.message);
+  } finally { button.disabled = false; }
+});
 
 el("telegram-settings").addEventListener("submit", async (event) => {
   event.preventDefault();

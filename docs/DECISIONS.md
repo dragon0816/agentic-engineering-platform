@@ -2331,3 +2331,14 @@ ignores answer skills. Design: `docs/phases/KNOWLEDGE_COLLAB.md` section 4.
 Rejected: listing every skill for every sandbox (unclear ownership, edits to other
 domains' rules), and making the general layer editable from a product-line sandbox
 (changes every product line).
+
+## 2026-10-13: Laya settings on the Settings page, tunnel kept by Agent Web
+
+Decision (owner): host.json gains `laya` (SSH host, port, account, remote and local port,
+automatic tunnel, mode off/shadow/active, threshold, timeout, approval reference), edited
+on the Settings page; `decision_accelerator` is derived from it and always points at a
+loopback port. Agent Web may keep the SSH tunnel open itself in batch mode (no password
+prompts) and reopens it when it drops. Host and account are validated names placed after
+`--`/`-l`, so they cannot inject ssh options.
+Rejected: accepting a plaintext LAN endpoint (the loopback-or-HTTPS rule stays); storing
+an SSH password (keys only).

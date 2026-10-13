@@ -586,6 +586,7 @@ def _web(
             print("Telegram messages are answered while this runs.")
         web.start_feedback_sync()
         web.start_experience_nightly()
+        web.start_laya_tunnel()
         web.start_mcp()
         print("This machine's Agent is at:")
         print(f"  {server.address}")
@@ -610,6 +611,9 @@ def _web(
                 loop.stop()
             if web.telegram_loop is not None:
                 web.telegram_loop.stop(timeout=2)
+            tunnel = getattr(web, "laya_tunnel", None)
+            if tunnel is not None:
+                tunnel.stop()
     return 0
 
 

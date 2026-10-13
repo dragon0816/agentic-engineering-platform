@@ -2,17 +2,24 @@
 
 Updated: 2026-10-13 (Asia/Taipei), by Claude Code
 
-## Latest (2026-10-13): re-ingest with the current rules
+## Latest (2026-10-13)
 
-- Built (b2781e41): Pull explains that already-ingested originals are already in the
-  sandbox as Raw and can tick them in step 4; step 4 re-ingests ticked Raw in the
-  background (Stop / Continue, flagged plans wait for Review). Decision in
-  `docs/DECISIONS.md` (2026-10-13); row in `docs/TASKS.md`.
-- Verified: ruff, mypy src, full suite 2543 passed / 6 skipped; headless page check;
-  live on `sb-c6-market-c6abe5` (8 KB Raw applied in 85 s; 994 KB NTN white paper timed
-  out after 15 min). Agent Web restarted on this code.
-- Open for the owner: (1) a Pull "convert again" option would change write-once Raw,
-  not built; (2) very large Raw cannot be planned in one call: decide split or skip.
+- Knowledge: re-ingest with current rules (b2781e41); one folder per sandbox with only its
+  rules editable (f1453389, design `docs/phases/KNOWLEDGE_COLLAB.md` section 4). Test
+  sandbox `sb-scope-check-fe64bb` (scope Knowledge) left for the owner to look at.
+- Laya: 141 reachable; SSH key for openlab is rejected. A scratch loopback relay
+  (127.0.0.1:18000 -> 172.25.228.141:8000, not in the repo, owner's choice) is running in
+  this session only; host.json still shadow. Settings page now has a Laya card that saves
+  host.json `laya` and can keep an `ssh -N` tunnel (needs the key accepted first).
+- Laya acceleration design `docs/phases/LAYA_ACCELERATION.md` is ON HOLD: collect a week of
+  shadow data, review with the owner, then decide. Do not implement before that.
+- Incident recorded in `docs/JEV_ADAPTER_READINESS.md`: a probe ran the weekly report once;
+  values identical to the owner's 2026-10-12 run, no restore needed. Never probe with
+  requests that run Workflows.
+- Verified: ruff, mypy src, full suite 2555 passed / 6 skipped; headless checks of the
+  scoped Knowledge tab and the Laya card. Agent Web restarted on this code.
+- Owner to decide: keep the relay or fix SSH (add this PC's key on 141); Pull
+  "convert again" option (not built, Raw is write-once); very large Raw (split or skip).
 
 ## Where the current work stopped (2026-10-09)
 

@@ -213,3 +213,19 @@ approval; they do not. "Run this week's SDE weekly report" ran
 (backup `SDE_Weekly_Report.backup-20261013-073548.xlsx` beside it); the mail step failed,
 so no draft. A second case failed at apply (`workbook_open`). Probes for decision
 quality must not use requests that run Workflows.
+
+### Settings page card (owner, 2026-10-13)
+
+Agent Web Settings has a "Laya decision acceleration" card: remote host, SSH port,
+account, remote and local port, mode (off / shadow / active), threshold, timeout and the
+owner's approval reference. Save writes host.json `laya` and derives
+`decision_accelerator` from it (endpoint always `http://127.0.0.1:<local port>`; hidden
+fields such as credential, model and list length are kept). The mode applies after an
+Agent Web restart; the tunnel follows at once. With "Agent Web opens the SSH tunnel"
+ticked, Agent Web runs `ssh -N -o BatchMode=yes -L 127.0.0.1:<local>:127.0.0.1:<remote>`
+(`src/host_runtime/laya.py`), reopens it with growing pauses, ends it with Agent Web (a
+Windows job kills it even on a forced stop) and shows the last ssh error. The card shows
+whether Laya answers through the local port, its response time and the last shadow
+decision. Encryption is unchanged: only an SSH tunnel or HTTPS reaches another machine.
+Prerequisite for the automatic tunnel: the remote host must accept this PC's SSH key
+(it rejects it as of 2026-10-13).

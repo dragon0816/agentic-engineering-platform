@@ -1,5 +1,6 @@
 """Closed contracts for the company-workstation host."""
 
+import re
 from pathlib import Path, PureWindowsPath
 from typing import Annotated, Literal, Self
 from urllib.parse import urlsplit
@@ -442,6 +443,45 @@ class ScheduleHostSettings(Contract):
     catch_up_hours: int = Field(default=24, ge=1, le=336, strict=True)
 
 
+_SSH_HOST = re.compile(r"[A-Za-z0-9](?:[A-Za-z0-9.-]{0,251}[A-Za-z0-9])?")
+_SSH_USER = re.compile(r"[A-Za-z0-9._][A-Za-z0-9._-]{0,31}")
+
+
+class LayaSettings(Contract):
+    """Laya decision acceleration as the Settings page edits it (owner 2026-10-13).
+
+    The Agent reaches Laya only through an SSH tunnel to a loopback port, so the
+    decision endpoint stays `http://127.0.0.1:<local_port>`: a plaintext LAN
+    address is never accepted. Host and user are checked so they can only be
+    an address and an account name on the ssh command line, never an option.
+    """
+
+    ssh_host: str = Field(default="", max_length=253)
+    ssh_port: int = Field(default=22, ge=1, le=65535, strict=True)
+    ssh_user: str = Field(default="", max_length=32)
+    remote_port: int = Field(default=8000, ge=1, le=65535, strict=True)
+    local_port: int = Field(default=18000, ge=1024, le=65535, strict=True)
+    # Agent Web opens the tunnel itself while it runs and reopens it when it drops.
+    auto_tunnel: StrictBool = False
+    mode: Literal["off", "shadow", "active"] = "off"
+    confidence_threshold: float = Field(default=0.9, ge=0, le=1)
+    timeout_ms: int = Field(default=1500, ge=100, le=5000, strict=True)
+    # The owner's approval to send the latest user message to Laya.
+    approval_ref: str | None = Field(default=None, max_length=120)
+
+    @model_validator(mode="after")
+    def ssh_names_only(self) -> Self:
+        if self.ssh_host and not _SSH_HOST.fullmatch(self.ssh_host):
+            raise ValueError("ssh_host must be a host name or address")
+        if self.ssh_user and not _SSH_USER.fullmatch(self.ssh_user):
+            raise ValueError("ssh_user must be an account name")
+        if self.auto_tunnel and not (self.ssh_host and self.ssh_user):
+            raise ValueError("an automatic tunnel needs ssh_host and ssh_user")
+        if self.approval_ref is not None and not self.approval_ref.strip():
+            raise ValueError("approval_ref must not be blank")
+        return self
+
+
 class CompanyHostConfiguration(Contract):
     """Non-secret local identity and workspace settings.
 
@@ -472,6 +512,9 @@ class CompanyHostConfiguration(Contract):
     # Optional bounded-decision acceleration. NONE is an exact baseline path;
     # a configured provider alone grants no data egress or execution authority.
     decision_accelerator: DecisionAcceleratorConfig = DecisionAcceleratorConfig()
+    # The Settings page's Laya card (owner 2026-10-13): the SSH tunnel to the
+    # Laya host and the mode it sets; `decision_accelerator` is derived from it.
+    laya: LayaSettings | None = None
     # Published Knowledge is installed only through exact local bindings.
     # Querying it needs the same explicitly configured model used by the
     # Personal Agent, so an empty binding cannot quietly become retrieval-only

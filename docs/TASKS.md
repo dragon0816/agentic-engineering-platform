@@ -1817,3 +1817,7 @@ s-k-20261011T102952` (not published).
   (`rule_outside_scope`); answer skills may carry `applies_to`; Raw, re-ingest and upload
   limited to the scope. Design in `docs/phases/KNOWLEDGE_COLLAB.md` section 4. Full suite
   2548 passed, 6 skipped; headless check on `sb-scope-check-fe64bb` (scope Knowledge).
+- [x] Laya settings card (owner, 2026-10-13): Settings page fields for the tunnel and mode,
+  saved to host.json `laya` with a derived loopback `decision_accelerator`; optional
+  Agent Web-managed `ssh -N` tunnel with reconnect and status (`src/host_runtime/laya.py`,
+  `/api/settings/laya`). Automatic tunnel needs the remote host to accept this PC's key.

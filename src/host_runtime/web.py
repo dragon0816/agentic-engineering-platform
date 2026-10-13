@@ -117,6 +117,7 @@ from host_runtime.contracts import (
     CredentialBinding,
     ExtensionLifecycleProjection,
     KnowledgeAskRequest,
+    LayaSettings,
     ModelBinding,
     ModelSettingsUpdateRequest,
     PlatformCatalogProjection,
@@ -162,6 +163,7 @@ from host_runtime.experience import (
 )
 from host_runtime.experience_review import latest_review, run_review
 from host_runtime.host import HostRuntime, build_telegram, choice_sources, load_authorization
+from host_runtime.jev_shadow import SHADOW_LOG_FILE
 from host_runtime.knowledge_bench import latest as latest_benchmark
 from host_runtime.knowledge_bench import run_benchmark
 from host_runtime.knowledge_harness import KnowledgeHarness, harness_skill, knowledge_source_lines
@@ -176,6 +178,11 @@ from host_runtime.knowledge_reingest import RUNS as REINGEST_RUNS
 from host_runtime.knowledge_reingest import ReingestRun, run_reingest
 from host_runtime.knowledge_reingest import latest as latest_reingest
 from host_runtime.knowledge_reingest import report as reingest_report
+from host_runtime.laya import ENDPOINT as LAYA_ENDPOINT
+from host_runtime.laya import LayaError, SshTunnel, current_settings
+from host_runtime.laya import accelerator_for as laya_accelerator
+from host_runtime.laya import last_decision as laya_last_decision
+from host_runtime.laya import probe as laya_probe
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
 from host_runtime.profiles import ProfileError, activate_profile
 from host_runtime.reference_sets import (
@@ -2771,6 +2778,62 @@ class AgentWeb:
             return {"ok": False, "code": error.code}
         return {"ok": True, "push": latest_push(sandbox)}
 
+    # -- Laya decision acceleration (Settings page, owner 2026-10-13) ---------
+
+    def laya_settings(self) -> dict[str, Any]:
+        """The card's values and whether Laya answers through the tunnel."""
+        settings = current_settings(self.runtime.config, Path.home() / ".ssh" / "config")
+        tunnel = getattr(self, "laya_tunnel", None)
+        return {
+            "ok": True, "writable": self.config_path is not None,
+            "settings": settings.model_dump(mode="json"),
+            "endpoint": LAYA_ENDPOINT.format(port=settings.local_port),
+            "running_mode": "off" if self.runtime.config.decision_accelerator.provider == "NONE"
+            else self.runtime.config.decision_accelerator.mode,
+            "tunnel": tunnel.status() if tunnel is not None else {"state": "not_managed"},
+            "probe": laya_probe(settings.local_port),
+            "last_decision": laya_last_decision(
+                self.runtime.layout.workspace_root / SHADOW_LOG_FILE),
+        }
+
+    def update_laya(self, body: dict[str, Any]) -> dict[str, Any]:
+        """Save the card to host.json; the tunnel follows at once, the mode
+        after a restart (the Gateway reads it when the Agent starts)."""
+        if self.config_path is None:
+            return {"ok": False, "code": "settings_read_only"}
+        try:
+            settings = LayaSettings.model_validate(body)
+        except ValueError:
+            return {"ok": False, "code": "laya_settings_invalid"}
+        with self._one_at_a_time:
+            current = CompanyHostConfiguration.model_validate_json(
+                self.config_path.read_text(encoding="utf-8-sig"))
+            try:
+                accelerator = laya_accelerator(settings, current.decision_accelerator,
+                                               current.credential_environment())
+            except LayaError as error:
+                return {"ok": False, "code": error.code}
+            candidate = current.model_dump(mode="json")
+            candidate["laya"] = settings.model_dump(mode="json")
+            candidate["decision_accelerator"] = accelerator.model_dump(mode="json")
+            updated = CompanyHostConfiguration.model_validate(candidate)
+            write_atomically(self.config_path,
+                             updated.model_dump_json(indent=2).encode("utf-8") + b"\n")
+        self.start_laya_tunnel(settings)
+        restart = accelerator != self.runtime.config.decision_accelerator
+        return {**self.laya_settings(), "ok": True, "restart_required": restart}
+
+    def start_laya_tunnel(self, settings: LayaSettings | None = None) -> None:
+        """(Re)open the tunnel when the card asks Agent Web to keep it."""
+        chosen = settings if settings is not None else self.runtime.config.laya
+        old = getattr(self, "laya_tunnel", None)
+        if old is not None:
+            old.stop()
+        self.laya_tunnel: SshTunnel | None = None
+        if chosen is not None and chosen.auto_tunnel:
+            self.laya_tunnel = SshTunnel(chosen)
+            self.laya_tunnel.start()
+
     def start_reingest(self, sandbox_id: str, raw_refs: list[str]) -> dict[str, Any]:
         """Ingest the chosen Raw documents again with the sandbox's current
         rules, one after another in the background (owner 2026-10-13)."""
@@ -3116,6 +3179,8 @@ class _Handler(BaseHTTPRequestHandler):
         elif parsed.path == "/api/knowledge/push":
             query = parse_qs(parsed.query)
             self._json(200, web.push_status((query.get("sandbox_id") or [""])[0]))
+        elif parsed.path == "/api/settings/laya":
+            self._json(200, web.laya_settings())
         elif parsed.path == "/api/knowledge/reingest":
             query = parse_qs(parsed.query)
             self._json(200, web.reingest_status((query.get("sandbox_id") or [""])[0]))
@@ -3191,6 +3256,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/experience/settings",
             "/api/experience/review",
             "/api/settings/model",
+            "/api/settings/laya",
             "/api/settings/telegram",
             "/api/mcp/save",
             "/api/mcp/delete",
@@ -3253,6 +3319,9 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, self.server.web.start_push(
                 str(body.get("sandbox_id") or ""), [str(x) for x in body["sets"]],
                 {str(k): str(v) for k, v in dict(body.get("resolutions") or {}).items()}))
+            return
+        if path == "/api/settings/laya":
+            self._json(200, self.server.web.update_laya(body if isinstance(body, dict) else {}))
             return
         if path == "/api/knowledge/reingest/start":
             if not isinstance(body, dict) or not isinstance(body.get("raw_refs"), list):
