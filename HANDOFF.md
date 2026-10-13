@@ -4,22 +4,31 @@ Updated: 2026-10-13 (Asia/Taipei), by Claude Code
 
 ## Latest (2026-10-13)
 
-- Knowledge: re-ingest with current rules (b2781e41); one folder per sandbox with only its
-  rules editable (f1453389, design `docs/phases/KNOWLEDGE_COLLAB.md` section 4). Test
-  sandbox `sb-scope-check-fe64bb` (scope Knowledge) left for the owner to look at.
-- Laya: 141 reachable; SSH key for openlab is rejected. A scratch loopback relay
-  (127.0.0.1:18000 -> 172.25.228.141:8000, not in the repo, owner's choice) is running in
-  this session only; host.json still shadow. Settings page now has a Laya card that saves
-  host.json `laya` and can keep an `ssh -N` tunnel (needs the key accepted first).
-- Laya acceleration design `docs/phases/LAYA_ACCELERATION.md` is ON HOLD: collect a week of
-  shadow data, review with the owner, then decide. Do not implement before that.
-- Incident recorded in `docs/JEV_ADAPTER_READINESS.md`: a probe ran the weekly report once;
-  values identical to the owner's 2026-10-12 run, no restore needed. Never probe with
-  requests that run Workflows.
-- Verified: ruff, mypy src, full suite 2555 passed / 6 skipped; headless checks of the
-  scoped Knowledge tab and the Laya card. Agent Web restarted on this code.
-- Owner to decide: keep the relay or fix SSH (add this PC's key on 141); Pull
-  "convert again" option (not built, Raw is write-once); very large Raw (split or skip).
+All of the following is committed on main (not pushed); rows are in `docs/TASKS.md`,
+decisions in `docs/DECISIONS.md`.
+
+- Knowledge tab: one folder per sandbox (Scope and rules); progress bars for create and
+  pull; Convert/Preview run in the background with picture progress and Stop (a convert
+  in one request outlived the 600 s step limit); every step shows its running time;
+  Ingest shows the clicked Raw beside a keyboard-tickable list; new Raw is ticked green.
+- Tasks tab: Workflows (telemetry) and background jobs (`workspace/tasks.json`), newest 50.
+- Reviews tab (experience review E3/E5): proposals are accepted, rejected with a reason,
+  snoozed, done or reopened; accept opens a review sandbox (rule edit, draft question),
+  adds a gap or tracks an issue. Push now merges `checks/`. 16 proposals are waiting for
+  the owner (mostly Workflow issues). Next: E4 (platform Skill and Workflow routes).
+- Releases: `scriptselease.cmd` (verify, build from `git archive HEAD`, bundle, release
+  folder, tag `release-<id>`); colleague manual `deploy/windows-preview/INSTALL.zh-TW.md`,
+  publisher guide `docs/RELEASING.zh-TW.md`. Last release `20261013-1349-fd87def6` predates
+  the icon, Tasks, Reviews and Ingest changes: make a new one before delivering.
+- Laya: Settings card (`laya` in host.json, optional Agent Web SSH tunnel). The SSH key for
+  openlab@172.25.228.141 is rejected; the scratch loopback relay ran only in that session.
+  `docs/phases/LAYA_ACCELERATION.md` is ON HOLD for a week of shadow data and owner review.
+- Load-sensitive tests seen under full load (pass alone): two browser tests,
+  `test_application_catalog` endpoint test, `test_telegram_ingress` back-off test.
+- Verified last: ruff, mypy src, full suite 2578 passed / 1 load-sensitive failure /
+  6 skipped; headless checks of each new page. Agent Web restarted on 25adad87.
+- Owner to decide: Pull "convert again" option (not built); very large Raw (split or
+  skip); SSH key on 141 versus the relay.
 
 ## Where the current work stopped (2026-10-09)
 
