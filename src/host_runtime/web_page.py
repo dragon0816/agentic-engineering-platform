@@ -154,8 +154,11 @@ body {
   border: 0; resize: none; background: transparent; overflow: auto; color: inherit;
   padding: 8px; margin: 0; white-space: pre; tab-size: 4; }
 #kp-after-preview { padding: 8px 12px; overflow: auto; flex: 1; }
-.kp-ai { display: flex; flex-direction: column; gap: 6px; padding: 8px 8px 40px;
-  overflow: hidden; }  /* the bottom keeps clear of the maximize button */
+.kp-ai { display: flex; flex-direction: column; gap: 6px; padding: 8px;
+  overflow: hidden; }
+/* The buttons sit on the pane's bottom edge, level with the file pane; the
+   right padding keeps them clear of the maximize button. */
+.kp-ai > .kp-actions { margin: 0; padding-right: 44px; align-items: center; }
 .kp-ai #kp-assist-log { flex: 1; overflow: auto; max-height: none; min-height: 0; }
 .kp-ai #kp-assist-input { width: 100%; box-sizing: border-box; }
 .kp-add { background: #e6f4ea; color: #137333; }
