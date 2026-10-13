@@ -1836,3 +1836,12 @@ s-k-20261011T102952` (not published).
   each loading step. Live: 6,786-file copy and 566-file pull showed counts. Full suite
   2564 passed, 6 skipped. Also: shortcut icon from the owner's `files/AEP.png`; stray
   empty `rsk-copy/drop/drop` removed; releases are tagged `release-<id>`.
+- [x] Convert in the background (owner, 2026-10-13): Convert and Preview run one original
+  at a time (`host_runtime/knowledge_convert.py`, `/api/knowledge/convert[/start|/stop]`)
+  with document and picture progress and Stop; every Knowledge step shows how long it
+  has been running. Cause: five decks held 248 pictures, so one convert request outlived
+  the 600 s Bridge step limit and the page heard nothing. Live Preview on `test_kn`
+  showed per-document progress. Full suite passed.
+- [ ] Experience review E3-E5 (owner chose the full version, 2026-10-13): Reviews page,
+  proposal actions (accept into a sandbox / reject / snooze), outcome tracking.
+- [ ] Task list (owner, 2026-10-13): the Agent's tasks, finished and running, newest 50.

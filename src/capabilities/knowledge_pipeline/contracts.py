@@ -70,6 +70,7 @@ class ConvertRequest(Contract):
     sandbox_id: Text
     paths: tuple[Text, ...] = ()
     mode: Literal["dry_run", "apply"] = "dry_run"
+    progress_key: Symbol | None = None
 
 
 class IngestPlanRequest(Contract):

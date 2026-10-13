@@ -166,6 +166,7 @@ from host_runtime.host import HostRuntime, build_telegram, choice_sources, load_
 from host_runtime.jev_shadow import SHADOW_LOG_FILE
 from host_runtime.knowledge_bench import latest as latest_benchmark
 from host_runtime.knowledge_bench import run_benchmark
+from host_runtime.knowledge_convert import ConvertRun, run_convert
 from host_runtime.knowledge_harness import KnowledgeHarness, harness_skill, knowledge_source_lines
 from host_runtime.knowledge_publish import (
     PublishError,
@@ -222,7 +223,7 @@ from knowledge.market_matrix import (
     MarketMatrixRequest,
     assess_market_cell,
 )
-from knowledge.pipeline import KnowledgePipeline
+from knowledge.pipeline import KnowledgePipeline, PipelineError
 from knowledge.procedure import KnowledgeProcedure
 from knowledge.progress import read as knowledge_progress
 from knowledge.query import cited_numbers
@@ -2835,6 +2836,68 @@ class AgentWeb:
             self.laya_tunnel = SshTunnel(chosen)
             self.laya_tunnel.start()
 
+    def start_convert(self, sandbox_id: str, mode: str) -> dict[str, Any]:
+        """Convert (or preview) every original in the sandbox's drop/ in the
+        background, one at a time (owner 2026-10-13)."""
+        installed = self.runtime.agent.gateway.bridge.installed.get(CONVERT_SPEC.identity)
+        pipeline = getattr(getattr(installed, "handler", None), "pipeline", None)
+        if not isinstance(pipeline, KnowledgePipeline) or mode not in ("dry_run", "apply"):
+            return {"ok": False, "code": "knowledge_pipeline_disabled"}
+        try:
+            paths = pipeline.contents(sandbox_id).drop
+        except (SandboxError, PipelineError) as error:
+            return {"ok": False, "code": error.code}
+        if not paths:
+            return {"ok": False, "code": "drop_empty"}
+        self._convert_stops: dict[str, threading.Event] = getattr(self, "_convert_stops", {})
+        self._convert_runs: dict[str, ConvertRun] = getattr(self, "_convert_runs", {})
+        if sandbox_id in self._convert_stops:
+            return {"ok": False, "code": "convert_running"}
+        stop = threading.Event()
+        self._convert_stops[sandbox_id] = stop
+        run = ConvertRun(
+            run_id=f"convert-{uuid.uuid4().hex[:8]}", sandbox_id=sandbox_id,
+            mode="apply" if mode == "apply" else "dry_run", paths=paths,
+            progress_key=f"cv{uuid.uuid4().hex[:16]}",
+            started=datetime.now(UTC).isoformat(timespec="seconds"))
+
+        def remember(current: ConvertRun) -> None:
+            self._convert_runs[sandbox_id] = current
+
+        def work() -> None:
+            try:
+                run_convert(
+                    lambda box, chosen, how, key: pipeline.convert(
+                        box, chosen, "apply" if how == "apply" else "dry_run", key),
+                    run, stop, remember)
+            except Exception as failure:  # noqa: BLE001 - the page must hear it ended
+                last = self._convert_runs.get(sandbox_id, run)
+                self._convert_runs[sandbox_id] = last.model_copy(update={
+                    "status": "failed", "error": type(failure).__name__, "current": None})
+            finally:
+                self._convert_stops.pop(sandbox_id, None)
+
+        threading.Thread(target=work, name="knowledge-convert", daemon=True).start()
+        return {"ok": True, "run_id": run.run_id}
+
+    def stop_convert(self, sandbox_id: str) -> dict[str, Any]:
+        stop = getattr(self, "_convert_stops", {}).get(sandbox_id)
+        if stop is None:
+            return {"ok": False, "code": "convert_not_running"}
+        stop.set()
+        return {"ok": True}
+
+    def convert_status(self, sandbox_id: str) -> dict[str, Any]:
+        run = getattr(self, "_convert_runs", {}).get(sandbox_id)
+        if run is None:
+            return {"ok": True, "run": None}
+        shown = run.model_dump(mode="json")
+        stop = getattr(self, "_convert_stops", {}).get(sandbox_id)
+        if shown["status"] == "running" and stop is not None and stop.is_set():
+            shown["status"] = "stopping"
+        shown["progress"] = knowledge_progress(run.progress_key)
+        return {"ok": True, "run": shown}
+
     def start_reingest(self, sandbox_id: str, raw_refs: list[str]) -> dict[str, Any]:
         """Ingest the chosen Raw documents again with the sandbox's current
         rules, one after another in the background (owner 2026-10-13)."""
@@ -3180,6 +3243,9 @@ class _Handler(BaseHTTPRequestHandler):
         elif parsed.path == "/api/knowledge/push":
             query = parse_qs(parsed.query)
             self._json(200, web.push_status((query.get("sandbox_id") or [""])[0]))
+        elif parsed.path == "/api/knowledge/convert":
+            query = parse_qs(parsed.query)
+            self._json(200, web.convert_status((query.get("sandbox_id") or [""])[0]))
         elif parsed.path == "/api/knowledge/progress":
             key = (parse_qs(parsed.query).get("key") or [""])[0]
             self._json(200, {"ok": True, "progress": knowledge_progress(key)})
@@ -3254,6 +3320,8 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/knowledge/benchmark/start",
             "/api/knowledge/push/start",
             "/api/knowledge/reingest/start",
+            "/api/knowledge/convert/start",
+            "/api/knowledge/convert/stop",
             "/api/knowledge/reingest/stop",
             "/api/knowledge/refresh",
             "/api/knowledge/skill-assist",
@@ -3326,6 +3394,12 @@ class _Handler(BaseHTTPRequestHandler):
             return
         if path == "/api/settings/laya":
             self._json(200, self.server.web.update_laya(body if isinstance(body, dict) else {}))
+            return
+        if path in ("/api/knowledge/convert/start", "/api/knowledge/convert/stop"):
+            chosen = body if isinstance(body, dict) else {}
+            sandbox_id = str(chosen.get("sandbox_id") or "")
+            self._json(200, self.server.web.start_convert(sandbox_id, str(chosen.get("mode") or ""))
+                       if path.endswith("/start") else self.server.web.stop_convert(sandbox_id))
             return
         if path == "/api/knowledge/reingest/start":
             if not isinstance(body, dict) or not isinstance(body.get("raw_refs"), list):

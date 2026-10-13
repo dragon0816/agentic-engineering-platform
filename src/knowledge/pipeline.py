@@ -414,7 +414,8 @@ class KnowledgePipeline:
     # -- convert -------------------------------------------------------------
 
     def convert(self, sandbox_id: str, paths: tuple[str, ...] = (),
-                mode: Literal["dry_run", "apply"] = "dry_run") -> ConvertResult:
+                mode: Literal["dry_run", "apply"] = "dry_run",
+                progress_key: str | None = None) -> ConvertResult:
         vault = self._open(sandbox_id)
         drop = vault.root / "drop"
         wanted = paths or tuple(
@@ -422,11 +423,19 @@ class KnowledgePipeline:
         intake = DropIntake(vault, self.extractors, self.describer)
         index = RawIndex.scan(vault)
         items = []
-        for rel in wanted:
+        progress = reporter(progress_key)
+        for number, rel in enumerate(wanted, 1):
             clean = normalize(rel)
             if not clean.startswith("drop/"):
                 raise PipelineError("outside_drop")
-            outcome = intake.intake(clean, mode=mode, index=index)
+            if progress is not None:
+                progress("converting", number - 1, len(wanted), clean)
+
+            def image(done: int, total: int, name: str = clean) -> None:
+                if progress is not None:
+                    progress("describing", done, total, name)
+
+            outcome = intake.intake(clean, mode=mode, index=index, on_image=image)
             items.append(ConvertItem(
                 path=clean, status=outcome.status, raw_ref=outcome.raw_ref,
                 images=outcome.images_to_describe,

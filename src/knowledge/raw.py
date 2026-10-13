@@ -10,7 +10,7 @@ carry their page, slide or image, and parses back exactly.
 
 import hashlib
 import re
-from collections.abc import Iterable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from datetime import date
 from pathlib import PurePosixPath
 from typing import Literal, Protocol, Self
@@ -351,7 +351,8 @@ class Describer(Protocol):
     written; `knowledge.describe.ImageDescriber` does so through a model."""
 
     def describe_sections(
-        self, sections: tuple[RawSection, ...], assets: Mapping[str, bytes], *, trace_id: str
+        self, sections: tuple[RawSection, ...], assets: Mapping[str, bytes], *, trace_id: str,
+        on_image: Callable[[int, int], None] | None = None,
     ) -> tuple[tuple[RawSection, ...], tuple[ImageDescription, ...]]: ...
 
 
@@ -567,6 +568,7 @@ class DropIntake:
         mode: Literal["dry_run", "apply"] = "dry_run",
         today: date | None = None,
         index: RawIndex | None = None,
+        on_image: Callable[[int, int], None] | None = None,
     ) -> IntakeOutcome:
         """One original. The index is scanned once per call unless a batch
         passes its own, which the intake keeps current with what it writes."""
@@ -629,7 +631,8 @@ class DropIntake:
             # no tokens and counts instead.
             sections = self._reuse_descriptions(sections, previous)
             sections, descriptions = self.describer.describe_sections(
-                sections, staged.items, trace_id=f"intake-{source.sha256[:16]}"
+                sections, staged.items, trace_id=f"intake-{source.sha256[:16]}",
+                **({"on_image": on_image} if on_image is not None else {}),
             )
             if any(item.status == "model_failed" for item in descriptions):
                 # The model failed, not the document: nothing is written, so a

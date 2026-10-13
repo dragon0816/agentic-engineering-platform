@@ -913,7 +913,8 @@ tr:last-child td { border-bottom: none; }
     </div>
     <div id="kp-disabled" class="empty" hidden>The Knowledge pipeline is not configured on
       this machine (host.json <code>knowledge_pipeline</code>).</div>
-    <div id="kp-status" class="section-status kp-sticky" role="status" aria-live="polite"></div>
+    <div id="kp-status" class="section-status kp-sticky" role="status" aria-live="polite"><span
+      id="kp-status-text"></span> <span id="kp-status-time" class="note"></span></div>
     <div id="kp-progress" class="kp-progress kp-sticky" hidden>
       <progress id="kp-progress-bar" max="1"></progress>
       <span id="kp-progress-text" class="note"></span></div>
@@ -1035,7 +1036,14 @@ tr:last-child td { border-bottom: none; }
           <div class="kp-actions">
             <button id="kp-preview" type="button">Preview convert</button>
             <button class="go" id="kp-convert" type="button">Convert</button>
-          </div><div id="kp-converted"></div></div>
+            <button id="kp-convert-stop" type="button" hidden>Stop</button>
+          </div>
+          <p class="note">Convert asks the model to describe every picture, so a deck can take
+            minutes. It runs in the background: you can keep working and come back.</p>
+          <div id="kp-convert-progress" class="kp-progress" hidden>
+            <progress id="kp-convert-bar" max="1"></progress>
+            <span id="kp-convert-text" class="note"></span></div>
+          <div id="kp-converted"></div></div>
         <div class="card"><h3>3. Ingest</h3>
           <p class="note">Plan ingest on a Raw document, Compare each page, then apply.
             After changing the rules, tick Raw documents (or a whole folder) and re-ingest
@@ -3814,14 +3822,23 @@ async function pipeline(step, args) {
 }
 
 function kpStatus(message, bad) {
-  const box = el("kp-status"); box.textContent = message || "";
+  const box = el("kp-status"); el("kp-status-text").textContent = message || "";
   box.classList.toggle("bad", !!bad);
 }
 
 async function kpRun(label, action) {
+  // Every step shows how long it has been running, so a slow one (planning an
+  // ingest, a merge, a lint over thousands of pages) never looks like nothing.
   kpStatus(label + "\u2026");
+  const started = Date.now(), clock = el("kp-status-time");
+  const timer = setInterval(() => {
+    const seconds = Math.round((Date.now() - started) / 1000);
+    clock.textContent = seconds >= 2 ? "running " + Math.floor(seconds / 60) + ":"
+      + String(seconds % 60).padStart(2, "0") : "";
+  }, 1000);
   try { await action(); kpStatus(""); }
   catch (failure) { kpStatus(label + " failed: " + (failure.code || failure.message), true); }
+  finally { clearInterval(timer); clock.textContent = ""; }
 }
 
 function kpKey() {
@@ -3955,6 +3972,7 @@ async function kpOpen(item) {
   }
   kpRawCount();
   await kpReingestShow();
+  await kpConvertShow();
   kpStatus("Opening the sandbox: rules (2/5)\u2026"); await kpLoadRules();
   kpStatus("Opening the sandbox: drop folders (3/5)\u2026"); await kpLoadPull();
   kpStatus("Opening the sandbox: question sets (4/5)\u2026"); await kpLoadBench();
@@ -4155,11 +4173,59 @@ function kpFileBase64(file) {
 }
 
 async function kpConvert(mode) {
-  const result = await pipeline("convert", {sandbox_id: kpSandbox.sandbox_id, mode});
-  el("kp-converted").replaceChildren(table(["Original", "Result", "Raw", "Images"],
-    result.items, (row) => [row.path, row.status, row.raw_ref || "", String(row.images)]));
-  if (mode === "apply") await kpOpen(kpSandbox);
+  // A background run, one original at a time (owner 2026-10-13).
+  const reply = await call("/api/knowledge/convert/start",
+                           {sandbox_id: kpSandbox.sandbox_id, mode});
+  if (!reply.ok) {
+    const problem = new Error(reply.code); problem.code = reply.code; throw problem;
+  }
+  await kpConvertShow();
 }
+
+let kpConvertTimer = null, kpConvertWatching = null;
+async function kpConvertShow() {
+  clearTimeout(kpConvertTimer);
+  const reply = await call("/api/knowledge/convert?sandbox_id="
+    + encodeURIComponent(kpSandbox.sandbox_id));
+  const run = reply.ok ? reply.run : null;
+  const box = el("kp-convert-progress"), bar = el("kp-convert-bar");
+  const live = run && ["running", "stopping"].includes(run.status);
+  box.hidden = !live; el("kp-convert-stop").hidden = !live;
+  el("kp-preview").disabled = !!live; el("kp-convert").disabled = !!live;
+  if (!run || run.sandbox_id !== kpSandbox.sandbox_id) {
+    el("kp-converted").replaceChildren(); return;
+  }
+  const total = run.paths.length, done = run.items.length;
+  if (live) {
+    const step = run.progress || {};
+    const pictures = step.phase === "describing" && step.total
+      ? "; pictures " + step.done + " / " + step.total : "";
+    bar.max = total; bar.value = done + (step.phase === "describing" && step.total
+      ? step.done / step.total : 0);
+    el("kp-convert-text").textContent = (run.mode === "apply" ? "Converting" : "Previewing")
+      + " " + Math.min(done + 1, total) + " / " + total + pictures
+      + (run.current ? " \u2014 " + run.current.replace(/^drop\//, "") : "")
+      + (run.status === "stopping" ? " (stopping after this one)" : "");
+  }
+  const head = document.createElement("p");
+  head.append(text((run.mode === "apply" ? "Convert" : "Preview") + ": " + run.status + ", "
+    + done + " of " + total + " originals" + (run.error ? " \u2014 " + run.error : "")));
+  el("kp-converted").replaceChildren(head, table(["Original", "Result", "Raw", "Pictures"],
+    run.items, (row) => [row.path, row.status, row.raw_ref || "",
+      row.described ? row.described + " described" : String(row.images)]));
+  if (live) {
+    kpConvertWatching = run.run_id;
+    kpConvertTimer = setTimeout(() => kpConvertShow().catch(() => {}), 1500);
+  } else if (run.mode === "apply" && kpConvertWatching === run.run_id) {
+    kpConvertWatching = null;  // it just ended: the new Raw appears in step 3
+    await kpOpen(kpSandbox);
+  }
+}
+
+el("kp-convert-stop").addEventListener("click", () => kpRun("Stopping", async () => {
+  await call("/api/knowledge/convert/stop", {sandbox_id: kpSandbox.sandbox_id});
+  await kpConvertShow();
+}));
 
 async function kpPlan(rawRef) {
   const plan = await pipeline("ingest-plan", {sandbox_id: kpSandbox.sandbox_id, raw_ref: rawRef});

@@ -293,3 +293,14 @@ def test_a_truncated_description_is_asked_once_more_with_a_larger_budget() -> No
     still = TruncatingModel(enough=10_000)
     failed = ImageDescriber(still, alias="v").describe("a.png", b"\x89PNG", trace=trace())
     assert failed.status == "model_failed" and len(still.requests) == 2  # one retry only
+
+
+def test_each_described_picture_is_reported_for_the_progress_bar(tmp_path: Path) -> None:
+    vault = make_vault(tmp_path)
+    describer = ImageDescriber(VisionModel(), alias="v")
+    intake = DropIntake(vault, [ImageExtractor()], describer=describer)
+    drop(vault, "drop/deck.img", b"anything")
+    heard: list[tuple[int, int]] = []
+    intake.intake("drop/deck.img", mode="apply", today=TODAY,
+                  on_image=lambda done, total: heard.append((done, total)))
+    assert heard[-1] == (2, 2) and heard[0][1] == 2  # two distinct pictures

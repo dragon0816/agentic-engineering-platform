@@ -140,7 +140,7 @@ class ConvertHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = ConvertRequest.model_validate(inputs)
         result: Contract = await _run(lambda: self.pipeline.convert(
-            request.sandbox_id, tuple(request.paths), request.mode))
+            request.sandbox_id, tuple(request.paths), request.mode, request.progress_key))
         return result
 
 

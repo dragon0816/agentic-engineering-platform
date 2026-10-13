@@ -12,7 +12,7 @@ adapter raising included — is a closed status, never a lost document.
 
 import base64
 import hashlib
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from pathlib import PurePosixPath
 
 from common.base import Symbol, Text
@@ -116,11 +116,15 @@ class ImageDescriber:
         assets: Mapping[str, bytes],
         *,
         trace_id: str,
+        on_image: Callable[[int, int], None] | None = None,
     ) -> tuple[tuple[RawSection, ...], tuple[ImageDescription, ...]]:
         """Every image section that needs a description gets one attempt; a
         section that already carries text is left alone. Bytes the sink does not
-        hold (an image that was never staged) are `missing_bytes`."""
+        hold (an image that was never staged) are `missing_bytes`. `on_image`
+        hears (done, total) after each image, for a progress bar."""
         results: dict[str, ImageDescription] = {}
+        total = len({s.image_ref for s in sections
+                     if s.image_ref is not None and needs_description(s)})
         issued = 0
         updated: list[RawSection] = []
         for section in sections:
@@ -140,6 +144,8 @@ class ImageDescriber:
                         span_id=f"image-{issued}",
                     )
                     results[ref] = self.describe(ref, data, trace=trace)
+                if on_image is not None:
+                    on_image(len(results), total)
             outcome = results[ref]
             if outcome.status == "described":
                 updated.append(
