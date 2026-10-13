@@ -3,7 +3,8 @@ param(
     [string]$BridgeId,
     [ValidatePattern('^[a-z0-9]+(-[a-z0-9]+)*$')][string]$Namespace,
     [string]$PythonExe = "python",
-    [string]$InstallRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\preview-0.1.0"
+    [string]$InstallRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\preview-0.1.0",
+    [switch]$NoShortcut
 )
 $ErrorActionPreference = "Stop"
 $BundleRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -158,6 +159,11 @@ $MembershipPath = Join-Path $Workspace "membership.json"
 $Membership | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $MembershipPath -Encoding UTF8
 & $HostExecutable doctor --config (Join-Path $InstallRoot "host.json")
 if ($LASTEXITCODE -ne 0) { throw "Host doctor failed." }
+if (-not $NoShortcut) {
+    # The 'AEP Agent' desktop and Start menu shortcut opens Agent Web, starting it if needed.
+    & $HostExecutable shortcut --config $ConfigPath
+    if ($LASTEXITCODE -ne 0) { Write-Warning "Could not create the AEP Agent shortcut; use start-web.cmd." }
+}
 Write-Host "Installed the local-only preview at $InstallRoot"
 Write-Host "Bundle source revision: $($Manifest.source_revision)"
 Write-Host "The resident Agent is bound to $Actor on $BridgeId. Capability grants remain separate."

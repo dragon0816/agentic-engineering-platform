@@ -98,6 +98,8 @@ def test_builder_emits_reproducible_closed_manifest(tmp_path: Path) -> None:
             "weekly-apply.cmd",
             "weekly-mail.cmd",
             "dut-validate.cmd",
+            "start-web.cmd",
+            "update.cmd",
         ):
             assert prefix + launcher in names
         for dut_file in (
