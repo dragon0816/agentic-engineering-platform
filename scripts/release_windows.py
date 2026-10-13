@@ -105,8 +105,8 @@ def verify(quick: bool) -> None:
         run([python, "-m", "pytest", "-q", "-p", "no:cacheprovider", "-x"])
 
 
-def wheels(work: Path, revision: str) -> tuple[Path, Path]:
-    """The platform wheel built from the committed revision, and the dependencies."""
+def wheels(work: Path, revision: str) -> tuple[Path, Path, Path]:
+    """The committed revision's source, its platform wheel and the dependencies."""
     python = sys.executable
     source = work / "source"
     archive = work / "source.zip"
@@ -124,7 +124,7 @@ def wheels(work: Path, revision: str) -> tuple[Path, Path]:
     run([python, "-m", "pip", "download", "--disable-pip-version-check",
          "--only-binary=:all:", "--platform", "win_amd64", "--python-version", "3.12",
          "--implementation", "cp", "--dest", str(work / "dependencies"), *DEPENDENCIES])
-    return built[0], work / "dependencies"
+    return source, built[0], work / "dependencies"
 
 
 def main() -> int:
@@ -153,10 +153,12 @@ def main() -> int:
         folder = releases / release
         folder.mkdir(parents=True, exist_ok=False)
         with tempfile.TemporaryDirectory() as temporary:
-            platform_wheel, dependencies = wheels(Path(temporary), revision)
+            source, platform_wheel, dependencies = wheels(Path(temporary), revision)
             print("Building the offline bundle ...", flush=True)
-            archive = build(repo=REPO, platform_wheel=platform_wheel,
+            # The installer scripts and manuals come from the same export as the wheel.
+            archive = build(repo=source, platform_wheel=platform_wheel,
                             dependency_dir=dependencies, output_dir=folder, revision=revision)
+            shutil.copy2(source / "deploy" / "windows-preview" / MANUAL, folder / MANUAL)
         digest = sha256(archive)
         (folder / "SHA256SUMS.txt").write_text(f"{digest}  {archive.name}\n", encoding="utf-8")
         previous = args.notes_since or previous_revision(releases)
@@ -166,7 +168,6 @@ def main() -> int:
         (folder / "RELEASE_NOTES.md").write_text(release_notes(
             release=release, revision=revision, previous=previous, commits=commits,
             created=created.isoformat(timespec="minutes")), encoding="utf-8")
-        shutil.copy2(REPO / "deploy" / "windows-preview" / MANUAL, folder / MANUAL)
         (releases / LATEST).write_text(json.dumps({
             "release": release, "revision": revision, "zip": archive.name, "sha256": digest,
             "created": created.isoformat(timespec="seconds")}, indent=2) + "\n",
