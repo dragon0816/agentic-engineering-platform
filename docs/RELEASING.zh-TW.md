@@ -32,14 +32,19 @@ scripts\release.cmd --publish-dir "C:\Users\<你>\OneDrive - Rohde & Schwarz\AEP
    - `INSTALL.zh-TW.md`：安裝手冊，不必解壓縮就能看。
 
    `dist/releases/latest.json` 記錄這次的版本碼，下次的發佈說明就從這裡接著列。
-6. **（選用）`--publish-dir`**：把整個發佈資料夾複製過去，不會刪除或覆蓋舊版本。
+6. **打 git tag**：在該 commit 建立 annotated tag `release-<日期時間>-<版本碼>`，
+   tag 訊息記錄 zip 名稱和 SHA-256。同事回報版本碼時，用 `git show <tag>` 就能找到對應的
+   原始碼。tag 只建在本機；要讓團隊看到，自己執行 `git push origin <tag>`。
+   加 `--no-tag` 可以不打 tag。
+7. **（選用）`--publish-dir`**：把整個發佈資料夾複製過去，不會刪除或覆蓋舊版本。
 
 ## 交付給同事
 
 - 把發佈資料夾（或 `--publish-dir` 那份）的位置告訴同事，並附上 `RELEASE_NOTES.md` 的
   重點。
 - 第一次安裝：`install.cmd`；之後更新：`update.cmd`（設定、workspace 和對話都會保留）。
-- 同事回報問題時，請他提供 `verify.cmd` 顯示的版本碼，再對照 `RELEASE_NOTES.md`。
+- 同事回報問題時，請他提供 `verify.cmd` 顯示的版本碼，再用 `git tag --contains <版本碼>`
+  或 `git show release-...` 找到對應的發佈和原始碼。
 
 ## 修正問題後重新發佈
 

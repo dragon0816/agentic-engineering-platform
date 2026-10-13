@@ -30,6 +30,9 @@ def test_notes_list_the_commits_since_the_previous_release(tmp_path: Path) -> No
                           previous="abc123", commits=["deadbee Fix the pull message"],
                           created="2026-10-13T12:00+08:00")
     assert "- deadbee Fix the pull message" in notes and "`abc123`" in notes
+    tagged = release_notes(release="r", revision="x", previous=None, commits=[], created="t",
+                           tag="release-r")
+    assert "(git tag `release-r`)" in tagged
     assert "update.cmd" in notes and MANUAL in notes
     assert "(no new commits)" in release_notes(release="r", revision="x", previous=None,
                                                commits=[], created="t")

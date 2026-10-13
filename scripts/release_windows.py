@@ -14,7 +14,10 @@ Steps, each of which stops the release when it fails:
 4. `scripts/build_windows_preview.py` makes the hash-verified offline bundle.
 5. A release folder `dist/releases/<date>-<revision>/` gets the zip, its SHA-256,
    release notes (commits since the previous release) and the installation manual.
-6. `--publish-dir` copies that folder to a shared location (never deletes anything).
+6. The revision gets an annotated git tag `release-<date>-<revision>` (local only; push
+   tags yourself when the team should see them), so a reported version maps to its
+   source with `git show <tag>`. `--no-tag` skips it.
+7. `--publish-dir` copies that folder to a shared location (never deletes anything).
 """
 
 from __future__ import annotations
@@ -72,10 +75,10 @@ def previous_revision(releases: Path) -> str | None:
 
 
 def release_notes(*, release: str, revision: str, previous: str | None,
-                  commits: list[str], created: str) -> str:
+                  commits: list[str], created: str, tag: str | None = None) -> str:
     lines = [
         f"# AEP Windows release {release}", "",
-        f"- Source revision: `{revision}`",
+        f"- Source revision: `{revision}`" + (f" (git tag `{tag}`)" if tag else ""),
         f"- Built: {created}",
         f"- Previous release: `{previous}`" if previous else "- Previous release: (first release)",
         "", "## How to install or update", "",
@@ -138,6 +141,7 @@ def main() -> int:
                         help="release although tracked files have uncommitted changes "
                              "(they are NOT in the bundle)")
     parser.add_argument("--notes-since", help="list commits since this revision")
+    parser.add_argument("--no-tag", action="store_true", help="do not tag the revision")
     args = parser.parse_args()
     try:
         revision = git("rev-parse", "HEAD")
@@ -150,6 +154,9 @@ def main() -> int:
         releases = args.output_dir.resolve()
         created = datetime.now().astimezone()
         release = f"{created:%Y%m%d-%H%M}-{revision[:8]}"
+        tag = f"release-{release}"
+        if not args.no_tag and git("tag", "--list", tag):
+            raise ReleaseError(f"tag {tag} already exists")
         folder = releases / release
         folder.mkdir(parents=True, exist_ok=False)
         with tempfile.TemporaryDirectory() as temporary:
@@ -167,9 +174,14 @@ def main() -> int:
             [log_range] if previous else ["-30", revision])).splitlines()
         (folder / "RELEASE_NOTES.md").write_text(release_notes(
             release=release, revision=revision, previous=previous, commits=commits,
-            created=created.isoformat(timespec="minutes")), encoding="utf-8")
+            created=created.isoformat(timespec="minutes"),
+            tag=None if args.no_tag else tag), encoding="utf-8")
+        if not args.no_tag:
+            git("tag", "-a", tag, revision, "-m",
+                f"AEP Windows release {release}\n\n{archive.name}\nsha256 {digest}")
         (releases / LATEST).write_text(json.dumps({
-            "release": release, "revision": revision, "zip": archive.name, "sha256": digest,
+            "release": release, "revision": revision, "tag": None if args.no_tag else tag,
+            "zip": archive.name, "sha256": digest,
             "created": created.isoformat(timespec="seconds")}, indent=2) + "\n",
             encoding="utf-8")
         published = None
@@ -181,6 +193,8 @@ def main() -> int:
         return 1
     print(f"\nRelease {release} ({BUNDLE_NAME}) is ready:\n  {folder}")
     print(f"  {archive.name}  sha256 {digest}")
+    if not args.no_tag:
+        print(f"Tagged {revision[:12]} as {tag} (local; `git push origin {tag}` to share it)")
     if published is not None:
         print(f"Copied to {published}")
     return 0
