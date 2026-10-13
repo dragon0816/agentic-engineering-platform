@@ -1806,3 +1806,7 @@ s-k-20261011T102952` (not published).
   report once (scratch sheet written, backup kept, no mail draft); recorded there.
 - [ ] Collect answered Laya shadow decisions (relay running) and re-evaluate active mode
   with a non-Workflow probe set.
+- [x] Laya acceleration design (owner, 2026-10-13): `docs/phases/LAYA_ACCELERATION.md`,
+  on hold. Owner: collect a week of shadow data and review before anything is built.
+  The weekly-report probe wrote values identical to the owner's 2026-10-12 run (all 85
+  sheets compared); no restore needed.

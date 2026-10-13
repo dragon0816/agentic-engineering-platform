@@ -73,3 +73,4 @@ in [archive/](archive/); they are kept for history, not for current work.
 | [deployment-validation-loop.md](deployment-validation-loop.md) | Deployment validation loop |
 | [remote-testing-codex-loop.md](remote-testing-codex-loop.md) | Remote testing and local Codex repair loop |
 | [JEV_ADAPTER_READINESS.md](JEV_ADAPTER_READINESS.md) | JEV adapter readiness audit |
+| [phases/LAYA_ACCELERATION.md](phases/LAYA_ACCELERATION.md) | Where Laya decisions could save time; on hold for shadow data |
