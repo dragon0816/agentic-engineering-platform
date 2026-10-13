@@ -1847,4 +1847,9 @@ s-k-20261011T102952` (not published).
   code untouched by this change: another load-sensitive test, like the two browser ones).
 - [ ] Experience review E3-E5 (owner chose the full version, 2026-10-13): Reviews page,
   proposal actions (accept into a sandbox / reject / snooze), outcome tracking.
-- [ ] Task list (owner, 2026-10-13): the Agent's tasks, finished and running, newest 50.
+- [x] Task list (owner, 2026-10-13, option b: Workflows and background jobs, not
+  conversations): Tasks tab (`/api/tasks`, `host_runtime/tasks.py`) merges Workflow runs
+  from telemetry with background jobs (convert, preview, re-ingest, benchmark, push,
+  experience review) recorded in `workspace/tasks.json`; newest 50; running ones refresh;
+  a job still running at a restart shows as interrupted; busy-file writes are retried.
+  Live: 50 Workflow runs listed. Full suite 2573 passed, 6 skipped.

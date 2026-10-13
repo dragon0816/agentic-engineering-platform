@@ -197,6 +197,7 @@ from host_runtime.slash_commands import (
     SlashCommandInvocation,
     parse_slash_command,
 )
+from host_runtime.tasks import TaskLog, TaskStatus, task_list
 from host_runtime.telegram_loop import ResidentTelegram
 from host_runtime.telegram_settings import (
     TelegramSettingsError,
@@ -1114,9 +1115,15 @@ class AgentWeb:
         except Exception as error:  # noqa: BLE001 - the page shows why a review stopped
             store.set_meta("last_error", f"{type(error).__name__}: {error}"[:300])
 
+    def _experience_review_task(self) -> tuple[TaskStatus, str]:
+        self._experience_review_logged()
+        error = self._experience_store().meta("last_error") or ""
+        return ("failed", error) if error else ("succeeded", "report written")
+
     def start_experience_review(self) -> dict[str, Any]:
-        thread = threading.Thread(target=self._experience_review_logged,
-                                  name="experience-review", daemon=True)
+        thread = threading.Thread(target=self.tasks().tracked(
+            "experience_review", "Experience review", "", self._experience_review_task),
+            name="experience-review", daemon=True)
         thread.start()
         return {"ok": True, "started": True}
 
@@ -1136,7 +1143,8 @@ class AgentWeb:
                         continue
                     self.experience_harvest()
                     if self._experience_store().cases("open"):
-                        self._experience_review_logged()
+                        self.tasks().tracked("experience_review", "Experience review (nightly)", "",
+                                             self._experience_review_task)()
                 except Exception:  # noqa: BLE001 - a failed night is retried the next
                     continue
 
@@ -2725,12 +2733,18 @@ class AgentWeb:
                     else Path(info.base_root) / "checks" / "questions")
         skill = harness_skill(self.runtime.agent.gateway.router.commands.skills)
         run_id = f"bench-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}"
-        thread = threading.Thread(target=run_benchmark, daemon=True, kwargs={
-            "ask": lambda request, catalog: self.knowledge_harness.ask(request, catalog=catalog),
-            "sandbox_id": sandbox_id, "sandbox": sandbox, "project": Vault(Path(info.base_root)),
-            "sets": tuple(sets), "actor": self.runtime.actor, "skill": skill,
-            "questions_fallback": fallback, "run_id": run_id})
-        thread.start()
+        def work() -> tuple[TaskStatus, str]:
+            report = run_benchmark(
+                lambda request, catalog: self.knowledge_harness.ask(request, catalog=catalog),
+                sandbox_id=sandbox_id, sandbox=sandbox, project=Vault(Path(info.base_root)),
+                sets=tuple(sets), actor=self.runtime.actor, skill=skill,
+                questions_fallback=fallback, run_id=run_id)
+            return ("succeeded" if report.status == "finished" else "failed",
+                    f"sandbox {report.sandbox_score} / project vault {report.project_score} "
+                    f"of {report.total}")
+
+        threading.Thread(target=self.tasks().tracked(
+            "benchmark", "Benchmark " + ", ".join(sets), sandbox_id, work), daemon=True).start()
         return {"ok": True, "run_id": run_id}
 
     def _pipeline(self) -> KnowledgePipeline | None:
@@ -2758,16 +2772,24 @@ class AgentWeb:
             return {"ok": False, "code": error.code}
         if not pipeline.may_push(info.base_name, self.runtime.actor):
             return {"ok": False, "code": "not_a_maintainer"}
-        chosen = {key: value for key, value in resolutions.items()
-                  if value in ("sandbox", "published")}
+        chosen: dict[str, Literal["sandbox", "published"]] = {
+            key: "sandbox" if value == "sandbox" else "published"
+            for key, value in resolutions.items() if value in ("sandbox", "published")}
         push_id = f"push-{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}-{uuid.uuid4().hex[:4]}"
         skill = harness_skill(self.runtime.agent.gateway.router.commands.skills)
-        thread = threading.Thread(target=run_push, daemon=True, args=(pipeline,), kwargs={
-            "ask": lambda request, catalog: self.knowledge_harness.ask(request, catalog=catalog),
-            "sandbox_id": sandbox_id, "actor": self.runtime.actor, "sets": tuple(sets),
-            "resolutions": chosen, "skill": skill, "push_id": push_id,
-            "questions_fallback": pipeline.questions_roots.get(info.base_name)})
-        thread.start()
+        def work() -> tuple[TaskStatus, str]:
+            report = run_push(
+                pipeline,
+                lambda request, catalog: self.knowledge_harness.ask(request, catalog=catalog),
+                sandbox_id=sandbox_id, actor=self.runtime.actor, sets=tuple(sets),
+                resolutions=chosen, skill=skill, push_id=push_id,
+                questions_fallback=pipeline.questions_roots.get(info.base_name))
+            status: TaskStatus = ("succeeded" if report.status == "pushed" else
+                                  "needs_input" if report.status == "conflicts" else "failed")
+            return status, report.status + (f": {report.reason}" if report.reason else "")
+
+        threading.Thread(target=self.tasks().tracked(
+            "push", f"Push to {info.base_name}", sandbox_id, work), daemon=True).start()
         return {"ok": True, "push_id": push_id}
 
     def push_status(self, sandbox_id: str) -> dict[str, Any]:
@@ -2836,6 +2858,16 @@ class AgentWeb:
             self.laya_tunnel = SshTunnel(chosen)
             self.laya_tunnel.start()
 
+    def tasks(self) -> TaskLog:
+        """The background jobs this Agent Web started (owner 2026-10-13)."""
+        if getattr(self, "_task_log", None) is None:
+            self._task_log = TaskLog(self.runtime.layout.workspace_root)
+        return self._task_log
+
+    def task_list(self) -> dict[str, Any]:
+        recorder = telemetry.recorder()
+        return task_list(self.tasks(), recorder.store if recorder is not None else None)
+
     def start_convert(self, sandbox_id: str, mode: str) -> dict[str, Any]:
         """Convert (or preview) every original in the sandbox's drop/ in the
         background, one at a time (owner 2026-10-13)."""
@@ -2864,9 +2896,9 @@ class AgentWeb:
         def remember(current: ConvertRun) -> None:
             self._convert_runs[sandbox_id] = current
 
-        def work() -> None:
+        def work() -> tuple[TaskStatus, str]:
             try:
-                run_convert(
+                done = run_convert(
                     lambda box, chosen, how, key: pipeline.convert(
                         box, chosen, "apply" if how == "apply" else "dry_run", key),
                     run, stop, remember)
@@ -2874,10 +2906,21 @@ class AgentWeb:
                 last = self._convert_runs.get(sandbox_id, run)
                 self._convert_runs[sandbox_id] = last.model_copy(update={
                     "status": "failed", "error": type(failure).__name__, "current": None})
+                raise
             finally:
                 self._convert_stops.pop(sandbox_id, None)
+            results: dict[str, int] = {}
+            for item in done.items:
+                results[item.status] = results.get(item.status, 0) + 1
+            return ("succeeded" if done.status == "finished" else "stopped",
+                    f"{len(done.items)} of {len(done.paths)} originals: "
+                    + ", ".join(f"{n} {status}" for status, n in sorted(results.items())))
 
-        threading.Thread(target=work, name="knowledge-convert", daemon=True).start()
+        title = ("Convert " if run.mode == "apply" else "Preview convert ") + \
+            f"{len(paths)} original(s)"
+        threading.Thread(target=self.tasks().tracked(
+            "convert" if run.mode == "apply" else "preview", title, sandbox_id, work),
+            name="knowledge-convert", daemon=True).start()
         return {"ok": True, "run_id": run.run_id}
 
     def stop_convert(self, sandbox_id: str) -> dict[str, Any]:
@@ -2926,15 +2969,23 @@ class AgentWeb:
         def live(current: ReingestRun) -> None:
             self._reingest_live[sandbox_id] = current
 
-        def work() -> None:
+        def work() -> tuple[TaskStatus, str]:
             try:
-                run_reingest(self.pipeline_call, run, sandbox.root / REINGEST_RUNS, stop,
-                             on_change=live)
+                done = run_reingest(self.pipeline_call, run, sandbox.root / REINGEST_RUNS, stop,
+                                    on_change=live)
             finally:
                 self._reingest_stops.pop(sandbox_id, None)
                 self._reingest_live.pop(sandbox_id, None)
+            results: dict[str, int] = {}
+            for item in done.items:
+                results[item.status] = results.get(item.status, 0) + 1
+            return ("succeeded" if done.status == "finished" else "stopped",
+                    f"{len(done.items)} of {len(done.raw_refs)} Raw: "
+                    + ", ".join(f"{n} {status}" for status, n in sorted(results.items())))
 
-        threading.Thread(target=work, name="knowledge-reingest", daemon=True).start()
+        threading.Thread(target=self.tasks().tracked(
+            "reingest", f"Re-ingest {len(chosen)} Raw document(s)", sandbox_id, work),
+            name="knowledge-reingest", daemon=True).start()
         return {"ok": True, "run_id": run.run_id}
 
     def stop_reingest(self, sandbox_id: str) -> dict[str, Any]:
@@ -3243,6 +3294,8 @@ class _Handler(BaseHTTPRequestHandler):
         elif parsed.path == "/api/knowledge/push":
             query = parse_qs(parsed.query)
             self._json(200, web.push_status((query.get("sandbox_id") or [""])[0]))
+        elif parsed.path == "/api/tasks":
+            self._json(200, web.task_list())
         elif parsed.path == "/api/knowledge/convert":
             query = parse_qs(parsed.query)
             self._json(200, web.convert_status((query.get("sandbox_id") or [""])[0]))

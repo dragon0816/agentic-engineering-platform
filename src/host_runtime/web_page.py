@@ -97,6 +97,14 @@ body {
 #nav-settings::before { content: "\2699"; }
 #nav-schedules::before { content: "\25f7"; }
 #nav-knowledge::before { content: "\25a4"; }
+#nav-tasks::before { content: "\2630"; }
+.task-status { display: inline-block; min-width: 86px; padding: 1px 8px; border-radius: 10px;
+  font-size: 12px; text-align: center; background: var(--soft, #eef3fb); }
+.task-status.running { background: #e8f0fe; color: #1a56db; }
+.task-status.succeeded { background: #e6f4ea; color: #137333; }
+.task-status.failed { background: #fce8e6; color: #a50e0e; }
+.task-status.needs_input, .task-status.interrupted, .task-status.stopped {
+  background: #fef7e0; color: #8a5a00; }
 .kp-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
 .kp-list button { margin: 2px 6px 2px 0; }
 .kp-check { display: inline-block; margin: 2px 14px 2px 0; }
@@ -483,6 +491,7 @@ tr:last-child td { border-bottom: none; }
     <button id="nav-settings" type="button">Settings</button>
     <button id="nav-schedules" type="button">Schedules</button>
     <button id="nav-knowledge" type="button">Knowledge</button>
+    <button id="nav-tasks" type="button">Tasks</button>
   </div>
   <div class="session-heading"><span>Sessions</span><span id="session-count">0</span></div>
   <input id="session-search" class="session-search" type="search"
@@ -1102,6 +1111,17 @@ tr:last-child td { border-bottom: none; }
           </div><div id="kp-index-result" class="note"></div></details>
       </div>
     </div>
+  </section>
+  <section id="panel-tasks">
+    <div class="workspace-head">
+      <div><h2>Tasks</h2>
+        <p class="note">Workflows and background jobs this Agent ran or is running: converts,
+          re-ingests, benchmarks, pushes and experience reviews. Conversations are not listed.
+          The newest 50 are kept; running ones refresh by themselves.</p>
+        <p class="note" id="task-counts" role="status">reading&hellip;</p></div>
+      <button id="task-refresh" type="button">Refresh</button>
+    </div>
+    <div class="card" id="task-list"></div>
   </section>
   <section id="panel-schedules">
     <div class="workspace-head">
@@ -4885,8 +4905,54 @@ el("kp-discard").addEventListener("click", () => {
   });
 });
 
+// -- Tasks (owner 2026-10-13): Workflows and background jobs, newest 50 --------
+const TASK_KINDS = {workflow: "Workflow", convert: "Convert", preview: "Preview convert",
+  reingest: "Re-ingest", benchmark: "Benchmark", push: "Push",
+  experience_review: "Experience review"};
+const TASK_LABELS = {running: "running", succeeded: "done", failed: "failed",
+  needs_input: "needs you", stopped: "stopped", interrupted: "interrupted"};
+let taskTimer = null;
+
+function taskTime(iso) {
+  if (!iso) return "";
+  const when = new Date(iso);
+  return isNaN(when) ? iso : when.toLocaleString();
+}
+
+function taskDuration(task) {
+  const start = Date.parse(task.started), end = task.ended ? Date.parse(task.ended) : Date.now();
+  if (isNaN(start) || isNaN(end)) return "";
+  const seconds = Math.max(0, Math.round((end - start) / 1000));
+  return seconds < 60 ? seconds + " s" : Math.floor(seconds / 60) + " min " + (seconds % 60) + " s";
+}
+
+async function loadTasks() {
+  clearTimeout(taskTimer);
+  const reply = await call("/api/tasks");
+  const counts = reply.counts || {};
+  el("task-counts").textContent = reply.tasks.length + " tasks: "
+    + Object.entries(TASK_LABELS).filter(([key]) => counts[key])
+      .map(([key, label]) => counts[key] + " " + label).join(", ");
+  el("task-list").replaceChildren(table(["Status", "Task", "Kind", "Started", "Took", "Result"],
+    reply.tasks, (task) => {
+      const badge = document.createElement("span");
+      badge.className = "task-status " + task.status;
+      badge.append(text(TASK_LABELS[task.status] || task.status));
+      return [badge, task.title + (task.where && task.kind !== "workflow"
+        ? " (" + task.where + ")" : ""), TASK_KINDS[task.kind] || task.kind,
+        taskTime(task.started), taskDuration(task), task.summary];
+    }));
+  if (reply.tasks.some((task) => task.status === "running")
+      && el("panel-tasks").hasAttribute("data-open")) {
+    taskTimer = setTimeout(() => loadTasks().catch(() => {}), 3000);
+  }
+}
+el("task-refresh").addEventListener("click", () => loadTasks().catch((failure) => {
+  el("task-counts").textContent = failure.message;
+}));
+
 const panels = {ask: null, installed: loadCapabilities,
-  settings: loadSettings, schedules: loadSchedules, knowledge: loadKnowledge};
+  settings: loadSettings, schedules: loadSchedules, knowledge: loadKnowledge, tasks: loadTasks};
 
 function showBootError(failure) {
   const banner = el("boot-error"); banner.hidden = false;
@@ -4901,6 +4967,7 @@ async function selectPrimaryTab(name) {
   el("nav-settings").toggleAttribute("aria-current", name === "settings");
   el("nav-schedules").toggleAttribute("aria-current", name === "schedules");
   el("nav-knowledge").toggleAttribute("aria-current", name === "knowledge");
+  el("nav-tasks").toggleAttribute("aria-current", name === "tasks");
   if (name === "ask") { field.focus(); return; }
   try { await panels[name](); }
   catch (failure) { showBootError(failure); }
@@ -4910,6 +4977,7 @@ el("nav-capabilities").addEventListener("click", () => selectPrimaryTab("install
 el("nav-settings").addEventListener("click", () => selectPrimaryTab("settings"));
 el("nav-schedules").addEventListener("click", () => selectPrimaryTab("schedules"));
 el("nav-knowledge").addEventListener("click", () => selectPrimaryTab("knowledge"));
+el("nav-tasks").addEventListener("click", () => selectPrimaryTab("tasks"));
 
 Promise.all([loadAbout(), loadAssets(), loadChat(), loadSlashCommands(), loadAvatars(), loadMcp()])
   .catch(showBootError);
