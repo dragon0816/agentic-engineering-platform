@@ -339,11 +339,22 @@ class KnowledgePipeline:
         writable this way. The change reaches the project vault only by a push."""
         info, vault = self.sandboxes.open(sandbox_id)
         rel = normalize(path)
-        if not (rel == SCHEMA or _SKILL_FILE.fullmatch(rel)):
+        question = _QUESTION_FILE.fullmatch(rel) is not None
+        if not (rel == SCHEMA or _SKILL_FILE.fullmatch(rel) or question):
             raise PipelineError("not_a_rule_file")
         if not text.strip() or len(text.encode("utf-8")) > MAX_PREVIEW_BYTES:
             raise PipelineError("bad_rule_text")
         target = vault.root / rel
+        if question:
+            # A question set is edited by the sandbox whose folder it tests
+            # (`market`, `market_production` for Market); the general set and
+            # other folders' sets are not, so no one weakens another's gate.
+            if _question_access(info.scope, rel) != "edit":
+                raise PipelineError("rule_outside_scope")
+            target.parent.mkdir(parents=True, exist_ok=True)
+            original = target.read_bytes().decode("utf-8") if target.is_file() else ""
+            target.write_bytes(like_endings(text, original).encode("utf-8"))
+            return SandboxFile(sandbox_id=sandbox_id, path=rel, text=text)
         # Both the file as it is and as it would be must belong to the scope,
         # so applies_to cannot be moved onto another folder's data either.
         current = (target.read_text(encoding="utf-8", errors="ignore")
@@ -720,6 +731,7 @@ class PullResult(Contract):
 SCHEMA = "CLAUDE.md"
 MAX_PREVIEW_BYTES = 1024 * 1024
 _SKILL_FILE = re.compile(r"skills/[A-Za-z0-9][A-Za-z0-9._-]*/SKILL\.md")
+_QUESTION_FILE = re.compile(r"checks/questions/(?:[^/]+/)?[^/]+\.md")
 _READABLE_AREAS = ("wiki/", "raw/", "skills/", "checks/")
 _READABLE_FILES = (SCHEMA, "index.md", "log.md", "decisions.md")
 
@@ -746,6 +758,18 @@ class RuleFiles(Contract):
     scope: str | None = None
     files: tuple[str, ...] = ()
     rules: tuple[RuleFile, ...] = ()
+
+
+def _question_access(scope: str | None, rel: str) -> Literal["edit"] | None:
+    """A question set belongs to the folders its name combines: `market_production`
+    tests Market and Productions. The general set (no folder) is nobody's alone."""
+    if scope is None:
+        return "edit"
+    parts = rel.split("/")
+    if len(parts) < 4:
+        return None
+    top = scope.split("/", 1)[0].casefold()
+    return "edit" if top in parts[2].casefold().split("_") else None
 
 
 def _within(folder: str, scope: str) -> bool:

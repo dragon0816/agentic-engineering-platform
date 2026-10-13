@@ -98,6 +98,16 @@ body {
 #nav-schedules::before { content: "\25f7"; }
 #nav-knowledge::before { content: "\25a4"; }
 #nav-tasks::before { content: "\2630"; }
+#nav-reviews::before { content: "\2611"; }
+.rv-card { border: 1px solid var(--line, #ddd); border-radius: 8px; padding: 10px 14px;
+  margin: 10px 0; background: var(--panel, #fff); }
+.rv-card h3 { margin: 0 0 4px; font-size: 15px; }
+.rv-text { white-space: pre-wrap; background: var(--soft, #f4f6fa); border-radius: 6px;
+  padding: 8px 10px; margin: 6px 0; }
+.rv-tabs { display: flex; gap: 4px; margin: 8px 0; }
+.rv-tabs [aria-selected="true"] { background: var(--accent, #2b6cb0); color: #fff; }
+.kp-banner { border: 1px solid #c9d8f5; background: #eef3fb; border-radius: 8px;
+  padding: 8px 12px; margin: 8px 0; }
 .task-status { display: inline-block; min-width: 86px; padding: 1px 8px; border-radius: 10px;
   font-size: 12px; text-align: center; background: var(--soft, #eef3fb); }
 .task-status.running { background: #e8f0fe; color: #1a56db; }
@@ -492,6 +502,7 @@ tr:last-child td { border-bottom: none; }
     <button id="nav-schedules" type="button">Schedules</button>
     <button id="nav-knowledge" type="button">Knowledge</button>
     <button id="nav-tasks" type="button">Tasks</button>
+    <button id="nav-reviews" type="button">Reviews</button>
   </div>
   <div class="session-heading"><span>Sessions</span><span id="session-count">0</span></div>
   <input id="session-search" class="session-search" type="search"
@@ -928,19 +939,6 @@ tr:last-child td { border-bottom: none; }
       <progress id="kp-progress-bar" max="1"></progress>
       <span id="kp-progress-text" class="note"></span></div>
     <div id="kp-main">
-      <details class="card" id="xp-card"><summary><strong>Experience review</strong>
-        <span class="note" id="xp-summary"></span></summary>
-        <p class="note">Failed, down-rated and evidence-gap answers are collected as cases;
-          a nightly review groups them and proposes improvements. Nothing is changed by the
-          review: it only reports.</p>
-        <div class="kp-actions">
-          <button class="go" id="xp-run" type="button">Review now</button>
-          <label>Keep cases <input id="xp-days" type="number" min="1" max="3650"
-            style="width:5em"> days</label>
-          <label><input id="xp-nightly" type="checkbox"> Review nightly</label>
-          <button id="xp-save" type="button">Save settings</button>
-        </div>
-        <div id="xp-report" class="kp-markdown"></div></details>
       <h2>Sandboxes</h2>
       <div class="card">
         <div id="kp-sandboxes" class="kp-list">reading&hellip;</div>
@@ -957,6 +955,7 @@ tr:last-child td { border-bottom: none; }
           <button id="kp-discard" type="button">Discard sandbox</button></div>
         <p class="note kp-flow">Scope and rules &rarr; Drop and convert &rarr; Ingest &rarr;
           Lint &rarr; Benchmark &rarr; Push</p>
+        <div class="kp-banner" id="kp-review" hidden></div>
         <div class="card"><h3>1. Scope and rules: <span id="kp-scope-name"></span></h3>
           <p class="note">This sandbox maintains one folder, chosen when it was created. Pull
             brings its originals not yet ingested; ingested ones are already here as Raw
@@ -1111,6 +1110,45 @@ tr:last-child td { border-bottom: none; }
           </div><div id="kp-index-result" class="note"></div></details>
       </div>
     </div>
+  </section>
+  <section id="panel-reviews">
+    <div class="workspace-head">
+      <div><h2>Reviews</h2>
+        <p class="note">Each night the Agent groups failed or down-rated work and proposes an
+          improvement. Nothing changes until you decide: <strong>Accept</strong> sends it to
+          its normal path (a rule edit or a draft test question opens a review sandbox you
+          compare, benchmark and push on the Knowledge page; missing knowledge goes to the
+          gap list; a platform problem becomes an issue to follow up),
+          <strong>Reject</strong> records why so it is not proposed again for these cases,
+          <strong>Snooze</strong> hides it for 7 days.</p>
+        <p class="note" id="rv-counts" role="status">reading&hellip;</p></div>
+      <button id="rv-refresh" type="button">Refresh</button>
+    </div>
+    <div class="rv-tabs" role="tablist">
+      <button type="button" data-rv="proposed" aria-selected="true">To decide</button>
+      <button type="button" data-rv="accepted">Accepted</button>
+      <button type="button" data-rv="snoozed">Snoozed</button>
+      <button type="button" data-rv="closed">Rejected or done</button>
+    </div>
+    <div id="rv-list"></div>
+    <h3>Knowledge gaps</h3>
+    <p class="note">Accepted proposals that say knowledge is missing. Add sources to the named
+      drop folder, then mark the gap done.</p>
+    <div id="rv-gaps"></div>
+      <details class="card" id="xp-card"><summary>
+        <strong>Review settings and the latest report</strong>
+        <span class="note" id="xp-summary"></span></summary>
+        <p class="note">Failed, down-rated and evidence-gap answers are collected as cases;
+          a nightly review groups them and proposes improvements. Nothing is changed by the
+          review: it only reports.</p>
+        <div class="kp-actions">
+          <button class="go" id="xp-run" type="button">Review now</button>
+          <label>Keep cases <input id="xp-days" type="number" min="1" max="3650"
+            style="width:5em"> days</label>
+          <label><input id="xp-nightly" type="checkbox"> Review nightly</label>
+          <button id="xp-save" type="button">Save settings</button>
+        </div>
+        <div id="xp-report" class="kp-markdown"></div></details>
   </section>
   <section id="panel-tasks">
     <div class="workspace-head">
@@ -3898,18 +3936,8 @@ function kpButton(label, action) {
   button.append(text(label)); button.addEventListener("click", action); return button;
 }
 
-async function xpLoad() {
-  const info = await call("/api/experience");
-  if (!info.ok) return;
-  el("xp-days").value = info.settings.retention_days;
-  el("xp-nightly").checked = info.settings.nightly;
-  el("xp-summary").textContent = " \u2014 " + info.open + " open cases"
-    + (info.last_review ? "; last review " + info.last_review.slice(0, 16) : "")
-    + (info.last_error ? "; last attempt failed: " + info.last_error : "");
-  el("xp-report").replaceChildren(info.review ? renderMarkdown(info.review.markdown)
-    : text("No review yet."));
-}
-el("xp-save").addEventListener("click", () => kpRun("Saving", async () => {
+async function xpLoad() { await loadReviews(); }
+el("xp-save").addEventListener("click", () => rvRun("Saving", async () => {
   const reply = await call("/api/experience/settings", {
     retention_days: Number(el("xp-days").value), nightly: el("xp-nightly").checked});
   if (!reply.ok) {
@@ -3917,14 +3945,145 @@ el("xp-save").addEventListener("click", () => kpRun("Saving", async () => {
   }
   await xpLoad();
 }));
-el("xp-run").addEventListener("click", () => kpRun("Starting the review", async () => {
+el("xp-run").addEventListener("click", () => rvRun("Starting the review", async () => {
   await call("/api/experience/review", {});
-  kpStatus("The review runs in the background; its report appears here when done.");
-  setTimeout(() => xpLoad().catch(() => {}), 60000);
+  el("rv-counts").textContent = "The review runs in the background (see Tasks); new "
+    + "proposals appear here when it is done.";
+  setTimeout(() => loadReviews().catch(() => {}), 60000);
 }));
 
+// -- Reviews (E3-E5, owner 2026-10-13) --------------------------------------
+const RV_KINDS = {rule_edit: "Rule change", knowledge_gap: "Missing knowledge",
+  test_question: "Test question", issue: "Platform issue"};
+const RV_ACCEPT = {rule_edit: "Accept: open a review sandbox",
+  test_question: "Accept: draft it in a review sandbox",
+  knowledge_gap: "Accept: add to the gap list",
+  issue: "Accept: track as an issue"};
+let rvTab = "proposed", rvData = null;
+
+async function rvRun(label, action) {
+  el("rv-counts").textContent = label + "\u2026";
+  try { await action(); }
+  catch (failure) { el("rv-counts").textContent = label + " failed: "
+    + (failure.code || failure.message); }
+}
+
+async function rvDecide(proposal, action) {
+  let reason = null;
+  if (action === "reject") {
+    reason = prompt("Why is this proposal wrong or not worth doing? (recorded, so the same "
+      + "cases are not proposed again)");
+    if (!reason || !reason.trim()) return;
+  }
+  await rvRun("Saving your decision", async () => {
+    const reply = await call("/api/reviews/decide",
+                             {proposal_id: proposal.proposal_id, action, reason});
+    if (!reply.ok) {
+      const problem = new Error(reply.code); problem.code = reply.code; throw problem;
+    }
+    rvShow(reply);
+    if (action === "accept" && ["rule_edit", "test_question"].includes(proposal.kind)) {
+      setTimeout(() => loadReviews().catch(() => {}), 4000);
+    }
+  });
+}
+
+async function rvOpenSandbox(sandboxId) {
+  await selectPrimaryTab("knowledge");
+  const listed = await pipeline("sandbox-list");
+  const item = listed.sandboxes.find((s) => s.sandbox_id === sandboxId);
+  if (item) await kpRun("Opening", () => kpOpen(item));
+}
+
+function rvCard(item) {
+  const card = document.createElement("div"); card.className = "rv-card";
+  const head = document.createElement("h3");
+  head.append(text((RV_KINDS[item.kind] || item.kind)
+    + (item.target ? " \u2014 " + item.target : "")));
+  const meta = document.createElement("p"); meta.className = "note";
+  meta.append(text("Cause: " + (item.cause || "-")
+    + " \u00b7 confidence " + (item.confidence || "-")
+    + " \u00b7 " + item.case_ids.length + " case(s) \u00b7 " + item.group
+    + " \u00b7 " + (item.created_at || "").slice(0, 10)));
+  const diagnosis = document.createElement("p"); diagnosis.append(text(item.diagnosis));
+  const proposal = document.createElement("div"); proposal.className = "rv-text";
+  proposal.append(text(item.text || "(no text)"));
+  card.append(head, meta, diagnosis, proposal);
+  if (item.confirm) {
+    const confirm = document.createElement("p"); confirm.className = "note";
+    confirm.append(text("Would confirm it: " + item.confirm)); card.append(confirm);
+  }
+  const actions = document.createElement("div"); actions.className = "kp-actions";
+  if (item.status === "proposed" || item.status === "snoozed") {
+    const accept = kpButton(RV_ACCEPT[item.kind] || "Accept", () => rvDecide(item, "accept"));
+    accept.className = "go";
+    actions.append(accept, kpButton("Reject", () => rvDecide(item, "reject")));
+    if (item.status === "proposed") actions.append(kpButton("Snooze 7 days",
+      () => rvDecide(item, "snooze")));
+    if (item.snooze_until) actions.append(text(" snoozed until " + item.snooze_until.slice(0, 10)));
+  } else if (item.status === "accepted") {
+    const where = document.createElement("p");
+    where.append(text("Accepted by " + item.decided_by + " \u2014 "
+      + (item.route_note || item.route)
+      + (item.outcome ? " \u00b7 " + item.outcome : "")));
+    card.append(where);
+    if ((item.route || "").startsWith("sandbox:")) {
+      actions.append(kpButton("Open in Knowledge", () => rvOpenSandbox(item.route.slice(8))));
+    }
+    actions.append(kpButton("Mark done", () => rvDecide(item, "done")),
+                   kpButton("Reject", () => rvDecide(item, "reject")));
+  } else {
+    const why = document.createElement("p"); why.className = "note";
+    why.append(text(item.status + " by " + item.decided_by + (item.reason ? ": " + item.reason : "")
+      + (item.outcome ? " \u00b7 " + item.outcome : "")));
+    card.append(why); actions.append(kpButton("Reopen", () => rvDecide(item, "reopen")));
+  }
+  card.append(actions);
+  return card;
+}
+
+function rvShow(data) {
+  rvData = data;
+  const counts = data.counts || {};
+  el("rv-counts").textContent = [["proposed", "to decide"], ["accepted", "accepted"],
+    ["pushed", "pushed"], ["snoozed", "snoozed"], ["rejected", "rejected"], ["done", "done"]]
+    .filter(([key]) => counts[key]).map(([key, label]) => counts[key] + " " + label)
+    .join(" \u00b7 ")
+    || "No proposals yet.";
+  const wanted = (item) => rvTab === "closed" ? ["rejected", "done"].includes(item.status)
+    : item.status === rvTab;
+  const shown = data.proposals.filter(wanted);
+  el("rv-list").replaceChildren(...(shown.length ? shown.map(rvCard)
+    : [Object.assign(document.createElement("p"), {className: "empty",
+        textContent: "Nothing here."})]));
+  const gaps = data.proposals.filter((p) => p.kind === "knowledge_gap" && p.status === "accepted");
+  el("rv-gaps").replaceChildren(table(["Missing knowledge", "Where", ""], gaps, (gap) => [
+    gap.text, gap.target, kpButton("Mark done", () => rvDecide(gap, "done"))]));
+  el("xp-days").value = data.settings.retention_days;
+  el("xp-nightly").checked = data.settings.nightly;
+  el("xp-summary").textContent = " \u2014 " + data.open + " open cases"
+    + (data.last_review ? "; last review " + data.last_review.slice(0, 16) : "")
+    + (data.last_error ? "; last attempt failed: " + data.last_error : "");
+  el("xp-report").replaceChildren(data.review ? renderMarkdown(data.review.markdown)
+    : text("No review yet."));
+}
+
+async function loadReviews() {
+  const reply = await call("/api/reviews");
+  if (reply.ok) rvShow(reply);
+}
+for (const tab of document.querySelectorAll(".rv-tabs [data-rv]")) {
+  tab.addEventListener("click", () => {
+    rvTab = tab.dataset.rv;
+    for (const other of document.querySelectorAll(".rv-tabs [data-rv]")) {
+      other.setAttribute("aria-selected", String(other === tab));
+    }
+    if (rvData) rvShow(rvData);
+  });
+}
+el("rv-refresh").addEventListener("click", () => rvRun("Reading", loadReviews));
+
 async function loadKnowledge() {
-  xpLoad().catch(() => {});
   const info = await call("/api/knowledge/pipeline");
   el("kp-disabled").hidden = info.enabled; el("kp-main").hidden = !info.enabled;
   if (!info.enabled) return;
@@ -3944,6 +4103,43 @@ async function loadKnowledge() {
   if (kpSandbox && !listed.sandboxes.some((s) => s.sandbox_id === kpSandbox.sandbox_id)) {
     kpSandbox = null; el("kp-box").hidden = true;
   }
+}
+
+async function kpReviewBanner(item) {
+  // A sandbox opened from an accepted review proposal (owner 2026-10-13).
+  const box = el("kp-review"); box.replaceChildren(); box.hidden = true;
+  const reply = await call("/api/knowledge/review-proposal?sandbox_id="
+    + encodeURIComponent(item.sandbox_id));
+  const proposal = reply.ok ? reply.proposal : null;
+  if (!proposal) return;
+  const head = document.createElement("p");
+  head.append(text("Opened from review proposal " + proposal.proposal_id + " (" + proposal.cause
+    + "): " + proposal.diagnosis));
+  const body = document.createElement("div"); body.className = "rv-text";
+  body.append(text(proposal.text));
+  const open = kpButton(proposal.kind === "test_question"
+    ? "Open the draft question " + proposal.path
+    : "Open " + proposal.path + " with the proposal added", () => kpRun("Reading", async () => {
+      const file = await pipeline("file-read", {sandbox_id: kpSandbox.sandbox_id,
+                                                path: proposal.path});
+      kpRulePath = proposal.path; el("kp-rule-editor").hidden = false;
+      el("kp-rule-path").textContent = proposal.path; kpRuleSaved = file.text;
+      const marker = "Review proposal (" + proposal.proposal_id + ")";
+      el("kp-rule-text").value = proposal.kind === "rule_edit" && !file.text.includes(marker)
+        ? file.text.replace(/\s*$/, "") + "\n\n## " + marker + "\n\n" + proposal.text
+          + "\n\n> Why: " + proposal.diagnosis + "\n"
+        : file.text;
+      el("kp-rule-text").dispatchEvent(new Event("input")); kpTab("md");
+      el("kp-rule-editor").scrollIntoView({block: "start"});
+    }));
+  open.className = "go";
+  const note = document.createElement("p"); note.className = "note";
+  note.append(text(proposal.kind === "test_question"
+    ? "Fill in the must-mention terms (an expert's job; the review never invents them), "
+      + "save, then benchmark and push."
+    : "The proposal is added as an unsaved edit: compare it, edit it (the AI session can "
+      + "help), save, then benchmark and push."));
+  box.append(head, body, note, open); box.hidden = false;
 }
 
 async function kpLoadScopes() {
@@ -3970,6 +4166,7 @@ async function kpOpen(item) {
   const rawRefs = item.scope ? contents.raw.filter((ref) =>
     ref.startsWith("raw/" + item.scope + "/")) : contents.raw;
   el("kp-scope-name").textContent = item.scope || "whole vault (older sandbox)";
+  await kpReviewBanner(item);
   raw.append(table(["", "Raw document", "", ""], rawRefs, (row) => {
     const tick = document.createElement("input"); tick.type = "checkbox";
     tick.className = "kp-raw-tick"; tick.value = row; tick.setAttribute("aria-label", row);
@@ -4952,7 +5149,8 @@ el("task-refresh").addEventListener("click", () => loadTasks().catch((failure) =
 }));
 
 const panels = {ask: null, installed: loadCapabilities,
-  settings: loadSettings, schedules: loadSchedules, knowledge: loadKnowledge, tasks: loadTasks};
+  settings: loadSettings, schedules: loadSchedules, knowledge: loadKnowledge, tasks: loadTasks,
+  reviews: loadReviews};
 
 function showBootError(failure) {
   const banner = el("boot-error"); banner.hidden = false;
@@ -4968,6 +5166,7 @@ async function selectPrimaryTab(name) {
   el("nav-schedules").toggleAttribute("aria-current", name === "schedules");
   el("nav-knowledge").toggleAttribute("aria-current", name === "knowledge");
   el("nav-tasks").toggleAttribute("aria-current", name === "tasks");
+  el("nav-reviews").toggleAttribute("aria-current", name === "reviews");
   if (name === "ask") { field.focus(); return; }
   try { await panels[name](); }
   catch (failure) { showBootError(failure); }
@@ -4978,6 +5177,7 @@ el("nav-settings").addEventListener("click", () => selectPrimaryTab("settings"))
 el("nav-schedules").addEventListener("click", () => selectPrimaryTab("schedules"));
 el("nav-knowledge").addEventListener("click", () => selectPrimaryTab("knowledge"));
 el("nav-tasks").addEventListener("click", () => selectPrimaryTab("tasks"));
+el("nav-reviews").addEventListener("click", () => selectPrimaryTab("reviews"));
 
 Promise.all([loadAbout(), loadAssets(), loadChat(), loadSlashCommands(), loadAvatars(), loadMcp()])
   .catch(showBootError);

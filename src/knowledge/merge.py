@@ -30,8 +30,10 @@ from knowledge.sections import Page, like_endings, parse
 # The schema and category rules (K3.1) merge like pages, so a domain owner's
 # rule change in a sandbox reaches the published vault.
 ROOT_FILES = ("index.md", "log.md", "decisions.md", "CLAUDE.md")
-AREAS = ("wiki", "raw", "skills")
-TEXT_AREAS = ("wiki", "skills")
+# `checks` carries the question sets, so questions written in a sandbox (an expert's,
+# or a review's draft) reach the project vault by a push (owner, 2026-10-13).
+AREAS = ("wiki", "raw", "skills", "checks")
+TEXT_AREAS = ("wiki", "skills", "checks")
 PREAMBLE = "(preamble)"
 Resolution = Literal["sandbox", "published"]
 

@@ -2353,3 +2353,17 @@ release. Updates use `update.cmd`, which reuses the installed user and Bridge ID
 host.json and the workspace. Rejected: building from the working tree (uncommitted changes
 would ship under a revision that does not contain them); a self-extracting .exe (the zip
 with `install.cmd` already installs offline and keeps the per-file hash check).
+
+## 2026-10-13: Review proposals are decided by a person; push carries question sets
+
+Decision (owner chose the full experience review): every review finding with a proposal
+is stored and shown on a Reviews tab. A person accepts, rejects (reason required, so the
+same cases are not proposed again) or snoozes it. Accept never changes a running system:
+a vault rule edit or a draft test question opens a review sandbox that goes through the
+normal benchmark and push gate; missing knowledge goes to a gap list; platform issues
+are tracked. To let questions reach the project vault, merge and push now include
+`checks/`; a scoped sandbox may edit only the question sets named for its folder
+(`market`, `market_production` for Market), never the general set or other folders'.
+Rejected: applying accepted rule text directly to the project vault (bypasses the
+benchmark gate); letting any sandbox edit any question set (could weaken another
+folder's gate).

@@ -169,7 +169,9 @@ def latest_review(workspace: Path) -> dict[str, Any] | None:
     if not runs:
         return None
     loaded: dict[str, Any] = json.loads(runs[-1].read_text(encoding="utf-8"))
-    loaded["markdown"] = runs[-1].with_suffix(".md").read_text(encoding="utf-8")
+    markdown = runs[-1].with_suffix(".md")
+    loaded["markdown"] = (markdown.read_text(encoding="utf-8") if markdown.is_file()
+                          else ReviewReport.model_validate(loaded).markdown())
     return loaded
 
 

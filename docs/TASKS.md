@@ -1845,8 +1845,20 @@ s-k-20261011T102952` (not published).
   (`test_application_catalog.py::test_application_endpoint_requires_a_member_session_and_filters_namespace`,
   `ConnectionAbortedError` while Agent Web restarted and a browser check ran; passed 3/3 alone,
   code untouched by this change: another load-sensitive test, like the two browser ones).
-- [ ] Experience review E3-E5 (owner chose the full version, 2026-10-13): Reviews page,
-  proposal actions (accept into a sandbox / reject / snooze), outcome tracking.
+- [x] Experience review E3 and E5 (owner chose the full version, 2026-10-13): Reviews tab
+  (`/api/reviews`, `/api/reviews/decide`); every review finding with a proposal becomes a
+  proposal (`host_runtime/experience_proposals.py`) a person accepts, rejects with a
+  reason, snoozes for 7 days, marks done or reopens. Accept routes it
+  (`host_runtime/review_routes.py`): a rule edit naming a vault rule opens a review
+  sandbox scoped to that rule's folder and the Knowledge page adds the proposal to the
+  rule as an unsaved edit; a test question opens a review sandbox with a draft question
+  (terms left for the expert); missing knowledge goes to the gap list; issues are
+  tracked. Outcome: the review sandbox's last push and benchmark. Push now merges
+  `checks/` (question sets); a scoped sandbox edits only its folder's sets. Review
+  settings moved from the Knowledge tab to Reviews. Live: 16 proposals from past
+  reports listed. Full suite 2578 passed, 6 skipped.
+- [ ] Experience review E4: platform Skill proposals as Skill candidates and Workflow
+  proposals as revision drafts (today they are routed "manual").
 - [x] Task list (owner, 2026-10-13, option b: Workflows and background jobs, not
   conversations): Tasks tab (`/api/tasks`, `host_runtime/tasks.py`) merges Workflow runs
   from telemetry with background jobs (convert, preview, re-ingest, benchmark, push,

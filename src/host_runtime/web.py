@@ -161,6 +161,7 @@ from host_runtime.experience import (
     load_settings,
     save_settings,
 )
+from host_runtime.experience_proposals import ProposalError, ProposalStore, ReviewProposal
 from host_runtime.experience_review import latest_review, run_review
 from host_runtime.host import HostRuntime, build_telegram, choice_sources, load_authorization
 from host_runtime.jev_shadow import SHADOW_LOG_FILE
@@ -189,6 +190,13 @@ from host_runtime.profiles import ProfileError, activate_profile
 from host_runtime.reference_sets import (
     REFERENCE_SETS_FILE,
     ReferenceSetStore,
+)
+from host_runtime.review_routes import (
+    draft_question,
+    question_folder,
+    read_proposal,
+    resolve_rule,
+    write_proposal,
 )
 from host_runtime.skill_assist import Turn, assist
 from host_runtime.slash_commands import (
@@ -1097,6 +1105,115 @@ class AgentWeb:
                 "open": len(store.cases("open")), "last_review": store.meta("last_review"),
                 "last_error": store.meta("last_error") or None,
                 "review": latest_review(workspace)}
+
+    # -- Reviews: proposals a person decides on (E3-E5, owner 2026-10-13) ------
+
+    def _proposals(self) -> ProposalStore:
+        return ProposalStore(self.runtime.layout.workspace_root)
+
+    def _outcome(self, route: str | None) -> str:
+        """How far an accepted proposal got: its review sandbox's last push."""
+        if not route or not route.startswith("sandbox:"):
+            return ""
+        boxes = self._sandboxes()
+        if boxes is None:
+            return ""
+        try:
+            _, sandbox = boxes.open(route[len("sandbox:"):])
+        except SandboxError:
+            return "sandbox discarded"
+        push = latest_push(sandbox)
+        if push is None:
+            return "in the sandbox, not pushed yet"
+        found = push.get("benchmark")
+        bench: dict[str, Any] = found if isinstance(found, dict) else {}
+        return (f"push {push.get('status')}"
+                + (f": sandbox {bench.get('sandbox_score')} / project vault "
+                   f"{bench.get('project_score')} of {bench.get('total')}" if bench else ""))
+
+    def reviews(self) -> dict[str, Any]:
+        store = self._proposals()
+        store.sync()
+        proposals = []
+        counts: dict[str, int] = {}
+        for item in store.all():
+            shown = item.model_dump(mode="json")
+            shown["outcome"] = self._outcome(item.route)
+            if shown["outcome"].startswith("push pushed"):
+                counts["pushed"] = counts.get("pushed", 0) + 1
+            counts[item.status] = counts.get(item.status, 0) + 1
+            proposals.append(shown)
+        return {**self.experience(), "proposals": proposals, "counts": counts}
+
+    def review_decide(self, proposal_id: str, action: str, reason: str | None) -> dict[str, Any]:
+        """A person's decision; an accept is routed to the asset's normal path."""
+        if action not in ("accept", "reject", "snooze", "done", "reopen"):
+            return {"ok": False, "code": "unknown_action"}
+        store = self._proposals()
+        try:
+            decided = store.decide(proposal_id, action, self.runtime.actor,  # type: ignore[arg-type]
+                                   reason)
+        except ProposalError as error:
+            return {"ok": False, "code": error.code}
+        if action == "accept":
+            self._route(store, decided)
+        return {**self.reviews(), "ok": True}
+
+    def _route(self, store: ProposalStore, proposal: ReviewProposal) -> None:
+        if proposal.kind == "knowledge_gap":
+            store.routed(proposal.proposal_id, "gap", "added to the gap list")
+            return
+        if proposal.kind == "issue":
+            store.routed(proposal.proposal_id, "issue", "an issue to follow up")
+            return
+        pipeline = self._pipeline()
+        binding = self.runtime.config.knowledge_pipeline
+        if pipeline is None or binding is None:
+            store.routed(proposal.proposal_id, "manual", "no Knowledge pipeline on this Agent")
+            return
+        # Project vaults first: they are where reviewed rules and questions live.
+        bases = {v.name: Path(v.root) for v in sorted(
+            binding.vaults, key=lambda v: v.knowledge_asset is None)}
+        if proposal.kind == "rule_edit":
+            target = resolve_rule(proposal.target, bases)
+            if target is None:
+                store.routed(proposal.proposal_id, "manual",
+                             "the target is not a vault rule file; platform Skill and "
+                             "Workflow proposals are followed up by hand for now")
+                return
+            base, path, scope = target.base, target.path, target.scope
+        else:
+            base = next(iter(bases))
+            scope = question_folder(proposal.target, bases[base])
+            folder = scope.casefold() if scope else "review"
+            path = f"checks/questions/{folder}/review-{proposal.proposal_id}.md"
+
+        def work() -> tuple[TaskStatus, str]:
+            info = pipeline.create_sandbox(base, f"review {proposal.proposal_id[-10:]}",
+                                           self.runtime.actor, scope=scope)
+            _, sandbox = pipeline.sandboxes.open(info.sandbox_id)
+            if proposal.kind == "test_question":
+                pipeline.write_rule(info.sandbox_id, path, draft_question(proposal))
+            write_proposal(sandbox.root, proposal, path)
+            store.routed(proposal.proposal_id, f"sandbox:{info.sandbox_id}",
+                         f"{path} in sandbox {info.label}")
+            return "succeeded", f"sandbox {info.sandbox_id} opened for {path}"
+
+        store.routed(proposal.proposal_id, "opening", "opening a review sandbox")
+        threading.Thread(target=self.tasks().tracked(
+            "review", f"Open a review sandbox for {proposal.proposal_id}", base, work),
+            name="review-route", daemon=True).start()
+
+    def review_proposal(self, sandbox_id: str) -> dict[str, Any]:
+        """The proposal a review sandbox was opened for, for the Knowledge page."""
+        boxes = self._sandboxes()
+        if boxes is None:
+            return {"ok": False, "code": "knowledge_pipeline_disabled"}
+        try:
+            _, sandbox = boxes.open(sandbox_id)
+        except SandboxError as error:
+            return {"ok": False, "code": error.code}
+        return {"ok": True, "proposal": read_proposal(sandbox.root)}
 
     def update_experience_settings(self, body: dict[str, Any]) -> dict[str, Any]:
         try:
@@ -3294,6 +3411,11 @@ class _Handler(BaseHTTPRequestHandler):
         elif parsed.path == "/api/knowledge/push":
             query = parse_qs(parsed.query)
             self._json(200, web.push_status((query.get("sandbox_id") or [""])[0]))
+        elif parsed.path == "/api/reviews":
+            self._json(200, web.reviews())
+        elif parsed.path == "/api/knowledge/review-proposal":
+            query = parse_qs(parsed.query)
+            self._json(200, web.review_proposal((query.get("sandbox_id") or [""])[0]))
         elif parsed.path == "/api/tasks":
             self._json(200, web.task_list())
         elif parsed.path == "/api/knowledge/convert":
@@ -3380,6 +3502,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/knowledge/skill-assist",
             "/api/experience/settings",
             "/api/experience/review",
+            "/api/reviews/decide",
             "/api/settings/model",
             "/api/settings/laya",
             "/api/settings/telegram",
@@ -3468,6 +3591,13 @@ class _Handler(BaseHTTPRequestHandler):
         if path == "/api/experience/settings":
             self._json(200, self.server.web.update_experience_settings(
                 body if isinstance(body, dict) else {}))
+            return
+        if path == "/api/reviews/decide":
+            chosen = body if isinstance(body, dict) else {}
+            reason = chosen.get("reason")
+            self._json(200, self.server.web.review_decide(
+                str(chosen.get("proposal_id") or ""), str(chosen.get("action") or ""),
+                str(reason) if reason is not None else None))
             return
         if path == "/api/experience/review":
             self._json(200, self.server.web.start_experience_review())

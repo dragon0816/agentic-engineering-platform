@@ -165,7 +165,7 @@ def test_a_review_reports_proposals_per_group_and_changes_nothing(tmp_path: Path
     assert any("RULES IN FORCE" in r.messages[1].text for r in model.requests)
 
 
-def test_the_knowledge_tab_shows_the_experience_review() -> None:
+def test_the_reviews_tab_shows_the_experience_review() -> None:
     for hook in ('id="xp-run"', 'id="xp-days"', "/api/experience/settings", "/api/experience"):
         assert hook in PAGE
 
