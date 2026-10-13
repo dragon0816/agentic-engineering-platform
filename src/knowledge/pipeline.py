@@ -49,7 +49,7 @@ from knowledge.raw import (
     load_document,
 )
 from knowledge.sandbox import BASE, Sandboxes, SandboxInfo
-from knowledge.schema import ingest_conventions
+from knowledge.schema import front_fields, ingest_conventions
 from knowledge.sections import like_endings, lost_lines
 from knowledge.vault import Vault, WritePlan, normalize
 from models.contracts import ModelClient
@@ -182,13 +182,25 @@ class KnowledgePipeline:
     # -- sandboxes -----------------------------------------------------------
 
     def create_sandbox(self, base: str, label: str, actor: str,
-                       domain: str | None = None) -> SandboxInfo:
+                       domain: str | None = None, scope: str | None = None) -> SandboxInfo:
         if base not in self.bases:
             raise PipelineError("unknown_base_vault")
         if domain is not None and domain not in KEYS:
             raise PipelineError("unknown_domain")
+        if scope is not None:
+            scope = self._scope(base, scope)
         return self.sandboxes.create(base, self.bases[base], label=label, actor=actor,
-                                     domain=domain)
+                                     domain=domain, scope=scope)
+
+    def _scope(self, base: str, scope: str) -> str:
+        """A folder the project vault collects (drop/) or holds (raw/)."""
+        rel = normalize(scope).strip("/")
+        if not rel or ".." in rel.split("/"):
+            raise PipelineError("bad_scope")
+        if not ((self.drop_roots[base] / rel).is_dir()
+                or (self.bases[base] / "raw" / rel).is_dir()):
+            raise PipelineError("unknown_scope")
+        return rel
 
     def _open(self, sandbox_id: str) -> Vault:
         return self.sandboxes.open(sandbox_id)[1]
@@ -235,6 +247,8 @@ class KnowledgePipeline:
                 raise PipelineError("outside_drop")
             if not source.is_dir():
                 raise PipelineError("unknown_drop_folder")
+            if info.scope is not None and not _within(rel, info.scope):
+                raise PipelineError("outside_scope")
             clean_folders.append(rel)
             for path in sorted(p for p in source.rglob("*") if p.is_file()):
                 name = path.relative_to(root).as_posix()
@@ -263,12 +277,26 @@ class KnowledgePipeline:
     # -- files: preview and rule editing (collaboration C2) --------------------
 
     def rule_files(self, sandbox_id: str) -> RuleFiles:
-        """The sandbox's schema and skill files, which its maintainer may edit."""
-        vault = self._open(sandbox_id)
-        found = [SCHEMA] if (vault.root / SCHEMA).is_file() else []
-        found += sorted(p.relative_to(vault.root).as_posix()
+        """The rules that concern the sandbox's scope: its folder's ingest and
+        answer skills (editable), the more general layers it inherits and the
+        vault-wide schema (read only). Other folders' skills are not listed.
+        A sandbox without a scope (made before scopes) may edit every rule."""
+        info, vault = self.sandboxes.open(sandbox_id)
+        rules = []
+        paths = [SCHEMA] if (vault.root / SCHEMA).is_file() else []
+        paths += sorted(p.relative_to(vault.root).as_posix()
                         for p in (vault.root / "skills").glob("*/SKILL.md"))
-        return RuleFiles(sandbox_id=sandbox_id, files=tuple(found))
+        for rel in paths:
+            fields = front_fields((vault.root / rel).read_text(encoding="utf-8", errors="ignore"))
+            access = _rule_access(info.scope, rel, fields)
+            if access is not None:
+                rules.append(RuleFile(
+                    path=rel, access=access, applies_to=fields.get("applies_to") or None,
+                    kind="schema" if rel == SCHEMA else (
+                        "answer" if fields.get("mode", "").casefold() == "answer"
+                        or rel.startswith("skills/ask-") else "ingest")))
+        return RuleFiles(sandbox_id=sandbox_id, scope=info.scope,
+                         files=tuple(rule.path for rule in rules), rules=tuple(rules))
 
     def skill_guide(self) -> SkillGuide:
         """The writing guide and the two templates shipped with the platform."""
@@ -295,13 +323,20 @@ class KnowledgePipeline:
     def write_rule(self, sandbox_id: str, path: str, text: str) -> SandboxFile:
         """Save the schema or one skill file in the sandbox; nothing else is
         writable this way. The change reaches the project vault only by a push."""
-        vault = self._open(sandbox_id)
+        info, vault = self.sandboxes.open(sandbox_id)
         rel = normalize(path)
         if not (rel == SCHEMA or _SKILL_FILE.fullmatch(rel)):
             raise PipelineError("not_a_rule_file")
         if not text.strip() or len(text.encode("utf-8")) > MAX_PREVIEW_BYTES:
             raise PipelineError("bad_rule_text")
         target = vault.root / rel
+        # Both the file as it is and as it would be must belong to the scope,
+        # so applies_to cannot be moved onto another folder's data either.
+        current = (target.read_text(encoding="utf-8", errors="ignore")
+                   if target.is_file() else text)
+        if (_rule_access(info.scope, rel, front_fields(current)) != "edit"
+                or _rule_access(info.scope, rel, front_fields(text)) != "edit"):
+            raise PipelineError("rule_outside_scope")
         target.parent.mkdir(parents=True, exist_ok=True)
         original = target.read_bytes().decode("utf-8") if target.is_file() else ""
         target.write_bytes(like_endings(text, original).encode("utf-8"))
@@ -674,9 +709,47 @@ def _readable(path: str) -> str:
     return rel
 
 
+class RuleFile(Contract):
+    path: str
+    kind: Literal["schema", "ingest", "answer"]
+    # edit: this scope's rule; inherited: a more general layer it builds on;
+    # shared: the vault-wide schema. Only `edit` can be saved in the sandbox.
+    access: Literal["edit", "inherited", "shared"]
+    applies_to: str | None = None
+
+
 class RuleFiles(Contract):
     sandbox_id: str
+    scope: str | None = None
     files: tuple[str, ...] = ()
+    rules: tuple[RuleFile, ...] = ()
+
+
+def _within(folder: str, scope: str) -> bool:
+    return folder == scope or folder.startswith(scope + "/")
+
+
+def _rule_access(scope: str | None, rel: str,
+                 fields: dict[str, str]) -> Literal["edit", "inherited", "shared"] | None:
+    """How a sandbox scoped to `scope` may treat one rule file; None hides it."""
+    if scope is None:
+        return "edit"
+    if rel == SCHEMA:
+        return "shared"
+    applies = normalize(fields.get("applies_to", "")).strip("/")
+    if applies:
+        if not applies.startswith("raw/"):
+            return None
+        folder = applies[len("raw/"):]
+        if _within(folder, scope):
+            return "edit"
+        return "inherited" if _within(scope, folder) else None
+    # An answering skill written before applies_to existed: ask-<folder>.
+    name = (fields.get("name") or rel.split("/")[1]).casefold()
+    top = scope.split("/", 1)[0]
+    if name == f"ask-{top.casefold()}":
+        return "edit" if scope == top else "inherited"
+    return None
 
 
 class SandboxFile(Contract):

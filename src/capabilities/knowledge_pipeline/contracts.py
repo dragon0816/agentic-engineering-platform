@@ -43,6 +43,8 @@ class SandboxCreateRequest(Contract):
     base: Symbol
     label: Text = Field(min_length=1, max_length=80)
     domain: Symbol | None = None  # a K2 index category, e.g. product-vna
+    # The folder the sandbox maintains, e.g. Knowledge or Productions/VNA.
+    scope: Text | None = Field(default=None, max_length=200)
 
 
 class SandboxListRequest(Contract):
@@ -55,6 +57,7 @@ class SandboxRecord(Contract):
     label: Text
     created_by: Text
     created_at: Text
+    scope: Text | None = None
 
 
 class SandboxList(Contract):

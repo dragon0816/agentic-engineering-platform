@@ -1,7 +1,9 @@
 # Skill 撰寫指引
 
 這份指引說明知識庫裡兩種規則檔怎麼寫。它們都放在知識庫的 `skills/<名稱>/SKILL.md`，
-由熟悉領域的人修改；在 Knowledge 頁面的「2. Rules」編輯後 push，就會生效。
+由熟悉領域的人修改；在 Knowledge 頁面的「1. Scope and rules」編輯後 push，就會生效。
+沙盒只能改它範圍（建立時選的資料夾）內的規則：該資料夾的 ingest 與 answer skill；
+較通用那層的 skill 和 `CLAUDE.md` 在沙盒裡唯讀，改它們請找知識庫維護者。
 
 | 種類 | `mode` | 決定什麼 | 何時套用 |
 |---|---|---|---|
@@ -36,7 +38,8 @@
 
 範本：`skill_guide/answer.SKILL.md`（也是 `ask-knowledge` 的預設內容）。
 
-1. **frontmatter**：`name`、`description`、`mode: answer`，可選
+1. **frontmatter**：`name`、`description`、`mode: answer`、`applies_to: raw/<類別>`
+   （這份回答規則屬於哪個資料夾，決定誰能改它；不影響何時套用），可選
    `topics: [市場, market, 客戶]`（只在問題含有這些詞時套用）。
 2. **分層**：技術／標準、產品／選件、市場、競品，回答時不要混在同一句。
 3. **數字、型號與版本**：只用證據裡的寫法，連同條件；新舊說法並列。

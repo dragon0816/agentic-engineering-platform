@@ -83,5 +83,5 @@ def test_an_error_in_one_document_does_not_end_the_run(tmp_path: Path) -> None:
 
 def test_the_page_offers_re_ingest_and_explains_pull() -> None:
     for hook in ('id="kp-reingest"', 'id="kp-reingest-stop"', 'id="kp-raw-folder"',
-                 "/api/knowledge/reingest/start", "already_raw", "Tick them in step 4"):
+                 "/api/knowledge/reingest/start", "already_raw", "Tick them in step 3"):
         assert hook in PAGE

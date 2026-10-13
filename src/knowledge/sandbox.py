@@ -61,8 +61,12 @@ class SandboxInfo(BaseModel):
     # A domain matrix cell (K2 index category) the sandbox works in; changes to
     # pages outside it are merge proposals (K3, owner 2026-10-11).
     domain: str | None = None
-    # drop/ folders pulled from the project vault: the sandbox's scope.
+    # drop/ folders pulled from the project vault so far.
     pulled: tuple[str, ...] = ()
+    # The one folder (e.g. Knowledge or Productions/VNA) this sandbox maintains,
+    # chosen at creation: it may pull only below it and edit only its rules
+    # (owner, 2026-10-13). None for sandboxes made before scopes existed.
+    scope: str | None = None
 
 
 def _slug(text: str) -> str:
@@ -85,7 +89,7 @@ class Sandboxes:
         return folder
 
     def create(self, base_name: str, base_root: Path, *, label: str, actor: str,
-               domain: str | None = None) -> SandboxInfo:
+               domain: str | None = None, scope: str | None = None) -> SandboxInfo:
         try:
             base = Vault(Path(base_root))
         except VaultError:
@@ -115,7 +119,7 @@ class Sandboxes:
             sandbox_id=sandbox_id, base_name=base_name, base_root=str(base.root.resolve()),
             base_raw_sha256=raw_digest(base), base_content_sha256=knowledge_digest(base),
             base_decisions_sha256=decision_digest(base), label=label, created_by=actor,
-            created_at=stamp.isoformat(timespec="seconds"), domain=domain)
+            created_at=stamp.isoformat(timespec="seconds"), domain=domain, scope=scope)
         (folder / RECORD).write_text(info.model_dump_json(indent=1), encoding="utf-8")
         return info
 

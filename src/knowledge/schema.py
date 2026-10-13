@@ -41,6 +41,11 @@ def _front(text: str) -> tuple[dict[str, str], str]:
     return fields, body
 
 
+def front_fields(text: str) -> dict[str, str]:
+    """A skill file's top-level frontmatter fields."""
+    return _front(text)[0]
+
+
 def category_skills(vault: Vault, raw_ref: str) -> list[tuple[str, str]]:
     """(name, rules) of every skill whose `applies_to` folder holds `raw_ref`,
     from the general to the specific: `raw/Productions` before
@@ -57,6 +62,8 @@ def category_skills(vault: Vault, raw_ref: str) -> list[tuple[str, str]]:
             fields, body = _front(vault.read(rel))
         except (VaultError, UnicodeDecodeError):
             continue
+        if fields.get("mode", "").strip().casefold() == "answer":
+            continue  # an answering skill's applies_to names its domain, not ingest rules
         scope = normalize(fields.get("applies_to", "")).rstrip("/")
         if scope and ref.startswith(scope + "/"):
             found.append((len(scope), fields.get("name") or path.parent.name, body.strip()))

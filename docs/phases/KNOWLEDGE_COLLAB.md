@@ -85,6 +85,44 @@ lines under `Productions/`:
   the shared `ingest-productions` (may be one of them), and a reviewer for shared pages
   (technical concepts, companies), whose changes arrive as proposals.
 
+### One folder per sandbox; only its rules are editable (owner, 2026-10-13)
+
+The Knowledge page's Pull and Rules steps are one step, "1. Scope and rules", because a
+maintainer pulls a folder in order to change how that folder's data is handled. This
+supersedes the "one or more folders" pull of section 3 for new sandboxes.
+
+- **The scope is chosen when the sandbox is created** and cannot change: one folder of
+  the project vault, such as `Knowledge`, `Market` or `Productions/VNA`
+  (`sandbox.json` `scope`). Pull accepts only that folder and folders below it.
+- **Rules listed for the scope**, from `applies_to` in each skill's frontmatter:
+
+  | Rule | Example (scope `Productions/VNA`) | In the sandbox |
+  |---|---|---|
+  | ingest skill of the folder or below | `ingest-vna` (`applies_to: raw/Productions/VNA`) | editable |
+  | answer skill of the folder or below | `ask-vna` (`mode: answer`, `applies_to: raw/Productions/VNA`) | editable |
+  | a more general layer the folder inherits | `ingest-productions`, `ask-productions` | read only, shown as "general layer" |
+  | `CLAUDE.md` (the whole vault's schema) | | read only, shown as "shared" |
+  | other folders' skills | `ingest-market` | not listed |
+
+  An answer skill written before `applies_to` existed belongs to the folder named by
+  `ask-<folder>` (`ask-knowledge` belongs to `Knowledge`). For an answer skill,
+  `applies_to` only says who owns it; when it applies to a question is unchanged
+  (`topics`, or every question). Ingest rules ignore answer skills.
+- **Why answer skills are in scope:** the benchmark uses the folder's question sets, so
+  a change to how the folder's questions are answered is measured by the same gate.
+- **Why the general layer and `CLAUDE.md` are read only:** a change there alters every
+  product line or every domain, other maintainers' areas included. Their keepers change
+  them (in a sandbox scoped to that folder, or a sandbox without a scope).
+- **Enforced in the pipeline, not only on the page:** saving a rule outside the scope is
+  refused (`rule_outside_scope`), for the file as it is and as it would be, so
+  `applies_to` cannot be moved onto another folder's data.
+- New skill: the page suggests `ingest-<folder>` (or `ask-<folder>` when the folder
+  already has an ingest skill) with `applies_to: raw/<scope>` filled in, then hands it to
+  the Skill assistant.
+- The Raw list, re-ingest and the upload category show only the scope's folder.
+- Sandboxes created before this change have no scope and keep the earlier behaviour
+  (every rule editable).
+
 ## 5. Benchmark: question sets by folder and folder combination
 
 - The question format is the owner's existing one in `checks/questions/`:

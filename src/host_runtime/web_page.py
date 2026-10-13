@@ -890,6 +890,7 @@ tr:last-child td { border-bottom: none; }
         <div id="kp-sandboxes" class="kp-list">reading&hellip;</div>
         <form id="kp-new" class="kp-actions">
           <select id="kp-base" aria-label="Project vault"></select>
+          <select id="kp-scope" aria-label="Folder this sandbox maintains" required></select>
           <input id="kp-label" required maxlength="80" placeholder="Sandbox name, e.g. VNA trial"
                  aria-label="Sandbox name">
           <button class="go" type="submit">Create sandbox</button>
@@ -898,18 +899,19 @@ tr:last-child td { border-bottom: none; }
       <div id="kp-box" hidden>
         <div class="kp-head"><h2 id="kp-title"></h2>
           <button id="kp-discard" type="button">Discard sandbox</button></div>
-        <p class="note kp-flow">Pull &rarr; Rules &rarr; Drop and convert &rarr; Ingest &rarr;
+        <p class="note kp-flow">Scope and rules &rarr; Drop and convert &rarr; Ingest &rarr;
           Lint &rarr; Benchmark &rarr; Push</p>
-        <div class="card"><h3>1. Pull from the project vault</h3>
-          <p class="note">Choose the drop folders this sandbox works on; they become its
-            scope. Pull brings originals not yet ingested. Ingested ones are already here as
-            Raw (step 4), so they are not pulled again.</p>
+        <div class="card"><h3>1. Scope and rules: <span id="kp-scope-name"></span></h3>
+          <p class="note">This sandbox maintains one folder, chosen when it was created. Pull
+            brings its originals not yet ingested; ingested ones are already here as Raw
+            (step 3), so they are not pulled again.</p>
           <div id="kp-pull-folders" class="kp-list"></div>
           <div class="kp-actions"><button class="go" id="kp-pull" type="button">Pull</button>
-            <span class="note" id="kp-pull-result"></span></div></div>
-        <div class="card"><h3>2. Rules (schema and skills)</h3>
-          <p class="note">Edit how this sandbox converts and ingests. Saved here only;
-            a push brings the change to the project vault.</p>
+            <span class="note" id="kp-pull-result"></span></div>
+          <p class="note">The rules for this folder: how its data becomes wiki pages
+            (ingest) and how its questions are answered (answer). More general layers and
+            the vault-wide CLAUDE.md are read only here; their maintainers change them.
+            Saved here only; a push brings a change to the project vault.</p>
           <div id="kp-rules" class="kp-list"></div>
           <div id="kp-rule-editor" hidden>
             <p><strong id="kp-rule-path"></strong>
@@ -975,7 +977,7 @@ tr:last-child td { border-bottom: none; }
         <div class="card" id="kp-viewer" hidden><h3 id="kp-viewer-title">Preview</h3>
           <div class="kp-actions"><button id="kp-viewer-close" type="button">Close</button></div>
           <div id="kp-viewer-body" class="kp-markdown"></div></div>
-        <div class="card"><h3>3. Drop and convert</h3>
+        <div class="card"><h3>2. Drop and convert</h3>
           <p class="note">Add originals from this computer if they are not in the project's
             drop. The category folder picks the ingest rules (raw/&lt;category&gt;).</p>
           <div class="kp-actions">
@@ -988,7 +990,7 @@ tr:last-child td { border-bottom: none; }
             <button id="kp-preview" type="button">Preview convert</button>
             <button class="go" id="kp-convert" type="button">Convert</button>
           </div><div id="kp-converted"></div></div>
-        <div class="card"><h3>4. Ingest</h3>
+        <div class="card"><h3>3. Ingest</h3>
           <p class="note">Plan ingest on a Raw document, Compare each page, then apply.
             After changing the rules, tick Raw documents (or a whole folder) and re-ingest
             them with the current rules; nothing needs to be pulled again.</p>
@@ -1003,10 +1005,10 @@ tr:last-child td { border-bottom: none; }
           <div id="kp-reingest-result"></div>
           <div id="kp-raw" class="kp-list"></div>
           <div id="kp-plan" class="empty">Choose Plan ingest on a Raw document.</div></div>
-        <div class="card"><h3>5. Lint</h3>
+        <div class="card"><h3>4. Lint</h3>
           <div class="kp-actions"><button id="kp-lint" type="button">Run lint</button></div>
           <div id="kp-lint-result"></div></div>
-        <div class="card"><h3>6. Benchmark</h3>
+        <div class="card"><h3>5. Benchmark</h3>
           <p class="note">Each question is asked against this sandbox and against the project
             vault, and graded by its must-mention / must-not-say terms.</p>
           <div id="kp-bench-sets" class="kp-list"></div>
@@ -1014,7 +1016,7 @@ tr:last-child td { border-bottom: none; }
             <button class="go" id="kp-bench" type="button">Run benchmark</button>
             <span class="note" id="kp-bench-state"></span></div>
           <div id="kp-bench-result"></div></div>
-        <div class="card"><h3>7. Push to the project vault</h3>
+        <div class="card"><h3>6. Push to the project vault</h3>
           <p class="note">Check conflicts first and choose a side for each. Push merges into
             the project vault as it is now, runs the question sets ticked under Benchmark on
             the merged result, and writes only when no question regresses and the score is
@@ -3746,6 +3748,7 @@ async function loadKnowledge() {
     const option = document.createElement("option"); option.value = name;
     option.append(text(name)); base.append(option);
   }
+  await kpLoadScopes();
   const listed = await pipeline("sandbox-list");
   const box = el("kp-sandboxes"); box.replaceChildren();
   if (!listed.sandboxes.length) box.append(text("No sandbox yet."));
@@ -3758,13 +3761,30 @@ async function loadKnowledge() {
   }
 }
 
+async function kpLoadScopes() {
+  // A sandbox maintains one folder of the project vault (owner, 2026-10-13).
+  const pick = el("kp-scope"); pick.replaceChildren();
+  if (!el("kp-base").value) return;
+  const folders = await pipeline("drop-folders", {base: el("kp-base").value});
+  const first = document.createElement("option"); first.value = "";
+  first.append(text("Folder to maintain\u2026")); pick.append(first);
+  for (const folder of folders.folders) {
+    const option = document.createElement("option"); option.value = folder.path;
+    option.append(text(folder.path)); pick.append(option);
+  }
+}
+el("kp-base").addEventListener("change", () => kpRun("Reading", kpLoadScopes));
+
 async function kpOpen(item) {
   kpSandbox = item; el("kp-box").hidden = false;
   el("kp-title").textContent = item.label + " \u2014 " + item.sandbox_id;
   const contents = await pipeline("sandbox-contents", {sandbox_id: item.sandbox_id});
   el("kp-drop").replaceChildren(table(["Original in drop"], contents.drop, (row) => [row]));
   const raw = el("kp-raw"); raw.replaceChildren();
-  raw.append(table(["", "Raw document", "", ""], contents.raw, (row) => {
+  const rawRefs = item.scope ? contents.raw.filter((ref) =>
+    ref.startsWith("raw/" + item.scope + "/")) : contents.raw;
+  el("kp-scope-name").textContent = item.scope || "whole vault (older sandbox)";
+  raw.append(table(["", "Raw document", "", ""], rawRefs, (row) => {
     const tick = document.createElement("input"); tick.type = "checkbox";
     tick.className = "kp-raw-tick"; tick.value = row; tick.setAttribute("aria-label", row);
     tick.addEventListener("change", kpRawCount);
@@ -3774,14 +3794,15 @@ async function kpOpen(item) {
         () => kpPlan(row)))];
   }));
   const folders = new Set();
-  for (const ref of contents.raw) {
+  for (const ref of rawRefs) {
     const parts = ref.split("/").slice(0, -1);
     for (let n = 2; n <= parts.length; n++) folders.add(parts.slice(0, n).join("/"));
   }
   const pick = el("kp-raw-folder"); pick.replaceChildren();
-  for (const folder of ["raw", ...[...folders].sort()]) {
+  const top = item.scope ? "raw/" + item.scope : "raw";
+  for (const folder of [top, ...[...folders].filter((f) => f !== top).sort()]) {
     const option = document.createElement("option"); option.value = folder;
-    option.append(text(folder === "raw" ? "raw (all)" : folder)); pick.append(option);
+    option.append(text(folder === top ? folder + " (all)" : folder)); pick.append(option);
   }
   kpRawCount();
   await kpReingestShow();
@@ -3837,15 +3858,21 @@ function kpTicked(box) {
 async function kpLoadPull() {
   const folders = await pipeline("drop-folders", {base: kpSandbox.base_name});
   const pick = el("kp-category"); pick.replaceChildren();
-  for (const [value, label] of [["", "(no category)"], ...folders.folders
-      .filter((f) => !f.path.includes("/")).map((f) => [f.path, f.path])]) {
+  const categories = kpSandbox.scope ? [[kpSandbox.scope, kpSandbox.scope]]
+    : [["", "(no category)"], ...folders.folders.filter((f) => !f.path.includes("/"))
+      .map((f) => [f.path, f.path])];
+  for (const [value, label] of categories) {
     const option = document.createElement("option"); option.value = value;
     option.append(text(label)); pick.append(option);
   }
-  kpChecks(el("kp-pull-folders"), folders.folders.map((f) =>
-    [f.path, f.path + " (" + f.files + " files)"]), []);
-  if (!folders.folders.length) {
-    el("kp-pull-folders").append(text("The project vault's drop is empty."));
+  const scope = kpSandbox.scope;
+  const inScope = folders.folders.filter((f) => !scope || f.path === scope
+    || f.path.startsWith(scope + "/"));
+  kpChecks(el("kp-pull-folders"), inScope.map((f) =>
+    [f.path, f.path + " (" + f.files + " files)"]), scope ? [scope] : []);
+  if (!inScope.length) {
+    el("kp-pull-folders").append(text(scope ? "The project vault's drop has no " + scope
+      + " folder yet." : "The project vault's drop is empty."));
   }
 }
 
@@ -3929,26 +3956,40 @@ let kpRulePath = null;
 async function kpLoadRules() {
   const rules = await pipeline("rule-files", {sandbox_id: kpSandbox.sandbox_id});
   const box = el("kp-rules"); box.replaceChildren();
-  box.append(table(["Rule file", ""], rules.files, (path) => [path,
-    kpButton("Edit", () => kpRun("Reading", async () => {
-      const file = await pipeline("file-read", {sandbox_id: kpSandbox.sandbox_id, path});
-      kpRulePath = path; el("kp-rule-editor").hidden = false;
-      el("kp-rule-path").textContent = path; el("kp-rule-text").value = file.text;
-      kpRuleSaved = file.text; kpTab("md");
-    }))]));
+  const roles = {ingest: "how its data becomes wiki pages", answer: "how its questions are "
+    + "answered", schema: "the whole vault's schema"};
+  const access = {edit: "", inherited: "general layer, read only", shared: "shared, read only"};
+  box.append(table(["Rule file", "What it decides", ""], rules.rules, (rule) => [
+    rule.path, roles[rule.kind] + (access[rule.access] ? " (" + access[rule.access] + ")" : ""),
+    rule.access === "edit"
+      ? kpButton("Edit", () => kpRun("Reading", async () => {
+          const file = await pipeline("file-read",
+                                      {sandbox_id: kpSandbox.sandbox_id, path: rule.path});
+          kpRulePath = rule.path; el("kp-rule-editor").hidden = false;
+          el("kp-rule-path").textContent = rule.path; el("kp-rule-text").value = file.text;
+          kpRuleSaved = file.text; kpTab("md");
+        }))
+      : kpButton("View", () => kpRun("Reading", () => kpShowFile(rule.path)))]));
+  const scope = rules.scope;
+  const slug = (scope || "").split("/").pop().toLowerCase().replace(/[^a-z0-9._-]+/g, "-");
   const guide = await pipeline("skill-guide", {});
   const add = kpButton("New skill", () => {
-    const name = (prompt("Skill folder name: ingest-<category> for processing data, "
-      + "ask-<topic> for answering, e.g. ingest-competitor") || "").trim();
+    const suggested = scope && !rules.rules.some((r) => r.kind === "ingest"
+      && r.access === "edit") ? "ingest-" + slug : (scope ? "ask-" + slug : "");
+    const name = (prompt("Skill folder name: ingest-<name> for processing data, "
+      + "ask-<name> for answering" + (scope ? "; it applies to raw/" + scope : ""),
+      suggested) || "").trim();
     if (!/^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(name)) return;
     const answering = name.startsWith("ask-");
-    const category = answering ? "" : name.replace(/^ingest-/, "");
+    const category = scope || name.replace(/^(ingest|ask)-/, "");
     kpRulePath = "skills/" + name + "/SKILL.md"; el("kp-rule-editor").hidden = false;
     el("kp-rule-path").textContent = kpRulePath;
     kpRuleSaved = ""; kpTab("md");
     el("kp-rule-text").value = (answering ? guide.answer_template : guide.ingest_template)
       .replaceAll("ingest-<category>", name).replaceAll("ask-knowledge", name)
-      .replaceAll("<Category>", category.charAt(0).toUpperCase() + category.slice(1));
+      .replaceAll("raw/<Category>", "raw/" + category)
+      .replaceAll("raw/Knowledge", "raw/" + category)
+      .replaceAll("<Category>", category);
   });
   const help = kpButton("Writing guide", () => kpViewer("Skill writing guide",
                                                         renderMarkdown(guide.guide)));
@@ -4132,8 +4173,10 @@ el("kp-refresh").addEventListener("click", () => kpRun("Reading", loadKnowledge)
 el("kp-new").addEventListener("submit", (event) => {
   event.preventDefault();
   kpRun("Creating the sandbox (copying the base vault)", async () => {
-    const made = await pipeline("sandbox-create",
-      {base: el("kp-base").value, label: el("kp-label").value.trim()});
+    if (!el("kp-scope").value) { kpStatus("Choose the folder this sandbox maintains.", true);
+      return; }
+    const made = await pipeline("sandbox-create", {base: el("kp-base").value,
+      label: el("kp-label").value.trim(), scope: el("kp-scope").value});
     el("kp-label").value = ""; await loadKnowledge(); await kpOpen(made);
   });
 });
@@ -4174,7 +4217,7 @@ el("kp-pull").addEventListener("click", () => kpRun("Pulling", async () => {
   const folders = kpTicked(el("kp-pull-folders"));
   if (!folders.length) { kpStatus("Choose at least one folder.", true); return; }
   const pulled = await pipeline("pull", {sandbox_id: kpSandbox.sandbox_id, folders});
-  const parts = [pulled.copied.length + " new original(s) copied to drop (convert them in step 3)"];
+  const parts = [pulled.copied.length + " new original(s) copied to drop (convert them in step 2)"];
   if (pulled.already_in_sandbox.length) {
     parts.push(pulled.already_in_sandbox.length + " already in this sandbox's drop");
   }
@@ -4182,12 +4225,12 @@ el("kp-pull").addEventListener("click", () => kpRun("Pulling", async () => {
   if (pulled.already_ingested.length) {
     parts.push(pulled.already_ingested.length + " already ingested: their Raw ("
       + pulled.already_raw.length + " document(s)) is already in this sandbox, so they are "
-      + "not pulled again. To try changed rules on them, re-ingest them in step 4");
+      + "not pulled again. To try changed rules on them, re-ingest them in step 3");
   }
   await kpOpen(kpSandbox);
   const box = el("kp-pull-result"); box.replaceChildren(text(parts.join("; ") + ". "));
   if (pulled.already_raw.length) {
-    box.append(kpButton("Tick them in step 4", () => {
+    box.append(kpButton("Tick them in step 3", () => {
       kpRawTick(pulled.already_raw);
       el("kp-raw").scrollIntoView({block: "start"});
     }));

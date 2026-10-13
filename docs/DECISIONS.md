@@ -2318,3 +2318,16 @@ would change that architecture and is only needed when the converter itself chan
 which vault skills do not control. Left for the owner to decide.
 Rejected: re-ingesting everything automatically after each rule save (hours of model
 calls, many shared pages changed at once, more push conflicts).
+
+## 2026-10-13: A sandbox maintains one folder and edits only its rules
+
+Decision (owner): merge Pull and Rules into one Knowledge-page step. The scope is one
+project-vault folder chosen when the sandbox is created; Pull accepts only it and its
+sub-folders. Its ingest and answer skills (by `applies_to`; legacy answer skills by the
+name `ask-<folder>`) are editable; more general layers and `CLAUDE.md` are read only;
+other folders' skills are hidden. The pipeline refuses out-of-scope rule writes. Answer
+skills may now carry `applies_to` to name their owning folder; ingest rule layering
+ignores answer skills. Design: `docs/phases/KNOWLEDGE_COLLAB.md` section 4.
+Rejected: listing every skill for every sandbox (unclear ownership, edits to other
+domains' rules), and making the general layer editable from a product-line sandbox
+(changes every product line).

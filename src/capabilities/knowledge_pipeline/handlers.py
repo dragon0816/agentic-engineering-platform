@@ -113,10 +113,10 @@ class SandboxCreateHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = SandboxCreateRequest.model_validate(inputs)
         info = await _run(lambda: self.pipeline.create_sandbox(
-            request.base, request.label, context.actor, request.domain))
+            request.base, request.label, context.actor, request.domain, request.scope))
         return SandboxRecord(sandbox_id=info.sandbox_id, base_name=info.base_name,
                              label=info.label, created_by=info.created_by,
-                             created_at=info.created_at)
+                             created_at=info.created_at, scope=info.scope)
 
 
 class SandboxListHandler:
@@ -128,7 +128,8 @@ class SandboxListHandler:
         found = await _run(self.pipeline.sandboxes.list)
         return SandboxList(sandboxes=tuple(
             SandboxRecord(sandbox_id=i.sandbox_id, base_name=i.base_name, label=i.label,
-                          created_by=i.created_by, created_at=i.created_at) for i in found))
+                          created_by=i.created_by, created_at=i.created_at, scope=i.scope)
+            for i in found))
 
 
 class ConvertHandler:

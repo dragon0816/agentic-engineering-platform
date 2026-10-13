@@ -1810,3 +1810,10 @@ s-k-20261011T102952` (not published).
   on hold. Owner: collect a week of shadow data and review before anything is built.
   The weekly-report probe wrote values identical to the owner's 2026-10-12 run (all 85
   sheets compared); no restore needed.
+- [x] One folder per sandbox (owner, 2026-10-13): Pull and Rules merged into "1. Scope and
+  rules"; the scope is chosen at creation (`sandbox.json` `scope`); pull only below it;
+  rules listed by `applies_to` (folder's ingest and answer skills editable, general layers
+  and `CLAUDE.md` read only, others hidden); out-of-scope rule writes refused
+  (`rule_outside_scope`); answer skills may carry `applies_to`; Raw, re-ingest and upload
+  limited to the scope. Design in `docs/phases/KNOWLEDGE_COLLAB.md` section 4. Full suite
+  2548 passed, 6 skipped; headless check on `sb-scope-check-fe64bb` (scope Knowledge).

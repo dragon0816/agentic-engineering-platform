@@ -2,6 +2,7 @@
 name: ask-knowledge
 description: How to answer technical questions from this knowledge base (standards, measurement principles, technologies, R&S products and options). Applies to every question; edit it to change how answers are judged and written.
 mode: answer
+applies_to: raw/Knowledge
 ---
 
 # ask-knowledge
