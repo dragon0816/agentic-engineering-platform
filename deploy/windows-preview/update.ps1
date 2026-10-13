@@ -1,6 +1,8 @@
 param(
     [string]$PythonExe = "python",
-    [string]$InstallRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\preview-0.1.0"
+    [string]$InstallRoot = "$env:LOCALAPPDATA\AgenticEngineeringPlatform\preview-0.1.0",
+    # Leave the desktop and Start menu shortcuts as they are.
+    [switch]$NoShortcut
 )
 # Update an existing installation from this bundle. The person, the Bridge ID,
 # host.json and the workspace are kept: install.ps1 rewrites only the device
@@ -36,5 +38,5 @@ if (Test-Path -LiteralPath $Previous) {
     Write-Host "Installed revision before the update: $From"
 }
 & (Join-Path $PSScriptRoot "install.ps1") -Actor $Actor -BridgeId $BridgeId `
-    -PythonExe $PythonExe -InstallRoot $InstallRoot
+    -PythonExe $PythonExe -InstallRoot $InstallRoot -NoShortcut:$NoShortcut
 Write-Host "Updated. Open Agent Web again with the 'AEP Agent' shortcut or start-web.cmd."

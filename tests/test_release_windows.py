@@ -38,6 +38,7 @@ def test_colleagues_get_a_manual_and_double_click_scripts() -> None:
     update = (TEMPLATE / "update.ps1").read_text(encoding="utf-8")
     assert "registered_by" in update and "bridge_id" in update  # nothing to retype
     assert "install.ps1" in update
+    assert "-NoShortcut:$NoShortcut" in update  # a test install never takes over the shortcut
     installer = (TEMPLATE / "install.ps1").read_text(encoding="utf-8")
     assert "shortcut --config" in installer and "$NoShortcut" in installer
     for name in ("install.cmd", "update.cmd", "start-web.cmd"):
