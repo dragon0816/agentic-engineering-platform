@@ -1841,7 +1841,10 @@ s-k-20261011T102952` (not published).
   with document and picture progress and Stop; every Knowledge step shows how long it
   has been running. Cause: five decks held 248 pictures, so one convert request outlived
   the 600 s Bridge step limit and the page heard nothing. Live Preview on `test_kn`
-  showed per-document progress. Full suite passed.
+  showed per-document progress. Full suite: 2566 passed, 1 failed
+  (`test_application_catalog.py::test_application_endpoint_requires_a_member_session_and_filters_namespace`,
+  `ConnectionAbortedError` while Agent Web restarted and a browser check ran; passed 3/3 alone,
+  code untouched by this change: another load-sensitive test, like the two browser ones).
 - [ ] Experience review E3-E5 (owner chose the full version, 2026-10-13): Reviews page,
   proposal actions (accept into a sandbox / reject / snooze), outcome tracking.
 - [ ] Task list (owner, 2026-10-13): the Agent's tasks, finished and running, newest 50.
