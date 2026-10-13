@@ -1865,3 +1865,11 @@ s-k-20261011T102952` (not published).
   experience review) recorded in `workspace/tasks.json`; newest 50; running ones refresh;
   a job still running at a restart shows as interrupted; busy-file writes are retried.
   Live: 50 Workflow runs listed. Full suite 2573 passed, 6 skipped.
+- [x] Ingest list and preview side by side (owner, 2026-10-13): the Raw list sits on the
+  right, the clicked document shows on the left (no Preview buttons, the page does not
+  jump; Compare shows there too), Plan ingest acts on the shown document; Raw a convert
+  just wrote is ticked and green; Up/Down move, Shift+Up/Down tick a range, Space ticks,
+  Ctrl+A and an All box tick every listed document; "Ingest ticked" runs them. Headless
+  check passed. Full suite: 2578 passed, 1 failed
+  (`test_telegram_ingress.py::test_the_loop_stops_on_what_will_not_fix_itself_and_backs_off_otherwise`,
+  untouched by this page-only change; passed 3/3 alone: load-sensitive, like the others).

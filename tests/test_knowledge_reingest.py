@@ -85,3 +85,13 @@ def test_the_page_offers_re_ingest_and_explains_pull() -> None:
     for hook in ('id="kp-reingest"', 'id="kp-reingest-stop"', 'id="kp-raw-folder"',
                  "/api/knowledge/reingest/start", "already_raw", "Tick them in step 3"):
         assert hook in PAGE
+
+
+def test_the_ingest_list_previews_on_click_and_ticks_with_keys() -> None:
+    # Owner 2026-10-13: the document shows beside the list (no Preview button, no jump),
+    # new Raw from a convert is ticked and green, keys move and tick, one box ticks all.
+    for hook in ('id="kp-doc"', 'id="kp-plan-one"', 'id="kp-raw-all"', 'class="kp-filelist"',
+                 '"ArrowDown"', "event.shiftKey", "kpNewRaw", ".kp-file.kp-new span",
+                 "Ingest ticked"):
+        assert hook in PAGE
+    assert 'id="kp-raw-tick"' not in PAGE and 'id="kp-raw-clear"' not in PAGE

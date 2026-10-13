@@ -188,6 +188,27 @@ body {
 .laya-grid label { display: flex; flex-direction: column; gap: 2px; }
 .settings .laya-check { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
 .settings .laya-check input { width: auto; margin: 0; flex: none; }
+.kp-ingest { display: flex; gap: 12px; align-items: stretch; height: 70vh; min-height: 380px; }
+.kp-ingest-main { flex: 2 1 0; min-width: 0; display: flex; flex-direction: column;
+  border: 1px solid var(--line, #ddd); border-radius: 6px; background: var(--panel, #fff); }
+.kp-ingest-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+  border-bottom: 1px solid var(--line, #ddd); }
+.kp-ingest-head strong { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis;
+  white-space: nowrap; }
+#kp-plan:empty { display: none; }
+#kp-plan { padding: 6px 10px; border-bottom: 1px solid var(--line, #ddd); max-height: 40%;
+  overflow: auto; }
+.kp-doc { flex: 1; overflow: auto; padding: 8px 14px; max-height: none; }
+.kp-ingest-side { flex: 1 1 0; min-width: 220px; display: flex; flex-direction: column; }
+.kp-filelist { position: relative; flex: 1; overflow: auto; border: 1px solid var(--line, #ddd);
+  border-radius: 6px; background: var(--panel, #fff); outline: none; }
+.kp-filelist:focus { box-shadow: 0 0 0 2px var(--accent-soft, #c9d8f5); }
+.kp-file { display: flex; align-items: center; gap: 6px; padding: 3px 8px; cursor: pointer;
+  white-space: nowrap; }
+.kp-file span { overflow: hidden; text-overflow: ellipsis; }
+.kp-file:hover { background: var(--soft, #f4f6fa); }
+.kp-file.kp-focus { background: var(--accent-soft, #dbe8f7); }
+.kp-file.kp-new span { color: #137333; font-weight: 600; }
 .kp-add { background: #e6f4ea; color: #137333; }
 .kp-del { background: #fce8e6; color: #a50e0e; }
 .kp-same { opacity: 0.7; }
@@ -1053,20 +1074,35 @@ tr:last-child td { border-bottom: none; }
             <span id="kp-convert-text" class="note"></span></div>
           <div id="kp-converted"></div></div>
         <div class="card"><h3>3. Ingest</h3>
-          <p class="note">Plan ingest on a Raw document, Compare each page, then apply.
-            After changing the rules, tick Raw documents (or a whole folder) and re-ingest
-            them with the current rules; nothing needs to be pulled again.</p>
+          <p class="note">Click a Raw document on the right to read it here; Plan ingest it,
+            or tick several and ingest them together with the current rules. Keys in the list:
+            &uarr;&darr; move, Shift+&uarr;&darr; tick a range, Space ticks one. Documents a
+            convert just made are ticked and shown in green.</p>
+          <div class="kp-ingest">
+            <section class="kp-ingest-main">
+              <div class="kp-ingest-head"><strong id="kp-doc-title">Choose a Raw document on
+                the right.</strong>
+                <button class="go" id="kp-plan-one" type="button" hidden>Plan ingest</button>
+                <button id="kp-doc-back" type="button" hidden>Back to the document</button></div>
+              <div id="kp-plan"></div>
+              <div id="kp-doc" class="kp-markdown kp-doc"></div>
+            </section>
+            <section class="kp-ingest-side">
+              <div class="kp-actions">
+                <label class="kp-check"><input type="checkbox" id="kp-raw-all"
+                  aria-label="Tick or untick every listed document"> All</label>
+                <select id="kp-raw-folder" aria-label="Raw folder to list"></select>
+              </div>
+              <div id="kp-raw" class="kp-filelist" tabindex="0" role="listbox"
+                   aria-multiselectable="true" aria-label="Raw documents"></div>
+              <p class="note" id="kp-raw-count"></p>
+            </section>
+          </div>
           <div class="kp-actions">
-            <select id="kp-raw-folder" aria-label="Raw folder to tick"></select>
-            <button id="kp-raw-tick" type="button">Tick folder</button>
-            <button id="kp-raw-clear" type="button">Clear ticks</button>
-            <button class="go" id="kp-reingest" type="button">Re-ingest ticked</button>
-            <button id="kp-reingest-stop" type="button" hidden>Stop</button>
-            <span class="note" id="kp-raw-count"></span></div>
+            <button class="go" id="kp-reingest" type="button">Ingest ticked</button>
+            <button id="kp-reingest-stop" type="button" hidden>Stop</button></div>
           <div class="note" id="kp-reingest-state"></div>
-          <div id="kp-reingest-result"></div>
-          <div id="kp-raw" class="kp-list"></div>
-          <div id="kp-plan" class="empty">Choose Plan ingest on a Raw document.</div></div>
+          <div id="kp-reingest-result"></div></div>
         <div class="card"><h3>4. Lint</h3>
           <div class="kp-actions"><button id="kp-lint" type="button">Run lint</button></div>
           <div id="kp-lint-result"></div></div>
@@ -4157,6 +4193,12 @@ async function kpLoadScopes() {
 el("kp-base").addEventListener("change", () => kpRun("Reading", kpLoadScopes));
 
 async function kpOpen(item) {
+  if (!kpSandbox || kpSandbox.sandbox_id !== item.sandbox_id) {
+    kpNewRaw = new Set(); kpFocus = null; kpAnchor = null;
+    el("kp-doc").replaceChildren(); el("kp-plan").replaceChildren();
+    el("kp-doc-title").textContent = "Choose a Raw document on the right.";
+    el("kp-plan-one").hidden = true; el("kp-doc-back").hidden = true;
+  }
   kpSandbox = item; el("kp-box").hidden = false;
   el("kp-title").textContent = item.label + " \u2014 " + item.sandbox_id;
   kpStatus("Opening the sandbox: its files (1/5)\u2026");
@@ -4167,21 +4209,27 @@ async function kpOpen(item) {
     ref.startsWith("raw/" + item.scope + "/")) : contents.raw;
   el("kp-scope-name").textContent = item.scope || "whole vault (older sandbox)";
   await kpReviewBanner(item);
-  raw.append(table(["", "Raw document", "", ""], rawRefs, (row) => {
+  const prefix = item.scope ? "raw/" + item.scope + "/" : "raw/";
+  for (const ref of rawRefs) {
+    const row = document.createElement("div"); row.className = "kp-file";
+    row.dataset.ref = ref; row.setAttribute("role", "option"); row.title = ref;
     const tick = document.createElement("input"); tick.type = "checkbox";
-    tick.className = "kp-raw-tick"; tick.value = row; tick.setAttribute("aria-label", row);
-    tick.addEventListener("change", kpRawCount);
-    return [tick, row,
-      kpButton("Preview", () => kpRun("Reading", () => kpShowFile(row))),
-      kpButton("Plan ingest", () => kpRun("Planning ingest (this asks the model)",
-        () => kpPlan(row)))];
-  }));
+    tick.className = "kp-raw-tick"; tick.value = ref; tick.setAttribute("aria-label", ref);
+    tick.tabIndex = -1;
+    const name = document.createElement("span");
+    name.append(text(ref.startsWith(prefix) ? ref.slice(prefix.length) : ref));
+    row.append(tick, name); raw.append(row);
+  }
+  if (!rawRefs.length) raw.append(text("No Raw documents yet: convert originals in step 2."));
+  kpMarkNew();
+  if (kpFocus && !rawRefs.includes(kpFocus)) kpFocus = null;
+  kpShowFocus();
   const folders = new Set();
   for (const ref of rawRefs) {
     const parts = ref.split("/").slice(0, -1);
     for (let n = 2; n <= parts.length; n++) folders.add(parts.slice(0, n).join("/"));
   }
-  const pick = el("kp-raw-folder"); pick.replaceChildren();
+  const pick = el("kp-raw-folder"); pick.replaceChildren(); kpRawFilter();
   const top = item.scope ? "raw/" + item.scope : "raw";
   for (const folder of [top, ...[...folders].filter((f) => f !== top).sort()]) {
     const option = document.createElement("option"); option.value = folder;
@@ -4334,7 +4382,9 @@ async function kpShowPlanPage(planId, path) {
   const summary = document.createElement("summary");
   summary.append(text("The page after apply")); full.append(summary, renderMarkdown(page.after));
   box.append(full);
-  kpViewer(path + " \u2014 planned change", box);
+  el("kp-doc-title").textContent = path + " \u2014 planned change";
+  el("kp-doc-back").hidden = false;
+  el("kp-doc").replaceChildren(box); el("kp-doc").scrollTop = 0;
 }
 
 let kpRulePath = null;
@@ -4435,6 +4485,8 @@ async function kpConvertShow() {
     kpConvertTimer = setTimeout(() => kpConvertShow().catch(() => {}), 1500);
   } else if (run.mode === "apply" && kpConvertWatching === run.run_id) {
     kpConvertWatching = null;  // it just ended: the new Raw appears in step 3
+    kpNewRaw = new Set(run.items.filter((i) => ["written", "drifted"].includes(i.status)
+      && i.raw_ref).map((i) => i.raw_ref));
     await kpOpen(kpSandbox);
   }
 }
@@ -4486,6 +4538,10 @@ function kpRawTicked() {
 }
 
 function kpRawCount() {
+  const rows = kpRows(), ticked = rows.filter((r) => r.querySelector(".kp-raw-tick").checked);
+  const all = el("kp-raw-all");
+  all.checked = rows.length > 0 && ticked.length === rows.length;
+  all.indeterminate = ticked.length > 0 && ticked.length < rows.length;
   const n = kpRawTicked().length;
   el("kp-raw-count").textContent = n ? n + " ticked, about "
     + Math.max(1, Math.round(n * KP_SECONDS_PER_DOC / 60)) + " min" : "";
@@ -4569,16 +4625,121 @@ function kpReview(item) {
   box.scrollIntoView({block: "nearest"});
 }
 
-el("kp-raw-tick").addEventListener("click", () => {
-  const folder = el("kp-raw-folder").value + "/";
-  kpRawTick([...document.querySelectorAll("#kp-raw .kp-raw-tick")]
-    .map((t) => t.value).filter((ref) => ref.startsWith(folder)));
+// -- The Raw list (owner 2026-10-13): click to read, keys to move and tick ------
+let kpFocus = null, kpAnchor = null, kpNewRaw = new Set(), kpDocTimer = null;
+
+function kpRows() {
+  return [...document.querySelectorAll("#kp-raw .kp-file")].filter((row) => !row.hidden);
+}
+
+function kpRawFilter() {
+  const folder = (el("kp-raw-folder").value || "raw") + "/";
+  for (const row of document.querySelectorAll("#kp-raw .kp-file")) {
+    row.hidden = !row.dataset.ref.startsWith(folder);
+  }
+  kpRawCount();
+}
+
+function kpMarkNew() {
+  for (const row of document.querySelectorAll("#kp-raw .kp-file")) {
+    const fresh = kpNewRaw.has(row.dataset.ref);
+    row.classList.toggle("kp-new", fresh);
+    if (fresh) row.querySelector(".kp-raw-tick").checked = true;
+  }
+  kpRawCount();
+}
+
+function kpShowFocus() {
+  for (const row of document.querySelectorAll("#kp-raw .kp-file")) {
+    const on = row.dataset.ref === kpFocus;
+    row.classList.toggle("kp-focus", on); row.setAttribute("aria-selected", String(on));
+    if (on) {
+      // Scroll the list only, never the page, so the document stays where it is.
+      const list = el("kp-raw"), top = row.offsetTop;  // the list is position: relative
+      if (top < list.scrollTop) list.scrollTop = top;
+      else if (top + row.offsetHeight > list.scrollTop + list.clientHeight) {
+        list.scrollTop = top + row.offsetHeight - list.clientHeight;
+      }
+    }
+  }
+}
+
+function kpFocusOn(ref, show = true) {
+  kpFocus = ref; kpShowFocus();
+  if (!show) return;
+  clearTimeout(kpDocTimer);  // holding an arrow key reads only where it stops
+  kpDocTimer = setTimeout(() => kpDocShow(ref).catch((failure) => {
+    el("kp-doc").replaceChildren(text("Not readable: " + (failure.code || failure.message)));
+  }), 200);
+}
+
+async function kpDocShow(ref) {
+  el("kp-doc-title").textContent = ref; el("kp-plan-one").hidden = false;
+  el("kp-doc-back").hidden = true; el("kp-doc").replaceChildren(text("Reading\u2026"));
+  const file = await pipeline("file-read", {sandbox_id: kpSandbox.sandbox_id, path: ref});
+  if (kpFocus !== ref) return;
+  el("kp-doc").replaceChildren(renderMarkdown(file.text)); el("kp-doc").scrollTop = 0;
+}
+
+function kpTickRange(from, to) {
+  const rows = kpRows(), a = rows.findIndex((r) => r.dataset.ref === from);
+  const b = rows.findIndex((r) => r.dataset.ref === to);
+  if (a < 0 || b < 0) return;
+  for (const row of rows.slice(Math.min(a, b), Math.max(a, b) + 1)) {
+    row.querySelector(".kp-raw-tick").checked = true;
+  }
+  kpRawCount();
+}
+
+el("kp-raw").addEventListener("click", (event) => {
+  const row = event.target.closest(".kp-file");
+  if (!row) return;
+  const ref = row.dataset.ref;
+  if (event.target.classList.contains("kp-raw-tick")) {
+    if (event.shiftKey && kpAnchor) kpTickRange(kpAnchor, ref);
+    kpAnchor = ref; kpFocusOn(ref, false); kpRawCount(); return;
+  }
+  if (event.shiftKey && kpAnchor) { kpTickRange(kpAnchor, ref); kpFocusOn(ref); return; }
+  kpAnchor = ref; kpFocusOn(ref); el("kp-raw").focus();
 });
-el("kp-raw-clear").addEventListener("click", () => {
-  for (const tick of document.querySelectorAll("#kp-raw .kp-raw-tick")) tick.checked = false;
+
+el("kp-raw").addEventListener("keydown", (event) => {
+  const rows = kpRows();
+  if (!rows.length) return;
+  let at = rows.findIndex((r) => r.dataset.ref === kpFocus);
+  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    event.preventDefault();
+    at = at < 0 ? 0 : Math.max(0, Math.min(rows.length - 1,
+                                            at + (event.key === "ArrowDown" ? 1 : -1)));
+    const ref = rows[at].dataset.ref;
+    if (event.shiftKey) {
+      if (!kpAnchor) kpAnchor = kpFocus || ref;
+      kpTickRange(kpAnchor, ref);
+    } else {
+      kpAnchor = ref;
+    }
+    kpFocusOn(ref);
+  } else if (event.key === " " && at >= 0) {
+    event.preventDefault();
+    const tick = rows[at].querySelector(".kp-raw-tick"); tick.checked = !tick.checked;
+    kpAnchor = kpFocus; kpRawCount();
+  } else if ((event.key === "a" || event.key === "A") && (event.ctrlKey || event.metaKey)) {
+    event.preventDefault();
+    for (const row of rows) row.querySelector(".kp-raw-tick").checked = true;
+    kpRawCount();
+  }
+});
+
+el("kp-raw-all").addEventListener("change", () => {
+  for (const row of kpRows()) row.querySelector(".kp-raw-tick").checked = el("kp-raw-all").checked;
   kpRawCount();
 });
-el("kp-reingest").addEventListener("click", () => kpRun("Starting the re-ingest", async () => {
+el("kp-raw-folder").addEventListener("change", kpRawFilter);
+el("kp-plan-one").addEventListener("click", () => {
+  if (kpFocus) kpRun("Planning ingest (this asks the model)", () => kpPlan(kpFocus));
+});
+el("kp-doc-back").addEventListener("click", () => { if (kpFocus) kpFocusOn(kpFocus); });
+el("kp-reingest").addEventListener("click", () => kpRun("Starting the ingest", async () => {
   const refs = kpRawTicked();
   if (!refs.length) { kpStatus("Tick at least one Raw document.", true); return; }
   await kpReingestStart(refs);
