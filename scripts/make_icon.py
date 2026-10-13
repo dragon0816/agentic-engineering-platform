@@ -1,4 +1,4 @@
-"""Make the AEP Agent shortcut icon from a square PNG (owner, 2026-10-13).
+r"""Make the AEP Agent shortcut icon from a square PNG (owner, 2026-10-13).
 
     .venv\Scripts\python.exe scripts\make_icon.py <icon.png>
 
