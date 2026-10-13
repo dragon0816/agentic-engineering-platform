@@ -2342,3 +2342,14 @@ prompts) and reopens it when it drops. Host and account are validated names plac
 `--`/`-l`, so they cannot inject ssh options.
 Rejected: accepting a plaintext LAN endpoint (the loopback-or-HTTPS rule stays); storing
 an SSH password (keys only).
+
+## 2026-10-13: Releases for colleagues are built from the committed revision
+
+Decision (owner request): one command (`scripts\release.cmd`) makes a deliverable release:
+verification, then the platform wheel and the bundle's scripts and manuals from
+`git archive HEAD`, the CI dependency list for 64-bit Windows Python 3.12, the existing
+hash-verified bundle builder, and a release folder with release notes since the previous
+release. Updates use `update.cmd`, which reuses the installed user and Bridge ID and keeps
+host.json and the workspace. Rejected: building from the working tree (uncommitted changes
+would ship under a revision that does not contain them); a self-extracting .exe (the zip
+with `install.cmd` already installs offline and keeps the per-file hash check).

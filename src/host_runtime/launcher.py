@@ -171,6 +171,10 @@ def open_agent(
         f"agent-web-*.err.log in {workspace_root / 'logs'}")
 
 
+#: The AEP Agent icon the shortcuts show; scripts/make_icon.py makes it from a PNG.
+SHORTCUT_ICON = Path(__file__).parent / "icons" / "aep-agent.ico"
+
+
 def create_shortcuts(config_path: Path, port: int = DEFAULT_PORT) -> list[Path]:
     """Desktop and Start menu shortcuts running `aep-host open` without a window."""
     if sys.platform != "win32":
@@ -193,11 +197,13 @@ def create_shortcuts(config_path: Path, port: int = DEFAULT_PORT) -> list[Path]:
             "$s = (New-Object -ComObject WScript.Shell).CreateShortcut($env:AEP_LINK); "
             "$s.TargetPath = $env:AEP_TARGET; $s.Arguments = $env:AEP_ARGS; "
             "$s.WorkingDirectory = $env:AEP_DIR; $s.Description = 'Open AEP Agent Web'; "
+            "if ($env:AEP_ICON) { $s.IconLocation = $env:AEP_ICON + ',0' }; "
             "$s.Save()"
         )
         # Values travel in the environment, so no path is ever parsed as script.
         env = {**os.environ, "AEP_LINK": str(link), "AEP_TARGET": str(target),
-               "AEP_ARGS": arguments, "AEP_DIR": str(config_path.resolve().parent)}
+               "AEP_ARGS": arguments, "AEP_DIR": str(config_path.resolve().parent),
+               "AEP_ICON": str(SHORTCUT_ICON) if SHORTCUT_ICON.is_file() else ""}
         done = subprocess.run(["powershell", "-NoProfile", "-NonInteractive", "-Command", script],
                               env=env, capture_output=True, text=True, timeout=60)
         if done.returncode != 0:

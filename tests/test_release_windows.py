@@ -2,8 +2,13 @@
 
 import json
 import re
+import subprocess
 from pathlib import Path
+from typing import Any
 
+import pytest
+
+from host_runtime import launcher
 from scripts.release_windows import DEPENDENCIES, MANUAL, previous_revision, release_notes
 
 REPO = Path(__file__).resolve().parents[1]
@@ -43,3 +48,24 @@ def test_colleagues_get_a_manual_and_double_click_scripts() -> None:
     assert "shortcut --config" in installer and "$NoShortcut" in installer
     for name in ("install.cmd", "update.cmd", "start-web.cmd"):
         assert b"\r\n" in (TEMPLATE / name).read_bytes()  # batch files need CRLF
+
+
+def test_the_shortcut_carries_the_aep_icon(tmp_path: Path,
+                                           monkeypatch: pytest.MonkeyPatch) -> None:
+    seen: list[dict[str, str]] = []
+
+    def run(command: list[str], **kwargs: Any) -> subprocess.CompletedProcess[str]:
+        seen.append(dict(kwargs["env"]))
+        return subprocess.CompletedProcess(command, 0, "", "")
+
+    icon = tmp_path / "aep-agent.ico"
+    icon.write_bytes(b"ico")
+    (tmp_path / "Desktop").mkdir()
+    monkeypatch.setattr(launcher.sys, "platform", "win32")
+    monkeypatch.setattr(launcher.subprocess, "run", run)
+    monkeypatch.setattr(launcher, "SHORTCUT_ICON", icon)
+    monkeypatch.setenv("USERPROFILE", str(tmp_path))
+    monkeypatch.setenv("APPDATA", str(tmp_path / "missing"))
+    assert launcher.create_shortcuts(tmp_path / "host.json") == [
+        tmp_path / "Desktop" / "AEP Agent.lnk"]
+    assert seen[0]["AEP_ICON"] == str(icon)

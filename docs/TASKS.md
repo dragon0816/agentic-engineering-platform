@@ -1821,3 +1821,12 @@ s-k-20261011T102952` (not published).
   saved to host.json `laya` with a derived loopback `decision_accelerator`; optional
   Agent Web-managed `ssh -N` tunnel with reconnect and status (`src/host_runtime/laya.py`,
   `/api/settings/laya`). Automatic tunnel needs the remote host to accept this PC's key.
+- [x] Windows release for colleagues (owner, 2026-10-13): `scripts\release.cmd`
+  (`scripts/release_windows.py`) verifies, builds from `git archive HEAD`, downloads the
+  CI dependency list, makes the hash-verified bundle and a release folder (zip,
+  SHA256SUMS, RELEASE_NOTES, manual), optional `--publish-dir`. Bundle adds `update.cmd`
+  (keeps user, Bridge ID and settings; stops a running Agent Web), `start-web.cmd`, an
+  "AEP Agent" shortcut at install and `INSTALL.zh-TW.md`; publisher guide
+  `docs/RELEASING.zh-TW.md`. Release `20261013-1349-fd87def6` installed, updated, verified
+  and removed in a test location. Shortcut icon support (`scripts/make_icon.py`,
+  `src/host_runtime/icons/aep-agent.ico`); the owner's icon file is still to be supplied.
