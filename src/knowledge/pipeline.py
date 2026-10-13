@@ -36,6 +36,7 @@ from knowledge.merge import (
 )
 from knowledge.migrate import adopt
 from knowledge.planning import DEFAULT_CONVENTIONS, IngestPlanner
+from knowledge.progress import reporter
 from knowledge.questions import default_sets
 from knowledge.questions import load as load_questions
 from knowledge.questions import sets as question_set_counts
@@ -182,7 +183,8 @@ class KnowledgePipeline:
     # -- sandboxes -----------------------------------------------------------
 
     def create_sandbox(self, base: str, label: str, actor: str,
-                       domain: str | None = None, scope: str | None = None) -> SandboxInfo:
+                       domain: str | None = None, scope: str | None = None,
+                       progress_key: str | None = None) -> SandboxInfo:
         if base not in self.bases:
             raise PipelineError("unknown_base_vault")
         if domain is not None and domain not in KEYS:
@@ -190,7 +192,8 @@ class KnowledgePipeline:
         if scope is not None:
             scope = self._scope(base, scope)
         return self.sandboxes.create(base, self.bases[base], label=label, actor=actor,
-                                     domain=domain, scope=scope)
+                                     domain=domain, scope=scope,
+                                     progress=reporter(progress_key))
 
     def _scope(self, base: str, scope: str) -> str:
         """A folder the project vault collects (drop/) or holds (raw/)."""
@@ -224,7 +227,8 @@ class KnowledgePipeline:
                     found.append(DropFolder(path=rel.as_posix(), files=files))
         return DropFolders(base=base, folders=tuple(found))
 
-    def pull(self, sandbox_id: str, folders: tuple[str, ...]) -> PullResult:
+    def pull(self, sandbox_id: str, folders: tuple[str, ...],
+             progress_key: str | None = None) -> PullResult:
         """Copy the chosen drop/ folders of the project vault into the sandbox's
         drop/, keeping their paths. An original already ingested (same content
         hash) or already in the sandbox is skipped; nothing is replaced. The Raw
@@ -232,6 +236,8 @@ class KnowledgePipeline:
         by ingesting them again, not by pulling."""
         info, vault = self.sandboxes.open(sandbox_id)
         root = self.drop_roots[info.base_name].resolve()
+        if (early := reporter(progress_key)) is not None:
+            early("reading", 0, 0, "the sandbox's Raw index")
         known = {entry.source.sha256: entry.raw_ref for entry in RawIndex.scan(vault).entries}
         legacy = _legacy_source_shas(vault)
         copied: list[str] = []
@@ -240,6 +246,8 @@ class KnowledgePipeline:
         present: list[str] = []
         large: list[str] = []
         clean_folders = []
+        progress = reporter(progress_key)
+        chosen: list[Path] = []
         for folder in folders:
             rel = normalize(folder).strip("/")
             source = (root / rel).resolve()
@@ -250,22 +258,28 @@ class KnowledgePipeline:
             if info.scope is not None and not _within(rel, info.scope):
                 raise PipelineError("outside_scope")
             clean_folders.append(rel)
-            for path in sorted(p for p in source.rglob("*") if p.is_file()):
-                name = path.relative_to(root).as_posix()
-                data = path.read_bytes()
-                target = vault.root / "drop" / name
-                if len(data) > MAX_DROP_BYTES:
-                    large.append(name)
-                elif (raw_ref := _raw_holding(hashlib.sha256(data).hexdigest(), known,
-                                              legacy)) is not None:
-                    already.append(name)
-                    already_raw.append(raw_ref)
-                elif target.exists():
-                    present.append(name)
-                else:
-                    target.parent.mkdir(parents=True, exist_ok=True)
-                    target.write_bytes(data)
-                    copied.append(name)
+            chosen.extend(p for p in sorted(source.rglob("*")) if p.is_file())
+        originals = list(dict.fromkeys(chosen))  # nested folders name a file once
+        for index, path in enumerate(originals, 1):
+            name = path.relative_to(root).as_posix()
+            if progress is not None:
+                progress("pulling", index - 1, len(originals), name)
+            data = path.read_bytes()
+            target = vault.root / "drop" / name
+            if len(data) > MAX_DROP_BYTES:
+                large.append(name)
+            elif (raw_ref := _raw_holding(hashlib.sha256(data).hexdigest(), known,
+                                          legacy)) is not None:
+                already.append(name)
+                already_raw.append(raw_ref)
+            elif target.exists():
+                present.append(name)
+            else:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_bytes(data)
+                copied.append(name)
+        if progress is not None:
+            progress("pulling", len(originals), len(originals), "")
         pulled = tuple(dict.fromkeys((*info.pulled, *clean_folders)))
         self.sandboxes.record(info.model_copy(update={"pulled": pulled}))
         return PullResult(sandbox_id=sandbox_id, folders=pulled, copied=tuple(copied),

@@ -45,6 +45,8 @@ class SandboxCreateRequest(Contract):
     domain: Symbol | None = None  # a K2 index category, e.g. product-vna
     # The folder the sandbox maintains, e.g. Knowledge or Productions/VNA.
     scope: Text | None = Field(default=None, max_length=200)
+    # A random key the page reads progress under while the copy runs.
+    progress_key: Symbol | None = None
 
 
 class SandboxListRequest(Contract):
@@ -133,6 +135,7 @@ class DropFoldersRequest(Contract):
 class PullRequest(Contract):
     sandbox_id: Text
     folders: tuple[Text, ...] = Field(min_length=1, max_length=50)
+    progress_key: Symbol | None = None
 
 
 class FileRequest(Contract):

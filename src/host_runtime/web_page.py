@@ -161,6 +161,10 @@ body {
 .kp-ai > .kp-actions { margin: 0; padding-right: 44px; align-items: center; }
 .kp-ai #kp-assist-log { flex: 1; overflow: auto; max-height: none; min-height: 0; }
 .kp-ai #kp-assist-input { width: 100%; box-sizing: border-box; }
+.kp-progress { display: flex; align-items: center; gap: 10px; padding: 6px 10px;
+  background: var(--panel, #fff); border: 1px solid var(--line, #ddd); border-radius: 6px; }
+.kp-progress progress { flex: 0 0 260px; height: 14px; }
+.kp-progress .note { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .laya-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 8px 14px; }
 .laya-grid label { display: flex; flex-direction: column; gap: 2px; }
@@ -910,6 +914,9 @@ tr:last-child td { border-bottom: none; }
     <div id="kp-disabled" class="empty" hidden>The Knowledge pipeline is not configured on
       this machine (host.json <code>knowledge_pipeline</code>).</div>
     <div id="kp-status" class="section-status kp-sticky" role="status" aria-live="polite"></div>
+    <div id="kp-progress" class="kp-progress kp-sticky" hidden>
+      <progress id="kp-progress-bar" max="1"></progress>
+      <span id="kp-progress-text" class="note"></span></div>
     <div id="kp-main">
       <details class="card" id="xp-card"><summary><strong>Experience review</strong>
         <span class="note" id="xp-summary"></span></summary>
@@ -3817,6 +3824,38 @@ async function kpRun(label, action) {
   catch (failure) { kpStatus(label + " failed: " + (failure.code || failure.message), true); }
 }
 
+function kpKey() {
+  // A letter first: the request contracts take the key as a symbol.
+  return "p" + Array.from(crypto.getRandomValues(new Uint8Array(12)),
+                          (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function kpWithProgress(label, key, work) {
+  // Long steps (copying the vault, pulling originals) report how far they are;
+  // the bar follows them while the request runs (owner 2026-10-13).
+  const box = el("kp-progress"), bar = el("kp-progress-bar"), note = el("kp-progress-text");
+  box.hidden = false; bar.removeAttribute("value"); note.textContent = label + "\u2026";
+  let live = true;
+  (async () => {
+    while (live) {
+      try {
+        const reply = await call("/api/knowledge/progress?key=" + key);
+        const step = reply.progress;
+        if (live && step && step.total) {
+          bar.max = step.total; bar.value = step.done;
+          note.textContent = label + ": " + step.done + " / " + step.total + " files"
+            + (step.current ? " \u2014 " + step.current : "");
+        } else if (live && step) {
+          bar.removeAttribute("value");
+          note.textContent = label + ": " + (step.current || step.phase);
+        }
+      } catch (failure) { /* the step's own result reports errors */ }
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
+  })();
+  try { return await work(); } finally { live = false; box.hidden = true; }
+}
+
 function kpButton(label, action) {
   const button = document.createElement("button"); button.type = "button";
   button.append(text(label)); button.addEventListener("click", action); return button;
@@ -3887,6 +3926,7 @@ el("kp-base").addEventListener("change", () => kpRun("Reading", kpLoadScopes));
 async function kpOpen(item) {
   kpSandbox = item; el("kp-box").hidden = false;
   el("kp-title").textContent = item.label + " \u2014 " + item.sandbox_id;
+  kpStatus("Opening the sandbox: its files (1/5)\u2026");
   const contents = await pipeline("sandbox-contents", {sandbox_id: item.sandbox_id});
   el("kp-drop").replaceChildren(table(["Original in drop"], contents.drop, (row) => [row]));
   const raw = el("kp-raw"); raw.replaceChildren();
@@ -3915,10 +3955,11 @@ async function kpOpen(item) {
   }
   kpRawCount();
   await kpReingestShow();
-  await kpLoadRules();
-  await kpLoadPull();
-  await kpLoadBench();
-  await kpPushShow();
+  kpStatus("Opening the sandbox: rules (2/5)\u2026"); await kpLoadRules();
+  kpStatus("Opening the sandbox: drop folders (3/5)\u2026"); await kpLoadPull();
+  kpStatus("Opening the sandbox: question sets (4/5)\u2026"); await kpLoadBench();
+  kpStatus("Opening the sandbox: push status (5/5)\u2026"); await kpPushShow();
+  kpStatus("");
 }
 
 let kpPushTimer = null;
@@ -4284,8 +4325,10 @@ el("kp-new").addEventListener("submit", (event) => {
   kpRun("Creating the sandbox (copying the base vault)", async () => {
     if (!el("kp-scope").value) { kpStatus("Choose the folder this sandbox maintains.", true);
       return; }
-    const made = await pipeline("sandbox-create", {base: el("kp-base").value,
-      label: el("kp-label").value.trim(), scope: el("kp-scope").value});
+    const key = kpKey();
+    const made = await kpWithProgress("Copying the project vault", key, () =>
+      pipeline("sandbox-create", {base: el("kp-base").value, label: el("kp-label").value.trim(),
+                                  scope: el("kp-scope").value, progress_key: key}));
     el("kp-label").value = ""; await loadKnowledge(); await kpOpen(made);
   });
 });
@@ -4325,7 +4368,9 @@ el("kp-refresh-agent").addEventListener("click", () => kpRun("Refreshing", async
 el("kp-pull").addEventListener("click", () => kpRun("Pulling", async () => {
   const folders = kpTicked(el("kp-pull-folders"));
   if (!folders.length) { kpStatus("Choose at least one folder.", true); return; }
-  const pulled = await pipeline("pull", {sandbox_id: kpSandbox.sandbox_id, folders});
+  const key = kpKey();
+  const pulled = await kpWithProgress("Pulling originals", key, () =>
+    pipeline("pull", {sandbox_id: kpSandbox.sandbox_id, folders, progress_key: key}));
   const parts = [pulled.copied.length + " new original(s) copied to drop (convert them in step 2)"];
   if (pulled.already_in_sandbox.length) {
     parts.push(pulled.already_in_sandbox.length + " already in this sandbox's drop");

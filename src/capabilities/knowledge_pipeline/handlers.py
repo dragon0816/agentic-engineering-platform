@@ -113,7 +113,8 @@ class SandboxCreateHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = SandboxCreateRequest.model_validate(inputs)
         info = await _run(lambda: self.pipeline.create_sandbox(
-            request.base, request.label, context.actor, request.domain, request.scope))
+            request.base, request.label, context.actor, request.domain, request.scope,
+            request.progress_key))
         return SandboxRecord(sandbox_id=info.sandbox_id, base_name=info.base_name,
                              label=info.label, created_by=info.created_by,
                              created_at=info.created_at, scope=info.scope)
@@ -269,7 +270,7 @@ class PullHandler:
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         request = PullRequest.model_validate(inputs)
         result: Contract = await _run(lambda: self.pipeline.pull(
-            request.sandbox_id, tuple(request.folders)))
+            request.sandbox_id, tuple(request.folders), request.progress_key))
         return result
 
 

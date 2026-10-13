@@ -1830,3 +1830,9 @@ s-k-20261011T102952` (not published).
   `docs/RELEASING.zh-TW.md`. Release `20261013-1349-fd87def6` installed, updated, verified
   and removed in a test location. Shortcut icon support (`scripts/make_icon.py`,
   `src/host_runtime/icons/aep-agent.ico`); the owner's icon file is still to be supplied.
+- [x] Progress bars for long Knowledge steps (owner, 2026-10-13): creating a sandbox and
+  pulling report counts and the current file under a page-chosen `progress_key`
+  (`src/knowledge/progress.py`, `GET /api/knowledge/progress`); opening a sandbox names
+  each loading step. Live: 6,786-file copy and 566-file pull showed counts. Full suite
+  2564 passed, 6 skipped. Also: shortcut icon from the owner's `files/AEP.png`; stray
+  empty `rsk-copy/drop/drop` removed; releases are tagged `release-<id>`.

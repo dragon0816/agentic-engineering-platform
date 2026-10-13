@@ -224,6 +224,7 @@ from knowledge.market_matrix import (
 )
 from knowledge.pipeline import KnowledgePipeline
 from knowledge.procedure import KnowledgeProcedure
+from knowledge.progress import read as knowledge_progress
 from knowledge.query import cited_numbers
 from knowledge.sandbox import SandboxError, Sandboxes
 from knowledge.schema import answer_rules_text
@@ -3179,6 +3180,9 @@ class _Handler(BaseHTTPRequestHandler):
         elif parsed.path == "/api/knowledge/push":
             query = parse_qs(parsed.query)
             self._json(200, web.push_status((query.get("sandbox_id") or [""])[0]))
+        elif parsed.path == "/api/knowledge/progress":
+            key = (parse_qs(parsed.query).get("key") or [""])[0]
+            self._json(200, {"ok": True, "progress": knowledge_progress(key)})
         elif parsed.path == "/api/settings/laya":
             self._json(200, web.laya_settings())
         elif parsed.path == "/api/knowledge/reingest":

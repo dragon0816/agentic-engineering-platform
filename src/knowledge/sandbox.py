@@ -15,6 +15,7 @@ import os
 import re
 import shutil
 import uuid
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -89,7 +90,10 @@ class Sandboxes:
         return folder
 
     def create(self, base_name: str, base_root: Path, *, label: str, actor: str,
-               domain: str | None = None, scope: str | None = None) -> SandboxInfo:
+               domain: str | None = None, scope: str | None = None,
+               progress: Callable[[str, int, int, str], None] | None = None) -> SandboxInfo:
+        """Copy the base vault into a new sandbox. `progress(phase, done, total,
+        current)` is told how far the copy is, for the page's progress bar."""
         try:
             base = Vault(Path(base_root))
         except VaultError:
@@ -98,23 +102,44 @@ class Sandboxes:
         # Short on purpose: every byte of the id is in every copied path.
         sandbox_id = f"sb-{_slug(label)[:16].strip('-')}-{uuid.uuid4().hex[:6]}"
         folder = self._folder(sandbox_id)
-        longest = max((len(os.path.relpath(os.path.join(d, f), base.root))
-                       for d, dirs, files in os.walk(base.root)
-                       if not set(Path(d).relative_to(base.root).parts) & _SKIPPED
-                       for f in files), default=0)
+        if progress is not None:
+            progress("counting", 0, 0, "counting the project vault's files")
+        copied_files = [os.path.relpath(os.path.join(d, f), base.root)
+                        for d, dirs, files in os.walk(base.root)
+                        if not set(Path(d).relative_to(base.root).parts) & _SKIPPED
+                        for f in files if f not in _SKIPPED]
+        longest = max(map(len, copied_files), default=0)
         if os.name == "nt" and len(str(folder)) + 1 + len(BASE) + 1 + longest > MAX_PATH:
             raise SandboxError("path_too_long")
+        snapshot_files = sum(1 for area in TEXT_AREAS if (base.root / area).is_dir()
+                             for p in (base.root / area).rglob("*") if p.is_file())
+        snapshot_files += sum(1 for name in ROOT_FILES if (base.root / name).is_file())
+        total = len(copied_files) + snapshot_files
+        done = 0
+
+        def copy(source: str, target: str) -> str:
+            nonlocal done
+            shutil.copy2(source, target)
+            done += 1
+            if progress is not None and (done % 25 == 0 or done == total):
+                progress("copying", done, total, os.path.relpath(source, base.root))
+            return target
+
+        if progress is not None:
+            progress("copying", 0, total, "")
         self.root.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(base.root, folder,
+        shutil.copytree(base.root, folder, copy_function=copy,
                         ignore=lambda _dir, names: [n for n in names if n in _SKIPPED])
         (folder / "drop").mkdir(exist_ok=True)
         for area in TEXT_AREAS:
             if (base.root / area).is_dir():
-                shutil.copytree(base.root / area, folder / BASE / area)
+                shutil.copytree(base.root / area, folder / BASE / area, copy_function=copy)
         for name in ROOT_FILES:
             if (base.root / name).is_file():
                 (folder / BASE).mkdir(exist_ok=True)
-                shutil.copy2(base.root / name, folder / BASE / name)
+                copy(str(base.root / name), str(folder / BASE / name))
+        if progress is not None:
+            progress("checking", total, total, "recording the vault's fingerprint")
         info = SandboxInfo(
             sandbox_id=sandbox_id, base_name=base_name, base_root=str(base.root.resolve()),
             base_raw_sha256=raw_digest(base), base_content_sha256=knowledge_digest(base),
