@@ -135,13 +135,15 @@ body {
 .kp-tabs [role="tab"][aria-selected="true"] { background: var(--accent, #2b6cb0); color: #fff; }
 .kp-panes { display: flex; height: 70vh; min-height: 360px; gap: 0; }
 .kp-pane { position: relative; display: flex; flex-direction: column; min-width: 0;
-  border: 1px solid var(--line, #ddd); border-radius: 6px; background: var(--panel, #fff); }
-.kp-pane > header { padding: 6px 10px; font-weight: 600; white-space: nowrap;
+  border: 1px solid var(--line, #ddd); border-radius: 6px; background: var(--panel, #fff);
+  padding-top: 0; max-width: none; }  /* a <section>: drop the page's section padding */
+.kp-pane > header { padding: 6px 48px 6px 10px; font-weight: 600; white-space: nowrap;
   overflow: hidden; text-overflow: ellipsis; border-bottom: 1px solid var(--line, #ddd); }
 .kp-pane-body { flex: 1; overflow: auto; position: relative; min-height: 0; }
 .kp-split { flex: 0 0 8px; cursor: col-resize; touch-action: none; }
 .kp-split:hover { background: var(--accent-soft, #dbe8f7); }
-.kp-max { position: absolute; right: 8px; bottom: 8px; z-index: 3; padding: 2px 8px; opacity: 0.8; }
+/* Top right, in the pane's header row, clear of the scrollbar arrows (owner 2026-10-14). */
+.kp-max { position: absolute; right: 8px; top: 4px; z-index: 3; padding: 2px 8px; opacity: 0.8; }
 .kp-pane.kp-maxed { position: fixed; inset: 16px; z-index: 60; flex-basis: auto !important;
   box-shadow: 0 8px 30px rgba(0,0,0,0.25); }
 .kp-filebody { display: flex; flex-direction: column; overflow: hidden; }
@@ -163,13 +165,17 @@ body {
 .kp-hunk { color: #888; background: var(--accent-soft, #eef3fb); }
 .kp-none { padding: 8px 12px; }
 .kp-cur { display: flex; overflow: hidden; }
-.kp-gutter { flex: 0 0 6.4em; overflow: hidden; padding: 8px 0; }
+.kp-gutter { flex: 0 0 6.4em; overflow: hidden; padding: 8px 0 48px; }
 .kp-gline { display: flex; height: 20px; white-space: pre; }
 .kp-code { padding: 8px; margin: 0; white-space: pre; tab-size: 4; }
 .kp-code > div { min-height: 20px; }
 .kp-editwrap { position: relative; flex: 1; overflow: hidden; }
 .kp-backdrop { position: absolute; inset: 0; overflow: hidden; color: transparent;
-  pointer-events: none; }
+  pointer-events: none; padding-bottom: 48px; padding-right: 48px; }
+/* The backdrop only shades lines: its text never shows (a green .kp-add line drew a second
+   copy under the textarea), and the extra padding lets it and the gutter scroll as far as
+   the textarea, whose scrollbars add to its range (owner 2026-10-14: doubled lines). */
+.kp-backdrop > div { color: transparent; width: max-content; min-width: 100%; }
 #kp-rule-text { position: absolute; inset: 0; width: 100%; height: 100%; box-sizing: border-box;
   border: 0; resize: none; background: transparent; overflow: auto; color: inherit;
   padding: 8px; margin: 0; white-space: pre; tab-size: 4; }

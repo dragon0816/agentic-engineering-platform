@@ -1894,3 +1894,11 @@ s-k-20261011T102952` (not published).
   status line and progress bar share one sticky header; switching steps scrolls the new
   step title to just below it. Headless check: header stays at top 0 after scrolling.
   Full suite 2583 passed, 6 skipped.
+- [x] Fix the rule editor's doubled lines and move the maximize buttons (owner, 2026-10-14):
+  the editor backdrop drew a second, green copy of added lines and could not scroll as far
+  as the textarea (whose scrollbars add range), so copies drifted a line apart. The
+  backdrop now only shades (transparent text, rows as wide as their text) and it and the
+  gutter carry 48px of extra scroll room. Maximize buttons sit top right in each pane's
+  header row instead of over the scrollbar arrows; panes drop the page's section padding.
+  Headless check: textarea, backdrop and gutter end at the same scroll position. Full
+  suite 2585 passed, 6 skipped.

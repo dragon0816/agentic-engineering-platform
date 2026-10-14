@@ -56,3 +56,16 @@ def test_the_steps_status_and_progress_stay_on_top_together() -> None:
     assert top < PAGE.index('id="kp-stepper"') < PAGE.index('id="kp-status"') \
         < PAGE.index('id="kp-progress"') < PAGE.index('id="kp-main"')
     assert ".kp-top { position: sticky; top: 0;" in PAGE and "kp-sticky" not in PAGE
+
+
+def test_the_maximize_buttons_sit_in_the_pane_header() -> None:
+    # Bottom right overlapped the scrollbar arrows (owner 2026-10-14).
+    assert ".kp-max { position: absolute; right: 8px; top: 4px;" in PAGE
+    assert ".kp-pane > header { padding: 6px 48px 6px 10px;" in PAGE
+
+
+def test_the_editor_backdrop_only_shades_and_scrolls_as_far_as_the_text() -> None:
+    # Added lines were drawn twice and drifted a line apart at the bottom (owner 2026-10-14).
+    assert ".kp-backdrop > div { color: transparent; width: max-content; min-width: 100%; }" in PAGE
+    assert "pointer-events: none; padding-bottom: 48px; padding-right: 48px; }" in PAGE
+    assert ".kp-gutter { flex: 0 0 6.4em; overflow: hidden; padding: 8px 0 48px; }" in PAGE
