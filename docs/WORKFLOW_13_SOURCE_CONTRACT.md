@@ -44,6 +44,13 @@ array-valued file chooser in the generic Workflow form. The source-compatible
 runtime schema is retained for those later controls. This preview does not
 claim full Workflow 13 parity.
 
+Update 2026-10-15 (forms v2): the full release now runs as
+`engineering/rs-wmt-package-release@1.0.0` (prepare, commit, push in one run;
+chipset and version lists, inbox picks and uploads). The source's
+`PARAMS_SCHEMA` copy (`schema.py`) was removed: that Workflow's declaration is
+the contract. The preview no longer has alias 13. See
+`docs/phases/WORKFLOW_FORMS_V2.md`.
+
 An independently named `engineering/release-package-apply-isolated@1.0.0`
 Workflow exposes the source-compatible file-preparation portion only. It has no
 numeric `/run 13` alias. The Host registers its write capability only when

@@ -533,6 +533,7 @@ def test_doctor_reports_the_integrations_without_contacting_anything(
             "workflows/engineering__release-package-preview__1.0.0.json",
             "workflows/engineering__release-package-push__1.0.0.json",
             "workflows/engineering__rs-ncc-improvement-plan__1.0.0.json",
+            "workflows/engineering__rs-wmt-package-release__1.0.0.json",
             "workflows/engineering__run-python__1.0.0.json",
             "workflows/engineering__sales-to-chipset-preview__1.0.0.json",
             "workflows/engineering__sales-to-chipset__1.0.0.json",

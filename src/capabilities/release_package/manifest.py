@@ -1,9 +1,15 @@
-"""Installed read-only Workflow 13 preview and its explicit Skill command."""
+"""Workflow 13 (release package): the one-run release Workflow, its step
+Workflows, the read-only preview and the `release` Skill."""
 
 from typing import Any
 
 from agent.skills import SkillManifest
 from capabilities.contracts import CapabilitySpec
+from capabilities.release_package.choices import (
+    CHIPSETS_FUNCTION,
+    GENERAL_TESTCASE,
+    VERSIONS_FUNCTION,
+)
 from common.assets import AssetIdentity, WorkflowManifest
 
 PREVIEW = AssetIdentity(namespace="engineering", name="release-package-preview", version="1.0.0")
@@ -11,6 +17,8 @@ ISOLATED_APPLY = AssetIdentity(
     namespace="engineering", name="release-package-apply-isolated", version="1.0.0"
 )
 SKILL = AssetIdentity(namespace="engineering", name="release-package-guide", version="1.0.0")
+# The one-run release Workflow (owner 2026-10-15): started by name, no number.
+RELEASE = AssetIdentity(namespace="engineering", name="rs-wmt-package-release", version="1.0.0")
 
 PREVIEW_SPEC = CapabilitySpec.model_validate(
     {
@@ -55,7 +63,6 @@ def preview_workflow() -> WorkflowManifest:
         {
             "metadata": {"identity": PREVIEW.model_dump(), **_METADATA},
             "kind": "workflow",
-            "run_alias": 13,
             "description": (
                 "Preview Workflow 13 from an existing checked-out release branch. "
                 "No files are written, and no Git, commit or push command runs."
@@ -108,12 +115,17 @@ def preview_skill() -> SkillManifest:
             "metadata": {"identity": SKILL.model_dump(), **_METADATA},
             "alias": "release",
             "instructions": (
-                "Preview Workflow 13's branch, pinned dependencies and release.yaml. "
-                "The checked-out branch and input inbox are configured by this Host. "
-                "This command never prepares, commits or pushes a release."
+                "Make an rs-wmt release package. `package` runs "
+                "engineering/rs-wmt-package-release: it asks for the company, chipset, "
+                "versions and files, prepares the release branch, and commits and pushes "
+                "only when the person turns dry run off and ticks push. `preview` only "
+                "reads an already checked-out branch and never prepares, commits or pushes."
             ),
-            "commands": [{"name": "preview", "kind": "workflow", "target": PREVIEW.model_dump()}],
-            "default_command": "preview",
+            "commands": [
+                {"name": "package", "kind": "workflow", "target": RELEASE.model_dump()},
+                {"name": "preview", "kind": "workflow", "target": PREVIEW.model_dump()},
+            ],
+            "default_command": "package",
         }
     )
 
@@ -352,5 +364,117 @@ def push_workflow() -> WorkflowManifest:
                        "inputs": {"branch": {"source": "run", "path": ["branch"]},
                                   "commit": {"source": "run", "path": ["commit"]},
                                   **_SETTING_INPUTS}}],
+        }
+    )
+
+
+# -- the one-run release (forms v2, owner 2026-10-15) ---------------------------
+
+_INBOX_FILES = "fn:folder_files?folder={inbox_path}&accept="
+
+
+def _files(
+    name: str, upload: str, label: str, accept: list[str], order: int,
+) -> list[dict[str, Any]]:
+    """Pick files from the inbox, and upload new ones, for one kind."""
+    picked: dict[str, Any] = {
+        "name": name, "label": f"{label} from the inbox", "kind": "select",
+        "multiple": True, "order": order,
+        "choices_source": _INBOX_FILES + ",".join(accept),
+        "help": "Files already in the input inbox." if accept else
+                "Files already in the input inbox (any type).",
+    }
+    uploaded: dict[str, Any] = {
+        "name": upload,
+        "label": f"Upload {label.lower()}", "kind": "upload", "multiple": True,
+        "order": order + 1, "help": "New files, added to the branch with the picked ones.",
+    }
+    if accept:
+        uploaded["accept"] = accept
+    return [picked, uploaded]
+
+
+def release_workflow() -> WorkflowManifest:
+    """`engineering/rs-wmt-package-release`: one run from the form to the push.
+
+    Prepare, then commit what was prepared (branch and fingerprint from step
+    0), then push the commit this run made (step 1) when `push` is ticked.
+    Dry run (default on) stops after prepare: commit and push skip. Each step
+    keeps its capability's approval policy; the run is confirmed as an
+    external side effect.
+    """
+    return WorkflowManifest.model_validate(
+        {
+            "metadata": {"identity": RELEASE.model_dump(), **_METADATA},
+            "kind": "workflow",
+            "description": (
+                "Make an rs-wmt release package in one run: prepare the customer release "
+                "branch, then commit it and push it to the release repository. Dry run "
+                "(on by default) stops after preparing; push happens only when ticked."
+            ),
+            "execution": {"mode": "local"},
+            "dependencies": {"central_required": False,
+                             "local_capabilities": [PREPARE_SPEC.name, COMMIT_SPEC.name,
+                                                    PUSH_SPEC.name]},
+            "parameters": [
+                *_RUN_SETTINGS,
+                {"name": "companyName", "label": "Which company is this release for?",
+                 "kind": "text", "required": True, "examples": ["Foxconn"], "order": 10,
+                 "group": "identity"},
+                {"name": "chipsetId", "label": "Which chipset or licence id?", "kind": "select",
+                 "required": True, "examples": ["kt326"], "order": 20, "group": "identity",
+                 "choices_source": f"fn:{CHIPSETS_FUNCTION}", "allow_other": True},
+                {"name": "chipsetVersion", "label": "Which version of it?", "kind": "select",
+                 "help": "Empty: the newest published release.", "order": 25,
+                 "choices_source": f"fn:{VERSIONS_FUNCTION}?package={{chipsetId}}",
+                 "allow_other": True},
+                {"name": "info", "label": "Any extra tag for the branch name?", "kind": "text",
+                 "examples": ["demo"], "order": 30, "group": "identity"},
+                {"name": "cmpKtOption", "label": "Which CMP_KT_OPTION?", "kind": "select",
+                 "required": True, "options": ["KT160", "KT161"], "order": 40,
+                 "help": "It decides which half of release.yaml the build reads."},
+                {"name": "generalTestcaseVersion", "label": "Which general testcase version?",
+                 "kind": "select", "required": True, "examples": ["3.0.17"], "order": 50,
+                 "choices_source": f"fn:{VERSIONS_FUNCTION}?package={GENERAL_TESTCASE}",
+                 "allow_other": True},
+                {"name": "notes", "label": "What changed in this release?", "kind": "text",
+                 "order": 60},
+                *_files("testPlans", "testPlanUploads", "Test plans (.json)", [".json"], 70),
+                *_files("configurations", "configurationUploads", "Configurations (.yaml)",
+                        [".yaml", ".yml"], 80),
+                *_files("overlays", "overlayUploads", "Overlay files", [], 90),
+                {"name": "suffix", "label": "SUFFIX in release.yaml (KT160 only)",
+                 "kind": "text", "order": 100},
+                {"name": "releaseVersion", "label": "VERSION override", "kind": "text",
+                 "help": "Empty: one more than the branch already has.", "order": 110},
+                {"name": "dryRun", "label": "Dry run: prepare only, no commit or push",
+                 "kind": "boolean", "default": True, "order": 120,
+                 "help": "On: the working copy is prepared and shown; nothing is committed."},
+                {"name": "push", "label": "Push to the release repository",
+                 "kind": "boolean", "default": False, "order": 130, "confirm": True,
+                 "help": "Pushes only the commit this run made, never forced. Ignored on a "
+                         "dry run."},
+            ],
+            "progress_steps": [
+                {"id": "prepare", "title": "Prepare the release branch"},
+                {"id": "commit", "title": "Commit", "optional": True},
+                {"id": "push", "title": "Push to the release repository", "optional": True},
+            ],
+            "input_contract": "release-package.prepare.input.v1",
+            "output_contract": "release-package.push.output.v1",
+            "steps": [
+                {"capability": PREPARE_SPEC.identity.model_dump(),
+                 "inputs": {"request": {"source": "run"}, **_SETTING_INPUTS}},
+                {"capability": COMMIT_SPEC.identity.model_dump(),
+                 "inputs": {"branch": {"source": "step", "step_index": 0, "path": ["branch"]},
+                            "fingerprint": {"source": "step", "step_index": 0,
+                                            "path": ["fingerprint"]},
+                            **_SETTING_INPUTS}},
+                {"capability": PUSH_SPEC.identity.model_dump(),
+                 "inputs": {"branch": {"source": "step", "step_index": 1, "path": ["branch"]},
+                            "commit": {"source": "step", "step_index": 1, "path": ["commit"]},
+                            "push": {"source": "run", "path": ["push"]},
+                            **_SETTING_INPUTS}},
+            ],
         }
     )

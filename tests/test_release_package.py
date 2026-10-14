@@ -48,7 +48,6 @@ from capabilities.release_package.preview import (
     ReleasePreviewHandler,
     build_preview,
 )
-from capabilities.release_package.schema import PARAMS_SCHEMA
 from capabilities.release_package.status import dry_run_plan, parse_status
 from capabilities.runtime import CapabilityGrant, CapabilityRefused, LocalPolicy
 from common.assets import WorkflowStep
@@ -71,16 +70,22 @@ def test_source_version_overflow_is_refused() -> None:
         ry.next_version("15.15.15")
 
 
-def test_source_runtime_form_contract_is_data_and_does_not_grant_push() -> None:
-    assert PARAMS_SCHEMA["required"] == [
-        "companyName", "chipsetId", "generalTestcaseVersion", "cmpKtOption"
+def test_source_runtime_form_contract_is_declared_and_does_not_let_a_model_push() -> None:
+    """The source's PARAMS_SCHEMA + x-ui, as the one-run Workflow declares it."""
+    from capabilities.release_package.manifest import release_workflow
+    from common.workflow_forms import agent_fields
+
+    workflow = release_workflow()
+    fields = {item.name: item for item in workflow.parameters if item.scope == "runtime"}
+    assert [name for name, item in fields.items() if item.required] == [
+        "companyName", "chipsetId", "cmpKtOption", "generalTestcaseVersion"
     ]
-    fields = PARAMS_SCHEMA["properties"]
-    assert fields["chipsetVersion"]["x-ui"]["options"] == (
-        "ref:packageVersions:{chipsetId}"
+    assert fields["chipsetVersion"].choices_source == (
+        "fn:release_package.versions?package={chipsetId}"
     )
-    assert fields["cmpKtOption"]["enum"] == ["KT160", "KT161"]
-    assert "x-ui" not in fields["push"]
+    assert fields["cmpKtOption"].choice_values == ("KT160", "KT161")
+    assert fields["push"].confirm and fields["push"].default is False
+    assert "push" not in {item.name for item in agent_fields(workflow)}
 
 
 def test_source_branch_and_pinned_requirements() -> None:
@@ -300,14 +305,15 @@ def _preview_request() -> ReleasePreviewRequest:
 def test_installed_w13_contract_is_exact_read_only_preview() -> None:
     workflow = preview_workflow()
     skill = preview_skill()
-    assert workflow.run_alias == 13
+    # Owner 2026-10-15: Workflows are started by name; the preview lost alias 13.
+    assert workflow.run_alias is None
     assert workflow.metadata.identity.name == "release-package-preview"
     assert PREVIEW_SPEC.side_effect == "read"
     assert isinstance(workflow.steps[0], WorkflowStep)
     assert workflow.steps[0].capability == PREVIEW_SPEC.identity
     assert workflow.steps[0].retry.max_attempts == 1
-    assert skill.commands[0].name == "preview"
-    assert skill.commands[0].target == workflow.metadata.identity
+    commands = {command.name: command.target for command in skill.commands}
+    assert commands["preview"] == workflow.metadata.identity
     params = {item.name: item for item in workflow.parameters}
     assert params["checkout_path"].scope == "static"
     assert params["inbox_path"].scope == "static"

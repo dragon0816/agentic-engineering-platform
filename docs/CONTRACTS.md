@@ -2832,7 +2832,8 @@ calling member's last `group: identity` values for that Workflow name, kept in
 `commit` (nothing committed in this run), the step returns `pushed=false` with a
 `skipped` reason and touches nothing. The release request gains
 `testPlanUploads`, `configurationUploads` and `overlayUploads`, accepted only
-inside the upload store the host gives the prepare handler. See
+inside the upload store the host gives the prepare handler. The preview
+Workflow no longer declares alias `13`; Workflows are started by name. See
 `docs/phases/WORKFLOW_FORMS_V2.md`.
 
 # Workflow 7 read-only Project preview (2026-10-02)
