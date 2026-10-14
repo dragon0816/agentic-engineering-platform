@@ -22,6 +22,8 @@ REQUIRED_DEPENDENCIES = (
     "annotated_types-",
     "pydantic-",
     "pydantic_core-",
+    # A core dependency (pyproject): without it the offline install fails on 141.
+    "tzdata-",
     "typing_extensions-",
     "typing_inspection-",
 )

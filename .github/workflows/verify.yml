@@ -103,7 +103,7 @@ jobs:
       - name: Build and install Shared Platform offline preview
         shell: pwsh
         run: |
-          python -m pip download --only-binary=:all: --dest dist/shared-platform-wheels "pydantic>=2.10,<3"
+          python -m pip download --only-binary=:all: --dest dist/shared-platform-wheels "pydantic>=2.10,<3" "tzdata>=2025.2,<2028"
           python -m scripts.build_shared_platform_preview --wheel dist/agentic_engineering_platform-0.1.0-py3-none-any.whl --dependency-dir dist/shared-platform-wheels
           $archive = Get-ChildItem dist/aep-shared-platform-preview-*.zip | Select-Object -First 1
           Expand-Archive -LiteralPath $archive.FullName -DestinationPath dist/shared-platform-expanded

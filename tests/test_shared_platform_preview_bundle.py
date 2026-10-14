@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import tomllib
 import zipfile
 from pathlib import Path
 
@@ -10,6 +11,7 @@ import pytest
 from scripts.build_shared_platform_preview import (
     ARTEFACT_PREFIX,
     BUNDLE_NAME,
+    REQUIRED_DEPENDENCIES,
     REQUIRED_OPERATOR_GUIDES,
     build,
 )
@@ -18,6 +20,7 @@ BUNDLED_WHEELS = (
     "annotated_types-0.1-py3-none-any.whl",
     "pydantic-2.0-py3-none-any.whl",
     "pydantic_core-2.0-cp312-cp312-win_amd64.whl",
+    "tzdata-2025.2-py2.py3-none-any.whl",
     "typing_extensions-4.0-py3-none-any.whl",
     "typing_inspection-0.1-py3-none-any.whl",
 )
@@ -118,3 +121,19 @@ def test_ci_uploads_the_shared_platform_as_a_separate_artifact() -> None:
     assert f"name: {ARTEFACT_PREFIX}${{{{ github.sha }}}}" in workflow
     assert "path: dist/aep-shared-platform-preview-*.zip" in workflow
     assert "name: aep-windows-preview-${{ github.sha }}" in workflow
+
+
+def test_shared_platform_bundle_needs_every_core_dependency(tmp_path: Path) -> None:
+    # The platform wheel declares pydantic and tzdata; a bundle without tzdata could
+    # not be installed offline (2026-10-14, 172.25.228.141).
+    repo = Path(__file__).resolve().parents[1]
+    declared = tomllib.loads((repo / "pyproject.toml").read_text(encoding="utf-8"))
+    for requirement in declared["project"]["dependencies"]:
+        name = requirement.split(">")[0].split("<")[0].split("=")[0].strip().lower()
+        assert any(prefix == name.replace("-", "_") + "-" for prefix in REQUIRED_DEPENDENCIES)
+    wheel = tmp_path / "agentic_engineering_platform-0.1.0-py3-none-any.whl"
+    wheel.write_bytes(b"platform-wheel")
+    with pytest.raises(ValueError, match="incomplete"):
+        build(repo=repo, platform_wheel=wheel,
+              dependency_dir=dependency_dir(tmp_path, omit="tzdata-"),
+              output_dir=tmp_path / "out", revision="a" * 40)
