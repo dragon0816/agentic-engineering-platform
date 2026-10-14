@@ -1873,3 +1873,13 @@ s-k-20261011T102952` (not published).
   check passed. Full suite: 2578 passed, 1 failed
   (`test_telegram_ingress.py::test_the_loop_stops_on_what_will_not_fix_itself_and_backs_off_otherwise`,
   untouched by this page-only change; passed 3/3 alone: load-sensitive, like the others).
+- [x] Knowledge tab as three guided steps (owner, 2026-10-14, designed with the
+  ui-ux-pro-max skill): a stepper (Pull data -> Ingest data -> Testing data, "Step N of 3",
+  clickable, focus moves to the step) with one page per step and Back/Next. Without a
+  sandbox, step 1 offers Continue a sandbox or Start a new sandbox (vault, folder, name;
+  the folder is pulled at once). Step 1: pull, add files, convert. Step 2: the folder's
+  skills (editor, AI session) and ingest. Step 3: questions (list, edit, new, coverage
+  against the folder's Raw count), test and push; lint and other advanced tools folded
+  away. Question sets list each question with who may edit it; set matching for edits
+  now uses the benchmark's (`productions` = `production`). Full suite 2581 passed,
+  6 skipped; headless walk through all steps.

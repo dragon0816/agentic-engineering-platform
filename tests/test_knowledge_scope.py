@@ -90,8 +90,10 @@ def test_an_answer_skill_with_applies_to_is_not_an_ingest_rule(tmp_path: Path) -
     assert names == ["ingest-productions", "ingest-vna"]
 
 
-def test_the_page_merges_pull_and_rules_under_the_scope() -> None:
-    for hook in ('id="kp-scope"', 'id="kp-scope-name"', "1. Scope and rules", "kpLoadScopes",
-                 "6. Push to the project vault"):
+def test_the_page_chooses_the_folder_at_creation_and_lists_its_skills() -> None:
+    # Since 2026-10-14 the folder is chosen when the sandbox is created (step 1) and its
+    # skills are edited in step 2, "Skills for this folder".
+    for hook in ('id="kp-scope"', 'id="kp-scope-name"', "Folder you maintain", "kpLoadScopes",
+                 "Skills for this folder", "Push to the vault"):
         assert hook in PAGE
     assert "2. Rules (schema and skills)" not in PAGE

@@ -183,6 +183,40 @@ body {
   background: var(--panel, #fff); border: 1px solid var(--line, #ddd); border-radius: 6px; }
 .kp-progress progress { flex: 0 0 260px; height: 14px; }
 .kp-progress .note { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Knowledge as three guided steps (owner 2026-10-14, ui-ux-pro-max: progress indicator,
+   progressive disclosure, one primary action per step, focus moves to the step). */
+.kp-stepper ol { list-style: none; display: flex; gap: 8px; padding: 0; margin: 8px 0 14px; }
+.kp-stepper li { flex: 1; min-width: 0; }
+.kp-stepper button { width: 100%; min-height: 52px; display: flex; align-items: center; gap: 10px;
+  text-align: left; padding: 10px 12px; border: 1px solid var(--line, #ddd); border-radius: 10px;
+  background: var(--panel, #fff); cursor: pointer; transition: border-color 150ms ease; }
+.kp-stepper button small { display: block; color: var(--dim, #666); font-size: 12px; }
+.kp-stepper button[aria-current="step"] { border-color: var(--accent, #2b6cb0);
+  box-shadow: inset 0 0 0 1px var(--accent, #2b6cb0); }
+.kp-stepper button:disabled { opacity: 0.45; cursor: not-allowed; }
+.kp-stepper button:focus-visible, .kp-stage-title:focus-visible {
+  outline: 3px solid var(--accent-soft, #c9d8f5); outline-offset: 2px; }
+.kp-step-n { flex: 0 0 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--soft, #eef3fb); font-weight: 600; }
+.kp-stepper button[aria-current="step"] .kp-step-n { background: var(--accent, #2b6cb0);
+  color: #fff; }
+.kp-stage-title { margin: 6px 0 2px; font-size: 20px; outline: none; }
+.kp-nav { display: flex; justify-content: space-between; gap: 8px; margin: 16px 0 4px;
+  padding-top: 12px; border-top: 1px solid var(--line, #ddd); }
+.kp-nav button { min-height: 44px; padding: 0 16px; }
+.kp-sandbox-bar { display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  flex-wrap: wrap; padding: 8px 12px; margin-bottom: 8px; border: 1px solid var(--line, #ddd);
+  border-radius: 8px; background: var(--soft, #f4f6fa); }
+#kp-sandboxes button { min-height: 44px; padding: 6px 14px; margin: 4px 6px 4px 0; }
+.kp-grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+.kp-form label { display: block; font-size: 13px; margin: 10px 0 4px; }
+.kp-form select, .kp-form input { width: 100%; box-sizing: border-box; min-height: 36px; }
+.kp-form button { margin-top: 8px; min-height: 44px; }
+.kp-coverage { padding: 8px 10px; border-radius: 6px; background: #e6f4ea; color: #137333; }
+.kp-coverage.kp-low { background: #fef7e0; color: #8a5a00; }
+.kp-q-editor textarea { width: 100%; box-sizing: border-box; font-family: ui-monospace, Consolas,
+  monospace; font-size: 13px; }
+@media (max-width: 720px) { .kp-stepper ol { flex-direction: column; } }
 .laya-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
   gap: 8px 14px; }
 .laya-grid label { display: flex; flex-direction: column; gap: 2px; }
@@ -948,9 +982,9 @@ tr:last-child td { border-bottom: none; }
   <section id="panel-knowledge">
     <div class="workspace-head">
       <div><h2>Knowledge</h2>
-        <p class="note">Convert, ingest and lint run in your own sandbox, a copy of a base
-          vault. Nothing here changes the base vault.</p></div>
-      <button class="go" id="kp-refresh" type="button">Refresh</button>
+        <p class="note">Improve one folder of a shared knowledge vault in three steps, inside
+          your own sandbox. Nothing reaches the vault until you push.</p></div>
+      <button id="kp-refresh" type="button">Refresh</button>
     </div>
     <div id="kp-disabled" class="empty" hidden>The Knowledge pipeline is not configured on
       this machine (host.json <code>knowledge_pipeline</code>).</div>
@@ -960,35 +994,96 @@ tr:last-child td { border-bottom: none; }
       <progress id="kp-progress-bar" max="1"></progress>
       <span id="kp-progress-text" class="note"></span></div>
     <div id="kp-main">
-      <h2>Sandboxes</h2>
-      <div class="card">
-        <div id="kp-sandboxes" class="kp-list">reading&hellip;</div>
-        <form id="kp-new" class="kp-actions">
-          <select id="kp-base" aria-label="Project vault"></select>
-          <select id="kp-scope" aria-label="Folder this sandbox maintains" required></select>
-          <input id="kp-label" required maxlength="80" placeholder="Sandbox name, e.g. VNA trial"
-                 aria-label="Sandbox name">
-          <button class="go" type="submit">Create sandbox</button>
-        </form>
+      <nav class="kp-stepper" aria-label="Maintenance steps">
+        <ol>
+          <li><button type="button" data-stage="pull"><span class="kp-step-n">1</span>
+            <span><strong>Pull data</strong><small>pull, add files, convert</small></span>
+          </button></li>
+          <li><button type="button" data-stage="ingest"><span class="kp-step-n">2</span>
+            <span><strong>Ingest data</strong><small>edit skills, ingest</small></span>
+          </button></li>
+          <li><button type="button" data-stage="test"><span class="kp-step-n">3</span>
+            <span><strong>Testing data</strong><small>questions, test, push</small></span>
+          </button></li>
+        </ol>
+      </nav>
+      <div id="kp-start">
+        <h2 class="kp-stage-title" tabindex="-1">Step 1 of 3 &middot; Pull data</h2>
+        <p class="note">Continue a sandbox, or start one for the folder you maintain.</p>
+        <div class="kp-grid2">
+          <div class="card"><h3>Continue a sandbox</h3>
+            <div id="kp-sandboxes" class="kp-list">reading&hellip;</div></div>
+          <form id="kp-new" class="card kp-form"><h3>Start a new sandbox</h3>
+            <label for="kp-base">Project vault</label>
+            <select id="kp-base"></select>
+            <label for="kp-scope">Folder you maintain</label>
+            <select id="kp-scope" required></select>
+            <label for="kp-label">Sandbox name</label>
+            <input id="kp-label" required maxlength="80" placeholder="e.g. VNA trial">
+            <p class="note">The vault is copied into your sandbox and the folder's originals are
+              pulled, so you can convert them next.</p>
+            <button class="go" type="submit">Create sandbox and pull</button>
+          </form>
+        </div>
       </div>
       <div id="kp-box" hidden>
-        <div class="kp-head"><h2 id="kp-title"></h2>
-          <button id="kp-discard" type="button">Discard sandbox</button></div>
-        <p class="note kp-flow">Scope and rules &rarr; Drop and convert &rarr; Ingest &rarr;
-          Lint &rarr; Benchmark &rarr; Push</p>
+        <div class="kp-sandbox-bar">
+          <div><strong id="kp-title"></strong>
+            <span class="note">&middot; folder <span id="kp-scope-name"></span></span></div>
+          <div class="kp-actions">
+            <button id="kp-switch" type="button">Switch sandbox</button>
+            <button id="kp-discard" type="button">Discard sandbox</button></div>
+        </div>
         <div class="kp-banner" id="kp-review" hidden></div>
-        <div class="card"><h3>1. Scope and rules: <span id="kp-scope-name"></span></h3>
-          <p class="note">This sandbox maintains one folder, chosen when it was created. Pull
-            brings its originals not yet ingested; ingested ones are already here as Raw
-            (step 3), so they are not pulled again.</p>
-          <div id="kp-pull-folders" class="kp-list"></div>
-          <div class="kp-actions"><button class="go" id="kp-pull" type="button">Pull</button>
-            <span class="note" id="kp-pull-result"></span></div>
-          <p class="note">The rules for this folder: how its data becomes wiki pages
-            (ingest) and how its questions are answered (answer). More general layers and
-            the vault-wide CLAUDE.md are read only here; their maintainers change them.
-            Saved here only; a push brings a change to the project vault.</p>
-          <div id="kp-rules" class="kp-list"></div>
+        <section class="kp-stage" data-stage="pull" aria-labelledby="kp-stage-pull">
+          <h2 class="kp-stage-title" id="kp-stage-pull" tabindex="-1">Step 1 of 3 &middot; Pull
+            data</h2>
+          <p class="note">Bring this folder's originals into the sandbox, add files from this
+            computer if needed, then convert everything to Raw.</p>
+          <div class="card"><h3>From the project vault</h3>
+            <p class="note">Originals not yet ingested are copied into the sandbox. Ingested
+              ones are already here as Raw, so they are not pulled again.</p>
+            <div id="kp-pull-folders" class="kp-list"></div>
+            <div class="kp-actions"><button id="kp-pull" type="button">Pull</button>
+              <span class="note" id="kp-pull-result"></span></div></div>
+          <div class="card"><h3>From this computer</h3>
+            <div class="kp-actions">
+              <label for="kp-category">Folder</label>
+              <select id="kp-category"></select>
+              <input id="kp-files" type="file" multiple aria-label="Files to add">
+              <button id="kp-upload" type="button">Add files</button>
+            </div>
+            <div id="kp-drop"></div></div>
+          <div class="card"><h3>Convert</h3>
+            <p class="note">Turns every original waiting in the sandbox into a Raw document.
+              Pictures are described by the model, so a deck can take minutes; it runs in the
+              background and you can keep working.</p>
+          <div class="kp-actions">
+            <button id="kp-preview" type="button">Preview convert</button>
+            <button class="go" id="kp-convert" type="button">Convert</button>
+            <button id="kp-convert-stop" type="button" hidden>Stop</button>
+          </div>
+          <p class="note">Convert asks the model to describe every picture, so a deck can take
+            minutes. It runs in the background: you can keep working and come back.</p>
+          <div id="kp-convert-progress" class="kp-progress" hidden>
+            <progress id="kp-convert-bar" max="1"></progress>
+            <span id="kp-convert-text" class="note"></span></div>
+          <div id="kp-converted"></div>
+          </div>
+          <div class="kp-nav"><span></span>
+            <button class="go" type="button" data-go="ingest">Next: Ingest data &rarr;</button>
+          </div>
+        </section>
+        <section class="kp-stage" data-stage="ingest" aria-labelledby="kp-stage-ingest" hidden>
+          <h2 class="kp-stage-title" id="kp-stage-ingest" tabindex="-1">Step 2 of 3 &middot;
+            Ingest data</h2>
+          <p class="note">Adjust how this folder's data becomes wiki pages, then ingest the Raw
+            documents with those rules.</p>
+          <div class="card"><h3>Skills for this folder</h3>
+            <p class="note">Edit or add the skills of this folder; the AI session can help.
+              The vault-wide CLAUDE.md and more general layers are read only here. Changes stay
+              in the sandbox until you push.</p>
+            <div id="kp-rules" class="kp-list"></div>
           <div id="kp-rule-editor" hidden>
             <p><strong id="kp-rule-path"></strong>
               <span class="note" id="kp-rule-dirty"></span></p>
@@ -1049,35 +1144,15 @@ tr:last-child td { border-bottom: none; }
               <button class="go" id="kp-rule-save" type="button">Save</button>
               <button id="kp-rule-revert" type="button">Revert to saved</button>
               <button id="kp-rule-close" type="button">Close</button>
-            </div></div></div>
+            </div></div>
+          </div>
         <div class="card" id="kp-viewer" hidden><h3 id="kp-viewer-title">Preview</h3>
           <div class="kp-actions"><button id="kp-viewer-close" type="button">Close</button></div>
           <div id="kp-viewer-body" class="kp-markdown"></div></div>
-        <div class="card"><h3>2. Drop and convert</h3>
-          <p class="note">Add originals from this computer if they are not in the project's
-            drop. The category folder picks the ingest rules (raw/&lt;category&gt;).</p>
-          <div class="kp-actions">
-            <select id="kp-category" aria-label="Category folder"></select>
-            <input id="kp-files" type="file" multiple aria-label="Originals to add">
-            <button id="kp-upload" type="button">Add to drop</button>
-          </div>
-          <div id="kp-drop"></div>
-          <div class="kp-actions">
-            <button id="kp-preview" type="button">Preview convert</button>
-            <button class="go" id="kp-convert" type="button">Convert</button>
-            <button id="kp-convert-stop" type="button" hidden>Stop</button>
-          </div>
-          <p class="note">Convert asks the model to describe every picture, so a deck can take
-            minutes. It runs in the background: you can keep working and come back.</p>
-          <div id="kp-convert-progress" class="kp-progress" hidden>
-            <progress id="kp-convert-bar" max="1"></progress>
-            <span id="kp-convert-text" class="note"></span></div>
-          <div id="kp-converted"></div></div>
-        <div class="card"><h3>3. Ingest</h3>
-          <p class="note">Click a Raw document on the right to read it here; Plan ingest it,
-            or tick several and ingest them together with the current rules. Keys in the list:
-            &uarr;&darr; move, Shift+&uarr;&darr; tick a range, Space ticks one. Documents a
-            convert just made are ticked and shown in green.</p>
+          <div class="card"><h3>Ingest</h3>
+            <p class="note">Click a document to read it. Tick the ones to ingest; documents a
+              convert just made are ticked and shown in green. Keys in the list: &uarr;&darr;
+              move, Shift+&uarr;&darr; tick a range, Space ticks one.</p>
           <div class="kp-ingest">
             <section class="kp-ingest-main">
               <div class="kp-ingest-head"><strong id="kp-doc-title">Choose a Raw document on
@@ -1102,31 +1177,60 @@ tr:last-child td { border-bottom: none; }
             <button class="go" id="kp-reingest" type="button">Ingest ticked</button>
             <button id="kp-reingest-stop" type="button" hidden>Stop</button></div>
           <div class="note" id="kp-reingest-state"></div>
-          <div id="kp-reingest-result"></div></div>
-        <div class="card"><h3>4. Lint</h3>
-          <div class="kp-actions"><button id="kp-lint" type="button">Run lint</button></div>
-          <div id="kp-lint-result"></div></div>
-        <div class="card"><h3>5. Benchmark</h3>
-          <p class="note">Each question is asked against this sandbox and against the project
-            vault, and graded by its must-mention / must-not-say terms.</p>
+          <div id="kp-reingest-result"></div>
+          </div>
+          <div class="kp-nav">
+            <button type="button" data-go="pull">&larr; Back: Pull data</button>
+            <button class="go" type="button" data-go="test">Next: Testing data &rarr;</button>
+          </div>
+        </section>
+        <section class="kp-stage" data-stage="test" aria-labelledby="kp-stage-test" hidden>
+          <h2 class="kp-stage-title" id="kp-stage-test" tabindex="-1">Step 3 of 3 &middot;
+            Testing data</h2>
+          <p class="note">Make sure the questions cover this folder, test the sandbox against
+            the project vault, and push when the result is good.</p>
+          <div class="card"><h3>Questions</h3>
+            <p id="kp-q-coverage" class="kp-coverage" role="status"></p>
+            <div class="kp-actions">
+              <button class="go" id="kp-q-new" type="button">New question</button></div>
+            <div id="kp-q-list"></div>
+            <div id="kp-q-editor" class="kp-q-editor" hidden>
+              <label for="kp-q-text"><strong id="kp-q-path"></strong></label>
+              <textarea id="kp-q-text" rows="14" spellcheck="false"></textarea>
+              <p class="note">The heading is the question. Under <code>必須提到:</code> list the
+                terms a good answer must mention, under <code>不可以說:</code> what it must not
+                say, one per line starting with <code>- </code>. A question without terms is
+                not graded.</p>
+              <div class="kp-actions">
+                <button class="go" id="kp-q-save" type="button">Save question</button>
+                <button id="kp-q-cancel" type="button">Close</button></div>
+            </div>
+          </div>
+          <div class="card"><h3>Test</h3>
+            <p class="note">Each ticked question set is asked against this sandbox and against
+              the project vault, and graded by its terms.</p>
           <div id="kp-bench-sets" class="kp-list"></div>
           <div class="kp-actions">
-            <button class="go" id="kp-bench" type="button">Run benchmark</button>
+            <button class="go" id="kp-bench" type="button">Run test</button>
             <span class="note" id="kp-bench-state"></span></div>
-          <div id="kp-bench-result"></div></div>
-        <div class="card"><h3>6. Push to the project vault</h3>
-          <p class="note">Check conflicts first and choose a side for each. Push merges into
-            the project vault as it is now, runs the question sets ticked under Benchmark on
-            the merged result, and writes only when no question regresses and the score is
-            not lower.</p>
+          <div id="kp-bench-result"></div>
+          </div>
+          <div class="card"><h3>Push to the vault</h3>
+            <p class="note">Check conflicts and choose a side for each. Push merges into the
+              project vault as it is now, tests the merged result with the ticked sets, and
+              writes only when no question regresses and the score is not lower.</p>
           <div class="kp-actions">
             <button id="kp-merge-preview" type="button">Check conflicts</button>
             <button class="go" id="kp-push" type="button">Push</button>
             <button id="kp-refresh-agent" type="button">Refresh the Agent's Knowledge</button>
             <span class="note" id="kp-push-state"></span></div>
           <div id="kp-merge-result"></div>
-          <div id="kp-push-result"></div></div>
-        <details class="card kp-advanced"><summary>Advanced</summary>
+          <div id="kp-push-result"></div>
+          </div>
+          <details class="card kp-advanced"><summary>Advanced</summary>
+            <h3>Lint</h3>
+            <div class="kp-actions"><button id="kp-lint" type="button">Run lint</button></div>
+            <div id="kp-lint-result"></div>
           <h3>Legacy Raw</h3>
           <div class="kp-actions"><button id="kp-adopt" type="button">Adopt legacy Raw</button>
             <span class="note" id="kp-adopt-result"></span></div>
@@ -1144,6 +1248,10 @@ tr:last-child td { border-bottom: none; }
             <button id="kp-enrich" type="button">Write bilingual summaries</button>
             <button id="kp-index" type="button">Build layered index</button>
           </div><div id="kp-index-result" class="note"></div></details>
+          <div class="kp-nav">
+            <button type="button" data-go="ingest">&larr; Back: Ingest data</button><span></span>
+          </div>
+        </section>
       </div>
     </div>
   </section>
@@ -4133,12 +4241,14 @@ async function loadKnowledge() {
   const box = el("kp-sandboxes"); box.replaceChildren();
   if (!listed.sandboxes.length) box.append(text("No sandbox yet."));
   for (const item of listed.sandboxes) {
-    box.append(kpButton(item.label + " (" + item.base_name + ")",
+    box.append(kpButton(item.label + " · " + (item.scope || "whole vault") + " ("
+      + item.base_name + ")",
       () => kpRun("Opening", () => kpOpen(item))));
   }
   if (kpSandbox && !listed.sandboxes.some((s) => s.sandbox_id === kpSandbox.sandbox_id)) {
-    kpSandbox = null; el("kp-box").hidden = true;
+    kpSandbox = null;
   }
+  if (!kpSandbox) kpStage("pull", false);
 }
 
 async function kpReviewBanner(item) {
@@ -4178,6 +4288,99 @@ async function kpReviewBanner(item) {
   box.append(head, body, note, open); box.hidden = false;
 }
 
+// -- Three guided steps (owner 2026-10-14) ----------------------------------
+let kpCurrentStage = "pull", kpRawTotal = 0;
+const KP_STAGES = ["pull", "ingest", "test"];
+
+function kpStage(name, focus = true) {
+  const open = !!kpSandbox;
+  const stage = open && KP_STAGES.includes(name) ? name : "pull";
+  kpCurrentStage = stage;
+  for (const button of document.querySelectorAll(".kp-stepper [data-stage]")) {
+    if (button.dataset.stage === stage) button.setAttribute("aria-current", "step");
+    else button.removeAttribute("aria-current");
+    button.disabled = !open && button.dataset.stage !== "pull";
+    button.title = button.disabled ? "Open or create a sandbox first" : "";
+  }
+  el("kp-start").hidden = open; el("kp-box").hidden = !open;
+  for (const section of document.querySelectorAll(".kp-stage")) {
+    section.hidden = section.dataset.stage !== stage;
+  }
+  if (open) {
+    try { localStorage.setItem("kp-stage-" + kpSandbox.sandbox_id, stage); } catch (e) { /* */ }
+  }
+  if (focus) {
+    const title = open ? document.querySelector('.kp-stage[data-stage="' + stage + '"] '
+      + ".kp-stage-title") : document.querySelector("#kp-start .kp-stage-title");
+    if (title) title.focus();  // screen readers hear the step; the page shows its top
+  }
+}
+
+function kpStoredStage(sandboxId) {
+  try { return localStorage.getItem("kp-stage-" + sandboxId) || "pull"; }
+  catch (e) { return "pull"; }
+}
+
+for (const button of document.querySelectorAll(".kp-stepper [data-stage]")) {
+  button.addEventListener("click", () => kpStage(button.dataset.stage));
+}
+for (const button of document.querySelectorAll(".kp-nav [data-go]")) {
+  button.addEventListener("click", () => kpStage(button.dataset.go));
+}
+el("kp-switch").addEventListener("click", () => {
+  kpSandbox = null; kpStage("pull"); kpRun("Reading", loadKnowledge);
+});
+
+// -- Questions and their coverage (step 3) -----------------------------------
+let kpQuestionPath = null, kpQuestionSets = null;
+
+function kpQuestionsShow(sets) {
+  kpQuestionSets = sets;
+  const scope = kpSandbox.scope || "this sandbox";
+  const scoped = sets.questions.filter((q) => sets.defaults.includes(q.set));
+  const graded = scoped.filter((q) => q.must + q.must_not > 0).length;
+  const target = Math.max(5, Math.ceil(kpRawTotal / 10));
+  const box = el("kp-q-coverage");
+  box.textContent = scope + ": " + scoped.length + " question(s) in its sets, " + graded
+    + " graded, for " + kpRawTotal + " Raw document(s). " + (graded < target
+      ? "Aim for at least " + target + " graded questions (about one per 10 documents, at "
+        + "least 5) so a test can catch a regression."
+      : "That is about one graded question per " + Math.max(1, Math.round(kpRawTotal
+        / Math.max(graded, 1))) + " documents.");
+  box.classList.toggle("kp-low", graded < target);
+  const ordered = [...scoped, ...sets.questions.filter((q) => !sets.defaults.includes(q.set))];
+  el("kp-q-list").replaceChildren(table(["Set", "Question", "Terms", ""], ordered, (q) => [
+    q.set || "(general)", q.text,
+    q.must + q.must_not ? q.must + " must, " + q.must_not + " must not" : "not graded",
+    kpButton(q.editable ? "Edit" : "View", () => kpRun("Reading", () => kpQuestionOpen(
+      q.path, q.editable)))]));
+}
+
+async function kpQuestionOpen(path, editable, text = null) {
+  const body = text !== null ? text
+    : (await pipeline("file-read", {sandbox_id: kpSandbox.sandbox_id, path})).text;
+  kpQuestionPath = path; el("kp-q-editor").hidden = false;
+  el("kp-q-path").textContent = path + (editable ? "" : " (another folder's set: read only)");
+  el("kp-q-text").value = body; el("kp-q-text").readOnly = !editable;
+  el("kp-q-save").hidden = !editable; el("kp-q-text").focus();
+}
+
+el("kp-q-new").addEventListener("click", () => {
+  const scope = (kpSandbox.scope || "general").split("/")[0].toLowerCase();
+  const set = (kpQuestionSets && kpQuestionSets.defaults[0]) || scope;
+  const stamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
+  kpQuestionOpen("checks/questions/" + set + "/q-" + stamp + ".md", true,
+    "---\nname: q-" + stamp + "\nasked_by: \n---\n\n# Write the question here?\n\n"
+    + "必須提到:\n  - \n\n不可以說:\n");
+});
+el("kp-q-save").addEventListener("click", () => kpRun("Saving the question", async () => {
+  await pipeline("rule-write", {sandbox_id: kpSandbox.sandbox_id, path: kpQuestionPath,
+                                text: el("kp-q-text").value});
+  await kpLoadBench();
+  kpStatus("Saved " + kpQuestionPath + ".");
+}));
+el("kp-q-cancel").addEventListener("click", () => { el("kp-q-editor").hidden = true; });
+
 async function kpLoadScopes() {
   // A sandbox maintains one folder of the project vault (owner, 2026-10-13).
   const pick = el("kp-scope"); pick.replaceChildren();
@@ -4193,7 +4396,9 @@ async function kpLoadScopes() {
 el("kp-base").addEventListener("change", () => kpRun("Reading", kpLoadScopes));
 
 async function kpOpen(item) {
-  if (!kpSandbox || kpSandbox.sandbox_id !== item.sandbox_id) {
+  const switched = !kpSandbox || kpSandbox.sandbox_id !== item.sandbox_id;
+  if (switched) {
+    kpCurrentStage = kpStoredStage(item.sandbox_id); el("kp-q-editor").hidden = true;
     kpNewRaw = new Set(); kpFocus = null; kpAnchor = null;
     el("kp-doc").replaceChildren(); el("kp-plan").replaceChildren();
     el("kp-doc-title").textContent = "Choose a Raw document on the right.";
@@ -4208,6 +4413,8 @@ async function kpOpen(item) {
   const rawRefs = item.scope ? contents.raw.filter((ref) =>
     ref.startsWith("raw/" + item.scope + "/")) : contents.raw;
   el("kp-scope-name").textContent = item.scope || "whole vault (older sandbox)";
+  kpRawTotal = rawRefs.length;
+  kpStage(kpCurrentStage, switched);
   await kpReviewBanner(item);
   const prefix = item.scope ? "raw/" + item.scope + "/" : "raw/";
   for (const ref of rawRefs) {
@@ -4311,6 +4518,7 @@ async function kpLoadPull() {
 
 async function kpLoadBench() {
   const sets = await pipeline("question-sets", {sandbox_id: kpSandbox.sandbox_id});
+  kpQuestionsShow(sets);
   kpChecks(el("kp-bench-sets"), Object.entries(sets.sets).map(([name, n]) =>
     [name, (name || "(general)") + " \u2014 " + n + " questions"]), sets.defaults);
   if (sets.ungraded.length) {
@@ -4774,6 +4982,8 @@ el("kp-new").addEventListener("submit", (event) => {
       pipeline("sandbox-create", {base: el("kp-base").value, label: el("kp-label").value.trim(),
                                   scope: el("kp-scope").value, progress_key: key}));
     el("kp-label").value = ""; await loadKnowledge(); await kpOpen(made);
+    kpStage("pull");
+    if (kpTicked(el("kp-pull-folders")).length) el("kp-pull").click();  // pull the folder now
   });
 });
 el("kp-upload").addEventListener("click", () => kpRun("Adding to drop", async () => {
@@ -5259,7 +5469,7 @@ el("kp-discard").addEventListener("click", () => {
   if (!kpSandbox || !confirm("Discard this sandbox? It is moved aside, not deleted.")) return;
   kpRun("Discarding", async () => {
     await pipeline("sandbox-discard", {sandbox_id: kpSandbox.sandbox_id});
-    kpSandbox = null; el("kp-box").hidden = true; await loadKnowledge();
+    kpSandbox = null; kpStage("pull"); await loadKnowledge();
   });
 });
 

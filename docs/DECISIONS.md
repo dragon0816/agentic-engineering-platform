@@ -2367,3 +2367,13 @@ are tracked. To let questions reach the project vault, merge and push now includ
 Rejected: applying accepted rule text directly to the project vault (bypasses the
 benchmark gate); letting any sandbox edit any question set (could weaken another
 folder's gate).
+
+## 2026-10-14: The Knowledge tab is a three-step guide
+
+Decision (owner): the maintenance flow is shown as three steps with one page each and a
+stepper to move freely: Pull data (pull, add files, convert), Ingest data (edit the
+folder's skills, ingest) and Testing data (questions and their coverage, test, push).
+Element ids and the pipeline calls are unchanged, so the steps only regroup existing
+features; advanced tools stay folded under step 3. Coverage is a stated guideline (at
+least 5 graded questions, about one per 10 Raw documents), not a gate.
+Rejected: one long page with numbered cards (the previous layout: too much at once).

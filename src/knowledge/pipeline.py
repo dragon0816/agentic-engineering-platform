@@ -37,7 +37,8 @@ from knowledge.merge import (
 from knowledge.migrate import adopt
 from knowledge.planning import DEFAULT_CONVENTIONS, IngestPlanner
 from knowledge.progress import reporter
-from knowledge.questions import default_sets
+from knowledge.questions import category as question_category
+from knowledge.questions import default_sets, set_categories
 from knowledge.questions import load as load_questions
 from knowledge.questions import sets as question_set_counts
 from knowledge.raw import (
@@ -391,9 +392,15 @@ class KnowledgePipeline:
         root = vault.root / "checks" / "questions"
         found = load_questions(root if root.is_dir() else self.questions_roots[info.base_name])
         counts = question_set_counts(found)
+        scope = (info.scope,) if info.scope else info.pulled
         return QuestionSets(
-            sandbox_id=sandbox_id, sets=counts, defaults=default_sets(counts, info.pulled),
-            ungraded=tuple(q.path for q in found if not (q.must or q.must_not)))
+            sandbox_id=sandbox_id, sets=counts, defaults=default_sets(counts, scope),
+            ungraded=tuple(q.path for q in found if not (q.must or q.must_not)),
+            questions=tuple(QuestionItem(
+                path=f"checks/questions/{q.path}", set=q.set, text=q.text, must=len(q.must),
+                must_not=len(q.must_not),
+                editable=_question_access(info.scope, f"checks/questions/{q.path}") == "edit")
+                for q in found))
 
     def add_drop(self, sandbox_id: str, name: str, data: bytes) -> str:
         """Put one original into the sandbox's drop/; never replaces a file."""
@@ -768,8 +775,9 @@ def _question_access(scope: str | None, rel: str) -> Literal["edit"] | None:
     parts = rel.split("/")
     if len(parts) < 4:
         return None
-    top = scope.split("/", 1)[0].casefold()
-    return "edit" if top in parts[2].casefold().split("_") else None
+    # The same matching the benchmark uses: `productions` and `production` are one.
+    folder = question_category(scope.split("/", 1)[0])
+    return "edit" if folder in set_categories(parts[2]) else None
 
 
 def _within(folder: str, scope: str) -> bool:
@@ -814,11 +822,21 @@ class PlanPage(Contract):
 
 
 
+class QuestionItem(Contract):
+    path: str  # in the sandbox, e.g. checks/questions/market/q1.md
+    set: str
+    text: str
+    must: int = Field(ge=0)
+    must_not: int = Field(ge=0)
+    editable: bool = False
+
+
 class QuestionSets(Contract):
     sandbox_id: str
     sets: dict[str, int] = Field(default_factory=dict)  # "" is the general set
     defaults: tuple[str, ...] = ()
     ungraded: tuple[str, ...] = ()
+    questions: tuple[QuestionItem, ...] = ()
 
 
 _LEGACY_SHA = re.compile(r"^source_sha:\s*([0-9a-f]{12,64})\s*$", re.MULTILINE)
