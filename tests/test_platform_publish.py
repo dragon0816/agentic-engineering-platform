@@ -203,3 +203,25 @@ def test_a_login_saved_with_setx_is_found_without_a_restart(
     environment = platform_publish.UserEnvironment({"PATH": "x"})
     assert environment.get("AEP_TEST_SAVED_LOGIN") == "login-1:saved-value"
     assert environment.get("PATH") == "x" and environment.get("MISSING") is None
+
+
+def test_agent_web_saves_a_pasted_code_for_this_user_and_never_echoes_it() -> None:
+    from types import SimpleNamespace
+
+    from host_runtime.web import AgentWeb
+    from host_runtime.web_page import PAGE
+
+    saved: dict[str, str] = {}
+    config = SimpleNamespace(
+        publishing=PlatformPublishBinding(member_portal_url="http://127.0.0.1:28776",
+                                          credential={"name": "platform_member_login"}),
+        credential_environment=lambda: {"platform_member_login": "AEP_PLATFORM_MEMBER_LOGIN"})
+    web = SimpleNamespace(runtime=SimpleNamespace(config=config),
+                          user_environment=lambda name, value: saved.__setitem__(name, value))
+    code = "login-0123456789abcdef:" + "S" * 43
+    reply = AgentWeb.connect_publishing(web, "  " + code + "\n")  # type: ignore[arg-type]
+    assert reply == {"ok": True} and saved == {"AEP_PLATFORM_MEMBER_LOGIN": code}
+    refused = AgentWeb.connect_publishing(web, "not a code")  # type: ignore[arg-type]
+    assert refused["code"] == "login_malformed" and "not a code" not in str(refused)
+    assert 'id="publish-code"' in PAGE and 'type="password"' in PAGE
+    assert "/api/publishing/connect" in PAGE

@@ -2821,6 +2821,31 @@ class AgentWeb:
             "for review"))
         return {"ok": True, "submission": submission}
 
+    def connect_publishing(self, code: str) -> dict[str, Any]:
+        """Save the member's Personal Agent login for this Windows user, as
+        the Telegram token is saved; the value is never written to a file,
+        logged or echoed (owner 2026-10-15: no command line for this)."""
+        binding = self.runtime.config.publishing
+        if binding is None:
+            return {"ok": False, "code": "publishing_not_configured",
+                    "message": "Add the shared platform's publishing settings to host.json."}
+        variable = self.runtime.config.credential_environment().get(binding.credential.name)
+        value = code.strip()
+        if variable is None:
+            return {"ok": False, "code": "login_variable_missing",
+                    "message": "host.json names no environment variable for this login."}
+        if not re.fullmatch(r"login-[0-9a-f]{16}:[A-Za-z0-9_-]{32,}", value):
+            return {"ok": False, "code": "login_malformed",
+                    "message": "That is not a Personal Agent code; copy it again from the portal."}
+        try:
+            self.user_environment(variable, value)
+        except Exception:  # noqa: BLE001 - the reason must not carry the value
+            return {"ok": False, "code": "login_not_saved",
+                    "message": "Windows did not save the code."}
+        # The next call builds a fresh publisher, which reads the new login.
+        self._member_publisher = (None, None)
+        return {"ok": True}
+
     def withdraw_submission(self, submission_id: str) -> dict[str, Any]:
         publisher = self._publisher()
         if publisher is None:
@@ -3616,6 +3641,7 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/ask",
             "/api/platform/sync",
             "/api/publishing/submit",
+            "/api/publishing/connect",
             "/api/publishing/withdraw",
             "/api/profiles/activate",
             "/api/workflows/run",
@@ -3963,6 +3989,13 @@ class _Handler(BaseHTTPRequestHandler):
                 return
             kind, asset, change = (str(value) for value in values)
             self._json(200, self.server.web.publish_asset(kind, asset, change, note))
+            return
+        if path == "/api/publishing/connect":
+            code = body.get("code") if isinstance(body, dict) else None
+            if not isinstance(code, str) or not code.strip():
+                self._json(400, {"error": "paste the code from the Member Portal"})
+                return
+            self._json(200, self.server.web.connect_publishing(code))
             return
         if path == "/api/publishing/withdraw":
             submission_id = body.get("submission_id") if isinstance(body, dict) else None

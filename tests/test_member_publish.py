@@ -153,7 +153,10 @@ def test_approval_publishes_as_the_submitter_with_the_reviewers_decision(
     assert json.loads(artifact)["metadata"]["business_approval"]["reviewer"] == "bob"
 
 
-def test_nobody_reviews_their_own_submission(queue: SubmissionService) -> None:
+def test_self_review_is_refused_when_the_platform_says_so(queue: SubmissionService) -> None:
+    # Allowed by default since 2026-10-15 (owner, temporary while publishing
+    # is verified); a platform that turns it off refuses it.
+    queue.allow_self_review = False
     item = submit(queue)
     with pytest.raises(SubmissionError, match="self_review_refused"):
         queue.approve(who("alice"), AssetApproveRequest(
@@ -317,3 +320,13 @@ def test_the_portal_shows_the_review_queue_and_the_agent_connection() -> None:
         assert hook in PAGE
     # Submitted text is shown as text, never as markup.
     assert "review-manifest\").textContent" in PAGE and "innerHTML=JSON" not in PAGE
+
+
+def test_an_administrator_may_approve_their_own_submission_by_default(
+    queue: SubmissionService,
+) -> None:
+    item = submit(queue)
+    approved = queue.approve(who("alice"), AssetApproveRequest(
+        submission_id=item.submission_id, evidence="my own, checked"))
+    assert (approved.status, approved.reviewer) == ("approved", "alice")
+    assert len(queue.packages.discover()) == 1

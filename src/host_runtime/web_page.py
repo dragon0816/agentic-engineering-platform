@@ -998,6 +998,12 @@ tr:last-child td { border-bottom: none; }
       <div id="publish-off" class="empty" hidden>Publishing is not set up on this PC: add
         <code>publishing</code> (the Member Portal address and the name of your Personal
         Agent login) to host.json.</div>
+      <div id="publish-connect" class="laya-grid" hidden>
+        <label>Personal Agent code from the Member Portal ("Connect a Personal Agent")
+          <input id="publish-code" type="password" autocomplete="off"
+                 placeholder="paste the code, then Save"></label>
+        <div><button id="publish-code-save" type="button">Save code</button></div>
+      </div>
       <div id="publish-form" class="laya-grid" hidden>
         <label>Skill or Workflow<select id="publish-asset"></select></label>
         <label>Change<select id="publish-change">
@@ -3869,6 +3875,7 @@ el("platform-sync").addEventListener("click", synchronizePlatform);
 async function loadPublishing() {
   const data = await call("/api/publishing");
   el("publish-off").hidden = data.configured; el("publish-form").hidden = !data.configured;
+  el("publish-connect").hidden = !data.configured;
   const select = el("publish-asset"), chosen = select.value;
   select.replaceChildren();
   for (const item of data.assets) {
@@ -3895,6 +3902,15 @@ async function withdrawSubmission(id) {
   el("publish-status").textContent = reply.ok ? "Withdrawn." : reply.message || reply.code;
   await loadPublishing();
 }
+
+el("publish-code-save").addEventListener("click", async () => {
+  const field = el("publish-code"), status = el("publish-status");
+  const reply = await call("/api/publishing/connect", {code: field.value});
+  field.value = "";  // the code never stays on the page
+  status.classList.toggle("bad", !reply.ok);
+  status.textContent = reply.ok ? "Saved. This PC now publishes as you." : reply.message;
+  if (reply.ok) await loadPublishing();
+});
 
 el("publish-go").addEventListener("click", async () => {
   const button = el("publish-go"), status = el("publish-status");

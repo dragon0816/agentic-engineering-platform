@@ -74,6 +74,9 @@ class SharedPlatformConfiguration(Contract):
     invitations: tuple[BootstrapInvitation, ...] = ()
     registry_path: Text | None = None
     seed_preview_catalog: bool = False
+    # Whether an administrator may approve their own submission (owner
+    # 2026-10-15: allowed while publishing is verified, to be revisited).
+    allow_self_review: bool = True
 
     @model_validator(mode="after")
     def coherent_listener(self) -> Self:
@@ -353,6 +356,8 @@ def application_from_config(
         from control_plane.preview_catalog import seed_preview_catalog
 
         seed_preview_catalog(application.state)
+    if application.member_service.submissions is not None:
+        application.member_service.submissions.allow_self_review = config.allow_self_review
     issued: list[IssuedInvitationProof] = []
     try:
         for bootstrap in config.invitations:

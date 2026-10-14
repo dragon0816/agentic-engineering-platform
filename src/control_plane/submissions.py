@@ -212,8 +212,13 @@ class SubmissionService:
         *,
         artifacts: Mapping[str, bytes] | None = None,
         clock: Callable[[], datetime] | None = None,
+        allow_self_review: bool = True,
     ) -> None:
         self.ownership = ownership
+        # Owner 2026-10-15, temporary while publishing is verified: an
+        # administrator may approve their own submission. Revisit after the
+        # verification (`docs/phases/MEMBER_PUBLISH.md`); False refuses it.
+        self.allow_self_review = allow_self_review
         self.packages = packages
         self.store = store
         self._artifacts = artifacts
@@ -371,7 +376,7 @@ class SubmissionService:
             item, content = held
             if item.status != "pending":
                 raise SubmissionError("submission_not_pending")
-            if item.submitter == actor:
+            if item.submitter == actor and not self.allow_self_review:
                 raise SubmissionError("self_review_refused")
             manifest = _parse(item.kind, json.loads(content))
             evidence = f"submission:{item.submission_id}; {decision.evidence}"
