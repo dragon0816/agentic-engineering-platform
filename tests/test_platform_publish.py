@@ -191,3 +191,15 @@ def test_agent_web_offers_publishing_beside_the_marketplace() -> None:
     for hook in ('id="publish-card"', 'id="publish-asset"', 'id="publish-go"',
                  "/api/publishing/submit", "/api/publishing/withdraw", "loadPublishing()"):
         assert hook in PAGE
+
+
+def test_a_login_saved_with_setx_is_found_without_a_restart(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from host_runtime import platform_publish
+
+    saved = {"AEP_TEST_SAVED_LOGIN": "login-1:saved-value"}
+    monkeypatch.setattr(platform_publish, "_saved_user_variable", saved.get)
+    environment = platform_publish.UserEnvironment({"PATH": "x"})
+    assert environment.get("AEP_TEST_SAVED_LOGIN") == "login-1:saved-value"
+    assert environment.get("PATH") == "x" and environment.get("MISSING") is None

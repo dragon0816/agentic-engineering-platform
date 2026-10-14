@@ -14,10 +14,13 @@ never goes to the Bridge API.
 from __future__ import annotations
 
 import json
+import os
 import re
+import sys
 import threading
 import urllib.error
 import urllib.request
+from collections.abc import Iterator, Mapping
 from datetime import UTC, datetime, timedelta
 from typing import Any, Literal
 
@@ -194,8 +197,49 @@ def explain(code: str) -> str:
     return EXPLANATIONS.get(code, f"The shared platform refused it ({code}).")
 
 
+class UserEnvironment(Mapping[str, str]):
+    """This process's environment, then this Windows user's saved variables.
+
+    A member sets their Personal Agent login once with `setx`; a running Agent
+    Web or a shell opened before that does not see it in its own environment,
+    so the user's saved value (HKCU\Environment) is read at the moment of use.
+    """
+
+    def __init__(self, base: Mapping[str, str] | None = None) -> None:
+        self._base = base if base is not None else os.environ
+
+    def __getitem__(self, name: str) -> str:
+        if name in self._base:
+            return self._base[name]
+        value = _saved_user_variable(name)
+        if value is None:
+            raise KeyError(name)
+        return value
+
+    def __iter__(self) -> Iterator[str]:
+        return iter(self._base)
+
+    def __len__(self) -> int:
+        return len(self._base)
+
+
+def _saved_user_variable(name: str) -> str | None:
+    if sys.platform != "win32":
+        return None
+    import winreg
+
+    try:
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as key:
+            value, _ = winreg.QueryValueEx(key, name)
+    except OSError:
+        return None
+    return value if isinstance(value, str) else None
+
+
 def publisher_for(
-    binding: PlatformPublishBinding | None, names: dict[str, str], environ: Any = None
+    binding: PlatformPublishBinding | None,
+    names: dict[str, str],
+    environ: Mapping[str, str] | None = None,
 ) -> MemberPortalPublisher | None:
     """The publisher for a host's configuration, or None when publishing is
     not configured. `names` is the host's secret-to-variable mapping."""
@@ -203,5 +247,6 @@ def publisher_for(
         return None
     from models.credentials import EnvironmentCredentials
 
-    return MemberPortalPublisher(binding, EnvironmentCredentials(names, environ))
-
+    return MemberPortalPublisher(
+        binding, EnvironmentCredentials(names, environ if environ is not None
+                                        else UserEnvironment()))
