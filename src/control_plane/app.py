@@ -38,6 +38,7 @@ from control_plane.member_signin import InMemoryInvitationSignIn
 from control_plane.ownership import AssetOwnershipService
 from control_plane.registry_sqlite import SqliteRegistry
 from control_plane.service import ControlPlaneService
+from control_plane.submissions import SubmissionService, SubmissionStore
 from software.marketplace import ApplicationCatalog
 
 LOOPBACK = frozenset(("127.0.0.1", "localhost", "::1"))
@@ -117,6 +118,7 @@ class SharedPlatformState:
     identity_storage: SqliteIdentityStorage | None = None
     logins: InMemoryMemberLogins = field(default_factory=InMemoryMemberLogins)
     feedback: FeedbackStore = field(default_factory=FeedbackStore)
+    submissions: SubmissionStore = field(default_factory=SubmissionStore)
 
     @classmethod
     def empty(cls, *, administrators: tuple[Symbol, ...]) -> Self:
@@ -159,6 +161,7 @@ class SharedPlatformState:
             identity_storage=storage,
             logins=InMemoryMemberLogins(storage=storage),
             feedback=FeedbackStore(path),
+            submissions=SubmissionStore(path),
         )
 
 
@@ -194,17 +197,23 @@ class SharedPlatformApplication:
             clock=moment,
             feedback=state.feedback,
         )
+        ownership = AssetOwnershipService(
+            state.enrollment,
+            state.packages,
+            artifacts=(state.artifacts if isinstance(state.artifacts, MutableMapping) else None),
+        )
         self.member_service = MemberService(
             enrollment=state.enrollment,
             authorization=state.authorization,
             sessions=sessions,
             applications=state.applications,
-            ownership=AssetOwnershipService(
-                state.enrollment,
+            ownership=ownership,
+            submissions=SubmissionService(
+                ownership,
                 state.packages,
-                artifacts=(
-                    state.artifacts if isinstance(state.artifacts, MutableMapping) else None
-                ),
+                state.submissions,
+                artifacts=state.artifacts,
+                clock=moment,
             ),
             clock=moment,
         )

@@ -6,13 +6,13 @@ own authenticated session and the authorization registry derives policy from
 the asset and Bridge records it already trusts.
 """
 
-from typing import Self
+from typing import Literal, Self
 
-from pydantic import AwareDatetime, Field, model_validator
+from pydantic import AwareDatetime, Field, JsonValue, model_validator
 
 from common.assets import AssetIdentity, Owner
 from common.authorization import DeviceAssetSelection
-from common.base import Contract, Slug, Symbol, Text
+from common.base import Contract, Sha256, Slug, Symbol, Text
 from common.distribution import PublishedAssetPackage
 from common.enrollment import Invitation, PlatformRole
 from common.ownership import AssetNameOwnership, VersionChange
@@ -202,3 +202,85 @@ class AssetOwnershipReply(Contract):
 
     ownership: AssetNameOwnership
     versions: tuple[Text, ...] = ()
+
+
+# -- Member publish with a review queue (owner 2026-10-15) -----------------
+# `docs/phases/MEMBER_PUBLISH.md`. A submission is not a package: a package is
+# published by definition, so the queue keeps its own record until approval.
+
+SubmissionKind = Literal["skill", "workflow"]
+SubmissionStatus = Literal["pending", "approved", "rejected", "withdrawn"]
+SubmissionRisk = Literal["low", "medium", "high", "critical"]
+
+
+class AssetSubmitRequest(Contract):
+    """A manifest as the member's Agent has it. The platform assigns the
+    version, owner and reviews; nothing the author wrote there is trusted."""
+
+    kind: SubmissionKind
+    change: VersionChange
+    note: Text | None = None
+    manifest: dict[str, JsonValue]
+
+
+class AssetSubmission(Contract):
+    """One submission's secret-free record, without its artifact bytes."""
+
+    submission_id: Symbol
+    kind: SubmissionKind
+    identity: AssetIdentity
+    submitter: Symbol
+    change: VersionChange
+    note: Text | None = None
+    sha256: Sha256
+    risk: SubmissionRisk = "low"
+    required_permissions: tuple[Symbol, ...] = ()
+    status: SubmissionStatus = "pending"
+    reviewer: Symbol | None = None
+    reason: Text | None = None
+    submitted_at: AwareDatetime
+    decided_at: AwareDatetime | None = None
+
+    @model_validator(mode="after")
+    def decided_with_reviewer(self) -> Self:
+        if self.status in ("approved", "rejected") and (
+            self.reviewer is None or self.decided_at is None
+        ):
+            raise ValueError("a review decision names its reviewer and time")
+        if self.status == "rejected" and self.reason is None:
+            raise ValueError("a rejection gives its reason")
+        return self
+
+
+class AssetSubmissionReply(Contract):
+    submission: AssetSubmission
+
+
+class AssetSubmissionListRequest(Contract):
+    status: SubmissionStatus | None = None
+
+
+class AssetSubmissionListReply(Contract):
+    submissions: tuple[AssetSubmission, ...] = ()
+
+
+class AssetSubmissionRequest(Contract):
+    submission_id: Symbol
+
+
+class AssetSubmissionDetailReply(Contract):
+    """What a reviewer reads: the manifest as it would be published, and the
+    highest published version of the same name to compare it with."""
+
+    submission: AssetSubmission
+    manifest: dict[str, JsonValue]
+    previous_version: Text | None = None
+    previous_manifest: dict[str, JsonValue] | None = None
+
+
+class AssetApproveRequest(AssetSubmissionRequest):
+    evidence: Text
+
+
+class AssetRejectRequest(AssetSubmissionRequest):
+    reason: Text

@@ -21,10 +21,15 @@ from common.member import (
     AdminInvitationListReply,
     AdminInvitationMetadata,
     AdminInvitationRevokeRequest,
+    AssetApproveRequest,
     AssetCoEditorRequest,
     AssetDeprecateRequest,
     AssetNameRequest,
     AssetNextVersionRequest,
+    AssetRejectRequest,
+    AssetSubmissionListRequest,
+    AssetSubmissionRequest,
+    AssetSubmitRequest,
     AssetTransferRequest,
     MemberCatalogRequest,
     MemberReplaceRequest,
@@ -35,6 +40,7 @@ from control_plane.member import IssuedMemberSession, MemberError, MemberService
 from control_plane.member_login import InMemoryMemberLogins
 from control_plane.member_page import PAGE
 from control_plane.member_signin import InMemoryInvitationSignIn, InvitationSignInError
+from control_plane.submissions import SubmissionError
 from software.marketplace import ApplicationCatalogRequest
 
 API_PREFIX = "/v1/member/"
@@ -73,7 +79,18 @@ STATUS_FOR = {
     "new_owner_unknown": 400,
     "version_missing": 404,
     "version_deprecated": 409,
+    # Member publish with a review queue (owner 2026-10-15).
+    "manifest_invalid": 400,
+    "artifact_too_large": 413,
+    "missing_dependency": 409,
+    "submission_missing": 404,
+    "submission_not_pending": 409,
+    "self_review_refused": 403,
+    "version_superseded": 409,
 }
+# The label of a login a member issues for their Personal Agent, so the
+# portal and an audit can tell it from the browser's own.
+AGENT_LOGIN_LABEL = "Personal Agent"
 
 
 def _credential(header: str | None) -> tuple[str, str] | None:
@@ -155,6 +172,14 @@ class _Handler(BaseHTTPRequestHandler):
             "assets/co-editors/remove",
             "assets/transfer",
             "assets/deprecate",
+            "assets/submit",
+            "assets/submissions",
+            "assets/submissions/withdraw",
+            "admin/submissions/list",
+            "admin/submissions/get",
+            "admin/submissions/approve",
+            "admin/submissions/reject",
+            "logins/issue-agent",
         ):
             self._json(404, {"code": "invalid_request"})
             return
@@ -232,6 +257,52 @@ class _Handler(BaseHTTPRequestHandler):
                 reply = self.server.service.asset_deprecate(
                     *credential, AssetDeprecateRequest.model_validate(raw)
                 )
+            elif operation == "assets/submit":
+                reply = self.server.service.asset_submit(
+                    *credential, AssetSubmitRequest.model_validate(raw)
+                )
+            elif operation == "assets/submissions":
+                if raw != {}:
+                    raise ValueError("the member's submissions take no request fields")
+                reply = self.server.service.asset_submissions(*credential)
+            elif operation == "assets/submissions/withdraw":
+                reply = self.server.service.asset_withdraw(
+                    *credential, AssetSubmissionRequest.model_validate(raw)
+                )
+            elif operation == "admin/submissions/list":
+                reply = self.server.service.review_queue(
+                    *credential, AssetSubmissionListRequest.model_validate(raw)
+                )
+            elif operation == "admin/submissions/get":
+                reply = self.server.service.review_detail(
+                    *credential, AssetSubmissionRequest.model_validate(raw)
+                )
+            elif operation == "admin/submissions/approve":
+                reply = self.server.service.review_approve(
+                    *credential, AssetApproveRequest.model_validate(raw)
+                )
+            elif operation == "admin/submissions/reject":
+                reply = self.server.service.review_reject(
+                    *credential, AssetRejectRequest.model_validate(raw)
+                )
+            elif operation == "logins/issue-agent":
+                # A login the member hands to their own Personal Agent, shown
+                # once; the Agent trades it for short sessions to publish.
+                if raw != {}:
+                    raise ValueError("an Agent login takes no request fields")
+                member = self.server.service.identity(*credential)
+                login = self.server.logins.issue(
+                    member.actor, label=AGENT_LOGIN_LABEL, now=self.server.service.now()
+                )
+                self._json(
+                    200,
+                    {
+                        "login": login.bearer,
+                        "login_id": login.grant.login_id,
+                        "expires_at": login.grant.expires_at.isoformat(),
+                    },
+                )
+                return
             elif operation == "admin/invitations":
                 create = AdminInvitationCreateRequest.model_validate(raw)
                 who = self.server.service.administrator(*credential)
@@ -292,7 +363,7 @@ class _Handler(BaseHTTPRequestHandler):
         except (ValidationError, ValueError):
             self._json(400, {"code": "invalid_request"})
             return
-        except MemberError as error:
+        except (MemberError, SubmissionError) as error:
             self._json(STATUS_FOR[error.code], {"code": error.code})
             return
         except Exception:  # noqa: BLE001 - no traceback crosses the member boundary

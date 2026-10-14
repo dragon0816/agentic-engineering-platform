@@ -1,6 +1,6 @@
 # Member publish to the Shared Platform
 
-Owner request: 2026-10-15. Status: **design, awaiting owner review. Nothing is implemented.**
+Owner request: 2026-10-15. Status: **approved 2026-10-15. Control plane done (submission queue, review routes, Agent login, portal UI); Agent side (Agent Web button, CLI) next.**
 
 This closes the open item 5 of `docs/phases/ASSET_OWNERSHIP.md` ("member publish route
 and UI").
@@ -179,17 +179,12 @@ above both published and pending versions.
    by design, so the owner invites e.g. `leo-review` as `platform_admin`.
 5. Confirm both appear in the catalog.
 
-## Open questions for the owner
+## Owner decisions on the open questions (2026-10-15)
 
-1. **Who reviews in the test.** Self-review is refused. Is a second admin account
-   (`leo-review`) acceptable? The alternative is a config switch
-   `allow_self_review` for single-admin previews.
-2. **Login storage.** The recommendation is the existing environment-variable
-   credential (set once with `setx`). The alternative is a new Windows-protected
-   (DPAPI) secret file written by the "Connect" button: easier to use, but a new
-   secret store.
-3. **Namespace.** Publish under the asset's current namespace (for example
-   `engineering/...`), or force a personal or team namespace on first publish?
+1. **Reviewer.** Self-review stays refused; the test uses a second administrator
+   account (`leo-review`). No `allow_self_review` switch.
+2. **Login storage.** The existing environment-variable credential.
+3. **Namespace.** The asset keeps its current namespace.
 
 ## Not in scope
 

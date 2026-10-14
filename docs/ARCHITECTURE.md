@@ -449,6 +449,14 @@ installed keep working for rollback. The rules are checked inside the
 Registry transaction that writes. Publishing still grants no execution, and
 the existing validation and review layers still apply.
 
+**Member publish (owner decisions 2026-10-15, `docs/phases/MEMBER_PUBLISH.md`).**
+A member publishes a Skill or Workflow from their Personal Agent as themselves,
+through a revocable `Personal Agent` login separate from the Bridge token. The
+platform stores the submission in a review queue with the version it assigns,
+the name's owner and both reviews pending. An administrator other than the
+submitter approves or rejects it. Only an approval publishes, as the submitter,
+under the ownership rules above.
+
 Bridge Extensions and independent Applications are separate marketplace
 categories. A Bridge Extension declares exact Windows/Python/ABI compatibility,
 a versioned JSON-lines subprocess protocol, typed Bridge capabilities, health

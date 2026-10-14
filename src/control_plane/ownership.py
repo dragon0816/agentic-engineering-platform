@@ -222,6 +222,43 @@ class AssetOwnershipService:
         Without a change level the version is the publisher's and must be
         above every existing one; with one it must be the assigned one."""
         actor, groups = self._member(identity, now)
+        return self._publish(actor, groups, package, artifact=artifact, change=change)
+
+    def publish_reviewed(
+        self,
+        submitter: Symbol,
+        package: PublishedAssetPackage,
+        *,
+        artifact: bytes,
+    ) -> PublishedAssetPackage:
+        """Publish an approved submission as the member who submitted it
+        (`docs/phases/MEMBER_PUBLISH.md`). The administrator's approval is the
+        authority here, so the submitter's session may long have ended; their
+        account must still be active, and the ownership and version rules are
+        checked again with their current groups."""
+        try:
+            user = self.enrollment.user(submitter)
+        except EnrollmentError:
+            raise OwnershipError("actor_unknown") from None
+        if user.status != "active":
+            raise OwnershipError("actor_disabled")
+        return self._publish(user.actor, user.groups, package, artifact=artifact, change=None)
+
+    def member(
+        self, identity: AuthenticatedActor, now: datetime | None = None
+    ) -> tuple[str, tuple[str, ...]]:
+        """The member's actor and current groups, from a still-valid identity."""
+        return self._member(identity, now)
+
+    def _publish(
+        self,
+        actor: str,
+        groups: tuple[str, ...],
+        package: PublishedAssetPackage,
+        *,
+        artifact: bytes | None,
+        change: VersionChange | None,
+    ) -> PublishedAssetPackage:
         try:
             if isinstance(self.packages, SqliteRegistry):
                 return self.packages.publish_as(

@@ -25,12 +25,20 @@ from common.identity import ACCESS_TOKEN_METHOD, AuthenticatedActor, entitled
 from common.member import (
     AdminExtensionCatalogEntry,
     AdminExtensionCatalogReply,
+    AssetApproveRequest,
     AssetCoEditorRequest,
     AssetDeprecateRequest,
     AssetNameRequest,
     AssetNextVersionReply,
     AssetNextVersionRequest,
     AssetOwnershipReply,
+    AssetRejectRequest,
+    AssetSubmissionDetailReply,
+    AssetSubmissionListReply,
+    AssetSubmissionListRequest,
+    AssetSubmissionReply,
+    AssetSubmissionRequest,
+    AssetSubmitRequest,
     AssetTransferRequest,
     MemberCatalogEntry,
     MemberCatalogReply,
@@ -48,6 +56,7 @@ from control_plane.enrollment import InMemoryEnrollmentRegistry
 from control_plane.identity import fingerprint
 from control_plane.identity_store import SqliteIdentityStorage
 from control_plane.ownership import AssetOwnershipService, OwnershipError
+from control_plane.submissions import SubmissionService
 from software.marketplace import (
     ApplicationCatalog,
     ApplicationCatalogReply,
@@ -238,6 +247,7 @@ class MemberService:
         sessions: InMemoryMemberSessions,
         applications: ApplicationCatalog | None = None,
         ownership: AssetOwnershipService | None = None,
+        submissions: SubmissionService | None = None,
         clock: Callable[[], datetime] | None = None,
     ) -> None:
         self.enrollment = enrollment
@@ -247,6 +257,9 @@ class MemberService:
         # Name management needs the Registry that keeps ownership records;
         # without it the entry point answers invalid_request.
         self.ownership = ownership
+        # Member publish with a review queue (owner 2026-10-15); without it the
+        # submission operations answer invalid_request.
+        self.submissions = submissions
         self._clock = clock if clock is not None else lambda: datetime.now(UTC)
         self._lock = threading.Lock()
 
@@ -517,3 +530,65 @@ class MemberService:
                 now=now,
             ),
         )
+
+    # -- member publish with a review queue (owner 2026-10-15) -------------
+
+    def _submissions(self) -> SubmissionService:
+        if self.submissions is None:
+            raise MemberError("invalid_request")
+        return self.submissions
+
+    def _session(self, session_id: str, secret: str) -> AuthenticatedActor:
+        now = self._clock()
+        with self._lock:
+            return self._who(session_id, secret, now)
+
+    def asset_submit(
+        self, session_id: str, secret: str, request: AssetSubmitRequest
+    ) -> AssetSubmissionReply:
+        service = self._submissions()
+        who = self._session(session_id, secret)
+        return AssetSubmissionReply(submission=service.submit(who, request))
+
+    def asset_submissions(self, session_id: str, secret: str) -> AssetSubmissionListReply:
+        service = self._submissions()
+        return service.mine(self._session(session_id, secret))
+
+    def asset_withdraw(
+        self, session_id: str, secret: str, request: AssetSubmissionRequest
+    ) -> AssetSubmissionReply:
+        service = self._submissions()
+        item = AssetSubmissionRequest.model_validate(request)
+        who = self._session(session_id, secret)
+        return AssetSubmissionReply(submission=service.withdraw(who, item.submission_id))
+
+    def review_queue(
+        self, session_id: str, secret: str, request: AssetSubmissionListRequest
+    ) -> AssetSubmissionListReply:
+        service = self._submissions()
+        item = AssetSubmissionListRequest.model_validate(request)
+        self.administrator(session_id, secret)
+        return service.queue(item.status)
+
+    def review_detail(
+        self, session_id: str, secret: str, request: AssetSubmissionRequest
+    ) -> AssetSubmissionDetailReply:
+        service = self._submissions()
+        item = AssetSubmissionRequest.model_validate(request)
+        self.administrator(session_id, secret)
+        return service.detail(item.submission_id)
+
+    def review_approve(
+        self, session_id: str, secret: str, request: AssetApproveRequest
+    ) -> AssetSubmissionReply:
+        service = self._submissions()
+        who = self.administrator(session_id, secret)
+        return AssetSubmissionReply(submission=service.approve(who, request))
+
+    def review_reject(
+        self, session_id: str, secret: str, request: AssetRejectRequest
+    ) -> AssetSubmissionReply:
+        service = self._submissions()
+        who = self.administrator(session_id, secret)
+        return AssetSubmissionReply(submission=service.reject(who, request))
+

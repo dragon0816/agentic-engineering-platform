@@ -1982,7 +1982,53 @@ The member portal (`/v1/member/assets/...`) exposes `ownership`,
 `deprecate` with `AssetNameRequest`, `AssetNextVersionRequest`,
 `AssetCoEditorRequest`, `AssetTransferRequest` and `AssetDeprecateRequest`;
 replies are `AssetOwnershipReply` or `AssetNextVersionReply`. Requests carry
-no actor. A member publish route is not exposed yet (see the phase plan).
+no actor.
+
+### Member publish with a review queue (2026-10-15)
+
+`docs/phases/MEMBER_PUBLISH.md`. A submission is not a package (a
+`PublishedAssetPackage` is published by definition), so the queue keeps its own
+`common.member.AssetSubmission`: id, kind (`skill` / `workflow`), the assigned
+identity, submitter, change level, optional note, artifact sha256, risk and
+required permissions, status (`pending` / `approved` / `rejected` /
+`withdrawn`), reviewer, reason and times. A decision names its reviewer and
+time; a rejection gives its reason.
+
+`control_plane.submissions.SubmissionService`:
+- `submit` parses the manifest as `WorkflowManifest` or `SkillManifest`, refuses
+  a member who may not publish the name, and refuses a Skill whose Workflow
+  targets are neither published nor pending from the same member
+  (`missing_dependency`). It assigns the next version above published and
+  pending ones, and keeps the name's owner (the submitter for a new name). It
+  sets `lifecycle: published` and resets both reviews to pending, keeping only
+  the author's risk, permissions and policy refs. It appends a
+  `member-submission` provenance entry, then stores the re-serialized
+  manifest, at most 192 KiB (`artifact_too_large`).
+- `approve` refuses the submitter (`self_review_refused`). It writes the
+  reviewer and evidence `submission:<id>; ...` into both reviews and builds
+  the package from the approved manifest's bytes. It then publishes through
+  `AssetOwnershipService.publish_reviewed`, as the submitter with their
+  current groups, under the same Registry rules. A version no longer above
+  the highest is `version_superseded`.
+- `reject` needs a reason. `withdraw` is the submitter's own. A decision is
+  conditional on the status still being pending.
+
+`SubmissionStore` shares the Registry's SQLite file (`submissions` table) or
+lives in memory without one.
+
+Member portal operations:
+- `assets/submit` (`AssetSubmitRequest`: kind, change, note, manifest);
+- `assets/submissions`;
+- `assets/submissions/withdraw`;
+- administrator only: `admin/submissions/list|get|approve|reject`.
+
+New codes: `manifest_invalid` 400, `artifact_too_large` 413,
+`missing_dependency` / `submission_not_pending` / `version_superseded` 409,
+`submission_missing` 404, `self_review_refused` 403.
+
+`logins/issue-agent` issues a `Personal Agent` login for the signed-in member
+and returns its bearer once. The Agent trades it at `session` for one-hour
+sessions and never sends it to the Bridge API.
 
 ## Shared-platform transport (Phase 7, slice 2i)
 
