@@ -1,0 +1,200 @@
+# Member publish to the Shared Platform
+
+Owner request: 2026-10-15. Status: **design, awaiting owner review. Nothing is implemented.**
+
+This closes the open item 5 of `docs/phases/ASSET_OWNERSHIP.md` ("member publish route
+and UI").
+
+## Goal
+
+A person publishes a Skill or Workflow from their own Personal Agent (Agent Web or CLI)
+to the Shared Platform. A platform administrator reviews it. Only an approved version
+enters the catalog, where other members can select it for their Bridges.
+
+## Owner decisions (2026-10-15)
+
+1. **Identity.** The Agent publishes as the person (a member login), not as the
+   machine. The first publisher of a name becomes its owner (ASSET_OWNERSHIP rule 1).
+2. **Review.** Every submission waits in a review queue. An administrator approves or
+   rejects it in the Member Portal. Only an approval publishes.
+3. **Entry points.** An Agent Web "Publish to shared platform" action, plus
+   `aep-host assets publish` for automation.
+
+## What exists (code survey 2026-10-15)
+
+- Registry, ownership and version rules: `AssetOwnershipService.publish_as` /
+  `publish_next` (`control_plane/ownership.py`), and `SqliteRegistry.publish_as`
+  (`control_plane/registry_sqlite.py`), which checks the artifact hash, owner,
+  co-editors and that the version is above every existing one.
+- The artifact of a Skill or Workflow is the manifest's UTF-8 JSON
+  (`control_plane/preview_catalog.py`). The Agent installs those exact bytes as
+  `assets/{skills,workflows}/{ns}__{name}__{version}.json` (`host_runtime/sync.py`).
+  Publishing is the inverse: read the installed manifest and send it.
+- Member Portal: JSON over POST with `Authorization: Bearer <session>`; a `Login`
+  bearer (30 days, revocable, stored in the platform's SQLite) mints sessions
+  (`member_http.py`, `member_login.py`). Bodies are capped at 256 KiB.
+- `assets/next-version` already returns the next version for a change level.
+- Missing:
+  - any upload route;
+  - any pending or review storage (`PublishedAssetPackage` must be `published`);
+  - any review check in the Registry;
+  - any Agent-side code that builds a package or talks to the Member Portal.
+
+## Design
+
+### 1. Agent login (identity)
+
+- **Issuing.** A new portal operation `logins/issue-agent` (member session required)
+  issues a `Login` labelled `Personal Agent` and shows its bearer once.
+  - The portal gets a "Connect a Personal Agent" button that displays the code to copy.
+  - Invitations stay single use; the browser keeps its own login.
+- **Storing.** The Agent stores the bearer through the existing credential mechanism:
+  - host.json `platform.member_credential: {"name": "platform_member_login"}`;
+  - the secret is mapped in `credentials` to an environment variable;
+  - the file never holds the value (`reject_embedded_secrets` still applies).
+- **Using.** Before each portal call, the Agent exchanges the login for a one-hour
+  session (`POST /v1/member/session`) and keeps the session only in memory.
+- **Revoking.** The member revokes the login from the portal. The Agent then gets
+  `authentication_failed` and Agent Web says to reconnect.
+
+### 2. Submission (member routes, member session)
+
+| Operation | Body | Result |
+|---|---|---|
+| `assets/submit` | `kind` (skill/workflow), `change` (patch/minor/major), `note`, `manifest` (the manifest JSON object) | `submission_id`, assigned `version`, `status: pending` |
+| `assets/submissions/mine` | — | the member's submissions with status and reviewer reason |
+| `assets/submissions/withdraw` | `submission_id` | a pending submission is withdrawn |
+
+**Checks on submit, before anything is stored:**
+1. Parse the manifest as `WorkflowManifest` or `SkillManifest`. Reject unknown fields
+   and embedded secrets.
+2. The platform assigns the version with `next_version(change)` and rewrites the
+   manifest metadata:
+   - `version` = the assigned version;
+   - `owner` = the submitter, or the name's existing owner;
+   - `lifecycle: published`;
+   - both reviews `pending`;
+   - provenance records the submitter and the Agent.
+
+   Author-written approvals are never trusted, as in `skill_authoring.py`.
+3. Run the ownership pre-check (`admit_member_version`). A non-owner who is not a
+   co-editor is refused now, not at approval.
+4. A Skill's command targets must already be published, or be pending submissions by
+   the same member. Otherwise the submission is refused with `missing_dependency`.
+5. Size: the manifest must fit the existing 256 KiB body limit; a larger one is
+   refused with `artifact_too_large`.
+
+**Stored** in a new SQLite table `submissions`, in the same database as the Registry:
+- id, kind, identity, submitter, change, note;
+- artifact bytes and their sha256;
+- status (`pending` / `approved` / `rejected` / `withdrawn`);
+- reviewer, reason, timestamps.
+
+The version is reserved: a second submission of the same name gets the next number
+above both published and pending versions.
+
+### 3. Review (admin routes)
+
+| Operation | Body | Result |
+|---|---|---|
+| `admin/submissions/list` | `status` filter | the queue |
+| `admin/submissions/get` | `submission_id` | the manifest, a diff against the previous published version, and the risk summary |
+| `admin/submissions/approve` | `submission_id`, `evidence` | the package is published |
+| `admin/submissions/reject` | `submission_id`, `reason` (required) | rejected |
+
+- **Approval** sets both reviews to `approved`, with the reviewer and evidence
+  `submission:<id>; <evidence>`. It builds the `PublishedAssetPackage` with
+  `artifact_ref registry://ns/name/version` and the artifact sha256, then calls
+  `publish_as(package, publisher=submitter)` in one transaction. Ownership and
+  version rules are checked again there.
+- **No self-review.** The reviewer must not be the submitter (`self_review_refused`).
+  This is the gap ASSET_OWNERSHIP names ("a member could otherwise assert their own
+  reviews").
+- **Risk.** A Workflow's risk is the highest `required_permissions` risk of its steps;
+  it is shown to the reviewer. High or critical risk keeps `approval_required`.
+- **Portal UI.** The admin sees a "Review queue" section (list, view manifest, approve
+  or reject with a reason). Every member sees "My submissions".
+
+### 4. Agent side
+
+- `host_runtime/platform_publish.py`:
+  - reads an installed Skill or Workflow manifest;
+  - signs in with the member login;
+  - calls `assets/submit`, `assets/submissions/mine` and `withdraw`.
+
+  It never sends the Bridge token to the portal, and never sends the member login to
+  the Bridge API.
+- **Agent Web.** The installed Skills and Workflows lists get "Publish to shared
+  platform":
+  - a dialog asks for the change level and a note, then shows the assigned version
+    and "waiting for review";
+  - a "Shared platform submissions" list shows status and any rejection reason;
+  - Settings gets the member portal URL and a "Connect" status.
+- **CLI.**
+  - `aep-host assets publish --kind workflow --asset ns/name@version --change minor
+    [--note ...]`
+  - `aep-host assets submissions`
+- **Task list.** Each submission is a `TaskLog` record, kind `publish`.
+
+### 5. Transport and security
+
+- Loopback HTTP is allowed: this test reaches 141 through an SSH tunnel, with the
+  portal at `http://127.0.0.1:28776`. Beyond loopback, HTTPS stays required, as now.
+- New credential errors use the existing codes. No credential, invitation or session
+  value is logged or put in the task list.
+- The submission body is data. The platform never runs a submitted Workflow during
+  review.
+
+## Tests
+
+- **Control plane:**
+  - submit (version assignment, metadata rewrite, author approvals dropped, ownership
+    pre-check, missing dependency, size);
+  - list and withdraw;
+  - approve (package published, hash, owner, co-editor);
+  - reject (reason required);
+  - self-review refused;
+  - two pending submissions of one name get distinct versions;
+  - restart keeps the queue.
+- **Portal HTTP:** auth for each operation; a non-admin cannot list, approve or reject.
+- **Agent:** builds the submission from an installed manifest, keeps login and session
+  separate from the Bridge token, handles errors and revocation, CLI output.
+- **End to end in process:**
+  1. a member submits a Workflow and a Skill;
+  2. a second admin approves;
+  3. both appear in another member's catalog;
+  4. a Bridge sync installs the exact bytes.
+
+## Live test on 172.25.228.141
+
+1. Redeploy the Shared Platform bundle with this change, keeping the loopback listener
+   and ports 8775/8776.
+2. The owner signs in as `leo` and issues an Agent login. The value goes to the
+   environment variable on this PC, never through the chat.
+3. From this PC, publish one Skill and one Workflow:
+   - the Workflow is a harmless one, for example a weekly-report preview without
+     running it;
+   - the Skill targets that Workflow.
+4. A second administrator account approves them in the portal. Self-review is refused
+   by design, so the owner invites e.g. `leo-review` as `platform_admin`.
+5. Confirm both appear in the catalog.
+
+## Open questions for the owner
+
+1. **Who reviews in the test.** Self-review is refused. Is a second admin account
+   (`leo-review`) acceptable? The alternative is a config switch
+   `allow_self_review` for single-admin previews.
+2. **Login storage.** The recommendation is the existing environment-variable
+   credential (set once with `setx`). The alternative is a new Windows-protected
+   (DPAPI) secret file written by the "Connect" button: easier to use, but a new
+   secret store.
+3. **Namespace.** Publish under the asset's current namespace (for example
+   `engineering/...`), or force a personal or team namespace on first publish?
+
+## Not in scope
+
+- Bridge token issuance.
+- Deprecation notices to Hosts.
+- Reconciling chat-authored local versions with the Registry.
+- Knowledge vault publishing.
+- Production identity provider and TLS.
