@@ -2790,8 +2790,13 @@ class AgentWeb:
     def knowledge_pipeline(self) -> dict[str, Any]:
         """What the Knowledge tab may offer: the configured base vaults."""
         binding = self.runtime.config.knowledge_pipeline
-        return {"enabled": binding is not None,
-                "bases": [item.name for item in binding.vaults] if binding else []}
+        vaults = list(binding.vaults) if binding else []
+        # A project vault (one the Agent's Knowledge is refreshed from) comes first, so
+        # the start form does not default to a test vault (seen live, 2026-10-14).
+        vaults.sort(key=lambda item: item.knowledge_asset is None)
+        return {"enabled": binding is not None, "bases": [item.name for item in vaults],
+                "vaults": [{"name": item.name, "project": item.knowledge_asset is not None,
+                            "asset": item.knowledge_asset} for item in vaults]}
 
     def pipeline_call(self, step: str, arguments: dict[str, Any]) -> dict[str, Any]:
         """One pipeline step through the Agent, as the person who pressed it."""

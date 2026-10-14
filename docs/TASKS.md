@@ -1883,3 +1883,10 @@ s-k-20261011T102952` (not published).
   away. Question sets list each question with who may edit it; set matching for edits
   now uses the benchmark's (`productions` = `production`). Full suite 2581 passed,
   6 skipped; headless walk through all steps.
+- [x] Fix the empty Knowledge steps (owner report, 2026-10-14): the page hides every
+  `<section>` that is not an open panel, and the steps had no display rule, so a new
+  sandbox showed only the stepper; `.kp-stage` now displays. The start form also listed a
+  test vault first, so the owner's sandbox came from `k-test` (1 original) instead of
+  `rs-project` (46): project vaults now come first and are labelled. The earlier headless
+  check looked at the `hidden` attribute only; checks now measure rendered height. Full
+  suite 2582 passed, 6 skipped.

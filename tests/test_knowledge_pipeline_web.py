@@ -52,7 +52,8 @@ def test_the_tab_lists_bases_and_runs_steps_in_a_sandbox(
     server, vault = served_pipeline
     before = _snapshot(vault)
     info = json.loads(fetch(base(server) + "/api/knowledge/pipeline", token=server.token).body)
-    assert info == {"enabled": True, "bases": ["k-test"]}
+    assert info == {"enabled": True, "bases": ["k-test"],
+                    "vaults": [{"name": "k-test", "project": False, "asset": None}]}
     made = _step(server, "sandbox-create", {"base": "k-test", "label": "web trial"})
     assert made["ok"], made
     sandbox = made["data"]["sandbox_id"]
@@ -197,3 +198,19 @@ def test_the_experience_review_routes_keep_settings_and_report(
     # Without a Knowledge asking model the review cannot run and says so.
     assert server.web.experience_review() == {"ok": False,
                                               "code": "experience_review_unavailable"}
+
+
+def test_a_project_vault_is_offered_first(tmp_path: Path) -> None:
+    # Live 2026-10-14: the start form defaulted to a test vault listed first, and a new
+    # sandbox pulled one file instead of the project's 46.
+    test_vault = _base(tmp_path / "t")
+    project = _base(tmp_path / "p")
+    config, _ = workspace(
+        tmp_path, membership=membership_record(), grants=_grants(),
+        config_changes={"knowledge_pipeline": {"vaults": [
+            {"name": "k-test", "root": str(test_vault)},
+            {"name": "rs-project", "root": str(project), "knowledge_asset": "rs-knowledge"}]}})
+    with build_runtime(config) as runtime:
+        info = AgentWeb(runtime).knowledge_pipeline()
+    assert info["bases"] == ["rs-project", "k-test"]
+    assert info["vaults"][0] == {"name": "rs-project", "project": True, "asset": "rs-knowledge"}

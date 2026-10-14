@@ -24,6 +24,9 @@ def test_the_knowledge_tab_is_three_steps_with_one_primary_action_each() -> None
                                       'id="kp-reingest"', 'id="kp-stage-test"',
                                       'id="kp-q-list"', 'id="kp-bench"', 'id="kp-push"')]
     assert order == sorted(order)
+    # The page hides every <section> that is not an open panel; a step must override
+    # that or it shows nothing (seen live on 2026-10-14).
+    assert "section { display: none;" in PAGE and ".kp-stage { display: block;" in PAGE
 
 
 def test_question_sets_list_each_question_and_who_may_edit_it(tmp_path: Path) -> None:

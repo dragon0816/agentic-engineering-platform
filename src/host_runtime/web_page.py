@@ -200,6 +200,9 @@ body {
   background: var(--soft, #eef3fb); font-weight: 600; }
 .kp-stepper button[aria-current="step"] .kp-step-n { background: var(--accent, #2b6cb0);
   color: #fff; }
+/* A step is a <section>, which the page hides unless it is an open panel. */
+.kp-stage { display: block; padding-top: 0; max-width: none; }
+.kp-stage[hidden] { display: none; }
 .kp-stage-title { margin: 6px 0 2px; font-size: 20px; outline: none; }
 .kp-nav { display: flex; justify-content: space-between; gap: 8px; margin: 16px 0 4px;
   padding-top: 12px; border-top: 1px solid var(--line, #ddd); }
@@ -4232,9 +4235,10 @@ async function loadKnowledge() {
   el("kp-disabled").hidden = info.enabled; el("kp-main").hidden = !info.enabled;
   if (!info.enabled) return;
   const base = el("kp-base"); base.replaceChildren();
-  for (const name of info.bases) {
-    const option = document.createElement("option"); option.value = name;
-    option.append(text(name)); base.append(option);
+  for (const vault of info.vaults || info.bases.map((name) => ({name}))) {
+    const option = document.createElement("option"); option.value = vault.name;
+    option.append(text(vault.name + (vault.project ? " — project vault (the Agent's "
+      + vault.asset + ")" : " — test vault"))); base.append(option);
   }
   await kpLoadScopes();
   const listed = await pipeline("sandbox-list");
