@@ -1890,3 +1890,7 @@ s-k-20261011T102952` (not published).
   `rs-project` (46): project vaults now come first and are labelled. The earlier headless
   check looked at the `hidden` attribute only; checks now measure rendered height. Full
   suite 2582 passed, 6 skipped.
+- [x] Keep the Knowledge steps on top while scrolling (owner, 2026-10-14): the stepper,
+  status line and progress bar share one sticky header; switching steps scrolls the new
+  step title to just below it. Headless check: header stays at top 0 after scrolling.
+  Full suite 2583 passed, 6 skipped.

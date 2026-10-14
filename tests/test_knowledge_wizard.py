@@ -48,3 +48,11 @@ def test_question_sets_list_each_question_and_who_may_edit_it(tmp_path: Path) ->
     productions = pipeline.create_sandbox("rs-k", "p", "leo", scope="Productions").sandbox_id
     editable = {q.path for q in pipeline.question_sets(productions).questions if q.editable}
     assert editable == {"checks/questions/productions/q3.md"}  # productions = production
+
+
+def test_the_steps_status_and_progress_stay_on_top_together() -> None:
+    # One sticky header (owner 2026-10-14): separate sticky rows at top 0 would overlap.
+    top = PAGE.index('<div class="kp-top">')
+    assert top < PAGE.index('id="kp-stepper"') < PAGE.index('id="kp-status"') \
+        < PAGE.index('id="kp-progress"') < PAGE.index('id="kp-main"')
+    assert ".kp-top { position: sticky; top: 0;" in PAGE and "kp-sticky" not in PAGE

@@ -118,7 +118,9 @@ body {
 .kp-actions { display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
 .kp-list button { margin: 2px 6px 2px 0; }
 .kp-check { display: inline-block; margin: 2px 14px 2px 0; }
-.kp-sticky { position: sticky; top: 0; z-index: 5; }
+/* The steps, the status and the progress stay on top while the page scrolls (owner
+   2026-10-14); kpStage scrolls a new step title to just below them. */
+.kp-top { position: sticky; top: 0; z-index: 6; background: var(--bg); padding-bottom: 2px; }
 .kp-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
 .kp-advanced summary { cursor: pointer; font-weight: 600; }
 .kp-assist { margin-top: 12px; border-top: 1px solid var(--line, #ddd); padding-top: 8px; }
@@ -991,13 +993,8 @@ tr:last-child td { border-bottom: none; }
     </div>
     <div id="kp-disabled" class="empty" hidden>The Knowledge pipeline is not configured on
       this machine (host.json <code>knowledge_pipeline</code>).</div>
-    <div id="kp-status" class="section-status kp-sticky" role="status" aria-live="polite"><span
-      id="kp-status-text"></span> <span id="kp-status-time" class="note"></span></div>
-    <div id="kp-progress" class="kp-progress kp-sticky" hidden>
-      <progress id="kp-progress-bar" max="1"></progress>
-      <span id="kp-progress-text" class="note"></span></div>
-    <div id="kp-main">
-      <nav class="kp-stepper" aria-label="Maintenance steps">
+    <div class="kp-top">
+      <nav id="kp-stepper" class="kp-stepper" aria-label="Maintenance steps">
         <ol>
           <li><button type="button" data-stage="pull"><span class="kp-step-n">1</span>
             <span><strong>Pull data</strong><small>pull, add files, convert</small></span>
@@ -1010,6 +1007,13 @@ tr:last-child td { border-bottom: none; }
           </button></li>
         </ol>
       </nav>
+      <div id="kp-status" class="section-status" role="status" aria-live="polite"><span
+        id="kp-status-text"></span> <span id="kp-status-time" class="note"></span></div>
+      <div id="kp-progress" class="kp-progress" hidden>
+        <progress id="kp-progress-bar" max="1"></progress>
+        <span id="kp-progress-text" class="note"></span></div>
+    </div>
+    <div id="kp-main">
       <div id="kp-start">
         <h2 class="kp-stage-title" tabindex="-1">Step 1 of 3 &middot; Pull data</h2>
         <p class="note">Continue a sandbox, or start one for the folder you maintain.</p>
@@ -4233,6 +4237,7 @@ el("rv-refresh").addEventListener("click", () => rvRun("Reading", loadReviews));
 async function loadKnowledge() {
   const info = await call("/api/knowledge/pipeline");
   el("kp-disabled").hidden = info.enabled; el("kp-main").hidden = !info.enabled;
+  el("kp-stepper").hidden = !info.enabled;
   if (!info.enabled) return;
   const base = el("kp-base"); base.replaceChildren();
   for (const vault of info.vaults || info.bases.map((name) => ({name}))) {
@@ -4316,7 +4321,12 @@ function kpStage(name, focus = true) {
   if (focus) {
     const title = open ? document.querySelector('.kp-stage[data-stage="' + stage + '"] '
       + ".kp-stage-title") : document.querySelector("#kp-start .kp-stage-title");
-    if (title) title.focus();  // screen readers hear the step; the page shows its top
+    if (title) {  // screen readers hear the step; the page shows its top below the steps
+      title.focus({preventScroll: true});
+      const below = document.querySelector(".kp-top").getBoundingClientRect().height + 8;
+      const top = title.getBoundingClientRect().top;
+      if (top < below) window.scrollTo({top: Math.max(0, top + window.scrollY - below)});
+    }
   }
 }
 
