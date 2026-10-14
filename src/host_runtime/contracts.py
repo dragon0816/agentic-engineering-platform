@@ -109,6 +109,44 @@ class PlatformBinding(Contract):
         return self
 
 
+class PlatformPublishBinding(Contract):
+    """Where this host's owner publishes Skills and Workflows, and as whom
+    (owner 2026-10-15, `docs/phases/MEMBER_PUBLISH.md`).
+
+    Publishing is the member's act, so it uses the member's own `Personal
+    Agent` login, issued in the Member Portal, never the Bridge token; a host
+    may publish without being enrolled as a Bridge. The login's value is a
+    `SecretRef` mapped to an environment variable, never in a file.
+    """
+
+    member_portal_url: Text
+    credential: SecretRef
+    timeout_seconds: int = Field(default=30, ge=1, le=300, strict=True)
+
+    @field_validator("member_portal_url")
+    @classmethod
+    def without_trailing_slash(cls, value: str) -> str:
+        return value.rstrip("/")
+
+    @model_validator(mode="after")
+    def https_beyond_loopback(self) -> Self:
+        parts = urlsplit(self.member_portal_url)
+        if (
+            parts.scheme not in ("https", "http")
+            or not parts.hostname
+            or parts.path
+            or parts.query
+            or parts.fragment
+        ):
+            raise ValueError("member_portal_url is an origin of the shared platform")
+        if parts.username is not None or parts.password is not None:
+            raise ValueError("member_portal_url carries no credential")
+        if parts.scheme == "http" and not _loopback(self.member_portal_url):
+            raise ValueError("a member portal beyond loopback is reached over https")
+        reject_embedded_secrets(self.model_dump(mode="json"))
+        return self
+
+
 PlatformReachability = Literal["answered", "unreachable", "withdrawn", "rejected", "refused"]
 
 
@@ -503,6 +541,9 @@ class CompanyHostConfiguration(Contract):
     # The shared platform, when this host has been given a token for one. A
     # host without it works locally, which every earlier command still does.
     platform: PlatformBinding | None = None
+    # Member publish to the shared platform (owner 2026-10-15); independent of
+    # `platform`, which is this host's Bridge enrollment.
+    publishing: PlatformPublishBinding | None = None
     # The external systems the migrated workflows reach, when configured.
     integrations: HostIntegrations | None = None
     # The models this host may use. Absent means none, and the Agent then
