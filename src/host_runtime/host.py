@@ -171,12 +171,16 @@ from capabilities.release_package.contracts import (
     ReleasePreview,
     ReleasePreviewStepInput,
 )
+from capabilities.release_package.manifest import COMMIT as RELEASE_COMMIT_WORKFLOW
 from capabilities.release_package.manifest import COMMIT_SPEC as RELEASE_COMMIT_SPEC
 from capabilities.release_package.manifest import ISOLATED_APPLY as ISOLATED_APPLY_WORKFLOW
 from capabilities.release_package.manifest import ISOLATED_APPLY_SPEC
+from capabilities.release_package.manifest import PREPARE as RELEASE_PREPARE_WORKFLOW
 from capabilities.release_package.manifest import PREPARE_SPEC as RELEASE_PREPARE_SPEC
 from capabilities.release_package.manifest import PREVIEW as RELEASE_PREVIEW_WORKFLOW
 from capabilities.release_package.manifest import PREVIEW_SPEC as RELEASE_PREVIEW_SPEC
+from capabilities.release_package.manifest import PUSH as RELEASE_PUSH_WORKFLOW
+from capabilities.release_package.manifest import PUSH_SPEC as RELEASE_PUSH_SPEC
 from capabilities.release_package.preview import ReleasePreviewHandler
 from capabilities.release_package.release_run import (
     CommitHandler,
@@ -185,6 +189,9 @@ from capabilities.release_package.release_run import (
     PreparedRelease,
     PrepareHandler,
     PrepareStepInput,
+    PushHandler,
+    PushResult,
+    PushStepInput,
 )
 from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
 from capabilities.script_tools import (
@@ -555,6 +562,15 @@ def _target_name(step: AssetIdentity | WorkflowStep) -> tuple[str, str, str]:
     return (step.capability if isinstance(step, WorkflowStep) else step).key
 
 
+def _has_workflow_settings(layout: HostLayout, identities: tuple[AssetIdentity, ...]) -> bool:
+    """Whether this install saved settings for any of these Workflows."""
+    try:
+        store = WorkflowSettingsStore(layout.workspace_root / SETTINGS_FILE)
+        return any(store.values(identity) for identity in identities)
+    except (OSError, ValueError):
+        return False
+
+
 def build_integrations(
     config: CompanyHostConfiguration,
     installed: InstalledCapabilities,
@@ -602,18 +618,23 @@ def build_integrations(
             IsolatedApplyOutput,
             ExecutionDependencies(central_required=False),
         )
-    # Workflow 13's release run up to the commit (owner 2026-10-08): two
-    # approved runs, isolated root only until push is approved.
-    if RELEASE_PREPARE_SPEC.identity.key in uses:
-        installed.register(
-            RELEASE_PREPARE_SPEC, PrepareHandler(), PrepareStepInput, PreparedRelease,
-            ExecutionDependencies(central_required=False),
-        )
-    if RELEASE_COMMIT_SPEC.identity.key in uses:
-        installed.register(
-            RELEASE_COMMIT_SPEC, CommitHandler(), CommitStepInput, CommitResult,
-            ExecutionDependencies(central_required=False),
-        )
+    # Workflow 13's release run (owner 2026-10-08, push 2026-10-15): prepare,
+    # commit and push, three approved runs. Registered when an installed
+    # Workflow uses them, or when this install already holds settings for one
+    # of their Workflows: that is how a host that does releases says so before
+    # their Workflows are installed from drafts. Grants still come only from
+    # the owner's install, and the settings keep the real GitLab out until
+    # `remote_release` is on.
+    release_configured = _has_workflow_settings(
+        layout, (RELEASE_PREPARE_WORKFLOW, RELEASE_COMMIT_WORKFLOW, RELEASE_PUSH_WORKFLOW))
+    for spec, handler, step_input, output in (
+        (RELEASE_PREPARE_SPEC, PrepareHandler(), PrepareStepInput, PreparedRelease),
+        (RELEASE_COMMIT_SPEC, CommitHandler(), CommitStepInput, CommitResult),
+        (RELEASE_PUSH_SPEC, PushHandler(), PushStepInput, PushResult),
+    ):
+        if release_configured or spec.identity.key in uses:
+            installed.register(spec, handler, step_input, output,
+                               ExecutionDependencies(central_required=False))
     # Workflow 14: its paths are per-install Workflow settings.
     if NCC_PREPARE_SPEC.identity.key in uses:
         installed.register(

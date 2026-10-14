@@ -32,6 +32,7 @@ from capabilities.release_package.manifest import (
 from capabilities.release_package.manifest import prepare_workflow as release_prepare_workflow
 from capabilities.release_package.manifest import preview_skill as release_preview_skill
 from capabilities.release_package.manifest import preview_workflow as release_preview_workflow
+from capabilities.release_package.manifest import push_workflow as release_push_workflow
 from capabilities.team_tickets.manifest import preview_skill as team_tickets_preview_skill
 from capabilities.team_tickets.manifest import preview_workflow as team_tickets_preview_workflow
 from capabilities.weekly_report.manifest import weekly_report_workflow, weekly_skill
@@ -50,6 +51,7 @@ def shipped() -> tuple[SkillManifest | WorkflowManifest, ...]:
         release_isolated_apply_workflow(),
         release_prepare_workflow(),
         release_commit_workflow(),
+        release_push_workflow(),
         ncc_plan_skill(),
         ncc_plan_workflow(),
         weekly_skill(),

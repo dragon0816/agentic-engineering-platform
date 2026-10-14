@@ -1,8 +1,11 @@
-"""Workflow 13's release run up to the commit (owner 2026-10-08).
+"""Workflow 13's release run (owner 2026-10-08; push 2026-10-14).
 
-Prepare and commit are separate approved runs. Commit takes only what was
-prepared and reviewed. Push does not exist yet, and the settings refuse any
-origin that is not a local repository in the marked isolated root.
+Prepare, commit and push are separate approved runs. Commit takes only what
+was prepared and reviewed; push takes only the commit that commit made. The
+settings refuse any origin that is not a local repository in the marked
+isolated root unless `remote_release` is on, and even then a URL carrying
+credentials is refused. Every test here uses a local bare origin in a
+temporary folder: no network, no real release repository.
 """
 
 from __future__ import annotations
@@ -18,18 +21,23 @@ from capabilities.release_package.apply_isolated import ISOLATED_MARKER, ISOLATE
 from capabilities.release_package.manifest import (
     COMMIT_SPEC,
     PREPARE_SPEC,
+    PUSH_SPEC,
     commit_workflow,
     prepare_workflow,
+    push_workflow,
 )
 from capabilities.release_package.release_run import (
     LOCK_NAME,
     CommitHandler,
     PrepareHandler,
+    PushHandler,
     ReleaseRunError,
     ReleaseRunRequest,
     ReleaseRunSettings,
     commit_release,
     prepare_release,
+    project_path,
+    push_release,
     quote_for_git,
 )
 from capabilities.release_package.versions import (
@@ -224,3 +232,170 @@ def test_the_two_workflows_are_separate_approved_runs_that_never_push(tmp_path: 
     with pytest.raises(CapabilityRefused):
         asyncio.run(CommitHandler()(context, {"branch": "Foxconn_kt326",
                                               "fingerprint": "f" * 16, **paths}))
+
+
+# -- push (owner 2026-10-14) ----------------------------------------------------
+
+GITLAB = "https://code.example.test/rs-wmt-projects/releases/rs-wmt-sw-release.git"
+
+
+def committed(tmp_path: Path) -> tuple[ReleaseRunSettings, str, Path]:
+    settings = isolated(tmp_path)
+    prepared = prepare_release(settings, request())
+    done = commit_release(settings, prepared.branch, prepared.fingerprint[:16])
+    return settings, done.commit, Path(prepared.repo_dir)
+
+
+def remote_head(repo: Path, branch: str) -> str:
+    return git("ls-remote", "--heads", "origin", branch, cwd=repo).split("\t", 1)[0]
+
+
+def test_push_sends_exactly_the_reviewed_commit_to_origin(tmp_path: Path) -> None:
+    settings, commit, repo = committed(tmp_path)
+    with pytest.raises(ReleaseRunError) as stale:
+        push_release(settings, "Foxconn_kt326", "0" * 12)
+    assert stale.value.code == "stale_commit"
+    with pytest.raises(ReleaseRunError) as other:
+        push_release(settings, "Other_kt326", commit[:12])
+    assert other.value.code == "stale_commit"
+
+    pushed = push_release(settings, "Foxconn_kt326", commit[:12])
+    assert pushed.pushed and pushed.commit == commit and pushed.project_path == ""
+    assert remote_head(repo, "Foxconn_kt326") == commit
+    upstream = git("rev-parse", "--abbrev-ref", "Foxconn_kt326@{upstream}", cwd=repo)
+    assert upstream.strip() == "origin/Foxconn_kt326"  # -u, as the source pushes
+    with pytest.raises(ReleaseRunError) as again:  # the record is used up
+        push_release(settings, "Foxconn_kt326", commit[:12])
+    assert again.value.code == "not_committed"
+
+
+def test_push_refuses_before_a_commit_or_after_the_checkout_changed(tmp_path: Path) -> None:
+    settings = isolated(tmp_path)
+    prepare_release(settings, request())
+    with pytest.raises(ReleaseRunError) as early:
+        push_release(settings, "Foxconn_kt326", "a" * 12)
+    assert early.value.code == "not_committed"
+
+    (tmp_path / "second").mkdir()
+    settings, commit, repo = committed(tmp_path / "second")
+    (repo / "requirements.txt").write_text("tampered\n", encoding="utf-8")
+    with pytest.raises(ReleaseRunError) as changed:
+        push_release(settings, "Foxconn_kt326", commit[:12])
+    assert changed.value.code == "checkout_changed"
+    assert remote_head(repo, "Foxconn_kt326") == ""
+
+
+def test_a_commit_already_on_origin_is_not_pushed_again(tmp_path: Path) -> None:
+    settings, commit, repo = committed(tmp_path)
+    git("push", "-q", "origin", "Foxconn_kt326", cwd=repo)
+    result = push_release(settings, "Foxconn_kt326", commit[:12])
+    assert not result.pushed and result.skipped == "already on origin"
+
+
+def test_a_push_never_forces_over_a_branch_that_moved_on_origin(tmp_path: Path) -> None:
+    settings, commit, repo = committed(tmp_path)
+    other = tmp_path / "other"
+    git("clone", "-q", settings.release_repo_url, str(other), cwd=tmp_path)
+    git("checkout", "-q", "-b", "Foxconn_kt326", "origin/template", cwd=other)
+    (other / "x.txt").write_text("someone else", encoding="utf-8")
+    git("add", "-A", cwd=other)
+    git("commit", "-q", "-m", "elsewhere", cwd=other)
+    git("push", "-q", "origin", "Foxconn_kt326", cwd=other)
+    moved = git("rev-parse", "HEAD", cwd=other).strip()
+    with pytest.raises(ReleaseRunError) as refused:
+        push_release(settings, "Foxconn_kt326", commit[:12])
+    assert refused.value.code == "git_failed"
+    assert remote_head(repo, "Foxconn_kt326") == moved
+
+
+def test_the_real_repository_needs_remote_release_and_a_clean_url(tmp_path: Path) -> None:
+    settings = isolated(tmp_path)
+    off = settings.model_copy(update={"release_repo_url": GITLAB})
+    with pytest.raises(ReleaseRunError) as refused:
+        off.checked()
+    assert refused.value.code == "remote_not_isolated"
+
+    on = settings.model_copy(update={"release_repo_url": GITLAB, "remote_release": True})
+    assert on.checked()[3] == GITLAB
+    for url in ("git@code.example.test:rs-wmt-projects/releases/rs-wmt-sw-release.git",
+                "ssh://git@code.example.test:2222/rs-wmt-projects/rs-wmt-sw-release.git"):
+        assert on.model_copy(update={"release_repo_url": url}).checked()[3] == url
+    for url in ("http://code.example.test/group/repo.git",
+                "https://someone@code.example.test/group/repo.git",
+                "https://oauth2:not-a-real-value@code.example.test/group/repo.git",
+                "file:///C:/repos/repo.git"):
+        with pytest.raises(ReleaseRunError) as bad:
+            on.model_copy(update={"release_repo_url": url}).checked()
+        assert bad.value.code == "remote_url_invalid"
+
+    outside = on.model_copy(update={"work_root": str(tmp_path / "elsewhere")})
+    with pytest.raises(ReleaseRunError) as escaped:
+        outside.checked()
+    assert escaped.value.code == "path_outside_isolated_root"
+
+
+def test_with_remote_release_the_plan_names_the_push_and_a_foreign_origin_is_refused(
+    tmp_path: Path,
+) -> None:
+    settings = isolated(tmp_path)
+    prepare_release(settings, request(testPlans=[]))  # leaves a working copy
+    remote = settings.model_copy(update={"release_repo_url": GITLAB, "remote_release": True})
+    prepared = prepare_release(remote, request())  # fetches the existing copy: no network
+    assert any("push to rs-wmt-projects/releases/rs-wmt-sw-release" in line
+               for line in prepared.plan)
+    done = commit_release(remote, prepared.branch, prepared.fingerprint[:16])
+    with pytest.raises(ReleaseRunError) as foreign:
+        push_release(remote, prepared.branch, done.commit[:12])
+    assert foreign.value.code == "origin_changed"
+
+
+def test_project_path_matches_the_source_rule() -> None:
+    assert project_path(GITLAB) == "rs-wmt-projects/releases/rs-wmt-sw-release"
+    assert project_path("git@host:group/repo.git") == "group/repo"
+    assert project_path("") == ""
+
+
+def test_push_is_its_own_high_risk_approved_workflow(tmp_path: Path) -> None:
+    assert PUSH_SPEC.side_effect == "external_side_effect"
+    assert PUSH_SPEC.policy.approval_required and PUSH_SPEC.policy.risk == "high"
+    assert [s.capability for s in push_workflow().steps] == [PUSH_SPEC.identity]
+    static = {p.name: p for p in push_workflow().parameters if p.scope == "static"}
+    assert static["remote_release"].default is False
+    assert {p.name for p in prepare_workflow().parameters if p.scope == "static"} == set(static)
+
+    settings, commit, _ = committed(tmp_path)
+    context = RequestContext(
+        trace=TraceIdentifiers(trace_id="t", request_id="r", span_id="s"), actor="owner",
+        namespace="engineering", channel="local", message="x")
+    paths = settings.model_dump()
+    with pytest.raises(CapabilityRefused):
+        asyncio.run(PushHandler()(context, {"branch": "Foxconn_kt326", "commit": "f" * 12,
+                                            **paths}))
+    pushed = asyncio.run(PushHandler()(context, {"branch": "Foxconn_kt326",
+                                                 "commit": commit[:12], **paths}))
+    assert pushed.pushed  # type: ignore[attr-defined]
+
+
+def test_the_release_capabilities_exist_once_this_install_has_release_settings(
+    tmp_path: Path,
+) -> None:
+    """An unrelated host does not offer them; a host holding settings for a
+    release Workflow does, so the Workflows can be installed from drafts."""
+    from test_host_wiring import membership_record, workspace
+
+    from capabilities.release_package.manifest import PREPARE
+    from host_runtime.host import build_runtime
+    from host_runtime.workflow_settings import SETTINGS_FILE, WorkflowSettingsStore
+
+    config, layout = workspace(tmp_path, membership=membership_record(), assets=False)
+    with build_runtime(config, layout=layout) as runtime:
+        installed = runtime.agent.gateway.bridge.installed
+        assert all(installed.get(spec.identity) is None
+                   for spec in (PREPARE_SPEC, COMMIT_SPEC, PUSH_SPEC))
+
+    WorkflowSettingsStore(layout.workspace_root / SETTINGS_FILE).save(
+        PREPARE, {"work_root": str(tmp_path / "work")})
+    with build_runtime(config, layout=layout) as runtime:
+        installed = runtime.agent.gateway.bridge.installed
+        for spec in (PREPARE_SPEC, COMMIT_SPEC, PUSH_SPEC):
+            assert installed.get(spec.identity) is not None

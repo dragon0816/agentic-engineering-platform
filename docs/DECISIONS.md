@@ -2377,3 +2377,35 @@ Element ids and the pipeline calls are unchanged, so the steps only regroup exis
 features; advanced tools stay folded under step 3. Coverage is a stated guideline (at
 least 5 graded questions, about one per 10 Raw documents), not a gate.
 Rejected: one long page with numbered cards (the previous layout: too much at once).
+
+## 2026-10-15: Workflow 13 gets its push, behind a setting and its own approved run
+
+Decision (owner asked for n8n workflow 13 to be ported in full and installed, with no
+n8n): the release run gains a third Workflow, `engineering/release-package-push`
+(capability `release-package/push@1.0.0`, `external_side_effect`, risk high, approval
+required). It pushes only the commit that `release-package-commit` made and recorded in
+the checkout's `.git`, and only when the branch, HEAD, a clean working tree and origin
+still match. It runs `git push -u origin <branch>` as the source does, never forced; a
+branch that moved on origin is refused by git and reported, not retried.
+
+The settings reach the real release repository only when the per-install
+`remote_release` setting is on (default off). Then `release_repo_url` must be an https
+or ssh URL with no user, password or token in it (git's own credential manager answers,
+never prompting); the working copy and inbox must still lie in a root carrying the
+`.aep-isolated-release-root` marker, as the source required `terminal.allowedRoots`.
+With the setting off, the 2026-10-08 rule stands: a local origin inside the marked root.
+
+The three release capabilities (prepare, commit, push) are registered when an installed
+Workflow uses them or when the install already holds Workflow settings for one of the
+release Workflows (`workflow-settings.json`). That is how a host that does releases says
+so before the Workflows exist, so they can be installed like any draft (`aep-host assets
+submit-workflow`, then the owner's Install in Agent Web). Grants come only from that
+install. Registering them on every host was tried and rejected: every host would then
+advertise release capabilities to the Shared Platform.
+
+Rejected alternatives:
+- Pushing from the commit step: the owner wanted each effect approved on its own.
+- Allowing any remote whenever push exists: an install that was set up for the isolated
+  test root would then reach GitLab without anybody choosing it.
+- Writing the manifests and grants into the live workspace directly, as earlier slices
+  did after a conversational yes: that is the model approving its own install.

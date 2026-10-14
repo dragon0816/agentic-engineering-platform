@@ -1902,3 +1902,11 @@ s-k-20261011T102952` (not published).
   header row instead of over the scrollbar arrows; panes drop the page's section padding.
   Headless check: textarea, backdrop and gutter end at the same scroll position. Full
   suite 2585 passed, 6 skipped.
+- [x] Workflow 13 push and install path (owner 2026-10-15, n8n `13_release_package` ported
+  in full): third Workflow `engineering/release-package-push` (capability
+  `release-package/push@1.0.0`, `external_side_effect`) pushes only the commit the commit
+  step recorded, never forced; `remote_release` setting (default off) lets the settings
+  name the real GitLab URL (https/ssh, no credentials), working copy and inbox still in
+  the marked root; release capabilities registered once the install holds settings for a
+  release Workflow, so the three Workflows install from drafts. Tests: `tests/test_release_run.py` (local bare origin only).
+  Drafts submitted to the live host with install requests waiting for the owner.

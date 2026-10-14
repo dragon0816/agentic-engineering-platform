@@ -50,7 +50,7 @@ settings editor. No n8n dependency (owner decision 2026-10-04).
 | 07 jira_team_tickets | write (Excel) | read-only preview; paused on Jira `MRT1CV` access |
 | 10 sales_to_chipset | write (Excel) | rules ported, guarded preview/apply; no real-workbook parity |
 | 11 github_weekly_report + email (was Jira) | write + draft (send double-gated) | one Workflow `sde-weekly-report` (plan, write, draft; dry run); GitHub selection rules aligned 2026-10-05; real-workbook parity open |
-| 13 release_package (+ pipeline_watch) | external_side_effect (git push) | read-only preview + isolated preparation |
+| 13 release_package (+ pipeline_watch) | external_side_effect (git push) | ADAPT: prepare, commit, push as three approved Workflows (2026-10-15); real GitLab behind `remote_release`; pipeline_watch not started |
 | 03 c4c_tickets_by_creator | write, occupies the machine | not started |
 | 06 loan_scan / 06b loan_process | queue write; customer-facing draft | not started |
 

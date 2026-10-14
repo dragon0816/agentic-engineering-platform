@@ -166,6 +166,7 @@ def isolated_apply_workflow() -> WorkflowManifest:
 
 PREPARE = AssetIdentity(namespace="engineering", name="release-package-prepare", version="1.0.0")
 COMMIT = AssetIdentity(namespace="engineering", name="release-package-commit", version="1.0.0")
+PUSH = AssetIdentity(namespace="engineering", name="release-package-push", version="1.0.0")
 
 PREPARE_SPEC = CapabilitySpec.model_validate(
     {
@@ -200,10 +201,33 @@ COMMIT_SPEC = CapabilitySpec.model_validate(
     }
 )
 
+# Workflow 13 push (owner 2026-10-14): its own approved run, after the commit.
+PUSH_SPEC = CapabilitySpec.model_validate(
+    {
+        "identity": {"namespace": "release-package", "name": "push", "version": "1.0.0"},
+        "name": "release_package.push",
+        "description": "Push exactly the release commit that was made and reviewed; never "
+                       "forced",
+        "input_contract": "release-package.push.input.v1",
+        "output_contract": "release-package.push.output.v1",
+        "side_effect": "external_side_effect",
+        "policy": {
+            "risk": "high",
+            "required_permissions": ["release-package.push"],
+            "policy_refs": ["release-package-push-policy"],
+            "approval_required": True,
+        },
+    }
+)
+
 _RUN_SETTINGS: list[dict[str, Any]] = [
     {"name": "release_repo_url", "label": "Release repository", "kind": "text",
      "scope": "static", "required": True,
-     "description": "For now a local repository inside the isolated root; GitLab comes with push."},
+     "description": "A local repository inside the isolated root, or the GitLab clone URL "
+                    "(https or ssh, no token in it) when remote_release is on."},
+    {"name": "remote_release", "label": "Use the real release repository (GitLab)",
+     "kind": "boolean", "scope": "static", "default": False,
+     "description": "Off: only a local repository inside the isolated root is accepted."},
     {"name": "template_branch", "label": "Template branch", "kind": "text", "scope": "static",
      "default": "template"},
     {"name": "work_root", "label": "Working copy folder", "kind": "text", "scope": "static",
@@ -211,7 +235,8 @@ _RUN_SETTINGS: list[dict[str, Any]] = [
     {"name": "inbox_path", "label": "Input inbox", "kind": "text", "scope": "static",
      "required": True},
     {"name": "allowed_root", "label": "Isolated root", "kind": "text", "scope": "static",
-     "required": True, "description": "Must carry the AEP isolated-release marker."},
+     "required": True, "description": "Must carry the AEP isolated-release marker; the "
+                                      "working copy and inbox must be inside it."},
     {"name": "artifactory_base_url", "label": "Published package index", "kind": "text",
      "scope": "static", "description": "PEP 503 simple-index root, for the chipset version."},
     {"name": "readiness_base_url", "label": "Readiness table", "kind": "text", "scope": "static",
@@ -296,6 +321,36 @@ def commit_workflow() -> WorkflowManifest:
             "steps": [{"capability": COMMIT_SPEC.identity.model_dump(),
                        "inputs": {"branch": {"source": "run", "path": ["branch"]},
                                   "fingerprint": {"source": "run", "path": ["fingerprint"]},
+                                  **_SETTING_INPUTS}}],
+        }
+    )
+
+
+def push_workflow() -> WorkflowManifest:
+    return WorkflowManifest.model_validate(
+        {
+            "metadata": {"identity": PUSH.model_dump(), **_METADATA},
+            "kind": "workflow",
+            "description": (
+                "Workflow 13, step 3: push the release commit that was made and reviewed "
+                "to the release repository (git push -u origin <branch>, never forced). "
+                "Refuses if anything changed since the commit."
+            ),
+            "execution": {"mode": "local"},
+            "dependencies": {"central_required": False,
+                             "local_capabilities": [PUSH_SPEC.name]},
+            "parameters": [
+                *_RUN_SETTINGS,
+                {"name": "branch", "label": "Which committed branch?", "kind": "text",
+                 "required": True, "order": 10},
+                {"name": "commit", "label": "The commit id the commit step showed",
+                 "kind": "text", "required": True, "order": 20, "min_length": 7},
+            ],
+            "input_contract": "release-package.push.input.v1",
+            "output_contract": "release-package.push.output.v1",
+            "steps": [{"capability": PUSH_SPEC.identity.model_dump(),
+                       "inputs": {"branch": {"source": "run", "path": ["branch"]},
+                                  "commit": {"source": "run", "path": ["commit"]},
                                   **_SETTING_INPUTS}}],
         }
     )

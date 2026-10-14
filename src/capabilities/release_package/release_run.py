@@ -1,8 +1,8 @@
-"""Workflow 13's release run up to the commit (owner 2026-10-08).
+"""Workflow 13's release run: prepare, commit and push (owner 2026-10-08, 2026-10-14).
 
 Ported from `host-bridge/jobs/release_package.py` at rs_workflow_system@896046e8,
 PRESERVE + ADAPT. The source does resolve, checkout, write, commit, push in one
-job. Here the work is split into two capabilities, each a separate approved run:
+job. Here the work is split into three capabilities, each a separate approved run:
 
 - `prepare` resolves the chipset version, clones or fetches the release
   repository, checks out the branch (or creates it from the template), writes
@@ -10,11 +10,16 @@ job. Here the work is split into two capabilities, each a separate approved run:
   commit would contain, with the source's plain-language dry-run plan. It never
   commits. It records what it prepared in the checkout's `.git`.
 - `commit` commits exactly what `prepare` left. If the branch, HEAD or any changed
-  file differs from that record, it refuses.
+  file differs from that record, it refuses. It records the commit it made.
+- `push` pushes exactly the commit `commit` made and the person reviewed
+  (`git push -u origin <branch>`, never forced). If the branch, HEAD, the
+  working tree or origin differ from that record, it refuses.
 
-Push is deliberately absent in this round. The settings accept only a release
-repository that is a local path inside an explicitly marked isolated root, so
-neither capability can reach the real GitLab yet.
+By default the settings accept only a release repository that is a local path
+inside an explicitly marked isolated root. The real GitLab is reached only when
+the install's `remote_release` setting is switched on; even then the working
+copy and inbox stay inside the marked root, and the URL may carry no
+credentials (git's own credential manager answers, never prompting).
 
 Git runs as a fixed argument list with no shell, inside the configured work
 root, and never prompts. The source ran it through the Bridge's PowerShell
@@ -59,8 +64,11 @@ from common.base import Contract, Text
 from common.execution import RequestContext
 
 PREPARED_RECORD = "aep-w13-prepared.json"
+COMMITTED_RECORD = "aep-w13-committed.json"
 LOCK_NAME = "aep-w13.lock"
 GIT_TIMEOUT_SECONDS = 600
+CLONE_TIMEOUT_SECONDS = 1800  # the source's clone timeout
+PUSH_TIMEOUT_SECONDS = 900  # the source's push timeout
 SOURCE_REVISION = "rs_workflow_system@896046e8fe2170d21f9213e56e5ce2f93c05ba43"
 
 LogFn = Callable[[str], None]
@@ -77,9 +85,39 @@ class ReleaseRunError(Exception):
 # -- settings ----------------------------------------------------------------
 
 
+#: A remote the release repository may be: https or ssh, with no password in it.
+_HTTPS_REMOTE = re.compile(r"^https://[A-Za-z0-9.-]+(:[0-9]+)?/[^\s@?#]+$")
+_SSH_REMOTE = re.compile(
+    r"^(ssh://[A-Za-z0-9._-]+@[A-Za-z0-9.-]+(:[0-9]+)?/[^\s?#]+"
+    r"|[A-Za-z0-9._-]+@[A-Za-z0-9.-]+:[^\s?#/][^\s?#]*)$")
+_LOOKS_REMOTE = re.compile(r"^[a-z][a-z0-9+.-]*://", re.IGNORECASE)
+
+
+def is_remote_url(url: str) -> bool:
+    return bool(_LOOKS_REMOTE.match(url)) or (
+        "@" in url and ":" in url.split("@", 1)[1])
+
+
+def project_path(url: str) -> str:
+    """The source's `path_from_clone_url`: `https://host/group/repo.git` ->
+    `group/repo`; scp-like `git@host:group/repo.git` gives the same."""
+    url = (url or "").strip()
+    if not url:
+        return ""
+    if "://" in url:
+        path = url.split("://", 1)[1]
+        path = path.split("/", 1)[1] if "/" in path else ""
+    else:
+        path = url.split(":", 1)[1] if ":" in url else ""
+    path = path.strip("/")
+    return path[:-4] if path.endswith(".git") else path
+
+
 class ReleaseRunSettings(Contract):
-    """This install's paths. Until push is approved, everything must live in
-    an isolated root that carries the AEP marker, origin included."""
+    """This install's paths. The working copy and inbox always live in a root
+    that carries the AEP marker. The origin is a local repository there too,
+    unless `remote_release` lets it name the real release repository (owner
+    2026-10-14)."""
 
     release_repo_url: Text
     template_branch: Text = "template"
@@ -88,14 +126,19 @@ class ReleaseRunSettings(Contract):
     allowed_root: Text
     artifactory_base_url: str = ""
     readiness_base_url: str = ""
+    remote_release: StrictBool = False
 
     @model_validator(mode="after")
     def no_secrets(self) -> Self:
         reject_embedded_secrets(self.model_dump(mode="json"))
         return self
 
-    def checked(self) -> tuple[Path, Path, Path, Path]:
-        """Root, work root, inbox and the local origin, or a refusal."""
+    def is_remote(self) -> bool:
+        return is_remote_url(self.release_repo_url.strip())
+
+    def checked(self) -> tuple[Path, Path, Path, str]:
+        """Root, work root, inbox and the origin (a resolved local path or the
+        remote URL), or a refusal."""
         root = Path(self.allowed_root)
         if not root.is_absolute():
             raise ReleaseRunError("settings_invalid", "allowed_root must be absolute")
@@ -106,19 +149,28 @@ class ReleaseRunSettings(Contract):
                 raise ReleaseRunError("isolated_root_unmarked")
         except OSError:
             raise ReleaseRunError("isolated_root_unmarked") from None
-        if re.match(r"^[a-z][a-z0-9+.-]*://", self.release_repo_url, re.IGNORECASE) or (
-                "@" in self.release_repo_url and ":" in self.release_repo_url.split("@", 1)[1]):
-            raise ReleaseRunError(
-                "remote_not_isolated",
-                "this release run only uses a local repository inside the isolated root; "
-                "a GitLab remote comes with the push step")
-        origin = Path(self.release_repo_url)
+        url = self.release_repo_url.strip()
         work = Path(self.work_root)
         inbox = Path(self.inbox_path)
-        for path in (origin, work, inbox):
+        local: tuple[Path, ...] = (work, inbox)
+        if is_remote_url(url):
+            if not self.remote_release:
+                raise ReleaseRunError(
+                    "remote_not_isolated",
+                    "this install only uses a local repository inside the isolated root; "
+                    "switch on remote_release in this Workflow's settings to use GitLab")
+            if not (_HTTPS_REMOTE.match(url) or _SSH_REMOTE.match(url)):
+                raise ReleaseRunError(
+                    "remote_url_invalid",
+                    "the release repository must be an https or ssh URL with no password "
+                    "or token in it")
+        else:
+            local += (Path(url),)
+        for path in local:
             if not path.is_absolute() or not path.resolve().is_relative_to(root):
                 raise ReleaseRunError("path_outside_isolated_root")
-        return root, work.resolve(), inbox.resolve(), origin.resolve()
+        origin = url if is_remote_url(url) else str(Path(url).resolve())
+        return root, work.resolve(), inbox.resolve(), origin
 
 
 # -- git -----------------------------------------------------------------------
@@ -131,14 +183,16 @@ class Git:
         self.root = root
         self.timeout = timeout
 
-    def __call__(self, *args: str, cwd: Path, check: bool = True) -> str:
+    def __call__(self, *args: str, cwd: Path, check: bool = True,
+                 timeout: float | None = None) -> str:
         if not cwd.resolve().is_relative_to(self.root):
             raise ReleaseRunError("git_outside_work_root")
         env = {**os.environ, "GIT_TERMINAL_PROMPT": "0", "GCM_INTERACTIVE": "never"}
         try:
             done = subprocess.run(
                 ["git", *args], cwd=cwd, capture_output=True, text=True, encoding="utf-8",
-                errors="replace", timeout=self.timeout, env=env, stdin=subprocess.DEVNULL)
+                errors="replace", timeout=timeout or self.timeout, env=env,
+                stdin=subprocess.DEVNULL)
         except FileNotFoundError:
             raise ReleaseRunError("git_unavailable") from None
         except subprocess.TimeoutExpired:
@@ -164,7 +218,7 @@ def ensure_working_copy(git: Git, work_root: Path, repo_url: str, log: LogFn) ->
         return repo_dir
     work_root.mkdir(parents=True, exist_ok=True)
     log(f"cloning {repo_url} into {repo_dir}")
-    git("clone", repo_url, repo_dir.name, cwd=work_root)
+    git("clone", repo_url, repo_dir.name, cwd=work_root, timeout=CLONE_TIMEOUT_SECONDS)
     return repo_dir
 
 
@@ -251,6 +305,7 @@ class PrepareStepInput(Contract):
     allowed_root: Text
     artifactory_base_url: str = ""
     readiness_base_url: str = ""
+    remote_release: StrictBool = False
 
     def settings(self) -> ReleaseRunSettings:
         return ReleaseRunSettings.model_validate(
@@ -291,6 +346,7 @@ class CommitStepInput(Contract):
     allowed_root: Text
     artifactory_base_url: str = ""
     readiness_base_url: str = ""
+    remote_release: StrictBool = False
 
     def settings(self) -> ReleaseRunSettings:
         return ReleaseRunSettings.model_validate(
@@ -306,7 +362,42 @@ class CommitResult(Contract):
     pushed: StrictBool = False
 
 
-# -- the two steps ---------------------------------------------------------------
+class CommittedRelease(Contract):
+    """What `commit` made, kept in the checkout's `.git` for `push`."""
+
+    branch: Text
+    commit: Text
+    subject: Text
+
+
+class PushStepInput(Contract):
+    """What the person reviewed: the branch and the commit `commit` showed."""
+
+    branch: Text
+    commit: Text = Field(min_length=7)
+    release_repo_url: Text
+    template_branch: Text = "template"
+    work_root: Text
+    inbox_path: Text
+    allowed_root: Text
+    artifactory_base_url: str = ""
+    readiness_base_url: str = ""
+    remote_release: StrictBool = False
+
+    def settings(self) -> ReleaseRunSettings:
+        return ReleaseRunSettings.model_validate(
+            self.model_dump(exclude={"branch", "commit"}))
+
+
+class PushResult(Contract):
+    branch: Text
+    commit: Text
+    pushed: StrictBool
+    project_path: str = ""
+    skipped: str = ""
+
+
+# -- the three steps -------------------------------------------------------------
 
 
 def _resolve(request: ReleaseRunRequest, settings: ReleaseRunSettings,
@@ -343,7 +434,7 @@ def prepare_release(
         raise ReleaseRunError("invalid_release_input", str(error)) from None
     chipset_version, source = _resolve(request, settings, log, fetch)
     git = Git(root)
-    repo_dir = ensure_working_copy(git, work_root, str(origin), log)
+    repo_dir = ensure_working_copy(git, work_root, origin, log)
     with checkout_lock(repo_dir):
         branch_state = checkout_branch(git, repo_dir, branch, settings.template_branch, log)
         release_path = repo_dir / "release.yaml"
@@ -380,7 +471,8 @@ def prepare_release(
             template=settings.template_branch, release_version=plan.release_version,
             previous_version=plan.previous_version or "",
             testcase=request.general_testcase_version, changed=changed,
-            project_path="", will_push=False)
+            project_path=project_path(origin) if settings.is_remote() else "",
+            will_push=settings.is_remote())
         subject = (f"Release {request.company_name} {request.chipset_id} {chipset_version} "
                    f"v{plan.release_version} (general-testcase "
                    f"{request.general_testcase_version})")
@@ -404,7 +496,7 @@ def commit_release(
 ) -> CommitResult:
     """Commit what `prepare` left, if it is still exactly what was reviewed."""
     root, work_root, _, origin = settings.checked()
-    repo_dir = _repo_dir(work_root, str(origin))
+    repo_dir = _repo_dir(work_root, origin)
     prepared = recorded_prepare(repo_dir)
     if prepared is None:
         raise ReleaseRunError("not_prepared", "prepare this release first")
@@ -434,8 +526,60 @@ def commit_release(
         git(*args, cwd=repo_dir)
         commit = git("rev-parse", "HEAD", cwd=repo_dir).strip()
         record.unlink(missing_ok=True)
+        (repo_dir / ".git" / COMMITTED_RECORD).write_text(
+            CommittedRelease(branch=prepared.branch, commit=commit,
+                             subject=prepared.subject).model_dump_json(indent=2),
+            encoding="utf-8")
         log(f"committed: {prepared.subject}")
     return CommitResult(branch=prepared.branch, committed=True, commit=commit, files=files)
+
+
+def push_release(
+    settings: ReleaseRunSettings, branch: str, commit_shown: str, *,
+    log: LogFn = lambda _: None,
+) -> PushResult:
+    """Push the commit `commit` made, if it is still exactly what was reviewed.
+
+    Never forced: a branch that moved on origin since is refused by git, and
+    that refusal is reported, not retried.
+    """
+    root, work_root, _, origin = settings.checked()
+    repo_dir = _repo_dir(work_root, origin)
+    committed = recorded_commit(repo_dir)
+    if committed is None:
+        raise ReleaseRunError("not_committed", "commit this release first")
+    shown = commit_shown.strip().lower()
+    if committed.branch != branch or len(shown) < 7 or not committed.commit.startswith(shown):
+        raise ReleaseRunError("stale_commit",
+                              "this is not the commit the release step made; commit and "
+                              "review it again")
+    git = Git(root)
+    remote = settings.is_remote()
+    path = project_path(origin) if remote else ""
+    record = repo_dir / ".git" / COMMITTED_RECORD
+    with checkout_lock(repo_dir):
+        if (_current_branch(git, repo_dir) != committed.branch
+                or git("rev-parse", "HEAD", cwd=repo_dir).strip() != committed.commit
+                or _changed(git, repo_dir)):
+            raise ReleaseRunError("checkout_changed",
+                                  "the working copy changed after the commit; prepare again")
+        actual = git("remote", "get-url", "origin", cwd=repo_dir).strip()
+        same = actual == origin if remote else Path(actual).resolve() == Path(origin)
+        if not same:
+            raise ReleaseRunError("origin_changed",
+                                  "the working copy's origin is not the configured release "
+                                  "repository")
+        heads = git("ls-remote", "--heads", "origin", committed.branch, cwd=repo_dir)
+        if heads.split("\t", 1)[0].strip() == committed.commit:
+            record.unlink(missing_ok=True)
+            return PushResult(branch=committed.branch, commit=committed.commit, pushed=False,
+                              project_path=path, skipped="already on origin")
+        git("push", "-u", "origin", committed.branch, cwd=repo_dir,
+            timeout=PUSH_TIMEOUT_SECONDS)
+        record.unlink(missing_ok=True)
+        log(f"pushed {committed.branch}")
+    return PushResult(branch=committed.branch, commit=committed.commit, pushed=True,
+                      project_path=path)
 
 
 # -- Bridge handlers --------------------------------------------------------------
@@ -474,6 +618,27 @@ class CommitHandler:
                                            step.fingerprint)
         except ReleaseRunError as error:
             raise _refused(error) from None
+
+
+class PushHandler:
+    async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
+        step = PushStepInput.model_validate(inputs)
+        try:
+            settings = step.settings()
+        except ValueError:
+            raise CapabilityRefused("release_settings_invalid") from None
+        try:
+            return await asyncio.to_thread(push_release, settings, step.branch, step.commit)
+        except ReleaseRunError as error:
+            raise _refused(error) from None
+
+
+def recorded_commit(repo_dir: Path) -> CommittedRelease | None:
+    try:
+        return CommittedRelease.model_validate_json(
+            (repo_dir / ".git" / COMMITTED_RECORD).read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
 
 
 def recorded_prepare(repo_dir: Path) -> PreparedRelease | None:

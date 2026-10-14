@@ -92,3 +92,30 @@ Adaptations from the source:
 Parity (`benchmarks/w13_parity`, run p001): the source job ran unchanged, through a stand-in Bridge that runs PowerShell inside the isolated root and refuses `git push`. AEP ran prepare and then commit on an identical copy. All four cases match: a new branch from the template, an existing branch, a dry run and an explicit version. The comparison covered branch, state, versions, requirements, the changed count, committed/pushed, the commit message and every committed blob hash (or, for the dry run, the status and the bytes of changed files).
 
 Still open: push with its own approval against the real GitLab, the pipeline watch, upload sets from attachments, and a dry-run comparison against the real release repository.
+
+## Push (2026-10-15)
+
+The owner asked for the n8n workflow (`workflows/13_release_package.json`: manual
+trigger, parameters, Bridge job `release_package`, success or failure summary) to be
+ported in full. Its parameters map to `release-package-prepare` (the n8n `dryRun`,
+`testPlans`, `configurations`, `overlays`, `chipsetVersion` and the identity fields), its
+commit to `release-package-commit` and its push to a third Workflow:
+
+- `engineering/release-package-push@1.0.0` runs capability `release-package/push@1.0.0`
+  (`external_side_effect`, risk high, approval required). Its run values are the branch
+  and the commit id the commit step reported. The commit step now records that commit in
+  the checkout's `.git`; push refuses (`not_committed`, `stale_commit`) unless it matches,
+  and refuses a changed branch, HEAD or working tree (`checkout_changed`) or an origin
+  that is not the configured repository (`origin_changed`). It runs
+  `git push -u origin <branch>` (the source's command and 900 s timeout), never forced;
+  a commit already on origin is reported as `already on origin`.
+- The per-install setting `remote_release` (default off) lets `release_repo_url` be the
+  real repository: an https or ssh URL with no user, password or token in it
+  (`remote_url_invalid` otherwise). The working copy and inbox must still be inside the
+  marked root. With it on, the prepare plan names the push and the GitLab project path,
+  as the source's dry-run plan does.
+
+The n8n summary node's fields come from the three results: branch and branch state
+(prepare), commit (commit), pushed and project path (push). Not carried: upload sets
+(the n8n workflow names inbox files, so it never used them) and the pipeline watch
+(a separate source job).
