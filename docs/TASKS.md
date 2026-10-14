@@ -1910,3 +1910,10 @@ s-k-20261011T102952` (not published).
   the marked root; release capabilities registered once the install holds settings for a
   release Workflow, so the three Workflows install from drafts. Tests: `tests/test_release_run.py` (local bare origin only).
   Drafts submitted to the live host with install requests waiting for the owner.
+- [x] Member publish to the Shared Platform (owner, 2026-10-15; design
+  `docs/phases/MEMBER_PUBLISH.md`): platform review queue (`control_plane/submissions.py`,
+  portal routes, review UI, `Personal Agent` login), Agent publisher
+  (`host_runtime/platform_publish.py`, host.json `publishing`), Agent Web "Publish to the
+  shared platform" card and `aep-host assets publish|submissions|withdraw`. Self-review is
+  refused; approval publishes as the submitter. Shared Platform bundle now carries
+  tzdata. Full suite 2624 passed, 6 skipped. Live test on 172.25.228.141 pending.

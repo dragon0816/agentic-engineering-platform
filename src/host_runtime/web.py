@@ -186,6 +186,14 @@ from host_runtime.laya import accelerator_for as laya_accelerator
 from host_runtime.laya import last_decision as laya_last_decision
 from host_runtime.laya import probe as laya_probe
 from host_runtime.persona import AgentPersonaStore, AgentPersonaUpdateRequest
+from host_runtime.platform_publish import (
+    MemberPortalPublisher,
+    explain,
+    installed_assets,
+    installed_manifest,
+    publisher_for,
+)
+from host_runtime.platform_publish import PublishError as PlatformPublishError
 from host_runtime.profiles import ProfileError, activate_profile
 from host_runtime.reference_sets import (
     REFERENCE_SETS_FILE,
@@ -2713,6 +2721,67 @@ class AgentWeb:
                 )
         return outcome.model_dump(mode="json")
 
+    # -- member publish to the shared platform (owner 2026-10-15) ----------
+    # `docs/phases/MEMBER_PUBLISH.md`: the member's own Personal Agent login,
+    # never the Bridge token; the platform's review queue decides.
+
+    def _publisher(self) -> MemberPortalPublisher | None:
+        binding = self.runtime.config.publishing
+        held = getattr(self, "_member_publisher", None)
+        if held is None or held[0] is not binding:
+            names = self.runtime.config.credential_environment()
+            self._member_publisher = (binding, publisher_for(binding, names))
+        publisher: MemberPortalPublisher | None = self._member_publisher[1]
+        return publisher
+
+    def publishing(self) -> dict[str, Any]:
+        binding = self.runtime.config.publishing
+        reply: dict[str, Any] = {
+            "configured": binding is not None,
+            "assets": installed_assets(self.runtime.layout),
+            "submissions": [],
+        }
+        publisher = self._publisher()
+        if binding is None or publisher is None:
+            return reply
+        reply["portal"] = binding.member_portal_url
+        reply["variable"] = self.runtime.config.credential_environment().get(
+            binding.credential.name)
+        try:
+            reply["submissions"] = publisher.submissions()
+        except PlatformPublishError as error:
+            reply["error"] = {"code": error.code, "message": explain(error.code)}
+        return reply
+
+    def publish_asset(self, kind: str, asset: str, change: str, note: str) -> dict[str, Any]:
+        publisher = self._publisher()
+        if publisher is None or kind not in ("skill", "workflow"):
+            return {"ok": False, "code": "publishing_not_configured",
+                    "message": "Add the shared platform's publishing settings to host.json."}
+        task = self.tasks().start("publish", f"Publish {asset} to the shared platform",
+                                  self.runtime.config.publishing.member_portal_url
+                                  if self.runtime.config.publishing else "")
+        try:
+            manifest = installed_manifest(self.runtime.layout, kind, asset)  # type: ignore[arg-type]
+            submission = publisher.submit(kind, manifest, change, note)  # type: ignore[arg-type]
+        except PlatformPublishError as error:
+            self.tasks().finish(task, "failed", error.code)
+            return {"ok": False, "code": error.code, "message": explain(error.code)}
+        identity = submission["identity"]
+        self.tasks().finish(task, "succeeded", (
+            f"{identity['namespace']}/{identity['name']}@{identity['version']} is waiting "
+            "for review"))
+        return {"ok": True, "submission": submission}
+
+    def withdraw_submission(self, submission_id: str) -> dict[str, Any]:
+        publisher = self._publisher()
+        if publisher is None:
+            return {"ok": False, "code": "publishing_not_configured"}
+        try:
+            return {"ok": True, "submission": publisher.withdraw(submission_id)}
+        except PlatformPublishError as error:
+            return {"ok": False, "code": error.code, "message": explain(error.code)}
+
     def ask(
         self,
         message: str,
@@ -3471,6 +3540,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.assets())
         elif parsed.path == "/api/platform":
             self._json(200, web.platform())
+        elif parsed.path == "/api/publishing":
+            self._json(200, web.publishing())
         else:
             self._json(404, {"error": "no such page"})
 
@@ -3492,6 +3563,8 @@ class _Handler(BaseHTTPRequestHandler):
         if path not in (
             "/api/ask",
             "/api/platform/sync",
+            "/api/publishing/submit",
+            "/api/publishing/withdraw",
             "/api/profiles/activate",
             "/api/workflows/run",
             "/api/knowledge/ask",
@@ -3802,6 +3875,24 @@ class _Handler(BaseHTTPRequestHandler):
                 return
             result = self.server.web.create_contribution_draft(contribution)
             self._json(201 if result.get("ok") else 409, result)
+            return
+        if path == "/api/publishing/submit":
+            fields = body if isinstance(body, dict) else {}
+            values = [fields.get(name) for name in ("kind", "asset", "change")]
+            note = fields.get("note") or ""
+            if not all(isinstance(value, str) and value for value in values) or not isinstance(
+                    note, str):
+                self._json(400, {"error": "name the kind, the asset and the change level"})
+                return
+            kind, asset, change = (str(value) for value in values)
+            self._json(200, self.server.web.publish_asset(kind, asset, change, note))
+            return
+        if path == "/api/publishing/withdraw":
+            submission_id = body.get("submission_id") if isinstance(body, dict) else None
+            if not isinstance(submission_id, str) or not submission_id:
+                self._json(400, {"error": "name the submission"})
+                return
+            self._json(200, self.server.web.withdraw_submission(submission_id))
             return
         if path == "/api/platform/sync":
             try:

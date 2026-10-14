@@ -984,6 +984,27 @@ tr:last-child td { border-bottom: none; }
         <div class="card"><div id="decisions" class="empty">reading&hellip;</div></div>
       </details>
     </div>
+    <div id="publish-card" class="card settings" style="margin-top: 14px">
+      <h3>Publish to the shared platform</h3>
+      <p class="note">Send an installed Skill or Workflow to the shared platform as you. It
+        waits there until an administrator (not you) approves it; only then can others
+        choose it. The platform gives it the next version number.</p>
+      <div id="publish-off" class="empty" hidden>Publishing is not set up on this PC: add
+        <code>publishing</code> (the Member Portal address and the name of your Personal
+        Agent login) to host.json.</div>
+      <div id="publish-form" class="laya-grid" hidden>
+        <label>Skill or Workflow<select id="publish-asset"></select></label>
+        <label>Change<select id="publish-change">
+          <option value="patch">patch: a fix</option>
+          <option value="minor" selected>minor: something added</option>
+          <option value="major">major: changes how it is used</option></select></label>
+        <label>Note for the reviewer<input id="publish-note" maxlength="300"
+          placeholder="what changed and why"></label>
+        <div><button class="go" id="publish-go" type="button">Publish for review</button></div>
+      </div>
+      <div id="publish-status" class="section-status" role="status" aria-live="polite"></div>
+      <div id="publish-list"></div>
+    </div>
     <details id="recent-runs" class="card settings" style="margin-top: 14px">
       <summary><strong>Recent runs</strong></summary>
       <div id="runs" class="empty">reading&hellip;</div>
@@ -3680,11 +3701,67 @@ async function synchronizePlatform() {
 
 el("platform-sync").addEventListener("click", synchronizePlatform);
 
+// -- Publish to the shared platform (owner 2026-10-15) ----------------------
+async function loadPublishing() {
+  const data = await call("/api/publishing");
+  el("publish-off").hidden = data.configured; el("publish-form").hidden = !data.configured;
+  const select = el("publish-asset"), chosen = select.value;
+  select.replaceChildren();
+  for (const item of data.assets) {
+    const option = document.createElement("option");
+    option.value = item.kind + " " + item.asset;
+    option.textContent = (item.kind === "skill" ? "Skill " : "Workflow ") + item.asset;
+    select.append(option);
+  }
+  if ([...select.options].some((o) => o.value === chosen)) select.value = chosen;
+  const status = el("publish-status");
+  status.classList.toggle("bad", !!data.error);
+  status.textContent = data.error ? data.error.message
+    : data.configured ? "Connected to " + data.portal + " as your Personal Agent." : "";
+  el("publish-list").replaceChildren(data.submissions.length ? table(
+    ["Asset", "Kind", "Submitted", "Status", "Reviewer note", ""], data.submissions, (s) => [
+      s.identity.namespace + "/" + s.identity.name + "@" + s.identity.version, s.kind,
+      new Date(s.submitted_at).toLocaleString(), s.status, s.reason || "",
+      s.status === "pending" ? kpButton("Withdraw", () => withdrawSubmission(s.submission_id))
+        : ""]) : document.createTextNode(""));
+}
+
+async function withdrawSubmission(id) {
+  const reply = await call("/api/publishing/withdraw", {submission_id: id});
+  el("publish-status").textContent = reply.ok ? "Withdrawn." : reply.message || reply.code;
+  await loadPublishing();
+}
+
+el("publish-go").addEventListener("click", async () => {
+  const button = el("publish-go"), status = el("publish-status");
+  const [kind, asset] = el("publish-asset").value.split(" ");
+  if (!asset) { status.textContent = "Choose a Skill or Workflow first."; return; }
+  button.disabled = true; status.classList.remove("bad");
+  status.textContent = "Sending " + asset + "…";
+  try {
+    const reply = await call("/api/publishing/submit", {kind, asset,
+      change: el("publish-change").value, note: el("publish-note").value});
+    if (reply.ok) {
+      const id = reply.submission.identity;
+      status.textContent = id.namespace + "/" + id.name + "@" + id.version
+        + " is waiting for an administrator's review.";
+      el("publish-note").value = "";
+    } else {
+      status.classList.add("bad"); status.textContent = reply.message || reply.code;
+    }
+    await loadPublishing();
+  } catch (failure) {
+    status.classList.add("bad"); status.textContent = "Not sent: " + failure.message;
+  } finally {
+    button.disabled = false;
+  }
+});
+
 async function loadCapabilities() {
   const refresh = el("cap-refresh"); refresh.disabled = true;
   refresh.setAttribute("aria-busy", "true"); refresh.textContent = "Refreshing…";
   try {
-    await Promise.all([loadAssets(), loadPlatform()]);
+    await Promise.all([loadAssets(), loadPlatform(), loadPublishing()]);
   } finally {
     refresh.disabled = false; refresh.removeAttribute("aria-busy");
     refresh.textContent = "Refresh status";

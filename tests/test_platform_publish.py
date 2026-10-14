@@ -150,3 +150,44 @@ def test_the_publish_binding_holds_no_secret_and_needs_https_beyond_loopback() -
     ok = PlatformPublishBinding(member_portal_url="http://127.0.0.1:28776/",
                                 credential={"name": "platform_member_login"})
     assert ok.member_portal_url == "http://127.0.0.1:28776"
+
+
+def test_the_cli_publishes_lists_and_withdraws(
+    platform: SharedPlatformApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    from test_host_runtime import config
+
+    from host_runtime.cli import main
+
+    layout = _installed(tmp_path)
+    host = config(
+        workspace_root=str(layout.workspace_root),
+        credentials=[{"secret": "platform_member_login",
+                      "environment_variable": "AEP_TEST_MEMBER_LOGIN"}],
+        publishing={"member_portal_url": platform.member_base_url,
+                    "credential": {"name": "platform_member_login"}},
+    )
+    path = tmp_path / "host.json"
+    path.write_text(host.model_dump_json(), encoding="utf-8")
+    monkeypatch.setenv("AEP_TEST_MEMBER_LOGIN", _agent_login(platform))
+    base = ["assets", "--config", str(path)]
+
+    assert main([*base, "publish", "--kind", "workflow", "--asset", "lab/weekly-check@0.3.0",
+                 "--change", "patch", "--note", "first"]) == 0
+    submitted = json.loads(capsys.readouterr().out)["result"]
+    assert submitted["identity"]["version"] == "1.0.0" and submitted["note"] == "first"
+    assert main([*base, "submissions"]) == 0
+    assert len(json.loads(capsys.readouterr().out)["result"]) == 1
+    assert main([*base, "withdraw", "--submission", submitted["submission_id"]]) == 0
+    assert json.loads(capsys.readouterr().out)["result"]["status"] == "withdrawn"
+    assert main([*base, "publish", "--kind", "skill", "--asset", "lab/none@1.0.0"]) == 1
+    assert json.loads(capsys.readouterr().out)["code"] == "not_installed"
+
+
+def test_agent_web_offers_publishing_beside_the_marketplace() -> None:
+    from host_runtime.web_page import PAGE
+
+    for hook in ('id="publish-card"', 'id="publish-asset"', 'id="publish-go"',
+                 "/api/publishing/submit", "/api/publishing/withdraw", "loadPublishing()"):
+        assert hook in PAGE

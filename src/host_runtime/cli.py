@@ -181,6 +181,17 @@ def _parser() -> argparse.ArgumentParser:
             chosen.add_argument("--arguments", default="{}", help="run values as JSON")
     asset_status = asset_actions.add_parser("status", help="an approval's outcome")
     asset_status.add_argument("--approval", required=True)
+    # Member publish to the shared platform (owner 2026-10-15): the submission
+    # waits for an administrator's review there; nothing is approved here.
+    publish = asset_actions.add_parser(
+        "publish", help="submit an installed Skill or Workflow to the shared platform")
+    publish.add_argument("--kind", required=True, choices=("skill", "workflow"))
+    publish.add_argument("--asset", required=True, help="namespace/name@version as installed")
+    publish.add_argument("--change", default="minor", choices=("patch", "minor", "major"))
+    publish.add_argument("--note", default="")
+    asset_actions.add_parser("submissions", help="your submissions to the shared platform")
+    withdraw = asset_actions.add_parser("withdraw", help="withdraw a pending submission")
+    withdraw.add_argument("--submission", required=True)
     connect = asset_actions.add_parser(
         "connect", help="install the creator skills for an agent and show its MCP setup"
     )
@@ -231,6 +242,8 @@ def _assets(args: argparse.Namespace) -> int:
     from host_runtime.external_authoring import build, connect
     from host_runtime.mcp_server import dispatch
 
+    if args.asset_action in ("publish", "submissions", "withdraw"):
+        return _publish(args)
     if args.asset_action == "connect":
         try:
             lines = connect(args.target, args.project, args.config, sys.executable)
@@ -262,6 +275,43 @@ def _assets(args: argparse.Namespace) -> int:
     outcome = dispatch(authoring, "aep_" + action.replace("-", "_"), call)
     print(json.dumps(outcome, ensure_ascii=False, indent=2))
     return 1 if outcome.get("ok") is False else 0
+
+
+def _publish(args: argparse.Namespace) -> int:
+    import json
+
+    from host_runtime.platform_publish import (
+        PublishError,
+        explain,
+        installed_manifest,
+        publisher_for,
+    )
+
+    try:
+        config = _load(args.config)
+    except (OSError, ValueError):
+        print(json.dumps({"ok": False, "code": "host_unavailable"}))
+        return 2
+    publisher = publisher_for(config.publishing, config.credential_environment())
+    if publisher is None:
+        print(json.dumps({"ok": False, "code": "publishing_not_configured",
+                          "message": "Add `publishing` to host.json."}))
+        return 2
+    try:
+        if args.asset_action == "publish":
+            manifest = installed_manifest(
+                HostLayout.under(config.workspace_root), args.kind, args.asset)
+            outcome: object = publisher.submit(args.kind, manifest, args.change, args.note)
+        elif args.asset_action == "withdraw":
+            outcome = publisher.withdraw(args.submission)
+        else:
+            outcome = publisher.submissions()
+    except PublishError as error:
+        print(json.dumps({"ok": False, "code": error.code, "message": explain(error.code)},
+                         ensure_ascii=False))
+        return 1
+    print(json.dumps({"ok": True, "result": outcome}, ensure_ascii=False, indent=2))
+    return 0
 
 
 def _mcp(args: argparse.Namespace) -> int:
