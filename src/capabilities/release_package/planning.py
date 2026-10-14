@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 from . import release_yaml as ry
@@ -20,6 +20,12 @@ DEST_DIRS = {
     "overlays": "overlay",
 }
 SAFE_SEGMENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+#: Extensions an uploaded file of each kind may have (None: any).
+UPLOAD_SUFFIXES: dict[str, frozenset[str] | None] = {
+    "testPlans": frozenset({".json"}),
+    "configurations": frozenset({".yaml", ".yml"}),
+    "overlays": None,
+}
 DEFAULT_INCLUDE = (
     "rswmt/**/*",
     "overlay/**/*",
@@ -47,6 +53,9 @@ class ReleaseRequest:
     configurations: tuple[str, ...] = ()
     overlays: tuple[str, ...] = ()
     upload_set_id: str = ""
+    # Files uploaded for this run (forms v2): (kind, absolute path), already
+    # confined to the host's upload store by the caller.
+    uploaded: tuple[tuple[str, Path], ...] = field(default=())
 
 
 @dataclass(frozen=True)
@@ -65,6 +74,8 @@ class SelectedFile:
     name: str
     destination: str
     sha256: str
+    # Where an uploaded file is read from; empty for an inbox file.
+    source: str = ""
 
 
 @dataclass(frozen=True)
@@ -108,6 +119,17 @@ def _selected_file(inbox: Path, kind: str, name: str) -> SelectedFile:
         raise ReleaseValidationError(f"{name!r} is not a file in the configured inbox")
     digest = hashlib.sha256(file_path.read_bytes()).hexdigest()
     return SelectedFile(kind, name, f"{DEST_DIRS[kind]}/{name}", digest)
+
+
+def _uploaded_file(kind: str, path: Path) -> SelectedFile:
+    name = path.name
+    if not name or name in {".", ".."} or not path.is_file():
+        raise ReleaseValidationError(f"{name!r} is not an uploaded file")
+    allowed = UPLOAD_SUFFIXES[kind]
+    if allowed is not None and path.suffix.lower() not in allowed:
+        raise ReleaseValidationError(f"{name!r} is not a {', '.join(sorted(allowed))} file")
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    return SelectedFile(kind, name, f"{DEST_DIRS[kind]}/{name}", digest, str(path))
 
 
 def plan_release(
@@ -171,7 +193,12 @@ def plan_release(
         _selected_file(settings.inbox, kind, name)
         for kind, names in named.items()
         for name in names
-    )
+    ) + tuple(_uploaded_file(kind, path) for kind, path in request.uploaded)
+    destinations = [item.destination for item in selected]
+    for destination in destinations:
+        if destinations.count(destination) > 1:
+            raise ReleaseValidationError(
+                f"two chosen files would both be written to {destination}")
     return ReleasePlan(
         branch=branch,
         previous_version=previous,

@@ -164,6 +164,7 @@ from capabilities.ncc_plan.manifest import PREPARE_SPEC as NCC_PREPARE_SPEC
 from capabilities.ncc_plan.manifest import RENDER_SPEC as NCC_RENDER_SPEC
 from capabilities.ncc_plan.manifest import STATIONS_FUNCTION as NCC_STATIONS_FUNCTION
 from capabilities.ncc_plan.planning import station_choices
+from capabilities.release_package import choices as release_choices
 from capabilities.release_package.apply_isolated import IsolatedApplyHandler
 from capabilities.release_package.contracts import (
     IsolatedApplyOutput,
@@ -181,6 +182,7 @@ from capabilities.release_package.manifest import PREVIEW as RELEASE_PREVIEW_WOR
 from capabilities.release_package.manifest import PREVIEW_SPEC as RELEASE_PREVIEW_SPEC
 from capabilities.release_package.manifest import PUSH as RELEASE_PUSH_WORKFLOW
 from capabilities.release_package.manifest import PUSH_SPEC as RELEASE_PUSH_SPEC
+from capabilities.release_package.manifest import RELEASE as RELEASE_RUN_WORKFLOW
 from capabilities.release_package.preview import ReleasePreviewHandler
 from capabilities.release_package.release_run import (
     CommitHandler,
@@ -401,10 +403,28 @@ def _ncc_stations(
     return [ReferenceItem(value=value, label=label) for value, label in station_choices(catalogue)]
 
 
+def _release_chipsets(
+    settings: Mapping[str, JsonValue], arguments: Mapping[str, str]
+) -> list[ReferenceItem]:
+    """The release form's chipset list (forms v2); fails soft, never blocks."""
+    return [ReferenceItem(value=value, label=label)
+            for value, label in release_choices.chipset_choices(settings, arguments)]
+
+
+def _release_versions(
+    settings: Mapping[str, JsonValue], arguments: Mapping[str, str]
+) -> list[ReferenceItem]:
+    """Published versions of one package, for the release form (forms v2)."""
+    return [ReferenceItem(value=value, label=label)
+            for value, label in release_choices.version_choices(settings, arguments)]
+
+
 #: Read-only `fn:` choice functions by name (see `host_runtime.choice_sources`).
 CHOICE_FUNCTIONS: dict[str, ChoiceFunction] = {
     NCC_STATIONS_FUNCTION: _ncc_stations,
     FOLDER_FILES: folder_files,
+    release_choices.CHIPSETS_FUNCTION: _release_chipsets,
+    release_choices.VERSIONS_FUNCTION: _release_versions,
 }
 
 
@@ -631,9 +651,13 @@ def build_integrations(
     # the owner's install, and the settings keep the real GitLab out until
     # `remote_release` is on.
     release_configured = _has_workflow_settings(
-        layout, (RELEASE_PREPARE_WORKFLOW, RELEASE_COMMIT_WORKFLOW, RELEASE_PUSH_WORKFLOW))
+        layout, (RELEASE_PREPARE_WORKFLOW, RELEASE_COMMIT_WORKFLOW, RELEASE_PUSH_WORKFLOW,
+                 RELEASE_RUN_WORKFLOW))
+    # Uploaded release files are read only from this host's upload store.
+    uploads = layout.workspace_root / UPLOADS_FOLDER
     for spec, handler, step_input, output in (
-        (RELEASE_PREPARE_SPEC, PrepareHandler(), PrepareStepInput, PreparedRelease),
+        (RELEASE_PREPARE_SPEC, PrepareHandler(upload_root=uploads), PrepareStepInput,
+         PreparedRelease),
         (RELEASE_COMMIT_SPEC, CommitHandler(), CommitStepInput, CommitResult),
         (RELEASE_PUSH_SPEC, PushHandler(), PushStepInput, PushResult),
     ):

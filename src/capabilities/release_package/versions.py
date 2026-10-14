@@ -112,11 +112,11 @@ def index_url(base_url: str, package: str) -> str:
     return f"{base}/{normalise_name(package)}/"
 
 
-def http_get(url: str, headers: dict[str, str]) -> tuple[int, str]:
+def http_get(url: str, headers: dict[str, str], timeout: float = 60) -> tuple[int, str]:
     """GET with the machine's own proxy settings; status and text only."""
     request = urllib.request.Request(url, headers=headers)
     try:
-        with urllib.request.urlopen(request, timeout=60) as response:  # noqa: S310 - configured URL
+        with urllib.request.urlopen(request, timeout=timeout) as response:  # noqa: S310 - configured URL
             return response.status, response.read().decode("utf-8", "replace")
     except urllib.error.HTTPError as error:
         return error.code, ""

@@ -46,6 +46,7 @@ from capabilities.release_package.apply_isolated import ISOLATED_MARKER, ISOLATE
 from capabilities.release_package.contracts import ReleasePreviewRequest
 from capabilities.release_package.planning import (
     DEFAULT_INCLUDE,
+    DEST_DIRS,
     ReleaseRequest,
     ReleaseSettings,
     ReleaseValidationError,
@@ -289,11 +290,23 @@ def _current_branch(git: Git, repo_dir: Path) -> str:
 
 
 class ReleaseRunRequest(ReleasePreviewRequest):
-    """The source's run values; chipsetVersion may be empty (looked up)."""
+    """The source's run values; chipsetVersion may be empty (looked up).
+
+    Forms v2: files uploaded for this run arrive as stored paths, one list per
+    kind, and are accepted only inside the host's upload store.
+    """
 
     chipset_version: str = Field(default="", alias="chipsetVersion")
     upload_set_id: str = Field(default="", alias="uploadSetId")
     dry_run: StrictBool = Field(default=False, alias="dryRun")
+    test_plan_uploads: tuple[Text, ...] = Field(default=(), alias="testPlanUploads")
+    configuration_uploads: tuple[Text, ...] = Field(default=(), alias="configurationUploads")
+    overlay_uploads: tuple[Text, ...] = Field(default=(), alias="overlayUploads")
+
+    def uploads(self) -> dict[str, tuple[str, ...]]:
+        return {"testPlans": self.test_plan_uploads,
+                "configurations": self.configuration_uploads,
+                "overlays": self.overlay_uploads}
 
 
 class PrepareStepInput(Contract):
@@ -371,10 +384,16 @@ class CommittedRelease(Contract):
 
 
 class PushStepInput(Contract):
-    """What the person reviewed: the branch and the commit `commit` showed."""
+    """What the person reviewed: the branch and the commit `commit` showed.
+
+    In the one-run release Workflow the commit comes from that run's commit
+    step and `push` from the person's tick: with `push` off, or when the run
+    committed nothing (a dry run, no change), the step pushes nothing.
+    """
 
     branch: Text
-    commit: Text = Field(min_length=7)
+    commit: str = ""
+    push: StrictBool = True
     release_repo_url: Text
     template_branch: Text = "template"
     work_root: Text
@@ -386,12 +405,12 @@ class PushStepInput(Contract):
 
     def settings(self) -> ReleaseRunSettings:
         return ReleaseRunSettings.model_validate(
-            self.model_dump(exclude={"branch", "commit"}))
+            self.model_dump(exclude={"branch", "commit", "push"}))
 
 
 class PushResult(Contract):
     branch: Text
-    commit: Text
+    commit: str
     pushed: StrictBool
     project_path: str = ""
     skipped: str = ""
@@ -418,11 +437,37 @@ def _resolve(request: ReleaseRunRequest, settings: ReleaseRunSettings,
         raise ReleaseRunError("chipset_version_unknown", str(error)) from None
 
 
+def checked_uploads(
+    request: ReleaseRunRequest, upload_root: Path | None,
+) -> tuple[tuple[str, Path], ...]:
+    """The run's uploaded files, each a regular file inside the host's upload
+    store (forms v2), or a refusal. Their extensions are checked by the plan."""
+    found: list[tuple[str, Path]] = []
+    for kind, paths in request.uploads().items():
+        assert kind in DEST_DIRS
+        for raw in paths:
+            if upload_root is None:
+                raise ReleaseRunError("uploads_not_available",
+                                      "this host has no upload store for release files")
+            path = Path(raw)
+            try:
+                inside = (path.is_absolute() and not path.is_symlink() and path.is_file()
+                          and path.resolve().is_relative_to(upload_root.resolve()))
+            except OSError:
+                inside = False
+            if not inside:
+                raise ReleaseRunError("upload_outside_store",
+                                      f"{path.name} is not a file uploaded for this run")
+            found.append((kind, path.resolve()))
+    return tuple(found)
+
+
 def prepare_release(
     settings: ReleaseRunSettings, request: ReleaseRunRequest, *, log: LogFn = lambda _: None,
-    fetch: Callable[..., tuple[int, str]] | None = None,
+    fetch: Callable[..., tuple[int, str]] | None = None, upload_root: Path | None = None,
 ) -> PreparedRelease:
     root, work_root, inbox, origin = settings.checked()
+    uploaded = checked_uploads(request, upload_root)
     if request.upload_set_id:
         # The source fetched upload sets from its own ops dashboard; on AEP the
         # files arrive as attachments. Until that is wired, name inbox files.
@@ -443,7 +488,7 @@ def prepare_release(
         try:
             plan = plan_release(
                 ReleaseRequest(**{**request.to_release_request().__dict__,
-                                  "chipset_version": chipset_version}),
+                                  "chipset_version": chipset_version, "uploaded": uploaded}),
                 ReleaseSettings(inbox=inbox, include=DEFAULT_INCLUDE),
                 previous_release_yaml=previous_text,
             )
@@ -459,9 +504,10 @@ def prepare_release(
             if not target.resolve().is_relative_to(repo_dir.resolve()):
                 raise ReleaseRunError("invalid_release_input")
             target.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(inbox / item.name, target)
+            shutil.copy2(Path(item.source) if item.source else inbox / item.name, target)
             placed.append({"kind": item.kind, "file": item.name,
-                           "dest": item.destination.split("/", 1)[0]})
+                           "dest": item.destination.split("/", 1)[0],
+                           "from": "upload" if item.source else "inbox"})
             log(item.destination)
         release_path.write_text(plan.release_yaml, encoding="utf-8")
         changed = _changed(git, repo_dir)
@@ -590,8 +636,11 @@ def _refused(error: ReleaseRunError) -> CapabilityRefused:
 
 
 class PrepareHandler:
-    def __init__(self, fetch: Callable[..., tuple[int, str]] | None = None) -> None:
+    def __init__(self, fetch: Callable[..., tuple[int, str]] | None = None,
+                 upload_root: Path | None = None) -> None:
         self.fetch = fetch
+        # The host's Workflow upload store: the only place uploads come from.
+        self.upload_root = upload_root
 
     async def __call__(self, context: RequestContext, inputs: Contract) -> Contract:
         step = PrepareStepInput.model_validate(inputs)
@@ -601,7 +650,7 @@ class PrepareHandler:
             raise CapabilityRefused("release_settings_invalid") from None
         try:
             return await asyncio.to_thread(prepare_release, settings, step.request,
-                                           fetch=self.fetch)
+                                           fetch=self.fetch, upload_root=self.upload_root)
         except ReleaseRunError as error:
             raise _refused(error) from None
 
@@ -628,6 +677,12 @@ class PushHandler:
         except ValueError:
             raise CapabilityRefused("release_settings_invalid") from None
         try:
+            if not step.push:
+                return PushResult(branch=step.branch, commit=step.commit, pushed=False,
+                                  skipped="push not requested")
+            if not step.commit:
+                return PushResult(branch=step.branch, commit="", pushed=False,
+                                  skipped="nothing was committed in this run")
             return await asyncio.to_thread(push_release, settings, step.branch, step.commit)
         except ReleaseRunError as error:
             raise _refused(error) from None
