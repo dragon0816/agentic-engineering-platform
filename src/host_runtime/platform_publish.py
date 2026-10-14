@@ -173,9 +173,9 @@ class MemberPortalPublisher:
 
 # What a person sees for each code, in the page and the CLI.
 EXPLANATIONS = {
-    "login_missing": "This PC has no Personal Agent login for the shared platform yet. In the "
-    "Member Portal press 'Connect a Personal Agent' and put the code in the environment "
-    "variable named in Settings, then restart Agent Web.",
+    "login_missing": "This PC has no Personal Agent code for the shared platform yet. In the "
+    "Member Portal press 'Connect a Personal Agent', copy the code and paste it into "
+    "'Personal Agent code' below, then Save.",
     "authentication_failed": "The shared platform did not accept this PC's login. Connect the "
     "Personal Agent again in the Member Portal.",
     "platform_unreachable": "The shared platform did not answer. Check the address in Settings "
