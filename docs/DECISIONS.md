@@ -2409,3 +2409,36 @@ Rejected alternatives:
   test root would then reach GitLab without anybody choosing it.
 - Writing the manifests and grants into the live workspace directly, as earlier slices
   did after a conversational yes: that is the model approving its own install.
+
+## 2026-10-15 — Workflow forms v2 and one release Workflow
+
+Decision (owner, items A, B, C): the parameter declaration gains `allow_other`
+(a `select` whose list is a suggestion), Agent Web resolves `fn:` lists like
+`ref:` sets, Telegram offers multi-select buttons (up to 96, toggled in place, then
+Done), a built-in `fn:folder_files` lists the files of a folder named by a setting
+or an earlier field (bare names only), `kind: upload` becomes a real upload into a
+per-run folder under the workspace (25 MB a file, `accept` enforced, sanitized
+names; the engine rejects an upload value outside that store), and identity-group
+values are remembered per member and Workflow for "same as last time". Placeholders
+in a choice source may name static settings. Workflow 13 becomes one Workflow,
+`engineering/rs-wmt-package-release@1.0.0` (prepare, commit, push in one run; dry run
+on and push off by default; started by name, no numeric alias; alias 13 removed from
+the preview). The prepare step accepts uploaded files only from the host's upload
+store and copies them straight into the branch. Design:
+`docs/phases/WORKFLOW_FORMS_V2.md`.
+
+Reason: authors should only declare parameters; the n8n-era dashboard and bot
+offered combo boxes, multi-select buttons, uploads and identity presets, and the
+port had fallen back to text boxes and three hand-chained runs (branch, fingerprint
+and commit typed by hand).
+
+Rejected alternatives:
+- `allow_other` with `multiple`: a multi-select combo has no plain HTML control;
+  not needed by any Workflow yet.
+- Copying uploads into the release inbox: it would write a folder the person
+  curates and mix runs; the step reads them from the store instead.
+- A new combined release capability: the three proven capabilities chained by step
+  inputs keep each effect's classification and approval policy.
+- Keeping the engine's choice check for `allow_other` fields: a slow index would
+  block runs the owner wants to go through with a typed value.
+- Storing presets in browser storage: Telegram and Web would not share them.

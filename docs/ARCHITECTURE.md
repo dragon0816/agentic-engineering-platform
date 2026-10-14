@@ -975,6 +975,8 @@ Capability exposure/discovery boundary. MCP is not the workflow engine and not t
 ### Workflow platform
 Owns deterministic multi-step execution, retry/idempotency, progress, state and resumability. Existing Host Bridge remains a first-class infrastructure capability because container/agent runtimes cannot replace Windows COM, authenticated browser profiles or local hardware access.
 
+Workflow parameters: a Workflow declares typed `WorkflowParameter` fields (kind, scope, choices or a `ref:`/`fn:` choice source, `allow_other`, `multiple`, `accept`, `group`, `order`, `channels`, `confirm`) and nothing else about its interface. `common/workflow_forms.py` derives the Agent Web form, the schedule form, the Telegram question flow (`channels/telegram_flow.py`) and the Agent tool schema from that one declaration; `common/workflow_parameters.py` validates every run against it and the engine re-checks dynamic choices and upload confinement. Choice lists resolve through one `host_runtime/choice_sources.py`; uploads land in one workspace store (`host_runtime/workflow_uploads.py`); identity presets in `host_runtime/identity_presets.py`. See `docs/phases/WORKFLOW_FORMS_V2.md`.
+
 ### n8n
 Event/business orchestration: schedules, triggers, coarse branching, notifications and integration glue. Do not move detailed engineering logic into n8n nodes when it can live in testable workflow/jobs code.
 

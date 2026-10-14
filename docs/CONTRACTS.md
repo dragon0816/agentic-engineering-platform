@@ -2802,6 +2802,39 @@ Static field definitions are reserved in the manifest contract for a later
 per-install settings slice. This change does not edit `host.json`, create a
 static settings editor, or generate Telegram controls.
 
+# Workflow forms v2 (2026-10-15)
+
+`WorkflowParameter.allow_other` (default false, `select` only, not with
+`multiple`) makes the choices suggestions: any nonempty text is valid, the
+Agent tool schema has no `enum`, and the engine does not consult the field's
+`choices_source` at run time. A `choices_source` placeholder may name a
+`scope: static` setting; it is bound from the install's settings and is never
+waited for. `fn:folder_files?folder={x}&accept=.a,.b` is a built-in read-only
+function returning the bare names of regular files directly in that absolute
+folder. A choice function that fails or times out yields no list.
+
+`kind: upload` values are absolute paths of files in the host's upload store
+(`<workspace>/workflow-uploads/<set>/<field>/<name>`), written only by
+`POST /api/workflow-uploads` (Agent Web, base64 JSON: `workflow`, `field`,
+`upload_set`, `filename`, `data`) or a Telegram flow's document replies.
+Limits: 25 MB a file, 20 files a field, the field's `accept` extensions,
+sanitized names. `WorkflowEngine` rejects a run whose upload value is not a file
+in the store with `workflow_upload_outside_store` (needs_input).
+
+Identity presets: `POST /api/workflow-identity` (`workflow`) returns the
+calling member's last `group: identity` values for that Workflow name, kept in
+`<workspace>/identity-presets.json` after a validated, dispatched run.
+
+`engineering/rs-wmt-package-release@1.0.0` chains `release-package/prepare`,
+`release-package/commit` (step inputs `branch`, `fingerprint` from step 0) and
+`release-package/push` (`branch`, `commit` from step 1, `push` from the run).
+`PushStepInput` gains `push: bool = true`; with `push` false, or an empty
+`commit` (nothing committed in this run), the step returns `pushed=false` with a
+`skipped` reason and touches nothing. The release request gains
+`testPlanUploads`, `configurationUploads` and `overlayUploads`, accepted only
+inside the upload store the host gives the prepare handler. See
+`docs/phases/WORKFLOW_FORMS_V2.md`.
+
 # Workflow 7 read-only Project preview (2026-10-02)
 
 `engineering/github-team-tickets-preview@1.0.0` has numeric alias `7` and
