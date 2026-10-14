@@ -54,6 +54,7 @@ def form_field(field: WorkflowParameter) -> dict[str, Any]:
         "help": field.help or field.description or "",
         "default": field.default,
         "choices_source": field.choices_source,
+        "allow_other": field.allow_other,
         "needs": list(field.needs),
         "multiple": field.multiple,
         "accept": list(field.accept),
@@ -98,7 +99,7 @@ def _property_schema(field: WorkflowParameter) -> dict[str, Any]:
         item = {"type": "string", "minLength": max(1, field.min_length or 1)}
         if field.pattern:
             item["pattern"] = field.pattern
-        if field.choice_values and field.choices_source is None:
+        if field.choice_values and field.choices_source is None and not field.allow_other:
             item["enum"] = list(field.choice_values)
     schema = (
         {"type": "array", "items": item}

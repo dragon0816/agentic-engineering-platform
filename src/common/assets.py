@@ -285,7 +285,7 @@ _PATH_KINDS = frozenset({"file", "folder", "upload"})
 _EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 _LATER_PARAMETER_FIELDS = frozenset({
     "default", "help", "examples", "order", "group", "pattern", "min_length", "choices",
-    "choices_source", "needs", "multiple", "accept", "channels", "confirm",
+    "choices_source", "needs", "multiple", "accept", "channels", "confirm", "allow_other",
 })
 CHOICES_SOURCE = re.compile(r"^(ref|fn):[A-Za-z0-9_.-]+(\?[^\s]*)?$")
 _PLACEHOLDER = re.compile(r"\{([A-Za-z_][A-Za-z0-9_]*)\}")
@@ -349,6 +349,9 @@ class WorkflowParameter(RegistryContract):
     # resolved at run time (`ref:<set>` or `fn:<name>?arg={field}`).
     choices: tuple[ParameterChoice, ...] = ()
     choices_source: Text | None = None
+    # The choices are suggestions: any nonempty text is accepted ("pick or
+    # type"), and the engine never consults the source at run time.
+    allow_other: StrictBool = False
     needs: tuple[Symbol, ...] = ()
     multiple: StrictBool = False
     accept: tuple[Text, ...] = ()
@@ -380,6 +383,8 @@ class WorkflowParameter(RegistryContract):
             raise ValueError("only select and text_list parameters may declare choices")
         if self.choices_source is not None and not CHOICES_SOURCE.fullmatch(self.choices_source):
             raise ValueError("choices_source must be ref:<set> or fn:<name>")
+        if self.allow_other and (self.kind != "select" or self.multiple):
+            raise ValueError("only single select parameters may allow other values")
         if self.kind not in ("integer", "number") and (
             self.minimum is not None or self.maximum is not None
         ):
@@ -454,7 +459,10 @@ def parameter_value_problem(field: WorkflowParameter, value: Any) -> str | None:
     if kind == "emails" and not all(_EMAIL.fullmatch(item) for item in items):
         return "must be email addresses"
     values = field.choice_values
-    if values and field.choices_source is None and any(item not in values for item in items):
+    if (
+        values and field.choices_source is None and not field.allow_other
+        and any(item not in values for item in items)
+    ):
         return "must be a declared choice"
     for item in items:
         if field.min_length is not None and len(item) < field.min_length:
@@ -505,11 +513,13 @@ class WorkflowManifest(ExecutableManifest):
         if len({item.name for item in value}) != len(value):
             raise ValueError("workflow parameter names must be unique")
         # A field that another field depends on must exist and be asked first:
-        # by declared `order`, else by position in the manifest.
+        # by declared `order`, else by position in the manifest. A placeholder
+        # may also name a setting (`scope: static`), which is never asked.
         position = {
             item.name: (item.order if item.order is not None else index, index)
             for index, item in enumerate(value)
         }
+        settings = {item.name for item in value if item.scope == "static"}
         for item in value:
             placeholders = (
                 _PLACEHOLDER.findall(item.choices_source) if item.choices_source else []
@@ -517,7 +527,8 @@ class WorkflowManifest(ExecutableManifest):
             for name in placeholders:
                 if name not in position:
                     raise ValueError(f"{item.name}: placeholder {{{name}}} names no parameter")
-            for name in (*item.needs, *placeholders):
+            asked = [name for name in placeholders if name not in settings]
+            for name in (*item.needs, *asked):
                 if name not in position:
                     raise ValueError(f"{item.name}: needs {name}, which is not declared")
                 if position[name] >= position[item.name]:

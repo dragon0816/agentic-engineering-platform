@@ -55,8 +55,15 @@ from host_runtime.attachments import (
     safe_name,
 )
 from host_runtime.chat_authoring import ChatAuthoring, ChatAuthoringError, approval_text
+from host_runtime.identity_presets import IdentityPresets
 from host_runtime.schedule_policy import target_side_effect
 from host_runtime.turn_summary import tool_summary
+from host_runtime.workflow_uploads import (
+    MAX_UPLOAD_BYTES,
+    WorkflowUploadError,
+    WorkflowUploadStore,
+    accepts,
+)
 from models.contracts import ModelMessage
 from models.credentials import CredentialMisconfigured, CredentialResolver
 from models.wire import (
@@ -190,6 +197,9 @@ class TelegramDelivery(Contract):
     reply: Text | None = None
     # Inline keyboard rows of (label, callback data) sent with the reply.
     buttons: tuple[tuple[tuple[Text, Text], ...], ...] = ()
+    # Replace this message of the chat (a tapped multi-select) instead of
+    # sending a new one.
+    edit_message_id: int | None = Field(default=None, strict=True)
     replied: StrictBool = False
     outcome: LocalAgentOutcome | None = None
     failure: Failure | None = None
@@ -236,8 +246,11 @@ class _Update:
         self, update_id: int, chat_id: int, sender_id: int, text: str | None,
         callback_id: str | None = None, sender_name: str = "",
         files: list[_File] | None = None, media_group_id: str | None = None,
+        message_id: int | None = None,
     ) -> None:
         self.update_id = update_id
+        # The message a tapped button sits on, so a toggle can edit it.
+        self.message_id = message_id
         self.chat_id = chat_id
         self.sender_id = sender_id
         self.text = text
@@ -284,9 +297,11 @@ def _parse(raw: object) -> _Update | None:
             and isinstance(chat, dict) and type(chat.get("id")) is int
             and isinstance(data, str) and isinstance(callback.get("id"), str)
         ):
+            identifier = message.get("message_id") if isinstance(message, dict) else None
             return _Update(
                 raw["update_id"], chat["id"], sender["id"], data, callback["id"],
                 sender_name=_display_name(sender),
+                message_id=identifier if type(identifier) is int else None,
             )
         return None
     message = raw.get("message")
@@ -526,6 +541,8 @@ class TelegramIngress:
         *,
         transport: Transport | None = None,
         attachments: AttachmentStore | None = None,
+        uploads: WorkflowUploadStore | None = None,
+        presets: IdentityPresets | None = None,
     ) -> None:
         self.config = TelegramIngressConfig.model_validate(config)
         if self.config.bridge_id != agent.membership.device.bridge_id:
@@ -545,6 +562,11 @@ class TelegramIngress:
         self._flows: dict[tuple[int, int], telegram_flow.FlowState] = {}
         # Where attached files are kept; without it files are refused.
         self.attachments = attachments
+        # Workflow `upload` fields (forms v2): documents sent while a flow
+        # waits on one are stored here; without it such fields are refused.
+        self.uploads = uploads
+        # The member's identity answers from last time ("same as last time?").
+        self.presets = presets
 
     def offset(self) -> int | None:
         """How far this bot has been consumed, from the Bridge's own durable
@@ -649,9 +671,15 @@ class TelegramIngress:
             if update.callback_id is not None:
                 await asyncio.to_thread(self._acknowledge, update.callback_id)
             if delivery.reply is not None:
-                replied = await asyncio.to_thread(
-                    self._reply, update.chat_id, delivery.reply, delivery.buttons
-                )
+                replied = False
+                if delivery.edit_message_id is not None:
+                    replied = await asyncio.to_thread(
+                        self._edit_reply, update.chat_id, delivery.edit_message_id,
+                        delivery.reply, delivery.buttons)
+                if not replied:
+                    replied = await asyncio.to_thread(
+                        self._reply, update.chat_id, delivery.reply, delivery.buttons
+                    )
                 delivery = delivery.model_copy(update={"replied": replied})
             deliveries.append(delivery)
         if highest is None or highest == offset:
@@ -710,6 +738,11 @@ class TelegramIngress:
                 del self.unmapped[oldest.sender_id]
             return TelegramDelivery(**base, disposition="unmapped_sender")
         if update.files:
+            waiting = self._flows.get((update.chat_id, update.sender_id))
+            if waiting is not None and not waiting.expired() and (
+                telegram_flow.current_upload(waiting) is not None
+            ):
+                return await self._flow_upload(base, waiting, actor, update)
             return await self._attached(base, actor, update)
         if update.text is None or not update.text.strip():
             return TelegramDelivery(
@@ -1023,8 +1056,13 @@ class TelegramIngress:
         effect = await asyncio.to_thread(
             target_side_effect, self.agent, "workflow", manifest.metadata.identity, {}
         )
+        preset = (
+            await asyncio.to_thread(self.presets.last, actor, manifest)
+            if self.presets is not None else {}
+        )
         state = telegram_flow.start(
-            manifest, effect, self.agent.gateway.engine.choices_provider
+            manifest, effect, self.agent.gateway.engine.choices_provider,
+            uploads=self.uploads is not None, preset=preset,
         )
         if isinstance(state, str):
             return TelegramDelivery(**base, disposition="answered", reply=state)
@@ -1039,10 +1077,13 @@ class TelegramIngress:
             return TelegramDelivery(
                 **base, disposition="answered", reply=scrub(step.prompt.text),
                 buttons=tuple(tuple(row) for row in step.prompt.buttons),
+                edit_message_id=update.message_id if step.prompt.edit else None,
             )
         self._flows.pop(key, None)
         if step.kind == "cancelled" or step.arguments is None:
             return TelegramDelivery(**base, disposition="answered", reply="Cancelled.")
+        if self.presets is not None:
+            await asyncio.to_thread(self.presets.remember, actor, state.manifest, step.arguments)
         acting, on_behalf_of = self._acting(actor)
         progress = await self._progress(update.chat_id, f"Running Workflow {state.workflow.name}")
         succeeded = False
@@ -1066,6 +1107,69 @@ class TelegramIngress:
                      f"{run.completed_steps} step(s)"
                      + (f" ({run.failure.code})" if run.failure is not None else ""))
         return TelegramDelivery(**base, disposition="routed", reply=scrub(reply), outcome=outcome)
+
+    async def _flow_upload(
+        self, base: dict[str, Any], state: telegram_flow.FlowState, actor: str,
+        update: _Update,
+    ) -> TelegramDelivery:
+        """Documents for the upload field a flow waits on (forms v2): checked
+        against the field and the limits before anything is downloaded, then
+        stored in the Workflow upload store; the run gets their paths."""
+        assert self.uploads is not None
+        item = telegram_flow.current_upload(state)
+        assert item is not None
+        key = (update.chat_id, update.sender_id)
+
+        def again(message: str) -> TelegramDelivery:
+            reprompt = telegram_flow.prompt(state)
+            return TelegramDelivery(
+                **base, disposition="answered", reply=scrub(f"{message}\n\n{reprompt.text}"),
+                buttons=tuple(tuple(row) for row in reprompt.buttons))
+
+        if not item.multiple and len(update.files) > 1:
+            return again("Send one file here.")
+        for file in update.files:
+            if not accepts(item, safe_name(file.filename)):
+                return again(f"{safe_name(file.filename)} is not a "
+                             f"{', '.join(item.accept)} file.")
+            if file.size is not None and file.size > TELEGRAM_DOWNLOAD_BYTES:
+                return again(attachment_reply("attachment_telegram_limit"))
+            if file.size is not None and file.size > MAX_UPLOAD_BYTES:
+                return again(attachment_reply("attachment_too_large"))
+        if state.upload_set is None:
+            state.upload_set = await asyncio.to_thread(self.uploads.new_set)
+        step: telegram_flow.FlowStep | None = None
+        for file in update.files:
+            try:
+                data = await asyncio.to_thread(self._download, file.file_id)
+                path = await asyncio.to_thread(
+                    self.uploads.add, state.upload_set, item, file.filename, data)
+            except AttachmentError as error:
+                return again(attachment_reply(error.code))
+            except WorkflowUploadError as error:
+                return again(f"That file was not kept ({error.code}).")
+            step = telegram_flow.add_upload(state, str(path))
+        assert step is not None
+        return await self._flow_step(base, key, state, step, actor, update)
+
+    def _edit_reply(
+        self, chat_id: int, message_id: int, text: str,
+        buttons: tuple[tuple[tuple[str, str], ...], ...] = (),
+    ) -> bool:
+        """Replace one message's text and keyboard (a multi-select toggle)."""
+        if len(text) > MAX_MESSAGE_CHARS:
+            return False
+        try:
+            status, _ = self._call("editMessageText", {
+                "chat_id": chat_id, "message_id": message_id, "text": text,
+                "reply_markup": {"inline_keyboard": [
+                    [{"text": label, "callback_data": data} for label, data in row]
+                    for row in buttons
+                ]},
+            })
+        except Exception:  # noqa: BLE001 - the caller sends a new message instead
+            return False
+        return status == 200
 
     async def _execute_flow(
         self, state: telegram_flow.FlowState, step: telegram_flow.FlowStep, acting: str,

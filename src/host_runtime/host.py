@@ -260,7 +260,7 @@ from host_runtime.agent import LocalAgent
 from host_runtime.attachments import AttachmentStore
 from host_runtime.bridge_tools import bridge_tools
 from host_runtime.chat_authoring import ChatAuthoring
-from host_runtime.choice_sources import ChoiceFunction, ChoiceSources
+from host_runtime.choice_sources import FOLDER_FILES, ChoiceFunction, ChoiceSources, folder_files
 from host_runtime.contracts import (
     CompanyHostConfiguration,
     DoctorCheck,
@@ -271,6 +271,7 @@ from host_runtime.contracts import (
 # Re-exported: the layout moved to the contracts module so the platform client
 # can take one without importing this module, and callers still find it here.
 from host_runtime.contracts import HostLayout as HostLayout
+from host_runtime.identity_presets import IdentityPresets
 from host_runtime.jev_shadow import SHADOW_LOG_FILE, JevShadowLog, skill_accelerator
 from host_runtime.mcp_servers import McpHub
 from host_runtime.profiles import ProfileError, load_active_profile
@@ -281,6 +282,7 @@ from host_runtime.sync import PlatformClient
 from host_runtime.task_artifacts import LocalTaskArtifacts
 from host_runtime.telegram_settings import windows_user_environment
 from host_runtime.workflow_settings import SETTINGS_FILE, WorkflowSettingsStore, settings_key
+from host_runtime.workflow_uploads import UPLOADS_FOLDER, WorkflowUploadStore
 from host_runtime.workspace import documents
 from integrations import excel
 from integrations.chipset_excel import ChipsetExcelWriter
@@ -400,7 +402,10 @@ def _ncc_stations(
 
 
 #: Read-only `fn:` choice functions by name (see `host_runtime.choice_sources`).
-CHOICE_FUNCTIONS: dict[str, ChoiceFunction] = {NCC_STATIONS_FUNCTION: _ncc_stations}
+CHOICE_FUNCTIONS: dict[str, ChoiceFunction] = {
+    NCC_STATIONS_FUNCTION: _ncc_stations,
+    FOLDER_FILES: folder_files,
+}
 
 
 class HostRuntime:
@@ -1138,6 +1143,7 @@ def build_gateway(
             workflows, bridge,
             settings_provider=workflow_settings_provider(config, layout),
             choices_provider=choice_sources(config, layout).values,
+            upload_root=layout.workspace_root / UPLOADS_FOLDER,
         ),
         skill_accelerator=factory,
         skill_authorizer=authorize,
@@ -1376,6 +1382,8 @@ def build_telegram(
         return TelegramIngress(
             ingress_config, agent, resolver,
             attachments=AttachmentStore(layout.workspace_root),
+            uploads=WorkflowUploadStore(layout.workspace_root),
+            presets=IdentityPresets(layout.workspace_root),
         )
     except ValueError as error:
         raise HostError("telegram_invalid", layout.telegram) from error

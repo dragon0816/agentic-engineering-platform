@@ -6,10 +6,16 @@ idea over AEP's `WorkflowParameter`: the fields shown on the `telegram`
 channel, in form order, each converted from a reply or a button tap and
 checked by the shared field rules. The flow is pure state; the ingress
 sends its prompts and runs the Workflow once the person confirms.
+
+Forms v2 (owner 2026-10-15): a multi-select is a set of toggle buttons and a
+Done button; a pick-or-type list (`allow_other`) takes a typed value; an
+upload field takes documents one by one, then /done (when the ingress has an
+upload store); and identity fields may be filled from last time.
 """
 
 from __future__ import annotations
 
+import json
 import re
 import time
 from collections.abc import Callable, Mapping
@@ -22,15 +28,22 @@ from common.assets import (
     WorkflowParameter,
     parameter_value_problem,
 )
-from common.workflow_forms import ordered_fields
+from common.workflow_forms import IDENTITY_GROUP, ordered_fields
 from common.workflow_parameters import WorkflowParameterError, validate_run_parameters
 
 FLOW_TTL_SECONDS = 15 * 60
 BUTTONS_PER_ROW = 3
-MAX_BUTTONS = 24
+#: Choice buttons on one keyboard; Telegram allows 100 buttons, and a
+#: multi-select needs one more for Done.
+MAX_BUTTONS = 96
+#: Telegram's limit on a button's callback data, in bytes.
+MAX_CALLBACK_BYTES = 64
 _YES = {"yes", "y", "true", "1", "是", "對", "好", "確認"}
 _NO = {"no", "n", "false", "0", "否", "不", "不要", "取消"}
 _SPLIT = re.compile(r"[\n,，、;；]+")
+_PICK = re.compile(r"^pick:(\d{1,3})$")
+_POSITION = re.compile(r"^#(\d{1,3})$")
+CHECK = "✓ "
 
 Button = tuple[str, str]
 
@@ -39,6 +52,9 @@ Button = tuple[str, str]
 class FlowPrompt:
     text: str
     buttons: list[list[Button]] = field(default_factory=list)
+    # Replace the message the tapped button sits on (a multi-select toggle)
+    # instead of sending a new one.
+    edit: bool = False
 
 
 ChoicesProvider = Callable[[WorkflowManifest, str, Mapping[str, Any]], "list[str] | None"]
@@ -55,6 +71,14 @@ class FlowState:
     answers: dict[str, Any] = field(default_factory=dict)
     confirming: bool = False
     started: float = field(default_factory=time.monotonic)
+    # Identity values from last time, offered before the first question.
+    preset: dict[str, Any] = field(default_factory=dict)
+    asking_preset: bool = False
+    # Values ticked so far on the current multi-select.
+    picked: list[str] = field(default_factory=list)
+    # The upload set this flow stores documents in (set by the ingress).
+    upload_set: str | None = None
+    _cache: dict[str, list[str] | None] = field(default_factory=dict)
 
     @property
     def workflow(self) -> AssetIdentity:
@@ -73,16 +97,24 @@ class FlowStep:
 
 def start(
     manifest: WorkflowManifest, effect: str | None, choices: ChoicesProvider | None = None,
+    *, uploads: bool = False, preset: Mapping[str, Any] | None = None,
 ) -> FlowState | str:
-    """A new flow, or why this Workflow cannot be filled in from Telegram."""
+    """A new flow, or why this Workflow cannot be filled in from Telegram.
+
+    `uploads` says the ingress can store documents for `upload` fields; without
+    it a required upload is refused and an optional one skipped, as before.
+    """
     fields = ordered_fields(manifest, "telegram")
-    for item in fields:
-        if item.kind == "upload" and item.required:
-            return (f"{item.label} needs a file upload, which Telegram does not accept here; "
-                    "run this Workflow from Agent Web.")
-    # Optional uploads are skipped: attachments are not accepted on this channel.
+    if not uploads:
+        for item in fields:
+            if item.kind == "upload" and item.required:
+                return (f"{item.label} needs a file upload, which Telegram does not accept "
+                        "here; run this Workflow from Agent Web.")
+        fields = tuple(item for item in fields if item.kind != "upload")
+    identity = {item.name for item in fields if item.group == IDENTITY_GROUP}
+    remembered = {name: value for name, value in (preset or {}).items() if name in identity}
     return FlowState(
-        manifest, effect, tuple(item for item in fields if item.kind != "upload"), choices,
+        manifest, effect, fields, choices, preset=remembered, asking_preset=bool(remembered),
     )
 
 
@@ -94,25 +126,62 @@ def _dynamic_values(state: FlowState, item: WorkflowParameter) -> list[str] | No
     source = item.choices_source
     if not source or state.choices is None:
         return None
-    return state.choices(state.manifest, source, state.answers)
+    # A slow list (a package index) is read once per question, not per reply.
+    key = item.name + "\0" + json.dumps(state.answers, sort_keys=True, default=str)
+    if key not in state._cache:
+        state._cache = {key: state.choices(state.manifest, source, state.answers)}
+    return state._cache[key]
+
+
+def _choices(state: FlowState, item: WorkflowParameter) -> list[tuple[str, str]]:
+    """(value, label) pairs for a select, from its source or its declaration."""
+    if item.kind != "select":
+        return []
+    if item.choices_source:
+        return [(value, value) for value in _dynamic_values(state, item) or []]
+    labels = {choice.value: (choice.label or choice.value) for choice in item.choices}
+    return [(value, labels.get(value, value)) for value in item.choice_values]
+
+
+def _rows(buttons: list[Button]) -> list[list[Button]]:
+    return [buttons[i:i + BUTTONS_PER_ROW] for i in range(0, len(buttons), BUTTONS_PER_ROW)]
 
 
 def _choice_buttons(state: FlowState, item: WorkflowParameter) -> list[list[Button]]:
     if item.kind == "boolean":
         return [[("Yes", "yes"), ("No", "no")]]
-    dynamic = _dynamic_values(state, item)
-    if item.kind == "select" and dynamic and not item.multiple:
-        buttons = [(value, value) for value in dynamic[:MAX_BUTTONS]]
-        return [buttons[i:i + BUTTONS_PER_ROW] for i in range(0, len(buttons), BUTTONS_PER_ROW)]
-    if item.kind != "select" or item.choices_source or item.multiple:
+    if item.kind == "upload":
+        return [[("Done", "/done")]] if item.multiple else []
+    listed = _choices(state, item)[:MAX_BUTTONS]
+    if not listed:
         return []
-    labels = {choice.value: (choice.label or choice.value) for choice in item.choices}
-    values = item.choice_values[:MAX_BUTTONS]
-    buttons = [(labels.get(value, value), value) for value in values]
-    return [buttons[i:i + BUTTONS_PER_ROW] for i in range(0, len(buttons), BUTTONS_PER_ROW)]
+    if item.multiple:
+        rows = _rows([
+            ((CHECK if value in state.picked else "") + label, f"pick:{position}")
+            for position, (value, label) in enumerate(listed, start=1)
+        ])
+        return [*rows, [("Done", "pick:done")]]
+    return _rows([
+        (label, value if len(value.encode("utf-8")) <= MAX_CALLBACK_BYTES else f"#{position}")
+        for position, (value, label) in enumerate(listed, start=1)
+    ])
+
+
+def _preset_prompt(state: FlowState) -> FlowPrompt:
+    labels = {item.name: item.label for item in state.fields}
+    shown = [f"{_title(state)}: same as last time?"]
+    shown.extend(f"- {labels.get(name, name)}: {_shown(value)}"
+                 for name, value in state.preset.items())
+    return FlowPrompt("\n".join(shown), [[("Yes", "preset:yes"), ("Change", "preset:no")]])
+
+
+def _shown(value: Any) -> str:
+    return ", ".join(str(item) for item in value) if isinstance(value, list) else str(value)
 
 
 def prompt(state: FlowState) -> FlowPrompt:
+    if state.asking_preset:
+        return _preset_prompt(state)
     if state.confirming:
         return _confirmation(state)
     item = state.fields[state.index]
@@ -120,18 +189,35 @@ def prompt(state: FlowState) -> FlowPrompt:
              + (" *" if item.required else "")]
     if item.help or item.description:
         lines.append(item.help or item.description or "")
-    if item.kind in ("text_list", "emails") or item.multiple:
+    listed = _choices(state, item)
+    if item.kind == "upload":
+        kinds = f" ({', '.join(item.accept)})" if item.accept else ""
+        if item.multiple:
+            received = state.answers.get(item.name) or []
+            lines.append(f"Send the files{kinds} as documents, one by one, then /done.")
+            if received:
+                lines.append(f"Received {len(received)} so far.")
+        else:
+            lines.append(f"Send the file{kinds} as a document.")
+    elif item.multiple and listed:
+        lines.append("Tap to tick, then Done. You can also type the values, separated "
+                     "by commas.")
+        if len(listed) > MAX_BUTTONS:
+            lines.append("More choices than buttons: " + ", ".join(
+                value for value, _ in listed[MAX_BUTTONS:]))
+    elif item.kind in ("text_list", "emails") or item.multiple:
         lines.append("Several values: separate them with commas or new lines.")
-    if item.kind == "select" and (item.choices_source or item.multiple) and item.choice_values:
-        lines.append("Choices: " + ", ".join(item.choice_values))
-    if item.choices_source:
-        dynamic = _dynamic_values(state, item)
-        if dynamic is None:
+    if item.choices_source and item.kind == "select" and not listed:
+        if item.allow_other:
+            lines.append("Its choice list is not available right now; type the value.")
+        elif _dynamic_values(state, item) is None:
             lines.append("Its choice list is not available yet; type the value.")
-        elif item.multiple and dynamic:
-            lines.append("Choices: " + ", ".join(dynamic[:MAX_BUTTONS]))
+        else:
+            lines.append("Its choice list is empty.")
+    elif item.allow_other:
+        lines.append("Tap one, or type another value.")
     if item.default is not None:
-        lines.append(f"Default: {item.default}")
+        lines.append(f"Default: {_shown(item.default)}")
     if item.confirm:
         lines.append("This is a privileged setting; it is confirmed before the run.")
     lines.append("/skip uses the default" if not item.required else "Required.")
@@ -144,7 +230,11 @@ def _confirmation(state: FlowState) -> FlowPrompt:
     for item in state.fields:
         if item.name in state.answers:
             mark = " (privileged)" if item.confirm else ""
-            shown.append(f"- {item.label}{mark}: {state.answers[item.name]}")
+            value = state.answers[item.name]
+            if item.kind == "upload":
+                files = value if isinstance(value, list) else [value]
+                value = [str(path).replace("\\", "/").rsplit("/", 1)[-1] for path in files]
+            shown.append(f"- {item.label}{mark}: {_shown(value)}")
     return FlowPrompt("\n".join(shown), [[("Run", "run:yes"), ("Cancel", "run:no")]])
 
 
@@ -185,9 +275,15 @@ def _convert(item: WorkflowParameter, text: str, dynamic: list[str] | None = Non
 
 
 def _match_choice(item: WorkflowParameter, value: str, dynamic: list[str] | None = None) -> str:
-    """A declared or published value, its label, or its 1-based position."""
+    """A declared or published value, its label, its 1-based position (or the
+    `#n` a long value's button sends), or, when the list allows it, any text."""
+    position = _POSITION.match(value)
     if dynamic is not None:
         if value in dynamic:
+            return value
+        if position is not None and 1 <= int(position.group(1)) <= len(dynamic):
+            return dynamic[int(position.group(1)) - 1]
+        if item.allow_other:
             return value
         if value.isdigit() and 1 <= int(value) <= len(dynamic):
             return dynamic[int(value) - 1]
@@ -199,13 +295,22 @@ def _match_choice(item: WorkflowParameter, value: str, dynamic: list[str] | None
     for choice in item.choices:
         if (choice.label or "").casefold() == value.casefold():
             return choice.value
-    if value.isdigit() and 1 <= int(value) <= len(item.choice_values):
-        return item.choice_values[int(value) - 1]
+    number = position.group(1) if position is not None else value
+    if number.isdigit() and 1 <= int(number) <= len(item.choice_values) and (
+        position is not None or not item.allow_other
+    ):
+        return item.choice_values[int(number) - 1]
+    if item.allow_other:
+        return value
     raise ValueError("choose one of the listed values")
 
 
 def _next(state: FlowState) -> FlowStep:
     state.index += 1
+    state.picked = []
+    while state.index < len(state.fields) and state.fields[state.index].name in state.preset \
+            and state.fields[state.index].name in state.answers:
+        state.index += 1
     if state.index < len(state.fields):
         return FlowStep("ask", prompt(state))
     return _finish(state)
@@ -221,6 +326,7 @@ def _finish(state: FlowState) -> FlowStep:
             (index for index, item in enumerate(state.fields) if item.name == name), 0
         )
         state.answers.pop(name, None)
+        state.picked = []
         reprompt = prompt(state)
         return FlowStep("ask", FlowPrompt(f"{error}.\n\n{reprompt.text}", reprompt.buttons))
     if needs_confirmation(state) and not state.confirming:
@@ -231,15 +337,88 @@ def _finish(state: FlowState) -> FlowStep:
 
 def begin(state: FlowState) -> FlowStep:
     """The first prompt, or straight to confirmation when nothing is asked."""
+    if state.asking_preset:
+        return FlowStep("ask", prompt(state))
     if state.fields:
         return FlowStep("ask", prompt(state))
     return _finish(state)
+
+
+def current_upload(state: FlowState) -> WorkflowParameter | None:
+    """The upload field the flow is waiting on, if any."""
+    if state.asking_preset or state.confirming or state.index >= len(state.fields):
+        return None
+    item = state.fields[state.index]
+    return item if item.kind == "upload" else None
+
+
+def add_upload(state: FlowState, path: str) -> FlowStep:
+    """A stored document for the current upload field."""
+    item = current_upload(state)
+    if item is None:
+        return FlowStep("ask", prompt(state))
+    if not item.multiple:
+        state.answers[item.name] = path
+        return _next(state)
+    state.answers.setdefault(item.name, []).append(path)
+    return FlowStep("ask", prompt(state))
+
+
+def _again(state: FlowState, message: str, *, edit: bool = False) -> FlowStep:
+    again = prompt(state)
+    return FlowStep("ask", FlowPrompt(f"{message}\n\n{again.text}", again.buttons, edit))
+
+
+def _answer_preset(state: FlowState, reply: str) -> FlowStep:
+    lowered = reply.casefold()
+    if lowered in ("preset:yes", *_YES):
+        state.asking_preset = False
+        state.answers.update(state.preset)
+        state.index = -1
+        return _next(state)
+    if lowered in ("preset:no", "change", "改", "修改", *_NO):
+        state.asking_preset = False
+        state.preset = {}
+        return begin(state)
+    return _again(state, "Tap Yes or Change.")
+
+
+def _answer_pick(state: FlowState, item: WorkflowParameter, reply: str) -> FlowStep | None:
+    """A tap on a multi-select: toggle one value, or Done. None: not a tap."""
+    if reply == "pick:done":
+        if not state.picked:
+            if item.required:
+                return _again(state, "Tick at least one.")
+            state.answers.pop(item.name, None)
+            return _next(state)
+        ticked = list(state.picked)
+        problem = parameter_value_problem(item, ticked)
+        if problem:
+            return _again(state, f"{item.label} {problem}.")
+        state.answers[item.name] = ticked
+        return _next(state)
+    tapped = _PICK.match(reply)
+    if tapped is None:
+        return None
+    listed = _choices(state, item)[:MAX_BUTTONS]
+    position = int(tapped.group(1))
+    if not 1 <= position <= len(listed):
+        return _again(state, "That choice is no longer listed.")
+    value = listed[position - 1][0]
+    if value in state.picked:
+        state.picked.remove(value)
+    else:
+        state.picked.append(value)
+    again = prompt(state)
+    return FlowStep("ask", FlowPrompt(again.text, again.buttons, edit=True))
 
 
 def answer(state: FlowState, text: str) -> FlowStep:
     reply = text.strip()
     if reply.casefold() in ("/cancel", "run:no"):
         return FlowStep("cancelled")
+    if state.asking_preset:
+        return _answer_preset(state, reply)
     if state.confirming:
         if reply.casefold() in ("run:yes", *_YES):
             state.confirming = False
@@ -252,7 +431,18 @@ def answer(state: FlowState, text: str) -> FlowStep:
         if item.required:
             return FlowStep("ask", FlowPrompt("This field is required.\n\n" + prompt(state).text,
                                               prompt(state).buttons))
+        state.answers.pop(item.name, None)
         return _next(state)
+    if item.kind == "upload":
+        if reply.casefold() == "/done" and item.multiple:
+            if item.required and not state.answers.get(item.name):
+                return _again(state, "Send at least one file first.")
+            return _next(state)
+        return _again(state, "Send the file as a document (not as text or a photo).")
+    if item.multiple and item.kind == "select":
+        tapped = _answer_pick(state, item, reply)
+        if tapped is not None:
+            return tapped
     try:
         value = _convert(item, reply, _dynamic_values(state, item))
     except ValueError as error:
@@ -260,8 +450,6 @@ def answer(state: FlowState, text: str) -> FlowStep:
     else:
         problem = parameter_value_problem(item, value)
     if problem:
-        again = prompt(state)
-        message = f"{item.label} {problem}.\n\n{again.text}"
-        return FlowStep("ask", FlowPrompt(message, again.buttons))
+        return _again(state, f"{item.label} {problem}.")
     state.answers[item.name] = value
     return _next(state)

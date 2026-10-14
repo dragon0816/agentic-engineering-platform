@@ -13,6 +13,7 @@ import math
 import uuid
 from collections.abc import Callable, Mapping
 from copy import deepcopy
+from pathlib import Path
 from typing import Literal
 
 from pydantic import Field, JsonValue, TypeAdapter, ValidationError
@@ -296,8 +297,12 @@ class WorkflowEngine:
             [WorkflowManifest, str, Mapping[str, JsonValue]], list[str] | None
         ]
         | None = None,
+        upload_root: Path | None = None,
     ) -> None:
         self.workflows = workflows
+        # The host's upload store (forms v2): an `upload` value must be a file
+        # in it, so no run can pass an arbitrary file off as an upload.
+        self.upload_root = upload_root
         self.bridge = bridge
         # Per-install settings (`scope: static` fields), read on every run so a
         # change on the settings page applies without a restart.
@@ -608,10 +613,16 @@ class WorkflowEngine:
     def _choices(
         self, manifest: WorkflowManifest, run_arguments: dict[str, JsonValue]
     ) -> str | None:
-        """A value for a `ref:` or `fn:` field must be in its current choices."""
+        """A value for a `ref:` or `fn:` field must be in its current choices,
+        unless the field allows other values, and an upload must be in the
+        host's upload store."""
         for field in manifest.parameters:
+            if field.kind == "upload" and field.scope == "runtime":
+                problem = self._upload_problem(run_arguments.get(field.name))
+                if problem is not None:
+                    return problem
             source = field.choices_source
-            if field.scope != "runtime" or not source:
+            if field.scope != "runtime" or not source or field.allow_other:
                 continue
             value = run_arguments.get(field.name)
             if value is None:
@@ -628,6 +639,23 @@ class WorkflowEngine:
             chosen = value if isinstance(value, list) else [value]
             if any(item not in allowed for item in chosen):
                 return "workflow_choice_unavailable"
+        return None
+
+    def _upload_problem(self, value: JsonValue) -> str | None:
+        if value is None or self.upload_root is None:
+            return None
+        root = self.upload_root.resolve()
+        for item in value if isinstance(value, list) else [value]:
+            path = Path(str(item))
+            try:
+                inside = (
+                    path.is_absolute() and not path.is_symlink() and path.is_file()
+                    and path.resolve().is_relative_to(root)
+                )
+            except OSError:
+                inside = False
+            if not inside:
+                return "workflow_upload_outside_store"
         return None
 
     def _preflight(
