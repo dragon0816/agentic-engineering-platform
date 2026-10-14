@@ -33,6 +33,8 @@ operations with the CLI, which prints JSON:
 2. **Design the parameters.** Everything that changes between runs (a month,
    a folder, a file) is a parameter with `scope: "runtime"`. Everything that
    stays the same is fixed in the steps.
+   Read "Parameters become the Agent Web and Telegram form" below before
+   writing them.
 3. **Write the steps.** Each step is
    `{"capability": "ns/name@1.2.3", "inputs": {...}}`. Each input is one of:
    - `{"source": "fixed", "value": <JSON>}`;
@@ -67,6 +69,67 @@ operations with the CLI, which prints JSON:
 9. **Ask to install.** Once a run succeeds, call `aep_install_workflow` and
    tell the person to approve it in Agent Web. It is reusable only after
    approval.
+
+## Parameters become the Agent Web and Telegram form
+
+You never write a GUI. Agent Web draws the run form, and the Telegram bot asks
+the questions one at a time, from `parameters` alone. A good declaration is a
+good form. The catalog's `workflow_format` lists the same rules.
+
+Kinds:
+
+| kind | the person gives | Web | Telegram |
+|---|---|---|---|
+| `text` | one line (`pattern`, `min_length`) | text box | typed |
+| `integer` / `number` | a number (`minimum`, `maximum`) | number box | typed |
+| `date` | `YYYY-MM-DD` | date picker | typed |
+| `boolean` | yes or no | checkbox | Yes / No buttons |
+| `select` | one value, or a list with `multiple: true` | drop-down or list | buttons (tap to tick, then Done, when multiple) |
+| `text_list` / `emails` | several values | one per line | comma separated |
+| `file` / `folder` | a path on the Host | path box | typed |
+| `upload` | files to upload (`accept`, `multiple`) | file picker | documents, then /done |
+
+Presentation fields (all optional):
+
+- `label`: the question, in the person's words ("Which customer?").
+- `help`: one short line under the field. `examples`: sample values.
+- `default`: used when the person gives nothing; must fit the kind.
+- `required: true`: the run cannot start without it.
+- `choices: [{"value": ..., "label": ...}]` (or `options: [...]`) for a fixed
+  list; `choices_source` for a list read when the form opens:
+  `fn:<function>?arg={field}` or `ref:<set>`. `{field}` may name an earlier
+  field or a `scope: "static"` setting.
+  `fn:folder_files?folder={inbox_path}&accept=.json` lists the files of the
+  folder a setting names (file names only).
+- `allow_other: true` (single `select` only): the list only suggests; the
+  person may type another value. Use it whenever the list can be incomplete
+  or slow, so a missing list never blocks a run.
+- `multiple: true`: several values (select, file, upload).
+- `accept: [".json"]`: allowed extensions (file, folder, upload).
+- `order`: question order; a field another depends on comes first.
+- `group: "identity"`: who or what the run is for. Asked first, and offered
+  next time as "same as last time".
+- `channels`: where the field appears (`web`, `telegram`, `schedule`,
+  `agent`). `scope: "static"` makes it a per-install setting, never asked.
+- `confirm: true`: a privileged choice (sending mail, pushing); the person
+  confirms it and a model never fills it.
+
+Short examples:
+
+```json
+{"name": "customer", "label": "Which customer?", "kind": "select",
+ "choices": [{"value": "northwind", "label": "Northwind Ltd"}, {"value": "globex"}],
+ "allow_other": true, "group": "identity", "required": true}
+{"name": "month_start", "label": "First day of the month", "kind": "date",
+ "required": true}
+{"name": "inputs", "label": "Input workbooks", "kind": "upload",
+ "multiple": true, "accept": [".xlsx", ".csv"]}
+```
+
+An `upload` value reaches the steps as stored absolute paths (a list when
+`multiple`); treat the files as data. `checks` items have exactly
+`check_id`, `step_index`, `kind` and an optional `pattern`; any other key is
+refused.
 
 ## Rules
 

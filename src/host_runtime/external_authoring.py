@@ -46,13 +46,70 @@ WORKFLOW_FORMAT: dict[str, JsonValue] = {
     "name": "kebab-case name; the host adds namespace, owner and version",
     "description": "one sentence",
     "parameters": [{"name": "snake_case", "label": "the question asked for it",
-                    "kind": "text|date|integer|boolean|folder|file",
-                    "scope": "runtime", "required": True}],
+                    "kind": "text", "scope": "runtime", "required": True}],
+    "parameters become the form": (
+        "Agent Web draws the run form and Telegram asks the questions from the parameters "
+        "alone; never write a GUI. Choose the kind and presentation fields so both work."),
+    "parameter kinds": {
+        "text": "one line of text; pattern and min_length apply",
+        "integer": "a whole number; minimum and maximum apply",
+        "number": "any number; minimum and maximum apply",
+        "date": "YYYY-MM-DD; a date picker on the Web",
+        "boolean": "yes or no; a checkbox on the Web, Yes/No buttons on Telegram",
+        "select": "one value (or several with multiple: true) from choices, options or "
+                  "choices_source; buttons on Telegram",
+        "text_list": "several lines of text",
+        "emails": "several email addresses",
+        "file": "a path to an existing file on the Host (typed)",
+        "folder": "a path to an existing folder on the Host (typed)",
+        "upload": "files the person uploads (Web file picker, Telegram documents); the "
+                  "run gets their stored absolute paths, a list when multiple",
+    },
+    "parameter fields": {
+        "scope": "runtime (asked every run) or static (a per-install setting on the "
+                 "Settings page, never asked at run time)",
+        "required": "true: the run cannot start without it",
+        "default": "the value used when the person gives none; must fit the kind",
+        "help": "one short line shown under the field",
+        "examples": "up to 5 sample values, shown as a placeholder",
+        "choices": "[{value, label}] for select or text_list; options: [values] is the "
+                   "shorthand",
+        "choices_source": "a list read when the form opens: fn:<function>?arg={field} or "
+                          "ref:<published set>; {field} names an earlier field or a static "
+                          "setting. fn:folder_files?folder={setting}&accept=.json lists the "
+                          "file names in a folder",
+        "allow_other": "select only, not with multiple: the choices are suggestions and "
+                       "any typed value is accepted (pick or type)",
+        "multiple": "select, file or upload: several values (a list)",
+        "accept": "file, folder or upload: allowed extensions, e.g. [\".json\"]",
+        "pattern": "text: a regular expression the whole value must match",
+        "min_length": "text: the shortest allowed value",
+        "minimum/maximum": "integer or number bounds",
+        "order": "0-99999; the question order (depended-on fields first)",
+        "group": "identity: who or what the run is for; asked first and offered as "
+                 "\"same as last time\"",
+        "needs": "names of earlier fields this one depends on",
+        "channels": "where it is shown: web, telegram, schedule, agent (default all)",
+        "confirm": "true: a privileged choice (e.g. send mail); confirmed before the run and "
+                   "never filled by a model",
+    },
+    "parameter examples": [
+        {"name": "customer", "label": "Which customer?", "kind": "select",
+         "choices": [{"value": "northwind", "label": "Northwind Ltd"}, {"value": "globex"}],
+         "allow_other": True, "group": "identity", "required": True},
+        {"name": "month_start", "label": "First day of the month", "kind": "date",
+         "required": True},
+        {"name": "inputs", "label": "Input workbooks", "kind": "upload", "multiple": True,
+         "accept": [".xlsx", ".csv"]},
+    ],
     "steps": [{"capability": "namespace/name@1.2.3 from the catalog",
                "inputs": {"<input field>": "an input source"}}],
     "checks": [{"check_id": "snake_case", "step_index": 0,
-                "kind": "files_nonempty|file_exists|data_nonempty", "pattern": "*.xlsx",
-                "note": "what a successful run must produce; the Host checks it"}],
+                "kind": "files_nonempty", "pattern": "*.xlsx"}],
+    "checks note": "what a successful run must produce; the Host checks it after the "
+                   "steps. A check has exactly check_id, step_index, kind "
+                   "(files_nonempty, file_exists or data_nonempty) and an optional pattern "
+                   "(a file-name glob for the file kinds); any other key is refused.",
     "input sources": [
         {"source": "fixed", "value": "any JSON the Workflow fixes"},
         {"source": "run", "path": ["<parameter>"], "note": "[] is all run values"},
