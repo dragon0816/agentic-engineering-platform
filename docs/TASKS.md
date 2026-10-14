@@ -1917,3 +1917,23 @@ s-k-20261011T102952` (not published).
   shared platform" card and `aep-host assets publish|submissions|withdraw`. Self-review is
   refused; approval publishes as the submitter. Shared Platform bundle now carries
   tzdata. Full suite 2624 passed, 6 skipped. Live test on 172.25.228.141 pending.
+- [x] Workflow forms v2 (owner 2026-10-15; design `docs/phases/WORKFLOW_FORMS_V2.md`):
+  A1 Agent Web resolves `fn:` lists like `ref:`; A2 `allow_other` pick-or-type selects
+  (Web combo box with Refresh, Telegram typed values, engine skips the list check); A3
+  Telegram multi-select toggle buttons edited in place, up to 96 buttons; A4
+  `fn:folder_files` and placeholders naming static settings; A5 real uploads
+  (`/api/workflow-uploads`, Telegram documents then /done, store
+  `workspace/workflow-uploads`, engine rejects uploads outside it); A6 identity presets
+  (`identity-presets.json`, Web "Use last values", Telegram "same as last time?"); A7
+  `WORKFLOW_FORMAT` and the creator Skill document every kind and form field (the
+  invalid `checks.note` example fixed). Tests: `test_workflow_forms_v2*.py`,
+  `test_telegram_forms_v2.py`; headless check `.scratch/forms_v2_ui.py`.
+- [x] One-run release `engineering/rs-wmt-package-release@1.0.0` (owner 2026-10-15, item
+  B): prepare -> commit -> push in one run, dry run on and push off by default, chipset
+  and version lists (`release_package.chipsets` / `.versions`, 5 s, fail soft), inbox
+  picks plus uploads; alias 13 removed from the preview; `release` Skill default command
+  `package`; dead `schema.py` removed. Tests: `test_rs_wmt_package_release.py` (local bare
+  origin only). Full suite: 2660 passed, 6 skipped, 1 failed (the shipped-asset export
+  snapshot, then updated; that file rerun 16 passed). Draft
+  wf-20261014-181908-f31f09 submitted; settings copied from prepare; waits for the
+  owner's Install.

@@ -1,24 +1,37 @@
 # Handoff
 
-Updated: 2026-10-13 (Asia/Taipei), by Claude Code
+Updated: 2026-10-15 (Asia/Taipei), by Claude Code
 
-## Workflow 13 release package (2026-10-15, Claude Code)
+## Workflow forms v2 and the one-run release (2026-10-15, Claude Code)
 
-n8n `13_release_package` is ported in full (commit 4d0f277e; DECISIONS 2026-10-15):
-`engineering/release-package-prepare` -> `-commit` -> `-push`, three approved runs.
-Verified: ruff, mypy src, full suite 2595 passed, 6 skipped. Nothing was run against the
-real release repository.
-- Live: settings saved for all three in `workspace\workflow-settings.json` (backup
-  `*.bak-20261015-003552-before-w13`): ssh origin of the existing working copy
-  `Documents\git_repository\_release_repository\rs-wmt-sw-release`, inbox
-  `_release_inputs` (folder does not exist yet), allowed root `Documents\git_repository`.
-  `remote_release` is OFF. Drafts wf-20261014-163750-4cebdd (prepare),
-  -163801-a21f8f (commit), -163808-659ae4 (push) are submitted, status draft; Agent Web
-  restarted on 4d0f277e and lists their capabilities.
-- Owner next: Capabilities -> 我的草稿（尚未安裝） -> Install each of the three; create
+Goal (owner decisions A, B, C): authors only declare parameters; AEP draws Web and
+Telegram forms. Design `docs/phases/WORKFLOW_FORMS_V2.md`, decision in
+`docs/DECISIONS.md` (2026-10-15 "Workflow forms v2"), rows in `docs/TASKS.md`.
+All committed on main, not pushed (9d4f9f61 .. 456c0ef6).
+- Built: `allow_other` pick-or-type, `fn:` lists on Web, Telegram multi-select toggles,
+  `fn:folder_files`, real uploads (`workspace\workflow-uploads`, engine confinement),
+  identity presets (`workspace\identity-presets.json`), creator format/Skill, and
+  `engineering/rs-wmt-package-release@1.0.0` (prepare -> commit -> push, dry run on, push
+  off; preview alias 13 removed; `schema.py` deleted).
+- Verified: ruff, mypy src; full suite 2660 passed, 6 skipped, 1 failed (export snapshot
+  list), fixed and that file rerun green. Headless Web check `.scratch/forms_v2_ui.py`
+  (combo box, fn: list, folder picks, upload, "Use last values"; sizes measured).
+  Telegram checked only against the fake Bot API, not the live bot.
+- Live: settings for `engineering/rs-wmt-package-release` copied from prepare (backup
+  `workflow-settings.json.bak-20261015-before-rs-wmt-package-release`; `remote_release`
+  still OFF). Draft wf-20261014-181908-f31f09 submitted. Agent Web restarted on 456c0ef6.
+  The earlier three step drafts (prepare, commit) are still drafts; push 1.0.0 is
+  installed.
+- Owner next: Capabilities -> 我的草稿 -> Install rs-wmt-package-release (and prepare /
+  commit if the step Workflows are wanted); create
   `Documents\git_repository\.aep-isolated-release-root` (content
-  `AEP_ISOLATED_RELEASE_ROOT_V1` + newline); switch `remote_release` on in the Workflows'
-  settings; first run prepare with dry run on.
+  `AEP_ISOLATED_RELEASE_ROOT_V1` + newline) and the inbox `_release_inputs`; turn
+  `remote_release` on in that Workflow's settings only when ready for GitLab; first run
+  with dry run on.
+- Known: a release Workflow run fails with `workflow_input_missing` if
+  `artifactory_base_url` or `readiness_base_url` is unset (steps map every setting); the
+  live install has both. Commit 04995b03 alone does not import (host.py names RELEASE,
+  added in 456c0ef6).
 
 ## Latest (2026-10-13)
 
