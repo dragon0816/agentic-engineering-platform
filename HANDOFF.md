@@ -2,6 +2,24 @@
 
 Updated: 2026-10-13 (Asia/Taipei), by Claude Code
 
+## Workflow 13 release package (2026-10-15, Claude Code)
+
+n8n `13_release_package` is ported in full (commit 4d0f277e; DECISIONS 2026-10-15):
+`engineering/release-package-prepare` -> `-commit` -> `-push`, three approved runs.
+Verified: ruff, mypy src, full suite 2595 passed, 6 skipped. Nothing was run against the
+real release repository.
+- Live: settings saved for all three in `workspace\workflow-settings.json` (backup
+  `*.bak-20261015-003552-before-w13`): ssh origin of the existing working copy
+  `Documents\git_repository\_release_repository\rs-wmt-sw-release`, inbox
+  `_release_inputs` (folder does not exist yet), allowed root `Documents\git_repository`.
+  `remote_release` is OFF. Drafts wf-20261014-163750-4cebdd (prepare),
+  -163801-a21f8f (commit), -163808-659ae4 (push) are submitted, status draft; Agent Web
+  restarted on 4d0f277e and lists their capabilities.
+- Owner next: Capabilities -> 我的草稿（尚未安裝） -> Install each of the three; create
+  `Documents\git_repository\.aep-isolated-release-root` (content
+  `AEP_ISOLATED_RELEASE_ROOT_V1` + newline); switch `remote_release` on in the Workflows'
+  settings; first run prepare with dry run on.
+
 ## Latest (2026-10-13)
 
 All of the following is committed on main (not pushed); rows are in `docs/TASKS.md`,
