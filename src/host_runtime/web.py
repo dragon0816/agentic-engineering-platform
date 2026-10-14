@@ -125,6 +125,7 @@ from host_runtime.contracts import (
     PlatformProjection,
     PlatformSyncRequest,
     PlatformSyncResult,
+    WorkflowIdentityRequest,
     WorkflowLaunchRequest,
     WorkflowOptionsRequest,
     WorkflowSettingsUpdateRequest,
@@ -164,6 +165,7 @@ from host_runtime.experience import (
 from host_runtime.experience_proposals import ProposalError, ProposalStore, ReviewProposal
 from host_runtime.experience_review import latest_review, run_review
 from host_runtime.host import HostRuntime, build_telegram, choice_sources, load_authorization
+from host_runtime.identity_presets import IdentityPresets
 from host_runtime.jev_shadow import SHADOW_LOG_FILE
 from host_runtime.knowledge_bench import latest as latest_benchmark
 from host_runtime.knowledge_bench import run_benchmark
@@ -229,6 +231,7 @@ from host_runtime.workflow_settings import (
     WorkflowSettingsError,
     WorkflowSettingsStore,
 )
+from host_runtime.workflow_uploads import WorkflowUploadError, WorkflowUploadStore
 from host_runtime.workspace import documents, write_atomically
 from knowledge.evolution import KnowledgeAnswerRecord, KnowledgeManifest
 from knowledge.market_matrix import (
@@ -395,6 +398,8 @@ class AgentWeb:
         self.persona = AgentPersonaStore(runtime.layout.workspace_root)
         self.preferences = UserPreferencesStore(runtime.layout.workspace_root)
         self.attachments = AttachmentStore(runtime.layout.workspace_root)
+        self.workflow_uploads = WorkflowUploadStore(runtime.layout.workspace_root)
+        self.identity_presets = IdentityPresets(runtime.layout.workspace_root)
         self.conversation_context = ConversationContextStore(runtime.layout.workspace_root)
         self.backends = conversation_backends or LocalConversationBackends(
             runtime.layout.workspace_root
@@ -844,6 +849,48 @@ class AgentWeb:
             return {"ok": False, "code": "workflow_settings_refused", "message": str(error)}
         return {"ok": True, "workflow": self._settings_entry(manifest)}
 
+    def _installed_workflow(self, identity: AssetIdentity) -> WorkflowManifest | None:
+        return next(
+            (
+                candidate
+                for candidate in manifests(self.runtime.layout.workflows, WorkflowManifest)
+                if candidate.metadata.identity == identity
+            ),
+            None,
+        )
+
+    def upload_workflow_file(
+        self, workflow: AssetIdentity, field_name: str, upload_set: str, filename: str,
+        data: bytes,
+    ) -> dict[str, Any]:
+        """Store one file for an installed Workflow's `upload` field (forms v2).
+
+        The page starts a set with an empty `upload_set`; the stored path is
+        what the run then carries as the field's value.
+        """
+        manifest = self._installed_workflow(workflow)
+        field = None if manifest is None else next(
+            (item for item in manifest.parameters if item.name == field_name), None)
+        if field is None or field.kind != "upload" or field.scope != "runtime":
+            return {"ok": False, "code": "workflow_field_unknown"}
+        try:
+            chosen = upload_set or self.workflow_uploads.new_set()
+            path = self.workflow_uploads.add(chosen, field, filename, data)
+        except WorkflowUploadError as error:
+            return {"ok": False, "code": error.code}
+        except OSError:
+            return {"ok": False, "code": "upload_not_saved"}
+        return {"ok": True, "upload_set": chosen, "path": str(path), "filename": path.name,
+                "size_bytes": len(data)}
+
+    def workflow_identity(self, request: WorkflowIdentityRequest) -> dict[str, Any]:
+        """The calling member's last identity values for this Workflow."""
+        item = WorkflowIdentityRequest.model_validate(request)
+        manifest = self._installed_workflow(item.workflow)
+        if manifest is None:
+            return {"ok": False, "code": "workflow_not_installed"}
+        return {"ok": True, "values": self.identity_presets.last(self.runtime.actor, manifest)}
+
     def workflow_options(self, request: WorkflowOptionsRequest) -> dict[str, Any]:
         """Choices for a `ref:` or `fn:` field given the answers so far."""
         item = WorkflowOptionsRequest.model_validate(request)
@@ -863,7 +910,8 @@ class AgentWeb:
             return {"ok": False, "code": "workflow_field_unknown"}
         source = field.choices_source
         waiting = [
-            name for name in ChoiceSources.needed(source) if item.answers.get(name) in (None, "")
+            name for name in ChoiceSources.needed(source, manifest)
+            if item.answers.get(name) in (None, "")
         ]
         if waiting:
             return {"ok": True, "choices": [], "waiting_for": waiting}
@@ -2832,6 +2880,10 @@ class AgentWeb:
             if manifest is not None
             else item.arguments
         )
+        if manifest is not None:
+            # Same as last time (forms v2): the identity answers of a run that
+            # passed validation, kept for this member's next form.
+            self.identity_presets.remember(self.runtime.actor, manifest, arguments)
         device = self.runtime.config.device
         local = LocalWorkflowRequest(
             actor=self.runtime.actor,
@@ -3589,6 +3641,8 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/mcp/reconnect",
             "/api/settings/workflows",
             "/api/workflow-options",
+            "/api/workflow-uploads",
+            "/api/workflow-identity",
             "/api/settings/persona",
             "/api/settings/context",
             "/api/preferences",
@@ -3615,7 +3669,8 @@ class _Handler(BaseHTTPRequestHandler):
         limit = (
             MAX_SOP_UPLOAD_BYTES if path == "/api/authoring/start"
             else MAX_ATTACHMENT_REQUEST_BYTES
-            if path in ("/api/attachments", "/api/knowledge/pipeline/call")
+            if path in (
+                "/api/attachments", "/api/knowledge/pipeline/call", "/api/workflow-uploads")
             else MAX_BODY_BYTES
         )
         if length > limit:
@@ -3773,6 +3828,28 @@ class _Handler(BaseHTTPRequestHandler):
                 return
             result = self.server.web.save_workflow_settings(update)
             self._json(200 if result["ok"] else 400, result)
+            return
+        if path == "/api/workflow-uploads":
+            try:
+                workflow = AssetIdentity.model_validate(
+                    body.get("workflow") if isinstance(body, dict) else None)
+                data = base64.b64decode(str(body.get("data") or ""), validate=True)
+            except (ValueError, TypeError, binascii.Error):
+                self._json(400, {"ok": False, "code": "upload_request_invalid"})
+                return
+            result = self.server.web.upload_workflow_file(
+                workflow, str(body.get("field") or ""), str(body.get("upload_set") or ""),
+                str(body.get("filename") or ""), data)
+            self._json(200 if result["ok"] else 400, result)
+            return
+        if path == "/api/workflow-identity":
+            try:
+                wanted = WorkflowIdentityRequest.model_validate(body)
+            except (ValueError, TypeError):
+                self._json(400, {"error": "the request was not a valid Workflow identity"})
+                return
+            result = self.server.web.workflow_identity(wanted)
+            self._json(200 if result["ok"] else 404, result)
             return
         if path == "/api/attachments":
             if not isinstance(body, dict):

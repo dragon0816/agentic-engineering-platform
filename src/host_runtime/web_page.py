@@ -501,6 +501,12 @@ tr:last-child td { border-bottom: none; }
   color: var(--ink); background: var(--bg); border: 1px solid var(--line);
   border-radius: 8px; font: inherit; }
 .workflow-field input[type="checkbox"] { width: 22px; min-height: 22px; }
+.workflow-field input[type="file"] { min-height: 44px; padding: 9px 0; border: 0; }
+.workflow-field .field-refresh, .use-last { margin: 6px 0 0; min-height: 36px;
+  padding: 6px 12px; color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 8px; font: inherit; cursor: pointer; }
+.use-last { display: block; width: 100%; text-align: left; margin: 0 0 8px; }
+.upload-list { margin: 6px 0; padding-left: 20px; font-size: 13px; }
 .workflow-field .field-error { color: var(--bad); margin: 4px 0; font-size: 12px; }
 .workflow-field [aria-invalid="true"] { border-color: var(--bad); }
 .markdown-panel { max-height: 330px; margin: 8px 0 16px; padding: 16px;
@@ -3223,7 +3229,7 @@ function showWorkflowContract() {
   workflowFields = typed ? workflow.parameters.fields : [];
   renderParameterForm(el("workflow-fields"), workflowFields, "workflow-field-",
     typed ? {workflow: {namespace: workflow.namespace, name: workflow.name,
-      version: workflow.version}} : null);
+      version: workflow.version}, uploads: true, presets: true} : null);
 }
 
 // -- Parameter forms ------------------------------------------------------
@@ -3234,10 +3240,49 @@ let workflowFields = [];
 const LIST_KINDS = ["text_list", "emails"];
 const PATH_KINDS = ["file", "folder", "upload"];
 
+function comboControl(field, id) {
+  // Pick or type (forms v2 `allow_other`): a text box with suggestions.
+  const input = document.createElement("input"); input.type = "text";
+  const list = document.createElement("datalist"); list.id = id + "-choices";
+  input.setAttribute("list", list.id); input.autocomplete = "off";
+  for (const choice of field.choices) {
+    const option = document.createElement("option"); option.value = choice.value;
+    if (choice.label && choice.label !== choice.value) option.label = choice.label;
+    list.append(option);
+  }
+  if (field.default !== null && field.default !== undefined) input.value = String(field.default);
+  input.placeholder = field.examples && field.examples.length
+    ? "Pick or type, e.g. " + field.examples[0] : "Pick from the list or type a value";
+  input.extras = [list];
+  if (isDynamicChoice(field) && dynamicContext) {
+    const refresh = document.createElement("button"); refresh.type = "button";
+    refresh.className = "field-refresh"; refresh.append(text("Refresh list"));
+    refresh.dataset.refreshFor = field.name;
+    input.extras.push(refresh);
+  }
+  return input;
+}
+
+function uploadControl(field, id) {
+  // A real upload (forms v2): files go to the Host now; the run carries paths.
+  const input = document.createElement("input"); input.type = "file";
+  input.multiple = !!field.multiple;
+  if (field.accept && field.accept.length) input.accept = field.accept.join(",");
+  input.dataset.paths = "[]"; input.dataset.pending = "0";
+  const listed = document.createElement("ul"); listed.className = "upload-list";
+  listed.id = id + "-files"; listed.setAttribute("aria-live", "polite");
+  input.extras = [listed];
+  return input;
+}
+
 function parameterControl(field, id) {
   const kind = field.kind;
   let input;
-  if (kind === "select" && isDynamicChoice(field) && dynamicContext) {
+  if (kind === "select" && field.allow_other && !field.multiple) {
+    input = comboControl(field, id);
+  } else if (kind === "upload" && dynamicContext && dynamicContext.uploads) {
+    input = uploadControl(field, id);
+  } else if (kind === "select" && isDynamicChoice(field) && dynamicContext) {
     input = document.createElement("select"); input.multiple = !!field.multiple;
     const waiting = document.createElement("option"); waiting.value = "";
     waiting.append(text("Loading choices…")); input.append(waiting);
@@ -3289,7 +3334,9 @@ function parameterControl(field, id) {
 let dynamicContext = null;
 
 function isDynamicChoice(field) {
-  return !!field.choices_source && field.choices_source.startsWith("ref:");
+  // `ref:` published sets and `fn:` Host functions alike (forms v2).
+  return field.kind === "select" && !!field.choices_source
+    && (field.choices_source.startsWith("ref:") || field.choices_source.startsWith("fn:"));
 }
 
 function choiceDependencies(field) {
@@ -3325,17 +3372,100 @@ function renderParameterForm(container, fields, prefix, context) {
     input.addEventListener("input", () => {
       error.textContent = ""; input.removeAttribute("aria-invalid");
     });
-    row.append(label, input, help, error); container.append(row);
+    row.append(label, input, ...(input.extras || []), help, error); container.append(row);
+    if (input.type === "file" && dynamicContext) {
+      wireUpload(input, field, dynamicContext);
+    }
   }
   if (dynamicContext) wireDynamicChoices(container, fields, prefix, dynamicContext);
+  if (dynamicContext && dynamicContext.presets) {
+    offerLastValues(container, fields, prefix, dynamicContext);
+  }
   dynamicContext = null;
+}
+
+function wireUpload(input, field, context) {
+  const listed = input.extras[0];
+  const show = () => {
+    const paths = JSON.parse(input.dataset.paths || "[]");
+    listed.replaceChildren(...paths.map(path => {
+      const item = document.createElement("li");
+      item.append(text(path.split(/[\\/]/).pop()));
+      return item;
+    }));
+    if (Number(input.dataset.pending) > 0) {
+      const busy = document.createElement("li"); busy.append(text("Uploading\u2026"));
+      listed.append(busy);
+    }
+  };
+  input.addEventListener("change", async () => {
+    const chosen = Array.from(input.files || []);
+    if (!field.multiple) input.dataset.paths = "[]";
+    for (const file of chosen) {
+      input.dataset.pending = String(Number(input.dataset.pending) + 1); show();
+      try {
+        const saved = await call("/api/workflow-uploads", {
+          workflow: context.workflow, field: field.name,
+          upload_set: context.uploadSet || "", filename: file.name,
+          data: await readAsBase64(file),
+        });
+        context.uploadSet = saved.upload_set;
+        const paths = field.multiple ? JSON.parse(input.dataset.paths || "[]") : [];
+        paths.push(saved.path); input.dataset.paths = JSON.stringify(paths);
+      } catch (failure) {
+        const error = document.getElementById(input.id + "-error");
+        if (error) error.textContent = file.name + " was not uploaded: "
+          + (failure.code || failure.message);
+      } finally {
+        input.dataset.pending = String(Number(input.dataset.pending) - 1); show();
+      }
+    }
+    input.value = "";
+  });
+}
+
+async function offerLastValues(container, fields, prefix, context) {
+  // Same as last time (forms v2): this member's last identity answers.
+  let found;
+  try { found = await call("/api/workflow-identity", {workflow: context.workflow}); }
+  catch (failure) { return; }
+  const values = found && found.values ? found.values : {};
+  const names = fields.filter(field => Object.prototype.hasOwnProperty.call(values, field.name));
+  if (!names.length || !container.isConnected) return;
+  const button = document.createElement("button"); button.type = "button";
+  button.className = "use-last";
+  button.append(text("Use last values: " + names.map(field => {
+    const value = values[field.name];
+    return Array.isArray(value) ? value.join(", ") : String(value);
+  }).join(" \u00b7 ")));
+  button.addEventListener("click", () => {
+    for (const field of names) {
+      const input = container.querySelector("#" + CSS.escape(prefix + field.name));
+      if (!input) continue;
+      const value = values[field.name];
+      if (input.type === "checkbox") input.checked = value === true;
+      else if (input.tagName === "TEXTAREA") {
+        input.value = Array.isArray(value) ? value.join("\n") : String(value);
+      } else if (input.tagName === "SELECT" && input.multiple) {
+        for (const option of input.options) {
+          option.selected = Array.isArray(value) && value.includes(option.value);
+        }
+      } else if (input.tagName === "SELECT"
+          && ![...input.options].some(option => option.value === String(value))) {
+        const option = document.createElement("option"); option.value = String(value);
+        option.append(text(String(value))); input.append(option); input.value = String(value);
+      } else input.value = String(value);
+      input.dispatchEvent(new Event("change"));
+    }
+  });
+  container.prepend(button);
 }
 
 function rawAnswers(container, fields, prefix) {
   const answers = {};
   for (const field of fields) {
     const input = container.querySelector("#" + CSS.escape(prefix + field.name));
-    if (!input) continue;
+    if (!input || input.type === "file") continue;
     answers[field.name] = field.kind === "boolean" ? input.checked : input.value.trim();
   }
   return answers;
@@ -3349,6 +3479,28 @@ async function refreshChoices(container, fields, prefix, context, field) {
     const option = document.createElement("option"); option.value = "";
     option.append(text(label)); return option;
   };
+  if (input.tagName === "INPUT") {
+    // Pick or type: the list only suggests, so a missing list never blocks.
+    const list = document.getElementById(input.getAttribute("list"));
+    let listed = null;
+    try {
+      listed = await call("/api/workflow-options", {
+        workflow: context.workflow, field: field.name,
+        answers: rawAnswers(container, fields, prefix),
+      });
+    } catch (failure) { listed = null; }
+    const choices = listed && listed.choices ? listed.choices : [];
+    list.replaceChildren(...choices.map(choice => {
+      const option = document.createElement("option"); option.value = choice.value;
+      if (choice.label && choice.label !== choice.value) option.label = choice.label;
+      return option;
+    }));
+    input.placeholder = listed && listed.waiting_for && listed.waiting_for.length
+      ? "Answer " + listed.waiting_for.join(", ") + " first, or type a value"
+      : choices.length ? "Pick from " + choices.length + " listed, or type a value"
+      : "No list available right now; type a value";
+    return;
+  }
   let listed;
   try {
     listed = await call("/api/workflow-options", {
@@ -3379,6 +3531,12 @@ function wireDynamicChoices(container, fields, prefix, context) {
   const dynamic = fields.filter(isDynamicChoice);
   for (const field of dynamic) {
     refreshChoices(container, fields, prefix, context, field);
+    const again = container.querySelector(
+      "[data-refresh-for=\"" + CSS.escape(field.name) + "\"]");
+    if (again) {
+      again.addEventListener("click",
+        () => refreshChoices(container, fields, prefix, context, field));
+    }
     for (const name of choiceDependencies(field)) {
       const source = container.querySelector("#" + CSS.escape(prefix + name));
       if (source) {
@@ -3403,7 +3561,11 @@ function collectParameterValues(container, fields, prefix) {
     };
     let value;
     if (kind === "boolean") value = input.checked;
-    else if (input.tagName === "SELECT" && input.multiple) {
+    else if (input.type === "file") {
+      if (Number(input.dataset.pending) > 0) fail("Wait for the upload to finish.");
+      const paths = JSON.parse(input.dataset.paths || "[]");
+      value = !paths.length ? undefined : field.multiple ? paths : paths[0];
+    } else if (input.tagName === "SELECT" && input.multiple) {
       value = [...input.selectedOptions].map(option => option.value);
       if (!value.length) value = undefined;
     } else if (input.tagName === "TEXTAREA") {
@@ -3426,7 +3588,9 @@ function collectParameterValues(container, fields, prefix) {
       if (field.required) fail("This field is required.");
       continue;
     }
-    if (!input.checkValidity()) fail(input.validationMessage || "This value is not valid.");
+    if (input.type !== "file" && !input.checkValidity()) {
+      fail(input.validationMessage || "This value is not valid.");
+    }
     if (field.confirm && value !== field.default && value !== false
         && !confirm("Confirm " + field.label + "?")) {
       fail("Not confirmed.");

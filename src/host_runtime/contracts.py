@@ -232,6 +232,12 @@ class WorkflowOptionsRequest(Contract):
         return self
 
 
+class WorkflowIdentityRequest(Contract):
+    """The calling member's last identity values for one Workflow (forms v2)."""
+
+    workflow: AssetIdentity
+
+
 class WorkflowSettingsUpdateRequest(Contract):
     """One Workflow's per-install settings from the settings page."""
 
