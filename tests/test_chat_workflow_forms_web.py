@@ -187,7 +187,7 @@ def test_the_inline_chat_form_renders_and_runs_in_a_real_browser(tmp_path: Path)
             raise AssertionError(expression)
 
         def measure(selector: str) -> list[int]:
-            return json.loads(
+            size: list[int] = json.loads(
                 str(
                     browser._evaluate(
                         "JSON.stringify((() => { const r = document.querySelector("
@@ -197,6 +197,7 @@ def test_the_inline_chat_form_renders_and_runs_in_a_real_browser(tmp_path: Path)
                     )
                 )
             )
+            return size
 
         def ask(message: str) -> None:
             browser._evaluate(

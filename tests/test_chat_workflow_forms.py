@@ -220,7 +220,12 @@ def test_the_form_tool_ends_the_turn_with_the_offer_and_the_prompt_says_so() -> 
     assert offer["origin"] == "agent" and result.text == offer["message"]
     tool = next(t for t in model.calls[0].tools if t.name == FORM_TOOL)
     assert tool.input_schema is not None
-    assert "rs-wmt-package-release" in tool.input_schema["properties"]["workflow"]["enum"]
+    properties = tool.input_schema["properties"]
+    assert isinstance(properties, dict)
+    workflow_field = properties["workflow"]
+    assert isinstance(workflow_field, dict)
+    enum = workflow_field["enum"]
+    assert isinstance(enum, list) and "rs-wmt-package-release" in enum
     assert FORM_TOOL in model.calls[0].messages[0].text
 
 

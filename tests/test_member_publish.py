@@ -20,7 +20,7 @@ from test_shared_platform_app import request
 
 from capabilities.files import READ_FILE_SPEC
 from common.assets import AssetIdentity, ExecutionDependencies, WorkflowManifest
-from common.enrollment import Invitation
+from common.enrollment import Invitation, PlatformRole
 from common.member import (
     AssetApproveRequest,
     AssetRejectRequest,
@@ -127,7 +127,9 @@ def test_a_submission_waits_with_the_platforms_version_owner_and_pending_reviews
     assert item.identity.version == "1.0.0"  # the platform's, not the author's 0.3.0
     assert item.submitter == "alice" and item.risk == "medium"
     detail = queue.detail(item.submission_id)
-    metadata = detail.manifest["metadata"]
+    raw_metadata = detail.manifest["metadata"]
+    assert isinstance(raw_metadata, dict)
+    metadata: dict[str, Any] = raw_metadata
     assert metadata["owner"] == {"type": "user", "id": "alice"}  # not the claimed mallory
     assert metadata["business_approval"]["status"] == "pending"
     assert metadata["technical_policy"]["status"] == "pending"
@@ -269,7 +271,7 @@ def test_the_queue_survives_a_restart(tmp_path: Path) -> None:
 # -- over HTTP -----------------------------------------------------------------
 
 
-def _signed_in(app: SharedPlatformApplication, actor: str, role: str) -> str:
+def _signed_in(app: SharedPlatformApplication, actor: str, role: PlatformRole) -> str:
     proof = app.issue_invitation(
         Invitation(
             invitation_id=f"invite-{actor}",
@@ -277,7 +279,7 @@ def _signed_in(app: SharedPlatformApplication, actor: str, role: str) -> str:
             issued_by="platform-admin",
             groups=("engineering",),
             role=role,
-        ),  # type: ignore[arg-type]
+        ),
         expires_at=app.member_service.now() + timedelta(days=1),
     )
     status, reply = request(

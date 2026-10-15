@@ -121,9 +121,9 @@ def web(tmp_path: Path) -> Iterator[tuple[AgentWeb, Path, _Model]]:
 def _propose(
     web: AgentWeb, kind: str, values: dict[str, Any], reason: str = "asked", channel: str = "local"
 ) -> Any:
-    tool = next(
-        item for item in web.runtime.agent.gateway.host_tools() if item.tool.name == PROPOSE_TOOL
-    )
+    host_tools = web.runtime.agent.gateway.host_tools
+    assert host_tools is not None
+    tool = next(item for item in host_tools() if item.tool.name == PROPOSE_TOOL)
     context = RequestContext(
         trace=TraceIdentifiers(trace_id="t1", request_id="r1", span_id="s1"),
         actor="engineer",
@@ -132,7 +132,11 @@ def _propose(
         message="change it",
         session_id="session-1",
     )
-    return asyncio.run(tool.handler(context, {"kind": kind, "values": values, "reason": reason}))
+
+    async def propose() -> Any:
+        return await tool.handler(context, {"kind": kind, "values": values, "reason": reason})
+
+    return asyncio.run(propose())
 
 
 def _card(outcome: Any) -> dict[str, Any]:
@@ -397,8 +401,9 @@ def test_shared_platform_apply_backs_host_json_up_as_the_card_does(web: Any) -> 
     assert any("backed up" in effect for effect in card["effects"])
     decided = agent_web.decide_card(card["card_id"], "apply")
     assert decided["ok"], decided
-    assert _host(path).publishing is not None
-    assert _host(path).publishing.member_portal_url == "https://portal.example.com"
+    publishing = _host(path).publishing
+    assert publishing is not None
+    assert publishing.member_portal_url == "https://portal.example.com"
     assert list(path.parent.glob("host.json.bak-*-before-shared-platform"))
 
 
@@ -488,13 +493,17 @@ def test_model_and_telegram_kinds_go_through_their_writers(web: Any, monkeypatch
     assert agent_web.decide_card(card["card_id"], "apply")["ok"]
     written = _host(path)
     assert written.models is not None
-    assert written.models.catalog.endpoint("company").model == "bigger-model"
+    company = written.models.catalog.endpoint("company")
+    assert company is not None and company.model == "bigger-model"
 
     monkeypatch.setenv("AEP_TELEGRAM_BOT_TOKEN", TELEGRAM_TOKEN)
     swapped: list[Any] = []
-    agent_web.update_telegram_settings = lambda form: (  # type: ignore[method-assign]
-        swapped.append(form) or {"ok": True}
-    )
+
+    def update_telegram_settings(form: Any) -> dict[str, Any]:
+        swapped.append(form)
+        return {"ok": True}
+
+    agent_web.update_telegram_settings = update_telegram_settings
     card = _card(
         _propose(
             agent_web,
@@ -661,7 +670,7 @@ def test_the_card_renders_and_applies_in_a_real_browser(tmp_path: Path) -> None:
             raise AssertionError(expression)
 
         def measure(selector: str) -> list[int]:
-            return json.loads(
+            size: list[int] = json.loads(
                 str(
                     browser._evaluate(
                         "JSON.stringify((() => { const r = document.querySelector("
@@ -671,6 +680,7 @@ def test_the_card_renders_and_applies_in_a_real_browser(tmp_path: Path) -> None:
                     )
                 )
             )
+            return size
 
         try:
             browser.navigate(served.address)

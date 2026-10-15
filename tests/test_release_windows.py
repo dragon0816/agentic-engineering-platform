@@ -3,6 +3,7 @@
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -79,8 +80,8 @@ def test_the_shortcut_carries_the_aep_icon(tmp_path: Path, monkeypatch: pytest.M
     icon = tmp_path / "aep-agent.ico"
     icon.write_bytes(b"ico")
     (tmp_path / "Desktop").mkdir()
-    monkeypatch.setattr(launcher.sys, "platform", "win32")
-    monkeypatch.setattr(launcher.subprocess, "run", run)
+    monkeypatch.setattr(sys, "platform", "win32")  # the sys module launcher uses
+    monkeypatch.setattr(subprocess, "run", run)  # the subprocess module launcher uses
     monkeypatch.setattr(launcher, "SHORTCUT_ICON", icon)
     monkeypatch.setenv("USERPROFILE", str(tmp_path))
     monkeypatch.setenv("APPDATA", str(tmp_path / "missing"))

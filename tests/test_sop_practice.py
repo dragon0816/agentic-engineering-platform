@@ -21,7 +21,8 @@ from evaluation.sop_practice import (
 def fetch(url: str, data: dict[str, str] | None = None) -> str:
     body = urllib.parse.urlencode(data).encode() if data is not None else None
     with urllib.request.urlopen(url, data=body, timeout=10) as reply:
-        return reply.read().decode("utf-8")
+        page: bytes = reply.read()
+        return page.decode("utf-8")
 
 
 def test_the_site_searches_lists_and_records_a_notification() -> None:
@@ -89,19 +90,17 @@ _FAKE_PDF = b"%PDF-1.4\n" + b"x" * 4096 + b"\n%%EOF\n"
 def _fake_browser(monkeypatch: pytest.MonkeyPatch, script: str) -> list["subprocess.Popen[bytes]"]:
     """Run ``script`` where the browser would start; anything else (taskkill)
     starts for real."""
-    import evaluation.sop_practice as practice
-
     started: list[subprocess.Popen[bytes]] = []
     real_popen = subprocess.Popen
 
     def popen(arguments: list[str], **options: object) -> subprocess.Popen[bytes]:
         if arguments[0] == "fake-edge":
             arguments = [sys.executable, "-c", script, *arguments[1:]]
-        process = real_popen(arguments, **options)  # type: ignore[call-overload]
+        process: subprocess.Popen[bytes] = real_popen(arguments, **options)  # type: ignore[call-overload]
         started.append(process)
         return process
 
-    monkeypatch.setattr(practice.subprocess, "Popen", popen)
+    monkeypatch.setattr(subprocess, "Popen", popen)  # the module sop_practice uses
     return started
 
 

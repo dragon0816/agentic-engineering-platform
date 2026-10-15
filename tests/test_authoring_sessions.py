@@ -8,7 +8,7 @@ from typing import Any
 
 import pytest
 from test_authoring_conversation import Scripted
-from test_workflow_preview import LOCAL, Plans, Value, spec
+from test_workflow_preview import LOCAL, Calls, Plans, Value, spec
 
 from capabilities.runtime import InstalledCapabilities, LocalPolicy
 from common.assets import WorkflowManifest
@@ -17,11 +17,6 @@ from host_runtime.workflow_settings import WorkflowSettingsStore
 from workflow.dispatch import BridgeExecutor
 
 ACTOR = "engineer"
-
-
-class Calls:
-    def __init__(self) -> None:
-        self.ran: list[str] = []
 
 
 def blocks(calls: Calls) -> InstalledCapabilities:

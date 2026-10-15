@@ -31,6 +31,7 @@ from common.agent_guard import (
     AgentRequest,
     Grants,
     GuardPlaces,
+    RequestKind,
     command_refusal,
     folder_refusal,
     judge,
@@ -250,7 +251,7 @@ def test_inside_free_outside_asks_and_folder_grants_and_read_roots(tmp_path: Pat
     for path in (folder, other, wiki):
         path.mkdir()
 
-    def decide(kind: str, path: Path, grants: Grants | None = None) -> Any:
+    def decide(kind: RequestKind, path: Path, grants: Grants | None = None) -> Any:
         return judge(
             AgentRequest(kind=kind, tool="T", paths=(str(path),)),
             folder=folder,
@@ -979,7 +980,7 @@ def test_permission_and_mail_cards_render_and_answer_in_a_real_browser(served: A
         raise AssertionError(expression)
 
     def measure(selector: str) -> list[int]:
-        return json.loads(
+        size: list[int] = json.loads(
             str(
                 browser._evaluate(
                     "JSON.stringify((() => { const r = document.querySelector("
@@ -989,6 +990,7 @@ def test_permission_and_mail_cards_render_and_answer_in_a_real_browser(served: A
                 )
             )
         )
+        return size
 
     try:
         browser.navigate(server.address)

@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 
 import pytest
+from pydantic import JsonValue
 from test_gateway import Probe, Report, capability_spec, request, workflow_manifest
 
 from capabilities.runtime import CapabilityGrant, InstalledCapabilities, LocalPolicy
@@ -35,7 +36,7 @@ def manifest_with(inputs: dict[str, object]) -> WorkflowManifest:
     return WorkflowManifest.model_validate(data)
 
 
-def run(manifest: WorkflowManifest, arguments: dict[str, object]) -> tuple[object, Recording]:
+def run(manifest: WorkflowManifest, arguments: dict[str, JsonValue]) -> tuple[object, Recording]:
     handler = Recording()
     installed = InstalledCapabilities()
     installed.register(

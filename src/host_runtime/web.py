@@ -1515,8 +1515,8 @@ class AgentWeb:
         try:
             decided = store.decide(
                 proposal_id,
-                action,
-                self.runtime.actor,  # type: ignore[arg-type]
+                action,  # type: ignore[arg-type]
+                self.runtime.actor,
                 reason,
             )
         except ProposalError as error:

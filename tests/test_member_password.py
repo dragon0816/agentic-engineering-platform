@@ -75,7 +75,9 @@ def _join(
     return reply
 
 
-def _password(app: SharedPlatformApplication, account: str, password: str) -> tuple[int, dict]:
+def _password(
+    app: SharedPlatformApplication, account: str, password: str
+) -> tuple[int, dict[str, Any]]:
     return request(
         app.member_base_url + "/v1/member/sign-in/password",
         body={"account": account, "password": password},

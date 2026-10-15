@@ -54,13 +54,15 @@ def test_a_search_is_replayed_and_the_table_comes_back_as_rows(browser, site) ->
         WebScript(actions=SEARCH, values={"site": site.url, "customer": "C001"}), "read"
     )
     rows = result.data["orders"]
-    assert isinstance(rows, list) and [row["訂單號"] for row in rows] == [
+    assert isinstance(rows, list)
+    table = [row for row in rows if isinstance(row, dict)]
+    assert len(table) == len(rows) and [row["訂單號"] for row in table] == [
         "SO-1001",
         "SO-1002",
         "SO-1003",
         "SO-1004",
     ]
-    assert rows[1]["狀態"] == "延遲" and "customer=C001" in result.url
+    assert table[1]["狀態"] == "延遲" and "customer=C001" in result.url
 
 
 def test_read_mode_refuses_a_click_that_would_change_the_site(browser, site) -> None:  # type: ignore[no-untyped-def]

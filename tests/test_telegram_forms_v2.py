@@ -150,7 +150,7 @@ def test_uploads_are_asked_when_the_channel_can_store_them() -> None:
 
 
 def test_same_as_last_time_fills_the_identity_fields() -> None:
-    fields = [
+    fields: list[dict[str, Any]] = [
         {
             "name": "company",
             "label": "Company",

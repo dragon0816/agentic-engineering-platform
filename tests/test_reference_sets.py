@@ -142,7 +142,9 @@ def test_telegram_offers_published_choices_as_buttons(tmp_path: Path) -> None:
     first = flow.begin(state)
     assert first.prompt is not None
     assert first.prompt.buttons == [[("kt326", "kt326"), ("kt100", "kt100")]]
-    assert "choose one" in (flow.answer(state, "kt555").prompt.text or "")
+    refused = flow.answer(state, "kt555").prompt
+    assert refused is not None
+    assert "choose one" in (refused.text or "")
     second = flow.answer(state, "kt326")
     assert second.prompt is not None
     assert second.prompt.buttons == [[("2.0.18", "2.0.18"), ("2.0.19", "2.0.19")]]

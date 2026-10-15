@@ -608,7 +608,7 @@ def test_free_text_is_a_conversation_with_context_and_new_clears_it(tmp_path: Pa
             [update(3, OWNER, "/new")],
         ]
     )
-    from models.contracts import ModelRequest, ModelResponse
+    from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
 
     class Talking:
         def __init__(self) -> None:
@@ -619,6 +619,9 @@ def test_free_text_is_a_conversation_with_context_and_new_clears_it(tmp_path: Pa
             return ModelResponse(
                 trace=request.trace, model_alias=request.model_alias, text="Hello from the Agent"
             )
+
+        def stream(self, request: ModelRequest) -> Iterator[ModelStreamEvent]:
+            raise NotImplementedError
 
     item, agent, _ = ingress(tmp_path, transport)
     model = Talking()
@@ -638,7 +641,7 @@ def test_a_conversation_shows_it_is_working_and_which_skills_it_used(tmp_path: P
     """Owner request 2026-10-06: while the Agent works, Telegram says so and
     lists the skills in use; the status message is edited, then the answer
     follows as its own message. Only tool names are shown."""
-    from models.contracts import ModelRequest, ModelResponse, ModelToolCall
+    from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent, ModelToolCall
 
     class UsingATool:
         def __init__(self) -> None:
@@ -658,6 +661,9 @@ def test_a_conversation_shows_it_is_working_and_which_skills_it_used(tmp_path: P
                 model_alias=request.model_alias,
                 text="The package was released.",
             )
+
+        def stream(self, request: ModelRequest) -> Iterator[ModelStreamEvent]:
+            raise NotImplementedError
 
     transport = FakeTransport([[update(1, OWNER, "please release the package")]])
     item, agent, _ = ingress(tmp_path, transport)

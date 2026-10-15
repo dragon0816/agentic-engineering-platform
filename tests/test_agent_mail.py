@@ -347,9 +347,15 @@ def test_sending_needs_a_press_on_each_message(tmp_path: Path) -> None:
         "stopped",
     ]
     # The answer keeps every mail card as decided.
-    shown = mode.finish(run, "answered")
-    assert [card["status"] for card in shown] == ["sent", "kept", "cancelled", "failed", "expired"]
-    assert all(card["card_id"].startswith("ml-") for card in shown)
+    finished = mode.finish(run, "answered")
+    assert [card["status"] for card in finished] == [
+        "sent",
+        "kept",
+        "cancelled",
+        "failed",
+        "expired",
+    ]
+    assert all(card["card_id"].startswith("ml-") for card in finished)
 
 
 def test_a_draft_is_refused_before_outlook_when_it_is_unsafe(tmp_path: Path) -> None:

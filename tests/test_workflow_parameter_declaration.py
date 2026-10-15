@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-from pydantic import ValidationError
+from pydantic import JsonValue, ValidationError
 from test_contracts import task_data
 
 from common.assets import WorkflowManifest
@@ -25,7 +25,7 @@ def _manifest(parameters: list[dict[str, Any]], **extra: Any) -> WorkflowManifes
     return WorkflowManifest.model_validate(data)
 
 
-RICH = [
+RICH: list[dict[str, Any]] = [
     {
         "name": "project",
         "label": "Project",
@@ -206,7 +206,7 @@ def test_runtime_values_follow_the_richer_kinds_and_defaults() -> None:
     # Declared defaults fill absent fields; supplied values are kept.
     assert checked["mode"] == "full" and checked["send"] is False
     assert checked["reporters"] == ["amy", "bo"]
-    for invalid in (
+    invalids: tuple[dict[str, JsonValue], ...] = (
         {"project": "R"},  # min_length and pattern
         {"project": "Rs/CMX"},  # pattern
         {"ratio": 2},  # above maximum
@@ -215,7 +215,8 @@ def test_runtime_values_follow_the_richer_kinds_and_defaults() -> None:
         {"cc": ["not-an-email"]},
         {"mode": "other"},
         {"requirements": "req.txt"},  # multiple upload expects a list
-    ):
+    )
+    for invalid in invalids:
         with pytest.raises(WorkflowParameterError):
             validate_run_parameters(manifest, invalid)
 

@@ -67,7 +67,7 @@ def package(
             "metadata": AssetMetadata(
                 identity=identity,
                 owner=owner,
-                visibility=visibility,  # type: ignore[arg-type]
+                visibility=visibility,
                 lifecycle="published",
                 package=PackageMetadata(
                     artifact_ref=(

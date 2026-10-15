@@ -13,7 +13,8 @@ from pathlib import Path
 from typing import Any
 
 from test_chat_authoring import Echo, Out, Recorder, context, spec
-from test_gateway import FakeModel, Handler, Probe, Report, capability_spec, gateway, request
+from test_gateway import Handler, Probe, Report, capability_spec, gateway, request
+from test_routing import FakeModel
 
 from agent.gateway import HostToolOutcome
 from capabilities.contracts import CapabilitySpec

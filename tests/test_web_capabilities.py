@@ -19,6 +19,7 @@ from capabilities.web.handlers import (
     SELECT_SPEC,
     SelectHandler,
     SelectRequest,
+    SelectResult,
     WebHostBinding,
     WebScriptHandler,
 )
@@ -92,12 +93,13 @@ def test_read_select_then_act_on_the_practice_site(site: PracticeSite, tmp_path:
         SelectHandler(),
         SelectRequest(rows=rows, where={"狀態": "延遲", "通知": "標記已通知"}, take="訂單號"),
     )
+    assert isinstance(delayed, SelectResult)
     act = call(
         WebScriptHandler(binding, tmp_path / "profile", "act"),
         WebScript.model_validate(
             {"actions": NOTIFY, "values": values, "for_each": list(delayed.values)}
         ),
-    )  # type: ignore[attr-defined]
+    )
     assert act.done == ("SO-1002", "SO-1004")  # type: ignore[attr-defined]
     with urllib.request.urlopen(site.url + "/state.json") as reply:
         assert json.loads(reply.read())["notified"] == ["SO-1002", "SO-1004"]

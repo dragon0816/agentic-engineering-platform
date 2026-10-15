@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import base64
 import json
-from collections.abc import Mapping
+from collections.abc import Iterator, Mapping
 from pathlib import Path
 from typing import Any
 
@@ -26,7 +26,7 @@ from test_telegram_ingress import (
 
 from channels.telegram import DEFAULT_CAPTION, SUPPORTED_TYPES, TelegramIngress
 from host_runtime.attachments import MAX_FILE_BYTES, AttachmentStore
-from models.contracts import ModelRequest, ModelResponse
+from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
 
 PNG = base64.b64decode(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="
@@ -109,6 +109,9 @@ class Seeing:
         return ModelResponse(
             trace=request.trace, model_alias=request.model_alias, text="I looked at it."
         )
+
+    def stream(self, request: ModelRequest) -> Iterator[ModelStreamEvent]:
+        raise NotImplementedError
 
 
 def message(

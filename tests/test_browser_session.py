@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import asyncio
 import json
+from collections.abc import Awaitable
 from pathlib import Path
-from typing import Any
+from typing import Any, TypeVar
 
 import pytest
+from pydantic import JsonValue
 
 from capabilities.browser_session.handlers import (
     SPEC,
@@ -28,6 +30,12 @@ from integrations.browser import PageView
 from workflow.dispatch import BridgeExecutor
 
 SITE = "http://127.0.0.1:8810"
+T = TypeVar("T")
+
+
+async def _settled(pending: Awaitable[T]) -> T:
+    """Await a tool handler's result; asyncio.run needs a coroutine, not any Awaitable."""
+    return await pending
 
 
 class FakeBrowser:
@@ -135,11 +143,11 @@ def test_the_conversation_tool_goes_through_the_bridge_and_its_grants(tmp_path: 
         channel="local",
         message="x",
     )
-    args = {"actions": [{"do": "open", "url": SITE + "/orders"}]}
+    args: dict[str, JsonValue] = {"actions": [{"do": "open", "url": SITE + "/orders"}]}
     ungranted = bridge_tools(BridgeExecutor(installed, LocalPolicy(())))
     (tool,) = ungranted
     assert tool.tool.name == "browser__operate"
-    refused = asyncio.run(tool.handler(context, args))
+    refused = asyncio.run(_settled(tool.handler(context, args)))
     assert refused.status == "failed" and browser.visited == []
     grant = CapabilityGrant(
         actor="owner",
@@ -149,7 +157,7 @@ def test_the_conversation_tool_goes_through_the_bridge_and_its_grants(tmp_path: 
         approval_ref="owner-approved",
     )
     (granted,) = bridge_tools(BridgeExecutor(installed, LocalPolicy((grant,))))
-    done = asyncio.run(granted.handler(context, args))
+    done = asyncio.run(_settled(granted.handler(context, args)))
     assert done.status == "succeeded" and browser.visited == [SITE + "/orders"]
     assert bridge_tools(BridgeExecutor(InstalledCapabilities(), LocalPolicy(()))) == []
 

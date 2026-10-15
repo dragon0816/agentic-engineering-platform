@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from pydantic import JsonValue
 from test_gateway import request
 
 from capabilities.contracts import CapabilitySpec
@@ -200,6 +201,11 @@ NOTIFY = [
 COLUMNS = ["訂單號", "品項", "數量", "預計出貨日", "狀態"]
 
 
+def obj(value: JsonValue) -> dict[str, JsonValue]:
+    assert isinstance(value, dict), value
+    return value
+
+
 def ref(index: int, *path: str) -> dict[str, Any]:
     return {"source": "step", "step_index": index, "path": list(path)}
 
@@ -310,14 +316,18 @@ def test_the_practice_sop_previews_without_changes_then_runs(tmp_path: Path) -> 
         workflow = shipment_workflow()
         workflows.register(workflow)
         running = WorkflowEngine(workflows, bridge)
-        arguments = {"site": site.url, "customer": "C001", "workbook": str(book)}
+        arguments: dict[str, JsonValue] = {
+            "site": site.url,
+            "customer": "C001",
+            "workbook": str(book),
+        }
         before = book.read_bytes()
 
         shown = asyncio.run(running.preview(request("x"), workflow.metadata.identity, arguments))
         assert [item.state for item in shown.steps] == ["ran", "ran", "planned", "planned"]
-        assert shown.steps[1].output["values"] == ["SO-1002", "SO-1004"]
-        assert shown.steps[2].output["added"] == ["SO-1002", "SO-1003", "SO-1004"]
-        assert shown.steps[3].inputs["for_each"] == ["SO-1002", "SO-1004"]
+        assert obj(shown.steps[1].output)["values"] == ["SO-1002", "SO-1004"]
+        assert obj(shown.steps[2].output)["added"] == ["SO-1002", "SO-1003", "SO-1004"]
+        assert obj(shown.steps[3].inputs)["for_each"] == ["SO-1002", "SO-1004"]
         assert book.read_bytes() == before and site.notified == set()
 
         run = asyncio.run(

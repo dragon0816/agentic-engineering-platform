@@ -4,6 +4,7 @@ import importlib.util
 import json
 import sys
 import sysconfig
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -22,7 +23,7 @@ from capabilities.coding_change.handlers import CodingChangeHandler, is_test_pat
 from capabilities.coding_change.manifest import coding_skill, coding_workflow  # noqa: E402
 from capabilities.runtime import CapabilityRefused  # noqa: E402
 from common.execution import TraceIdentifiers  # noqa: E402
-from models.contracts import ModelRequest, ModelResponse  # noqa: E402
+from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent  # noqa: E402
 
 requires_win32 = pytest.mark.skipif(
     importlib.util.find_spec("win32api") is None,
@@ -47,6 +48,9 @@ class Replies:
             text=json.dumps(answer),
             structured_output=answer,
         )
+
+    def stream(self, request: ModelRequest) -> Iterator[ModelStreamEvent]:
+        raise NotImplementedError
 
 
 PLAN = {"summary": "Add double", "purpose": "implement double"}
@@ -146,7 +150,7 @@ def test_no_model_no_network_block_or_a_venv_runner_is_refused(tmp_path: Path) -
         ({"model": Replies(), "blocked": False}, "coding_network_block_missing"),
         ({"model": Replies(), "python": sys.executable}, "runner_python_is_venv_launcher"),
     ):
-        run, _ = handler(tmp_path / code, **kwargs)  # type: ignore[arg-type]
+        run, _ = handler(tmp_path / code, **kwargs)
         with pytest.raises(CapabilityRefused) as refused:
             run.change(TRACE, ask())
         assert refused.value.code == code

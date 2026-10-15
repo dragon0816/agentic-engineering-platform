@@ -4,6 +4,7 @@ import itertools
 import json
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 import pytest
 from test_raw import make_vault
@@ -893,7 +894,7 @@ def test_host_checks_labeled_inference_without_upgrading_the_relationship() -> N
     assert not answer_claims_overlap_raw(invented, inference_label=procedure.inference_label)
 
 
-def _uncredited_record(vault: Vault, question: str, cite: str) -> dict:
+def _uncredited_record(vault: Vault, question: str, cite: str) -> dict[str, Any]:
     """A record whose answer cites one passage, with every facet's listed
     passages emptied: retrieval lists only its first few per facet."""
     assessment = assess_knowledge_evidence(vault, question, _procedure())

@@ -17,7 +17,7 @@ from models.contracts import ModelTool
 
 def tool(status: str = "succeeded") -> HostTool:
     async def run(context: RequestContext, args: dict[str, Any]) -> HostToolOutcome:
-        return HostToolOutcome(status=status, data={})  # type: ignore[arg-type]
+        return HostToolOutcome(status=status, data={})
 
     return HostTool(
         ModelTool(

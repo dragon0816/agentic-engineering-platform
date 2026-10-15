@@ -10,7 +10,7 @@ import json
 from collections.abc import Iterator
 from datetime import timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pytest
 from test_member_publish import _signed_in, workflow_manifest
@@ -410,18 +410,18 @@ def test_agent_web_asks_who_can_use_it_and_passes_it_on(tmp_path: Path) -> None:
         ),
     )
     reply = AgentWeb.publish_asset(
-        web,
+        cast(AgentWeb, web),
         "workflow",
-        "lab/weekly-check@0.3.0",  # type: ignore[arg-type]
+        "lab/weekly-check@0.3.0",
         "minor",
         "",
         "team",
     )
     assert reply["ok"] is True and sent[0][-1] == "team"
     AgentWeb.publish_asset(
-        web,
+        cast(AgentWeb, web),
         "workflow",
-        "lab/weekly-check@0.3.0",  # type: ignore[arg-type]
+        "lab/weekly-check@0.3.0",
         "minor",
         "",
     )

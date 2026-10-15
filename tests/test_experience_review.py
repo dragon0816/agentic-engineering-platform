@@ -40,12 +40,10 @@ def _answer(
         role="assistant",
         text=text,
         created_at=NOW,
-        status=status,  # type: ignore[arg-type]
+        status=status,
         trace=TRACE,
         tool_summary=tools,
-        feedback=MessageFeedback(rating=rating, note=note, updated_at=NOW)  # type: ignore[arg-type]
-        if rating
-        else None,
+        feedback=MessageFeedback(rating=rating, note=note, updated_at=NOW) if rating else None,
     )
 
 

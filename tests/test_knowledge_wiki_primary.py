@@ -12,8 +12,8 @@ from test_raw import make_vault
 from capabilities.knowledge_query.handlers import KnowledgeQueryHandler
 from common.assets import AssetIdentity
 from common.execution import RequestContext, TraceIdentifiers
+from host_runtime.knowledge_harness import knowledge_source_lines
 from host_runtime.knowledge_observation import KnowledgeBridgeActions
-from host_runtime.web import knowledge_source_lines
 from knowledge.evolution import KnowledgeAnswerRecord, WikiProvenance, grounded_record
 from knowledge.procedure import KnowledgeProcedure
 from knowledge.query import Answer, Citation, Passage, RetrievalSnapshot, wiki_sections

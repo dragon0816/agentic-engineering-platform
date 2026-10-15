@@ -12,6 +12,7 @@ from pathlib import Path
 from test_agent_web import base, fetch, served  # noqa: F401 - the server fixture
 from test_chat_authoring import draft, studio
 
+from agent.gateway import HostToolOutcome
 from common.execution import RequestContext, TraceIdentifiers
 from host_runtime.web import AgentWebServer
 from host_runtime.web_page import PAGE
@@ -40,10 +41,15 @@ def test_the_owner_decides_over_http_and_the_result_joins_the_conversation(
     # so re-draft it for the served actor.
     chat_candidate = chat.candidate(candidate, "owner")
     chat._save_candidate(chat_candidate.model_copy(update={"actor": served.web.runtime.actor}))
-    asked = asyncio.run(
-        run.handler(context, {"candidate_id": candidate, "arguments": {"month": "2026-09"}})
-    )
+
+    async def ask() -> HostToolOutcome:
+        return await run.handler(
+            context, {"candidate_id": candidate, "arguments": {"month": "2026-09"}}
+        )
+
+    asked = asyncio.run(ask())
     assert asked.status == "awaiting_approval" and recorder.calls == []
+    assert isinstance(asked.data, dict)
 
     listed = fetch(url + "/api/approvals?session_id=" + session_id, token=token).json()
     (pending,) = listed["approvals"]
@@ -114,7 +120,8 @@ def test_the_owner_sees_drafts_not_yet_installed_and_installs_or_deletes_them(
 ) -> None:
     """Owner 2026-10-08: a Workflow that was only run once never shows up as
     installed; the draft list shows it, and Install is the owner's approval."""
-    from test_external_authoring import desk, skill, workflow
+    from test_chat_authoring import workflow
+    from test_external_authoring import desk, skill
 
     from host_runtime.external_authoring import ExternalAuthoring
 

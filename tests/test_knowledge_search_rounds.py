@@ -7,7 +7,7 @@ from pathlib import Path
 from test_knowledge_wiki_primary import TRACE, _wiki_vault
 
 from common.execution import Failure
-from knowledge.query import RetrievalSnapshot
+from knowledge.query import Passage, RetrievalSnapshot
 from knowledge.search_rounds import PLANNER_PROMPT, search_rounds
 from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
 
@@ -52,17 +52,17 @@ def _snapshot(tmp_path: Path) -> RetrievalSnapshot:
     return RetrievalSnapshot(vault)
 
 
-def _first(snapshot: RetrievalSnapshot) -> tuple:  # type: ignore[type-arg]
+def _first(snapshot: RetrievalSnapshot) -> tuple[Passage, ...]:
     return snapshot.wiki_primary_passages(("ZNA option",))
 
 
-def _rounds(snapshot: RetrievalSnapshot, planner: _Planner, rounds: int = 2) -> tuple:  # type: ignore[type-arg]
+def _rounds(snapshot: RetrievalSnapshot, planner: _Planner, rounds: int = 2) -> tuple[Passage, ...]:
     return search_rounds(
         snapshot,
         planner,
         "a",
         TRACE,
-        "ZNA option",  # type: ignore[arg-type]
+        "ZNA option",
         _first(snapshot),
         rounds=rounds,
     )
@@ -112,7 +112,10 @@ def test_the_round_budget_bounds_planner_calls(tmp_path: Path) -> None:
             "a calibration step in detail.\n",
             encoding="utf-8",
         )
-    planner = _Planner(*({"relevant_pages": [], "queries": [word]} for word in words))
+    decisions: list[dict[str, object] | None] = [
+        {"relevant_pages": [], "queries": [word]} for word in words
+    ]
+    planner = _Planner(*decisions)
     _rounds(snapshot, planner, rounds=2)
     assert len(planner.requests) == 3  # the first look plus two more rounds
 
@@ -177,7 +180,7 @@ def test_the_skill_sets_how_many_sections_of_a_relevant_page_are_read(tmp_path: 
             planner,
             "a",
             TRACE,
-            "示波器 抖動",  # type: ignore[arg-type]
+            "示波器 抖動",
             _first(snapshot),
             rounds=2,
             per_page=per_page,
@@ -211,7 +214,7 @@ def test_every_relevant_page_gives_its_best_sections_before_any_goes_deeper(
         planner,
         "a",
         TRACE,
-        "jitter",  # type: ignore[arg-type]
+        "jitter",
         _first(snapshot),
         rounds=2,
         k=6,
@@ -234,7 +237,7 @@ def test_relevant_page_sections_are_ranked_by_the_rank_text(tmp_path: Path) -> N
         planner,
         "a",
         TRACE,
-        "jitter",  # type: ignore[arg-type]
+        "jitter",
         _first(snapshot),
         rounds=2,
         k=1,

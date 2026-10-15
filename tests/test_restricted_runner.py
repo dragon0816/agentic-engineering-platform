@@ -133,11 +133,11 @@ def test_a_venv_launcher_or_missing_interpreter_is_refused(tmp_path: Path) -> No
 def test_the_firewall_rule_check_reads_powershell_and_names_the_program() -> None:
     import subprocess
 
-    from harness.network_block import RULE_NAME, create_rule_command, outbound_rule_present
+    from harness.network_block import RULE_NAME, Run, create_rule_command, outbound_rule_present
 
     seen: list[list[str]] = []
 
-    def answering(text: str):  # noqa: ANN202 - test double
+    def answering(text: str) -> Run:
         def run(args: list[str], **options: object) -> subprocess.CompletedProcess[str]:
             env = options["env"]
             assert isinstance(env, dict)

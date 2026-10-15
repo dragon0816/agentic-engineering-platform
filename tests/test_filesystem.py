@@ -5,13 +5,12 @@ from pathlib import Path
 
 import pytest
 
-from common import filesystem
 from common.filesystem import publish_directory
 
 
 def _refusal(winerror: int) -> PermissionError:
     error = PermissionError(13, "Access is denied")
-    error.winerror = winerror  # type: ignore[attr-defined]
+    error.winerror = winerror
     return error
 
 
@@ -55,8 +54,8 @@ def test_a_brief_windows_lock_is_waited_out(
     replace = _FakeReplace(3, _refusal(winerror))
     sleeps: list[float] = []
     monkeypatch.setattr(sys, "platform", "win32")
-    monkeypatch.setattr(filesystem.os, "replace", replace)
-    monkeypatch.setattr(filesystem.time, "sleep", sleeps.append)
+    monkeypatch.setattr("common.filesystem.os.replace", replace)
+    monkeypatch.setattr("common.filesystem.time.sleep", sleeps.append)
 
     publish_directory(stage, target)
 
@@ -73,10 +72,10 @@ def test_a_lock_that_outlasts_the_budget_is_raised(
     replace = _FakeReplace(1_000, refusal)
     clock = [0.0]
     monkeypatch.setattr(sys, "platform", "win32")
-    monkeypatch.setattr(filesystem.os, "replace", replace)
-    monkeypatch.setattr(filesystem.time, "monotonic", lambda: clock[0])
+    monkeypatch.setattr("common.filesystem.os.replace", replace)
+    monkeypatch.setattr("common.filesystem.time.monotonic", lambda: clock[0])
     monkeypatch.setattr(
-        filesystem.time, "sleep", lambda seconds: clock.__setitem__(0, clock[0] + seconds)
+        "common.filesystem.time.sleep", lambda seconds: clock.__setitem__(0, clock[0] + seconds)
     )
 
     with pytest.raises(PermissionError) as raised:
@@ -98,8 +97,8 @@ def test_other_failures_are_raised_at_once(
     stage, target = staged
     replace = _FakeReplace(1, error)
     monkeypatch.setattr(sys, "platform", "win32")
-    monkeypatch.setattr(filesystem.os, "replace", replace)
-    monkeypatch.setattr(filesystem.time, "sleep", pytest.fail)
+    monkeypatch.setattr("common.filesystem.os.replace", replace)
+    monkeypatch.setattr("common.filesystem.time.sleep", pytest.fail)
 
     with pytest.raises(OSError) as raised:
         publish_directory(stage, target)
@@ -114,8 +113,8 @@ def test_access_denied_is_not_retried_outside_windows(
     stage, target = staged
     replace = _FakeReplace(1, _refusal(5))
     monkeypatch.setattr(sys, "platform", "linux")
-    monkeypatch.setattr(filesystem.os, "replace", replace)
-    monkeypatch.setattr(filesystem.time, "sleep", pytest.fail)
+    monkeypatch.setattr("common.filesystem.os.replace", replace)
+    monkeypatch.setattr("common.filesystem.time.sleep", pytest.fail)
 
     with pytest.raises(PermissionError):
         publish_directory(stage, target)

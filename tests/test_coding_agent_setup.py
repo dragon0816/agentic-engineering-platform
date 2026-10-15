@@ -10,6 +10,7 @@ from __future__ import annotations
 import json
 import tomllib
 from pathlib import Path
+from typing import Any
 
 import pytest
 
@@ -52,7 +53,10 @@ def backups(folder: Path) -> list[Path]:
 def test_claude_code_gets_skills_and_both_servers_beside_its_own(tmp_path: Path) -> None:
     environment = env(tmp_path, "claude")
     home = environment.home
-    own = {"numStartups": 7, "mcpServers": {"github": {"type": "http", "url": "https://x"}}}
+    own: dict[str, Any] = {
+        "numStartups": 7,
+        "mcpServers": {"github": {"type": "http", "url": "https://x"}},
+    }
     (home / ".claude.json").write_text(json.dumps(own), encoding="utf-8")
     first = install("claude-code", environment, launch(tmp_path))
     assert first.changed and len(first.backups) == 1

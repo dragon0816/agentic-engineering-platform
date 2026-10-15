@@ -113,7 +113,11 @@ def context() -> RequestContext:
 
 def call(chat: ChatAuthoring, name: str, args: dict[str, Any]) -> Any:
     tool = next(t for t in chat.tools() if t.tool.name == name)
-    return asyncio.run(tool.handler(context(), args))
+
+    async def invoke() -> Any:
+        return await tool.handler(context(), args)
+
+    return asyncio.run(invoke())
 
 
 def draft(chat: ChatAuthoring, capability: str) -> Any:
@@ -204,6 +208,7 @@ def test_install_needs_approval_and_a_rerun_keeps_the_same_digest(tmp_path: Path
     listed = call(chat, "authoring__list_workflows", {})
     assert listed.data[0]["status"] == "installed"
     item = chat.candidate(candidate_id, "owner")
+    assert isinstance(installed.result, dict)
     assert listed.data[0]["digest"] == digest(item.draft) == installed.result["digest"]
     again = call(chat, "authoring__install_workflow", {"candidate_id": candidate_id})
     assert again.status == "failed" and again.failure.code == "candidate_already_installed"
@@ -285,7 +290,9 @@ def test_an_installed_workflow_runs_without_asking_again_and_is_usable_at_once(
     candidate_id = draft(chat, "write-it").data["candidate_id"]
     decided = chat.install_now("owner", candidate_id)
     assert decided.status == "approved" and used == [("echo-month", 1)]
-    assert "runs now" in decided.result["note"]  # type: ignore[index]
+    assert isinstance(decided.result, dict)
+    note = decided.result["note"]
+    assert isinstance(note, str) and "runs now" in note
     ran = call(
         chat,
         "authoring__run_workflow",

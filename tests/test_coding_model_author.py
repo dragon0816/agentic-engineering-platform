@@ -1,6 +1,7 @@
 """The Gateway-backed change author (CODING_ON_BRIDGE C4)."""
 
 import json
+from collections.abc import Iterator
 from typing import Any
 
 import pytest
@@ -16,7 +17,7 @@ from harness.contracts import (
 )
 from harness.model_author import AuthorUnavailable, ModelChangeAuthor
 from harness.pytest_commands import NEW_COMMAND, SUITE_COMMAND, new_cases, suite_case
-from models.contracts import ModelRequest, ModelResponse
+from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
 
 TRACE = TraceIdentifiers(trace_id="c", request_id="c", span_id="c")
 REQUEST = CodingHarnessRequest(
@@ -49,6 +50,9 @@ class Replies:
             text=text,
             structured_output=None if isinstance(answer, str) else answer,
         )
+
+    def stream(self, request: ModelRequest) -> Iterator[ModelStreamEvent]:
+        raise NotImplementedError
 
 
 def author(model: Replies) -> ModelChangeAuthor:

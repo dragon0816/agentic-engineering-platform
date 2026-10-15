@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -28,7 +29,7 @@ from capabilities.web.handlers import (
 from capabilities.workflow_author.conversation import AuthoringTurn, author_turn
 from common.execution import Failure, TraceIdentifiers
 from integrations.web_script import WebScript, WebScriptResult
-from models.contracts import ModelRequest, ModelResponse
+from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent
 
 TRACE = TraceIdentifiers(trace_id="a", request_id="a", span_id="a")
 SOP = "每日出貨追蹤：打開出貨查詢網站，輸入客戶代碼查詢，把結果更新到出貨追蹤.xlsx。"
@@ -68,6 +69,10 @@ class Scripted:
             text=json.dumps(answer, ensure_ascii=False),
             structured_output=answer,
         )
+
+    def stream(self, request: ModelRequest) -> Iterator[ModelStreamEvent]:
+        raise AssertionError("authoring turns do not stream")
+        yield  # pragma: no cover
 
 
 def turn(model: Scripted, turns: tuple[AuthoringTurn, ...] = ()) -> Any:

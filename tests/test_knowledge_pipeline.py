@@ -15,7 +15,7 @@ def _pipeline(tmp_path: Path, model: PlanningModel | None = None) -> tuple[Knowl
     base = _base(tmp_path)
     pipeline = KnowledgePipeline(
         Sandboxes(tmp_path / "workspace"), {"k-test": base}, model=model, alias="company"
-    )  # type: ignore[arg-type]
+    )
     return pipeline, base
 
 
@@ -88,7 +88,7 @@ def test_ingest_needs_a_model_and_a_known_raw_and_plan(tmp_path: Path) -> None:
     sandbox, _ = _sandbox_with_note(pipeline)
     with pytest.raises(PipelineError, match="no_model"):
         pipeline.plan_ingest(sandbox, "raw/notes/mcp.md")
-    pipeline.model, pipeline.alias = PlanningModel(answers()), "company"  # type: ignore[assignment]
+    pipeline.model, pipeline.alias = PlanningModel(answers()), "company"
     with pytest.raises(PipelineError, match="unknown_raw"):
         pipeline.plan_ingest(sandbox, "raw/notes/nothing.md")
     for bad in ("plan-x", "../plan", "plan-../../x"):

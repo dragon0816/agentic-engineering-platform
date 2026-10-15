@@ -460,7 +460,7 @@ def test_the_capability_list_works_in_a_real_browser(tmp_path: Path) -> None:
             raise AssertionError(expression)
 
         def size(selector: str) -> list[int]:
-            return json.loads(
+            size: list[int] = json.loads(
                 str(
                     browser._evaluate(
                         "JSON.stringify((() => { const r = document.querySelector("
@@ -470,6 +470,7 @@ def test_the_capability_list_works_in_a_real_browser(tmp_path: Path) -> None:
                     )
                 )
             )
+            return size
 
         try:
             browser.navigate(served.address)

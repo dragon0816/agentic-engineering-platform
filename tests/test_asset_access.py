@@ -85,7 +85,9 @@ def publish(queue: SubmissionService, actor: str = "alice", **options: Any) -> A
     queue.approve(
         who("root"), AssetApproveRequest(submission_id=item.submission_id, evidence="read it")
     )
-    return item.identity
+    identity = item.identity
+    assert isinstance(identity, AssetIdentity)
+    return identity
 
 
 def available(queue: SubmissionService, actor: str) -> list[str]:
@@ -101,7 +103,8 @@ def test_a_declared_team_owner_is_kept_when_the_submitter_belongs_to_it(
 ) -> None:
     item = submit(queue, "alice", manifest=declared(QUALITY))
     assert item.owner == Owner(type="team", id="quality")
-    assert queue.detail(item.submission_id).manifest["metadata"]["owner"] == QUALITY
+    metadata = queue.detail(item.submission_id).manifest["metadata"]
+    assert isinstance(metadata, dict) and metadata["owner"] == QUALITY
     publish_identity = queue.approve(
         who("root"), AssetApproveRequest(submission_id=item.submission_id, evidence="ok")
     ).identity
@@ -143,7 +146,8 @@ def test_the_publisher_chooses_the_visibility_when_submitting(
     assert default.visibility == "organization"
     chosen = queue.submit(who("alice"), _request(declared(QUALITY, "organization"), "team"))
     assert chosen.visibility == "team"
-    assert queue.detail(chosen.submission_id).manifest["metadata"]["visibility"] == "team"
+    metadata = queue.detail(chosen.submission_id).manifest["metadata"]
+    assert isinstance(metadata, dict) and metadata["visibility"] == "team"
     with pytest.raises(ValidationError):
         _request(declared(QUALITY), "everyone")
 

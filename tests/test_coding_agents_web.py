@@ -80,7 +80,9 @@ def test_the_bridge_reads_the_address_and_token_at_call_time(tmp_path: Path) -> 
     bridge = Bridge(tmp_path, "test", post=post)
     (tmp_path / assistant_tools.TOKEN_FILE).write_text("t" * 40, encoding="utf-8")
     write_record(tmp_path, "http://127.0.0.1:50001/?token=session", 50001)
-    assert bridge.handle(_call("aep_workflows"))["result"]["structuredContent"] == {"ok": True}
+    answered = bridge.handle(_call("aep_workflows"))
+    assert answered is not None
+    assert answered["result"]["structuredContent"] == {"ok": True}
     # Agent Web restarted on another port: the next call follows it.
     write_record(tmp_path, "http://127.0.0.1:50002/?token=other", 50002)
     bridge.handle(_call("aep_workflows"))
@@ -88,7 +90,9 @@ def test_the_bridge_reads_the_address_and_token_at_call_time(tmp_path: Path) -> 
     assert seen[0][1]["Authorization"] == "Bearer " + "t" * 40
     # Never anywhere but the loopback address.
     write_record(tmp_path, "http://10.0.0.5:50003/?token=x", 50003)
-    assert bridge.handle(_call("aep_workflows"))["result"]["isError"] is True
+    failed = bridge.handle(_call("aep_workflows"))
+    assert failed is not None
+    assert failed["result"]["isError"] is True
 
 
 def test_the_bridge_reaches_a_real_agent_web(served: AgentWebServer) -> None:  # noqa: F811
@@ -96,6 +100,7 @@ def test_the_bridge_reaches_a_real_agent_web(served: AgentWebServer) -> None:  #
     served.web.assistant_token  # noqa: B018 - Agent Web keeps its token in the workspace
     write_record(workspace, served.address, served.server_address[1])
     reply = Bridge(workspace, "test").handle(_call("aep_workflows"))
+    assert reply is not None
     listed = reply["result"]["structuredContent"]["workflows"]
     assert listed and {"workflow", "read_only", "parameters"} <= set(listed[0])
 
@@ -191,7 +196,7 @@ def test_the_coding_agents_card_renders_in_a_real_browser(
         raise AssertionError(expression)
 
     def measure(selector: str) -> list[int]:
-        return json.loads(
+        size: list[int] = json.loads(
             str(
                 browser._evaluate(
                     "JSON.stringify((() => { const r = document.querySelector("
@@ -201,6 +206,7 @@ def test_the_coding_agents_card_renders_in_a_real_browser(
                 )
             )
         )
+        return size
 
     try:
         browser.navigate(served.address)

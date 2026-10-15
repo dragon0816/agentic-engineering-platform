@@ -226,7 +226,8 @@ def test_a_host_wires_the_shadow_and_refuses_an_unmapped_credential(tmp_path: Pa
 def test_each_finished_turn_reaches_the_conversation_observer() -> None:
     import asyncio
 
-    from test_gateway import FakeModel, Handler, gateway, request
+    from test_gateway import Handler, gateway, request
+    from test_routing import FakeModel
 
     from models.contracts import ModelMessage, ModelRequest, ModelResponse
 

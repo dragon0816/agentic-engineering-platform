@@ -105,3 +105,10 @@ module = [
     "win32file", "win32job", "win32process", "win32security",
 ]
 ignore_missing_imports = true
+
+# matplotlib is the optional weekly-mail extra (it ships inline types when
+# installed). The chart module imports it lazily, so a host -- or CI -- without
+# that extra must still type-check; there the imports resolve to Any.
+[[tool.mypy.overrides]]
+module = ["matplotlib", "matplotlib.*"]
+ignore_missing_imports = true

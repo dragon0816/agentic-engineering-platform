@@ -82,7 +82,7 @@ def test_rules_place_pages_by_tags_title_and_opening(tmp_path: Path) -> None:
 def test_enrich_writes_only_frontmatter_and_resumes(tmp_path: Path) -> None:
     vault = _vault(tmp_path)
     body_before = L._front(vault.read("wiki/concepts/EVM.md"))[1]
-    index = L.LayeredIndex(vault, _Model(_answer), "company")  # type: ignore[arg-type]
+    index = L.LayeredIndex(vault, _Model(_answer), "company")
     first = index.enrich(limit=2)
     assert first.done == 2 and first.remaining > 0
     second = index.enrich(limit=100)
@@ -100,7 +100,7 @@ def test_enrich_writes_only_frontmatter_and_resumes(tmp_path: Path) -> None:
 def test_a_failed_model_batch_writes_nothing(tmp_path: Path) -> None:
     vault = _vault(tmp_path)
     before = vault.read("wiki/concepts/EVM.md")
-    report = L.LayeredIndex(vault, _Model({"oops": 1}), "company").enrich()  # type: ignore[arg-type]
+    report = L.LayeredIndex(vault, _Model({"oops": 1}), "company").enrich()
     assert report.done == 0 and report.failed_batches >= 1
     assert vault.read("wiki/concepts/EVM.md") == before
 

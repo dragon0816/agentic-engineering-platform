@@ -17,7 +17,7 @@ from capabilities.mail_draft.handlers import (
     MailDraftResult,
 )
 from capabilities.runtime import CapabilityRefused
-from integrations.outlook_draft import DraftError, MailDraft, RecordingDraftWriter
+from integrations.outlook_draft import DraftError, DraftReceipt, MailDraft, RecordingDraftWriter
 
 
 def _run(handler: MailDraftHandler, **values: object) -> MailDraftResult:
@@ -89,7 +89,7 @@ def test_refusals_carry_a_code_and_no_content(tmp_path: Path) -> None:
     assert raised.value.code == "attachment_missing"
 
     class Broken:
-        def save(self, draft: MailDraft) -> object:
+        def save(self, draft: MailDraft) -> DraftReceipt:
             raise DraftError("draft_failed")
 
     with pytest.raises(CapabilityRefused) as raised:
@@ -100,7 +100,7 @@ def test_refusals_carry_a_code_and_no_content(tmp_path: Path) -> None:
 
 def test_a_best_effort_draft_reports_its_failure_instead_of_failing() -> None:
     class Broken:
-        def save(self, draft: MailDraft) -> object:
+        def save(self, draft: MailDraft) -> DraftReceipt:
             raise DraftError("outlook_missing")
 
     result = _run(

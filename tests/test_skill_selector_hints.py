@@ -97,7 +97,8 @@ def test_the_v3_corpus_sends_hints_and_keeps_unhinted_tools_readable() -> None:
 def test_a_conversation_hands_the_selector_each_skills_hint() -> None:
     import asyncio
 
-    from test_gateway import FakeModel, Handler, gateway, request
+    from test_gateway import Handler, gateway, request
+    from test_routing import FakeModel
 
     from agent.decisions import DecisionAcceleratorConfig, DecisionService
     from agent.gateway import SkillCandidateRequest, _valid_skill_subset

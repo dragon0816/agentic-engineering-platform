@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from pydantic import JsonValue
 from test_chat_authoring import Echo, Out, Recorder, spec, workflow
 
 from capabilities.runtime import InstalledCapabilities, LocalPolicy
@@ -27,6 +28,18 @@ from host_runtime.external_authoring import (
 )
 from host_runtime.mcp_server import TOOLS, Server, dispatch
 from workflow.dispatch import BridgeExecutor
+
+
+def _obj(value: JsonValue) -> dict[str, Any]:
+    """Narrow a JSON reply field that the test knows is an object."""
+    assert isinstance(value, dict)
+    return value
+
+
+def _items(value: JsonValue) -> list[Any]:
+    """Narrow a JSON reply field that the test knows is a list."""
+    assert isinstance(value, list)
+    return value
 
 
 def desk(tmp_path: Path, agent: str = "codex") -> tuple[ExternalAuthoring, Recorder]:
@@ -94,7 +107,7 @@ def test_a_workflow_is_checked_submitted_and_its_read_only_run_returns_codes_onl
     assert candidate.source == "external:codex"
     ran = authoring.run_workflow(str(submitted["candidate_id"]), {"month": "SECRET-2026-09"})
     assert ran["ran"] is True and recorder.calls == ["SECRET-2026-09"]
-    assert ran["run"]["status"] == "succeeded"  # type: ignore[index]
+    assert _obj(ran["run"])["status"] == "succeeded"
     assert "SECRET-2026-09" not in json.dumps(ran)
 
 
@@ -111,7 +124,7 @@ def test_a_writing_run_and_an_install_wait_for_the_owner_and_report_without_data
     decided = authoring.chat.decide(approval_id, "owner", True)  # the owner's button
     assert decided.source == "external:codex" and recorder.calls == ["PRIVATE-08"]
     view = authoring.status(approval_id)
-    assert view["status"] == "approved" and view["run"]["status"] == "succeeded"  # type: ignore[index]
+    assert view["status"] == "approved" and _obj(view["run"])["status"] == "succeeded"
     assert "PRIVATE-08" not in json.dumps(view)
     install = authoring.install_workflow(candidate_id)
     assert not (tmp_path / "workflows").exists()
@@ -121,7 +134,7 @@ def test_a_writing_run_and_an_install_wait_for_the_owner_and_report_without_data
         == "engineering/echo-month@1.0.0"
     )
     listed = authoring.list()
-    assert listed["workflows"][0]["status"] == "installed"  # type: ignore[index]
+    assert _items(listed["workflows"])[0]["status"] == "installed"
 
 
 def test_another_actors_approvals_and_candidates_are_unknown(tmp_path: Path) -> None:
@@ -347,7 +360,7 @@ def test_the_catalog_names_installed_assets_without_what_people_wrote_about_them
             "parameters": [{"name": "month", "kind": "text", "required": True}],
         }
     ]
-    assert "ACME" not in json.dumps(catalog) and catalog["skills"][0]["alias"] == "ncc"  # type: ignore[index]
+    assert "ACME" not in json.dumps(catalog) and _items(catalog["skills"])[0]["alias"] == "ncc"
 
 
 def test_an_installed_unchanged_workflow_runs_directly_for_an_external_agent(
@@ -394,10 +407,12 @@ def _size(value: Any) -> int:
 def test_the_catalog_stays_under_the_agents_output_limit(tmp_path: Path) -> None:
     authoring = _many(tmp_path, 60)
     catalog = authoring.catalog()
-    full = sum(_size(authoring.capability(str(c["target"]))) for c in catalog["capabilities"])
+    full = sum(
+        _size(authoring.capability(str(c["target"]))) for c in _items(catalog["capabilities"])
+    )
     assert full > 60_000  # what the old catalog carried
     assert _size(catalog) < 15_000 and "omitted" not in catalog
-    entry = next(c for c in catalog["capabilities"] if c["target"] == "lab/tool-007@1.0.0")
+    entry = next(c for c in _items(catalog["capabilities"]) if c["target"] == "lab/tool-007@1.0.0")
     assert entry == {
         "target": "lab/tool-007@1.0.0",
         "purpose": "Tool 7 reads the station log and returns rows.",
@@ -410,20 +425,20 @@ def test_the_catalog_stays_under_the_agents_output_limit(tmp_path: Path) -> None
 def test_a_very_large_host_is_trimmed_and_says_what_was_left_out(tmp_path: Path) -> None:
     catalog = _many(tmp_path, 400).catalog()
     assert _size(catalog) <= 15_000
-    assert catalog["omitted"]["capabilities"] > 0  # type: ignore[index]
+    assert _obj(catalog["omitted"])["capabilities"] > 0
 
 
 def test_one_capability_and_the_formats_come_in_full(tmp_path: Path) -> None:
     authoring, _ = desk(tmp_path)
     one = dispatch(authoring, "aep_capability", {"target": "lab/read-it@1.0.0"})
-    assert one["ok"] and one["input_schema"]["properties"]["value"]  # type: ignore[index]
+    assert one["ok"] and _obj(one["input_schema"])["properties"]["value"]
     assert dispatch(authoring, "aep_capability", {"target": "read-it"})["ok"] is True
     assert dispatch(authoring, "aep_capability", {"target": "lab/none@1.0.0"})["code"] == (
         "capability_unknown"
     )
-    workflow_format = dispatch(authoring, "aep_workflow_format", {})["workflow_format"]
-    assert "upload" in workflow_format["parameter kinds"]  # type: ignore[index]
-    assert workflow_format["complete example"]["checks"]  # type: ignore[index]
+    workflow_format = _obj(dispatch(authoring, "aep_workflow_format", {})["workflow_format"])
+    assert "upload" in workflow_format["parameter kinds"]
+    assert workflow_format["complete example"]["checks"]
     assert "not allowed" in dispatch(authoring, "aep_skill_format", {})["skill_format"]  # type: ignore[operator]
     assert {"aep_capability", "aep_workflow_format", "aep_skill_format"} <= set(TOOLS)
 

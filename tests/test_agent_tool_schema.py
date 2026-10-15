@@ -150,7 +150,9 @@ def test_the_model_sees_the_declared_fields_and_a_valid_call_runs() -> None:
     result, handler, model = _converse({"args": "quick"})
     offered = {tool.name: tool for tool in model.calls[0].tools}
     schema = offered["release__package"].input_schema
-    assert schema is not None and set(schema["properties"]) == {"args"}
+    assert schema is not None
+    properties = schema["properties"]
+    assert isinstance(properties, dict) and set(properties) == {"args"}
     assert result.tools[0].workflow is not None
     assert handler.calls == 1
 

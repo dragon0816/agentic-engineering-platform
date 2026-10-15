@@ -90,7 +90,7 @@ def tools_offered(picked: tuple[str, ...], excluded: frozenset[str]) -> list[str
         RequestRouter(CommandRouter(skills), model=model, decision_accelerator=config()),
         bridge,
         WorkflowEngine(InstalledWorkflows(), bridge),
-        skill_accelerator=lambda: Picks(picked),  # type: ignore[arg-type,return-value]
+        skill_accelerator=lambda: Picks(picked),
         skill_authorizer=lambda _request: True,
         accelerator_excluded_aliases=excluded,
     )

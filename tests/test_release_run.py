@@ -29,8 +29,11 @@ from capabilities.release_package.manifest import (
 from capabilities.release_package.release_run import (
     LOCK_NAME,
     CommitHandler,
+    CommitStepInput,
     PrepareHandler,
+    PrepareStepInput,
     PushHandler,
+    PushStepInput,
     ReleaseRunError,
     ReleaseRunRequest,
     ReleaseRunSettings,
@@ -46,7 +49,15 @@ from capabilities.release_package.versions import (
     parse_simple_index,
 )
 from capabilities.runtime import CapabilityRefused
+from common.assets import AssetIdentity, WorkflowManifest, WorkflowStep
 from common.execution import RequestContext, TraceIdentifiers
+
+
+def _capabilities(workflow: WorkflowManifest) -> list[AssetIdentity]:
+    """The capability of every step; each release workflow step is a WorkflowStep."""
+    steps = [step for step in workflow.steps if isinstance(step, WorkflowStep)]
+    assert len(steps) == len(workflow.steps)
+    return [step.capability for step in steps]
 
 
 def git(*args: str, cwd: Path) -> str:
@@ -234,8 +245,8 @@ def test_the_commit_message_keeps_the_source_quoting() -> None:
 def test_the_two_workflows_are_separate_approved_runs_that_never_push(tmp_path: Path) -> None:
     for spec in (PREPARE_SPEC, COMMIT_SPEC):
         assert spec.side_effect == "write" and spec.policy.approval_required
-    assert [s.capability for s in prepare_workflow().steps] == [PREPARE_SPEC.identity]
-    assert [s.capability for s in commit_workflow().steps] == [COMMIT_SPEC.identity]
+    assert _capabilities(prepare_workflow()) == [PREPARE_SPEC.identity]
+    assert _capabilities(commit_workflow()) == [COMMIT_SPEC.identity]
     names = {p.name for p in prepare_workflow().parameters}
     assert "push" not in names and {"testPlans", "dryRun", "chipsetVersion"} <= names
 
@@ -249,22 +260,34 @@ def test_the_two_workflows_are_separate_approved_runs_that_never_push(tmp_path: 
     )
     paths = settings.model_dump()
     prepared = asyncio.run(
-        PrepareHandler()(context, {"request": request().model_dump(by_alias=True), **paths})
+        PrepareHandler()(
+            context,
+            PrepareStepInput.model_validate(
+                {"request": request().model_dump(by_alias=True), **paths}
+            ),
+        )
     )
     committed = asyncio.run(
         CommitHandler()(
             context,
-            {
-                "branch": "Foxconn_kt326",
-                "fingerprint": prepared.fingerprint[:16],  # type: ignore[attr-defined]
-                **paths,
-            },
+            CommitStepInput.model_validate(
+                {
+                    "branch": "Foxconn_kt326",
+                    "fingerprint": prepared.fingerprint[:16],  # type: ignore[attr-defined]
+                    **paths,
+                }
+            ),
         )
     )
     assert committed.committed  # type: ignore[attr-defined]
     with pytest.raises(CapabilityRefused):
         asyncio.run(
-            CommitHandler()(context, {"branch": "Foxconn_kt326", "fingerprint": "f" * 16, **paths})
+            CommitHandler()(
+                context,
+                CommitStepInput.model_validate(
+                    {"branch": "Foxconn_kt326", "fingerprint": "f" * 16, **paths}
+                ),
+            )
         )
 
 
@@ -397,7 +420,7 @@ def test_project_path_matches_the_source_rule() -> None:
 def test_push_is_its_own_high_risk_approved_workflow(tmp_path: Path) -> None:
     assert PUSH_SPEC.side_effect == "external_side_effect"
     assert PUSH_SPEC.policy.approval_required and PUSH_SPEC.policy.risk == "high"
-    assert [s.capability for s in push_workflow().steps] == [PUSH_SPEC.identity]
+    assert _capabilities(push_workflow()) == [PUSH_SPEC.identity]
     static = {p.name: p for p in push_workflow().parameters if p.scope == "static"}
     assert static["remote_release"].default is False
     assert {p.name for p in prepare_workflow().parameters if p.scope == "static"} == set(static)
@@ -413,10 +436,20 @@ def test_push_is_its_own_high_risk_approved_workflow(tmp_path: Path) -> None:
     paths = settings.model_dump()
     with pytest.raises(CapabilityRefused):
         asyncio.run(
-            PushHandler()(context, {"branch": "Foxconn_kt326", "commit": "f" * 12, **paths})
+            PushHandler()(
+                context,
+                PushStepInput.model_validate(
+                    {"branch": "Foxconn_kt326", "commit": "f" * 12, **paths}
+                ),
+            )
         )
     pushed = asyncio.run(
-        PushHandler()(context, {"branch": "Foxconn_kt326", "commit": commit[:12], **paths})
+        PushHandler()(
+            context,
+            PushStepInput.model_validate(
+                {"branch": "Foxconn_kt326", "commit": commit[:12], **paths}
+            ),
+        )
     )
     assert pushed.pushed  # type: ignore[attr-defined]
 

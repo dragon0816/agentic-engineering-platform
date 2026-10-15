@@ -271,7 +271,7 @@ def test_card_content_is_read_as_the_member_only_when_shared(
         assert "Settings > Shared platform" in bare["message"]
 
 
-def _post(served: Any, path: str, body: object, token: str | None) -> tuple[int, dict]:
+def _post(served: Any, path: str, body: object, token: str | None) -> tuple[int, dict[str, Any]]:
     host, port = served.server_address[0], served.server_address[1]
     sent = urllib.request.Request(
         f"http://{host}:{port}{path}", method="POST", data=json.dumps(body).encode("utf-8")

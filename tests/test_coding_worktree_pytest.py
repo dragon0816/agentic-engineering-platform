@@ -5,6 +5,7 @@ import subprocess
 import sys
 import sysconfig
 from pathlib import Path
+from typing import cast
 
 import pytest
 
@@ -101,7 +102,9 @@ class Scripted:
         return CandidateChange(path=request.artifact_path, content=RIGHT)
 
 
-def harness_for(tmp_path: Path, author: Scripted, max_repairs: int = 1):  # noqa: ANN201
+def harness_for(
+    tmp_path: Path, author: Scripted, max_repairs: int = 1
+) -> tuple[Path, git_worktree.RunWorkspace, CodingHarness, CodingHarnessRequest]:
     repo = repository(tmp_path)
     run = git_worktree.create(repo, tmp_path / "runs", "run-1")
     runner = RestrictedRunner(
@@ -184,7 +187,7 @@ def test_a_missing_test_is_a_named_failure_not_a_pass(tmp_path: Path) -> None:
     _, run, harness, request = harness_for(tmp_path, author)
     command = PytestCommand(
         "new",
-        harness.commands._commands[NEW_COMMAND].runner,  # type: ignore[attr-defined]
+        cast(PytestCommand, harness.commands._commands[NEW_COMMAND]).runner,
         run.run_dir,
         SITE,
     )

@@ -39,6 +39,12 @@ def _state(effect: str = "read", fields: list[dict[str, Any]] | None = None) -> 
     return started
 
 
+def _text(step: flow.FlowStep) -> str:
+    """The prompt text of a step that asks."""
+    assert step.prompt is not None
+    return step.prompt.text
+
+
 def test_questions_follow_the_telegram_channel_in_form_order() -> None:
     state = _state()
     assert [item.name for item in state.fields] == ["project", "mode", "cc", "limit", "send"]
@@ -50,15 +56,15 @@ def test_questions_follow_the_telegram_channel_in_form_order() -> None:
 def test_buttons_answers_skip_and_validation() -> None:
     state = _state()
     flow.begin(state)
-    assert flow.answer(state, "/skip").prompt.text.startswith("This field is required")
-    assert "does not match" in flow.answer(state, "Bad Name").prompt.text
+    assert _text(flow.answer(state, "/skip")).startswith("This field is required")
+    assert "does not match" in _text(flow.answer(state, "Bad Name"))
     mode = flow.answer(state, "rsx")
     assert mode.prompt is not None
     assert mode.prompt.buttons == [[("Brief", "brief"), ("Full", "full")]]
     flow.answer(state, "Full")  # matched by label
     flow.answer(state, "a@example.com, b@example.com")  # list kind
-    assert "whole number" in flow.answer(state, "many").prompt.text
-    assert "minimum" in flow.answer(state, "0").prompt.text
+    assert "whole number" in _text(flow.answer(state, "many"))
+    assert "minimum" in _text(flow.answer(state, "0"))
     flow.answer(state, "5")
     send = flow.prompt(state)
     assert send.buttons == [[("Yes", "yes"), ("No", "no")]]
@@ -89,7 +95,7 @@ def test_effectful_or_privileged_runs_need_a_confirmation_tap() -> None:
     for reply in ("rsx", "/skip", "/skip", "/skip"):
         flow.answer(privileged, reply)
     confirm = flow.answer(privileged, "yes")  # send = true is privileged
-    assert confirm.kind == "ask" and "(privileged)" in confirm.prompt.text
+    assert confirm.kind == "ask" and "(privileged)" in _text(confirm)
     assert flow.answer(privileged, "run:no").kind == "cancelled"
 
 

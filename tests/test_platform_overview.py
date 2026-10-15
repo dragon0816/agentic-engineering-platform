@@ -364,7 +364,7 @@ def test_the_enrollment_registry_audits_changes_and_keeps_the_last_administrator
             Invitation(
                 invitation_id=f"invite-{actor}", actor=actor, issued_by="platform-admin", role=role
             )
-        )  # type: ignore[arg-type]
+        )
         registry.accept(f"invite-{actor}", actor)
     with pytest.raises(EnrollmentError) as refused:
         registry.update_user("leo", "leo", role="platform_admin", groups=())

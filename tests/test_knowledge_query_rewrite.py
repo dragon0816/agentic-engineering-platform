@@ -88,14 +88,14 @@ def test_rewrite_queries_are_bounded_and_deduplicated() -> None:
     model = _Model(
         '{"queries": ["EVM  test", "EVM test", "誤差向量", 3, "", "' + long + '", "a", "b", "c"]}'
     )
-    queries = rewrite_queries(model, "a", "What is EVM?", TRACE)  # type: ignore[arg-type]
+    queries = rewrite_queries(model, "a", "What is EVM?", TRACE)
     assert queries[:2] == ("EVM test", "誤差向量")
     assert len(queries) == 6 and len(queries[2]) == 80
 
 
 def test_a_failed_or_unparseable_rewrite_gives_no_queries() -> None:
     for rewrite in (None, RuntimeError("down"), "not json", '{"queries": "EVM"}'):
-        assert rewrite_queries(_Model(rewrite), "a", "q", TRACE) == ()  # type: ignore[arg-type]
+        assert rewrite_queries(_Model(rewrite), "a", "q", TRACE) == ()
 
 
 def test_bilingual_retrieval_offers_a_page_only_the_rewrite_finds(tmp_path: Path) -> None:

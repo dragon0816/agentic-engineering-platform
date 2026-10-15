@@ -7,7 +7,8 @@ from pathlib import Path
 
 from test_agent_web import base, fetch, served  # noqa: F401 - the server fixture
 from test_authoring_conversation import Scripted
-from test_authoring_sessions import Calls, blocks, draft
+from test_authoring_sessions import blocks, draft
+from test_workflow_preview import Calls
 
 from host_runtime.authoring import AuthoringStudio
 from host_runtime.web import AgentWebServer
@@ -31,7 +32,7 @@ def use_studio(server: AgentWebServer, tmp_path: Path, model: Scripted) -> Calls
         grants_file=tmp_path / "grants.json",
         settings_store=WorkflowSettingsStore(tmp_path / "settings.json"),
     )
-    web.runtime.agent.gateway.bridge.installed = installed  # type: ignore[misc]
+    web.runtime.agent.gateway.bridge.installed = installed
     return calls
 
 

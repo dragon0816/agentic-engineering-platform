@@ -8,6 +8,7 @@ import asyncio
 import json
 import sys
 import threading
+from collections.abc import Awaitable
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from typing import Any
@@ -16,6 +17,7 @@ import pytest
 from pydantic import SecretStr
 from test_agent_web import served  # noqa: F401 - the server fixture
 
+from agent.gateway import HostToolOutcome
 from capabilities.runtime import CapabilityInvocation, InstalledCapabilities, LocalPolicy
 from common.execution import RequestContext, TraceIdentifiers
 from host_runtime.chat_authoring import ChatAuthoring
@@ -62,6 +64,11 @@ def fake(tmp_path: Path) -> Path:
     script = tmp_path / "fake_mcp.py"
     script.write_text(FAKE_SERVER, encoding="utf-8")
     return script
+
+
+async def _outcome(pending: Awaitable[HostToolOutcome]) -> HostToolOutcome:
+    """asyncio.run needs a coroutine; a host tool handler returns an awaitable."""
+    return await pending
 
 
 def context() -> RequestContext:
@@ -183,9 +190,11 @@ def test_adding_a_server_grants_its_tools_to_conversations_and_workflows(
 
         tools = {tool.tool.name: tool for tool in hub.tools(bridge)}
         assert set(tools) == {"mcp__fake__echo", "mcp__fake__secret_hint"}
-        said = asyncio.run(tools["mcp__fake__echo"].handler(context(), {"text": "你好"}))
+        said = asyncio.run(_outcome(tools["mcp__fake__echo"].handler(context(), {"text": "你好"})))
+        assert isinstance(said.data, dict)
         assert said.status == "succeeded" and said.data["text"] == "echo: 你好"
-        secret = asyncio.run(tools["mcp__fake__secret_hint"].handler(context(), {}))
+        secret = asyncio.run(_outcome(tools["mcp__fake__secret_hint"].handler(context(), {})))
+        assert isinstance(secret.data, dict)
         assert secret.data["text"] == "secret ok"  # write tool, granted by adding the server
 
         # The same tool as a Workflow step: drafting finds it installed.

@@ -82,7 +82,10 @@ def test_a_validated_tool_answer_keeps_its_cited_passages_for_checking() -> None
     from models.contracts import ModelMessage
 
     result = asyncio.run(built.converse(request("q"), (ModelMessage(role="user", text="q"),)))
-    data = result.tools[0].host.data
+    host = result.tools[0].host
+    assert host is not None
+    data = host.data
+    assert isinstance(data, dict)
     assert data["record"] == record and data["phase"] == "validated"
     assert data["failure_code"] is None
 

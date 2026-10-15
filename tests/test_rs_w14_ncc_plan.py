@@ -397,7 +397,7 @@ def test_parity_with_the_source_job_on_the_real_template(
     for name in [key for key in sys.modules if key == "jobs" or key.startswith("jobs.")]:
         monkeypatch.delitem(sys.modules, name)
     import jobs.ncc_improvement_plan as job  # type: ignore[import-not-found]
-    from jobs import _steps  # type: ignore[import-not-found]
+    from jobs import _steps
 
     catalogue_file = SOURCE_ROOT / "config/workflow-14.json"
     catalogue = json.loads(catalogue_file.read_text(encoding="utf-8-sig"))

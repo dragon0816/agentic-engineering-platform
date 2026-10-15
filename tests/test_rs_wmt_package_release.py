@@ -385,6 +385,7 @@ def test_the_release_capabilities_exist_once_the_new_workflow_has_settings(
             assert installed.get(spec.identity) is not None
         prepare = installed.get(PREPARE_SPEC.identity)
         assert prepare is not None
+        assert isinstance(prepare.handler, PrepareHandler)
         assert prepare.handler.upload_root == layout.workspace_root / "workflow-uploads"
         assert runtime.agent.gateway.engine.upload_root == (
             layout.workspace_root / "workflow-uploads"

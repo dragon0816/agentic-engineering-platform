@@ -28,7 +28,13 @@ import telemetry.recorder as telemetry
 from agent.gateway import HostTool, HostToolOutcome
 from common.execution import RequestContext
 from models.approved import _observed
-from models.contracts import ModelRequest, ModelResponse, ModelTool
+from models.contracts import (
+    ModelClient,
+    ModelRequest,
+    ModelResponse,
+    ModelStreamEvent,
+    ModelTool,
+)
 from telemetry.events import TelemetryEvent, sanitize
 from telemetry.store import TelemetryStore
 
@@ -53,7 +59,7 @@ def events(item: TelemetryStore) -> list[dict[str, Any]]:
 class Observed:
     """The scripted model behind the host's llm.completed hook."""
 
-    def __init__(self, inner: Any, usage: bool) -> None:
+    def __init__(self, inner: ModelClient, usage: bool) -> None:
         self.inner, self.usage = inner, usage
 
     def generate(self, item: ModelRequest) -> ModelResponse:
@@ -62,6 +68,9 @@ class Observed:
             reply = reply.model_copy(update={"input_tokens": 120, "output_tokens": 30})
         _observed(item, reply, 5.0)
         return reply
+
+    def stream(self, item: ModelRequest) -> Iterator[ModelStreamEvent]:
+        return self.inner.stream(item)
 
 
 def test_a_conversation_turn_is_one_ordered_run_with_nested_spans(store: TelemetryStore) -> None:
@@ -75,7 +84,9 @@ def test_a_conversation_turn_is_one_ordered_run_with_nested_spans(store: Telemet
         tool,
     )
     built, model = _host_gateway([host], [_call("lookup", {}), _text("done")])
-    built.router.model = Observed(built.router.model, usage=False)
+    inner = built.router.model
+    assert inner is not None
+    built.router.model = Observed(inner, usage=False)
     result = asyncio.run(built.converse(request("go"), ()))
     assert result.status == "answered"
     found = events(store)
@@ -104,7 +115,9 @@ def test_reported_usage_is_summed_and_a_failed_model_call_is_recorded(
     store: TelemetryStore,
 ) -> None:
     built, _ = _host_gateway([], [_text("hi")])
-    built.router.model = Observed(built.router.model, usage=True)
+    inner = built.router.model
+    assert inner is not None
+    built.router.model = Observed(inner, usage=True)
     asyncio.run(built.converse(request("go"), ()))
     found = events(store)
     llm = next(e for e in found if e["event_type"] == "llm.completed")
@@ -298,7 +311,9 @@ def test_atlas_reads_runs_events_and_the_stream_without_the_token(
         assert first["event_type"] == "run.started" and first["ingest_seq"] >= 1
         with telemetry.run("capability_call"):
             pass
-        telemetry.recorder().flush()  # type: ignore[union-attr]
+        current = telemetry.recorder()
+        assert current is not None
+        current.flush()
         seen = [_message(sock)["event_type"] for _ in range(4)]
         assert seen[-2:] == ["run.started", "run.completed"]
     finally:

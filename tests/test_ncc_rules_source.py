@@ -13,6 +13,8 @@ the document it produces stops matching the ones the customer has already seen.
 
 from __future__ import annotations
 
+from typing import Any
+
 import pytest
 
 from capabilities.ncc_plan.rules import (
@@ -308,12 +310,12 @@ def test_display_name_falls_back_to_the_contract_wording() -> None:
 STATION = {"station": "東清站", "authority": "蘭嶼鄉公所", "builtYear": "100", "population": 1654}
 
 
-def _preview(**over):
+def _preview(**over: Any) -> str:
     from capabilities.ncc_plan.rules import preview
 
     selection = parse_selection("25瓦(含以上)(各頻道)發射/補隙系統調變錯誤比改善服務:2")
     rows, total = service_rows(selection, PRICES, {}, "115/09/30")
-    kw = dict(
+    kw: dict[str, Any] = dict(
         station=STATION,
         area="台東縣蘭嶼鄉東清村",
         out_name="x.docx",

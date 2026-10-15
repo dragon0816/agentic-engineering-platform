@@ -27,11 +27,11 @@ def test_a_pull_reports_its_originals(tmp_path: Path) -> None:
         seen.append((done, total))
         original(key, phase, done, total, current)
 
-    progress.report = spy  # type: ignore[assignment]
+    progress.report = spy
     try:
         pipeline.pull(sandbox, ("Productions",), progress_key="pull-key-0001")
     finally:
-        progress.report = original  # type: ignore[assignment]
+        progress.report = original
     assert seen[-1] == (2, 2) and (0, 2) in seen  # VNA/x.txt and CMX/x.txt
 
 

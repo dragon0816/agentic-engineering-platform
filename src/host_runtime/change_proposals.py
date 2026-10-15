@@ -915,9 +915,10 @@ class ChangeProposals:
         manifest = self._workflow(str(proposal.values["workflow"]))
         reply = self.web.save_workflow_settings(
             WorkflowSettingsUpdateRequest(
-                workflow=manifest.metadata.identity, values=dict(proposal.values["settings"])
+                workflow=manifest.metadata.identity,
+                values=dict(proposal.values["settings"]),  # type: ignore[arg-type]
             )
-        )  # type: ignore[arg-type]
+        )
         if not reply.get("ok"):
             return False, str(reply.get("message") or reply.get("code"))
         return True, "Saved; the next run uses them."

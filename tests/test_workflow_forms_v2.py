@@ -85,7 +85,7 @@ def _inbox(tmp_path: Path) -> Path:
     return inbox
 
 
-PICK = [
+PICK: list[dict[str, Any]] = [
     {"name": "inbox_path", "label": "Inbox", "kind": "folder", "scope": "static"},
     {
         "name": "plans",

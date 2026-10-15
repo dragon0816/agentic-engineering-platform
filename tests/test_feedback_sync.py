@@ -13,7 +13,8 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from test_platform_transport import BRIDGE, Platform, client, platform, server  # noqa: F401
+from test_host_wiring import BRIDGE
+from test_platform_transport import Platform, client, platform, server  # noqa: F401
 
 from common.execution import TraceIdentifiers
 from common.sync import FeedbackRecord, FeedbackRequest
@@ -63,7 +64,7 @@ def rate(state: SqliteLocalState, rating: str, minutes: int = 0, note: str | Non
         "session-1",
         "engineer",
         "m2",
-        MessageFeedback(rating=rating, note=note, updated_at=NOW + timedelta(minutes=minutes)),  # type: ignore[arg-type]
+        MessageFeedback(rating=rating, note=note, updated_at=NOW + timedelta(minutes=minutes)),
         queue=True,
     )
 
@@ -149,7 +150,7 @@ def record(rating: str = "up", minutes: int = 0, bridge: str = BRIDGE) -> Feedba
         actor="engineer",
         session_id="session-1",
         message_id="m2",
-        rating=rating,  # type: ignore[arg-type]
+        rating=rating,
         question="q",
         answer="a",
         answered_at=NOW,

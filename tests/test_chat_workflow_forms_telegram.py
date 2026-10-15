@@ -5,6 +5,7 @@ see docs/phases/CHAT_WORKFLOW_FORMS.md."""
 from __future__ import annotations
 
 import json
+from collections.abc import Iterator
 from pathlib import Path
 from typing import Any
 
@@ -22,7 +23,7 @@ from test_telegram_workflow_flow import _install, _tap
 
 from capabilities.release_package.manifest import release_workflow
 from common.workflow_run_form import FORM_TOOL
-from models.contracts import ModelRequest, ModelResponse, ModelToolCall
+from models.contracts import ModelRequest, ModelResponse, ModelStreamEvent, ModelToolCall
 
 # -- Telegram -----------------------------------------------------------------
 
@@ -96,6 +97,9 @@ class _Scripted:
             text=reply.get("text", ""),
             tool_calls=calls,
         )
+
+    def stream(self, item: ModelRequest) -> Iterator[ModelStreamEvent]:
+        raise NotImplementedError
 
 
 def test_telegram_follows_the_models_form_hand_off_into_the_flow(tmp_path: Path) -> None:
