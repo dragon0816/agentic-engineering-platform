@@ -37,6 +37,12 @@ from control_plane.registry_sqlite import SCHEMA_VERSION, SqliteRegistry
 from control_plane.submissions import SubmissionService, SubmissionStore
 
 QUALITY = {"type": "team", "id": "quality"}
+
+
+def _browser_missing() -> bool:
+    from integrations.browser import browser_path
+
+    return browser_path() is None
 WEEKLY = AssetIdentity(namespace="lab", name="weekly-check", version="1.0.0")
 
 
@@ -347,3 +353,113 @@ def test_an_invitation_for_an_invalid_account_says_why(tmp_path: Path) -> None:
         status, _ = request(app.member_base_url + "/v1/member/admin/invitations",
                             authorization=admin, body={"actor": "leo.chi"})
         assert status == 200
+
+
+# -- the Member Portal page ---------------------------------------------------
+
+
+def test_the_portal_page_has_the_published_assets_editor_and_name_rules() -> None:
+    from control_plane.member_page import PAGE
+
+    for hook in ('id="published"', 'id="published-rows"', 'id="published-scope"',
+                 'id="access-editor"', 'id="access-visibility"', 'id="access-members"',
+                 'id="access-groups"', 'id="access-save"', "/v1/member/assets/access",
+                 "/v1/member/assets/access/update", "Everyone in the organization",
+                 "Only the owning team", "not_name_owner"):
+        assert hook in PAGE, hook
+    # The invitation field shows a valid account, and the rule, not an email.
+    assert 'placeholder="name@example"' not in PAGE and 'placeholder="leo.chi"' in PAGE
+    assert "no @" in PAGE and "^[a-zA-Z_][a-zA-Z0-9_.-]*$" in PAGE
+    # A refusal shows the platform's reason when it gives one.
+    assert "data.message||data.code" in PAGE
+    # An expired session is renewed from the stored login, then retried once.
+    assert 'data.code==="session_expired"&&await renewSession()' in PAGE
+    assert "Authorization:`Login ${login}`" in PAGE
+
+
+@pytest.mark.skipif(_browser_missing(), reason="no Chromium browser is installed")
+def test_the_portal_renews_its_session_and_edits_access_in_a_real_browser(
+    tmp_path: Path,
+) -> None:
+    """A real browser: the published assets list renders with a size, the
+    page keeps working after its one-hour session expired, the editor saves,
+    and an invitation for an e-mail address is refused in the page."""
+    import json
+    import time
+
+    from test_shared_platform_app import request
+
+    from control_plane.app import SharedPlatformApplication
+    from integrations.browser import Browser
+
+    moment = [NOW]
+    app = SharedPlatformApplication.empty(
+        administrators=("platform-admin",), registry_path=tmp_path / "registry.sqlite",
+        clock=lambda: moment[0])
+    with app:
+        url = app.member_base_url + "/v1/member/"
+        leo = _member(app, "leo", groups=("engineering",))
+        status, submitted = request(url + "assets/submit", authorization=leo, body={
+            "kind": "workflow", "change": "minor", "manifest": declared(
+                {"type": "team", "id": "engineering"}, "team")})
+        assert status == 200, submitted
+        proof = app.issue_invitation(
+            Invitation(invitation_id="invite-root", actor="root", issued_by="platform-admin",
+                       groups=("engineering",), role="platform_admin"),
+            expires_at=NOW + timedelta(days=1))
+        browser = Browser(tmp_path / "browser", timeout_s=60)
+        browser.start()
+
+        def text(element: str) -> str:
+            return str(browser._evaluate(f'document.getElementById("{element}").textContent'))
+
+        def until(check: Any, seconds: float = 20) -> None:
+            deadline = time.monotonic() + seconds
+            while not check() and time.monotonic() < deadline:
+                time.sleep(0.2)
+            assert check()
+
+        try:
+            browser.navigate(app.member_base_url + f"/#invitation={proof.bearer}")
+            until(lambda: "root" in text("actor"))
+            approve = request(url + "admin/submissions/approve", authorization=leo, body={
+                "submission_id": submitted["submission"]["submission_id"], "evidence": "x"})
+            assert approve[0] == 403  # leo is no administrator; root approves below
+            root_session = _member(app, "root2", "platform_admin")
+            assert request(url + "admin/submissions/approve", authorization=root_session, body={
+                "submission_id": submitted["submission"]["submission_id"],
+                "evidence": "read"})[0] == 200
+
+            # The session the page signed in with is over; the stored login is not.
+            moment[0] = NOW + timedelta(hours=3)
+            browser._evaluate('document.getElementById("published-scope").value="all";'
+                              ' loadPublished(); 0')
+            until(lambda: "weekly-check" in text("published-rows"))
+            assert "unavailable" not in text("published-status")
+            size = json.loads(str(browser._evaluate(
+                'JSON.stringify(["published","published-rows"].map(id => {const r ='
+                ' document.getElementById(id).getBoundingClientRect(); return [r.width,'
+                ' r.height];}))')))
+            assert size[0][0] > 300 and size[0][1] > 100 and size[1][1] > 20, size
+
+            browser._evaluate('document.querySelector("#published-rows button").click(); 0')
+            until(lambda: "weekly-check" in text("access-title"))
+            assert "engineering" in text("access-effect")
+            browser._evaluate('document.getElementById("access-visibility").value='
+                              '"organization"; document.getElementById("access-members")'
+                              '.value="leo"; document.getElementById("access-save").click(); 0')
+            until(lambda: "Saved." in text("published-status"))
+            saved = app.state.packages.access("lab", "weekly-check")
+            assert saved is not None and saved.visibility == "organization"
+            assert saved.members == ("leo",) and saved.updated_by == "root"
+
+            browser._evaluate('document.getElementById("invite-actor").value="leo.chi@example";'
+                              ' document.getElementById("create-invite").click(); 0')
+            until(lambda: "no @" in str(browser._evaluate(
+                'document.getElementById("invite-url").value')))
+            # Refused in the page: the platform was never asked.
+            assert sorted(item.actor for item in app.state.enrollment.invitations()) == [
+                "leo", "root", "root2"]
+        finally:
+            browser.close()
+            browser.discard_profile()
