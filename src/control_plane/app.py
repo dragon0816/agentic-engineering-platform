@@ -35,6 +35,7 @@ from control_plane.identity_store import SqliteIdentityStorage
 from control_plane.member import InMemoryMemberSessions, MemberService
 from control_plane.member_http import MemberPortalServer
 from control_plane.member_login import InMemoryMemberLogins
+from control_plane.member_password import MemberPasswords
 from control_plane.member_signin import InMemoryInvitationSignIn
 from control_plane.ownership import AssetOwnershipService
 from control_plane.registry_sqlite import SqliteRegistry
@@ -124,6 +125,8 @@ class SharedPlatformState:
     feedback: FeedbackStore = field(default_factory=FeedbackStore)
     submissions: SubmissionStore = field(default_factory=SubmissionStore)
     activity: BridgeActivity = field(default_factory=BridgeActivity)
+    # Account and password sign-in (owner 2026-10-15).
+    passwords: MemberPasswords = field(default_factory=MemberPasswords)
 
     @classmethod
     def empty(cls, *, administrators: tuple[Symbol, ...]) -> Self:
@@ -168,6 +171,7 @@ class SharedPlatformState:
             feedback=FeedbackStore(path),
             submissions=SubmissionStore(path),
             activity=BridgeActivity(storage=storage),
+            passwords=MemberPasswords(storage=storage),
         )
 
 
@@ -241,6 +245,7 @@ class SharedPlatformApplication:
                 ssl_context=ssl_context,
                 sign_in=self.sign_in,
                 logins=state.logins,
+                passwords=state.passwords,
             )
         except BaseException:
             self.control_server.server_close()

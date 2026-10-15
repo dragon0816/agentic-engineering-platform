@@ -76,6 +76,29 @@ class InMemoryMemberLogins:
             expires_at=min(moment + DEFAULT_IDENTITY_TTL, grant.expires_at),
         )
 
+    def active(self, actor: str, *, now: datetime | None = None) -> tuple[MemberLoginGrant, ...]:
+        """The member's logins that can still mint sessions."""
+        moment = now if now is not None else datetime.now(UTC)
+        return tuple(
+            grant.model_copy(deep=True)
+            for grant in self._grants.values()
+            if grant.actor == actor and grant.status == "active" and moment < grant.expires_at
+        )
+
+    def revoke_actor(self, actor: str, *, keep_label: str | None = None) -> int:
+        """Revoke every active login of one member, except those labelled
+        `keep_label` (a password reset keeps the Personal Agent's login).
+        Returns how many were revoked."""
+        revoked = 0
+        for grant in list(self._grants.values()):
+            if grant.actor != actor or grant.status != "active":
+                continue
+            if keep_label is not None and grant.label == keep_label:
+                continue
+            self.revoke(grant.login_id)
+            revoked += 1
+        return revoked
+
     def revoke(self, login_id: str) -> MemberLoginGrant:
         grant = self._grants.get(login_id)
         if grant is None:

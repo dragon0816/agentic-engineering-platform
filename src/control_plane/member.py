@@ -226,6 +226,19 @@ class InMemoryMemberSessions:
         self._save(grant)
         return IssuedMemberSession(grant.model_copy(deep=True), value)
 
+    def revoke_actor(self, actor: str) -> int:
+        """End every active session of one member (password reset or change,
+        force sign-out). Returns how many were ended."""
+        ended = 0
+        for grant in list(self._grants.values()):
+            if grant.actor != actor or grant.status != "active":
+                continue
+            revoked = MemberSessionGrant.model_validate({**grant.model_dump(), "status": "revoked"})
+            self._grants[grant.session_id] = revoked
+            self._save(revoked)
+            ended += 1
+        return ended
+
     def authenticate(
         self, session_id: str, secret: str, *, now: datetime | None = None
     ) -> AuthenticatedActor:

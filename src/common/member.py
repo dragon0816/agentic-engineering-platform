@@ -403,6 +403,24 @@ class AdminMemberUpdateRequest(Contract):
     groups: tuple[Symbol, ...] = ()
 
 
+# -- Account and password sign-in (owner 2026-10-15, docs/phases/PASSWORD_SIGN_IN.md) --
+# Requests that carry a password are deliberately not contracts: the portal
+# parses them by hand so no validation error or dump can ever hold the value.
+
+
+class AdminMemberRequest(Contract):
+    """An administrator acts on one member (force sign-out)."""
+
+    actor: Symbol
+
+
+class AdminPasswordResetRequest(Contract):
+    """An administrator issues a single-use password reset link."""
+
+    actor: Symbol
+    valid_for_minutes: int = Field(default=60, ge=1, le=24 * 60)
+
+
 # -- An asset's content (owner 2026-10-15, docs/CONTRACTS.md "Asset content") --
 
 # The largest published artifact the portal returns as a manifest.

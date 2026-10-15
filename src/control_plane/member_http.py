@@ -15,14 +15,16 @@ from pydantic import ValidationError
 
 from common.base import Contract
 from common.enrollment import Invitation
-from common.identity import IssuedInvitationProof
+from common.identity import AuthenticatedActor, IssuedInvitationProof
 from common.member import (
     AdminBridgeRequest,
     AdminInvitationCreateRequest,
     AdminInvitationListReply,
     AdminInvitationMetadata,
     AdminInvitationRevokeRequest,
+    AdminMemberRequest,
     AdminMemberUpdateRequest,
+    AdminPasswordResetRequest,
     AssetAccessListRequest,
     AssetAccessUpdateRequest,
     AssetApproveRequest,
@@ -42,10 +44,22 @@ from common.member import (
     MemberRevokeRequest,
     MemberSelectRequest,
 )
+from control_plane.enrollment import EnrollmentError
 from control_plane.member import IssuedMemberSession, MemberError, MemberService
 from control_plane.member_login import InMemoryMemberLogins
 from control_plane.member_page import PAGE
-from control_plane.member_signin import InMemoryInvitationSignIn, InvitationSignInError
+from control_plane.member_password import (
+    PASSWORD_METHOD,
+    PROBLEM_MESSAGES,
+    IssuedPasswordReset,
+    MemberPasswords,
+    PasswordError,
+)
+from control_plane.member_signin import (
+    DEFAULT_MEMBER_SESSION,
+    InMemoryInvitationSignIn,
+    InvitationSignInError,
+)
 from control_plane.submissions import SubmissionError
 from software.marketplace import ApplicationCatalogRequest
 
@@ -54,6 +68,7 @@ MAX_BODY_BYTES = 256 * 1024
 BEARER = "Bearer "
 INVITATION = "Invitation "
 LOGIN = "Login "
+RESET = "Reset "
 
 STATUS_FOR = {
     "authentication_failed": 401,
@@ -102,10 +117,18 @@ STATUS_FOR = {
     "device_missing": 404,
     # Platform overview (owner 2026-10-15).
     "last_administrator": 409,
+    # Account and password sign-in (owner 2026-10-15).
+    "password_rejected": 400,
+    "password_already_set": 409,
+    "password_not_set": 409,
+    "reset_link_used": 409,
+    "reset_link_expired": 401,
+    "reset_link_revoked": 401,
 }
 # The label of a login a member issues for their Personal Agent, so the
 # portal and an audit can tell it from the browser's own.
 AGENT_LOGIN_LABEL = "Personal Agent"
+BROWSER_LOGIN_LABEL = "Marketplace browser"
 
 
 def _credential(header: str | None) -> tuple[str, str] | None:
@@ -133,6 +156,37 @@ def _login_credential(header: str | None) -> tuple[str, str] | None:
     if not separator or not login_id or not secret:
         return None
     return login_id, secret
+
+
+def _reset_credential(header: str | None) -> tuple[str, str] | None:
+    if header is None or not header.startswith(RESET):
+        return None
+    reset_id, separator, secret = header[len(RESET) :].strip().partition(":")
+    if not separator or not reset_id or not secret:
+        return None
+    return reset_id, secret
+
+
+def _strings(raw: object, *names: str) -> tuple[str, ...]:
+    """Exactly these string fields. A body carrying a password is parsed
+    here, not as a contract, and the error says nothing about the values."""
+    if (
+        not isinstance(raw, dict)
+        or set(raw) != set(names)
+        or not all(isinstance(raw[name], str) for name in names)
+    ):
+        raise ValueError("invalid password request")
+    return tuple(str(raw[name]) for name in names)
+
+
+def _password_refusal(error: PasswordError) -> dict[str, str]:
+    if error.code == "password_rejected" and error.reason is not None:
+        return {
+            "code": error.code,
+            "reason": error.reason,
+            "message": PROBLEM_MESSAGES[error.reason],
+        }
+    return {"code": error.code}
 
 
 # Why a name was refused, in words the portal shows as they are (owner,
@@ -232,6 +286,15 @@ class _Handler(BaseHTTPRequestHandler):
             "admin/overview",
             "admin/members/update",
             "assets/manifest",
+            "sign-in/check",
+            "sign-in/password",
+            "password/reset",
+            "password/status",
+            "password/set",
+            "password/change",
+            "admin/members/password-reset",
+            "admin/members/sign-out",
+            "admin/members/credentials",
         ):
             self._json(404, {"code": "invalid_request"})
             return
@@ -240,6 +303,9 @@ class _Handler(BaseHTTPRequestHandler):
             return
         if operation == "session":
             self._refresh_session()
+            return
+        if operation in ("sign-in/check", "sign-in/password", "password/reset"):
+            self._password_entry(operation)
             return
         credential = _credential(self.headers.get("Authorization"))
         if credential is None:
@@ -409,6 +475,104 @@ class _Handler(BaseHTTPRequestHandler):
                 reply = self.server.service.update_member(
                     *credential, AdminMemberUpdateRequest.model_validate(raw)
                 )
+            elif operation == "password/status":
+                if raw != {}:
+                    raise ValueError("the password status takes no request fields")
+                member = self.server.service.identity(*credential)
+                record = self.server.passwords.record(member.actor)
+                self._json(
+                    200,
+                    {
+                        "password_set": record is not None,
+                        "set_at": record.set_at.isoformat() if record is not None else None,
+                    },
+                )
+                return
+            elif operation == "password/set":
+                (password,) = _strings(raw, "password")
+                member = self.server.service.identity(*credential)
+                self.server.passwords.set_first(
+                    member.actor, password, now=self.server.service.now()
+                )
+                self._json(200, {"password_set": True})
+                return
+            elif operation == "password/change":
+                current, new = _strings(raw, "current_password", "new_password")
+                member = self.server.service.identity(*credential)
+                if not self.server.passwords.has_password(member.actor):
+                    raise PasswordError("password_not_set")
+                now = self.server.service.now()
+                self.server.passwords.authenticate(
+                    member.actor,
+                    current,
+                    address=self.client_address[0],
+                    now=now,
+                    active=self._active,
+                )
+                self.server.passwords.set(member.actor, new, now=now, set_by="change")
+                # The other browsers are signed out; this one gets a new login.
+                self._sign_out(member.actor, keep_label=AGENT_LOGIN_LABEL)
+                self._signed_in(member.actor)
+                return
+            elif operation == "admin/members/password-reset":
+                reset_request = AdminPasswordResetRequest.model_validate(raw)
+                who = self.server.service.administrator(*credential)
+                self._member(reset_request.actor)
+                reset_link = self.server.passwords.issue_reset(
+                    reset_request.actor,
+                    issued_by=who.actor,
+                    now=self.server.service.now(),
+                    minutes=reset_request.valid_for_minutes,
+                )
+                self._json(
+                    200,
+                    {
+                        "actor": reset_link.grant.actor,
+                        "reset_id": reset_link.grant.reset_id,
+                        "expires_at": reset_link.grant.expires_at.isoformat(),
+                        "url": self.server.reset_url(reset_link),
+                    },
+                )
+                return
+            elif operation == "admin/members/sign-out":
+                member_request = AdminMemberRequest.model_validate(raw)
+                self.server.service.administrator(*credential)
+                self._member(member_request.actor)
+                logins, sessions = self._sign_out(member_request.actor, keep_label=None)
+                self._json(
+                    200,
+                    {
+                        "actor": member_request.actor,
+                        "logins_revoked": logins,
+                        "sessions_revoked": sessions,
+                    },
+                )
+                return
+            elif operation == "admin/members/credentials":
+                if raw != {}:
+                    raise ValueError("the credential overview takes no request fields")
+                self.server.service.administrator(*credential)
+                now = self.server.service.now()
+                rows = []
+                for user in self.server.service.enrollment.users():
+                    record = self.server.passwords.record(user.actor)
+                    pending = self.server.passwords.pending_reset(user.actor, now)
+                    rows.append(
+                        {
+                            "actor": user.actor,
+                            "status": user.status,
+                            "password_set": record is not None,
+                            "password_set_at": (
+                                record.set_at.isoformat() if record is not None else None
+                            ),
+                            "active_logins": len(self.server.logins.active(user.actor, now=now)),
+                            "reset_link_expires_at": (
+                                pending.expires_at.isoformat() if pending is not None else None
+                            ),
+                        }
+                    )
+                self._json(200, {"members": rows})
+                return
             elif operation == "admin/invitations":
                 create = AdminInvitationCreateRequest.model_validate(raw)
                 who = self.server.service.administrator(*credential)
@@ -472,6 +636,9 @@ class _Handler(BaseHTTPRequestHandler):
         except ValueError:
             self._json(400, {"code": "invalid_request"})
             return
+        except PasswordError as error:
+            self._json(STATUS_FOR[error.code], _password_refusal(error))
+            return
         except (MemberError, SubmissionError) as error:
             self._json(STATUS_FOR[error.code], {"code": error.code})
             return
@@ -493,18 +660,41 @@ class _Handler(BaseHTTPRequestHandler):
         except ValueError:
             self._json(400, {"code": "invalid_request"})
             return
-        if length != 0:
+        if length < 0 or length > MAX_BODY_BYTES:
             self._json(400, {"code": "invalid_request"})
             return
         try:
+            # Empty: the invitation alone signs in (automation, and members
+            # who set a password later). With `{"password"}` the password is
+            # checked against the policy before the invitation is used up,
+            # and set in the same step (owner 2026-10-15).
+            password: str | None = None
+            if length:
+                (password,) = _strings(json.loads(self.rfile.read(length)), "password")
+            if password is not None:
+                grant = self.server.sign_in.check(*credential)
+                self.server.passwords.check_policy(grant.actor, password)
             session = self.server.sign_in.accept(*credential)
+            if password is not None:
+                self.server.passwords.set(
+                    session.grant.actor,
+                    password,
+                    now=self.server.service.now(),
+                    set_by="invitation",
+                )
             login = self.server.logins.issue(
                 session.grant.actor,
-                label="Marketplace browser",
+                label=BROWSER_LOGIN_LABEL,
                 now=self.server.service.now(),
             )
         except InvitationSignInError as error:
             self._json(STATUS_FOR[error.code], {"code": error.code})
+            return
+        except PasswordError as error:
+            self._json(STATUS_FOR[error.code], _password_refusal(error))
+            return
+        except ValueError:
+            self._json(400, {"code": "invalid_request"})
             return
         except Exception:  # noqa: BLE001 - no traceback crosses the sign-in boundary
             self._json(500, {"code": "internal_error"})
@@ -525,6 +715,9 @@ class _Handler(BaseHTTPRequestHandler):
             return
         try:
             identity = self.server.logins.authenticate(*credential, now=self.server.service.now())
+            # A disabled member's stored login no longer signs them in.
+            if not self._active(identity.actor):
+                raise MemberError("actor_disabled")
             session = self.server.service.sessions.issue(identity, now=self.server.service.now())
         except MemberError as error:
             self._json(STATUS_FOR[error.code], {"code": error.code})
@@ -536,6 +729,117 @@ class _Handler(BaseHTTPRequestHandler):
             200,
             {"session": session.bearer, "expires_at": session.grant.expires_at.isoformat()},
         )
+
+    # -- Account and password sign-in (owner 2026-10-15) -------------------
+
+    def _active(self, actor: str) -> bool:
+        try:
+            return self.server.service.enrollment.user(actor).status == "active"
+        except (EnrollmentError, ValueError):
+            return False
+
+    def _member(self, actor: str) -> None:
+        try:
+            self.server.service.enrollment.user(actor)
+        except EnrollmentError:
+            raise MemberError("actor_unknown") from None
+
+    def _sign_out(self, actor: str, *, keep_label: str | None) -> tuple[int, int]:
+        logins = self.server.logins.revoke_actor(actor, keep_label=keep_label)
+        sessions = self.server.service.sessions.revoke_actor(actor)
+        return logins, sessions
+
+    def _signed_in(self, actor: str) -> None:
+        """The same browser login and one-hour session an invitation gives."""
+        now = self.server.service.now()
+        identity = AuthenticatedActor(
+            actor=actor,
+            method=PASSWORD_METHOD,
+            authenticated_at=now,
+            expires_at=now + DEFAULT_MEMBER_SESSION,
+        )
+        session = self.server.service.sessions.issue(identity, now=now)
+        login = self.server.logins.issue(actor, label=BROWSER_LOGIN_LABEL, now=now)
+        self._json(
+            200,
+            {
+                "session": session.bearer,
+                "login": login.bearer,
+                "expires_at": session.grant.expires_at.isoformat(),
+            },
+        )
+
+    def _password_entry(self, operation: str) -> None:
+        """Routes used before anyone is signed in: account and password,
+        a password reset link, and checking an invitation or reset link."""
+        if self.headers.get("Transfer-Encoding"):
+            self._json(400, {"code": "invalid_request"})
+            return
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            self._json(400, {"code": "invalid_request"})
+            return
+        if length < 0 or length > MAX_BODY_BYTES:
+            self._json(413, {"code": "invalid_request"})
+            return
+        header = self.headers.get("Authorization")
+        passwords = self.server.passwords
+        try:
+            raw: object = json.loads(self.rfile.read(length)) if length else {}
+            now = self.server.service.now()
+            if operation == "sign-in/password":
+                account, password = _strings(raw, "account", "password")
+                actor = passwords.authenticate(
+                    account,
+                    password,
+                    address=self.client_address[0],
+                    now=now,
+                    active=self._active,
+                )
+                self._signed_in(actor)
+            elif operation == "password/reset":
+                reset = _reset_credential(header)
+                if reset is None:
+                    raise PasswordError("authentication_failed")
+                (password,) = _strings(raw, "password")
+                actor = passwords.redeem_reset(*reset, password, now=now, active=self._active)
+                # Forgot password: every browser of this member is signed out.
+                self._sign_out(actor, keep_label=AGENT_LOGIN_LABEL)
+                self._signed_in(actor)
+            else:
+                if raw != {}:
+                    raise ValueError("a link check takes no request fields")
+                invitation = _invitation_credential(header)
+                reset = _reset_credential(header)
+                if invitation is not None and self.server.sign_in is not None:
+                    grant = self.server.sign_in.check(*invitation)
+                    purpose, actor, expires_at = "invitation", grant.actor, grant.expires_at
+                elif reset is not None:
+                    reset_grant = passwords.check_reset(*reset, now=now)
+                    purpose, actor = "reset", reset_grant.actor
+                    expires_at = reset_grant.expires_at
+                else:
+                    raise PasswordError("authentication_failed")
+                self._json(
+                    200,
+                    {
+                        "purpose": purpose,
+                        "actor": actor,
+                        "expires_at": expires_at.isoformat(),
+                        "password_set": passwords.has_password(actor),
+                    },
+                )
+        except PasswordError as error:
+            self._json(STATUS_FOR[error.code], _password_refusal(error))
+        except InvitationSignInError as error:
+            self._json(STATUS_FOR[error.code], {"code": error.code})
+        except MemberError as error:
+            self._json(STATUS_FOR[error.code], {"code": error.code})
+        except ValueError:
+            self._json(400, {"code": "invalid_request"})
+        except Exception:  # noqa: BLE001 - no traceback crosses the sign-in boundary
+            self._json(500, {"code": "internal_error"})
 
 
 class MemberPortalServer(ThreadingHTTPServer):
@@ -551,12 +855,14 @@ class MemberPortalServer(ThreadingHTTPServer):
         ssl_context: ssl.SSLContext | None = None,
         sign_in: InMemoryInvitationSignIn | None = None,
         logins: InMemoryMemberLogins | None = None,
+        passwords: MemberPasswords | None = None,
     ) -> None:
         if ssl_context is None and host not in ("127.0.0.1", "localhost", "::1"):
             raise ValueError("a member portal exposed beyond loopback requires TLS")
         self.service = service
         self.sign_in = sign_in
         self.logins = logins if logins is not None else InMemoryMemberLogins()
+        self.passwords = passwords if passwords is not None else MemberPasswords()
         super().__init__((host, port), _Handler)
         if ssl_context is not None:
             self.socket = ssl_context.wrap_socket(self.socket, server_side=True)
@@ -582,6 +888,10 @@ class MemberPortalServer(ThreadingHTTPServer):
     def invitation_url(self, proof: IssuedInvitationProof) -> str:
         """Out-of-band invitation link whose proof stays in the URL fragment."""
         return f"{self.base_url}/#invitation={proof.bearer}"
+
+    def reset_url(self, issued: IssuedPasswordReset) -> str:
+        """Out-of-band password reset link whose secret stays in the fragment."""
+        return f"{self.base_url}/#reset={issued.bearer}"
 
     def start(self) -> Self:
         if self._thread is None:

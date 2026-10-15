@@ -102,6 +102,23 @@ class InMemoryInvitationSignIn:
             self._save(grant)
         return IssuedInvitationProof(grant.model_copy(deep=True), value)
 
+    def check(self, invitation_id: str, secret: str) -> InvitationProofGrant:
+        """The grant of a proof that can still be accepted; nothing is used
+        up. Raises the same errors `accept` would."""
+        now = self._clock()
+        with self._lock:
+            grant = self._grants.get(invitation_id)
+            expected = grant.fingerprint if grant is not None else fingerprint("")
+            if grant is None or not hmac.compare_digest(expected, fingerprint(secret)):
+                raise InvitationSignInError("authentication_failed")
+            if grant.status == "redeemed":
+                raise InvitationSignInError("invitation_used")
+            if grant.status == "revoked":
+                raise InvitationSignInError("invitation_revoked")
+            if now >= grant.expires_at:
+                raise InvitationSignInError("invitation_expired")
+            return grant.model_copy(deep=True)
+
     def accept(self, invitation_id: str, secret: str) -> IssuedMemberSession:
         """Redeem a proof once and create the existing short-lived member session."""
         now = self._clock()

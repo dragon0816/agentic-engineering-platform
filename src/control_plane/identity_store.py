@@ -22,6 +22,9 @@ TABLES = frozenset(
         # Platform overview (owner 2026-10-15): additive tables.
         "identity_user_changes",
         "bridge_activity",
+        # Account and password sign-in (owner 2026-10-15): additive tables.
+        "identity_passwords",
+        "identity_password_resets",
     }
 )
 
