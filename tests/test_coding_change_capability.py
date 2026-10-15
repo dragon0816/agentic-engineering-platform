@@ -145,10 +145,17 @@ def test_what_a_person_can_fix_is_refused_before_anything_runs(
 
 
 def test_no_model_no_network_block_or_a_venv_runner_is_refused(tmp_path: Path) -> None:
+    # A venv launcher of its own: CI runs without a venv, so sys.executable is
+    # not one there (2026-10-16).
+    venv = tmp_path / "some-venv"
+    (venv / "Scripts").mkdir(parents=True)
+    (venv / "pyvenv.cfg").write_text("home = C:\\Python312\n", encoding="utf-8")
+    launcher = venv / "Scripts" / "python.exe"
+    launcher.write_bytes(b"")
     for kwargs, code in (
         ({"model": None}, "coding_model_unavailable"),
         ({"model": Replies(), "blocked": False}, "coding_network_block_missing"),
-        ({"model": Replies(), "python": sys.executable}, "runner_python_is_venv_launcher"),
+        ({"model": Replies(), "python": str(launcher)}, "runner_python_is_venv_launcher"),
     ):
         run, _ = handler(tmp_path / code, **kwargs)
         with pytest.raises(CapabilityRefused) as refused:
