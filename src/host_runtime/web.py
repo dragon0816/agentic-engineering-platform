@@ -2982,7 +2982,9 @@ class AgentWeb:
             reply["error"] = {"code": error.code, "message": explain(error.code)}
         return reply
 
-    def publish_asset(self, kind: str, asset: str, change: str, note: str) -> dict[str, Any]:
+    def publish_asset(
+        self, kind: str, asset: str, change: str, note: str, visibility: str = ""
+    ) -> dict[str, Any]:
         publisher = self._publisher()
         if publisher is None or kind not in ("skill", "workflow"):
             return {"ok": False, "code": "publishing_not_configured",
@@ -2992,7 +2994,8 @@ class AgentWeb:
                                   if self.runtime.config.publishing else "")
         try:
             manifest = installed_manifest(self.runtime.layout, kind, asset)  # type: ignore[arg-type]
-            submission = publisher.submit(kind, manifest, change, note)  # type: ignore[arg-type]
+            submission = publisher.submit(
+                kind, manifest, change, note, visibility or None)  # type: ignore[arg-type]
         except PlatformPublishError as error:
             self.tasks().finish(task, "failed", error.code)
             return {"ok": False, "code": error.code, "message": explain(error.code)}
@@ -4171,12 +4174,13 @@ class _Handler(BaseHTTPRequestHandler):
             fields = body if isinstance(body, dict) else {}
             values = [fields.get(name) for name in ("kind", "asset", "change")]
             note = fields.get("note") or ""
+            visibility = fields.get("visibility") or ""
             if not all(isinstance(value, str) and value for value in values) or not isinstance(
-                    note, str):
+                    note, str) or not isinstance(visibility, str):
                 self._json(400, {"error": "name the kind, the asset and the change level"})
                 return
             kind, asset, change = (str(value) for value in values)
-            self._json(200, self.server.web.publish_asset(kind, asset, change, note))
+            self._json(200, self.server.web.publish_asset(kind, asset, change, note, visibility))
             return
         if path == "/api/publishing/connect":
             code = body.get("code") if isinstance(body, dict) else None

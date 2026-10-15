@@ -22,6 +22,7 @@ import urllib.error
 import urllib.request
 from collections.abc import Iterator, Mapping
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from typing import Any, Literal
 
 from host_runtime.contracts import HostLayout, PlatformPublishBinding
@@ -29,6 +30,8 @@ from models.credentials import CredentialResolver
 
 PublishKind = Literal["skill", "workflow"]
 CHANGES = ("patch", "minor", "major")
+# Who the publisher wants to use it (owner decision 2026-10-15).
+VISIBILITIES = ("private", "team", "organization", "public")
 # An asset as a person names it: namespace/name@version.
 ASSET_REFERENCE = re.compile(r"^([a-z0-9]+(?:-[a-z0-9]+)*)/([a-z0-9]+(?:-[a-z0-9]+)*)@(\S+)$")
 # A session is renewed this long before the platform would end it.
@@ -61,6 +64,19 @@ def installed_manifest(layout: HostLayout, kind: PublishKind, reference: str) ->
         raise PublishError("not_installed") from None
     if not isinstance(manifest, dict):
         raise PublishError("not_installed")
+    return manifest
+
+
+def manifest_file(path: Path) -> dict[str, Any]:
+    """A manifest from a file the member names, for `aep-host assets publish
+    --file`: a Skill or Workflow not installed on this PC, such as a test
+    asset. The platform validates it; this only reads JSON."""
+    try:
+        manifest = json.loads(path.read_text(encoding="utf-8-sig"))
+    except (OSError, ValueError):
+        raise PublishError("file_unreadable") from None
+    if not isinstance(manifest, dict):
+        raise PublishError("file_unreadable")
     return manifest
 
 
@@ -154,12 +170,17 @@ class MemberPortalPublisher:
         manifest: dict[str, Any],
         change: str,
         note: str | None = None,
+        visibility: str | None = None,
     ) -> dict[str, Any]:
         if change not in CHANGES:
             raise PublishError("bad_change")
+        if visibility and visibility not in VISIBILITIES:
+            raise PublishError("bad_visibility")
         body: dict[str, Any] = {"kind": kind, "change": change, "manifest": manifest}
         if note and note.strip():
             body["note"] = note.strip()
+        if visibility:
+            body["visibility"] = visibility
         return self._call("assets/submit", body)["submission"]  # type: ignore[no-any-return]
 
     def submissions(self) -> list[dict[str, Any]]:
@@ -196,6 +217,8 @@ EXPLANATIONS = {
     "not_installed": "That Skill or Workflow is not installed on this PC.",
     "bad_reference": "Name the asset as namespace/name@version.",
     "bad_change": "Choose patch, minor or major.",
+    "bad_visibility": "Choose private, team, organization or public.",
+    "file_unreadable": "That file is not a JSON manifest.",
     "manifest_invalid": "The platform could not read this manifest.",
     "artifact_too_large": "The manifest is larger than the platform accepts.",
     "missing_dependency": "Publish the Workflow this Skill runs first (or submit it now).",

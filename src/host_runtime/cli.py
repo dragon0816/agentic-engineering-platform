@@ -186,9 +186,15 @@ def _parser() -> argparse.ArgumentParser:
     publish = asset_actions.add_parser(
         "publish", help="submit an installed Skill or Workflow to the shared platform")
     publish.add_argument("--kind", required=True, choices=("skill", "workflow"))
-    publish.add_argument("--asset", required=True, help="namespace/name@version as installed")
+    source = publish.add_mutually_exclusive_group(required=True)
+    source.add_argument("--asset", help="namespace/name@version as installed")
+    source.add_argument("--file", dest="manifest_file", type=Path,
+                        help="a manifest JSON file instead of an installed asset")
     publish.add_argument("--change", default="minor", choices=("patch", "minor", "major"))
     publish.add_argument("--note", default="")
+    publish.add_argument(
+        "--visibility", choices=("private", "team", "organization", "public"),
+        help="who may use it once approved (default: what the manifest says)")
     asset_actions.add_parser("submissions", help="your submissions to the shared platform")
     withdraw = asset_actions.add_parser("withdraw", help="withdraw a pending submission")
     withdraw.add_argument("--submission", required=True)
@@ -284,6 +290,7 @@ def _publish(args: argparse.Namespace) -> int:
         PublishError,
         explain,
         installed_manifest,
+        manifest_file,
         publisher_for,
     )
 
@@ -299,9 +306,14 @@ def _publish(args: argparse.Namespace) -> int:
         return 2
     try:
         if args.asset_action == "publish":
-            manifest = installed_manifest(
-                HostLayout.under(config.workspace_root), args.kind, args.asset)
-            outcome: object = publisher.submit(args.kind, manifest, args.change, args.note)
+            manifest = (
+                manifest_file(args.manifest_file)
+                if args.manifest_file is not None
+                else installed_manifest(
+                    HostLayout.under(config.workspace_root), args.kind, args.asset)
+            )
+            outcome: object = publisher.submit(
+                args.kind, manifest, args.change, args.note, args.visibility)
         elif args.asset_action == "withdraw":
             outcome = publisher.withdraw(args.submission)
         else:

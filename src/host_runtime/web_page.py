@@ -1025,8 +1025,13 @@ tr:last-child td { border-bottom: none; }
           <option value="patch">patch: a fix</option>
           <option value="minor" selected>minor: something added</option>
           <option value="major">major: changes how it is used</option></select></label>
+        <label>Who can use it<select id="publish-visibility">
+          <option value="" selected>As the Skill or Workflow says</option>
+          <option value="team">Only my team</option>
+          <option value="organization">Everyone in the organization</option></select></label>
         <label>Note for the reviewer<input id="publish-note" maxlength="300"
           placeholder="what changed and why"></label>
+        <p id="publish-audience" class="note"></p>
         <div><button class="go" id="publish-go" type="button">Publish for review</button></div>
       </div>
       <div id="publish-status" class="section-status" role="status" aria-live="polite"></div>
@@ -3997,6 +4002,21 @@ async function loadPublishing() {
         : ""]) : document.createTextNode(""));
 }
 
+// Who can use it, in words (owner decision 2026-10-15). The owner is the team
+// the Skill or Workflow names when you belong to it, otherwise you.
+const PUBLISH_AUDIENCE = {
+  "": "Who can use it is what the Skill or Workflow says (its visibility).",
+  team: "Only my team: members of the team it names as owner, if you belong to that "
+    + "team; otherwise only you. You can change this later in the Member Portal.",
+  organization: "Everyone in the organization can choose it once it is approved. "
+    + "You can change this later in the Member Portal.",
+};
+function showPublishAudience() {
+  el("publish-audience").textContent = PUBLISH_AUDIENCE[el("publish-visibility").value] || "";
+}
+el("publish-visibility").addEventListener("change", showPublishAudience);
+showPublishAudience();
+
 async function withdrawSubmission(id) {
   const reply = await call("/api/publishing/withdraw", {submission_id: id});
   el("publish-status").textContent = reply.ok ? "Withdrawn." : reply.message || reply.code;
@@ -4011,7 +4031,8 @@ el("publish-go").addEventListener("click", async () => {
   status.textContent = "Sending " + asset + "…";
   try {
     const reply = await call("/api/publishing/submit", {kind, asset,
-      change: el("publish-change").value, note: el("publish-note").value});
+      change: el("publish-change").value, note: el("publish-note").value,
+      visibility: el("publish-visibility").value});
     if (reply.ok) {
       const id = reply.submission.identity;
       status.textContent = id.namespace + "/" + id.name + "@" + id.version

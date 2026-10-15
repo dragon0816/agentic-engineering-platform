@@ -10,6 +10,7 @@ import json
 from collections.abc import Iterator
 from datetime import timedelta
 from pathlib import Path
+from typing import Any
 
 import pytest
 from test_member_publish import _signed_in, workflow_manifest
@@ -226,3 +227,180 @@ def test_agent_web_saves_a_pasted_code_for_this_user_and_never_echoes_it() -> No
     # The paste box lives in Settings > Shared platform (owner 2026-10-15).
     assert 'id="shared-code"' in PAGE and 'type="password"' in PAGE
     assert "/api/settings/shared-platform" in PAGE
+
+
+# -- owner decisions 2026-10-15: visibility at submit, publishing a file ------
+
+SAMPLE = Path(__file__).resolve().parents[1] / "deploy" / "samples" / "sync-test.workflow.json"
+
+
+def test_the_publisher_sends_the_chosen_visibility(
+    platform: SharedPlatformApplication, tmp_path: Path
+) -> None:
+    publisher = _publisher(platform, _agent_login(platform))
+    manifest = installed_manifest(_installed(tmp_path), "workflow", "lab/weekly-check@0.3.0")
+    with pytest.raises(PublishError, match="bad_visibility"):
+        publisher.submit("workflow", manifest, "minor", visibility="everyone")
+    submitted = publisher.submit("workflow", manifest, "minor", visibility="team")
+    assert submitted["visibility"] == "team"
+    default = publisher.submit("workflow", manifest, "patch")
+    assert default["visibility"] == "organization"  # what the manifest says
+
+
+def test_the_cli_publishes_a_manifest_file_with_a_chosen_visibility(
+    platform: SharedPlatformApplication, tmp_path: Path, monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    from test_host_runtime import config
+
+    from host_runtime.cli import main
+
+    host = config(
+        workspace_root=str(tmp_path / "workspace"),
+        credentials=[{"secret": "platform_member_login",
+                      "environment_variable": "AEP_TEST_MEMBER_LOGIN"}],
+        publishing={"member_portal_url": platform.member_base_url,
+                    "credential": {"name": "platform_member_login"}},
+    )
+    path = tmp_path / "host.json"
+    path.write_text(host.model_dump_json(), encoding="utf-8")
+    monkeypatch.setenv("AEP_TEST_MEMBER_LOGIN", _agent_login(platform))  # leo, engineering
+    base = ["assets", "--config", str(path), "publish", "--kind", "workflow"]
+
+    assert main([*base, "--file", str(SAMPLE), "--visibility", "team"]) == 0
+    submitted = json.loads(capsys.readouterr().out)["result"]
+    assert submitted["identity"] == {"namespace": "company-agent", "name": "sync-test",
+                                     "version": "1.0.0"}
+    # The sample names team engineering as owner, and leo belongs to it.
+    assert submitted["owner"] == {"type": "team", "id": "engineering"}
+    assert submitted["visibility"] == "team"
+    assert main([*base, "--file", str(SAMPLE), "--change", "patch"]) == 0
+    assert json.loads(capsys.readouterr().out)["result"]["visibility"] == "organization"
+
+    broken = tmp_path / "broken.json"
+    broken.write_text("not json", encoding="utf-8")
+    assert main([*base, "--file", str(broken)]) == 1
+    assert json.loads(capsys.readouterr().out)["code"] == "file_unreadable"
+    with pytest.raises(SystemExit):  # one source only
+        main([*base, "--file", str(SAMPLE), "--asset", "lab/x@1.0.0"])
+    with pytest.raises(SystemExit):
+        main([*base, "--file", str(SAMPLE), "--visibility", "everyone"])
+
+
+def test_the_sync_test_sample_is_a_harmless_read_only_workflow(tmp_path: Path) -> None:
+    from test_chat_authoring import Echo, Out, Recorder
+
+    from capabilities.company_agent.manifest import personal_proof_fixture_read_spec
+    from capabilities.runtime import InstalledCapabilities, LocalPolicy
+    from common.assets import ExecutionDependencies, WorkflowManifest
+    from host_runtime.chat_authoring import ChatAuthoring
+    from host_runtime.external_authoring import ExternalAuthoring
+    from workflow.dispatch import BridgeExecutor
+
+    raw = json.loads(SAMPLE.read_text(encoding="utf-8"))
+    manifest = WorkflowManifest.model_validate(raw)
+    metadata = manifest.metadata
+    assert (metadata.identity.namespace, metadata.identity.name) == ("company-agent",
+                                                                     "sync-test")
+    assert metadata.owner.model_dump() == {"type": "team", "id": "engineering"}
+    assert metadata.visibility == "organization"
+    installed = InstalledCapabilities()
+    installed.register(personal_proof_fixture_read_spec(), Recorder(), Echo, Out,
+                       ExecutionDependencies(central_required=False))
+    bridge = BridgeExecutor(installed, LocalPolicy(()))
+    chat = ChatAuthoring(
+        tmp_path / "chat", bridge=lambda: bridge, namespace="company-agent",
+        workflows_dir=tmp_path / "workflows", grants_file=tmp_path / "grants.json",
+        skills_dir=tmp_path / "skills")
+    checked = ExternalAuthoring(chat, "owner", "cli").check_workflow(raw)
+    assert checked["ok"] is True and checked["read_only"] is True, checked
+
+
+def test_agent_web_asks_who_can_use_it_and_passes_it_on(tmp_path: Path) -> None:
+    from types import SimpleNamespace
+
+    from host_runtime.web import AgentWeb
+    from host_runtime.web_page import PAGE
+
+    for hook in ('id="publish-visibility"', '<option value="team">Only my team</option>',
+                 '<option value="organization">Everyone in the organization</option>',
+                 'id="publish-audience"', 'visibility: el("publish-visibility").value'):
+        assert hook in PAGE, hook
+    sent: list[Any] = []
+
+    class Publisher:
+        def submit(self, *args: Any) -> dict[str, Any]:
+            sent.append(args)
+            return {"identity": {"namespace": "lab", "name": "weekly-check",
+                                 "version": "1.0.0"}}
+
+    tasks = SimpleNamespace(start=lambda *a: "t", finish=lambda *a: None)
+    web = SimpleNamespace(
+        _publisher=lambda: Publisher(), tasks=lambda: tasks,
+        runtime=SimpleNamespace(layout=_installed(tmp_path),
+                                config=SimpleNamespace(publishing=None)))
+    reply = AgentWeb.publish_asset(web, "workflow", "lab/weekly-check@0.3.0",  # type: ignore[arg-type]
+                                   "minor", "", "team")
+    assert reply["ok"] is True and sent[0][-1] == "team"
+    AgentWeb.publish_asset(web, "workflow", "lab/weekly-check@0.3.0",  # type: ignore[arg-type]
+                           "minor", "")
+    assert sent[1][-1] is None
+
+
+def _no_browser() -> bool:
+    from integrations.browser import browser_path
+
+    return browser_path() is None
+
+
+@pytest.mark.skipif(_no_browser(), reason="no Chromium browser is installed")
+def test_the_who_can_use_it_choice_renders_in_a_real_browser(
+    platform: SharedPlatformApplication, tmp_path: Path,
+) -> None:
+    import threading
+    import time
+
+    from test_host_wiring import host_json, ready
+
+    from host_runtime.host import build_runtime
+    from host_runtime.web import AgentWeb, AgentWebServer
+    from integrations.browser import Browser
+
+    config, layout = ready(tmp_path, config_changes={
+        "publishing": {"member_portal_url": platform.member_base_url,
+                       "credential": {"name": "platform_member_login"}},
+        "credentials": [{"secret": "platform_member_login",
+                         "environment_variable": "AEP_TEST_UNSET_MEMBER_LOGIN"}],
+    })
+    path = host_json(tmp_path, config)
+    with build_runtime(config, layout=layout) as runtime:
+        served = AgentWebServer(AgentWeb(runtime, config_path=path))
+        thread = threading.Thread(target=served.serve_forever, daemon=True)
+        thread.start()
+        browser = Browser(tmp_path / "browser", timeout_s=60)
+        browser.start()
+        try:
+            browser.navigate(served.address)
+            browser._evaluate('document.getElementById("nav-capabilities").click(); 0')
+            measure = (
+                'JSON.stringify(["publish-visibility","publish-audience"].map(id => {const r ='
+                ' document.getElementById(id).getBoundingClientRect(); return [r.width,'
+                ' r.height];}))')
+            deadline = time.monotonic() + 20
+            size = [[0, 0], [0, 0]]
+            while size[0][1] == 0 and time.monotonic() < deadline:
+                time.sleep(0.2)  # the form shows once the publishing settings arrive
+                size = json.loads(str(browser._evaluate(measure)))
+            assert size[0][0] > 100 and size[0][1] > 20, size
+            assert size[1][1] > 10, size
+            browser._evaluate('const s = document.getElementById("publish-visibility");'
+                              ' s.value = "team"; s.dispatchEvent(new Event("change")); 0')
+            text = str(browser._evaluate(
+                'document.getElementById("publish-audience").textContent'))
+            assert "Only my team" in text and "Member Portal" in text
+        finally:
+            browser.close()
+            browser.discard_profile()
+            served.shutdown()
+            served.server_close()
+            thread.join(timeout=5)

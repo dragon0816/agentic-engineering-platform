@@ -1,0 +1,44 @@
+{
+  "metadata": {
+    "identity": {
+      "namespace": "company-agent",
+      "name": "sync-test",
+      "version": "1.0.0"
+    },
+    "owner": {
+      "type": "team",
+      "id": "engineering"
+    },
+    "visibility": "organization",
+    "lifecycle": "published"
+  },
+  "description": "Shared Platform sync test: read the controlled personal-proof fixture. Read only; no write, external or network side effect.",
+  "execution": {
+    "mode": "local"
+  },
+  "dependencies": {
+    "local_capabilities": [
+      "company-agent.personal-proof.fixture-read"
+    ],
+    "central_required": false
+  },
+  "input_contract": "company-agent.sync-test.input.v1",
+  "output_contract": "filesystem.read-file.output.v1",
+  "steps": [
+    {
+      "capability": {
+        "namespace": "company-agent",
+        "name": "personal-proof-fixture-read",
+        "version": "1.0.0"
+      },
+      "inputs": {
+        "path": {
+          "source": "run",
+          "path": [
+            "args"
+          ]
+        }
+      }
+    }
+  ]
+}
