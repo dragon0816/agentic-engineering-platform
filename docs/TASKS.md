@@ -1989,3 +1989,23 @@ s-k-20261011T102952` (not published).
   mypy src clean; full suite 2713 passed, 6 skipped, 2 failed under load
   (`test_release_run` unreachable-index and `test_script_tools` PowerShell fixture,
   both script timeouts), both rerun alone and passed. Live check pending.
+
+- [x] Workflow run forms in the chat (owner finding 2026-10-15; design
+  `docs/phases/CHAT_WORKFLOW_FORMS.md`, decision in `docs/DECISIONS.md` 2026-10-15 "A
+  person's "run X" in a chat is the Workflow's form"). Root cause: no route for a
+  person's run request, so the model read the declaration and asked for settings and
+  values in prose (Web); Telegram free text also went to the model, and a reply Telegram
+  refused (or blank text) was dropped silently after the "Done" status. Built:
+  `common/workflow_run_form.py` (run intent, `name=value` prefill, agent-only prefill,
+  missing settings, `workflow_form` offer); host tool `workflows__run_form`; Gateway and
+  `authoring__run_workflow` turn incomplete model runs in a person's conversation into
+  the offer (complete calls still run); Agent Web routes "run X" and `/run <name>` to an
+  inline form drawn by `renderParameterForm` (prefill, settings notice + "Open settings",
+  run recorded in the conversation); Telegram starts `telegram_flow` with prefill as
+  confirmed answers, names missing settings, and is never silent (blank answer notice,
+  429 retry, keyboard-less retry, undelivered notice). Tests:
+  `tests/test_chat_workflow_forms.py` (pure + Gateway), `..._web.py` (incl. real
+  browser: form 640x491, Run 88x44, runs and records; settings link),
+  `..._telegram.py`. ruff, mypy src clean; full suite 2746 passed, 6 skipped, 1 failed
+  under load (`test_workflow_preview` capability timeout), rerun alone and passed.
+  Live check pending (owner).

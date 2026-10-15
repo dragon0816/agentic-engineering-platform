@@ -1,8 +1,41 @@
 # Handoff
 
-Updated: 2026-10-15 (Asia/Taipei), by Claude Code (Capabilities redesign)
+Updated: 2026-10-15 (Asia/Taipei), by Claude Code (Workflow run forms in the chat)
 
-## Capabilities redesign (2026-10-15, Claude Code) — latest
+## Workflow run forms in the chat (2026-10-15, Claude Code) — latest
+
+Goal: owner finding — "我要執行rs-wmt-package-release" got prose in Agent Web (settings
+and values asked in chat) and only "✅ Done" in Telegram. Now a person's run request is
+the Workflow's generated form (Web, inline) or question flow (Telegram). Design
+`docs/phases/CHAT_WORKFLOW_FORMS.md`; decision in `docs/DECISIONS.md` (2026-10-15 "A
+person's "run X" in a chat is the Workflow's form"); row in `docs/TASKS.md`. Committed
+on main, not pushed (85ef6f3c, 259e80ba, 0a2dabe7, b77d0fbb + this docs commit).
+- Shared: `common/workflow_run_form.py` (intent, prefill, missing settings, offer);
+  host tool `workflows__run_form` (`host_runtime/workflow_form_tool.py`, only when the
+  request has a `session_id`); Gateway ends the turn on an offer; incomplete Skill
+  Workflow tool calls and `authoring__run_workflow` (installed) become the offer.
+- Web: route `workflow_form` before Skill rules/Knowledge; `/run <name>`;
+  `ConversationMessage.workflow_form`; page `chatRunForm`/`drawChatRunForm`,
+  `fillParameterValues`; `/api/workflows/run` takes `session_id` and records the run.
+- Telegram: `_open_flow` (intent, model offer, `/run`), `telegram_flow.start(prefill=)`,
+  `_no_answer_reply`, `_send_piece` (429/400 retry), `UNDELIVERED_REPLY`.
+- Verified: ruff, mypy src clean; full suite 2746 passed, 6 skipped, 1 failed under load
+  (`test_workflow_preview` capability timeout), rerun alone and passed. Headless check in
+  `tests/test_chat_workflow_forms_web.py` (screenshot `.scratch/chat-forms-ui/`).
+- NOT done: live check (owner). Restart Agent Web on this code; in a Gateway chat type
+  "我要執行rs-wmt-package-release": expect the inline form (identity, chipset combo with
+  Refresh list, versions, inbox picks/uploads, dryRun on, push off) or, if settings are
+  missing, the notice with "Open rs-wmt-package-release settings". Try "run
+  rs-wmt-package-release companyName=Foxconn" (prefilled). In Telegram (after the bot
+  restarts with Agent Web) send "我要執行rs-wmt-package-release workflow": expect "same as
+  last time?" or the first question; /cancel to stop. Do not press Run with push on.
+- Risks: intent words are heuristics (a question with a run verb and a distinctive name
+  but no question word opens the form; the person can just ignore it); two installed
+  versions of one name are ambiguous and fall back to the model; the live Telegram
+  silence cause is not confirmed (blank model text vs refused/rate-limited send), both
+  are now covered.
+
+## Capabilities redesign (2026-10-15, Claude Code)
 
 Goal: owner's redesign of Agent Web "Capabilities" (Hermes skills page as reference):
 Library as expandable cards with one-action "+ Add to this Agent"; drafts in the same
