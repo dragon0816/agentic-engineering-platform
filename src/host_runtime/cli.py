@@ -166,7 +166,12 @@ def _parser() -> argparse.ArgumentParser:
     assets.add_argument("--config", required=True, type=Path)
     assets.add_argument("--agent", default="cli", help="who is submitting, e.g. claude-code")
     asset_actions = assets.add_subparsers(dest="asset_action", required=True)
-    asset_actions.add_parser("catalog", help="formats, capabilities, Workflows and Skills")
+    asset_actions.add_parser("catalog", help="compact: capabilities, Workflows and Skills")
+    asset_capability = asset_actions.add_parser(
+        "capability", help="one capability's description and input schema")
+    asset_capability.add_argument("--target", required=True, help="namespace/name@version")
+    asset_actions.add_parser("workflow-format", help="the full Workflow format with examples")
+    asset_actions.add_parser("skill-format", help="the full Skill format")
     asset_actions.add_parser("list", help="your candidates and their last approval")
     for action in ("check-workflow", "submit-workflow", "check-skill", "submit-skill"):
         drafted = asset_actions.add_parser(action)
@@ -199,12 +204,18 @@ def _parser() -> argparse.ArgumentParser:
     withdraw = asset_actions.add_parser("withdraw", help="withdraw a pending submission")
     withdraw.add_argument("--submission", required=True)
     connect = asset_actions.add_parser(
-        "connect", help="install the creator skills for an agent and show its MCP setup"
+        "connect", help="install AEP's skills and MCP servers for a coding agent"
     )
     connect.add_argument("--for", dest="target", required=True,
-                         choices=("claude-code", "codex", "copilot"))
-    connect.add_argument("--project", required=True, type=Path,
-                         help="the folder the agent works in")
+                         choices=("claude-code", "codex", "copilot", "all"))
+    where = connect.add_mutually_exclusive_group(required=True)
+    where.add_argument("--project", type=Path, help="the folder the agent works in")
+    where.add_argument("--user", action="store_true",
+                       help="for every folder: the agent's own user configuration")
+    connect.add_argument("--remove", action="store_true",
+                         help="with --user: take out what AEP put in")
+    connect.add_argument("--status", action="store_true",
+                         help="with --user: show what is installed, change nothing")
     # One-click Agent Web (owner 2026-10-08): the running server keeps its
     # address in the workspace; `open` starts it when needed and opens it.
     opened = commands.add_parser(
@@ -239,6 +250,10 @@ def _parser() -> argparse.ArgumentParser:
     mcp = commands.add_parser("mcp", help="serve authoring tools to a coding agent over stdio")
     mcp.add_argument("--config", required=True, type=Path)
     mcp.add_argument("--agent", default="mcp", help="who is connecting, e.g. codex")
+    assistant = commands.add_parser(
+        "assistant-mcp",
+        help="serve AEP's Knowledge and Workflow tools over stdio, through the running Agent Web")
+    assistant.add_argument("--config", required=True, type=Path)
     return parser
 
 
@@ -250,7 +265,12 @@ def _assets(args: argparse.Namespace) -> int:
 
     if args.asset_action in ("publish", "submissions", "withdraw"):
         return _publish(args)
+    if args.asset_action == "connect" and args.user:
+        return _connect_user(args)
     if args.asset_action == "connect":
+        if args.target == "all" or args.remove or args.status:
+            print("--for all, --remove and --status go with --user", file=sys.stderr)
+            return 2
         try:
             lines = connect(args.target, args.project, args.config, sys.executable)
         except (OSError, ValueError) as error:
@@ -273,6 +293,8 @@ def _assets(args: argparse.Namespace) -> int:
             print(json.dumps({"ok": False, "code": "draft_unreadable"}))
             return 2
         call["title"] = getattr(args, "title", "")
+    if action == "capability":
+        call["target"] = args.target
     for name in ("candidate", "approval"):
         if getattr(args, name, None):
             call[f"{name}_id"] = getattr(args, name)
@@ -323,6 +345,39 @@ def _publish(args: argparse.Namespace) -> int:
                          ensure_ascii=False))
         return 1
     print(json.dumps({"ok": True, "result": outcome}, ensure_ascii=False, indent=2))
+    return 0
+
+
+def _connect_user(args: argparse.Namespace) -> int:
+    """`assets connect --user`: AEP's skills and MCP servers in each coding
+    agent's own configuration (owner 2026-10-15)."""
+    import json
+
+    from host_runtime import agent_setup
+    from host_runtime.launcher import console_python
+
+    environment = agent_setup.Environment.current()
+    targets = agent_setup.AGENT_NAMES if args.target == "all" else (args.target,)
+    if args.status:
+        print(json.dumps([agent_setup.status(a, environment) for a in targets], indent=2))
+        return 0
+    launch = agent_setup.Launch(console_python(), args.config)
+    lines = agent_setup.apply("remove" if args.remove else "install", targets, environment,
+                              launch, only_detected=args.target == "all")
+    print("\n".join(lines))
+    return 1 if any(": not changed (" in line for line in lines) else 0
+
+
+def _assistant_mcp(args: argparse.Namespace) -> int:
+    from host_runtime.assistant_bridge import Bridge
+
+    try:
+        config = _load(args.config)
+    except (OSError, ValueError):
+        print(f"cannot read {args.config}", file=sys.stderr)
+        return 2
+    workspace = HostLayout.under(config.workspace_root).workspace_root
+    Bridge(workspace, _package_version()).serve(sys.stdin.buffer, sys.stdout.buffer)
     return 0
 
 
@@ -1084,6 +1139,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _assets(args)
     if args.command == "mcp":
         return _mcp(args)
+    if args.command == "assistant-mcp":
+        return _assistant_mcp(args)
     try:
         config = _load(args.config)
     except OSError:

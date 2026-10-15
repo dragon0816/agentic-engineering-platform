@@ -27,10 +27,13 @@ from host_runtime.external_authoring import ExternalAuthoring, guarded
 PROTOCOL_VERSIONS = ("2025-06-18", "2025-03-26", "2024-11-05")
 INSTRUCTIONS = (
     "AEP authoring: build Workflows and Skills this AEP Host can use. Start with aep_catalog "
-    "(formats, installed capabilities with input schemas, installed Workflows and Skills). "
-    "Check a draft with aep_check_*, submit it with aep_submit_*, run a Workflow with test "
-    "values, then ask to install it. Runs that change something, and every install, wait "
-    "for the owner's approval in Agent Web; follow them with aep_status. You get statuses "
+    "(compact: installed capabilities with their purpose and side effect, installed Workflows "
+    "and Skills), then aep_workflow_format or aep_skill_format for the full format, and "
+    "aep_capability for each capability's input schema. When the request is unclear, ask the "
+    "person before writing. Check a draft with aep_check_*, submit it with aep_submit_*, "
+    "run a Workflow with test values, then ask to install it. Runs that change something, "
+    "and every install, wait for the owner's approval in Agent Web; follow them with "
+    "aep_status. You get statuses "
     "and codes, never the data a run read."
 )
 
@@ -38,8 +41,19 @@ _OBJECT = {"type": "object"}
 _ID = {"candidate_id": {"type": "string"}}
 
 TOOLS: dict[str, tuple[str, dict[str, Any]]] = {
-    "aep_catalog": ("The authoring formats, installed capabilities (with input schemas), "
-                    "Workflows and Skills on this Host.", {"type": "object", "properties": {}}),
+    "aep_catalog": ("Compact catalog: installed capabilities (purpose, side effect, input "
+                    "field names), Workflows and Skills on this Host.",
+                    {"type": "object", "properties": {}}),
+    "aep_capability": ("One capability in full: description and input schema.",
+                       {"type": "object", "properties": {"target": {
+                           "type": "string",
+                           "description": "namespace/name@version from aep_catalog"}},
+                        "required": ["target"]}),
+    "aep_workflow_format": ("The full Workflow format: parameter kinds and form fields, steps, "
+                            "input sources, checks and rules, with examples.",
+                            {"type": "object", "properties": {}}),
+    "aep_skill_format": ("The full Skill format and what an authored Skill may not carry.",
+                         {"type": "object", "properties": {}}),
     "aep_list": ("Your submitted Workflow and Skill candidates and their last approval.",
                  {"type": "object", "properties": {}}),
     "aep_get": ("One submitted candidate in full.",
@@ -88,6 +102,9 @@ def dispatch(authoring: ExternalAuthoring, name: str, args: dict[str, Any]) -> d
     title = str(args.get("title") or "")
     calls: dict[str, Callable[[], dict[str, JsonValue]]] = {
         "aep_catalog": authoring.catalog,
+        "aep_capability": lambda: authoring.capability(str(args.get("target") or "")),
+        "aep_workflow_format": authoring.workflow_format,
+        "aep_skill_format": authoring.skill_format,
         "aep_list": authoring.list,
         "aep_get": lambda: authoring.get(ident),
         "aep_status": lambda: authoring.status(str(args.get("approval_id") or "")),

@@ -216,7 +216,9 @@ def test_the_mcp_server_speaks_json_rpc_and_calls_the_same_operations(tmp_path: 
     assert submitted["ok"] and replies[2]["result"]["isError"] is False
     catalog = replies[3]["result"]["structuredContent"]
     targets = {c["target"]: c for c in catalog["capabilities"]}
-    assert targets["lab/read-it@1.0.0"]["input_schema"]["properties"]["value"]
+    # The catalog is compact; the schema comes from aep_capability.
+    assert targets["lab/read-it@1.0.0"]["inputs"] == ["value"]
+    assert "input_schema" not in targets["lab/read-it@1.0.0"]
     assert replies[4]["error"]["code"] == -32601
 
 
@@ -242,8 +244,9 @@ def test_connect_installs_the_creators_for_each_agent(tmp_path: Path) -> None:
         assert (project / ".claude" / "skills" / name / "SKILL.md").read_text(
             encoding="utf-8") == creator_text(name)
     servers = json.loads((project / ".mcp.json").read_text())["mcpServers"]
-    assert set(servers) == {"other", "aep"}
+    assert set(servers) == {"other", "aep", "aep-assistant"}
     assert servers["aep"]["args"][:3] == ["-m", "host_runtime.cli", "mcp"]
+    assert servers["aep-assistant"]["args"][:3] == ["-m", "host_runtime.cli", "assistant-mcp"]
     lines = connect("codex", project, config, "python.exe")
     assert "[mcp_servers.aep]" in lines and (project / ".agents" / "skills" / CREATORS[0]).is_dir()
     assert main(["assets", "--config", str(config), "connect", "--for", "copilot",
@@ -258,7 +261,10 @@ def test_each_creator_skill_has_the_frontmatter_agents_read() -> None:
         assert f"\nname: {name}\n" in header
         description = header.split("description:", 1)[1].strip()
         assert 0 < len(description) <= 1024
-        assert "aep_catalog" in text and "approval" in text
+        if name == "aep-knowledge":
+            assert "aep_knowledge_search" in text and "Sources:" in text
+        else:
+            assert "aep_catalog" in text and "approval" in text
 
 
 def test_the_catalog_names_installed_assets_without_what_people_wrote_about_them(
@@ -288,3 +294,100 @@ def test_an_installed_unchanged_workflow_runs_directly_for_an_external_agent(
     ran = authoring.run_workflow(candidate_id, {"month": "SECRET-11"})
     assert ran["ran"] is True and recorder.calls == ["SECRET-11"]
     assert "SECRET-11" not in json.dumps(ran)
+
+
+# -- compact catalog, one capability, formats (owner live test 2026-10-15) -------
+
+
+def _many(tmp_path: Path, count: int) -> ExternalAuthoring:
+    from capabilities.coding_change.run_python import RunPythonResult, RunPythonStepInput
+
+    authoring, recorder = desk(tmp_path)
+    for index in range(count):
+        item = spec(f"tool-{index:03d}", "read").model_copy(update={
+            "description": f"Tool {index} reads the station log and returns rows. " + "x" * 400})
+        authoring.chat.installed.register(item, recorder, RunPythonStepInput, RunPythonResult,
+                                          ExecutionDependencies(central_required=False))
+    return authoring
+
+
+def _size(value: Any) -> int:
+    return len(json.dumps(value, ensure_ascii=False, indent=1))
+
+
+def test_the_catalog_stays_under_the_agents_output_limit(tmp_path: Path) -> None:
+    authoring = _many(tmp_path, 60)
+    catalog = authoring.catalog()
+    full = sum(_size(authoring.capability(str(c["target"]))) for c in catalog["capabilities"])
+    assert full > 60_000  # what the old catalog carried
+    assert _size(catalog) < 15_000 and "omitted" not in catalog
+    entry = next(c for c in catalog["capabilities"] if c["target"] == "lab/tool-007@1.0.0")
+    assert entry == {"target": "lab/tool-007@1.0.0",
+                     "purpose": "Tool 7 reads the station log and returns rows.",
+                     "side_effect": "read", "inputs": ["request", "arguments"]}
+    assert "aep_capability" in str(catalog["how_to"])
+
+
+def test_a_very_large_host_is_trimmed_and_says_what_was_left_out(tmp_path: Path) -> None:
+    catalog = _many(tmp_path, 400).catalog()
+    assert _size(catalog) <= 15_000
+    assert catalog["omitted"]["capabilities"] > 0  # type: ignore[index]
+
+
+def test_one_capability_and_the_formats_come_in_full(tmp_path: Path) -> None:
+    authoring, _ = desk(tmp_path)
+    one = dispatch(authoring, "aep_capability", {"target": "lab/read-it@1.0.0"})
+    assert one["ok"] and one["input_schema"]["properties"]["value"]  # type: ignore[index]
+    assert dispatch(authoring, "aep_capability", {"target": "read-it"})["ok"] is True
+    assert dispatch(authoring, "aep_capability", {"target": "lab/none@1.0.0"})["code"] == (
+        "capability_unknown")
+    workflow_format = dispatch(authoring, "aep_workflow_format", {})["workflow_format"]
+    assert "upload" in workflow_format["parameter kinds"]  # type: ignore[index]
+    assert workflow_format["complete example"]["checks"]  # type: ignore[index]
+    assert "not allowed" in dispatch(authoring, "aep_skill_format", {})["skill_format"]  # type: ignore[operator]
+    assert {"aep_capability", "aep_workflow_format", "aep_skill_format"} <= set(TOOLS)
+
+
+def test_the_cli_offers_the_same_new_operations(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str],
+) -> None:
+    import host_runtime.external_authoring as module
+
+    authoring, _ = desk(tmp_path)
+    monkeypatch.setattr(module, "build", lambda config, agent: authoring)
+    config = str(tmp_path / "host.json")
+    assert main(["assets", "--config", config, "capability", "--target", "lab/read-it@1.0.0"]) \
+        == 0
+    assert json.loads(capsys.readouterr().out)["input_schema"]["properties"]["value"]
+    assert main(["assets", "--config", config, "workflow-format"]) == 0
+    assert "parameter kinds" in json.loads(capsys.readouterr().out)["workflow_format"]
+    assert main(["assets", "--config", config, "skill-format"]) == 0
+
+
+def _tree(root: Path) -> list[str]:
+    return sorted(str(p.relative_to(root)) for p in root.rglob("*"))
+
+
+def test_checking_has_no_side_effects_and_submitting_prepares_the_workspace(
+    tmp_path: Path,
+) -> None:
+    from capabilities.coding_change.run_python import RunPythonResult, RunPythonStepInput
+
+    root = tmp_path / "tasks"
+    root.mkdir()
+    authoring, recorder = desk(tmp_path / "host")
+    authoring.chat.coding_workspace_roots = (str(root),)
+    run_python = spec("run-python", "execute").model_copy(update={"identity": {
+        "namespace": "coding", "name": "run-python", "version": "1.0.0"}})
+    authoring.chat.installed.register(run_python, recorder, RunPythonStepInput, RunPythonResult,
+                                      ExecutionDependencies(central_required=False))
+    task = root / "csv-merge"
+    draft = {"name": "csv-merge", "description": "Merge CSV files.", "parameters": [],
+             "steps": [{"capability": "coding/run-python@1.0.0", "inputs": {"request": {
+                 "source": "fixed", "value": {"workspace": str(task), "script": "print(1)"}}}}]}
+    before = _tree(tmp_path)
+    assert authoring.check_workflow(draft)["ok"] is True
+    assert authoring.check_skill(skill())["ok"] is True
+    assert _tree(tmp_path) == before and not task.exists()  # nothing created, nothing kept
+    assert authoring.submit_workflow(draft, "Merge")["ok"] is True
+    assert (task / "input").is_dir() and (task / "output").is_dir()

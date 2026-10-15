@@ -18,6 +18,8 @@ operations with the CLI, which prints JSON:
 | MCP tool | CLI (`aep-host assets --config <host.json> --agent <you> ...`) |
 |---|---|
 | `aep_catalog` | `catalog` |
+| `aep_workflow_format` | `workflow-format` |
+| `aep_capability` | `capability --target ns/name@1.2.3` |
 | `aep_check_workflow` | `check-workflow --file draft.json` |
 | `aep_submit_workflow` | `submit-workflow --file draft.json --title "..." [--candidate wf-...]` |
 | `aep_run_workflow` | `run-workflow --candidate wf-... --arguments '{"month": "2026-09"}'` |
@@ -26,22 +28,40 @@ operations with the CLI, which prints JSON:
 
 ## Procedure
 
-1. **Read the catalog first.** `aep_catalog` gives `workflow_format`, every
-   installed capability with its `input_schema` and `side_effect`, and the
-   installed Workflows. Use only capabilities listed there, at the exact
-   version shown. Do not invent capabilities or input fields.
+0. **Understand the request before writing anything.** Restate in two or
+   three lines what the Workflow will do: its inputs, what it produces, which
+   values change per run, and whether it changes anything outside its own
+   output folder (mail, uploads, pushes, other systems). When any of these is
+   unclear, ask the person short, concrete questions first and wait for the
+   answers. Typical gaps: file formats and encodings (CSV delimiter, UTF-8 or
+   Big5), date formats and time zones, which columns or sheets, where results
+   go, what to do with missing values, and whether a step may send or change
+   something. Never assume an answer to these; one round of questions is
+   cheaper than a wrong Workflow.
+1. **Read the catalog first.** `aep_catalog` is compact: every installed
+   capability with its purpose, `side_effect` and input field names, and the
+   installed Workflows and Skills. Then read `aep_workflow_format` (the full
+   format with examples) and, for each capability you will use,
+   `aep_capability` (its full `input_schema`). Use only capabilities listed
+   in the catalog, at the exact version shown. Do not invent capabilities or
+   input fields.
 2. **Design the parameters.** Everything that changes between runs (a month,
    a folder, a file) is a parameter with `scope: "runtime"`. Everything that
    stays the same is fixed in the steps.
    Read "Parameters become the Agent Web and Telegram form" below before
-   writing them.
+   writing them. Prefer typed parameters over free text: `select` for a known
+   list (with `allow_other` when it may be incomplete), `date` for dates,
+   `boolean` for yes/no, `upload` for files the person provides, `folder` or
+   `file` for paths on the Host, `integer`/`number` with bounds. A typed
+   parameter gives a picker on the Web and buttons on Telegram, and the run
+   cannot start with a malformed value.
 3. **Write the steps.** Each step is
    `{"capability": "ns/name@1.2.3", "inputs": {...}}`. Each input is one of:
    - `{"source": "fixed", "value": <JSON>}`;
    - `{"source": "run", "path": ["<parameter>"]}` (`[]` is all run values);
    - `{"source": "step", "step_index": N, "path": ["<field>"]}`, an earlier
      step's output.
-   Inputs must satisfy the capability's `input_schema`.
+   Inputs must satisfy the capability's `input_schema` (`aep_capability`).
 4. **Custom processing.** Use `coding/run-python@1.0.0` when it is in the
    catalog. Give it a complete script and an absolute workspace folder under
    one of the catalog's `coding_workspace_roots`; put the script's input files
@@ -74,7 +94,7 @@ operations with the CLI, which prints JSON:
 
 You never write a GUI. Agent Web draws the run form, and the Telegram bot asks
 the questions one at a time, from `parameters` alone. A good declaration is a
-good form. The catalog's `workflow_format` lists the same rules.
+good form. `aep_workflow_format` lists the same rules.
 
 Kinds:
 

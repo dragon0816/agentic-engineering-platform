@@ -115,8 +115,25 @@ WORKFLOW_FORMAT: dict[str, JsonValue] = {
         {"source": "run", "path": ["<parameter>"], "note": "[] is all run values"},
         {"source": "step", "step_index": 0, "path": ["<output field>"]},
     ],
+    "complete example": {
+        "name": "monthly-expense-summary",
+        "description": "Summarize the month's uploaded expense CSV files into one workbook.",
+        "parameters": [
+            {"name": "month_start", "label": "First day of the month", "kind": "date",
+             "required": True},
+            {"name": "inputs", "label": "Expense CSV files", "kind": "upload",
+             "multiple": True, "accept": [".csv"], "required": True},
+        ],
+        "steps": [{"capability": "coding/run-python@1.0.0", "inputs": {
+            "request": {"source": "fixed", "value": {
+                "workspace": "<a folder under coding_workspace_roots>",
+                "script": "import json, os ... write output/expenses-<month>.xlsx"}},
+            "arguments": {"source": "run", "path": []}}}],
+        "checks": [{"check_id": "workbook", "step_index": 0, "kind": "files_nonempty",
+                    "pattern": "*.xlsx"}],
+    },
     "rules": [
-        "Each step's inputs must fit that capability's input_schema in the catalog.",
+        "Each step's inputs must fit that capability's input_schema (aep_capability).",
         "Never put a password, token or key in a fixed value.",
         "coding/run-python@1.0.0 runs a complete Python script in an absolute workspace "
         "folder; it reads run values from os.environ['AEP_WORKFLOW_PARAMS'] (a JSON file) "
@@ -141,6 +158,56 @@ SKILL_FORMAT: dict[str, JsonValue] = {
 }
 
 
+CATALOG_GUIDE = (
+    "Compact catalog. Read the full Workflow format with aep_workflow_format and the Skill "
+    "format with aep_skill_format; read one capability's input schema with aep_capability "
+    "before using it in a step. Use only the targets listed here, at the exact version.")
+CATALOG_BUDGET_CHARS = 15_000
+PURPOSE_CHARS = 140
+
+
+def _purpose(description: str) -> str:
+    """The first sentence of a description, at most PURPOSE_CHARS long."""
+    text = " ".join(description.split())
+    sentence = re.split(r"(?<=[.!?])\s", text, maxsplit=1)[0]
+    return sentence if len(sentence) <= PURPOSE_CHARS else sentence[: PURPOSE_CHARS - 1] + "…"
+
+
+def _size(value: JsonValue) -> int:
+    return len(json.dumps(value, ensure_ascii=False, indent=1))
+
+
+def _within_budget(catalog: dict[str, JsonValue]) -> dict[str, JsonValue]:
+    """Drop detail, then entries, until the catalog fits CATALOG_BUDGET_CHARS;
+    say what was left out so the agent can ask for it."""
+    if _size(catalog) <= CATALOG_BUDGET_CHARS:
+        return catalog
+    for key in ("capabilities", "workflows", "skills"):
+        entries = catalog[key]
+        assert isinstance(entries, list)
+        for entry in entries:
+            if isinstance(entry, dict):
+                entry.pop("inputs", None)
+                parameters = entry.get("parameters")
+                if isinstance(parameters, list):
+                    entry["parameters"] = [p["name"] for p in parameters
+                                           if isinstance(p, dict)]
+    omitted: dict[str, JsonValue] = {}
+    for key in ("skills", "workflows", "capabilities"):
+        entries = catalog[key]
+        assert isinstance(entries, list)
+        dropped = 0
+        # Room for the "omitted" note itself.
+        while entries and _size(catalog) > CATALOG_BUDGET_CHARS - 200:
+            entries.pop()
+            dropped += 1
+        if dropped:
+            omitted[key] = dropped
+    if omitted:
+        catalog["omitted"] = omitted
+    return catalog
+
+
 class ExternalAuthoring:
     def __init__(self, chat: ChatAuthoring, actor: str, agent: str) -> None:
         if not AGENT_NAME.match(agent):
@@ -152,19 +219,24 @@ class ExternalAuthoring:
     # -- reading -----------------------------------------------------------
 
     def catalog(self) -> dict[str, JsonValue]:
+        """A compact catalog that fits an agent's tool-output limit (live
+        2026-10-15: the full one was ~82K characters, over Claude Code's MCP
+        limit). Input schemas come one at a time from `capability`, the full
+        formats from `workflow_format` and `skill_format`."""
         capabilities: list[JsonValue] = []
         for spec in self.chat.installed.discover():
             binding = self.chat.installed.get(spec.identity)
-            schema: JsonValue = None
+            fields: list[JsonValue] = []
             if binding is not None:
                 try:
-                    schema = binding.input_model.model_json_schema()
+                    properties = binding.input_model.model_json_schema().get("properties")
                 except Exception:  # noqa: BLE001 - a schema that cannot render is omitted
-                    schema = None
+                    properties = None
+                if isinstance(properties, dict):
+                    fields = list(properties)
             capabilities.append({
-                "target": _target(spec.identity), "name": spec.name,
-                "description": spec.description, "side_effect": spec.side_effect,
-                "input_schema": schema})
+                "target": _target(spec.identity), "purpose": _purpose(spec.description),
+                "side_effect": spec.side_effect, "inputs": fields})
         workflows: list[JsonValue] = [
             {"target": _target(m.metadata.identity), "owner": m.metadata.owner.id,
              "parameters": [{"name": p.name, "kind": p.kind, "required": p.required}
@@ -178,11 +250,42 @@ class ExternalAuthoring:
                  "owner": m.metadata.owner.id, "commands": [c.name for c in m.commands]}
                 for m in installed_skills(self.chat.skills_dir)
             ]
-        return {"actor": self.actor, "namespace": self.chat.namespace,
-                "workflow_format": WORKFLOW_FORMAT, "skill_format": SKILL_FORMAT,
-                # Where a coding/run-python step's workspace may be.
-                "coding_workspace_roots": list(self.chat.coding_workspace_roots),
-                "capabilities": capabilities, "workflows": workflows, "skills": skills}
+        catalog: dict[str, JsonValue] = {
+            "actor": self.actor, "namespace": self.chat.namespace,
+            "how_to": CATALOG_GUIDE,
+            # Where a coding/run-python step's workspace may be.
+            "coding_workspace_roots": list(self.chat.coding_workspace_roots),
+            "capabilities": capabilities, "workflows": workflows, "skills": skills}
+        return _within_budget(catalog)
+
+    def capability(self, target: str) -> dict[str, JsonValue]:
+        """One capability in full: its description and input schema. `target`
+        is namespace/name@version or just the name."""
+        wanted = target.strip()
+        for spec in self.chat.installed.discover():
+            if wanted not in (_target(spec.identity), spec.name, spec.identity.name,
+                              f"{spec.identity.namespace}/{spec.name}"):
+                continue
+            binding = self.chat.installed.get(spec.identity)
+            schema: JsonValue = None
+            if binding is not None:
+                try:
+                    schema = binding.input_model.model_json_schema()
+                except Exception:  # noqa: BLE001 - a schema that cannot render is omitted
+                    schema = None
+            return {"ok": True, "target": _target(spec.identity),
+                    "description": spec.description, "side_effect": spec.side_effect,
+                    "input_schema": schema}
+        return {"ok": False, "code": "capability_unknown",
+                "next": "pick a target from aep_catalog's capabilities"}
+
+    @staticmethod
+    def workflow_format() -> dict[str, JsonValue]:
+        return {"ok": True, "workflow_format": WORKFLOW_FORMAT}
+
+    @staticmethod
+    def skill_format() -> dict[str, JsonValue]:
+        return {"ok": True, "skill_format": SKILL_FORMAT}
 
     def list(self) -> dict[str, JsonValue]:
         approvals = self.chat.approvals(self.actor, pending_only=False)
@@ -326,7 +429,7 @@ def build(config_path: Path, agent: str) -> ExternalAuthoring:
 
 # -- connecting an agent (X4) -------------------------------------------------
 
-CREATORS = ("aep-workflow-creator", "aep-skill-creator")
+CREATORS = ("aep-workflow-creator", "aep-skill-creator", "aep-knowledge")
 AGENTS: dict[str, str] = {
     "claude-code": ".claude/skills",
     "codex": ".agents/skills",
@@ -345,6 +448,12 @@ def server_command(python: str, config_path: Path, agent: str) -> tuple[str, lis
                     "--agent", agent]
 
 
+def assistant_command(python: str, config_path: Path) -> tuple[str, list[str]]:
+    """The Knowledge and Workflow tools, through the running Agent Web."""
+    return python, ["-m", "host_runtime.cli", "assistant-mcp", "--config",
+                    str(config_path.resolve())]
+
+
 def connect(agent: str, project: Path, config_path: Path, python: str) -> list[str]:
     """Write the creator Skills where `agent` reads project skills, and say how
     to register the `aep` MCP server. Claude Code's `.mcp.json` lives in the
@@ -359,6 +468,7 @@ def connect(agent: str, project: Path, config_path: Path, python: str) -> list[s
         target.write_text(creator_text(name), encoding="utf-8")
         lines.append(f"wrote {target}")
     command, arguments = server_command(python, config_path, agent)
+    helper, helper_args = assistant_command(python, config_path)
     if agent == "claude-code":
         settings = project / ".mcp.json"
         current: dict[str, Any] = {}
@@ -367,16 +477,21 @@ def connect(agent: str, project: Path, config_path: Path, python: str) -> list[s
             current = loaded if isinstance(loaded, dict) else {}
         servers = current.setdefault("mcpServers", {})
         servers["aep"] = {"type": "stdio", "command": command, "args": arguments}
+        servers["aep-assistant"] = {"type": "stdio", "command": helper, "args": helper_args}
         settings.write_text(json.dumps(current, ensure_ascii=False, indent=2) + "\n",
                             encoding="utf-8")
-        lines.append(f"wrote {settings} (server 'aep'); Claude Code asks you to trust it once")
+        lines.append(f"wrote {settings} (servers 'aep' and 'aep-assistant'); Claude Code asks "
+                     "you to trust them once")
     elif agent == "codex":
-        lines += ["Add this to ~/.codex/config.toml:", "", "[mcp_servers.aep]",
-                  f"command = {json.dumps(command)}",
-                  f"args = {json.dumps(arguments)}", ""]
+        lines += ["Add this to ~/.codex/config.toml (or run connect --user):", "",
+                  "[mcp_servers.aep]", f"command = {json.dumps(command)}",
+                  f"args = {json.dumps(arguments)}", "", '[mcp_servers."aep-assistant"]',
+                  f"command = {json.dumps(helper)}", f"args = {json.dumps(helper_args)}", ""]
     else:
-        block = {"mcpServers": {"aep": {"type": "local", "command": command,
-                                        "args": arguments, "tools": ["*"]}}}
+        block = {"mcpServers": {
+            "aep": {"type": "local", "command": command, "args": arguments, "tools": ["*"]},
+            "aep-assistant": {"type": "local", "command": helper, "args": helper_args,
+                              "tools": ["*"]}}}
         lines += ["Add this server to ~/.copilot/mcp-config.json:", "",
                   json.dumps(block, indent=2), ""]
     return lines

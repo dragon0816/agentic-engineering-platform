@@ -321,6 +321,7 @@ class ChatAuthoring:
         manifest, problems = self.check(actor, raw, previous)
         if manifest is None:
             return None, problems
+        self.prepare_workspaces(manifest)
         now = _now()
         item = ChatCandidate(
             candidate_id=previous.candidate_id if previous is not None
@@ -389,9 +390,9 @@ class ChatAuthoring:
                     "true and tell the person what the Workflow no longer does")
         return (None, problems) if problems else (manifest, [])
 
-    def _workspace_problems(self, index: int, step: WorkflowStep) -> list[str]:
-        """A fixed task folder must lie under the coding roots. One that does
-        not exist yet is created there, with input/ and output/."""
+    @staticmethod
+    def _fixed_workspace(step: WorkflowStep) -> str | None:
+        """The task folder a run-python or browser step fixes, if any."""
         name = (step.capability.namespace, step.capability.name)
         source = None
         if name == ("coding", "run-python"):
@@ -401,18 +402,34 @@ class ChatAuthoring:
         elif name == ("browser", "operate"):
             fixed = step.inputs.get("workspace")
             source = fixed.value if isinstance(fixed, FixedInput) else None
-        if not isinstance(source, str):
+        return source if isinstance(source, str) else None
+
+    def _workspace_problems(self, index: int, step: WorkflowStep) -> list[str]:
+        """A fixed task folder must lie under the coding roots. Checking
+        creates nothing; `prepare_workspaces` does, when the Workflow is kept,
+        run or installed."""
+        source = self._fixed_workspace(step)
+        if source is None:
             return []
         roots = self.coding_workspace_roots
-        resolved = containing_root(source, roots)
-        if resolved is None:
+        if containing_root(source, roots) is None:
             allowed = "; ".join(roots) if roots else "none are configured on this host"
             return [f"step {index}: workspace {source} is outside the allowed task folders "
                     f"({allowed}); use a folder under one of them"]
-        if not resolved.is_dir():
-            for part in ("input", "output"):
-                (resolved / part).mkdir(parents=True, exist_ok=True)
         return []
+
+    def prepare_workspaces(self, manifest: WorkflowManifest) -> None:
+        """Create each fixed task folder that does not exist yet, under its
+        coding root, with input/ and output/."""
+        for step in manifest.steps:
+            if not isinstance(step, WorkflowStep):
+                continue
+            source = self._fixed_workspace(step)
+            resolved = None if source is None else containing_root(
+                source, self.coding_workspace_roots)
+            if resolved is not None and not resolved.is_dir():
+                for part in ("input", "output"):
+                    (resolved / part).mkdir(parents=True, exist_ok=True)
 
     def _published(self, namespace: str, name: str) -> list[WorkflowManifest]:
         """The versions of one Workflow name installed on this Host."""
@@ -492,6 +509,7 @@ class ChatAuthoring:
     def execute(
         self, actor: str, candidate: ChatCandidate, arguments: dict[str, JsonValue], ref: str
     ) -> dict[str, JsonValue]:
+        self.prepare_workspaces(candidate.draft)
         engine = self._engine(candidate.draft, actor, ref)
         snapshot = asyncio.run(run_workflow_checked(
             engine, self._context(actor, self.namespace, candidate.session_id, "run"),
@@ -616,6 +634,7 @@ class ChatAuthoring:
         })
         published = WorkflowManifest.model_validate(
             {**candidate.draft.model_dump(mode="json"), "metadata": metadata})
+        self.prepare_workspaces(published)
         self.workflows_dir.mkdir(parents=True, exist_ok=True)
         write_atomically(target, (json.dumps(published.model_dump(mode="json"),
                                              ensure_ascii=False, indent=2) + "\n").encode("utf-8"))

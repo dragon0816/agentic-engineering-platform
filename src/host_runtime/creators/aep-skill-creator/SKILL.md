@@ -22,6 +22,8 @@ Use the `aep` MCP server tools when available, or the CLI
 | MCP tool | CLI |
 |---|---|
 | `aep_catalog` | `catalog` |
+| `aep_skill_format` | `skill-format` |
+| `aep_capability` | `capability --target ns/name@1.2.3` |
 | `aep_check_skill` | `check-skill --file skill.json` |
 | `aep_submit_skill` | `submit-skill --file skill.json --title "..." [--candidate sk-...]` |
 | `aep_install_skill` | `install-skill --candidate sk-...` |
@@ -29,12 +31,21 @@ Use the `aep` MCP server tools when available, or the CLI
 
 ## Procedure
 
-1. **Read `aep_catalog`.** It gives `skill_format`, the installed capabilities
-   and Workflows a command may target, and the installed Skills. Their names
-   and aliases are taken, so do not reuse them.
+0. **Understand the request before writing anything.** Restate in two or
+   three lines when the AEP Agent should use the Skill, what it should do,
+   which inputs it must ask the person for, and whether any command changes
+   something (sends, uploads, writes outside its output). When any of this is
+   unclear, ask the person short, concrete questions and wait for the
+   answers. Never assume formats, defaults or side effects.
+1. **Read `aep_catalog` and `aep_skill_format`.** The catalog lists the
+   installed capabilities and Workflows a command may target, and the
+   installed Skills. Their names and aliases are taken, so do not reuse them.
+   `aep_skill_format` is the full Skill format.
 2. **Decide what the Skill is for.** One Skill covers one kind of request.
    When the work needs a fixed sequence of steps, build a Workflow first with
-   the `aep-workflow-creator` skill. Then make the Skill's command target that
+   the `aep-workflow-creator` skill, with typed parameters (`select`, `date`,
+   `upload`, `folder`, ...) so the person gets a good form on the Web and in
+   Telegram. Then make the Skill's command target that
    installed Workflow (`"kind": "workflow"`).
 3. **Write the manifest:**
    ```json
