@@ -1967,3 +1967,25 @@ s-k-20261011T102952` (not published).
   sample check-workflow, card render), `test_shared_platform_settings.py` (share after
   publication reaches another member's PC). ruff, mypy src clean; full suite 2702 passed, 6 skipped, 4 failed under load (three browser tests lost their DevTools socket, incl. the new portal browser test; one checkpoint-store 'unavailable'), all four rerun alone and passed.
   Live test on 172.25.228.141 pending.
+
+- [x] Capabilities redesign (owner 2026-10-15, Hermes-style reference): one list for
+  installed, drafts and switched-off Skills/Workflows (chips All / Installed / Drafts /
+  Switched off, an on/off switch per row, "Draft — not installed" with Install; the
+  separate 我的草稿 card is gone); detail-pane Discard draft / Switch off / Remove from
+  this Agent behind a confirmation naming the asset; Library entries as expandable cards
+  (one open at a time, `aria-expanded`, Escape closes) with overview, owner, who can use
+  it, provenance, dependencies and "+ Add to this Agent" / "Remove selection".
+  Backend: `host_runtime/asset_shelf.py` (switch off = kind's `disabled/` folder; remove
+  = `workspace/removed/<date>/` + `removed.jsonl`, refused for shipped manifests),
+  `SqliteLocalState.forget`, `InstalledWorkflows.remove`, `SkillRegistry.remove`,
+  `MemberPortalPublisher.select/revoke`, routes `/api/assets/switch`,
+  `/api/assets/remove`, `/api/platform/add`, `/api/platform/unselect`; add = portal
+  `select` as the member + verified sync in one action, the answer redraws card, list,
+  counts and status (no reload, no Synchronize press; "Sync again" stays for portal
+  selections); assets-only installs a Workflow live, otherwise says restart. Decision in
+  `docs/DECISIONS.md` (2026-10-15 "Switching off, removing and adding assets").
+  Tests: `tests/test_capability_shelf.py` (9, incl. in-process platform add/remove/
+  revoke, refusals, two real-browser checks), page hooks in `test_agent_web.py`. ruff,
+  mypy src clean; full suite 2713 passed, 6 skipped, 2 failed under load
+  (`test_release_run` unreachable-index and `test_script_tools` PowerShell fixture,
+  both script timeouts), both rerun alone and passed. Live check pending.

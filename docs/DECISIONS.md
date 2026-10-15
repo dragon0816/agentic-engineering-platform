@@ -2519,3 +2519,50 @@ Rejected alternatives:
 - Refusing combinations that leave nobody but the owner (e.g. `team` on a
   person-owned asset): the owner chose to keep it simple; the dialog explains the
   effect instead.
+
+## 2026-10-15 — Switching off, removing and adding assets from Agent Web Capabilities
+
+Decision (owner request 2026-10-15, Capabilities redesign; design choices by Claude
+Code, to be confirmed by the owner):
+1. **Switch off / on.** An installed Skill or Workflow is switched off by moving its
+   manifest into its kind's `disabled/` subfolder
+   (`assets\skills\disabled`, `assets\workflows\disabled`). The host reads only the top
+   level of those folders, and installing a newer Skill already sets older versions
+   aside there, so "superseded" and "switched off" are one state. The running engine
+   stops offering it at once (`InstalledWorkflows.remove`, `SkillRegistry.remove`). A
+   Skill is not switched on while another version with the same alias is on
+   (`alias_in_use`), because the host refuses to start with two.
+2. **Remove from this Agent** never deletes. The file moves to
+   `workspace\removed\<YYYY-MM-DD>\{skills,workflows}\` (a second removal of the same
+   version that day gets a time suffix), a line is appended to
+   `workspace\removed\removed.jsonl` (at, actor, kind, asset, from, to), and the
+   inventory row in `state.sqlite` is dropped (`SqliteLocalState.forget`), so the asset
+   is neither offered nor reported, and a later sync may install it again. Putting it
+   back means moving the file back. When the platform still selects it for this PC
+   the reply says so (the next sync would reinstall it) and points to "Remove
+   selection". Removing does not revoke the selection on its own.
+3. **Shipped manifests are refused** for removal (`shipped_asset`): the host does not
+   re-install them at start-up, but `aep-host export-assets` (install and upgrade)
+   writes them back, so a removal would not last. They can be switched off.
+4. **"+ Add to this Agent"** is one action: the Agent calls the Member Portal `select`
+   as the member (Personal Agent login, never the Bridge token) for this PC's Bridge,
+   then runs the existing verified sync, and the reply carries the new catalog and the
+   installed list so the page redraws without a second request. `duplicate_selection`
+   counts as already selected. In assets-only mode a newly installed Workflow is
+   registered in the running engine at once (grants.json still decides each step);
+   otherwise, and for Skills, the reply says a restart is needed. "Remove selection"
+   calls `revoke` and syncs; the installed file stays. "Synchronize selected" is kept
+   as a secondary "Sync again" for selections made in the portal.
+
+Reason: the owner wants to switch off assets that crowd the Agent's choices and to
+remove assets without losing them; a second "disabled" convention or a hard delete
+would contradict the one that exists. The live finding (a portal selection showed
+nothing until a manual sync) shows a separate sync step is easy to miss.
+
+Rejected alternatives:
+- A `disabled.json` list beside the files: the host and `chat_authoring` already treat
+  the `disabled/` folder as "not offered"; a second mechanism could disagree with it.
+- Hard delete, or the recycle bin: not recoverable from the workspace alone.
+- Removing shipped manifests with a warning: the removal silently undoes on upgrade.
+- Revoking the platform selection on removal: removal is a local act; the member's
+  platform decision stays theirs to change (one button away on the card).

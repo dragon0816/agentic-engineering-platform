@@ -1,8 +1,39 @@
 # Handoff
 
-Updated: 2026-10-15 (Asia/Taipei), by Claude Code (member publish owner and access)
+Updated: 2026-10-15 (Asia/Taipei), by Claude Code (Capabilities redesign)
 
-## Owner and who can use a member-published asset (2026-10-15, Claude Code) — latest
+## Capabilities redesign (2026-10-15, Claude Code) — latest
+
+Goal: owner's redesign of Agent Web "Capabilities" (Hermes skills page as reference):
+Library as expandable cards with one-action "+ Add to this Agent"; drafts in the same
+list as installed assets; Remove / Discard in the detail pane. Decision:
+`docs/DECISIONS.md` (2026-10-15 "Switching off, removing and adding assets from Agent
+Web Capabilities"); row in `docs/TASKS.md`. Committed on main, not pushed.
+- Backend `host_runtime/asset_shelf.py`: switch off/on moves the manifest to/from the
+  kind's `disabled/` folder (the place superseded Skills already go; live engine stops
+  offering it); Remove moves it to `workspace/removed/<YYYY-MM-DD>/{skills,workflows}/`,
+  appends `workspace/removed/removed.jsonl`, drops the `state.sqlite` inventory row;
+  shipped manifests refused (`export-assets` writes them back) but may be switched off.
+- "+ Add to this Agent" (`AgentWeb.add_to_agent`): portal `select` as the member, then
+  `synchronize()`; reply carries `assets` + `sync.after`, the page redraws badge, left
+  list (new item selected), counts and status. Assets-only: a new Workflow is offered
+  live; Skills or platform-managed mode say "Restart Agent Web". "Remove selection" =
+  `revoke` + sync. Errors (not configured, no login, not enrolled =
+  `actor_not_admitted`, unreachable) explained, pointing to Settings > Shared platform.
+- The enable/disable toggle the owner mentioned did not exist before; it was built here.
+- Verified: ruff, mypy src clean; full suite 2713 passed, 6 skipped, 2 failed under
+  load (script timeouts in `test_release_run`, `test_script_tools`), both passed alone.
+  Headless check `.scratch/capabilities_ui.py` (sizes: chips/switch/buttons 44 px,
+  dialog 500x214, no horizontal scroll at 390 px; screenshots `.scratch/capabilities-ui/`).
+- NOT done: live check (owner). Restart Agent Web on this code, open Capabilities:
+  drafts show first with Install; on the Library card of `company-agent/sync-test`
+  (or another asset) press "+ Add to this Agent" and expect the badge to turn Installed
+  and the Workflow to appear selected on the left without F5.
+- Risks: removing a still-selected asset is reinstalled by the next sync (the reply says
+  so); a removed Workflow's schedules and settings are kept and would fail until it is
+  back; switched-on Skills need a restart.
+
+## Owner and who can use a member-published asset (2026-10-15, Claude Code)
 
 Goal: fix the live finding that `leo`'s two published assets were invisible to
 `leo.chi`, with the owner's five decisions. Design and decisions:
