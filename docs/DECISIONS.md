@@ -2479,3 +2479,43 @@ Rejected alternatives:
 - Self-enrolling a shared test workstation: it has a virtual member of its own; it
   stays an administrator's act.
 
+
+## 2026-10-15 — Owner and who can use a member-published asset
+
+Decision (owner): after the live finding that `leo`'s two published assets were
+invisible to `leo.chi` (`docs/phases/MEMBER_PUBLISH.md`, "Owner and who can use
+it"):
+1. A submission for a new name keeps the team or organization owner its manifest
+   declares when the submitter belongs to that group; otherwise the submitter owns
+   it. An existing name keeps its recorded owner.
+2. The publisher chooses the visibility when submitting (optional
+   `AssetSubmitRequest.visibility`; Agent Web select and `--visibility`).
+3. After publication the name's owner, a member of an owning team or a platform
+   administrator changes who may use it in the Member Portal. The decision is a
+   `NameAccess` record beside the name (visibility override plus extra members and
+   groups) in an additive `name_access` SQLite table; `schema_version` stays `1`.
+   `entitled` takes the record, and every caller goes through
+   `control_plane.distribution.entitled_in`, so catalog, select, replace and the
+   Bridge catalog agree. Narrowing access does not withdraw existing selections.
+4. Portal: valid-account placeholder and in-page check, a `reason`/`message` for
+   refused names, transparent session renewal from the stored login.
+5. `aep-host assets publish --file` and a read-only sample Workflow for the live
+   sync test.
+
+Reason: a team-declared asset owned by the person who happened to publish it is
+invisible to the team; and because packages are immutable, the only way to fix
+access after publication without a new version is a record beside the name, as
+deprecations already are.
+
+Rejected alternatives:
+- Keeping any declared owner: anybody could publish in another person's name.
+- Republishing a new version to change visibility: needs another review and leaves
+  older versions with the old answer.
+- Storing access inside the `name_owners` payload: code from before this change
+  parses that record strictly and could no longer open the database; a separate
+  table stays invisible to it.
+- Withdrawing selections when access narrows: would remove what a member already
+  installed, unlike deprecation; left for a later decision.
+- Refusing combinations that leave nobody but the owner (e.g. `team` on a
+  person-owned asset): the owner chose to keep it simple; the dialog explains the
+  effect instead.

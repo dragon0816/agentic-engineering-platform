@@ -1,6 +1,6 @@
 # Member publish to the Shared Platform
 
-Owner request: 2026-10-15. Status: **approved 2026-10-15. Control plane done (submission queue, review routes, Agent login, portal UI); Agent side (Agent Web button, CLI) next.**
+Owner request: 2026-10-15. Status: **approved 2026-10-15. Control plane, Agent Web and CLI done; owner and access decisions of 2026-10-15 (below) done, live test pending.**
 
 This closes the open item 5 of `docs/phases/ASSET_OWNERSHIP.md` ("member publish route
 and UI").
@@ -185,6 +185,50 @@ above both published and pending versions.
    account (`leo-review`). No `allow_self_review` switch.
 2. **Login storage.** The existing environment-variable credential.
 3. **Namespace.** The asset keeps its current namespace.
+
+## Owner and who can use it (owner decisions 2026-10-15)
+
+Live finding (2026-10-15, Shared Platform on 172.25.228.141): two assets
+published by `leo` were invisible to `leo.chi`. `submit` replaced the declared
+owner (`team engineering`) with the submitter (`user leo`) and kept the author's
+visibility `team`; `entitled` lets only that user see a user-owned `team` or
+`private` asset.
+
+Decisions:
+1. **Keep a declared team owner.** For a new name, a declared `team` or
+   `organization` owner is kept when the submitter belongs to it (their platform
+   groups); otherwise the submitter owns it. A declared person or service is
+   never kept. An existing name keeps its recorded owner.
+2. **The publisher chooses who may use it at submit time.** `AssetSubmitRequest`
+   takes an optional `visibility` (default: the manifest's). Agent Web's publish
+   card offers "As the Skill or Workflow says", "Only my team" and "Everyone in
+   the organization" and explains the effect; `aep-host assets publish
+   --visibility`. Any combination is allowed; the dialog says what it means.
+3. **Changing it later.** The name's owner, a member of an owning team or a
+   platform administrator changes who may use it in the Member Portal ("My
+   published assets"; administrators also see "All published assets"). The
+   decision is a `NameAccess` record beside the name: a visibility override plus
+   extra members and groups, stored in an additive `name_access` table
+   (`schema_version` unchanged). `entitled` applies it everywhere a member's
+   assets are listed, offered or accepted (portal catalog, `select`, `replace`,
+   Bridge `catalog` and therefore what a sync can install). Routes
+   `assets/access` and `assets/access/update`; anyone else gets
+   `not_name_owner`. Narrowing it does not withdraw selections already made.
+4. **Portal fixes.** The invitation Account field shows `leo.chi` and the rule
+   (letters, digits, `.` `-` `_`; no `@`) and checks it in the page; a refused
+   name answers `invalid_request` with `reason` `account_invalid` /
+   `group_invalid` and a message; the page renews its one-hour session from its
+   stored login and retries once instead of failing with `session_expired`.
+5. **Test asset.** `aep-host assets publish --file <manifest.json>` publishes a
+   manifest file instead of an installed asset. `deploy/samples/sync-test.workflow.json`
+   (`company-agent/sync-test`, owner team `engineering`, visibility
+   `organization`) reads only the personal-proof fixture.
+
+Fixing the two assets already published: the owner (`leo`) opens the Member
+Portal, "My published assets", presses "Who can use it" on each and chooses
+"Everyone in the organization" (or adds `leo.chi` as a member). Their recorded
+owner stays `user leo`; a transfer to team `engineering` (`assets/transfer`) is
+the alternative.
 
 ## Not in scope
 

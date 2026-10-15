@@ -457,6 +457,18 @@ the name's owner and both reviews pending. An administrator other than the
 submitter approves or rejects it. Only an approval publishes, as the submitter,
 under the ownership rules above.
 
+Owner and who can use it (owner decisions 2026-10-15). A new name keeps the team
+or organization owner its manifest declares when the submitter belongs to that
+group; otherwise the submitter owns it, and an existing name keeps its recorded
+owner. The publisher chooses the visibility when submitting. After publication
+the name's owner, a member of an owning team or a platform administrator decides
+who may use it in the Member Portal: a visibility that replaces what the
+versions declared, plus named members and groups. The decision is a record
+beside the name (published packages stay immutable), and every place that
+lists, offers or accepts an asset for a member applies it through one rule
+(`entitled` with the name's access record). Narrowing it does not withdraw
+selections already made, as with a deprecation.
+
 **Bridge self-enrollment (owner decisions 2026-10-15, `docs/phases/BRIDGE_ENROLLMENT.md`).**
 The member enrolls their own company workstation from Agent Web (Settings > Shared
 platform > Enroll this PC). The Agent calls the Member Portal's `bridges/enroll` with

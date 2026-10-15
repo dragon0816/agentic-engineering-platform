@@ -1554,6 +1554,16 @@ asset they come to the same answer, the owning group and nobody else, because
 the owning group is the team. A user-owned asset marked `team` names no team
 to check, so it stays with its owner.
 
+`entitled(..., access)` also takes the name's `common.identity.NameAccess`
+record (owner decision 2026-10-15): `namespace`, `name`, optional `visibility`
+(replaces every version's declared visibility), `members` and `groups` (unique;
+may use it whatever the visibility), `updated_by`, `updated_at`. A record for
+another name is a `ValueError`. The record never takes the asset away from its
+owner or a contributor. `control_plane.distribution.entitled_in(packages,
+metadata, actor, groups)` looks the record up; `available`, `select`, `replace`,
+the Bridge `catalog`, the administrator's extension catalog and ownership
+visibility all use it.
+
 `InMemoryAuthorizationRegistry.select(identity, selection)` and
 `revoke(identity, bridge_id, asset)` require an authenticated actor whose
 session is still valid (`session_expired`) and who is the member the decision
@@ -1955,6 +1965,10 @@ the same rule `entitled` uses); `may_publish` adds the co-editors.
 - `ownership(namespace, name)` and `save_ownership(updated, *, previous)`, a
   compare-and-set that refuses `ownership_changed` when the stored record is
   no longer `previous`, and `name_missing`.
+- `access(namespace, name)` and `save_access(access)` (2026-10-15): the
+  name's `NameAccess` record, replaced whole; `name_missing` for a name with
+  no versions. `SqliteRegistry` keeps it in an additive `name_access` table
+  (`schema_version` stays `1`).
 
 A package's artifact carries its own version, so the platform never
 renumbers a built package. `control_plane.ownership.AssetOwnershipService`
@@ -1990,7 +2004,8 @@ no actor.
 `PublishedAssetPackage` is published by definition), so the queue keeps its own
 `common.member.AssetSubmission`: id, kind (`skill` / `workflow`), the assigned
 identity, submitter, change level, optional note, artifact sha256, risk and
-required permissions, status (`pending` / `approved` / `rejected` /
+required permissions, the owner and visibility it will be published with
+(optional; absent on records from before 2026-10-15), status (`pending` / `approved` / `rejected` /
 `withdrawn`), reviewer, reason and times. A decision names its reviewer and
 time; a rejection gives its reason.
 
@@ -1999,8 +2014,11 @@ time; a rejection gives its reason.
   a member who may not publish the name, and refuses a Skill whose Workflow
   targets are neither published nor pending from the same member
   (`missing_dependency`). It assigns the next version above published and
-  pending ones, and keeps the name's owner (the submitter for a new name). It
-  sets `lifecycle: published` and resets both reviews to pending, keeping only
+  pending ones. The owner is the name's recorded owner; for a new name it is
+  the team or organization the manifest declares when the submitter belongs
+  to it (their platform groups), otherwise the submitter. The visibility is
+  the request's `visibility` or else the manifest's. It sets
+  `lifecycle: published` and resets both reviews to pending, keeping only
   the author's risk, permissions and policy refs. It appends a
   `member-submission` provenance entry, then stores the re-serialized
   manifest, at most 192 KiB (`artifact_too_large`).
@@ -2017,7 +2035,8 @@ time; a rejection gives its reason.
 lives in memory without one.
 
 Member portal operations:
-- `assets/submit` (`AssetSubmitRequest`: kind, change, note, manifest);
+- `assets/submit` (`AssetSubmitRequest`: kind, change, note, optional
+  `visibility` `private|team|organization|public`, manifest);
 - `assets/submissions`;
 - `assets/submissions/withdraw`;
 - administrator only: `admin/submissions/list|get|approve|reject`.
@@ -2025,6 +2044,22 @@ Member portal operations:
 New codes: `manifest_invalid` 400, `artifact_too_large` 413,
 `missing_dependency` / `submission_not_pending` / `version_superseded` 409,
 `submission_missing` 404, `self_review_refused` 403.
+
+Who can use a published name (2026-10-15):
+- `assets/access` (`AssetAccessListRequest`: `scope` `mine` | `all`) returns
+  `AssetAccessListReply` of `AssetAccessEntry` (namespace, name, kind, owner,
+  versions, `declared_visibility` of the highest version, effective
+  `visibility`, `access` record). `mine` is the names the member manages;
+  `all` is for a platform administrator (`not_name_owner` 403 otherwise).
+- `assets/access/update` (`AssetAccessUpdateRequest`: namespace, name,
+  `visibility` or null, `members`, `groups`) replaces the record; only the
+  owner, a member of an owning team or a platform administrator
+  (`not_name_owner` 403); an unknown member is `access_member_unknown` 400.
+  Selections already made are not withdrawn.
+
+A `ValidationError` on a name field (`actor`, `groups`, `members`,
+`co_editor`) answers `invalid_request` with `reason` `account_invalid` or
+`group_invalid` and a `message` stating the rule; the value is never echoed.
 
 `logins/issue-agent` issues a `Personal Agent` login for the signed-in member
 and returns its bearer once. The Agent trades it at `session` for one-hour
