@@ -36,8 +36,8 @@ def use_studio(server: AgentWebServer, tmp_path: Path, model: Scripted) -> Calls
 
 
 def test_start_discuss_preview_and_install_over_http(
-    served: AgentWebServer,
-    tmp_path: Path,  # noqa: F811
+    served: AgentWebServer,  # noqa: F811
+    tmp_path: Path,
 ) -> None:
     calls = use_studio(
         served,
@@ -89,8 +89,8 @@ def test_start_discuss_preview_and_install_over_http(
 
 
 def test_requests_need_the_token_and_a_bad_pdf_is_refused(
-    served: AgentWebServer,
-    tmp_path: Path,  # noqa: F811
+    served: AgentWebServer,  # noqa: F811
+    tmp_path: Path,
 ) -> None:
     use_studio(served, tmp_path, Scripted())
     url = base(served)

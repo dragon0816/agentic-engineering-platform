@@ -18,8 +18,8 @@ from host_runtime.web_page import PAGE
 
 
 def test_the_owner_decides_over_http_and_the_result_joins_the_conversation(
-    served: AgentWebServer,
-    tmp_path: Path,  # noqa: F811
+    served: AgentWebServer,  # noqa: F811
+    tmp_path: Path,
 ) -> None:
     chat, recorder = studio(tmp_path)
     served.web.runtime.chat_authoring = chat
@@ -79,8 +79,8 @@ def test_the_owner_decides_over_http_and_the_result_joins_the_conversation(
 
 
 def test_external_submissions_wait_in_their_own_list_with_the_whole_draft(
-    served: AgentWebServer,
-    tmp_path: Path,  # noqa: F811
+    served: AgentWebServer,  # noqa: F811
+    tmp_path: Path,
 ) -> None:
     from test_external_authoring import desk, skill
 
@@ -109,8 +109,8 @@ def test_external_submissions_wait_in_their_own_list_with_the_whole_draft(
 
 
 def test_the_owner_sees_drafts_not_yet_installed_and_installs_or_deletes_them(
-    served: AgentWebServer,
-    tmp_path: Path,  # noqa: F811
+    served: AgentWebServer,  # noqa: F811
+    tmp_path: Path,
 ) -> None:
     """Owner 2026-10-08: a Workflow that was only run once never shows up as
     installed; the draft list shows it, and Install is the owner's approval."""

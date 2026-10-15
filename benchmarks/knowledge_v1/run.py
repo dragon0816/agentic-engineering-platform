@@ -400,7 +400,8 @@ def main() -> int:
         )
         with lock:
             print(
-                f"{question['id']}: {result['status']} ({result.get('seconds')} s, {result['route']}) "
+                f"{question['id']}: {result['status']} ({result.get('seconds')} s, "
+                f"{result['route']}) "
                 f"{result.get('why', '')[:120]}",
                 flush=True,
             )
@@ -412,7 +413,8 @@ def main() -> int:
     report(out_dir, results, by_id, meta)
     bench.finish()
     print(
-        f"done: {len(results)} graded in {round(time.monotonic() - started)} s; see {out_dir / 'report.md'}"
+        f"done: {len(results)} graded in {round(time.monotonic() - started)} s; see "
+        f"{out_dir / 'report.md'}"
     )
     return 0
 

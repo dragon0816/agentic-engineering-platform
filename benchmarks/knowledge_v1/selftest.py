@@ -194,7 +194,9 @@ def compare_cases() -> int:
         markdown = compare.compare(runs, compare.load_questions())
         moved = compare.transitions(runs[0].results, runs[1].results, ["Q0001", "Q0002", "Q0011"])
     checks = {
-        "a partial run is compared on the shared questions": "| run-a | run-a | `abc1234` | 1.1 | 4 | 3 | 1 |"
+        "a partial run is compared on the shared questions": (
+            "| run-a | run-a | `abc1234` | 1.1 | 4 | 3 | 1 |"
+        )
         in markdown,
         "status counts": "| PASS | 1 | 1 |" in markdown and "| SYSTEM_ERROR | 1 | 0 |" in markdown,
         "route x status": "| run-b | direct | 1 | 1 | 0 | 0 | 0 | 0 | 100% |" in markdown,
@@ -206,10 +208,14 @@ def compare_cases() -> int:
             moved["counts"]["changed, same rank"],
         )
         == (1, 1, 1),
-        "transition rows with route change and reason": "| Q0001 | regressed | PASS → FAIL | direct → tool |"
+        "transition rows with route change and reason": (
+            "| Q0001 | regressed | PASS → FAIL | direct → tool |"
+        )
         in markdown
         and "reviewer: overreach / detail" in markdown,
-        "reviewer overreach share": "| run-a | 2 | 2 | 1 (50%) | 2 (100%) | 2 / 0 / 0 | 1 (50%) | 1.0 |"
+        "reviewer overreach share": (
+            "| run-a | 2 | 2 | 1 (50%) | 2 (100%) | 2 / 0 / 0 | 1 (50%) | 1.0 |"
+        )
         in markdown,
         "latency median and p90": "| run-a | tool | 2 | 310.0 | 600.0 |" in markdown,
         "citations and verification rate": "| run-b | 2 | 4 | 2.0 | 3 (75%) |" in markdown,
@@ -303,7 +309,8 @@ def main() -> int:
             ok = got["status"] == want
             wrong += 0 if ok else 1
             print(
-                f"{'PASS' if ok else 'FAIL'}  expected {want}, got {got['status']} ({got.get('why', '')})"
+                f"{'PASS' if ok else 'FAIL'}  expected {want}, got {got['status']} "
+                f"({got.get('why', '')})"
             )
     bank = load()
     picked = sample(bank)

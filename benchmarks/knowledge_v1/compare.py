@@ -145,7 +145,8 @@ def compare(runs: list[Run], questions: dict[str, dict[str, Any]]) -> str:
     lines = [
         "# knowledge_v1 run comparison",
         "",
-        "Generated offline by `benchmarks/knowledge_v1/compare.py` from the stored `result.json` files.",
+        "Generated offline by `benchmarks/knowledge_v1/compare.py` from the stored `result.json` "
+        "files.",
         "",
         "| Run | Started | Commit | Grader | Questions | Compared | Left out |",
         "|---|---|---|---|---|---|---|",
@@ -153,7 +154,8 @@ def compare(runs: list[Run], questions: dict[str, dict[str, Any]]) -> str:
     for run in runs:
         graders = sorted({str(r.get("grader")) for r in run.results.values()})
         lines.append(
-            f"| {run.name} | {run.meta.get('started', '')} | `{str(run.meta.get('commit', ''))[:7]}` | "
+            f"| {run.name} | {run.meta.get('started', '')} | "
+            f"`{str(run.meta.get('commit', ''))[:7]}` | "
             f"{', '.join(graders)} | {len(run.results)} | {len(shared)} | "
             f"{len(run.results) - len(shared)} |"
         )
@@ -251,10 +253,12 @@ def compare(runs: list[Run], questions: dict[str, dict[str, Any]]) -> str:
     lines += [
         "## Reviewer verdicts",
         "",
-        "Over answers the reviewer read (citations all verified); overreach = at least one claim listed "
+        "Over answers the reviewer read (citations all verified); overreach = at least one claim "
+        "listed "
         "as going beyond the passages.",
         "",
-        "| Run | Reviewed | Verdict given | Supported | Reasonable | Confidence high / medium / low "
+        "| Run | Reviewed | Verdict given | Supported | Reasonable | Confidence high / medium / "
+        "low "
         "| With overreach | Overreach items per answer |",
         "|---|---|---|---|---|---|---|---|",
     ]

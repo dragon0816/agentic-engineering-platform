@@ -70,8 +70,10 @@ def workflow_form_tools(engine: WorkflowEngine) -> tuple[HostTool, ...]:
             ModelTool(
                 name=FORM_TOOL,
                 description=(
-                    "Show the person the run form of an installed Workflow when they ask to run it. "
-                    "Give `workflow` and, in `values`, only run values the person already stated, by "
+                    "Show the person the run form of an installed Workflow when they ask to run "
+                    "it. "
+                    "Give `workflow` and, in `values`, only run values the person already stated, "
+                    "by "
                     "parameter name; never guess one. The form asks for the rest and shows which "
                     "settings are missing; settings are never run values. Nothing runs until the "
                     "person presses Run; the turn ends with the form."

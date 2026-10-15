@@ -57,7 +57,8 @@ def write(path: Path, text: str) -> None:
 def ok_t01(o: Path, _w: Path) -> None:
     write(
         o / "combined.md",
-        "## a\n第一行中文內容\n第二行：測試資料\n\n## b\nHello world\n\nThe line above is blank.\n\n## empty\n",
+        "## a\n第一行中文內容\n第二行：測試資料\n\n## b\nHello world\n\nThe line above is "
+        "blank.\n\n## empty\n",
     )
 
 
@@ -481,7 +482,9 @@ def run() -> int:
         "nested file merged",
         lambda o, w: write(
             o / "combined.md",
-            "## a\n第一行中文內容\n第二行：測試資料\n\n## b\nHello world\n\nThe line above is blank.\n\n## c\nnested file must not be merged\n\n## empty\n",
+            "## a\n第一行中文內容\n第二行：測試資料\n\n## b\nHello world\n\nThe line above is "
+            "blank.\n\n## "
+            "c\nnested file must not be merged\n\n## empty\n",
         ),
     )
     wrong(

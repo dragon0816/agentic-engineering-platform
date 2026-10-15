@@ -81,8 +81,8 @@ def test_a_file_belongs_to_its_conversation_and_goes_with_it(tmp_path: Path) -> 
 
 
 def test_a_turn_carries_the_files_to_the_model_and_remembers_their_paths(
-    served: AgentWebServer,
-    monkeypatch: pytest.MonkeyPatch,  # noqa: F811
+    served: AgentWebServer,  # noqa: F811
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     from agent.gateway import GatewayConversationResult
     from common.execution import TraceIdentifiers

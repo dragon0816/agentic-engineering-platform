@@ -92,8 +92,8 @@ def test_only_an_answer_carries_a_record_and_the_model_reads_it_with_the_text() 
 
 
 def test_a_stopped_turn_says_so_and_the_next_turn_sees_what_was_done(
-    served: AgentWebServer,
-    monkeypatch: pytest.MonkeyPatch,  # noqa: F811
+    served: AgentWebServer,  # noqa: F811
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     seen: list[Any] = []
 
@@ -148,8 +148,8 @@ def test_credential_shaped_text_is_redacted_not_refused() -> None:
 
 
 def test_a_reply_quoting_a_bearer_header_still_answers_the_turn(
-    served: AgentWebServer,
-    monkeypatch: pytest.MonkeyPatch,  # noqa: F811
+    served: AgentWebServer,  # noqa: F811
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     quoted = "登入後以 header Authorization: Bearer <token> 呼叫 GET /data。"
 

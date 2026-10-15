@@ -318,7 +318,10 @@ class Handler(BaseHTTPRequestHandler):
     def _login_page(self, query: dict[str, str]) -> None:
         notes = ""
         if query.get("expired"):
-            notes += "<p class='msg error' id='session-expired'>工作階段已逾時，請重新登入。 (Session expired)</p>"
+            notes += (
+                "<p class='msg error' id='session-expired'>工作階段已逾時，請重新登入。 (Session "
+                "expired)</p>"
+            )
         if query.get("failed"):
             notes += (
                 "<p class='msg error' id='login-error'>登入失敗，請再試一次。 (Sign-in failed)</p>"
@@ -394,10 +397,14 @@ class Handler(BaseHTTPRequestHandler):
         filters = (
             f"<form class='filters' method='get' action='/{name}' id='filter-form'>"
             f"<label for='f-customer'>Customer ID<input id='f-customer' name='customer' "
-            f"value='{html.escape(query.get('customer', ''))}'></label>{project_input}{date_inputs}{status_select}"
-            f"<label for='f-sort'>Sort by<select id='f-sort' name='sort'>{sort_options}</select></label>"
-            f"<label for='f-dir'>Order<select id='f-dir' name='dir'><option value='asc'>asc</option>"
-            f"<option value='desc'{' selected' if query.get('dir') == 'desc' else ''}>desc</option></select></label>"
+            f"value='{html.escape(query.get('customer', ''))}'></label>"
+            f"{project_input}{date_inputs}{status_select}"
+            f"<label for='f-sort'>Sort by<select id='f-sort' "
+            f"name='sort'>{sort_options}</select></label>"
+            f"<label for='f-dir'>Order<select id='f-dir' name='dir'><option "
+            f"value='asc'>asc</option>"
+            f"<option value='desc'{' selected' if query.get('dir') == 'desc' else ''}>"
+            "desc</option></select></label>"
             "<button type='submit' id='search'>Search</button></form>"
             "<div id='loading'>Loading… 查詢中</div>"
         )
@@ -407,9 +414,15 @@ class Handler(BaseHTTPRequestHandler):
                 f"<p><a id='export-csv' href='/{name}/export.csv?{urllib.parse.urlencode(keep)}'>"
                 "Export CSV (all filtered rows)</a></p>"
             )
-        count = f"<p id='result-count'>Total: <strong>{total}</strong> rows · Page {number} of {pages}</p>"
+        count = (
+            f"<p id='result-count'>Total: <strong>{total}</strong> rows · Page {number} of "
+            f"{pages}</p>"
+        )
         if not rows:
-            table = "<p class='msg info' id='empty-result'>查無資料（0 筆）。 No rows match the filters.</p>"
+            table = (
+                "<p class='msg info' id='empty-result'>查無資料（0 筆）。 No rows match the "
+                "filters.</p>"
+            )
         else:
             head = "".join(f"<th data-field='{c}'>{c}</th>" for c in spec["columns"])
             body_rows = []
@@ -501,7 +514,10 @@ class Handler(BaseHTTPRequestHandler):
                 + "</tr>"
                 for line in row["Lines"]
             )
-            body += f"<h2>Line items</h2><table id='line-items'><thead><tr>{head}</tr></thead><tbody>{lines}</tbody></table>"
+            body += (
+                f"<h2>Line items</h2><table "
+                f"id='line-items'><thead><tr>{head}</tr></thead><tbody>{lines}</tbody></table>"
+            )
         body += f"<p><a href='/{name}'>← Back to {spec['title']}</a></p>"
         self._send(200, page(f"{spec['title'][:-1]} {ident}", body, user))
 

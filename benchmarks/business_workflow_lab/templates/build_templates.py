@@ -167,7 +167,8 @@ def instructions(book: Workbook, rows: list[tuple[str, str, str]]) -> None:
         (
             "All sheets",
             "AmountTWD",
-            "原幣金額 × 匯率（fx_rates.csv），四捨五入 ROUND_HALF_UP 至兩位小數；不同幣別的原幣金額不可直接相加。",
+            "原幣金額 × 匯率（fx_rates.csv），四捨五入 ROUND_HALF_UP "
+            "至兩位小數；不同幣別的原幣金額不可直接相加。",
         ),
     ]
     for offset, (sheet_name, cell_ref, rule) in enumerate(common + rows, 4):
@@ -287,7 +288,8 @@ GROUP_RULE = (
     "Summary",
     "A4:F4 / row 5+",
     "彙總表：Group、SubGroup 為分組鍵（依題目要求，例如 Status、Currency、"
-    "EmployeeID、Category；不用時留空），Currency 為原幣，Amount 為該組原幣合計，AmountTWD 為該組 TWD 合計，"
+    "EmployeeID、Category；不用時留空），Currency 為原幣，Amount 為該組原幣合計，AmountTWD 為該組 "
+    "TWD 合計，"
     "Count 為筆數；全部 TWD 總額不得混加不同原幣。",
 )
 
@@ -304,7 +306,9 @@ def sales() -> Workbook:
             (
                 "Summary",
                 "B2",
-                "公式 =SUM(Details!I5:I{最後資料列})：Details 的 NetAmountTWD 合計；填入資料後把範圍延伸到最後一列，零筆時保留 I5:I5（結果為 0）。",
+                "公式 =SUM(Details!I5:I{最後資料列})：Details 的 NetAmountTWD "
+                "合計；填入資料後把範圍延伸到最後一列，零筆時保留 "
+                "I5:I5（結果為 0）。",
             ),
             GROUP_RULE,
         ],
@@ -332,13 +336,15 @@ def expense() -> Workbook:
             (
                 "Summary",
                 "B2",
-                "公式 =SUM(Details!I5:I{最後資料列})：Details 的 AmountTWD 合計；填入資料後把範圍延伸到最後一列，零筆時保留 I5:I5。",
+                "公式 =SUM(Details!I5:I{最後資料列})：Details 的 AmountTWD "
+                "合計；填入資料後把範圍延伸到最後一列，零筆時保留 I5:I5。",
             ),
             GROUP_RULE,
             (
                 "Exceptions",
                 "A4:D4 / row 5+",
-                "例外清單：原始 ExpenseID、EmployeeID、ExpenseDate 與原因；列入例外的費用仍須保留在 Details。",
+                "例外清單：原始 ExpenseID、EmployeeID、ExpenseDate "
+                "與原因；列入例外的費用仍須保留在 Details。",
             ),
         ],
     )
@@ -361,7 +367,8 @@ def quote() -> Workbook:
             (
                 "Summary",
                 "B2",
-                "公式 =SUM(Quotes!K5:K{最後資料列})：Quotes 的 NetAmountTWD 合計；填入資料後把範圍延伸到最後一列，零筆時保留 K5:K5。",
+                "公式 =SUM(Quotes!K5:K{最後資料列})：Quotes 的 NetAmountTWD "
+                "合計；填入資料後把範圍延伸到最後一列，零筆時保留 K5:K5。",
             ),
             GROUP_RULE,
         ],
@@ -399,7 +406,8 @@ def project() -> Workbook:
                 "Summary",
                 "A4:E4 / row 5+",
                 "每個專案一列：OrderTWD 訂單金額、InvoiceBalanceTWD 發票未收金額、"
-                "ApprovedExpenseTWD 核准支出、AcceptedQuoteTWD 已接受報價，皆為 TWD；各來源分開彙總，不互相加總。",
+                "ApprovedExpenseTWD 核准支出、AcceptedQuoteTWD 已接受報價，皆為 "
+                "TWD；各來源分開彙總，不互相加總。",
             ),
             (
                 "Summary",
@@ -409,7 +417,9 @@ def project() -> Workbook:
             (
                 "Exceptions",
                 "A4:D4 / row 5+",
-                "Source 為 Orders / Invoices / Expenses / Quotes，DocumentID 為來源文件 ID，Reason 為原因（例如 Overdue）。",
+                "Source 為 Orders / Invoices / Expenses / Quotes，DocumentID 為來源文件 "
+                "ID，Reason 為原因（例如 "
+                "Overdue）。",
             ),
         ],
     )

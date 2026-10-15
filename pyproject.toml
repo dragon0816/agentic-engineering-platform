@@ -72,6 +72,13 @@ extend-exclude = ["packages/*/*/vendor", "benchmarks/*/runs"]
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"]
 
+# Long lines inside text these files emit verbatim: the PowerShell UI Automation
+# script the smoke check runs, and the frozen fixture prompts whose bytes the
+# fixture manifest hashes. Re-wrapping either would change what they produce.
+[tool.ruff.lint.per-file-ignores]
+"benchmarks/business_workflow_lab/operator/smoke.py" = ["E501"]
+"benchmarks/coding_v1/fixtures/build_fixtures.py" = ["E501"]
+
 [tool.mypy]
 python_version = "3.11"
 strict = true

@@ -117,8 +117,8 @@ def test_agent_web_serves_the_authoring_tools_with_the_assistant_token(
 
 
 def test_settings_lists_installs_and_removes_for_a_coding_agent(
-    served: AgentWebServer,
-    tmp_path: Path,  # noqa: F811
+    served: AgentWebServer,  # noqa: F811
+    tmp_path: Path,
 ) -> None:
     home = tmp_path / "home"
     home.mkdir()
@@ -167,8 +167,8 @@ def test_settings_lists_installs_and_removes_for_a_coding_agent(
 
 @pytest.mark.skipif(_browser_missing(), reason="no Chromium browser is installed")
 def test_the_coding_agents_card_renders_in_a_real_browser(
-    served: AgentWebServer,
-    tmp_path: Path,  # noqa: F811
+    served: AgentWebServer,  # noqa: F811
+    tmp_path: Path,
 ) -> None:
     from integrations.browser import Browser
 

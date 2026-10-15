@@ -471,8 +471,10 @@ def web(root: Path) -> None:
     _write(
         root / "t12" / "b.html",
         '<!doctype html><html><head><meta charset="utf-8"></head><body>'
-        '<div class="item"><h2>NX-1</h2><p class="price">USD 399.50</p><p class="mem">Memory: 16384 MB</p></div>'
-        '<div class="item"><h2>NX-3</h2><p class="price">USD 1,250.00</p><p class="mem">Memory: 32 GB</p></div>'
+        '<div class="item"><h2>NX-1</h2><p class="price">USD 399.50</p><p class="mem">Memory: '
+        "16384 MB</p></div>"
+        '<div class="item"><h2>NX-3</h2><p class="price">USD 1,250.00</p><p class="mem">Memory: '
+        "32 GB</p></div>"
         "</body></html>",
     )
     _write(
@@ -501,7 +503,8 @@ def web(root: Path) -> None:
         )
         _write(
             root / "t13" / f"item{u.rsplit('/', 1)[1]}.html",
-            f'<!doctype html><html><head><meta charset="utf-8"></head><body><h1 class="name">{n}</h1>'
+            f'<!doctype html><html><head><meta charset="utf-8"></head><body><h1 '
+            f'class="name">{n}</h1>'
             f'<table class="spec">{rows}</table></body></html>',
         )
 

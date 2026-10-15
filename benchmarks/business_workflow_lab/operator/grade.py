@@ -229,7 +229,8 @@ def grade_workbook(
         if "Lines" in book.sheetnames:
             _, rows, _ = table(book["Lines"])
             got = sorted(
-                f"{text(r.get('QuoteID'))}|{text(r.get('ProductID'))}|{int(dec(r.get('Quantity')) or 0)}|"
+                f"{text(r.get('QuoteID'))}|{text(r.get('ProductID'))}|"
+                f"{int(dec(r.get('Quantity')) or 0)}|"
                 f"{dec(r.get('LineAmount'))}"
                 for r in rows
             )
@@ -269,7 +270,8 @@ def grade_workbook(
             )
             out.append(
                 check(
-                    "findings.md: boundary quotes need a human look (Q0012 due on 09-30, Q0015 accepted)",
+                    "findings.md: boundary quotes need a human look (Q0012 due on 09-30, Q0015 "
+                    "accepted)",
                     None,
                     [line for line in body.splitlines() if "Q0012" in line or "Q0015" in line][:4],
                 )

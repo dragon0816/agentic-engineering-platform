@@ -1239,7 +1239,9 @@ class ChatAuthoring:
                     data={
                         "approval_id": request.approval_id,
                         "summary": request.summary,
-                        "next": "Nothing is installed yet; it waits for the person's approval button.",
+                        "next": (
+                            "Nothing is installed yet; it waits for the person's approval button."
+                        ),
                     },
                 )
 
@@ -1317,8 +1319,10 @@ class ChatAuthoring:
             HostTool(
                 ModelTool(
                     name="authoring__preview_workflow",
-                    description="Preview a drafted Workflow: read steps run for real, other steps show "
-                    "what they would do; nothing changes.",
+                    description=(
+                        "Preview a drafted Workflow: read steps run for real, other steps show "
+                        "what they would do; nothing changes."
+                    ),
                     input_contract="host.authoring.preview.v1",
                     input_schema={
                         "type": "object",
@@ -1331,12 +1335,14 @@ class ChatAuthoring:
             HostTool(
                 ModelTool(
                     name="authoring__run_workflow",
-                    description="Run a drafted or installed Workflow once with run values. A Workflow "
-                    "whose steps only read runs now and returns its result; otherwise it "
-                    "waits for the person's approval button and nothing runs yet. If a "
-                    "platform run failed, fix the cause (revise the candidate when its "
-                    "steps were wrong) and run it again here; do not redo the work "
-                    "outside the Workflow.",
+                    description=(
+                        "Run a drafted or installed Workflow once with run values. A Workflow "
+                        "whose steps only read runs now and returns its result; otherwise it "
+                        "waits for the person's approval button and nothing runs yet. If a "
+                        "platform run failed, fix the cause (revise the candidate when its "
+                        "steps were wrong) and run it again here; do not redo the work "
+                        "outside the Workflow."
+                    ),
                     input_contract="host.authoring.run.v1",
                     input_schema={
                         "type": "object",
@@ -1349,8 +1355,10 @@ class ChatAuthoring:
             HostTool(
                 ModelTool(
                     name="authoring__install_workflow",
-                    description="Ask the person to install a drafted Workflow for reuse; it waits for "
-                    "their approval button.",
+                    description=(
+                        "Ask the person to install a drafted Workflow for reuse; it waits for "
+                        "their approval button."
+                    ),
                     input_contract="host.authoring.install.v1",
                     input_schema={
                         "type": "object",
@@ -1363,8 +1371,10 @@ class ChatAuthoring:
             HostTool(
                 ModelTool(
                     name="authoring__get_workflow",
-                    description="Show a drafted or installed Workflow in full (parameters and steps "
-                    "with their inputs), to check or revise it.",
+                    description=(
+                        "Show a drafted or installed Workflow in full (parameters and steps "
+                        "with their inputs), to check or revise it."
+                    ),
                     input_contract="host.authoring.get.v1",
                     input_schema={
                         "type": "object",

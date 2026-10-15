@@ -214,12 +214,15 @@ class ChangeProposals:
                 ModelTool(
                     name=PROPOSE_TOOL,
                     description=(
-                        "Propose a change to this Agent's settings or Capabilities. Nothing changes: "
+                        "Propose a change to this Agent's settings or Capabilities. Nothing "
+                        "changes: "
                         "the person sees a card with the before and after and presses Apply. Give "
                         "only the values that should change. Kinds and their values: "
                         "laya {ssh_host, ssh_port, ssh_user, remote_port, local_port, "
-                        "mode: off|shadow|active, confidence_threshold 0-1, timeout_ms, auto_tunnel}; "
-                        "shared_platform {member_portal_url, base_url (Bridge API URL), enroll: true}; "
+                        "mode: off|shadow|active, confidence_threshold 0-1, timeout_ms, "
+                        "auto_tunnel}; "
+                        "shared_platform {member_portal_url, base_url (Bridge API URL), enroll: "
+                        "true}; "
                         "model {provider: openai_compatible|ollama, alias, base_url (Gateway URL), "
                         "model, credential_secret (a name), credential_environment (a variable "
                         "name)}; telegram {enabled, senders: [{sender_id, actor}]}; "

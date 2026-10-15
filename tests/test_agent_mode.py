@@ -1051,7 +1051,8 @@ def test_permission_and_mail_cards_render_and_answer_in_a_real_browser(served: A
         labels = json.loads(
             str(
                 browser._evaluate(
-                    "JSON.stringify([...document.querySelectorAll('#mail-card .card-actions button')]"
+                    "JSON.stringify([...document.querySelectorAll('#mail-card .card-actions "
+                    "button')]"
                     ".map(b => b.textContent))"
                 )
             )

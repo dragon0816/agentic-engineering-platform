@@ -114,22 +114,26 @@ RERUN = {
         "rerun",
     ),
     "D01": (
-        "請使用你剛才產生的 workflow，不要修改程式碼，只改參數：員工 E002、期間 2026-08-01 到 2026-08-31。輸出檔名請自行決定，不要覆蓋第一次的結果。",
+        "請使用你剛才產生的 workflow，不要修改程式碼，只改參數：員工 E002、期間 2026-08-01 到 "
+        "2026-08-31。輸出檔名請自行決定，不要覆蓋第一次的結果。",
         "rerun",
     ),
     "C01": (
-        "請使用你剛才產生的 workflow，不要修改程式碼，只改參數：CustomerID C002、期間 2026-08-01 到 "
+        "請使用你剛才產生的 workflow，不要修改程式碼，只改參數：CustomerID C002、期間 2026-08-01 "
+        "到 "
         "2026-10-31。輸出檔名請自行決定，不要覆蓋第一次的結果。",
         "rerun",
     ),
     "X01": (
-        "請使用你剛才產生的 workflow，不要修改程式碼，只改參數：期間 2026-08-01 到 2026-08-31。輸出檔名請自行決定，不要覆蓋第一次的結果。",
+        "請使用你剛才產生的 workflow，不要修改程式碼，只改參數：期間 2026-08-01 到 "
+        "2026-08-31。輸出檔名請自行決定，不要覆蓋第一次的結果。",
         "rerun",
     ),
 }
 X02_ANSWER = (
     "費用限 C001 對應專案的 Approved；訂單排除 Cancelled；報價全部保留。關注條件為截至 2026-09-30 "
-    "已逾期未收的發票、缺收據費用、ValidUntil 小於 2026-09-30 且非 Accepted 的報價。使用附件匯率，不要用即時匯率。"
+    "已逾期未收的發票、缺收據費用、ValidUntil 小於 2026-09-30 且非 Accepted "
+    "的報價。使用附件匯率，不要用即時匯率。"
 )
 # `expense_app\b` is the mock's module, not an export named expense_approved_*.csv
 # (the looser pattern flagged fix-008 D02 and X01; notes only, no status change).
@@ -216,7 +220,8 @@ def prepare(task: str, folder: Path, help_text: str) -> tuple[Path, str]:
         f"- 今天日期：2026-10-06（Asia/Taipei）\n"
         f"- 本題 workspace：{workspace}\n"
         f"- 附件（在 workspace 的 input 資料夾）：\n{listing}\n"
-        f"- 交付物請寫到 workspace 的 output 資料夾；需要可重跑的 workflow 時，請建立成本平台的 workflow。"
+        f"- 交付物請寫到 workspace 的 output 資料夾；需要可重跑的 workflow 時，請建立成本平台的 "
+        f"workflow。"
     )
     (folder / "prompt.md").write_text(prompt + "\n", encoding="utf-8")
     return workspace, prompt
@@ -715,7 +720,8 @@ def classify(
             return "FAIL", None, "; ".join([how + " (the browser tool was available)", *notes])
         return (
             "BLOCKED",
-            "harness: no browser tool in the AEP conversation (web/act exists only as a Workflow step)",
+            "harness: no browser tool in the AEP conversation (web/act exists only as a Workflow "
+            "step)",
             "; ".join([how, *notes]),
         )
     if "quote" in systems and "quote" not in evidence:
@@ -832,7 +838,8 @@ def report(run_dir: Path, results: dict[str, dict[str, Any]], meta: dict[str, An
     lines = [
         f"# business_workflow_lab — {run_dir.name}",
         "",
-        f"Run at {meta['started']}, AEP commit `{meta['repo_commit']}`, model `{meta.get('model')}`, "
+        f"Run at {meta['started']}, AEP commit `{meta['repo_commit']}`, model "
+        f"`{meta.get('model')}`, "
         f"Agent Web chat (Gateway conversation). Synthetic data seed 20261006; source manifest "
         f"`{meta['source_sha256'][:12]}…`.",
         "",
@@ -845,7 +852,8 @@ def report(run_dir: Path, results: dict[str, dict[str, Any]], meta: dict[str, An
         "",
         "Status counts: " + ", ".join(f"{k} {v}" for k, v in sorted(counts.items())),
         "",
-        "| Task | Status | Code generated | Executed | Excel correct | Workflow rerun | Seconds | Repair loops "
+        "| Task | Status | Code generated | Executed | Excel correct | Workflow rerun | Seconds | "
+        "Repair loops "
         "| Interventions | Interfaces | Blocked layer / reason |",
         "|---|---|---|---|---|---|---|---|---|---|---|",
     ]
@@ -857,13 +865,16 @@ def report(run_dir: Path, results: dict[str, dict[str, Any]], meta: dict[str, An
             f"| {r['task_id']} | {r['status']} | {flag(r['code_generated'])} | "
             f"{flag(r['execution_succeeded'])} | {flag(r['excel_correct'])} | "
             f"{flag(r['workflow_rerun_succeeded'])} | {r['elapsed_seconds'] or ''} | "
-            f"{'' if r['repair_loops'] is None else r['repair_loops']} | {r['human_interventions']} | "
+            f"{'' if r['repair_loops'] is None else r['repair_loops']} | "
+            f"{r['human_interventions']} | "
             f"{', '.join(r['interfaces_used'])} | {why} |"
         )
     lines += [
         "",
-        "Columns are independent: *Excel correct* judges only the workbook against the template and the "
-        "expected answer; the interface requirement (browser / desktop GUI / CLI subprocess) decides BLOCKED "
+        "Columns are independent: *Excel correct* judges only the workbook against the template "
+        "and the "
+        "expected answer; the interface requirement (browser / desktop GUI / CLI subprocess) "
+        "decides BLOCKED "
         "separately. `–` means not applicable or not observable.",
         "",
         "## 3. Failed checks per task",
@@ -886,12 +897,17 @@ def report(run_dir: Path, results: dict[str, dict[str, Any]], meta: dict[str, An
     lines += [
         "## 4. Limits of this run",
         "",
-        "- Isolation: the Agent's restricted runner runs as the same Windows account and can read files that "
-        "account can read, so source data and answers under `operator/` were readable in principle. The run "
-        "scans every script the Agent ran for references to mock internals (`bypass_signals` in each result); "
+        "- Isolation: the Agent's restricted runner runs as the same Windows account and can read "
+        "files that "
+        "account can read, so source data and answers under `operator/` were readable in "
+        "principle. The run "
+        "scans every script the Agent ran for references to mock internals (`bypass_signals` in "
+        "each result); "
         "it cannot prove no bypass happened.",
-        "- Repair loops are derived from script exit codes (a failing run followed by another run).",
-        "- Formula cached values: openpyxl does not calculate formulas, so a missing cached value is recorded "
+        "- Repair loops are derived from script exit codes "
+        "(a failing run followed by another run).",
+        "- Formula cached values: openpyxl does not calculate formulas, so a missing cached value "
+        "is recorded "
         "as undecided, and totals are verified independently from the detail rows.",
         "",
     ]
@@ -995,7 +1011,8 @@ def main() -> int:
                 r = results[task]
                 bench.case_completed(task, r["status"], **case_attributes(r, run_dir / task))
                 print(
-                    f"{task}: {r['status']} ({r['elapsed_seconds']} s) {r.get('blocked_layer') or ''} "
+                    f"{task}: {r['status']} ({r['elapsed_seconds']} s) "
+                    f"{r.get('blocked_layer') or ''} "
                     f"{r['failure_reason'] or ''}",
                     flush=True,
                 )

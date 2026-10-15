@@ -262,8 +262,8 @@ def _message(sock: socket.socket) -> dict[str, Any]:
 
 
 def test_atlas_reads_runs_events_and_the_stream_without_the_token(
-    served: Any,
-    store: TelemetryStore,  # noqa: F811
+    served: Any,  # noqa: F811
+    store: TelemetryStore,
 ) -> None:
     with telemetry.run("capability_call", trace_id="trace-x"):
         telemetry.emit("state.entered", status="started", state="model")

@@ -172,7 +172,7 @@ def test_the_platform_keeps_the_newest_rating_of_each_answer(
 
 
 def test_a_bridge_uploads_only_its_own_feedback_over_the_wire(
-    platform: Platform,
+    platform: Platform,  # noqa: F811
     server: ControlPlaneServer,  # noqa: F811
 ) -> None:
     base = f"http://127.0.0.1:{server.server_address[1]}"

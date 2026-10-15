@@ -145,7 +145,8 @@ def classify(
         return (
             "BLOCKED",
             "environment",
-            "no output was produced; the Agent had no usable tool to read the workspace, write files "
+            "no output was produced; the Agent had no usable tool to read the workspace, write "
+            "files "
             f"or run code ({tried})",
         )
     failed = [c["name"] for c in checks if c["passed"] is not True]
@@ -282,7 +283,6 @@ def run_task(
     first = session.send(prompt, TIME_LIMIT_S)
     interventions: list[dict[str, Any]] = []
     asked = False
-    clarification_wait = 0.0
     if task == "T20" and not first["timed_out"]:
         reply = answer_text(first)
         # A request for the value counts as asking even without a question mark
@@ -440,7 +440,8 @@ def run_task(
     limitations = [
         "repair loops and first-attempt success are not observable: the Gateway trace records tool "
         "calls per turn, not program edits or reruns",
-        "attachments are given as workspace paths in the prompt: Agent Web chat has no upload entry",
+        "attachments are given as workspace paths in the prompt: "
+        "Agent Web chat has no upload entry",
     ]
     if task == "T20" and not fault["injected"]:
         limitations.append(
@@ -620,16 +621,20 @@ def report(
             else ""
         ),
         "",
-        "Evidence per task: `T??/prompt.md`, `T??/trace.json`, `T??/result.json`, `T??/workspace/`. "
-        "Rerun: `python benchmarks/coding_v1/run.py --run-id <new-id> --tasks all` (see README.md).",
+        "Evidence per task: `T??/prompt.md`, `T??/trace.json`, `T??/result.json`, "
+        "`T??/workspace/`. "
+        "Rerun: `python benchmarks/coding_v1/run.py --run-id <new-id> --tasks all` "
+        "(see README.md).",
         "",
         "## Setup",
         "",
         f"- Repository commit: `{meta['repo_commit']}`",
-        f"- Entry point: Agent Web chat (`/api/conversations/turn`), one new session per task",
+        "- Entry point: Agent Web chat (`/api/conversations/turn`), one new session per task",
         f"- Model: {meta['model']}",
-        f"- Fixture manifest SHA-256: `{meta['fixture_manifest_sha256']}`; validator {VALIDATOR_VERSION}",
-        f"- Budget: {TIME_LIMIT_S} s per task; tool calls bounded by the Gateway loop (4 per turn before commit fea13ff, 8 from it on: fix-run-003 and later)",
+        f"- Fixture manifest SHA-256: `{meta['fixture_manifest_sha256']}`; validator "
+        f"{VALIDATOR_VERSION}",
+        f"- Budget: {TIME_LIMIT_S} s per task; tool calls bounded by the Gateway loop (4 per turn "
+        f"before commit fea13ff, 8 from it on: fix-run-003 and later)",
         "",
         "## Results",
         "",
@@ -648,10 +653,12 @@ def report(
         codes = script_runs(r.get("trace_path"))
         loops = derived_loops(codes)
         lines.append(
-            f"| {task} | {r['status']} | {r.get('tool_calls') if r.get('tool_calls') is not None else ''} | "
+            f"| {task} | {r['status']} | "
+            f"{r.get('tool_calls') if r.get('tool_calls') is not None else ''} | "
             f"{codes if codes else ''} | {'' if loops is None else loops} | "
             f"{r.get('duration_seconds') if r.get('duration_seconds') is not None else ''} | "
-            f"{r.get('human_interventions') if r.get('human_interventions') is not None else ''} | {reason} |"
+            f"{r.get('human_interventions') if r.get('human_interventions') is not None else ''} "
+            f"| {reason} |"
         )
     lines += [
         "",
@@ -667,7 +674,8 @@ def report(
         else "- Median duration: n/a",
         f"- Median tool calls: {statistics.median(calls)}" if calls else "- Median tool calls: n/a",
         first_attempt(results),
-        "- Repair loops above are derived from script exit codes (a failing run followed by another "
+        "- Repair loops above are derived from script exit codes (a failing run followed by "
+        "another "
         "run); `results.jsonl` keeps them null because the trace has no explicit edit events.",
         "",
     ]
@@ -733,7 +741,8 @@ def main() -> int:
             )
             print(
                 f"{task}: {results[task]['status']} ({results[task]['duration_seconds']} s, "
-                f"{results[task]['tool_calls']} tool calls) {results[task]['failure_reason'] or ''}",
+                f"{results[task]['tool_calls']} tool calls) "
+                f"{results[task]['failure_reason'] or ''}",
                 flush=True,
             )
             for other in ALL:
