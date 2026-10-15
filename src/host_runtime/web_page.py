@@ -2937,7 +2937,8 @@ form.addEventListener("submit", (event) => {
     } catch (failure) {
       entry.state = "failed"; entry.error = failure.message;
       showPendingState(entry);
-    } finally { watching.stop(); avatarWorking(-1); }
+    } finally { avatarWorking(-1); }
+    watching.stop();
     try {
       if (session === activeConversation) await loadConversations(session);
       else { conversationRows = (await call("/api/conversations")).conversations;
