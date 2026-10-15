@@ -962,6 +962,17 @@ tr:last-child td { border-bottom: none; }
         </form>
       </details>
     </div>
+    <div class="card settings" id="coding-agents-card" style="margin-top: 14px">
+      <h2>Coding agents</h2>
+      <p class="note">Claude Code, Codex and GitHub Copilot on this computer get AEP's skills
+        (build AEP Workflows and Skills, use AEP Knowledge) and two MCP servers in their own
+        user settings: <code>aep</code> (authoring) and <code>aep-assistant</code> (Knowledge
+        and Workflows, through this Agent Web). Only AEP's entries are changed; a file is backed
+        up before it is edited.</p>
+      <div id="coding-agents" class="empty">reading&hellip;</div>
+      <p id="coding-agents-result" class="note" role="status"
+        style="white-space: pre-wrap; overflow-wrap: anywhere"></p>
+    </div>
     <div class="card settings" style="margin-top: 14px">
       <h2>Agent profile</h2>
       <p class="note">Profiles narrow the Agent's Skills, Knowledge, capabilities and
@@ -3319,6 +3330,60 @@ el("mcp-form").addEventListener("submit", async (event) => {
   } finally { button.disabled = false; }
 });
 
+function renderCodingAgents(listed) {
+  const box = el("coding-agents");
+  box.className = ""; box.replaceChildren();
+  for (const agent of listed.agents) {
+    const card = document.createElement("div"); card.className = "approval-card";
+    card.dataset.agent = agent.agent;
+    const title = document.createElement("strong");
+    title.textContent = agent.label + " — " + (agent.detected ? "found on this computer"
+      : "not found on this computer");
+    const skills = document.createElement("p");
+    skills.textContent = "Skills: " + listed.skills.map((name) => {
+      const v = agent.skills[name];
+      return name + " " + (v === null ? "not installed" : v === "yours"
+        ? "(your own, kept)" : v === listed.version ? "installed" : "out of date");
+    }).join(", ");
+    const servers = document.createElement("p");
+    const registered = (on) => on ? "registered" : "not registered";
+    servers.textContent = "MCP: authoring (aep) " + registered(agent.servers.aep)
+      + "; Knowledge (aep-assistant) " + registered(agent.servers["aep-assistant"]);
+    const where = document.createElement("p"); where.className = "note";
+    where.style.overflowWrap = "anywhere";
+    where.textContent = agent.problem || (agent.skills_dir + " · " + agent.mcp_file);
+    const install = document.createElement("button"); install.type = "button";
+    install.className = "go";
+    install.textContent = agent.current ? "Reinstall" : agent.installed ? "Update" : "Install";
+    install.disabled = !listed.writable;
+    const remove = document.createElement("button"); remove.type = "button";
+    remove.className = "reject"; remove.textContent = "Remove"; remove.hidden = !agent.installed;
+    const act = async (action) => {
+      const result = el("coding-agents-result");
+      if (action === "remove" && !confirm("Remove AEP's skills and MCP servers from "
+        + agent.label + "?")) return;
+      install.disabled = remove.disabled = true; result.textContent = "Working…";
+      try {
+        const done = await call("/api/coding-agents/" + action, {agent: agent.agent});
+        renderCodingAgents(done);
+        el("coding-agents-result").textContent = (done.lines || []).join("\n")
+          + (done.ok ? "\nRestart " + agent.label + " to use the change." : "");
+      } catch (failure) {
+        result.textContent = "Not changed: " + failure.message;
+        install.disabled = remove.disabled = false;
+      }
+    };
+    install.addEventListener("click", () => act("install"));
+    remove.addEventListener("click", () => act("remove"));
+    card.append(title, skills, servers, where, install, remove);
+    box.append(card);
+  }
+}
+
+async function loadCodingAgents() {
+  renderCodingAgents(await call("/api/coding-agents"));
+}
+
 async function loadSettings() {
   const settings = await call("/api/settings"), model = settings.model,
     persona = settings.persona;
@@ -3328,6 +3393,7 @@ async function loadSettings() {
   showTelegram(settings.telegram);
   loadSharedPlatform().catch(() => {});
   loadLaya().catch(() => {});
+  loadCodingAgents().catch(() => {});
   el("persona-result").textContent =
     "Saved locally. Changes apply to the next natural-language turn.";
   el("model-provider").value = model.provider || "openai_compatible";

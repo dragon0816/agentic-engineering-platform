@@ -28,14 +28,20 @@ BACKEND_TIMEOUT_SECONDS = 90
 # The Copilot agent mode reads Knowledge through AEP's tools, several calls per turn.
 AGENT_TIMEOUT_SECONDS = 300
 AGENT_MCP_FILE = "copilot-agent-mcp.json"
+AGENT_SKILLS = ("aep-workflow-creator", "aep-skill-creator", "aep-knowledge")
 AGENT_POLICY = (
     "You are GitHub Copilot answering inside AEP, a company engineering agent. You may use "
-    "only the `aep` tools. For anything about the company's products, options, standards, "
-    "markets or competitors, look it up with aep_knowledge_search and aep_knowledge_read "
-    "(try English and Chinese wording) or ask aep_knowledge_ask, and name the page paths "
-    "your answer relies on. Say what the knowledge base does not cover instead of guessing. "
-    "Run a Workflow only with aep_run_workflow, and never claim one ran when the tool says "
-    "the person must run it. Do not write files or run commands."
+    "only the `aep-assistant` and `aep` tools. For anything about the company's products, "
+    "options, standards, markets or competitors, look it up with aep_knowledge_search and "
+    "aep_knowledge_read (try English and Chinese wording) or ask aep_knowledge_ask, and name "
+    "the page paths your answer relies on. Say what the knowledge base does not cover instead "
+    "of guessing. Run an installed Workflow only with the `aep-assistant` aep_run_workflow, "
+    "and never claim one ran when the tool says the person must run it. To build a new "
+    "Workflow or Skill for AEP, follow the aep-workflow-creator or aep-skill-creator skill "
+    "with the `aep` tools (aep_catalog, aep_workflow_format, aep_capability, "
+    "aep_check_workflow, aep_submit_workflow, ...); "
+    "when the request is unclear, reply with short questions first. Do not write files or "
+    "run commands."
 )
 AUTH_STATUS_TIMEOUT_SECONDS = 10
 
@@ -154,6 +160,7 @@ SPECS = (
             "--no-ask-user",
             "--disable-builtin-mcps",
             "--allow-tool=aep",
+            "--allow-tool=aep-assistant",
             "--deny-tool=shell",
             "--deny-tool=write",
         ),
@@ -322,7 +329,8 @@ class LocalConversationBackends:
         self._unavailable: dict[ConversationBackendName, str] = {}
         self._authentication_processes: dict[ConversationBackendName, AuthenticationProcess] = {}
         self._authenticated_this_run: set[ConversationBackendName] = set()
-        # (MCP URL, assistant token) of the running Agent Web, for the agent mode.
+        # (MCP URL, assistant token) of the running Agent Web, for the agent mode;
+        # its authoring tools are at the same URL + "/authoring".
         self.agent_mcp: tuple[str, str] | None = None
 
     def _authentication(
@@ -499,10 +507,18 @@ class LocalConversationBackends:
                     backend=backend, status="unavailable", code="assistant_tools_unavailable")
             url, token = self.agent_mcp
             config = self.root / AGENT_MCP_FILE
-            config.write_text(json.dumps({"mcpServers": {"aep": {
-                "type": "http", "url": url, "tools": ["*"],
-                "headers": {"Authorization": f"Bearer {token}"}}}}), encoding="utf-8")
-            extra = ["--additional-mcp-config", f"@{config}"]
+            headers = {"Authorization": f"Bearer {token}"}
+            # The same server names as the person's own user-level setup
+            # (agent_setup.py), so these replace those for this session: the
+            # Knowledge and Workflow tools, and the authoring tools, both
+            # served by this Agent Web.
+            config.write_text(json.dumps({"mcpServers": {
+                "aep-assistant": {"type": "http", "url": url, "tools": ["*"],
+                                  "headers": headers},
+                "aep": {"type": "http", "url": url.rstrip("/") + "/authoring",
+                        "tools": ["*"], "headers": headers}}}), encoding="utf-8")
+            self._write_agent_skills()
+            extra = ["--additional-mcp-config", f"@{config}", "--add-dir", str(self.root)]
             timeout = AGENT_TIMEOUT_SECONDS
             prompt = self._prompt(history, persona_guidance, max_history_messages,
                                   policy=AGENT_POLICY)
@@ -536,6 +552,19 @@ class LocalConversationBackends:
                 backend=backend, status="failed", code="backend_empty_response"
             )
         return ConversationBackendResult(backend=backend, status="answered", text=answer)
+
+    def _write_agent_skills(self) -> None:
+        """AEP's skills where the Copilot agent reads them (`.github/skills` of
+        its working folder, trusted through --add-dir), whatever the person's
+        own Copilot configuration holds."""
+        from host_runtime.agent_setup import skill_text
+
+        for name in AGENT_SKILLS:
+            target = self.root / ".github" / "skills" / name / "SKILL.md"
+            text = skill_text(name)
+            if not target.is_file() or target.read_text(encoding="utf-8") != text:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text(text, encoding="utf-8")
 
     @staticmethod
     def _prompt(

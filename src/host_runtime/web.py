@@ -1146,6 +1146,58 @@ class AgentWeb:
             self._assistant_tools = AssistantTools(self)
         return assistant_handle(self._assistant_tools, message)
 
+    # -- Coding agents (owner 2026-10-15, EXTERNAL_AUTHORING "Default user-level setup")
+
+    def _agent_environment(self) -> Any:
+        from host_runtime.agent_setup import Environment
+
+        return getattr(self, "agent_environment", None) or Environment.current()
+
+    def coding_agents(self) -> dict[str, Any]:
+        """For each coding agent: found here, AEP skills (version) and MCP servers."""
+        from host_runtime.agent_setup import AGENT_NAMES, SERVERS, SKILLS, bundle_version, status
+
+        environment = self._agent_environment()
+        return {"ok": True, "version": bundle_version(), "skills": list(SKILLS),
+                "servers": list(SERVERS), "writable": self.config_path is not None,
+                "agents": [status(agent, environment) for agent in AGENT_NAMES]}
+
+    def coding_agent_action(self, action: str, body: dict[str, Any]) -> dict[str, Any]:
+        """Install/update or remove AEP's skills and servers for one agent, the
+        same code `aep-host assets connect --user` runs."""
+        from host_runtime.agent_setup import AGENT_NAMES, Launch, apply
+        from host_runtime.launcher import console_python
+
+        agent = body.get("agent")
+        if action not in ("install", "remove") or agent not in AGENT_NAMES:
+            return {"ok": False, "code": "coding_agent_request_invalid"}
+        if action == "install" and self.config_path is None:
+            return {"ok": False, "code": "host_config_unknown"}
+        launch = None if self.config_path is None else Launch(console_python(), self.config_path)
+        lines = apply("install" if action == "install" else "remove", (agent,),
+                      self._agent_environment(), launch, only_detected=False)
+        ok = not any(": not changed (" in line for line in lines)
+        return {**self.coding_agents(), "ok": ok, "lines": lines}
+
+    def authoring_mcp(self, message: dict[str, Any]) -> dict[str, Any] | None:
+        """AEP's authoring tools over the same loopback MCP endpoint
+        (`/mcp/authoring`), for the Copilot agent mode: the creator skills
+        need them, and this Agent Web already holds the authoring state, so no
+        second Host is assembled per turn (owner 2026-10-15)."""
+        if getattr(self, "_authoring_server", None) is None:
+            from host_runtime.external_authoring import ExternalAuthoring
+            from host_runtime.mcp_server import Server
+
+            def factory() -> ExternalAuthoring:
+                chat = self.runtime.chat_authoring
+                if chat is None:
+                    raise ChatAuthoringError("authoring_unavailable")
+                return ExternalAuthoring(chat, self.runtime.actor, "copilot")
+
+            self._authoring_server = Server(factory, "agent-web")
+        reply: dict[str, Any] | None = self._authoring_server.handle(message)
+        return reply
+
     def assistant_mcp_config(self, base_url: str) -> dict[str, Any]:
         """The MCP blocks for VS Code (`.vscode/mcp.json`) and the Copilot CLI."""
         server = {"type": "http", "url": base_url.rstrip("/") + "/mcp",
@@ -3913,8 +3965,11 @@ class _Handler(BaseHTTPRequestHandler):
                              "error": {"code": -32700, "message": "parse error"}})
             return
         batch = message if isinstance(message, list) else [message]
+        serve = (self.server.web.authoring_mcp
+                 if urlparse(self.path).path == "/mcp/authoring"
+                 else self.server.web.assistant_mcp)
         replies = [reply for item in batch if isinstance(item, dict)
-                   for reply in [self.server.web.assistant_mcp(item)] if reply is not None]
+                   for reply in [serve(item)] if reply is not None]
         if not replies:
             self.send_response(202)
             self.send_header("Content-Length", "0")
@@ -4092,6 +4147,8 @@ class _Handler(BaseHTTPRequestHandler):
             self._json(200, web.approvals(session_id))
         elif parsed.path == "/api/mcp":
             self._json(200, web.mcp_servers())
+        elif parsed.path == "/api/coding-agents":
+            self._json(200, web.coding_agents())
         elif parsed.path == "/api/settings/workflows":
             self._json(200, web.workflow_settings())
         elif parsed.path == "/api/backends":
@@ -4117,7 +4174,7 @@ class _Handler(BaseHTTPRequestHandler):
             refusal = {"error": "this interface answers on the loopback address only"}
             self._refuse_unread(403, refusal)
             return
-        if urlparse(self.path).path == "/mcp":
+        if urlparse(self.path).path in ("/mcp", "/mcp/authoring"):
             self._assistant_mcp()
             return
         if not self._authorized():
@@ -4160,6 +4217,8 @@ class _Handler(BaseHTTPRequestHandler):
             "/api/mcp/save",
             "/api/mcp/delete",
             "/api/mcp/reconnect",
+            "/api/coding-agents/install",
+            "/api/coding-agents/remove",
             "/api/settings/workflows",
             "/api/workflow-options",
             "/api/workflow-uploads",
@@ -4318,6 +4377,13 @@ class _Handler(BaseHTTPRequestHandler):
             except (OSError, ValueError, TypeError):
                 self._json(400, {"error": "the request was not valid model settings"})
                 return
+            self._json(200 if result.get("ok") else 409, result)
+            return
+        if path in ("/api/coding-agents/install", "/api/coding-agents/remove"):
+            if not isinstance(body, dict):
+                self._json(400, {"ok": False, "code": "coding_agent_request_invalid"})
+                return
+            result = self.server.web.coding_agent_action(path.rsplit("/", 1)[1], body)
             self._json(200 if result.get("ok") else 409, result)
             return
         if path in ("/api/mcp/save", "/api/mcp/delete", "/api/mcp/reconnect"):

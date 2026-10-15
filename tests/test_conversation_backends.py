@@ -298,11 +298,38 @@ def test_copilot_agent_gets_only_aeps_tools_through_the_running_agent_web(
     config_arg = argv[argv.index("--additional-mcp-config") + 1]
     config = json.loads((tmp_path / ".conversation-backends" / AGENT_MCP_FILE)
                         .read_text(encoding="utf-8"))
-    assert config_arg.startswith("@") and config["mcpServers"]["aep"]["url"].endswith("/mcp")
-    assert config["mcpServers"]["aep"]["headers"]["Authorization"] == "Bearer assistant-token"
+    servers = config["mcpServers"]
+    assert config_arg.startswith("@") and servers["aep-assistant"]["url"].endswith("/mcp")
+    assert servers["aep-assistant"]["headers"]["Authorization"] == "Bearer assistant-token"
+    # The authoring tools come from the same Agent Web, with the same token.
+    assert servers["aep"]["url"] == "http://127.0.0.1:5000/mcp/authoring"
+    assert servers["aep"]["headers"] == servers["aep-assistant"]["headers"]
+    assert "--allow-tool=aep-assistant" in argv
+    # AEP's skills are in the agent's trusted working folder.
+    root = tmp_path / ".conversation-backends"
+    assert argv[argv.index("--add-dir") + 1] == str(root)
+    for name in ("aep-workflow-creator", "aep-skill-creator", "aep-knowledge"):
+        assert (root / ".github" / "skills" / name / "SKILL.md").is_file()
+    assert "aep-workflow-creator" in call["input"]
     assert "aep_knowledge_search" in call["input"] and "Do not use tools" not in call["input"]
     assert call["timeout"] == AGENT_TIMEOUT_SECONDS
     statuses = {item.name: item for item in backends.statuses(gateway_available=True)}
     # Listed for the person to choose; like copilot, it asks for a sign-in first.
     assert statuses["copilot_agent"].selectable is True
     assert statuses["copilot_agent"].action == "authenticate"
+
+
+def test_the_text_only_backends_never_load_the_persons_agent_setup() -> None:
+    """The user-level AEP setup (agent_setup.py) is for the person's own sessions.
+    The text-only chat backends stay tool-less (2026-10-02 backend rule): they
+    ignore user MCP servers and settings; only the Copilot agent mode gets
+    AEP's tools and skills, passed explicitly."""
+    from host_runtime.conversation_backends import SPECS
+
+    arguments = {spec.name: spec.arguments for spec in SPECS}
+    assert {"--strict-mcp-config", "--restricted", "--safe-mode"} <= set(
+        arguments["claude_code"])
+    assert arguments["claude_code"][arguments["claude_code"].index("--tools") + 1] == ""
+    assert "--ignore-user-config" in arguments["codex"]
+    assert "--sandbox" in arguments["codex"]
+    assert "--available-tools=" in arguments["copilot"]
