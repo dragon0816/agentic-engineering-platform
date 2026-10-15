@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import importlib.util
 import sys
 import sysconfig
 from pathlib import Path
@@ -14,6 +15,12 @@ from capabilities.coding_change.contracts import CodingHostBinding  # noqa: E402
 from capabilities.coding_change.manifest import coding_skill, run_python_workflow  # noqa: E402
 from capabilities.coding_change.run_python import RunPythonHandler, RunPythonRequest  # noqa: E402
 from capabilities.runtime import CapabilityRefused  # noqa: E402
+
+requires_win32 = pytest.mark.skipif(
+    importlib.util.find_spec("win32api") is None,
+    reason="needs pywin32 (the windows extra); CI installs only dev,office",
+)
+
 
 BASE_PYTHON = str(Path(getattr(sys, "_base_executable", sys.executable)))
 SITE = {"PYTHONPATH": sysconfig.get_paths()["purelib"]}
@@ -35,6 +42,7 @@ def task(tmp_path: Path) -> Path:
     return workspace
 
 
+@requires_win32
 def test_a_script_reads_input_writes_output_and_its_result_comes_back(tmp_path: Path) -> None:
     workspace = task(tmp_path)
     run = handler(tmp_path / "tasks").run(RunPythonRequest(workspace=str(workspace), script=(
@@ -47,6 +55,7 @@ def test_a_script_reads_input_writes_output_and_its_result_comes_back(tmp_path: 
     assert (workspace / run.script_path).is_file()
 
 
+@requires_win32
 def test_input_and_other_folders_are_not_writable_and_a_failure_is_returned(tmp_path: Path) -> None:
     workspace = task(tmp_path)
     outside = tmp_path / "outside.txt"
@@ -83,6 +92,7 @@ def test_the_skill_says_when_not_to_use_it() -> None:
     assert names == ["workspace", "script"]
 
 
+@requires_win32
 def test_a_workflow_step_gives_the_same_script_new_values(tmp_path: Path) -> None:
     """G4: a saved script reruns with new run values and unchanged code."""
     import asyncio

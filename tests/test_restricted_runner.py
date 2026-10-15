@@ -1,11 +1,18 @@
 """Restricted Windows execution for generated code (CODING_ON_BRIDGE C2)."""
 
+import importlib.util
 import sys
 from pathlib import Path
 
 import pytest
 
-pytestmark = pytest.mark.skipif(sys.platform != "win32", reason="Windows execution limits")
+pytestmark = [
+    pytest.mark.skipif(sys.platform != "win32", reason="Windows execution limits"),
+    pytest.mark.skipif(
+        importlib.util.find_spec("win32api") is None,
+        reason="needs pywin32 (the windows extra); CI installs only dev,office",
+    ),
+]
 
 from harness.restricted_runner import (  # noqa: E402
     RestrictedRunner,

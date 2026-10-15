@@ -7,6 +7,7 @@ are the same afterwards, and the plan is the only output.
 """
 
 import asyncio
+import importlib.util
 import json
 from pathlib import Path
 from typing import Any
@@ -47,6 +48,12 @@ from integrations import excel
 from integrations.excel import digest_rows
 from integrations.excel_writer import owner_file
 from models.credentials import StaticCredentials
+
+requires_matplotlib = pytest.mark.skipif(
+    importlib.util.find_spec("matplotlib") is None,
+    reason="needs matplotlib (the weekly-mail extra); CI installs only dev,office",
+)
+
 
 openpyxl = pytest.importorskip("openpyxl")
 
@@ -585,6 +592,7 @@ def test_the_whole_report_writes_the_plan_and_carries_the_evidence(tmp_path: Pat
     assert "upsert" in writer.names and writer.closed_saving is True
 
 
+@requires_matplotlib
 def test_one_run_writes_the_workbook_then_drafts_the_mail(tmp_path: Path) -> None:
     """Source Workflow 11 in one trigger: the report is written, then the
     week's mail is saved as a draft (never sent)."""
@@ -676,6 +684,7 @@ def test_drafting_the_mail_needs_an_approval(tmp_path: Path) -> None:
     assert drafter.drafts == []
 
 
+@requires_matplotlib
 def test_a_host_without_outlook_says_so_rather_than_failing_to_assemble(tmp_path: Path) -> None:
     """The drafter is built per run, so a machine without Outlook still
     installs the capability and refuses at the draft with its own code."""

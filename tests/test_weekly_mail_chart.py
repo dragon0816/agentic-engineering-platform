@@ -8,6 +8,7 @@ outside the circle is the page.
 
 from __future__ import annotations
 
+import importlib.util
 import struct
 import zlib
 
@@ -15,6 +16,12 @@ import pytest
 
 from capabilities.weekly_report import chart
 from capabilities.weekly_report.contracts import ReportItem
+
+requires_matplotlib = pytest.mark.skipif(
+    importlib.util.find_spec("matplotlib") is None,
+    reason="needs matplotlib (the weekly-mail extra); CI installs only dev,office",
+)
+
 
 
 def decoded(png: bytes) -> tuple[int, int, list[list[tuple[int, int, int]]]]:
@@ -172,6 +179,7 @@ def test_the_mailed_pie_uses_the_same_complete_series_as_its_totals() -> None:
     assert chart.slices_for(totals)[-1] == ("Model-7", 10, chart.colour_for_index(7))
 
 
+@requires_matplotlib
 def test_source_style_composite_has_two_panels_for_issue_assignees_and_production() -> None:
     items = (
         ReportItem(key="GTM-1", instrument="CMP180, CMX500", issue_assignees=("alice", "bob")),

@@ -1,5 +1,6 @@
 """Git worktree + restricted pytest as the harness's declared commands (C3)."""
 
+import importlib.util
 import subprocess
 import sys
 import sysconfig
@@ -30,6 +31,12 @@ from harness.pytest_commands import (  # noqa: E402
 from harness.restricted_runner import RestrictedRunner, RunnerLimits  # noqa: E402
 from harness.runtime import CodingHarness, DeclaredCommands  # noqa: E402
 from harness.workspace import BoundedWorkspace, WorkspaceRefused  # noqa: E402
+
+requires_win32 = pytest.mark.skipif(
+    importlib.util.find_spec("win32api") is None,
+    reason="needs pywin32 (the windows extra); CI installs only dev,office",
+)
+
 
 TRACE = TraceIdentifiers(trace_id="coding", request_id="coding", span_id="coding")
 # The suite's own pytest, read by the base interpreter the runner uses.
@@ -111,6 +118,7 @@ def harness_for(tmp_path: Path, author: Scripted, max_repairs: int = 1):  # noqa
     return repo, run, CodingHarness(commands, author), request
 
 
+@requires_win32
 def test_a_wrong_change_fails_real_tests_is_repaired_and_the_suite_passes(tmp_path: Path) -> None:
     author = Scripted()
     repo, run, harness, request = harness_for(tmp_path, author)
@@ -132,6 +140,7 @@ def test_a_wrong_change_fails_real_tests_is_repaired_and_the_suite_passes(tmp_pa
     assert not run.worktree.exists()
 
 
+@requires_win32
 def test_a_change_that_never_passes_stops_at_the_repair_budget(tmp_path: Path) -> None:
     class StillWrong(Scripted):
         def repair(self, request, plan, failure, attempt):  # type: ignore[no-untyped-def]
@@ -144,6 +153,7 @@ def test_a_change_that_never_passes_stops_at_the_repair_budget(tmp_path: Path) -
     assert result.failure.code == "repair_budget_exceeded" and result.artifact is None
 
 
+@requires_win32
 def test_a_repair_that_changes_nothing_is_a_typed_stop(tmp_path: Path) -> None:
     """Found on real pytest: the same file handed back made an empty patch
     and the run raised instead of answering."""
@@ -157,6 +167,7 @@ def test_a_repair_that_changes_nothing_is_a_typed_stop(tmp_path: Path) -> None:
     assert result.failure.code == "change_made_no_difference"
 
 
+@requires_win32
 def test_a_missing_test_is_a_named_failure_not_a_pass(tmp_path: Path) -> None:
     author = Scripted()
     _, run, harness, request = harness_for(tmp_path, author)

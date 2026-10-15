@@ -1,5 +1,6 @@
 """`coding/change@1.0.0` on a real repository (CODING_ON_BRIDGE C5)."""
 
+import importlib.util
 import json
 import sys
 import sysconfig
@@ -22,6 +23,12 @@ from capabilities.coding_change.manifest import coding_skill, coding_workflow  #
 from capabilities.runtime import CapabilityRefused  # noqa: E402
 from common.execution import TraceIdentifiers  # noqa: E402
 from models.contracts import ModelRequest, ModelResponse  # noqa: E402
+
+requires_win32 = pytest.mark.skipif(
+    importlib.util.find_spec("win32api") is None,
+    reason="needs pywin32 (the windows extra); CI installs only dev,office",
+)
+
 
 TRACE = TraceIdentifiers(trace_id="coding", request_id="coding", span_id="coding")
 SITE = {"PYTHONPATH": sysconfig.get_paths()["purelib"]}
@@ -62,6 +69,7 @@ def ask(**changes: Any) -> CodingChangeStepInput:
     return CodingChangeStepInput(request=CodingChangeRequest.model_validate(request))
 
 
+@requires_win32
 def test_a_wrong_first_version_is_repaired_and_left_uncommitted_for_review(
     tmp_path: Path,
 ) -> None:
@@ -79,6 +87,7 @@ def test_a_wrong_first_version_is_repaired_and_left_uncommitted_for_review(
     assert git("rev-list", "--count", "HEAD", cwd=repo).strip() == "1"
 
 
+@requires_win32
 def test_a_run_that_never_passes_is_refused_with_its_evidence_kept(tmp_path: Path) -> None:
     still_wrong = WRONG.replace("+ 2", "+ 3")
     run, _ = handler(tmp_path, Replies(PLAN, {"content": WRONG}, {"content": still_wrong}))
@@ -153,6 +162,7 @@ def test_a_host_with_coding_installs_the_capability_and_lists_its_repositories(
     assert REPOSITORIES_FUNCTION not in choice_sources(plain, layout).functions
 
 
+@requires_win32
 def test_doctor_names_what_coding_still_needs(tmp_path: Path) -> None:
     from test_host_wiring import ready
 
