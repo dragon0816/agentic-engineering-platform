@@ -1,6 +1,6 @@
 # AI proposes, the person applies
 
-Owner request: 2026-10-15. Status: **approved 2026-10-15; implementation starts after `CHAT_WORKFLOW_FORMS.md` lands.**
+Owner request: 2026-10-15. Status: **approved 2026-10-15; implemented 2026-10-15 (version 1, every kind); live check pending (owner).** See "Implementation" at the end.
 
 ## Goal
 
@@ -115,3 +115,31 @@ refuses with `stale` and the Agent can propose again.
 1. Telegram applies only the low-risk kinds (`laya`, `workflow_settings`, capability
    switch on/off); every other kind links to Agent Web.
 2. Version 1 covers every kind in the table above.
+
+## Implementation (2026-10-15)
+
+- **Card component** (shared with `AGENT_MODE_BACKENDS.md`): `common/action_cards.py`
+  `ActionCard` (`card_id`, `kind`, `title`, `rows` before/after, `preview` body,
+  `reason`, `effects`, `buttons` [`action`, `label`, `style`], `status`,
+  `status_label`, `outcome`, `outcome_ok`, `link`, `expires_at`, `web_only`,
+  `message`), `card_in`, `telegram_card`, `CARD_TAP` (`card:<id>:<action>`);
+  `host_runtime/card_store.py` `PendingRecord` + `CardStore` (JSON file, expiry, a lock
+  around check-and-decide). Agent Web: one renderer `renderActionCard` in
+  `web_page.py`, `POST /api/cards/decide`, `GET /api/cards[?card_id=]`, Tasks >
+  Pending changes.
+- **Proposals**: `common/change_proposal.py` (tool name, guidance, kinds, Telegram
+  kinds, credential check); `host_runtime/change_proposals.py` `ChangeProposals`
+  (tool, validation per kind, store `workspace/proposals/change-proposals.json`,
+  Apply through the `AgentWeb` writers, Tasks). The Gateway offers `propose_change`
+  only to a person's conversation and ends the turn on a card.
+- **Value names per kind** are in the tool description: `laya` {ssh_host, ssh_port,
+  ssh_user, remote_port, local_port, mode, confidence_threshold, timeout_ms,
+  auto_tunnel}; `shared_platform` {member_portal_url, base_url, enroll};
+  `model` {provider, alias, base_url, model, credential_secret,
+  credential_environment}; `telegram` {enabled, senders}; `workflow_settings`
+  {workflow, settings}; `capability` {action, kind, asset | draft};
+  `platform_add` {kind, asset}; `publish` {kind, asset, change, visibility, note}.
+- **Telegram link**: the card says "Open in Agent Web to apply: Agent Web on this PC,
+  Tasks > Pending changes" without an address, because Agent Web's address carries its
+  page key (see `docs/DECISIONS.md` 2026-10-15 "Change proposals ...").
+- Tests: `tests/test_ai_proposed_changes.py`.

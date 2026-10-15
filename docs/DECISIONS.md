@@ -2768,3 +2768,57 @@ Rejected alternatives:
 - A one-off session per click without a browser login: the page could not renew it,
   so the member would be signed out after an hour on that tab.
 - Caching content on the Agent: a withdrawn share would keep showing until a restart.
+
+## 2026-10-15 — Change proposals: one tool, one card component, Apply through the cards' own writers
+
+Context: owner-approved design `docs/phases/AI_PROPOSED_CHANGES.md` (AI proposes, the
+person applies), and the agent-mode slice (`docs/phases/AGENT_MODE_BACKENDS.md`) that
+must reuse the same approval card.
+
+Decision:
+1. The model gets exactly one host tool, `propose_change(kind, values, reason)`,
+   offered only in a person's conversation (a session id), like `workflows__run_form`.
+   It validates and stores a proposal; it never calls a writer. The turn ends with the
+   card.
+2. One generic card (`common/action_cards.py` `ActionCard`) with server-defined button
+   actions and labels; one server record type (`host_runtime/card_store.py`
+   `PendingRecord` in a `CardStore` JSON file with expiry and a decide lock); one
+   Agent Web renderer (`renderActionCard`) and one Telegram renderer
+   (`telegram_card`). Card ids carry a two-letter handler prefix (`cp-` proposals);
+   `AgentWeb.decide_card` dispatches by it.
+3. Apply calls the very `AgentWeb` method the Settings/Capabilities card calls, with
+   the current values merged with the proposal's, so backups, live switches, Tasks and
+   messages are identical. Laya, model and Telegram writers make no host.json backup
+   today, and Apply does not add one: "the same effect" includes the same backups
+   (the shared-platform writer's).
+4. Staleness is a SHA-256 fingerprint of the setting's current values (from host.json
+   on disk for Laya and the model; the runtime's view otherwise); expiry 30 minutes;
+   any non-pending status refuses a press. A failed Apply is final (`failed`); the
+   Agent proposes again.
+5. Values are checked against the writer's contract at proposal time; secret-named
+   fields and credential-shaped values are refused naming the field only; permission
+   fields (`approval_ref`, grants, data approval, `require_local_model`) are refused.
+   Laya's owner approval reference stays a Settings-card-only field.
+6. Telegram applies only `laya`, `workflow_settings` and capability switch on/off
+   (owner decision); the server enforces it (`web_only`), not only the button layout.
+   Its "Open in Agent Web" text names the place (Tasks > Pending changes) but no
+   address, because Agent Web's address carries the page key. Agent Web lists open
+   cards from every channel there.
+7. The decided card is redrawn on its stored answer and its outcome appended to that
+   answer's tool record, so later turns tell the model what happened, without adding
+   chat messages.
+8. Fixed in passing: the Laya card showed the previous values after Save until a
+   restart (`runtime.config.laya` now follows the saved settings; the running mode
+   still applies after a restart).
+
+Rejected alternatives:
+- One tool per kind or per writer: more schema for the model and more ways to reach a
+  writer; one tool with a kind enum keeps the boundary in one handler.
+- Letting the model continue the turn after proposing: it could narrate as if applied;
+  ending on the card is deterministic.
+- Adding a chat message pair on Apply (as G4 approvals do): duplicates the in-place
+  result; the tool-record line carries it to the model.
+- A clickable Agent Web link with its token in Telegram: the token is a standing key to
+  this machine's Agent.
+- Making the card status a closed enum: the agent-mode slice needs allowed/denied/sent
+  statuses; the handler owns its statuses, the card only knows `pending` is open.

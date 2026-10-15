@@ -2102,3 +2102,22 @@ s-k-20261011T102952` (not published).
   `tests/test_browser_ticket.py` (7, incl. real browser) and
   `tests/test_library_content_web.py` (6, incl. real browser measured at 1400 px and
   narrow). Verification in `HANDOFF.md`. Live check pending (owner).
+
+- [x] AI proposes, the person applies (owner-approved design
+  `docs/phases/AI_PROPOSED_CHANGES.md`, version 1 with every kind; decision in
+  `docs/DECISIONS.md` 2026-10-15 "Change proposals: one tool, one card component, Apply
+  through the cards' own writers"; contract `docs/CONTRACTS.md` "Action card and change
+  proposal"). The model's only tool is `propose_change(kind, values, reason)` (person's
+  conversations only; the turn ends on the card). Kinds `laya`, `shared_platform`,
+  `model`, `telegram`, `workflow_settings`, `capability` (install draft, switch on/off,
+  remove), `platform_add`, `publish` are validated with the cards' contracts and applied
+  through the same `AgentWeb` writers; secret-shaped values, permission fields and no-op
+  changes are refused as messages; stale (fingerprint), expired (30 min), cancelled and
+  repeated presses are refused; every proposal and outcome is a `proposal` Task.
+  Generic card for the agent-mode slice: `common/action_cards.py`,
+  `host_runtime/card_store.py`, Agent Web `renderActionCard`, `/api/cards[/decide]`,
+  Tasks > Pending changes; Telegram renders it with Apply/Cancel only for `laya`,
+  `workflow_settings` and capability switch on/off (server-enforced) and points to Agent
+  Web otherwise. Fixed: the Laya card now shows saved values before a restart. Tests:
+  `tests/test_ai_proposed_changes.py` (48, incl. Telegram end to end and a real browser,
+  card 640x288, Apply 88x44). Verification in `HANDOFF.md`. Live check pending (owner).

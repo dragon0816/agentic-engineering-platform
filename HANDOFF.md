@@ -1,8 +1,55 @@
 # Handoff
 
-Updated: 2026-10-15 (Asia/Taipei), by Claude Code (one-click portal sign-in, Library card content)
+Updated: 2026-10-15 (Asia/Taipei), by Claude Code (AI proposes, the person applies)
 
-## One-click Member Portal sign-in and Library card content (2026-10-15, Claude Code) — latest
+## AI proposes, the person applies (2026-10-15, Claude Code) — latest
+
+Goal: owner-approved design `docs/phases/AI_PROPOSED_CHANGES.md` (version 1, every kind;
+Telegram applies only `laya`, `workflow_settings`, capability switch on/off). Decision
+`docs/DECISIONS.md` 2026-10-15 "Change proposals: one tool, one card component, Apply
+through the cards' own writers"; contract `docs/CONTRACTS.md` "Action card and change
+proposal"; row in `docs/TASKS.md`. Committed on main, not pushed (6a7cd6aa, 36d2c29f +
+this docs commit).
+- Card component (for the agent-mode slice, `docs/phases/AGENT_MODE_BACKENDS.md`):
+  `common/action_cards.py` (`ActionCard`, `CardButton` action/label/style, `CardRow`,
+  `CardLink`, `card_in`, `telegram_card`, `CARD_TAP`), `host_runtime/card_store.py`
+  (`PendingRecord`, `CardStore`, `new_card_id`); Agent Web `renderActionCard`,
+  `/api/cards`, `/api/cards/decide`, Tasks > Pending changes; `AgentWeb.decide_card`
+  dispatches by card-id prefix (`cp-`); `ConversationMessage.action_card`,
+  `LocalState.set_message_card`.
+- Proposals: `common/change_proposal.py` (tool `propose_change`, guidance, kinds,
+  credential check), `host_runtime/change_proposals.py` (`ChangeProposals`: one plan,
+  snapshot and apply per kind, store `workspace/proposals/change-proposals.json`,
+  Tasks kind `proposal`). Gateway offers the tool only with a session id and ends the
+  turn on a card. Telegram `_decide_card` (owner only) and the card in `_converse`.
+- Also fixed: the Laya card showed old values after Save until a restart.
+- Verified: ruff src tests clean; mypy src clean; `tests/test_ai_proposed_changes.py`
+  48 passed (incl. Telegram end to end and a real browser: card 640x288, Apply 88x44);
+  related suites (chat workflow forms + Telegram, Laya, Telegram ingress, conversation
+  turns, gateway, tool schema, capability shelf, shared platform settings) 110 passed.
+  Full suite after the last code change: 2854 passed, 6 skipped, 1 failed under load
+  (`test_agent_web.py::test_capability_workspace_is_interactive_in_a_real_browser`,
+  passed when rerun alone), 21 min 43 s.
+- NOT done: live check (owner). Steps: (1) restart Agent Web on this code (never done
+  by the agent); (2) in a Gateway chat type "把 Laya 改成 shadow" / "turn Laya to
+  shadow": expect a card "Change Laya decision acceleration" with Mode off -> shadow,
+  the reason, "takes effect after Agent Web restarts", Apply/Cancel; (3) Cancel once,
+  ask again, Apply: the card shows "Applied: Saved to host.json ..." and "Open Settings
+  > Laya" shows Shadow; host.json `laya.mode` is shadow (restart to run it); (4) ask
+  "switch off <some Workflow>" in Telegram: Apply/Cancel buttons, tap Apply; (5) ask
+  "remove <Workflow>" or "enroll this PC" in Telegram: no buttons, "Open in Agent Web to
+  apply: Agent Web on this PC, Tasks > Pending changes"; apply it there; (6) ask to set
+  a token in chat: refused with where to paste it; Tasks lists every proposal.
+- Risks: the model must choose `propose_change` from the tool description (no
+  deterministic intent route like "run X"); credential detection is a heuristic (a
+  32+ character mixed-case alphanumeric value is refused even if harmless); cards
+  stored in an answer are refreshed only while pending; Telegram's card edit falls back
+  to a new message if Telegram refuses the edit.
+- Next: the agent-mode slice reuses the component: add a `PendingRecord` subclass and a
+  handler prefix (for example `pm-`) in `AgentWeb.decide_card`, buttons
+  allow/allow_session/deny or send/keep_draft/cancel, `preview` for commands/diffs/mail.
+
+## One-click Member Portal sign-in and Library card content (2026-10-15, Claude Code)
 
 Goal: owner requests — Agent Web's "Open Marketplace" opens the Member Portal already
 signed in as this PC's member; a Library card shows the asset's real content. Design

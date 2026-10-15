@@ -2164,6 +2164,37 @@ Member portal operations for one-click sign-in from Agent Web
   /api/platform/asset-content` (`kind`, `asset`) answers `ok` and `content`
   (the `AssetManifestReply`), or `code` and `message`.
 
+### Action card and change proposal (2026-10-15)
+
+One card for every "the Agent asks, the person decides" moment
+(`docs/phases/AI_PROPOSED_CHANGES.md`, next `docs/phases/AGENT_MODE_BACKENDS.md`):
+- `common.action_cards.ActionCard`: `card_id` (`[a-z]{2}-[0-9a-f]{12}`; `cp-` change
+  proposals), `kind` (the deciding handler), `title`, `rows` (`label`, `before`,
+  `after`; only changing fields), `preview` (a body shown as written), `reason`,
+  `effects`, `buttons` (`action` `[a-z_]{1,24}` sent to the server, `label` shown,
+  `style` primary/secondary/danger; distinct actions), `status` (`pending` keeps the
+  buttons live), `status_label`, `outcome`, `outcome_ok`, `link` (`view`, `anchor`,
+  `capability_kind`, `asset`), `expires_at`, `web_only`, `message` (the turn's answer
+  text). Never a secret value.
+- A host tool returns a card under `data.action_card`; the Gateway ends the turn with
+  `message`. `ConversationMessage.action_card` keeps the last drawn card on the answer;
+  a decision redraws it (`LocalState.set_message_card`) and appends
+  `[card <id>] <status>: <outcome>` to that answer's `tool_summary`.
+- Agent Web: `GET /api/cards` (open cards, any channel), `GET /api/cards?card_id=`,
+  `POST /api/cards/decide` (`card_id`, `action`) answers `ok`, `code`, `message`,
+  `card`. Codes: `card_unknown`, `card_action_unknown`, `proposal_<status>`,
+  `proposal_stale`, `web_only`, `applied`, `apply_failed`, `cancelled`.
+- Telegram: callback data `card:<card_id>:<action>` (at most 64 bytes); owner only.
+- Server record: `host_runtime.card_store.PendingRecord` (`card_id`, `status`,
+  `created_at`, `expires_at`, `decided_at`) extended per handler;
+  `ChangeProposal` adds `kind`, `values`, `rows`, `reason`, `effects`, `link`,
+  `session_id`, `actor`, `channel`, `fingerprint` (SHA-256 of the current settings it
+  was based on), `telegram_ok`, `task_id`, `outcome`, `outcome_ok`.
+- Model tool `propose_change` (`host.change-proposal.v1`): `kind` (laya,
+  shared_platform, model, telegram, workflow_settings, capability, platform_add,
+  publish), `values` (only what changes), `reason`. A refusal is a failed host outcome
+  `proposal_refused` with a message naming fields, never values.
+
 ## Shared-platform transport (Phase 7, slice 2i)
 
 `common.sync` is the wire between a Bridge and the shared platform: seven
