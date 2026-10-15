@@ -1953,3 +1953,17 @@ s-k-20261011T102952` (not published).
   placeholders; fixed, that file and the card tests rerun 98 passed). Live test on
   172.25.228.141 pending.
 
+- [x] Owner and who can use a member-published asset (owner 2026-10-15, live finding:
+  `leo`'s assets invisible to `leo.chi`; `docs/phases/MEMBER_PUBLISH.md` "Owner and who
+  can use it"): submit keeps a declared team/organization owner the submitter belongs
+  to; the publisher picks `visibility` (Agent Web select, `--visibility`); `NameAccess`
+  records (additive `name_access` table) let the owner, an owning-team member or an
+  administrator change who may use a name, applied by `entitled_in` in catalog, select,
+  replace and the Bridge catalog; portal "My published assets" editor
+  (`assets/access`, `assets/access/update`), `leo.chi` placeholder with in-page check,
+  name refusal reasons, session auto-renew; `aep-host assets publish --file` and
+  `deploy/samples/sync-test.workflow.json`. Tests: `test_asset_access.py` (incl. real
+  browser renew/editor check), `test_platform_publish.py` (CLI `--file`, visibility,
+  sample check-workflow, card render), `test_shared_platform_settings.py` (share after
+  publication reaches another member's PC). ruff, mypy src clean; full suite 2702 passed, 6 skipped, 4 failed under load (three browser tests lost their DevTools socket, incl. the new portal browser test; one checkpoint-store 'unavailable'), all four rerun alone and passed.
+  Live test on 172.25.228.141 pending.

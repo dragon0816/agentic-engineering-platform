@@ -1,8 +1,43 @@
 # Handoff
 
-Updated: 2026-10-15 (Asia/Taipei), by Claude Code (Bridge enrollment)
+Updated: 2026-10-15 (Asia/Taipei), by Claude Code (member publish owner and access)
 
-## Bridge self-enrollment on the Shared Platform (2026-10-15, Claude Code) — latest
+## Owner and who can use a member-published asset (2026-10-15, Claude Code) — latest
+
+Goal: fix the live finding that `leo`'s two published assets were invisible to
+`leo.chi`, with the owner's five decisions. Design and decisions:
+`docs/phases/MEMBER_PUBLISH.md` "Owner and who can use it"; `docs/DECISIONS.md`
+(2026-10-15 "Owner and who can use a member-published asset"); row in
+`docs/TASKS.md`. Committed on main, not pushed.
+- Submit keeps a declared team/organization owner when the submitter belongs to it;
+  the publisher's `visibility` (request field, Agent Web select, CLI `--visibility`)
+  replaces the manifest's. `AssetSubmission` records owner and visibility.
+- `NameAccess` record per name (visibility override + extra members/groups) in the
+  additive `name_access` table; `entitled(..., access)` via `entitled_in` everywhere
+  (portal catalog, select, replace, Bridge catalog, extension catalog, ownership
+  visibility). Portal routes `assets/access` (`scope` mine/all) and
+  `assets/access/update` (owner, owning-team member or administrator; else
+  `not_name_owner`). Portal "My published assets" / "All published assets" with a
+  "Who can use it" editor.
+- Portal fixes: `leo.chi` placeholder and in-page name check; `reason`/`message` on
+  refused names; session renewed from the stored login and retried once.
+- `aep-host assets publish --file <manifest.json>`; sample
+  `deploy/samples/sync-test.workflow.json` (not installed anywhere).
+- Verified: ruff, mypy src clean; full suite 2702 passed, 6 skipped, 4 failed under load (three browser tests lost their DevTools socket, incl. the new portal browser test; one checkpoint-store 'unavailable'), all four rerun alone and passed.
+- NOT done: deploy and live test on 172.25.228.141 (owner). Steps: redeploy the
+  platform bundle; as `leo` open the portal, "My published assets", "Who can use it"
+  on each of the two assets, choose "Everyone in the organization" (or add member
+  `leo.chi`), Save; as `leo.chi` load add-ons for the Bridge and select them; in
+  Agent Web press Synchronize selected. For a fresh test publish:
+  `aep-host assets publish --config <host.json> --kind workflow --file
+  deploy\samples\sync-test.workflow.json --visibility organization`, approve as
+  `leo-review`, then select and sync as `leo.chi`.
+- Risks: narrowing access does not withdraw existing selections (documented);
+  the two existing assets stay owned by `user leo` (transfer to team `engineering`
+  via `assets/transfer` if wanted); a Bridge whose member lacks a group sees a
+  team-owned `team` asset only if the access record names them.
+
+## Bridge self-enrollment on the Shared Platform (2026-10-15, Claude Code)
 
 Goal: the install half of the Shared Platform (platform to PC). Design
 `docs/phases/BRIDGE_ENROLLMENT.md` (approved with option (a)), decision in
