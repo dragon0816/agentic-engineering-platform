@@ -55,3 +55,57 @@ Bridge token 與其他 secret 不可提交到 GitHub 或附在測試 evidence。
 
 回報測試時請保留 artifact 名稱、workflow run URL、bundle revision、兩個實際 URL、
 Member Portal 畫面，以及 sanitized 的錯誤碼。不得附上 invitation proof 或 token。
+
+## 管理員 SOP：讓同事開始使用
+
+同事端的操作寫在 Agent 安裝包的 `INSTALL.zh-TW.md` 第 5 節。管理員要做的是：
+
+### 1. 發邀請（每位同事一次）
+
+1. 以管理員帳號登入 Member Portal → **Invitation administration**。
+2. **Account** 填同事電腦 `host.json` 裡 `device.registered_by` 的值（例如 `leo.chi`）。
+   只能用英文字母、數字和 `. - _`，**不能用 email**；名稱不一致時，同事註冊電腦會被拒絕
+   （`device_owner_mismatch`）。
+3. **Role**：一般同事選 Member；要能審核的人選 Administrator。**Groups** 填團隊名稱（例如
+   `engineering`），同團隊的人才看得到「只有我的團隊」的能力。
+4. 按 **Create invitation** → **Copy link**，用私訊交給同事。連結只能用一次；過期或用掉後
+   可以再發一張，不用的可以按 **Revoke**。
+5. 一併告訴同事兩個網址：Member Portal URL 與 Bridge API URL。
+
+### 2. 審核同事發布的 Skill / Workflow
+
+1. Member Portal → **Review queue**，預設只列出等待審核的項目。
+2. 按 **View** 看完整內容、要求的權限與風險，以及上一個已發布版本。
+3. 按 **Approve and publish**（寫下你檢查了什麼）或 **Reject**（一定要寫原因，送出的人看得到）。
+4. 核准後才會出現在其他人的 Library。目前設定允許管理員審核自己送出的項目
+   （`platform.json` 的 `allow_self_review`，驗證完成後可改成 `false`）。
+
+### 3. 調整誰能使用
+
+Member Portal → **My published assets**（管理員可切到 **All published assets**）→
+**Who can use it**：可改成「只有團隊」或「全公司」，也可以額外加指定的帳號或群組。
+已發布的版本內容不會改變；收回權限不會移除別人已經安裝的版本。
+
+### 4. 管理已註冊的電腦（Bridges）
+
+Member Portal → **Bridges** 列出所有已註冊的電腦、所屬帳號與 token 到期日。電腦遺失或
+同事離開時按 **Disable**，該電腦的 token 立即失效，也不能再自行註冊。
+
+### 5. 啟動、更新與資料
+
+- 啟動：`start-platform.cmd`（開機後不會自動啟動）。重啟不會遺失帳號、已發布的能力、
+  審核紀錄與已註冊的電腦，這些都存在 `workspace\registry.sqlite`。
+- 每次重啟會產生新的 `invitation-links-*.json`，裡面是 `platform.json` 裡尚未使用的
+  啟動邀請；**檔案內容是登入憑證，不要轉寄或提交到 Git**。
+- 更新：用新版安裝包重新執行 `install.cmd`，`platform.json` 會保留。
+
+### 6. 開放給公司網路
+
+預設只監聽本機（127.0.0.1），其他電腦連不到。開放時：
+
+1. `platform.json` 的 `listen_host` 改成這台電腦的固定 IP 或 DNS 名稱；
+2. 設定 `tls_certificate_path` 與 `tls_private_key_path`（非本機一律要求 HTTPS）；
+3. Windows 防火牆開放 `control_port` 與 `member_port`；
+4. 重啟後把新的兩個 `https://` 網址給同事。
+
+使用自簽憑證時，同事的 Agent 需要信任該憑證（Agent 端的信任設定尚在開發中）。
